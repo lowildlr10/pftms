@@ -14,13 +14,13 @@ class CreateEmpAccountsTable extends Migration
     public function up()
     {
         Schema::create('emp_accounts', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->uuid('id')->primary();
             $table->string('emp_id', 11)->unique();
             $table->unsignedBigInteger('division');
-            $table->unsignedBigInteger('province');
-            $table->unsignedBigInteger('region');
+            $table->uuid('province');
+            $table->uuid('region');
             $table->unsignedBigInteger('group')->nullable();
-            $table->unsignedBigInteger('role');
+            $table->uuid('role');
             $table->foreign('division')->references('id')->on('emp_divisions');
             $table->foreign('province')->references('id')->on('provinces');
             $table->foreign('region')->references('id')->on('regions');
@@ -31,6 +31,7 @@ class CreateEmpAccountsTable extends Migration
             $table->string('lastname', 50);
             $table->enum('gender', ['male', 'female']);
             $table->string('position', 200);
+            $table->enum('emp_type', ['regular', 'contractual']);
             $table->string('username', 100);
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();

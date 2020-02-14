@@ -14,8 +14,18 @@ class CreateListDemandPayableItemsTable extends Migration
     public function up()
     {
         Schema::create('list_demand_payable_items', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->timestamps();
+            $table->string('item_id')->primary();
+            $table->unsignedBigInteger('lddap_id')->nullable();
+            $table->foreign('lddap_id')->references('id')->on('list_demand_payables');
+            $table->enum('category', ['current_year', 'prior_year']);
+            $table->string('creditor_name');
+            $table->string('creditor_acc_no');
+            $table->text('ors_no');
+            $table->string('allot_class_uacs');
+            $table->double('gross_amount', 50, 2)->default(0.00);
+            $table->double('withold_tax', 50, 2)->default(0.00);
+            $table->double('net_amount', 50, 2)->default(0.00);
+            $table->text('remarks')->nullable();
         });
     }
 

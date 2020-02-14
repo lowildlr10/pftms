@@ -16,6 +16,7 @@ class CreateProcurementModesTable extends Migration
         Schema::create('procurement_modes', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('mode_name', 200);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

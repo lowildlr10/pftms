@@ -14,9 +14,11 @@ class CreateProvincesTable extends Migration
     public function up()
     {
         Schema::create('provinces', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('region');
+            $table->uuid('id')->primary();
+            $table->uuid('region');
             $table->foreign('region')->references('id')->on('regions');
+            $table->string('province_name');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

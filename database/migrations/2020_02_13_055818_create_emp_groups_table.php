@@ -14,10 +14,11 @@ class CreateEmpGroupsTable extends Migration
     public function up()
     {
         Schema::create('emp_groups', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->string('group_name', 100);
+            $table->uuid('id')->primary();
+            $table->string('group_name');
             $table->unsignedBigInteger('group_head')->nullable();
             $table->foreign('group_head')->references('id')->on('emp_accounts');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -15,6 +15,11 @@ class CreatePaperSizesTable extends Migration
     {
         Schema::create('paper_sizes', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('paper_type');
+            $table->enum('unit', ['mm', 'cm', 'in']);
+            $table->double('width', 10, 2);
+            $table->double('height', 10, 2);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

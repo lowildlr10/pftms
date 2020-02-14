@@ -17,8 +17,8 @@ class CreateSignatoriesTable extends Migration
             $table->bigIncrements('id');
             $table->string('emp_id', 11);
             $table->foreign('emp_id')->references('emp_id')->on('emp_accounts');
-            $table->text('position')->default('{"position":[]');
-            $table->text('module')->default('{"module":{}}');
+            $table->text('position');
+            $table->text('module')->default('{}');
             $table->enum('is_active', ['y', 'n'])->default('n');
             $table->softDeletes();
             $table->timestamps();

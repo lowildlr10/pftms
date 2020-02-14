@@ -15,6 +15,40 @@ class CreateLiquidationReportsTable extends Migration
     {
         Schema::create('liquidation_reports', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('code');
+            $table->string('period_covered')->nullable();
+            $table->string('entity_name')->nullable();
+            $table->string('serial_no')->nullable();
+            $table->string('fund_cluster', 50)->nullable();
+            $table->date('date_liquidation')->nullable();
+            $table->string('responsibility_center')->nullable();
+            $table->text('particulars')->nullable();
+            $table->double('amount', 50, 2)->default(0.00);
+            $table->double('total_amount', 50, 2)->default(0.00);
+            $table->double('amount_cash_dv', 50, 2)->default(0.00);
+            $table->string('or_no')->nullable();
+            $table->date('or_dtd')->nullable();
+            $table->double('amount_refunded', 50, 2)->default(0.00);
+            $table->double('amount_reimbursed', 50, 2)->default(0.00);
+            $table->unsignedBigInteger('sig_claimant')->nullable();
+            $table->foreign('sig_claimant')->references('id')->on('signatories');
+            $table->unsignedBigInteger('sig_supervisor')->nullable();
+            $table->foreign('sig_supervisor')->references('id')->on('signatories');
+            $table->unsignedBigInteger('sig_accounting')->nullable();
+            $table->foreign('sig_accounting')->references('id')->on('signatories');
+            $table->date('date_claimant')->nullable();
+            $table->date('date_supervisor')->nullable();
+            $table->date('date_accounting')->nullable();
+            $table->string('jev_no', 100)->nullable();
+            $table->string('dv_no')->nullable();
+            $table->foreign('dv_no')->references('dv_no')->on('disbursement_vouchers');
+            $table->string('dv_id');
+            $table->foreign('dv_id')->references('id')->on('disbursement_vouchers');
+            $table->date('dv_dtd')->nullable();
+            $table->string('liquidated_by')->nullable();
+            $table->foreign('liquidated_by')->references('emp_id')->on('emp_accounts');
+            $table->dateTime('date_liquidated')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

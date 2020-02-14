@@ -18,13 +18,13 @@ class CreateSuppliersTable extends Migration
             $table->unsignedBigInteger('classification');
             $table->foreign('classification')->references('id')->on('supplier_classifications');
             $table->string('company_name');
-            $table->date('date_file')->nullable();
+            $table->date('date_filed')->nullable();
             $table->text('address')->nullable();
             $table->string('name_bank')->nullable();
             $table->string('account_name')->nullable();
             $table->string('account_no')->nullable();
             $table->string('email', 191)->nullable();
-            $table->string('url_address')->nullable();
+            $table->string('website_url')->nullable();
             $table->string('telephone_no', 191)->nullable();
             $table->string('fax_no', 191)->nullable();
             $table->string('mobile_no', 191)->nullable();
@@ -41,6 +41,8 @@ class CreateSuppliersTable extends Migration
             $table->string('attachment', 20)->nullable();
             $table->string('attachment_others')->nullable();
             $table->enum('is_active', ['y', 'n']);
+            $table->dateTime('blacklisted_at');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

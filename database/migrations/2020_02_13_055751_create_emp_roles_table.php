@@ -14,9 +14,10 @@ class CreateEmpRolesTable extends Migration
     public function up()
     {
         Schema::create('emp_roles', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->uuid('id')->primary();
             $table->string('role', 100);
-            $table->text('access')->default('{"module":{}}');
+            $table->text('module_access')->default('{}');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

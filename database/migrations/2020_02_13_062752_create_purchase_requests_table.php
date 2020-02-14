@@ -25,6 +25,7 @@ class CreatePurchaseRequestsTable extends Migration
             $table->string('requested_by', 11);
             $table->foreign('funding')->references('id')->on('fundings');
             $table->foreign('requested_by')->references('emp_id')->on('emp_accounts');
+            $table->string('office');
             $table->unsignedBigInteger('division');
             $table->foreign('division')->references('id')->on('emp_divisions');
             $table->unsignedBigInteger('approved_by')->nullable();

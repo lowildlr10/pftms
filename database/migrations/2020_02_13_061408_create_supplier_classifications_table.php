@@ -16,6 +16,7 @@ class CreateSupplierClassificationsTable extends Migration
         Schema::create('supplier_classifications', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('classification_name');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -25,7 +25,8 @@ class CreatePurchaseRequestItemsTable extends Migration
             $table->double('est_total_cost', 50, 2)->default(0.00);
             $table->unsignedBigInteger('awarded_to');
             $table->foreign('awarded_to')->references('id')->on('suppliers');
-            $table->integer('group_no')->default(0);
+            $table->text('awarded_remarks')->nullable();
+            $table->unsignedBigInteger('group_no')->default(0);
             $table->enum('document_type', ['PO', 'JO']);
         });
     }

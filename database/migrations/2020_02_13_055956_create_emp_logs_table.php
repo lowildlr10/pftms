@@ -14,10 +14,15 @@ class CreateEmpLogsTable extends Migration
     public function up()
     {
         Schema::create('emp_logs', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('emp_id');
+            $table->uuid('id')->primary();
+            $table->string('emp_id', 11);
             $table->foreign('emp_id')->references('emp_id')->on('emp_accounts');
             $table->text('message');
+            $table->string('action_url')->nullable();
+            $table->string('method')->nullable();
+            $table->string('ip_add')->nullable();
+            $table->string('browser')->nullable();
+            $table->string('os')->nullable();
             $table->timestamps();
         });
     }

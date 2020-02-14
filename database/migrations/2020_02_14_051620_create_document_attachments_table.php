@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateInspectAcceptanceReportsTable extends Migration
+class CreateDocumentAttachmentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,11 @@ class CreateInspectAcceptanceReportsTable extends Migration
      */
     public function up()
     {
-        Schema::create('inspect_acceptance_reports', function (Blueprint $table) {
-            $table->bigIncrements('id');
+        Schema::create('document_attachments', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('parent_id');
+            $table->string('type');
+            $table->text('directory');
             $table->timestamps();
         });
     }
@@ -26,6 +29,6 @@ class CreateInspectAcceptanceReportsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('inspect_acceptance_reports');
+        Schema::dropIfExists('document_attachments');
     }
 }

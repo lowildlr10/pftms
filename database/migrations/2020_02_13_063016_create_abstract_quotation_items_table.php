@@ -17,6 +17,8 @@ class CreateAbstractQuotationItemsTable extends Migration
             $table->string('abstract_id')->primary();
             $table->unsignedBigInteger('pr_id');
             $table->foreign('pr_id')->references('id')->on('purchase_requests');
+            $table->string('pr_item_id');
+            $table->foreign('pr_item_id')->references('item_id')->on('purchase_request_items');
             $table->unsignedBigInteger('supplier');
             $table->foreign('supplier')->references('id')->on('suppliers');
             $table->text('specification')->nullable();

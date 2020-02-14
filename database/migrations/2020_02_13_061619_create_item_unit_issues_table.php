@@ -16,6 +16,7 @@ class CreateItemUnitIssuesTable extends Migration
         Schema::create('item_unit_issues', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('unit_name', 150);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

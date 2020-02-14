@@ -16,6 +16,7 @@ class CreateInventoryStockClassificationsTable extends Migration
         Schema::create('inventory_stock_classifications', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('classification', 200);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

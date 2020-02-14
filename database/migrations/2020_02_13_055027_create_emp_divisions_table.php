@@ -15,7 +15,8 @@ class CreateEmpDivisionsTable extends Migration
     {
         Schema::create('emp_divisions', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('division_name', 100);
+            $table->string('division_name');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

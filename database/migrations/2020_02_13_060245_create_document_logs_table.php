@@ -14,7 +14,7 @@ class CreateDocumentLogsTable extends Migration
     public function up()
     {
         Schema::create('document_logs', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->uuid('id')->primary();
             $table->string('code');
             $table->dateTime('date');
             $table->string('emp_from')->nullable();
