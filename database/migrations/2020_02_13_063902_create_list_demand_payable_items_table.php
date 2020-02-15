@@ -14,6 +14,8 @@ class CreateListDemandPayableItemsTable extends Migration
     public function up()
     {
         Schema::create('list_demand_payable_items', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->string('item_id')->primary();
             $table->unsignedBigInteger('lddap_id')->nullable();
             $table->foreign('lddap_id')->references('id')->on('list_demand_payables');

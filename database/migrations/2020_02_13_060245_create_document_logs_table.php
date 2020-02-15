@@ -14,6 +14,8 @@ class CreateDocumentLogsTable extends Migration
     public function up()
     {
         Schema::create('document_logs', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->uuid('id')->primary();
             $table->string('code');
             $table->dateTime('date');

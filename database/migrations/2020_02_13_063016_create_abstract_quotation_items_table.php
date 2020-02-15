@@ -14,6 +14,8 @@ class CreateAbstractQuotationItemsTable extends Migration
     public function up()
     {
         Schema::create('abstract_quotation_items', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->string('abstract_id')->primary();
             $table->unsignedBigInteger('pr_id');
             $table->foreign('pr_id')->references('id')->on('purchase_requests');

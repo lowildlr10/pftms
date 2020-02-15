@@ -14,6 +14,8 @@ class CreateInventoryStocksTable extends Migration
     public function up()
     {
         Schema::create('inventory_stocks', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->bigIncrements('id');
             $table->string('code');
             $table->unsignedBigInteger('pr_id')->nullable();
@@ -21,11 +23,11 @@ class CreateInventoryStocksTable extends Migration
             $table->string('po_item_id');
             $table->foreign('po_item_id')->references('item_id')->on('purchase_job_order_items');
             $table->string('po_no', 15)->nullable();
-            $table->foreign('po_no')->references('po_no')->on('purchase_job_order');
+            $table->foreign('po_no')->references('po_no')->on('purchase_job_orders');
             $table->string('inventory_no', 100);
             $table->string('property_no', 100)->nullable();
             $table->unsignedBigInteger('inventory_classification');
-            $table->foreign('inventory_classification')->references('id')->on('inventory_classifications');
+            $table->foreign('inventory_classification')->references('id')->on('inventory_stock_classifications');
             $table->unsignedBigInteger('item_classification');
             $table->foreign('item_classification')->references('id')->on('item_classifications');
             $table->string('requested_by', 11);

@@ -14,6 +14,8 @@ class CreatePurchaseRequestsTable extends Migration
     public function up()
     {
         Schema::create('purchase_requests', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->bigIncrements('id');
             $table->string('pr_no', 100)->unique();
             $table->string('code');

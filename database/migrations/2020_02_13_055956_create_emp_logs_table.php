@@ -14,6 +14,8 @@ class CreateEmpLogsTable extends Migration
     public function up()
     {
         Schema::create('emp_logs', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->uuid('id')->primary();
             $table->string('emp_id', 11);
             $table->foreign('emp_id')->references('emp_id')->on('emp_accounts');

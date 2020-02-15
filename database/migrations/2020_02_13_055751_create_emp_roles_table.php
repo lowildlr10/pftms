@@ -14,6 +14,8 @@ class CreateEmpRolesTable extends Migration
     public function up()
     {
         Schema::create('emp_roles', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->uuid('id')->primary();
             $table->string('role', 100);
             $table->text('module_access')->default('{}');

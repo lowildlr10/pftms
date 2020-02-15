@@ -14,6 +14,8 @@ class CreateRegionsTable extends Migration
     public function up()
     {
         Schema::create('regions', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->uuid('id')->primary();
             $table->string('region_name', 100);
             $table->softDeletes();

@@ -16,109 +16,251 @@ class RolesTableSeeder extends Seeder
             (object) [
                 'role' => 'Developer',
                 'modules' => '{
-                    {
-                        module: "pr",
-                        create: 1,
-                        read: 1,
-                        update: 1,
+                    "pr" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    }, 
+                    "rfq" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
                     },
-                    {
-                        module: "rfq",
-                        read: 1,
-                        update: 1,
+                    "abstract" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "po_jo" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "ors_burs" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "iar" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "dv" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
                     }
                 }'
-
+    
             ], (object) [
                 'role' => 'Supply & Property Officer',
                 'modules' => '{
-                    {
-                        module: "pr",
-                        create: 1,
-                        read: 1,
-                        update: 1,
+                    "pr" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    }, 
+                    "rfq" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
                     },
-                    {
-                        module: "rfq",
-                        read: 1,
-                        update: 1,
+                    "abstract" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "po_jo" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "ors_burs" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "iar" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "dv" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
                     }
                 }'
-
+    
             ], (object) [
                 'role' => 'Accountant',
                 'modules' => '{
-                    {
-                        module: "pr",
-                        create: 1,
-                        read: 1,
-                        update: 1,
+                    "pr" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    }, 
+                    "rfq" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
                     },
-                    {
-                        module: "rfq",
-                        read: 1,
-                        update: 1,
+                    "abstract" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "po_jo" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "ors_burs" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "iar" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "dv" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
                     }
                 }'
-
             ], (object) [
                 'role' => 'Budget Officer',
                 'modules' => '{
-                    {
-                        module: "pr",
-                        create: 1,
-                        read: 1,
-                        update: 1,
+                    "pr" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    }, 
+                    "rfq" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
                     },
-                    {
-                        module: "rfq",
-                        read: 1,
-                        update: 1,
+                    "abstract" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "po_jo" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "ors_burs" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "iar" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "dv" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
                     }
                 }'
-
             ], (object) [
                 'role' => 'PSTD',
                 'modules' => '{
-                    {
-                        module: "pr",
-                        create: 1,
-                        read: 1,
-                        update: 1,
+                    "pr" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    }, 
+                    "rfq" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
                     },
-                    {
-                        module: "rfq",
-                        read: 1,
-                        update: 1,
+                    "abstract" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "po_jo" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "ors_burs" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "iar" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "dv" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
                     }
                 }'
-
             ], (object) [
                 'role' => 'Ordinary User',
                 'modules' => '{
-                    {
-                        module: "pr",
-                        create: 1,
-                        read: 1,
-                        update: 1,
+                    "pr" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    }, 
+                    "rfq" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
                     },
-                    {
-                        module: "rfq",
-                        read: 1,
-                        update: 1,
+                    "abstract" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "po_jo" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "ors_burs" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "iar" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
+                    },
+                    "dv" : {
+                        "create": 1,
+                        "read": 1,
+                        "update": 1
                     }
                 }'
-
             ]
         ];
-
-        dd($roles);
-
+    
         foreach ($roles as $rol) {
+            $rol->modules = str_replace("\n", '', $rol->modules);
+            $rol->modules = trim($rol->modules);
+            $rol->modules = preg_replace('/\s/', '', $rol->modules );
+
             $role = new EmpRole;
-            $roles->role = $rol->role;
-            $roles->module_access = $rol->modules;
-            $roles->save();
+            $role->role = $rol->role;
+            $role->module_access = $rol->modules;
+            $role->save();
         }
     }
 }

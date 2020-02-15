@@ -14,6 +14,8 @@ class CreateObligationRequestStatusTable extends Migration
     public function up()
     {
         Schema::create('obligation_request_status', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->bigIncrements('id');
             $table->string('code');
             $table->unsignedBigInteger('pr_id')->nullable();
@@ -42,7 +44,7 @@ class CreateObligationRequestStatusTable extends Migration
             $table->foreign('sig_accounting')->references('id')->on('signatories');
             $table->unsignedBigInteger('sig_agency_head')->nullable();
             $table->foreign('sig_agency_head')->references('id')->on('signatories');
-            $table->unsignedBigInteger('obligated_by')->nullable();
+            $table->string('obligated_by', 11)->nullable();
             $table->foreign('obligated_by')->references('emp_id')->on('emp_accounts');
             $table->date('date_certified_1')->nullable();
             $table->date('date_certified_2')->nullable();

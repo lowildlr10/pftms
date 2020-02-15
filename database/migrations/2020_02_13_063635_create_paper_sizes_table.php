@@ -14,6 +14,8 @@ class CreatePaperSizesTable extends Migration
     public function up()
     {
         Schema::create('paper_sizes', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->bigIncrements('id');
             $table->string('paper_type');
             $table->enum('unit', ['mm', 'cm', 'in']);

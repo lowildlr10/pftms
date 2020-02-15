@@ -14,6 +14,8 @@ class CreatePurchaseRequestItemsTable extends Migration
     public function up()
     {
         Schema::create('purchase_request_items', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->string('item_id')->primary();
             $table->unsignedBigInteger('pr_id');
             $table->foreign('pr_id')->references('id')->on('purchase_requests');

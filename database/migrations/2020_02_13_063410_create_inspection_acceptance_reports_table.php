@@ -14,6 +14,8 @@ class CreateInspectionAcceptanceReportsTable extends Migration
     public function up()
     {
         Schema::create('inspection_acceptance_reports', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->string('iar_no', 15)->primary();
             $table->string('code');
             $table->unsignedBigInteger('pr_id');

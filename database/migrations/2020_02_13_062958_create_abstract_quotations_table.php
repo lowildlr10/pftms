@@ -14,6 +14,8 @@ class CreateAbstractQuotationsTable extends Migration
     public function up()
     {
         Schema::create('abstract_quotations', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->bigIncrements('id');
             $table->unsignedBigInteger('pr_id');
             $table->string('code');

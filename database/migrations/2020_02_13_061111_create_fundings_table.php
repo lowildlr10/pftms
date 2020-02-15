@@ -14,6 +14,8 @@ class CreateFundingsTable extends Migration
     public function up()
     {
         Schema::create('fundings', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->bigIncrements('id');
             $table->string('reference_code', 200);
             $table->string('funding_name');

@@ -14,6 +14,8 @@ class CreatePurchaseJobOrderItemsTable extends Migration
     public function up()
     {
         Schema::create('purchase_job_order_items', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->string('item_id')->primary();
             $table->string('po_no', 15);
             $table->foreign('po_no')->references('po_no')->on('purchase_job_orders');

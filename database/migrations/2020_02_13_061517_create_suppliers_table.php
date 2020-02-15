@@ -14,6 +14,8 @@ class CreateSuppliersTable extends Migration
     public function up()
     {
         Schema::create('suppliers', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->bigIncrements('id');
             $table->unsignedBigInteger('classification');
             $table->foreign('classification')->references('id')->on('supplier_classifications');

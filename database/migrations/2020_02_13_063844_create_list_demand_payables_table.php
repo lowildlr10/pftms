@@ -14,6 +14,8 @@ class CreateListDemandPayablesTable extends Migration
     public function up()
     {
         Schema::create('list_demand_payables', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->bigIncrements('id');
             $table->string('code');
             $table->unsignedBigInteger('dv_id')->nullable();

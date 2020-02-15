@@ -14,6 +14,8 @@ class CreateSignatoriesTable extends Migration
     public function up()
     {
         Schema::create('signatories', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->bigIncrements('id');
             $table->string('emp_id', 11);
             $table->foreign('emp_id')->references('emp_id')->on('emp_accounts');

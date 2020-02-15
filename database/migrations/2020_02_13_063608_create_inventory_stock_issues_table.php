@@ -14,6 +14,8 @@ class CreateInventoryStockIssuesTable extends Migration
     public function up()
     {
         Schema::create('inventory_stock_issues', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->bigIncrements('id');
             $table->unsignedBigInteger('pr_id')->nullable();
             $table->foreign('pr_id')->references('id')->on('purchase_requests');

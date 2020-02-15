@@ -14,17 +14,19 @@ class CreateEmpAccountsTable extends Migration
     public function up()
     {
         Schema::create('emp_accounts', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->uuid('id')->primary();
             $table->string('emp_id', 11)->unique();
             $table->unsignedBigInteger('division');
             $table->uuid('province');
             $table->uuid('region');
-            $table->unsignedBigInteger('group')->nullable();
+            $table->uuid('group')->nullable();
             $table->uuid('role');
             $table->foreign('division')->references('id')->on('emp_divisions');
             $table->foreign('province')->references('id')->on('provinces');
             $table->foreign('region')->references('id')->on('regions');
-            $table->foreign('group')->references('id')->on('emp_groups');
+            //$table->foreign('group')->references('id')->on('emp_groups');
             $table->foreign('role')->references('id')->on('emp_roles');
             $table->string('firstname', 50);
             $table->string('middlename', 50)->nullable();

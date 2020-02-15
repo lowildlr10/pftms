@@ -14,6 +14,8 @@ class CreateLiquidationReportsTable extends Migration
     public function up()
     {
         Schema::create('liquidation_reports', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+
             $table->bigIncrements('id');
             $table->string('code');
             $table->string('period_covered')->nullable();
@@ -40,9 +42,7 @@ class CreateLiquidationReportsTable extends Migration
             $table->date('date_supervisor')->nullable();
             $table->date('date_accounting')->nullable();
             $table->string('jev_no', 100)->nullable();
-            $table->string('dv_no')->nullable();
-            $table->foreign('dv_no')->references('dv_no')->on('disbursement_vouchers');
-            $table->string('dv_id');
+            $table->unsignedBigInteger('dv_id');
             $table->foreign('dv_id')->references('id')->on('disbursement_vouchers');
             $table->date('dv_dtd')->nullable();
             $table->string('liquidated_by')->nullable();

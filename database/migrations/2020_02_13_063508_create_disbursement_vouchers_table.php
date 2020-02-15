@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateInspectDisbursementVouchersTable extends Migration
+class CreateDisbursementVouchersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,6 +14,8 @@ class CreateInspectDisbursementVouchersTable extends Migration
     public function up()
     {
         Schema::create('disbursement_vouchers', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->bigIncrements('id');
             $table->string('code');
             $table->unsignedBigInteger('pr_id')->nullable();

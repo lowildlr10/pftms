@@ -14,6 +14,8 @@ class CreateProcurementStatusTable extends Migration
     public function up()
     {
         Schema::create('procurement_status', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->unsignedBigInteger('id')->primary();
             $table->string('status_name', 200);
         });

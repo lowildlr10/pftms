@@ -14,6 +14,8 @@ class CreatePurchaseJobOrdersTable extends Migration
     public function up()
     {
         Schema::create('purchase_job_orders', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            
             $table->string('po_no', 15)->primary();
             $table->unsignedBigInteger('pr_id');
             $table->string('code');
