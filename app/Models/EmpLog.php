@@ -3,19 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 
-class EmpDivision extends Model
+class EmpLog extends Model
 {
-    use SoftDeletes;
-
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'emp_divisions';
+    protected $table = 'emp_logs';
 
      /**
      * The attributes that are mass assignable.
@@ -23,7 +20,14 @@ class EmpDivision extends Model
      * @var array
      */
     protected $fillable = [
-        'division_name'
+        'id',
+        'emp_id',
+        'message',
+        'action_url',
+        'method',
+        'ip_add',
+        'browser',
+        'os'
     ];
 
     /**

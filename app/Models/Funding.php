@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 
-class EmpDivision extends Model
+class Funding extends Model
 {
     use SoftDeletes;
 
@@ -15,7 +15,7 @@ class EmpDivision extends Model
      *
      * @var string
      */
-    protected $table = 'emp_divisions';
+    protected $table = 'fundings';
 
      /**
      * The attributes that are mass assignable.
@@ -23,7 +23,9 @@ class EmpDivision extends Model
      * @var array
      */
     protected $fillable = [
-        'division_name'
+        'id',
+        'reference_code',
+        'funding_name'
     ];
 
     /**
