@@ -11,5 +11,11 @@ const mix = require('laravel-mix');
  |
  */
 
+
 mix.js('resources/js/app.js', 'public/js')
-    .sass('resources/sass/app.scss', 'public/css');
+   .sass('resources/sass/app.scss', 'public/css')
+   .styles([
+        'resources/css/app.css',
+        'resources/custom_modules/sidebar/sidebar-main.css',
+        'resources/custom_modules/sidebar/sidebar-themes.css',
+    ], 'public/css/all.css');

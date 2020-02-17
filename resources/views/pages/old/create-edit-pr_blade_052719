@@ -1,0 +1,427 @@
+<form id="form-create" class="z-depth-1-half wow animated fadeIn" method="POST" action="{{ url('procurement/pr/save') }}">
+    @csrf
+
+    <div class="table-responsive text-nowrap">
+        <table id="add-pr-table" class="table table-bordered">
+            <tr>
+                <td colspan="2">
+                    <label>Office/Section:</label>
+
+                    @if ($toggle == 'create')
+
+                    <input type="text" name="office" value="DOST-CAR" class="form-control">
+
+                    @elseif ($toggle == 'edit')
+
+                    <input type="text" name="office" value="{{ $pr->office }}" class="form-control">
+
+                    @endif
+
+                </td>
+                <td colspan="2">
+                    <label>PR No.:</label>
+
+                    @if ($toggle == 'create')
+
+                    <input name="pr_no" type="text" value="Auto Generated" class="form-control" disabled="disabled">
+
+                    @elseif ($toggle == 'edit')
+
+                    <input name="pr_no" type="text" value="{{ $pr->pr_no }}" class="form-control" disabled="disabled">
+
+                    @endif
+                    
+                </td>
+                <td colspan="2">
+                    <label>Date:</label>
+                    
+                    @if ($toggle == 'create')
+
+                    <input type="date" name="date_pr" class="form-control required">
+
+                    @elseif ($toggle == 'edit')
+
+                    <input type="date" name="date_pr" class="form-control required" value="{{ $pr->date_pr }}">
+
+                    @endif
+
+                </td>
+            </tr>
+            <tr>
+                <td colspan="6">
+                    <label>Division:</label>
+                    <select name="division" class="browser-default custom-select required">
+                        <option value=""> --Select a Division-- </option>
+
+                        @if (!empty($divisions))
+
+                            @foreach ($divisions as $division)
+
+                                @if ($toggle == 'create')
+
+                        <option value="{{ $division->id }}">{{ $division->division }}</option>
+
+                                @elseif ($toggle == 'edit')
+
+                                    @if ($division->id == $pr->pr_division_id)
+
+                        <option value="{{ $division->id }}" selected="selected">{{ $division->division }}</option>
+
+                                    @else
+
+                        <option value="{{ $division->id }}">{{ $division->division }}</option>
+
+                                    @endif
+
+                                @endif
+
+                            @endforeach
+
+                        @endif
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="6">
+                    <table id="item-pr-table" class="table table-bordered table-hover z-depth-1">
+                        <thead class="mdb-color white-text">
+                            <tr id="pr-item-header">
+                                <th width="5%">Stock/Propery No.</th>
+                                <th width="11%">Unit</th>
+                                <th width="40%">Item Description</th>
+                                <th width="10%">Quantity</th>
+                                <th width="17%">Unit Cost</th>
+                                <th width="17%">Total Cost</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="row-items">
+                        @if ($toggle == 'create')
+                            <tr id="row-0">
+                                <td><input type="hidden" name="id0" id="id0"></td>
+                                <td>
+                                    <select name="unit[]" class="browser-default custom-select required">
+                                        @if (!empty($unitIssue))
+
+                                        @foreach ($unitIssue as $unit)
+
+                                        <option value="{{ $unit->id }}">{{ $unit->unit }}</option>
+
+                                        @endforeach
+
+                                        @endif
+                                    </select>
+                                </td>
+                                <td><textarea name="item_description[]" class="form-control required"></textarea></td>
+                                <td>
+                                    <input id="quantity0" type="number" name="quantity[]" class="form-control required"
+                                           onkeyup="$(this).computeCost('{{ $itemNo }}', 'unit_cost{{ $itemNo }}')" 
+                                           onchange="$(this).computeCost('{{ $itemNo }}', 'unit_cost{{ $itemNo }}')"
+                                           min="0">
+                                </td>
+                                <td>
+                                    <input id="unit_cost0" type="number" name="unit_cost[]" class="form-control required"
+                                           onkeyup="$(this).computeCost('{{ $itemNo }}', 'unit_cost{{ $itemNo }}')" 
+                                           onchange="$(this).computeCost('{{ $itemNo }}', 'unit_cost{{ $itemNo }}')" 
+                                           min="0">
+                                </td>
+                                <td>
+                                    <input id="total_cost0" type="number" name="total_cost[]" class="form-control required" 
+                                           disabled="disabled">
+                                </td>
+                                <td>
+                                    <a  class="btn btn-outline-red waves-effect btn-sm btn-block" 
+                                            onclick="$(this).deleteRow('item-pr-table', 'id0')">
+                                        <i class="fas fa-minus-circle"></i> Remove
+                                    </a>
+                                </td>
+                            </tr>
+                        @elseif ($toggle == 'edit')
+                            @if (!empty($prItems))
+                                @foreach ($prItems as $key => $item)
+                            <tr id="row-{{$key}}">
+                                <td>
+                                    <input type="hidden" name="id{{ $key }}" id="id{{ $key }}">
+                                    <input type="hidden" name="item_id[]" value="{{ $item->item_id }}">
+                                </td>
+                                <td>
+                                    <select name="unit[]" class="browser-default custom-select required">
+                                        @if (!empty($unitIssue))
+                                            @foreach ($unitIssue as $unit)
+                                                @if ($unit->id == $item->unit_issue)
+                                        <option value="{{ $unit->id }}" selected="selected">{{ $unit->unit }}</option>
+                                                @else
+                                        <option value="{{ $unit->id }}">{{ $unit->unit }}</option>
+                                                @endif
+                                            @endforeach
+                                        @endif
+
+                                    </select>
+                                </td>
+                                <td><textarea name="item_description[]" class="form-control required">{{ $item->item_description }}</textarea></td>
+                                <td>
+                                    <input id="quantity{{ $key }}" type="number" name="quantity[]" class="form-control required"
+                                           onkeyup="$(this).computeCost('{{ $key }}', 'unit_cost{{ $key }}')" 
+                                           onchange="$(this).computeCost('{{ $key }}', 'unit_cost{{ $key }}')"
+                                           min="0" value="{{ $item->quantity }}">
+                                </td>
+                                <td>
+                                    <input id="unit_cost{{ $key }}" type="number" name="unit_cost[]" class="form-control required"
+                                           onkeyup="$(this).computeCost('{{ $key }}', 'unit_cost{{ $key }}')" 
+                                           onchange="$(this).computeCost('{{ $key }}', 'unit_cost{{ $key }}')" 
+                                           min="0" value="{{ $item->est_unit_cost }}">
+                                </td>
+                                <td>
+                                    <input id="total_cost{{ $key }}" type="number" name="total_cost[]" class="form-control required" 
+                                           disabled="disabled" value="{{ $item->est_total_cost }}">
+                                </td>
+                                <td>
+                                    @if ($pr->status < 5)
+                                    <a class="btn btn-outline-red waves-effect btn-sm btn-block" 
+                                       onclick="$(this).deleteRow('item-pr-table', 'row-{{$key}}')">
+                                        <i class="fas fa-minus-circle"></i> Remove
+                                    </a>
+                                    @endif
+                                </td>
+                            </tr>
+                                    @php  $itemNo++ @endphp
+                                @endforeach
+                            @endif
+                        @endif
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            @if ($pr->status < 5)
+            <tr>
+                <td colspan="6">
+                    <a id="add-block-btn" class="btn btn-outline-indigo btn-block waves-effect" 
+                       onclick="$(this).addRow('#item-pr-table')">
+                        <i class="fas fa-plus"></i>
+                        <strong>Add Item</strong>
+                    </a>
+                </td>
+            </tr>
+            @endif
+            <tr>
+                <td colspan="6">
+                    <label>Purpose:</label>
+
+                    @if ($toggle == 'create')
+
+                    <textarea name="purpose" class="form-control required"></textarea>
+
+                    @elseif ($toggle == 'edit')
+
+                    <textarea name="purpose" class="form-control required">{{ $pr->purpose }}</textarea>
+
+                    @endif
+
+                </td>
+            </tr>
+            <tr>
+                <td colspan="6">
+                    <label>Remarks:</label>
+
+                    @if ($toggle == 'create')
+
+                    <textarea name="remarks" class="form-control"></textarea>
+
+                    @elseif ($toggle == 'edit')
+
+                    <textarea name="remarks" class="form-control">{{ $pr->remarks }}</textarea>
+
+                    @endif
+
+                </td>
+            </tr>
+            <tr>
+                <td colspan="6">
+                    <label>Charge to:</label>
+                    <select name="project" class="browser-default custom-select required">
+                        <option value=""> --Select a project-- </option>
+
+                        @if (!empty($projects))
+
+                            @foreach ($projects as $project)
+
+                                @if ($toggle == 'create')
+
+                        <option value="{{ $project->id }}">{{ $project->project }}</option>
+
+                                @elseif ($toggle == 'edit')
+
+                                    @if ($project->id == $pr->project_id)
+
+                        <option value="{{ $project->id }}" selected="selected">{{ $project->project }}</option>
+
+                                    @else
+
+                        <option value="{{ $project->id }}">{{ $project->project }}</option>
+
+                                    @endif
+
+                                @endif
+
+                            @endforeach
+
+                        @endif
+
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" width="50%">
+                    <label>Requested by:</label>
+                    <select name="requested_by" class="browser-default custom-select required">
+                        <option value="">  -- Select requestor -- </option>
+
+                        @if (!empty($requestedBy))
+
+                            @foreach ($requestedBy as $emp)
+
+                                @if ($toggle == 'create')
+
+                        <option value="{{ $emp->emp_id }}">{{ $emp->firstname.' '.$emp->lastname }} [ {{ $emp->position }} ]</option>
+
+                                @elseif ($toggle == 'edit')
+
+                                    @if ($emp->emp_id == $pr->requested_by)
+
+                        <option value="{{ $emp->emp_id }}" selected="selected">{{ $emp->firstname.' '.$emp->lastname }} [ {{ $emp->position }} ]</option>
+
+                                    @else
+
+                        <option value="{{ $emp->emp_id }}">{{ $emp->firstname.' '.$emp->lastname }} [ {{ $emp->position }} ]</option>
+
+                                    @endif
+
+                                @endif
+
+                            @endforeach
+
+                        @endif
+
+                    </select>
+                </td>
+                <td colspan="3" width="50%">
+                    <label>Approved by:</label>
+                    <select name="approved_by" class="browser-default custom-select required">
+                        <option value="">  -- Select approval -- </option>
+
+                        @if (!empty($approvedBy))
+
+                            @foreach ($approvedBy as $app)
+
+                                @if ($app->pr_sign_type == 'approval')
+
+                                    @if ($toggle == 'create')
+
+                        <option value="{{ $app->id }}">{{ $app->name }} [ {{ $app->position }} ]</option>
+
+                                    @elseif ($toggle == 'edit')
+
+                                        @if ($app->id == $pr->approved_by)
+
+                        <option value="{{ $app->id }}" selected="selected">{{ $app->name }} [ {{ $app->position }} ]</option>
+
+                                        @else
+
+                        <option value="{{ $app->id }}">{{ $app->name }} [ {{ $app->position }} ]</option>
+
+                                        @endif
+
+                                    @endif
+
+                                @endif
+
+                            @endforeach
+
+                        @endif
+
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="3" width="50%">
+                    <label>Within APP:</label>
+                    <select name="sig_app" class="browser-default custom-select required">
+                        <option value="">  -- Select within APP -- </option>
+
+                        @if (!empty($approvedBy))
+
+                            @foreach ($approvedBy as $app)
+
+                                @if ($app->pr_sign_type == 'within-app')
+
+                                    @if ($toggle == 'create')
+
+                        <option value="{{ $app->id }}">{{ $app->name }} [ {{ $app->position }} ]</option>
+
+                                    @elseif ($toggle == 'edit')
+
+                                        @if ($app->id == $pr->sig_app)
+
+                        <option value="{{ $app->id }}" selected="selected">{{ $app->name }} [ {{ $app->position }} ]</option>
+
+                                        @else
+
+                        <option value="{{ $app->id }}">{{ $app->name }} [ {{ $app->position }} ]</option>
+
+                                        @endif
+
+                                    @endif
+
+                                @endif
+
+                            @endforeach
+
+                        @endif
+
+                    </select>
+                </td>
+                <td colspan="3" width="50%">
+                    <label>Certified Funds Available:</label>
+                    <select name="sig_funds_available" class="browser-default custom-select required">
+                        <option value="">  -- Select certified funds available -- </option>
+
+                        @if (!empty($approvedBy))
+
+                            @foreach ($approvedBy as $app)
+
+                                @if ($app->pr_sign_type == 'funds-available')
+
+                                    @if ($toggle == 'create')
+
+                        <option value="{{ $app->id }}">{{ $app->name }} [ {{ $app->position }} ]</option>
+
+                                    @elseif ($toggle == 'edit')
+
+                                        @if ($app->id == $pr->sig_funds_available)
+
+                        <option value="{{ $app->id }}" selected="selected">{{ $app->name }} [ {{ $app->position }} ]</option>
+
+                                        @else
+
+                        <option value="{{ $app->id }}">{{ $app->name }} [ {{ $app->position }} ]</option>
+
+                                        @endif
+
+                                    @endif
+
+                                @endif
+
+                            @endforeach
+
+                        @endif
+
+                    </select>
+                </td>
+            </tr>
+        </table>
+    </div>
+        
+    <input id="item-count" value="{{ $itemNo }}" type="hidden">
+</form>

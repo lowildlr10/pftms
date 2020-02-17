@@ -1,0 +1,226 @@
+<form id="form-update" method="POST" action="{{ url('procurement/dv/update/'.$dv->dv_id) }}"
+      class="z-depth-1-half wow animated fadeIn">
+	@csrf
+
+	<table class="table table-bordered">
+		<tr>
+			<td>
+				<label>DV No.:</label>
+			</td>
+			<td>
+				<input type="text" name="dv_no" class="form-control z-depth-1 required" value="{{ $dv->dv_no }}">
+			</td>
+		</tr>
+
+		<tr>
+			<td>
+				<label>Date:</label>
+			</td>
+			<td>
+				<input type="date" name="date_dv" class="form-control z-depth-1" value="{{ $dv->date_dv }}">
+			</td>
+		</tr>
+
+		<tr>
+			<td>
+				<label>Mode of Payment:</label>
+			</td>
+			<td>
+				<div class="form-check form-check-inline">
+					@if ($paymentMode[0] == 0)
+				  	<input class="form-check-input" name="payment_mode1" type="checkbox" id="chk1" value="1">
+				  	@else
+				  	<input class="form-check-input" name="payment_mode1" type="checkbox" id="chk1" value="1" checked>
+				  	@endif
+
+				  	<label class="form-check-label" for="chk1">MDS Check</label>
+				</div>
+				<div class="form-check form-check-inline">
+					@if ($paymentMode[1] == 0)
+				  	<input class="form-check-input" name="payment_mode2" type="checkbox" id="chk2" value="2">
+				  	@else
+				  	<input class="form-check-input" name="payment_mode2" type="checkbox" id="chk2" value="2" checked>
+				  	@endif
+
+					<label class="form-check-label" for="chk2">Commercial Check</label>
+				</div>
+				<div class="form-check form-check-inline">
+				  	@if ($paymentMode[2] == 0)
+				  	<input class="form-check-input" name="payment_mode3" type="checkbox" id="chk3" value="3">
+				  	@else
+				  	<input class="form-check-input" name="payment_mode3" type="checkbox" id="chk3" value="3" checked>
+				  	@endif
+
+				  	<label class="form-check-label" for="chk3">ADA</label>
+				</div>
+				<div class="form-check form-check-inline">
+					@if ($paymentMode[3] == 0)
+				  	<input class="form-check-input" name="payment_mode4" type="checkbox" id="chk4" value="4">
+				  	@else
+				  	<input class="form-check-input" name="payment_mode4" type="checkbox" id="chk4" value="4" checked>
+                    @endif
+
+					<label class="form-check-label" for="chk4">Others (Please Specify)</label>
+				</div>
+			</td>
+		</tr>
+
+		<tr>
+			<td>
+				<label>Payee:</label>
+			</td>
+			<td>
+				<select class="browser-default custom-select" disabled="disabled">
+					@if (!empty($payee))
+                        @if ($dv->module_class_id == 2)
+                            @foreach ($payee as $emp)
+                                @if ($emp->emp_id == $dv->payee)
+                                    @if (!empty($emp->middlename))
+                    <option value="{{ $emp->emp_id }}" selected="selected">{{ $emp->firstname }} {{ $emp->middlename[0] }}. {{ $emp->lastname }}</option>
+                                    @else
+                    <option value="{{ $emp->emp_id }}" selected="selected">{{ $emp->firstname }} {{ $emp->lastname }}</option>
+                                    @endif
+                                @else
+                                    @if (!empty($emp->middlename))
+                    <option value="{{ $emp->emp_id }}">{{ $emp->firstname }} {{ $emp->middlename[0] }}. {{ $emp->lastname }}</option>
+                                    @else
+                    <option value="{{ $emp->emp_id }}">{{ $emp->firstname }} {{ $emp->lastname }}</option>
+                                    @endif
+                                @endif
+                            @endforeach
+                        @elseif ($dv->module_class_id == 3)
+                            @foreach ($payee as $supplier)
+                                @if ($supplier->id == $dv->payee)
+                    <option value="{{ $supplier->id }}" selected="selected">{{ $supplier->company_name }}</option>
+                                @else
+                    <option value="{{ $supplier->id }}">{{ $supplier->company_name }}</option>
+                                @endif
+                            @endforeach
+                        @endif
+					@endif
+				</select>
+			</td>
+		</tr>
+
+		<tr>
+			<td>
+				<label>Address:</label>
+			</td>
+			<td>
+				<input type="text" class="form-control" value="{{ $dv->address }}" disabled="disabled">
+			</td>
+		</tr>
+
+		<tr>
+			<td colspan="2">
+				<table class="table table-hover z-depth-1-half">
+					<tr>
+						<th>Particulars</th>
+						<th>Responsibility Center</th>
+						<th>MFO/PAP</th>
+						<th>Amount</th>
+					</tr>
+
+					<tr>
+						<td width="43%">
+							<textarea style="resize: none;" class="form-control required" rows="5" name="particulars">{{ $dv->particulars }}</textarea>
+						</td>
+						<td width="20%">19 001 03000 14</td>
+						<td width="12%">
+							<p align="left">
+								a. A.III.b.1
+								b. A.III.c.1
+								c. A.III.c.2
+							</p>
+						</td>
+						<td width="25%">
+							<input type="number" class="form-control" disabled="disabled" value="{{ $dv->amount }}"
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+
+		<tr>
+			<td colspan="2">
+				<p align="left">
+					Certified: Expenses/Cash Advance necessary, lawful and incurred under my direct supervision. <br>
+
+					<div class="form-group">
+						<label>Printed Name, Designation and Signature of Supervisor</label>
+						<select class="browser-default custom-select" disabled="disabled">
+                            <option value=""></option>
+							@if (!empty($signatories))
+								@foreach ($signatories as $signatory)
+                                    @if ($signatory->dv_sign_type == 'supervisor')
+									   @if ($signatory->id == $dv->sig_certified_1)
+							<option value="{{ $signatory->id }}" selected="selected">
+								{{ $signatory->name }} [ {{ $signatory->position }} ]
+							</option>
+									   @else
+							<option value="{{ $signatory->id }}">
+								{{ $signatory->name }} [ {{ $signatory->position }} ]
+							</option>
+									   @endif
+                                    @endif
+								@endforeach
+							@endif
+						</select>
+					</div>
+				</p>
+			</td>
+		</tr>
+
+		<tr>
+			<td width="50%">
+				<div class="form-group">
+					<label>Head, Accounting Unit/Authorized Representative</label>
+                    <select class="browser-default custom-select z-depth-1 required"
+                            name="sig_accounting">
+						<option value=""> -- Select head accounting/authorize representative -- </option>
+						@if (!empty($signatories))
+							@foreach ($signatories as $signatory)
+                                @if ($signatory->dv_sign_type == 'accountant')
+								    @if ($signatory->id == $dv->sig_accounting)
+						<option value="{{ $signatory->id }}" selected="selected">
+							{{ $signatory->name }} [ {{ $signatory->position }} ]
+						</option>
+								    @else
+						<option value="{{ $signatory->id }}">
+							{{ $signatory->name }} [ {{ $signatory->position }} ]
+						</option>
+								    @endif
+                                @endif
+							@endforeach
+						@endif
+					</select>
+				</div>
+			</td>
+			<td width="50%">
+				<div class="form-group">
+					<label>Agency Head/Authorized Representative</label>
+                    <select class="browser-default custom-select z-depth-1 required"
+                            name="sig_agency_head">
+						<option value=""> -- Select agency head/authorized representative -- </option>
+
+						@if (!empty($signatories))
+							@foreach ($signatories as $signatory)
+                                @if ($signatory->dv_sign_type == 'agency-head')
+								    @if ($signatory->id == $dv->sig_agency_head)
+						<option value="{{ $signatory->id }}" selected="selected">
+							{{ $signatory->name }} [ {{ $signatory->position }} ]
+						</option>
+								    @else
+						<option value="{{ $signatory->id }}">
+							{{ $signatory->name }} [ {{ $signatory->position }} ]
+						</option>
+								    @endif
+                                @endif
+							@endforeach
+						@endif
+					</select>
+				</div>
+			</td>
+		</tr>
+	</table>
+</form>

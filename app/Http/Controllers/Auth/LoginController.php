@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Carbon\Carbon;
 
 class LoginController extends Controller
 {
@@ -36,5 +37,37 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
+    }
+
+    public function username()
+    {
+        return 'username';
+    }
+
+    /**
+     * Get the needed authorization credentials from the request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    protected function authenticate(Request $request)
+    {
+        //return $request->only($this->username(), 'password');
+        return ['username' => $request->{$this->username()},
+                'password' => $request->password,
+                'active' => 'y'];
+    }
+
+    /**
+     * The user has been authenticated.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  mixed  $user
+     * @return mixed
+     */
+    protected function authenticated(Request $request, $user)
+    {
+        $user->last_login = Carbon::now();
+        $user->save();
     }
 }

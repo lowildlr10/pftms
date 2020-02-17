@@ -77,4 +77,39 @@ class User extends Authenticatable
     public static function generateUuid() {
          return Uuid::generate();
     }
+
+    public function roles()
+    {
+        return $this->belongsToMany('App\Role', 'tblemp_accounts', 'id', 'role');
+    }
+
+    public function hasAnyRole($roles)
+    {
+        if (is_array($roles)) {
+            foreach ($roles as $role) {
+                if ($this->hasRole($role)) {
+                    return true;
+                }
+            }
+        } else {
+            if ($this->hasRole($roles)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function isActive() {
+        return $this->active;
+    }
+
+    public function hasRole($role)
+    {
+        if ($this->roles()->where('emp_roles.role', $role)->first()) {
+            return true;
+        }
+
+        return false;
+    }
 }

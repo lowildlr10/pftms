@@ -58,4 +58,19 @@ class PurchaseRequest extends Notification
             //
         ];
     }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return array
+     */
+    public function toDatabase($notifiable)
+    {
+        return [
+            'pr_no' => $this->data->pr_no,
+            'msg' => $this->data->msg,
+            'redirect' => $this->data->redirect
+        ];
+    }
 }
