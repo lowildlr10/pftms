@@ -15,10 +15,10 @@ class CreateEmpRolesTable extends Migration
     {
         Schema::create('emp_roles', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            
+
             $table->uuid('id')->primary();
             $table->string('role', 100);
-            $table->text('module_access')->default('{}');
+            $table->text('module_access');
             $table->softDeletes();
             $table->timestamps();
         });

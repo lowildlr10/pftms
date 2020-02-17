@@ -15,12 +15,12 @@ class CreateSignatoriesTable extends Migration
     {
         Schema::create('signatories', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            
+
             $table->bigIncrements('id');
             $table->string('emp_id', 11);
             $table->foreign('emp_id')->references('emp_id')->on('emp_accounts');
             $table->text('position');
-            $table->text('module')->default('{}');
+            $table->text('module');
             $table->enum('is_active', ['y', 'n'])->default('n');
             $table->softDeletes();
             $table->timestamps();

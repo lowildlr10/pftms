@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             RegionsTableSeeder::class,
             ProvincesTableSeeder::class,
             RolesTableSeeder::class,
+            UsersTableSeeder::class,
         ]);
     }
 }
