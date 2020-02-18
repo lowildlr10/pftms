@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateFundingsTable extends Migration
+class CreateFundingSourcesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,12 @@ class CreateFundingsTable extends Migration
      */
     public function up()
     {
-        Schema::create('fundings', function (Blueprint $table) {
+        Schema::create('funding_sources', function (Blueprint $table) {
             $table->engine = 'InnoDB';
 
             $table->uuid('id')->primary();
-            $table->string('reference_code', 200);
-            $table->string('funding_name');
+            $table->string('reference_code', 200)->nullable();
+            $table->string('source_name');
             $table->softDeletes();
             $table->timestamps();
         });

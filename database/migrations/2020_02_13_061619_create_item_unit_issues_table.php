@@ -15,8 +15,8 @@ class CreateItemUnitIssuesTable extends Migration
     {
         Schema::create('item_unit_issues', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            
-            $table->bigIncrements('id');
+
+            $table->uuid('id')->primary();
             $table->string('unit_name', 150);
             $table->softDeletes();
             $table->timestamps();

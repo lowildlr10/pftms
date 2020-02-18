@@ -8,6 +8,8 @@ use Webpatser\Uuid\Uuid;
 
 class InventoryClassification extends Model
 {
+    use SoftDeletes;
+
     /**
      * The table associated with the model.
      *

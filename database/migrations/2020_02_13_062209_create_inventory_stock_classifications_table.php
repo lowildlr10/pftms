@@ -15,8 +15,8 @@ class CreateInventoryStockClassificationsTable extends Migration
     {
         Schema::create('inventory_stock_classifications', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            
-            $table->bigIncrements('id');
+
+            $table->uuid('id')->primary();
             $table->string('classification', 200);
             $table->softDeletes();
             $table->timestamps();

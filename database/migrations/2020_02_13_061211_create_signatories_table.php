@@ -16,9 +16,9 @@ class CreateSignatoriesTable extends Migration
         Schema::create('signatories', function (Blueprint $table) {
             $table->engine = 'InnoDB';
 
-            $table->bigIncrements('id');
-            $table->string('emp_id', 11);
-            $table->foreign('emp_id')->references('emp_id')->on('emp_accounts');
+            $table->uuid('id')->primary();
+            $table->uuid('emp_id');
+            $table->foreign('emp_id')->references('id')->on('emp_accounts');
             $table->text('position');
             $table->text('module');
             $table->enum('is_active', ['y', 'n'])->default('n');

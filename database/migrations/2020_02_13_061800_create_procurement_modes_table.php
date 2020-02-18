@@ -15,8 +15,8 @@ class CreateProcurementModesTable extends Migration
     {
         Schema::create('procurement_modes', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            
-            $table->bigIncrements('id');
+
+            $table->uuid('id')->primary();
             $table->string('mode_name', 200);
             $table->softDeletes();
             $table->timestamps();

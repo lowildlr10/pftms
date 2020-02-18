@@ -15,10 +15,10 @@ class CreateObligationRequestStatusTable extends Migration
     {
         Schema::create('obligation_request_status', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            
-            $table->bigIncrements('id');
+
+            $table->uuid('id')->primary();
             $table->string('code');
-            $table->unsignedBigInteger('pr_id')->nullable();
+            $table->uuid('pr_id')->nullable();
             $table->foreign('pr_id')->references('id')->on('purchase_requests');
             $table->string('po_no', 15)->nullable();
             $table->foreign('po_no')->references('po_no')->on('purchase_job_orders');
@@ -28,7 +28,7 @@ class CreateObligationRequestStatusTable extends Migration
             $table->string('serial_no')->nullable();
             $table->date('date_ors_burs')->nullable();
             $table->dateTime('date_obligated')->nullable();
-            $table->string('payee', 11);
+            $table->string('payee', 255);
             $table->string('office')->nullable();
             $table->text('address')->nullable();
             $table->string('responsibility_center')->nullable();
@@ -36,16 +36,16 @@ class CreateObligationRequestStatusTable extends Migration
             $table->text('mfo_pap')->nullable();
             $table->string('uacs_object_code')->nullable();
             $table->double('amount', 50, 2)->default(0.00);
-            $table->unsignedBigInteger('sig_certified_1')->nullable();
+            $table->uuid('sig_certified_1')->nullable();
             $table->foreign('sig_certified_1')->references('id')->on('signatories');
-            $table->unsignedBigInteger('sig_certified_2')->nullable();
+            $table->uuid('sig_certified_2')->nullable();
             $table->foreign('sig_certified_2')->references('id')->on('signatories');
-            $table->unsignedBigInteger('sig_accounting')->nullable();
+            $table->uuid('sig_accounting')->nullable();
             $table->foreign('sig_accounting')->references('id')->on('signatories');
-            $table->unsignedBigInteger('sig_agency_head')->nullable();
+            $table->uuid('sig_agency_head')->nullable();
             $table->foreign('sig_agency_head')->references('id')->on('signatories');
-            $table->string('obligated_by', 11)->nullable();
-            $table->foreign('obligated_by')->references('emp_id')->on('emp_accounts');
+            $table->uuid('obligated_by');
+            $table->foreign('obligated_by')->references('id')->on('emp_accounts');
             $table->date('date_certified_1')->nullable();
             $table->date('date_certified_2')->nullable();
             $table->unsignedBigInteger('module_class');

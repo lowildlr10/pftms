@@ -15,13 +15,15 @@ class CreateDocumentLogsTable extends Migration
     {
         Schema::create('document_logs', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            
+
             $table->uuid('id')->primary();
             $table->string('code');
             $table->dateTime('date');
-            $table->string('emp_from')->nullable();
-            $table->string('emp_to')->nullable();
-            $table->enum('action', ['issued', 'received', 'issued_back', 'receive']);
+            $table->uuid('emp_from')->nullable();
+            $table->foreign('emp_from')->references('id')->on('emp_accounts');
+            $table->uuid('emp_to')->nullable();
+            $table->foreign('emp_to')->references('id')->on('emp_accounts');
+            $table->string('action');
             $table->text('remarks')->nullable();
             $table->timestamps();
         });

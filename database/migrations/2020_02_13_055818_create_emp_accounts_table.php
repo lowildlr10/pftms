@@ -15,10 +15,10 @@ class CreateEmpAccountsTable extends Migration
     {
         Schema::create('emp_accounts', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            
+
             $table->uuid('id')->primary();
             $table->string('emp_id', 11)->unique();
-            $table->unsignedBigInteger('division');
+            $table->uuid('division');
             $table->uuid('province');
             $table->uuid('region');
             $table->uuid('group')->nullable();

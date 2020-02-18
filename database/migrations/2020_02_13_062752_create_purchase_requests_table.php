@@ -15,25 +15,25 @@ class CreatePurchaseRequestsTable extends Migration
     {
         Schema::create('purchase_requests', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            
-            $table->bigIncrements('id');
+
+            $table->uuid('id')->primary();
             $table->string('pr_no', 100)->unique();
             $table->string('code');
             $table->date('date_pr');
             $table->dateTime('date_pr_approved')->nullable();
             $table->dateTime('date_pr_disapproved')->nullable();
             $table->dateTime('date_pr_cancelled')->nullable();
-            $table->unsignedBigInteger('funding')->nullable();
-            $table->string('requested_by', 11);
-            $table->foreign('funding')->references('id')->on('fundings');
-            $table->foreign('requested_by')->references('emp_id')->on('emp_accounts');
+            $table->uuid('funding_source')->nullable();
+            $table->uuid('requested_by');
+            $table->foreign('funding_source')->references('id')->on('funding_sources');
+            $table->foreign('requested_by')->references('id')->on('emp_accounts');
             $table->string('office');
-            $table->unsignedBigInteger('division');
+            $table->uuid('division');
             $table->foreign('division')->references('id')->on('emp_divisions');
-            $table->unsignedBigInteger('approved_by')->nullable();
-            $table->unsignedBigInteger('sig_app')->nullable();
-            $table->unsignedBigInteger('sig_funds_available')->nullable();
-            $table->unsignedBigInteger('recommended_by')->nullable();
+            $table->uuid('approved_by')->nullable();
+            $table->uuid('sig_app')->nullable();
+            $table->uuid('sig_funds_available')->nullable();
+            $table->uuid('recommended_by')->nullable();
             $table->foreign('approved_by')->references('id')->on('signatories');
             $table->foreign('sig_app')->references('id')->on('signatories');
             $table->foreign('sig_funds_available')->references('id')->on('signatories');

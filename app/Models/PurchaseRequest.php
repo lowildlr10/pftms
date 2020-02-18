@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Webpatser\Uuid\Uuid;
 
 class PurchaseRequest extends Model
 {
@@ -29,7 +30,7 @@ class PurchaseRequest extends Model
         'date_pr_approved',
         'date_pr_disapproved',
         'date_pr_cancelled',
-        'funding',
+        'funding_source',
         'requested_by',
         'office',
         'division',
@@ -41,4 +42,22 @@ class PurchaseRequest extends Model
         'remarks',
         'status',
     ];
+
+    /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+
+    public static function boot() {
+         parent::boot();
+         self::creating(function($model) {
+             $model->id = self::generateUuid();
+         });
+    }
+
+    public static function generateUuid() {
+         return Uuid::generate();
+    }
 }

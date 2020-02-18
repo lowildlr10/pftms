@@ -15,9 +15,9 @@ class CreateDocumentAttachmentsTable extends Migration
     {
         Schema::create('document_attachments', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            
+
             $table->uuid('id')->primary();
-            $table->string('parent_id');
+            $table->uuid('parent_id');
             $table->string('type');
             $table->text('directory');
             $table->timestamps();

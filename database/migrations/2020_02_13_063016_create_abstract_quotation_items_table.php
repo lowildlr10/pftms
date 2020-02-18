@@ -15,13 +15,14 @@ class CreateAbstractQuotationItemsTable extends Migration
     {
         Schema::create('abstract_quotation_items', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            
-            $table->string('abstract_id')->primary();
-            $table->unsignedBigInteger('pr_id');
+
+            $table->uuid('id')->primary();
+            $table->uuid('pr_id');
             $table->foreign('pr_id')->references('id')->on('purchase_requests');
-            $table->string('pr_item_id');
-            $table->foreign('pr_item_id')->references('item_id')->on('purchase_request_items');
-            $table->unsignedBigInteger('supplier');
+            $table->uuid('pr_item_id');
+            $table->foreign('pr_item_id')->references('id')->on('purchase_request_items');
+            $table->unsignedInteger('item_no');
+            $table->uuid('supplier');
             $table->foreign('supplier')->references('id')->on('suppliers');
             $table->text('specification')->nullable();
             $table->text('remarks')->nullable();
@@ -35,6 +36,7 @@ class CreateAbstractQuotationItemsTable extends Migration
      *
      * @return void
      */
+
     public function down()
     {
         Schema::dropIfExists('abstract_quotation_items');

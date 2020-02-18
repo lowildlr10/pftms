@@ -15,8 +15,8 @@ class CreateModuleClassificationsTable extends Migration
     {
         Schema::create('module_classifications', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            
-            $table->bigIncrements('id');
+
+            $table->unsignedBigInteger('id')->primary();
             $table->string('classification', 191);
         });
     }

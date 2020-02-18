@@ -15,10 +15,11 @@ class CreateListDemandPayableItemsTable extends Migration
     {
         Schema::create('list_demand_payable_items', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            
-            $table->string('item_id')->primary();
-            $table->unsignedBigInteger('lddap_id')->nullable();
+
+            $table->uuid('id')->primary();
+            $table->uuid('lddap_id')->nullable();
             $table->foreign('lddap_id')->references('id')->on('list_demand_payables');
+            $table->unsignedInteger('item_no');
             $table->enum('category', ['current_year', 'prior_year']);
             $table->string('creditor_name');
             $table->string('creditor_acc_no');

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 
-class Funding extends Model
+class FundingSource extends Model
 {
     use SoftDeletes;
 
@@ -15,7 +15,7 @@ class Funding extends Model
      *
      * @var string
      */
-    protected $table = 'fundings';
+    protected $table = 'funding_sources';
 
      /**
      * The attributes that are mass assignable.
@@ -25,7 +25,7 @@ class Funding extends Model
     protected $fillable = [
         'id',
         'reference_code',
-        'funding_name'
+        'source_name'
     ];
 
     /**

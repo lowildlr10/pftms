@@ -15,21 +15,22 @@ class CreatePurchaseRequestItemsTable extends Migration
     {
         Schema::create('purchase_request_items', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            
-            $table->string('item_id')->primary();
-            $table->unsignedBigInteger('pr_id');
+
+            $table->uuid('id')->primary();
+            $table->uuid('pr_id');
             $table->foreign('pr_id')->references('id')->on('purchase_requests');
+            $table->unsignedInteger('item_no');
             $table->unsignedInteger('quantity');
-            $table->unsignedBigInteger('unit_issue');
+            $table->uuid('unit_issue');
             $table->foreign('unit_issue')->references('id')->on('item_unit_issues');
             $table->text('item_description');
             $table->double('est_unit_cost', 50, 2)->default(0.00);
             $table->double('est_total_cost', 50, 2)->default(0.00);
-            $table->unsignedBigInteger('awarded_to');
+            $table->uuid('awarded_to');
             $table->foreign('awarded_to')->references('id')->on('suppliers');
             $table->text('awarded_remarks')->nullable();
-            $table->unsignedBigInteger('group_no')->default(0);
-            $table->enum('document_type', ['PO', 'JO']);
+            $table->unsignedInteger('group_no')->default(0);
+            $table->enum('document_type', ['po', 'jo']);
         });
     }
 

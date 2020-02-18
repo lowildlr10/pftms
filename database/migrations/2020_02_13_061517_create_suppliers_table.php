@@ -15,9 +15,9 @@ class CreateSuppliersTable extends Migration
     {
         Schema::create('suppliers', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('classification');
+
+            $table->uuid('id')->primary();
+            $table->uuid('classification');
             $table->foreign('classification')->references('id')->on('supplier_classifications');
             $table->string('company_name');
             $table->date('date_filed')->nullable();

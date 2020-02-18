@@ -16,7 +16,7 @@ class CreateLiquidationReportsTable extends Migration
         Schema::create('liquidation_reports', function (Blueprint $table) {
             $table->engine = 'InnoDB';
 
-            $table->bigIncrements('id');
+            $table->uuid('id')->primary();
             $table->string('code');
             $table->string('period_covered')->nullable();
             $table->string('entity_name')->nullable();
@@ -32,21 +32,21 @@ class CreateLiquidationReportsTable extends Migration
             $table->date('or_dtd')->nullable();
             $table->double('amount_refunded', 50, 2)->default(0.00);
             $table->double('amount_reimbursed', 50, 2)->default(0.00);
-            $table->unsignedBigInteger('sig_claimant')->nullable();
+            $table->uuid('sig_claimant')->nullable();
             $table->foreign('sig_claimant')->references('id')->on('signatories');
-            $table->unsignedBigInteger('sig_supervisor')->nullable();
+            $table->uuid('sig_supervisor')->nullable();
             $table->foreign('sig_supervisor')->references('id')->on('signatories');
-            $table->unsignedBigInteger('sig_accounting')->nullable();
+            $table->uuid('sig_accounting')->nullable();
             $table->foreign('sig_accounting')->references('id')->on('signatories');
             $table->date('date_claimant')->nullable();
             $table->date('date_supervisor')->nullable();
             $table->date('date_accounting')->nullable();
             $table->string('jev_no', 100)->nullable();
-            $table->unsignedBigInteger('dv_id');
+            $table->uuid('dv_id');
             $table->foreign('dv_id')->references('id')->on('disbursement_vouchers');
             $table->date('dv_dtd')->nullable();
-            $table->string('liquidated_by')->nullable();
-            $table->foreign('liquidated_by')->references('emp_id')->on('emp_accounts');
+            $table->uuid('liquidated_by')->nullable();
+            $table->foreign('liquidated_by')->references('id')->on('emp_accounts');
             $table->dateTime('date_liquidated')->nullable();
             $table->softDeletes();
             $table->timestamps();
