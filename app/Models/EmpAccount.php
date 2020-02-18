@@ -38,8 +38,7 @@ class User extends Authenticatable
         'gender',
         'position',
         'emp_type',
-        'username',
-
+        'username'
     ];
 
     /**
@@ -80,7 +79,7 @@ class User extends Authenticatable
 
     public function roles()
     {
-        return $this->belongsToMany('App\Role', 'tblemp_accounts', 'id', 'role');
+        return $this->belongsToMany('App\Models\EmpRole', 'emp_accounts', 'id', 'role');
     }
 
     public function hasAnyRole($roles)
@@ -111,5 +110,20 @@ class User extends Authenticatable
         }
 
         return false;
+    }
+
+    public function hasModuleAccess($role, $module, $access) {
+        $roleData = $this->roles()->where('emp_roles.id', $role)->first();
+        $jsonRole = json_decode($roleData->module_access);
+
+        if (!isset($jsonRole->{$module})) {
+            return false;
+        }
+
+        if (!isset($jsonRole->{$module}->{$access})) {
+            return false;
+        }
+
+        return $jsonRole->{$module}->{$access} ? true : false;
     }
 }

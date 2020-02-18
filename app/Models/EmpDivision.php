@@ -23,6 +23,7 @@ class EmpDivision extends Model
      * @var array
      */
     protected $fillable = [
+        'id',
         'division_name'
     ];
 

@@ -13,8 +13,6 @@
 
 Auth::routes();
 
-Route::get('/', 'HomeController@index')->name('dashboard');
-
 Route::group(['middlewareGroups' => ['web']], function () {
 
     // Registration Routes...
@@ -22,7 +20,7 @@ Route::group(['middlewareGroups' => ['web']], function () {
     Route::post('register', 'Auth\RegisterController@register');
 
     // Dashboard
-    Route::get('main', 'HomeController@index');
+    Route::get('/', 'HomeController@index')->name('dashboard');
 
     /*===================== CASH ADVANCE, REIMBURSEMENT, & LIQUIDATION ROUTES =====================*/
 
@@ -80,7 +78,12 @@ Route::group(['middlewareGroups' => ['web']], function () {
     /*===================== PROCUREMENT ROUTES =====================*/
 
     // Purchase Request
-    Route::any('procurement/pr', 'PurchaseRequestController@index');
+    Route::any('procurement/pr', [
+        'uses' => 'PurchaseRequestController@index',
+        'middleware' => 'moduleaccess',
+        'module' => 'pr',
+        'access' => 'is_allowed'
+    ]);
     Route::get('procurement/pr/show/{id}', 'PurchaseRequestController@show');
     Route::get('procurement/pr/tracker/{prNo}', 'PurchaseRequestController@showTrackPR');
     Route::get('procurement/pr/create', 'PurchaseRequestController@create');
