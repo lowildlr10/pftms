@@ -20,7 +20,7 @@ class RolesTableSeeder extends Seeder
                         "create": 1,
                         "read": 1,
                         "update": 1
-                    }, 
+                    },
                     "rfq" : {
                         "create": 1,
                         "read": 1,
@@ -52,7 +52,7 @@ class RolesTableSeeder extends Seeder
                         "update": 1
                     }
                 }'
-    
+
             ], (object) [
                 'role' => 'Supply & Property Officer',
                 'modules' => '{
@@ -60,7 +60,7 @@ class RolesTableSeeder extends Seeder
                         "create": 1,
                         "read": 1,
                         "update": 1
-                    }, 
+                    },
                     "rfq" : {
                         "create": 1,
                         "read": 1,
@@ -92,7 +92,7 @@ class RolesTableSeeder extends Seeder
                         "update": 1
                     }
                 }'
-    
+
             ], (object) [
                 'role' => 'Accountant',
                 'modules' => '{
@@ -100,7 +100,7 @@ class RolesTableSeeder extends Seeder
                         "create": 1,
                         "read": 1,
                         "update": 1
-                    }, 
+                    },
                     "rfq" : {
                         "create": 1,
                         "read": 1,
@@ -139,7 +139,7 @@ class RolesTableSeeder extends Seeder
                         "create": 1,
                         "read": 1,
                         "update": 1
-                    }, 
+                    },
                     "rfq" : {
                         "create": 1,
                         "read": 1,
@@ -178,7 +178,7 @@ class RolesTableSeeder extends Seeder
                         "create": 1,
                         "read": 1,
                         "update": 1
-                    }, 
+                    },
                     "rfq" : {
                         "create": 1,
                         "read": 1,
@@ -217,7 +217,7 @@ class RolesTableSeeder extends Seeder
                         "create": 1,
                         "read": 1,
                         "update": 1
-                    }, 
+                    },
                     "rfq" : {
                         "create": 1,
                         "read": 1,
@@ -251,7 +251,7 @@ class RolesTableSeeder extends Seeder
                 }'
             ]
         ];
-    
+
         foreach ($roles as $rol) {
             $rol->modules = str_replace("\n", '', $rol->modules);
             $rol->modules = trim($rol->modules);

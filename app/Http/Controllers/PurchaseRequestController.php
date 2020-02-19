@@ -3,22 +3,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\PurchaseRequest;
-use App\Canvass;
-use App\Abstracts;
-use App\PurchaseOrder;
-use App\OrsBurs;
-use App\InspectionAcceptance;
-use App\DisbursementVoucher;
-use App\InventoryStock;
+use App\Models\PurchaseRequest;
+use App\Models\Canvass;
+use App\Models\Abstracts;
+use App\Models\PurchaseOrder;
+use App\Models\OrsBurs;
+use App\Models\InspectionAcceptance;
+use App\Models\DisbursementVoucher;
+use App\Models\InventoryStock;
 
 use App\User;
-use App\Division;
-use App\UnitIssue;
-use App\Projects;
-use App\EmployeeLog;
-use App\DocumentLogHistory;
-use App\PaperSize;
+use App\Models\Division;
+use App\Models\UnitIssue;
+use App\Models\Projects;
+use App\Models\EmployeeLog;
+use App\Models\DocumentLogHistory;
+use App\Models\PaperSize;
 use Carbon\Carbon;
 use DB;
 use Auth;

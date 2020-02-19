@@ -77,270 +77,378 @@ Route::group(['middlewareGroups' => ['web']], function () {
 
     /*===================== PROCUREMENT ROUTES =====================*/
 
-    // Purchase Request
+    // Purchase Request Module
     Route::any('procurement/pr', [
         'uses' => 'PurchaseRequestController@index',
         'middleware' => 'moduleaccess',
-        'module' => 'pr',
+        'module' => 'procurement_pr',
         'access' => 'is_allowed'
     ]);
-    Route::get('procurement/pr/show/{id}', 'PurchaseRequestController@show');
-    Route::get('procurement/pr/tracker/{prNo}', 'PurchaseRequestController@showTrackPR');
-    Route::get('procurement/pr/create', 'PurchaseRequestController@create');
-    Route::get('procurement/pr/edit/{id}', 'PurchaseRequestController@edit');
-    Route::post('procurement/pr/save', 'PurchaseRequestController@store');
-    Route::post('procurement/pr/update/{id}', 'PurchaseRequestController@update');
-    Route::post('procurement/pr/delete/{id}', 'PurchaseRequestController@delete');
+    Route::get('procurement/pr/show-create', [
+        'uses' => 'PurchaseRequestController@showCreate',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_pr',
+        'access' => 'create'
+    ]);
+    Route::post('procurement/pr/store', [
+        'uses' => 'PurchaseRequestController@store',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_pr',
+        'access' => 'create'
+    ]);
+    Route::get('procurement/pr/show-items/{id}', [
+        'uses' => 'PurchaseRequestController@showItems',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_pr',
+        'access' => 'read'
+    ]);
+    Route::get('procurement/pr/show-edit/{id}', [
+        'uses' => 'PurchaseRequestController@showEdit',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_pr',
+        'access' => 'update'
+    ]);
+    Route::post('procurement/pr/update/{id}', [
+        'uses' => 'PurchaseRequestController@update',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_pr',
+        'access' => 'update'
+    ]);
+    Route::post('procurement/pr/delete/{id}', [
+        'uses' => 'PurchaseRequestController@delete',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_pr',
+        'access' => 'delete'
+    ]);
     Route::post('procurement/pr/approve/{id}', [
         'uses' => 'PurchaseRequestController@approve',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_pr',
+        'access' => 'approve'
     ]);
     Route::post('procurement/pr/disapprove/{id}', [
         'uses' => 'PurchaseRequestController@disapprove',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_pr',
+        'access' => 'disapprove'
     ]);
-    Route::post('procurement/pr/cancel/{id}', 'PurchaseRequestController@cancel');
+    Route::post('procurement/pr/cancel/{id}', [
+        'uses' => 'PurchaseRequestController@cancel',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_pr',
+        'access' => 'cancel'
+    ]);
+    Route::get('procurement/pr/tracker/{prNo}', [
+        'uses' => 'PurchaseRequestController@showTrackPR',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_pr',
+        'access' => 'is_allowed'
+    ]);
 
-    // Canvass
-    Route::any('procurement/rfq', 'CanvassController@index');
-    Route::get('procurement/rfq/show/{id}', 'CanvassController@show');
+    // Request for Quotation Module
+    Route::any('procurement/rfq', [
+        'uses' => 'CanvassController@index',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_rfq',
+        'access' => 'is_allowed'
+    ]);
+    Route::get('procurement/rfq/show-edit/{id}', [
+        'uses' => 'CanvassController@showEdit',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_rfq',
+        'access' => 'update'
+    ]);
+    Route::post('procurement/rfq/update/{id}', [
+        'uses' => 'CanvassController@update',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_rfq',
+        'access' => 'update'
+    ]);
     Route::get('procurement/rfq/show-issue/{id}', [
-        'uses' => 'CanvassController@showIssuedTo',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'uses' => 'CanvassController@showIssue',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_rfq',
+        'access' => 'issue'
     ]);
     Route::post('procurement/rfq/issue/{id}', [
         'uses' => 'CanvassController@issue',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_rfq',
+        'access' => 'issue'
     ]);
     Route::post('procurement/rfq/receive/{id}', [
         'uses' => 'CanvassController@receive',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_rfq',
+        'access' => 'receive'
     ]);
-    Route::post('procurement/rfq/update/{id}', 'CanvassController@update');
 
-    // Abstract
+    // Abstract of Quotation Module
     Route::any('procurement/abstract', [
         'uses' => 'AbstractController@index',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ]);
-    Route::get('procurement/abstract/create/{id}', [
-        'uses' => 'AbstractController@create',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_abstract',
+        'access' => 'is_allowed'
     ]);
     Route::get('procurement/abstract/segment/{id}', [
         'uses' => 'AbstractController@getSegment',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_abstract',
+        'access' => 'is_allowed'
     ]);
-    Route::get('procurement/abstract/show/{id}', [
-        'uses' => 'AbstractController@show',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    Route::get('procurement/abstract/show-create/{id}', [
+        'uses' => 'AbstractController@showCreate',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_abstract',
+        'access' => 'create'
+    ]);
+    Route::post('procurement/abstract/store/{id}', [
+        'uses' => 'AbstractController@store',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_abstract',
+        'access' => 'create'
+    ]);
+    Route::post('procurement/abstract/store-items/{id}', [
+        'uses' => 'AbstractController@storeItems',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_abstract',
+        'access' => 'create'
+    ]);
+    Route::get('procurement/abstract/show-edit/{id}', [
+        'uses' => 'AbstractController@showEdit',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_abstract',
+        'access' => 'update'
     ]);
     Route::post('procurement/abstract/store-update/{id}', [
         'uses' => 'AbstractController@storeUpdate',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_abstract',
+        'access' => 'update'
     ]);
-    Route::post('procurement/abstract/store-update-items/{id}', [
-        'uses' => 'AbstractController@storeUpdateItems',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    Route::post('procurement/abstract/update-items/{id}', [
+        'uses' => 'AbstractController@updateItems',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_abstract',
+        'access' => 'update'
     ]);
     Route::post('procurement/abstract/delete/{id}', [
         'uses' => 'AbstractController@delete',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ]);
-    Route::post('procurement/abstract/receive/{id}', [
-        'uses' => 'AbstractController@receive',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_abstract',
+        'access' => 'delete'
     ]);
     Route::post('procurement/abstract/approve/{id}', [
         'uses' => 'AbstractController@approve',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_abstract',
+        'access' => 'approve'
     ]);
 
-    // Purchase and Job Order
+    // Purchase and Job Order Module
     Route::any('procurement/po-jo', [
         'uses' => 'PurchaseJobOrderController@index',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_po_jo',
+        'access' => 'is_allowed'
     ]);
-    Route::get('procurement/po-jo/show/{poNo}', [
-        'uses' => 'PurchaseJobOrderController@show',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    Route::get('procurement/po-jo/show-edit/{id}', [
+        'uses' => 'PurchaseJobOrderController@showEdit',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_po_jo',
+        'access' => 'update'
     ]);
-    Route::get('procurement/po-jo/show-issue/{poNo}', [
-        'uses' => 'PurchaseJobOrderController@showIssuedTo',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ]);
-    Route::post('procurement/po-jo/update/{poNo}', [
+    Route::post('procurement/po-jo/update/{id}', [
         'uses' => 'PurchaseJobOrderController@update',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_po_jo',
+        'access' => 'update'
     ]);
-    Route::post('procurement/po-jo/accountant-signed/{poNo}', [
+    Route::post('procurement/po-jo/accountant-signed/{id}', [
         'uses' => 'PurchaseJobOrderController@accountantSigned',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_po_jo',
+        'access' => 'accountant_signed'
     ]);
-    Route::post('procurement/po-jo/approve/{poNo}', [
+    Route::post('procurement/po-jo/approve/{id}', [
         'uses' => 'PurchaseJobOrderController@approve',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_po_jo',
+        'access' => 'approve'
     ]);
-    Route::post('procurement/po-jo/issue/{poNo}', [
+    Route::get('procurement/po-jo/show-issue/{id}', [
+        'uses' => 'PurchaseJobOrderController@showIssue',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_po_jo',
+        'access' => 'issue'
+    ]);
+    Route::post('procurement/po-jo/issue/{id}', [
         'uses' => 'PurchaseJobOrderController@issue',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_po_jo',
+        'access' => 'issue'
     ]);
-    Route::post('procurement/po-jo/receive/{poNo}', [
+    Route::post('procurement/po-jo/receive/{id}', [
         'uses' => 'PurchaseJobOrderController@receive',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_po_jo',
+        'access' => 'receive'
     ]);
-    Route::post('procurement/po-jo/cancel/{poNo}', [
+    Route::post('procurement/po-jo/cancel/{id}', [
         'uses' => 'PurchaseJobOrderController@cancel',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_po_jo',
+        'access' => 'cancel'
     ]);
-    Route::post('procurement/po-jo/uncancel/{poNo}', [
+    Route::post('procurement/po-jo/uncancel/{id}', [
         'uses' => 'PurchaseJobOrderController@unCancel',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_po_jo',
+        'access' => 'uncancel'
     ]);
-    Route::post('procurement/po-jo/create-ors-burs/{poNo}', [
+    Route::post('procurement/po-jo/create-ors-burs/{id}', [
         'uses' => 'PurchaseJobOrderController@createORS_BURS',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_po_jo',
+        'access' => 'create_ors_burs'
     ]);
-    Route::post('procurement/po-jo/delivery/{poNo}', [
+    Route::post('procurement/po-jo/delivery/{id}', [
         'uses' => 'PurchaseJobOrderController@delivery',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_po_jo',
+        'access' => 'for_delivery'
     ]);
-    Route::post('procurement/po-jo/inspection/{poNo}', [
+    Route::post('procurement/po-jo/inspection/{id}', [
         'uses' => 'PurchaseJobOrderController@inspection',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_po_jo',
+        'access' => 'to_inspection'
     ]);
 
-    // Obligation and Request Status/BURS
+    // Obligation and Request Status/BURS Module
     Route::any('procurement/ors-burs', [
         'uses' => 'OrsBursController@index',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'Budget Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_ors_burs',
+        'access' => 'is_allowed'
     ]);
-    Route::get('procurement/ors-burs/edit/{key}', [
+    Route::get('procurement/ors-burs/show-edit/{id}', [
         'uses' => 'OrsBursController@showEdit',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'Budget Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_ors_burs',
+        'access' => 'update'
     ]);
-    Route::post('procurement/ors-burs/update/{key}', [
+    Route::post('procurement/ors-burs/update/{id}', [
         'uses' => 'OrsBursController@update',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'Budget Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_ors_burs',
+        'access' => 'update'
     ]);
     Route::get('procurement/ors-burs/show-issue/{id}', [
-        'uses' => 'OrsBursController@showIssuedTo',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'Budget Officer', 'PSTD']
+        'uses' => 'OrsBursController@showIssue',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_ors_burs',
+        'access' => 'issue'
     ]);
     Route::post('procurement/ors-burs/issue/{id}', [
         'uses' => 'OrsBursController@issue',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'Budget Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_ors_burs',
+        'access' => 'issue'
     ]);
     Route::post('procurement/ors-burs/receive/{id}', [
         'uses' => 'OrsBursController@receive',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'Budget Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_ors_burs',
+        'access' => 'receive'
     ]);
     Route::post('procurement/ors-burs/obligate/{id}', [
         'uses' => 'OrsBursController@obligate',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'Budget Officer', 'Accountant', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_ors_burs',
+        'access' => 'obligate'
     ]);
 
-    // Inpection and Acceptance Report
+    // Inpection and Acceptance Report Module
     Route::any('procurement/iar', [
         'uses' => 'InspectionAcceptanceController@index',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_iar',
+        'access' => 'is_allowed'
     ]);
-    Route::get('procurement/iar/show/{poNo}', [
-        'uses' => 'InspectionAcceptanceController@show',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ]);
-    Route::get('procurement/iar/show-issue/{iarNo}', [
-        'uses' => 'InspectionAcceptanceController@showIssuedTo',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    Route::get('procurement/iar/show-edit/{poNo}', [
+        'uses' => 'InspectionAcceptanceController@showEdit',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_iar',
+        'access' => 'update'
     ]);
     Route::post('procurement/iar/update/{iarNo}', [
         'uses' => 'InspectionAcceptanceController@update',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_iar',
+        'access' => 'update'
+    ]);
+    Route::get('procurement/iar/show-issue/{iarNo}', [
+        'uses' => 'InspectionAcceptanceController@showIssue',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_iar',
+        'access' => 'issue'
     ]);
     Route::post('procurement/iar/issue/{iarNo}', [
         'uses' => 'InspectionAcceptanceController@issue',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_iar',
+        'access' => 'issue'
     ]);
     Route::post('procurement/iar/inspect/{iarNo}', [
         'uses' => 'InspectionAcceptanceController@inspect',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_iar',
+        'access' => 'inspect'
     ]);
 
-    // Disbursement Voucher
+    // Disbursement Voucher Module
     Route::any('procurement/dv', [
         'uses' => 'DisbursementVoucherController@index',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'Accountant', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_dv',
+        'access' => 'is_allowed'
     ]);
-    Route::get('procurement/dv/edit/{id}', [
+    Route::get('procurement/dv/show-edit/{id}', [
         'uses' => 'DisbursementVoucherController@showEdit',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'Accountant', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_dv',
+        'access' => 'update'
     ]);
     Route::post('procurement/dv/update/{id}', [
         'uses' => 'DisbursementVoucherController@update',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'Accountant', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_dv',
+        'access' => 'update'
     ]);
     Route::get('procurement/dv/show-issue/{id}', [
-        'uses' => 'DisbursementVoucherController@showIssuedTo',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'Accountant', 'PSTD']
+        'uses' => 'DisbursementVoucherController@showIssue',
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_dv',
+        'access' => 'issue'
     ]);
     Route::post('procurement/dv/issue/{id}', [
         'uses' => 'DisbursementVoucherController@issue',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'Accountant', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_dv',
+        'access' => 'issue'
     ]);
     Route::post('procurement/dv/receive/{id}', [
         'uses' => 'DisbursementVoucherController@receive',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'Accountant', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_dv',
+        'access' => 'receive'
     ]);
     Route::post('procurement/dv/payment/{id}', [
         'uses' => 'DisbursementVoucherController@payment',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'Accountant', 'PSTD']
+        'middleware' => 'moduleaccess',
+        'module' => 'procurement_dv',
+        'access' => 'disburse'
     ]);
 
     /*===================== PAYMENT ROUTES =====================*/
