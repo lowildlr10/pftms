@@ -32,6 +32,7 @@ class CreatePurchaseJobOrdersTable extends Migration
             $table->string('payment_term');
             $table->string('amount_words');
             $table->double('grand_total', 50, 2)->default(0.00);
+            $table->string('fund_cluster', 50)->nullable();
             $table->uuid('sig_department')->nullable();
             $table->foreign('sig_department')->references('id')->on('signatories');
             $table->uuid('sig_approval')->nullable();

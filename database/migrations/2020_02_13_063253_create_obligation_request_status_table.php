@@ -48,6 +48,8 @@ class CreateObligationRequestStatusTable extends Migration
             $table->foreign('obligated_by')->references('id')->on('emp_accounts');
             $table->date('date_certified_1')->nullable();
             $table->date('date_certified_2')->nullable();
+            $table->date('date_received')->nullable();
+            $table->date('date_released')->nullable();
             $table->unsignedBigInteger('module_class');
             $table->foreign('module_class')->references('id')->on('module_classifications');
             $table->softDeletes();

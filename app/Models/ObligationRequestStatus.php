@@ -48,6 +48,8 @@ class ObligationRequestStatus extends Model
         'obligated_by',
         'date_certified_1',
         'date_certified_2',
+        'date_received',
+        'date_released',
         'module_class'
     ];
 

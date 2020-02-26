@@ -18,6 +18,8 @@ class CreateInspectionAcceptanceReportsTable extends Migration
 
             $table->uuid('id')->primary();
             $table->string('iar_no', 15)->unique();
+            $table->string('po_no', 15);
+            $table->foreign('po_no')->references('po_no')->on('purchase_job_orders');
             $table->string('code');
             $table->uuid('pr_id');
             $table->foreign('pr_id')->references('id')->on('purchase_requests');
@@ -30,6 +32,12 @@ class CreateInspectionAcceptanceReportsTable extends Migration
             $table->foreign('sig_inspection')->references('id')->on('signatories');
             $table->uuid('sig_supply')->nullable();
             $table->foreign('sig_supply')->references('id')->on('signatories');
+            $table->date('date_inspected')->nullable();
+            $table->enum('inspection_remarks', ['', 'inspected', 'not_conformity'])->default('');
+            $table->date('date_received')->nullable();
+            $table->enum('acceptance_remarks', ['', 'complete', 'partial'])->default('');
+            $table->string('specify_quantity')->nullable();
+            $table->text('remarks_recommendation')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

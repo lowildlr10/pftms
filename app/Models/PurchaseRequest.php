@@ -33,6 +33,7 @@ class PurchaseRequest extends Model
         'funding_source',
         'requested_by',
         'office',
+        'responsibility_center',
         'division',
         'approved_by',
         'sig_app',

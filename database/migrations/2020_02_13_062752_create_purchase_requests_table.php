@@ -28,6 +28,7 @@ class CreatePurchaseRequestsTable extends Migration
             $table->foreign('funding_source')->references('id')->on('funding_sources');
             $table->foreign('requested_by')->references('id')->on('emp_accounts');
             $table->string('office');
+            $table->string('responsibility_center')->nullable();
             $table->uuid('division');
             $table->foreign('division')->references('id')->on('emp_divisions');
             $table->uuid('approved_by')->nullable();

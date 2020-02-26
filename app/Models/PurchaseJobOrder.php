@@ -37,6 +37,7 @@ class PurchaseJobOrder extends Model
         'payment_term',
         'amount_words',
         'grand_total',
+        'fund_cluster',
         'sig_department',
         'sig_approval',
         'sig_funds_available',

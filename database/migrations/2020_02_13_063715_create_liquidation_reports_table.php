@@ -41,7 +41,7 @@ class CreateLiquidationReportsTable extends Migration
             $table->date('date_claimant')->nullable();
             $table->date('date_supervisor')->nullable();
             $table->date('date_accounting')->nullable();
-            $table->string('jev_no', 100)->nullable();
+            $table->string('jev_no')->nullable();
             $table->uuid('dv_id');
             $table->foreign('dv_id')->references('id')->on('disbursement_vouchers');
             $table->date('dv_dtd')->nullable();

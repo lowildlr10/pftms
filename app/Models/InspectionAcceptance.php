@@ -31,6 +31,7 @@ class InspectionAcceptance extends Model
      */
     protected $fillable = [
         'iar_no',
+        'po_no',
         'code',
         'pr_id',
         'ors_id',
@@ -38,7 +39,13 @@ class InspectionAcceptance extends Model
         'invoice_no',
         'date_invoice',
         'sig_inspection',
-        'sig_supply'
+        'sig_supply',
+        'date_inspected',
+        'inspection_remarks',
+        'date_received',
+        'acceptance_remarks',
+        'specify_quantity',
+        'remarks_recommendation',
     ];
 
     /**

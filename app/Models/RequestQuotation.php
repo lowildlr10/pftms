@@ -28,6 +28,7 @@ class RequestQuotation extends Model
         'code',
         'date_canvass',
         'sig_rfq',
+        'canvassed_by',
         'document_abrv'
     ];
 
