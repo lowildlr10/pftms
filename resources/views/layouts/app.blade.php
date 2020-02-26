@@ -112,7 +112,7 @@
         <!-- Main content -->
         <div id="module-body" class="container-fluid mt-4">
             <div class="page-wrapper default-theme sidebar-bg">
-                @include('layouts.partials.nav')
+                @include('partials.nav')
                 <main class="page-content pt-5">
                     <div id="overlay" class="overlay"></div>
                     @yield('main-content')

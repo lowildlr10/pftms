@@ -18,37 +18,37 @@ class RolesTableSeeder extends Seeder
                 'modules' => '{
                     "pr" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "rfq" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "abstract" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "po_jo" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "ors_burs" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "iar" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "dv" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     }
                 }'
@@ -58,37 +58,37 @@ class RolesTableSeeder extends Seeder
                 'modules' => '{
                     "pr" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "rfq" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "abstract" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "po_jo" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "ors_burs" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "iar" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "dv" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     }
                 }'
@@ -98,37 +98,37 @@ class RolesTableSeeder extends Seeder
                 'modules' => '{
                     "pr" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "rfq" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "abstract" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "po_jo" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "ors_burs" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "iar" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "dv" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     }
                 }'
@@ -137,37 +137,37 @@ class RolesTableSeeder extends Seeder
                 'modules' => '{
                     "pr" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "rfq" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "abstract" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "po_jo" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "ors_burs" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "iar" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "dv" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     }
                 }'
@@ -176,37 +176,37 @@ class RolesTableSeeder extends Seeder
                 'modules' => '{
                     "pr" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "rfq" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "abstract" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "po_jo" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "ors_burs" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "iar" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "dv" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     }
                 }'
@@ -215,37 +215,37 @@ class RolesTableSeeder extends Seeder
                 'modules' => '{
                     "pr" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "rfq" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "abstract" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "po_jo" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "ors_burs" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "iar" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     },
                     "dv" : {
                         "create": 1,
-                        "read": 1,
+                        "view": 1,
                         "update": 1
                     }
                 }'

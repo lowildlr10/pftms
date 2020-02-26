@@ -16,24 +16,14 @@
             </div>
 
             <!--Body-->
-            <div class="modal-body rgba-grey-slight">
-                <div id="modal-body-create">
-                    <div class="mt-5" style="height: 150px;">
-                        <center>
-                            <div class="preloader-wrapper big active crazy">
-                                <div class="spinner-layer spinner-blue-only">
-                                    <div class="circle-clipper left">
-                                        <div class="circle"></div>
-                                    </div>
-                                    <div class="gap-patch">
-                                        <div class="circle"></div>
-                                    </div>
-                                    <div class="circle-clipper right">
-                                        <div class="circle"></div>
-                                    </div>
-                                </div>
-                            </div><br>
-                        </center>
+            <div class="modal-body rgba-stylish-light transparent">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col d-flex justify-content-center">
+                            <div class="card w-responsive">
+                                <div class="card-body"><div id="modal-body-create"></div></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

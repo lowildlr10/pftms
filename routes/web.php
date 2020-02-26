@@ -83,37 +83,37 @@ Route::group(['middlewareGroups' => ['web']], function () {
         'middleware' => 'moduleaccess',
         'module' => 'procurement_pr',
         'access' => 'is_allowed'
-    ]);
+    ])->name('pr-index');
     Route::get('procurement/pr/show-create', [
         'uses' => 'PurchaseRequestController@showCreate',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_pr',
         'access' => 'create'
-    ]);
+    ])->name('pr-show-create');
     Route::post('procurement/pr/store', [
         'uses' => 'PurchaseRequestController@store',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_pr',
         'access' => 'create'
-    ]);
+    ])->name('pr-store');
     Route::get('procurement/pr/show-items/{id}', [
         'uses' => 'PurchaseRequestController@showItems',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_pr',
         'access' => 'read'
-    ]);
+    ])->name('pr-show-items');
     Route::get('procurement/pr/show-edit/{id}', [
         'uses' => 'PurchaseRequestController@showEdit',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_pr',
         'access' => 'update'
-    ]);
+    ])->name('pr-show-edit');
     Route::post('procurement/pr/update/{id}', [
         'uses' => 'PurchaseRequestController@update',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_pr',
         'access' => 'update'
-    ]);
+    ])->name('pr-update');
     Route::post('procurement/pr/delete/{id}', [
         'uses' => 'PurchaseRequestController@delete',
         'middleware' => 'moduleaccess',
@@ -125,25 +125,25 @@ Route::group(['middlewareGroups' => ['web']], function () {
         'middleware' => 'moduleaccess',
         'module' => 'procurement_pr',
         'access' => 'approve'
-    ]);
+    ])->name('pr-approve');
     Route::post('procurement/pr/disapprove/{id}', [
         'uses' => 'PurchaseRequestController@disapprove',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_pr',
         'access' => 'disapprove'
-    ]);
+    ])->name('pr-disapprove');
     Route::post('procurement/pr/cancel/{id}', [
         'uses' => 'PurchaseRequestController@cancel',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_pr',
         'access' => 'cancel'
-    ]);
+    ])->name('pr-cancel');
     Route::get('procurement/pr/tracker/{prNo}', [
         'uses' => 'PurchaseRequestController@showTrackPR',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_pr',
         'access' => 'is_allowed'
-    ]);
+    ])->name('pr-tracker');
 
     // Request for Quotation Module
     Route::any('procurement/rfq', [

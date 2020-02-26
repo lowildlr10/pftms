@@ -4,20 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\PurchaseRequest;
-use App\Models\Canvass;
-use App\Models\Abstracts;
-use App\Models\PurchaseOrder;
-use App\Models\OrsBurs;
+use App\Models\RequestQuotation;
+use App\Models\AbstractQuotation;
+use App\Models\PurchaseJobOrder;
+use App\Models\ObligationRequestStatus;
 use App\Models\InspectionAcceptance;
 use App\Models\DisbursementVoucher;
 use App\Models\InventoryStock;
 
 use App\User;
-use App\Models\Division;
-use App\Models\UnitIssue;
-use App\Models\Projects;
-use App\Models\EmployeeLog;
-use App\Models\DocumentLogHistory;
+use App\Models\EmpDivision;
+use App\Models\ItemUnitIssue;
+use App\Models\FundingSource;
+use App\Models\EmpLog;
+use App\Models\DocumentLog;
 use App\Models\PaperSize;
 use Carbon\Carbon;
 use DB;
@@ -51,32 +51,33 @@ class PurchaseRequestController extends Controller
 
         $prList = $this->getMainData($pageLimit, $search, $filter);
 
-        return view('pages.pr', ['search' => $search,
-                                 'filter' => $filter,
-                                 'list' => $prList,
-                                 'pageLimit' => $pageLimit,
-                                 'paperSizes' => $paperSizes]);
+        return view('modules.procurement.pr.index', [
+            'search' => $search,
+            'filter' => $filter,
+            'list' => $prList,
+            'pageLimit' => $pageLimit,
+            'paperSizes' => $paperSizes
+        ]);
     }
 
     private function getMainData($pageLimit = 50, $search = "", $filter = "") {
-        $data = [];
-        $prData = DB::table('tblpr AS pr')
-                  ->select('pr.*', 'status.status','proj.project', 'status.id AS sID',
-                            DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                  ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'pr.requested_by')
-                  ->join('tblpr_status AS status', 'status.id', '=', 'pr.status')
-                  ->leftJoin('tblprojects AS proj', 'proj.id', '=', 'pr.project_id')
-                  ->whereNull('pr.deleted_at');
+        $prData = DB::table('purchase_requests AS pr')
+                    ->select('pr.*', 'status.status','proj.project', 'status.id AS sID',
+                              DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
+                    ->join('emp_accounts AS emp', 'emp.id', '=', 'pr.requested_by')
+                    ->join('procurement_status AS status', 'status.id', '=', 'pr.status')
+                    ->leftJoin('funding_sources AS proj', 'proj.id', '=', 'pr.funding_source')
+                    ->whereNull('pr.deleted_at');
 
         if (!empty($search)) {
             $prData = $prData->where(function ($query) use ($search) {
-                              $query->where('pr.pr_no', 'LIKE', '%' . $search . '%')
-                                    ->orWhere('pr.date_pr', 'LIKE', '%' . $search . '%')
-                                    ->orWhere('pr.purpose', 'LIKE', '%' . $search . '%')
-                                    ->orWhere('emp.firstname', 'LIKE', '%' . $search . '%')
-                                    ->orWhere('emp.middlename', 'LIKE', '%' . $search . '%')
-                                    ->orWhere('emp.lastname', 'LIKE', '%' . $search . '%');
-                          });
+                $query->where('pr.pr_no', 'LIKE', '%' . $search . '%')
+                      ->orWhere('pr.date_pr', 'LIKE', '%' . $search . '%')
+                      ->orWhere('pr.purpose', 'LIKE', '%' . $search . '%')
+                      ->orWhere('emp.firstname', 'LIKE', '%' . $search . '%')
+                      ->orWhere('emp.middlename', 'LIKE', '%' . $search . '%')
+                      ->orWhere('emp.lastname', 'LIKE', '%' . $search . '%');
+            });
         }
 
         if (!empty($filter) && $filter != 0) {
@@ -88,7 +89,7 @@ class PurchaseRequestController extends Controller
         }
 
         if (Auth::user()->role == 5) {
-            $prData = $prData->where('emp.division_id', Auth::user()->division_id);
+            $prData = $prData->where('emp.division', Auth::user()->division_id);
         }
 
         $prData = $prData->orderBy('pr.id', 'desc')
@@ -102,19 +103,17 @@ class PurchaseRequestController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
+    public function showCreate() {
         $itemNo = 0;
         $toggle = "create";
-        $unitIssue = UnitIssue::all();
-        $projects = Projects::all();
-        $division = Division::all();
-        $approvedBy = DB::table('tblsignatories AS sig')
-                         ->select('sig.id', 'sig.position', 'sig.pr_sign_type', 'sig.active',
+        $unitIssue = ItemUnitIssue::all();
+        $projects = FundingSource::all();
+        $division = EmpDivision::all();
+        $approvedBy = DB::table('signatories AS sig')
+                         ->select('sig.id', 'sig.position', 'sig.module', 'sig.is_active',
                                    DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                         ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'sig.emp_id')
-                         ->where([['sig.p_req', 'y'],
-                                  ['sig.active', 'y']])
+                         ->join('emp_accounts AS emp', 'emp.id', '=', 'sig.emp_id')
+                         ->where('sig.is_active', 'y')
                          ->orderBy('emp.firstname')
                          ->get();
 
@@ -124,14 +123,16 @@ class PurchaseRequestController extends Controller
             $requestedBy = User::where('emp_id', Auth::user()->emp_id)->get();
         }
 
-        return view('pages.create-edit-pr', ['requestedBy' => $requestedBy,
-                                             'approvedBy' => $approvedBy,
-                                             'unitIssue' => $unitIssue,
-                                             'projects' => $projects,
-                                             'divisions' => $division,
-                                             'itemNo' => $itemNo,
-                                             'toggle' => $toggle,
-                                             'pr' => (object)['status' => 1]]);
+        return view('modules.procurement.pr.create', [
+            'requestedBy' => $requestedBy,
+            'approvedBy' => $approvedBy,
+            'unitIssue' => $unitIssue,
+            'projects' => $projects,
+            'divisions' => $division,
+            'itemNo' => $itemNo,
+            'toggle' => $toggle,
+            'pr' => (object)['status' => 1]]
+        );
     }
 
     /**
@@ -140,8 +141,7 @@ class PurchaseRequestController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id, Request $request)
-    {
+    public function showItems($id, Request $request) {
         $awardedTo = $request['awarded'];
         $toggle = $request['toggle'];
         $poNo = $request['po_no'];
@@ -157,13 +157,13 @@ class PurchaseRequestController extends Controller
                            ->join('tblunit_issue AS unit', 'unit.id','=', 'po.unit_issue')
                            ->where('po.po_no', $poNo);
             } else {
-                $items = DB::table('tblpr_items AS itm')
+                $items = DB::table('purchase_requests_items AS itm')
                            ->join('tblunit_issue AS unit', 'unit.id','=', 'itm.unit_issue')
                            ->where('itm.pr_id', $id)
                            ->where('itm.awarded_to', $awardedTo);
             }
         } else {
-            $items = DB::table('tblpr_items AS itm')
+            $items = DB::table('purchase_requests_items AS itm')
                        ->join('tblunit_issue AS unit', 'unit.id','=', 'itm.unit_issue')
                        ->where('itm.pr_id', $id);
         }
@@ -520,18 +520,18 @@ class PurchaseRequestController extends Controller
         $unitIssue = UnitIssue::all();
         $projects = Projects::all();
         $division = Division::all();
-        $approvedBy = DB::table('tblsignatories AS sig')
+        $approvedBy = DB::table('signatories AS sig')
                          ->select('sig.id', 'sig.position', 'sig.pr_sign_type', 'sig.active',
                                    DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                         ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'sig.emp_id')
+                         ->join('emp_accounts AS emp', 'emp.emp_id', '=', 'sig.emp_id')
                          ->orderBy('emp.firstname')
                          ->where([['sig.p_req', 'y'],
                                   ['sig.active', 'y']])
                          ->get();
-        $pr = DB::table('tblpr')
+        $pr = DB::table('purchase_requests')
                 ->where('id', $id)
                 ->first();
-        $prItems = DB::table('tblpr_items')
+        $prItems = DB::table('purchase_requests_items')
                      ->where('pr_id', $id)
                      ->orderByRaw('LENGTH(item_id)')
                      ->orderBy('item_id')
@@ -543,16 +543,18 @@ class PurchaseRequestController extends Controller
             $requestedBy = User::where('emp_id', Auth::user()->emp_id)->get();
         }
 
-        return view('pages.create-edit-pr', ['requestedBy' => $requestedBy,
-                                             'approvedBy' => $approvedBy,
-                                             'unitIssue' => $unitIssue,
-                                             'projects' => $projects,
-                                             'divisions' => $division,
-                                             'itemNo' => $itemNo,
-                                             'id' => $id,
-                                             'toggle' => $toggle,
-                                             'pr' => $pr,
-                                             'prItems' => $prItems]);
+        return view('modules.procuremnt.pr.update', [
+            'requestedBy' => $requestedBy,
+            'approvedBy' => $approvedBy,
+            'unitIssue' => $unitIssue,
+            'projects' => $projects,
+            'divisions' => $division,
+            'itemNo' => $itemNo,
+            'id' => $id,
+            'toggle' => $toggle,
+            'pr' => $pr,
+            'prItems' => $prItems
+        ]);
     }
 
     /**
@@ -565,7 +567,7 @@ class PurchaseRequestController extends Controller
     {
         $pr = new PurchaseRequest;
 
-        // To tblpr
+        // To purchase_requests
         $prDate = $request['date_pr'];
         $prNo = $request['pr_no'];
         $divisionID = $request['division'];
@@ -579,7 +581,7 @@ class PurchaseRequestController extends Controller
         $recommendedBy = $request['recommended_by'];
         $office = $request['office'];
 
-        // To tblpr_items
+        // To purchase_requests_items
         $unitIssue = $request['unit'];
         $itemDescription = $request['item_description'];
         $quantity = $request['quantity'];
@@ -587,7 +589,7 @@ class PurchaseRequestController extends Controller
         $totalCost = $request['total_cost'];
 
         // Auto Generate pr_no if empty
-        $prSequence = DB::table('tblpr')->select('id', 'pr_no')
+        $prSequence = DB::table('purchase_requests')->select('id', 'pr_no')
                                          ->orderBy('id')
                                          ->get();
         $currentYearMonth = date('y') . date('m');
@@ -608,7 +610,7 @@ class PurchaseRequestController extends Controller
         }
 
         try {
-            // Saving data to tblpr
+            // Saving data to purchase_requests
             $pr->date_pr = $prDate;
             $pr->pr_no = $prNo;
             $pr->project_id = $projectID;
@@ -624,8 +626,8 @@ class PurchaseRequestController extends Controller
             $pr->code = $this->generateTrackerCode('pr', $prNo, 3);
             $pr->save();
 
-            // Saving pr items to tblpr_items
-            $getPR_ID = DB::table('tblpr')
+            // Saving pr items to purchase_requests_items
+            $getPR_ID = DB::table('purchase_requests')
                           ->select('id')
                           ->where('pr_no', '=', $prNo)
                           ->first();
@@ -639,7 +641,7 @@ class PurchaseRequestController extends Controller
                 $unCost = $unitCost[$arrayKey];
                 $totCost =  $qnty * $unCost;
 
-                DB::table('tblpr_items')->insert(
+                DB::table('purchase_requests_items')->insert(
                     ['item_id' => $itemID,
                      'pr_id' => $prID,
                      'quantity' => $qnty,
@@ -739,10 +741,10 @@ class PurchaseRequestController extends Controller
                     $itemID = $id . "-" . ($arrayKey + 1);
 
                     if ($arrayKey == 0) {
-                        DB::table('tblpr_items')->where('pr_id', $id)->delete();
+                        DB::table('purchase_requests_items')->where('pr_id', $id)->delete();
                     }
 
-                    DB::table('tblpr_items')->insert(
+                    DB::table('purchase_requests_items')->insert(
                         ['item_id' => $itemID,
                          'pr_id' => $id,
                          'quantity' => $qnty,
@@ -760,7 +762,7 @@ class PurchaseRequestController extends Controller
                         $this->notifyForApproval($prNo, $requestedBy);
                     }
 
-                    DB::table('tblpr_items')
+                    DB::table('purchase_requests_items')
                       ->where('item_id', $itemID)
                       ->update([
                             'quantity' => $qnty,
@@ -775,8 +777,8 @@ class PurchaseRequestController extends Controller
 
             $pr->save();
 
-            $sig = DB::table('tblpr as pr')
-                     ->join('tblsignatories as sig', 'sig.id', '=', 'pr.sig_app')
+            $sig = DB::table('purchase_requests as pr')
+                     ->join('signatories as sig', 'sig.id', '=', 'pr.sig_app')
                      ->where('sig.id', 53)
                      ->first();
 
@@ -981,7 +983,7 @@ class PurchaseRequestController extends Controller
     }
 
     private function getEmployeeName($empID) {
-        $employee = DB::table('tblemp_accounts')
+        $employee = DB::table('emp_accounts')
                       ->where('emp_id', $empID)
                       ->first();
         $fullname = "";
