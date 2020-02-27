@@ -47,4 +47,12 @@ class Signatory extends Model
     public static function generateUuid() {
          return Uuid::generate();
     }
+
+    /**
+     * Get the users for the blog post.
+     */
+    public function user()
+    {
+        return $this->hasMany('App\User', 'id', 'emp_id');
+    }
 }
