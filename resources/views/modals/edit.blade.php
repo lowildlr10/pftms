@@ -5,10 +5,10 @@
         <div class="modal-content">
             <!--Header-->
             <div class="modal-header stylish-color-dark white-text">
-                <h6>
+                <h7 class="mt-1">
                     <i class="fas fa-edit"></i>
                     <span id="edit-title"></span>
-                </h6>
+                </h7>
                 <button type="button" class="close white-text" data-dismiss="modal"
                         aria-label="Close">
                     &times;

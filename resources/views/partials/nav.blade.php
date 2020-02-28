@@ -91,13 +91,13 @@
                     <div class="sidebar-submenu">
                         <ul>
                             <li>
-                                <a href="{{ url('cadv-reim-liquidation/ors-burs') }}" class="waves-effect">ORS & BURS</a>
+                                <a href="{{ url('voucher-ors-burs') }}" class="waves-effect">ORS & BURS</a>
                             </li>
                             <li>
-                                <a href="{{ url('cadv-reim-liquidation/dv') }}" class="waves-effect">Disbursement Voucher</a>
+                                <a href="{{ url('voucher-dv') }}" class="waves-effect">Disbursement Voucher</a>
                             </li>
                             <li>
-                                <a href="{{ url('cadv-reim-liquidation/liquidation') }}" class="waves-effect">Liquidation Report</a>
+                                <a href="{{ url('voucher-liquidation') }}" class="waves-effect">Liquidation Report</a>
                             </li>
                         </ul>
                     </div>
@@ -110,25 +110,25 @@
                     <div class="sidebar-submenu">
                         <ul>
                             <li>
-                                <a href="{{ url('procurement/pr') }}" class="waves-effect">Purchase Request</a>
+                                <a href="{{ route('pr') }}" class="waves-effect">Purchase Request</a>
                             </li>
                             <li>
-                                <a href="{{ url('procurement/rfq') }}" class="waves-effect">Request for Quotations</a>
+                                <a href="{{ route('rfq') }}" class="waves-effect">Request for Quotations</a>
                             </li>
                             <li>
-                                <a href="{{ url('procurement/abstract') }}" class="waves-effect">Abstract of Bids & Quotations</a>
+                                <a href="{{ route('abstract') }}" class="waves-effect">Abstract of Bids & Quotations</a>
                             </li>
                             <li>
-                                <a href="{{ url('procurement/po-jo') }}" class="waves-effect">Purchase & Job Order</a>
+                                <a href="{{ route('po-jo') }}" class="waves-effect">Purchase & Job Order</a>
                             </li>
                             <li>
-                                <a href="{{ url('procurement/ors-burs') }}" class="waves-effect">ORS & BURS</a>
+                                <a href="{{ route('proc-ors-burs') }}" class="waves-effect">ORS & BURS</a>
                             </li>
                             <li>
-                                <a href="{{ url('procurement/iar') }}" class="waves-effect">Inspection & Acceptance Report</a>
+                                <a href="{{ route('iar') }}" class="waves-effect">Inspection & Acceptance Report</a>
                             </li>
                             <li>
-                                <a href="{{ url('procurement/dv') }}" class="waves-effect">Disbursement Voucher</a>
+                                <a href="{{ route('proc-dv') }}" class="waves-effect">Disbursement Voucher</a>
                             </li>
                         </ul>
                     </div>
@@ -288,39 +288,34 @@
                     <div class="sidebar-submenu">
                         <ul>
                             <li>
-                                <a href="{{ url('libraries/divisions') }}" class="waves-effect">Divisions</a>
+                                <a href="{{ route('emp-division') }}" class="waves-effect">Divisions</a>
                             </li>
                             <li>
-                                <a href="{{ url('libraries/item-classification') }}" class="waves-effect">Item Classifications</a>
-                            </li>
-                            <!--
-                            <li>
-                                <a href="{{ url('libraries/modes-procurement') }}" class="waves-effect">Modes of Procurement</a>
-                            </li>
-                            -->
-                            <li>
-                                <a href="{{ url('libraries/status') }}" class="waves-effect">Procurement Status</a>
+                                <a href="{{ route('item-classification') }}" class="waves-effect">Item Classifications</a>
                             </li>
                             <li>
-                                <a href="{{ url('libraries/projects') }}" class="waves-effect">Projects/Charging</a>
+                                <a href="{{ route('procurement-mode') }}" class="waves-effect">Modes of Procurement</a>
                             </li>
                             <li>
-                                <a href="{{ url('libraries/signatories') }}" class="waves-effect">Signatories</a>
+                                <a href="{{ route('funding-source') }}" class="waves-effect">Source of Funds</a>
                             </li>
                             <li>
-                                <a href="{{ url('libraries/supplier-classification') }}" class="waves-effect">Supplier Classifications</a>
+                                <a href="{{ route('signatory') }}" class="waves-effect">Signatories</a>
                             </li>
                             <li>
-                                <a href="{{ url('libraries/suppliers') }}" class="waves-effect">Suppliers</a>
+                                <a href="{{ route('supplier-classification') }}" class="waves-effect">Supplier Classifications</a>
                             </li>
                             <li>
-                                <a href="{{ url('libraries/unit-issue') }}" class="waves-effect">Unit of Issues</a>
+                                <a href="{{ route('supplier') }}" class="waves-effect">Suppliers</a>
                             </li>
                             <li>
-                                <a href="{{ url('libraries/accounts') }}" class="waves-effect">User Accounts</a>
+                                <a href="{{ route('item-unit-issue') }}" class="waves-effect">Unit of Issues</a>
                             </li>
                             <li>
-                                <a href="{{ url('libraries/user-groups') }}" class="waves-effect">User Groups</a>
+                                <a href="{{ route('emp-account') }}" class="waves-effect">User Accounts</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('emp-group') }}" class="waves-effect">User Groups</a>
                             </li>
                         </ul>
                     </div>

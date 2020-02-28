@@ -83,7 +83,7 @@ Route::group(['middlewareGroups' => ['web']], function () {
         'middleware' => 'moduleaccess',
         'module' => 'procurement_pr',
         'access' => 'is_allowed'
-    ])->name('pr-index');
+    ])->name('pr');
     Route::get('procurement/pr/show-create', [
         'uses' => 'PurchaseRequestController@showCreate',
         'middleware' => 'moduleaccess',
@@ -151,37 +151,37 @@ Route::group(['middlewareGroups' => ['web']], function () {
         'middleware' => 'moduleaccess',
         'module' => 'procurement_rfq',
         'access' => 'is_allowed'
-    ])->name('name');
+    ])->name('rfq');
     Route::get('procurement/rfq/show-edit/{id}', [
         'uses' => 'CanvassController@showEdit',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_rfq',
         'access' => 'update'
-    ])->name('name');
+    ])->name('rfq-show-edit');
     Route::post('procurement/rfq/update/{id}', [
         'uses' => 'CanvassController@update',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_rfq',
         'access' => 'update'
-    ])->name('name');
+    ])->name('rfq-update');
     Route::get('procurement/rfq/show-issue/{id}', [
         'uses' => 'CanvassController@showIssue',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_rfq',
         'access' => 'issue'
-    ])->name('name');
+    ])->name('rfq-show-issue');
     Route::post('procurement/rfq/issue/{id}', [
         'uses' => 'CanvassController@issue',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_rfq',
         'access' => 'issue'
-    ])->name('name');
+    ])->name('rfq-issue');
     Route::post('procurement/rfq/receive/{id}', [
         'uses' => 'CanvassController@receive',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_rfq',
         'access' => 'receive'
-    ])->name('name');
+    ])->name('rfq-receive');
 
     // Abstract of Quotation Module
     Route::any('procurement/abstract', [
@@ -189,61 +189,61 @@ Route::group(['middlewareGroups' => ['web']], function () {
         'middleware' => 'moduleaccess',
         'module' => 'procurement_abstract',
         'access' => 'is_allowed'
-    ])->name('name');
+    ])->name('abstract');
     Route::get('procurement/abstract/segment/{id}', [
         'uses' => 'AbstractController@getSegment',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_abstract',
         'access' => 'is_allowed'
-    ])->name('name');
+    ])->name('abstract-segment');
     Route::get('procurement/abstract/show-create/{id}', [
         'uses' => 'AbstractController@showCreate',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_abstract',
         'access' => 'create'
-    ])->name('name');
+    ])->name('abstract-show-create');
     Route::post('procurement/abstract/store/{id}', [
         'uses' => 'AbstractController@store',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_abstract',
         'access' => 'create'
-    ])->name('name');
+    ])->name('abstract-store');
     Route::post('procurement/abstract/store-items/{id}', [
         'uses' => 'AbstractController@storeItems',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_abstract',
         'access' => 'create'
-    ])->name('name');
+    ])->name('abstract-store-items');
     Route::get('procurement/abstract/show-edit/{id}', [
         'uses' => 'AbstractController@showEdit',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_abstract',
         'access' => 'update'
-    ])->name('name');
+    ])->name('abstract-show-edit');
     Route::post('procurement/abstract/store-update/{id}', [
         'uses' => 'AbstractController@storeUpdate',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_abstract',
         'access' => 'update'
-    ])->name('name');
+    ])->name('abstract-store');
     Route::post('procurement/abstract/update-items/{id}', [
         'uses' => 'AbstractController@updateItems',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_abstract',
         'access' => 'update'
-    ])->name('name');
+    ])->name('abstract-update');
     Route::post('procurement/abstract/delete/{id}', [
         'uses' => 'AbstractController@delete',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_abstract',
         'access' => 'delete'
-    ])->name('name');
+    ])->name('abstract-delete');
     Route::post('procurement/abstract/approve/{id}', [
         'uses' => 'AbstractController@approve',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_abstract',
         'access' => 'approve'
-    ])->name('name');
+    ])->name('abstract-approve');
 
     // Purchase and Job Order Module
     Route::any('procurement/po-jo', [
@@ -251,79 +251,79 @@ Route::group(['middlewareGroups' => ['web']], function () {
         'middleware' => 'moduleaccess',
         'module' => 'procurement_po_jo',
         'access' => 'is_allowed'
-    ])->name('name');
+    ])->name('po-jo');
     Route::get('procurement/po-jo/show-edit/{id}', [
         'uses' => 'PurchaseJobOrderController@showEdit',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_po_jo',
         'access' => 'update'
-    ])->name('name');
+    ])->name('po-jo-show-edit');
     Route::post('procurement/po-jo/update/{id}', [
         'uses' => 'PurchaseJobOrderController@update',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_po_jo',
         'access' => 'update'
-    ])->name('name');
+    ])->name('po-jo-update');
     Route::post('procurement/po-jo/accountant-signed/{id}', [
         'uses' => 'PurchaseJobOrderController@accountantSigned',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_po_jo',
         'access' => 'accountant_signed'
-    ])->name('name');
+    ])->name('po-jo-accountant-signed');
     Route::post('procurement/po-jo/approve/{id}', [
         'uses' => 'PurchaseJobOrderController@approve',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_po_jo',
         'access' => 'approve'
-    ])->name('name');
+    ])->name('po-jo-approve');
     Route::get('procurement/po-jo/show-issue/{id}', [
         'uses' => 'PurchaseJobOrderController@showIssue',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_po_jo',
         'access' => 'issue'
-    ])->name('name');
+    ])->name('po-jo-show-issue');
     Route::post('procurement/po-jo/issue/{id}', [
         'uses' => 'PurchaseJobOrderController@issue',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_po_jo',
         'access' => 'issue'
-    ])->name('name');
+    ])->name('po-jo-issue');
     Route::post('procurement/po-jo/receive/{id}', [
         'uses' => 'PurchaseJobOrderController@receive',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_po_jo',
         'access' => 'receive'
-    ])->name('name');
+    ])->name('po-jo-receive');
     Route::post('procurement/po-jo/cancel/{id}', [
         'uses' => 'PurchaseJobOrderController@cancel',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_po_jo',
         'access' => 'cancel'
-    ])->name('name');
+    ])->name('po-jo-cancel');
     Route::post('procurement/po-jo/uncancel/{id}', [
         'uses' => 'PurchaseJobOrderController@unCancel',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_po_jo',
         'access' => 'uncancel'
-    ])->name('name');
+    ])->name('po-jo-uncancel');
     Route::post('procurement/po-jo/create-ors-burs/{id}', [
         'uses' => 'PurchaseJobOrderController@createORS_BURS',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_po_jo',
         'access' => 'create_ors_burs'
-    ])->name('name');
+    ])->name('po-jo-create-ors-burs');
     Route::post('procurement/po-jo/delivery/{id}', [
         'uses' => 'PurchaseJobOrderController@delivery',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_po_jo',
         'access' => 'for_delivery'
-    ])->name('name');
+    ])->name('po-jo-delivery');
     Route::post('procurement/po-jo/inspection/{id}', [
         'uses' => 'PurchaseJobOrderController@inspection',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_po_jo',
         'access' => 'to_inspection'
-    ])->name('name');
+    ])->name('po-jo-inspection');
 
     // Obligation and Request Status/BURS Module
     Route::any('procurement/ors-burs', [
@@ -331,43 +331,43 @@ Route::group(['middlewareGroups' => ['web']], function () {
         'middleware' => 'moduleaccess',
         'module' => 'procurement_ors_burs',
         'access' => 'is_allowed'
-    ])->name('name');
+    ])->name('proc-ors-burs');
     Route::get('procurement/ors-burs/show-edit/{id}', [
         'uses' => 'OrsBursController@showEdit',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_ors_burs',
         'access' => 'update'
-    ])->name('name');
+    ])->name('proc-ors-burs-show-edit');
     Route::post('procurement/ors-burs/update/{id}', [
         'uses' => 'OrsBursController@update',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_ors_burs',
         'access' => 'update'
-    ])->name('name');
+    ])->name('proc-ors-burs-update');
     Route::get('procurement/ors-burs/show-issue/{id}', [
         'uses' => 'OrsBursController@showIssue',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_ors_burs',
         'access' => 'issue'
-    ])->name('name');
+    ])->name('proc-ors-burs-show-issue');
     Route::post('procurement/ors-burs/issue/{id}', [
         'uses' => 'OrsBursController@issue',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_ors_burs',
         'access' => 'issue'
-    ])->name('name');
+    ])->name('proc-ors-burs-issue');
     Route::post('procurement/ors-burs/receive/{id}', [
         'uses' => 'OrsBursController@receive',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_ors_burs',
         'access' => 'receive'
-    ])->name('name');
+    ])->name('proc-ors-burs-receive');
     Route::post('procurement/ors-burs/obligate/{id}', [
         'uses' => 'OrsBursController@obligate',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_ors_burs',
         'access' => 'obligate'
-    ])->name('name');
+    ])->name('proc-ors-burs-obligate');
 
     // Inpection and Acceptance Report Module
     Route::any('procurement/iar', [
@@ -375,37 +375,37 @@ Route::group(['middlewareGroups' => ['web']], function () {
         'middleware' => 'moduleaccess',
         'module' => 'procurement_iar',
         'access' => 'is_allowed'
-    ])->name('name');
+    ])->name('iar');
     Route::get('procurement/iar/show-edit/{poNo}', [
         'uses' => 'InspectionAcceptanceController@showEdit',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_iar',
         'access' => 'update'
-    ])->name('name');
+    ])->name('iar-show-edit');
     Route::post('procurement/iar/update/{iarNo}', [
         'uses' => 'InspectionAcceptanceController@update',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_iar',
         'access' => 'update'
-    ])->name('name');
+    ])->name('iar-update');
     Route::get('procurement/iar/show-issue/{iarNo}', [
         'uses' => 'InspectionAcceptanceController@showIssue',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_iar',
         'access' => 'issue'
-    ])->name('name');
+    ])->name('iar-show-issue');
     Route::post('procurement/iar/issue/{iarNo}', [
         'uses' => 'InspectionAcceptanceController@issue',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_iar',
         'access' => 'issue'
-    ])->name('name');
+    ])->name('iar-issue');
     Route::post('procurement/iar/inspect/{iarNo}', [
         'uses' => 'InspectionAcceptanceController@inspect',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_iar',
         'access' => 'inspect'
-    ])->name('name');
+    ])->name('iar-inspect');
 
     // Disbursement Voucher Module
     Route::any('procurement/dv', [
@@ -413,43 +413,43 @@ Route::group(['middlewareGroups' => ['web']], function () {
         'middleware' => 'moduleaccess',
         'module' => 'procurement_dv',
         'access' => 'is_allowed'
-    ])->name('name');
+    ])->name('proc-dv');
     Route::get('procurement/dv/show-edit/{id}', [
         'uses' => 'DisbursementVoucherController@showEdit',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_dv',
         'access' => 'update'
-    ])->name('name');
+    ])->name('proc-dv-show-edit');
     Route::post('procurement/dv/update/{id}', [
         'uses' => 'DisbursementVoucherController@update',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_dv',
         'access' => 'update'
-    ])->name('name');
+    ])->name('proc-dv-update');
     Route::get('procurement/dv/show-issue/{id}', [
         'uses' => 'DisbursementVoucherController@showIssue',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_dv',
         'access' => 'issue'
-    ])->name('name');
+    ])->name('proc-dv-show-issue');
     Route::post('procurement/dv/issue/{id}', [
         'uses' => 'DisbursementVoucherController@issue',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_dv',
         'access' => 'issue'
-    ])->name('name');
+    ])->name('proc-dv-issue');
     Route::post('procurement/dv/receive/{id}', [
         'uses' => 'DisbursementVoucherController@receive',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_dv',
         'access' => 'receive'
-    ])->name('name');
+    ])->name('proc-dv-receive');
     Route::post('procurement/dv/payment/{id}', [
         'uses' => 'DisbursementVoucherController@payment',
         'middleware' => 'moduleaccess',
         'module' => 'procurement_dv',
         'access' => 'disburse'
-    ])->name('name');
+    ])->name('proc-dv-payment');
 
     /*===================== PAYMENT ROUTES =====================*/
 
@@ -457,42 +457,42 @@ Route::group(['middlewareGroups' => ['web']], function () {
         'uses' => 'PaymentController@indexLDDAP',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Accountant']
-    ])->name('name');
-    Route::get('payment/lddap/create', [
+    ])->name('lddap');
+    Route::get('payment/lddap/show-create', [
         'uses' => 'PaymentController@showCreate',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Accountant']
-    ])->name('name');
-    Route::get('payment/lddap/edit/{lddapID}', [
+    ])->name('lddap-show-create');
+    Route::get('payment/lddap/show-edit/{id}', [
         'uses' => 'PaymentController@showEdit',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Accountant']
-    ])->name('name');
+    ])->name('lddap-show-edit');
     Route::post('payment/lddap/store', [
         'uses' => 'PaymentController@store',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Accountant']
-    ])->name('name');
-    Route::post('payment/lddap/update/{lddapID}', [
+    ])->name('lddap-store');
+    Route::post('payment/lddap/update/{id}', [
         'uses' => 'PaymentController@update',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Accountant']
-    ])->name('name');
-    Route::post('payment/lddap/delete/{lddapID}', [
+    ])->name('lddap-update');
+    Route::post('payment/lddap/delete/{id}', [
         'uses' => 'PaymentController@delete',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Accountant']
-    ])->name('name');
-    Route::post('payment/lddap/for-approval/{lddapID}', [
+    ])->name('lddap-delete');
+    Route::post('payment/lddap/for-approval/{id}', [
         'uses' => 'PaymentController@forApproval',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Accountant']
-    ])->name('name');
-    Route::post('payment/lddap/approve/{lddapID}', [
+    ])->name('lddap-for-approval');
+    Route::post('payment/lddap/approve/{id}', [
         'uses' => 'PaymentController@approve',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Accountant']
-    ])->name('name');
+    ])->name('lddap-approve');
 
     /*===================== INVENTORY ROUTES =====================*/
 
@@ -501,67 +501,67 @@ Route::group(['middlewareGroups' => ['web']], function () {
         'uses' => 'InventoryController@index',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('name');
+    ])->name('inventory');
     Route::get('inventory/stocks/create/{poNo}', [
         'uses' => 'InventoryController@create',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('name');
+    ])->name('inventory-create');
     Route::get('inventory/stocks/show/{key}', [
         'uses' => 'InventoryController@show',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('name');
+    ])->name('inventory-show');
     Route::get('inventory/stocks/show-create/{classification}', [
         'uses' => 'InventoryController@showCreate',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('name');
+    ])->name('inventory-show-create');
     Route::get('inventory/stocks/edit/{inventoryNo}', [
         'uses' => 'InventoryController@edit',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('name');
+    ])->name('inventory-edit');
     Route::get('inventory/stocks/issued/{inventoryNo}', [
         'uses' => 'InventoryController@showIssuedTo',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('name');
+    ])->name('inventory-issued');
     Route::post('inventory/stocks/store/{inventoryNo}', [
         'uses' => 'InventoryController@store',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('name');
+    ])->name('inventory-store');
     Route::post('inventory/stocks/issue-stocks/{key}', [
         'uses' => 'InventoryController@issueStocks',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('name');
+    ])->name('inventory-issue-stocks');
     Route::post('inventory/stocks/update/{inventoryNo}', [
         'uses' => 'InventoryController@update',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('name');
+    ])->name('inventory-update');
     Route::post('inventory/stocks/update-stocks/{inventoryNo}', [
         'uses' => 'InventoryController@updateStocks',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('name');
+    ])->name('inventory-update-stocks');
     Route::post('inventory/stocks/update-serial-no/{inventoryNo}', [
         'uses' => 'InventoryController@updateSerialNo',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('name');
+    ])->name('inventory-update-serial-no');
     Route::post('inventory/stocks/delete/{inventoryNo}', [
         'uses' => 'InventoryController@delete',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('name');
+    ])->name('inventory-delete');
     Route::post('inventory/stocks/set-issued/{inventoryNo}', [
         'uses' => 'InventoryController@setIssued',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('name');
+    ])->name('inventory-set-issued');
 
     /*===================== REPORTS =====================*/
 

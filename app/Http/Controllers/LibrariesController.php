@@ -211,7 +211,33 @@ class LibrariesController extends Controller
      *  Employee Group Module
     **/
     public function indexGroup(Request $request) {
+        $pageLimit = 25;
+        $search = trim($request->search);
+        $userGroupList = DB::table('tblemp_groups as group')
+                           ->select('group.id as group_id', 'group.group_name',
+                                    DB::raw("CONCAT(emp.firstname, ' ', emp.lastname,
+                                            '[ ', emp.position, ' ]') as group_head"))
+                           ->join('tblemp_accounts as emp', 'emp.id', '=', 'group.group_head');
 
+        if (!empty($search)) {
+            $userGroupList = $userGroupList->where(function ($query)  use ($search) {
+                                    $query->where('emp.emp_id', 'LIKE', '%' . $search . '%')
+                                          ->orWhere('emp.firstname', 'LIKE', '%' . $search . '%')
+                                          ->orWhere('emp.middlename', 'LIKE', '%' . $search . '%')
+                                          ->orWhere('emp.lastname', 'LIKE', '%' . $search . '%')
+                                          ->orWhere('emp.position', 'LIKE', '%' . $search . '%')
+                                          ->orWhere('group.group_name', 'LIKE', '%' . $search . '%');
+                                });
+        }
+
+        $userGroupList = $userGroupList->orderBy('group.group_name')
+                       ->paginate($pageLimit);
+
+        return view('modules.library.group.index', [
+            'search' => $search,
+            'pageLimit' => $pageLimit,
+            'list' => $userGroupList
+        ]);
     }
 
     public function showCreateGroup() {
@@ -336,12 +362,6 @@ class LibrariesController extends Controller
     public function indexSignatory(Request $request) {
         $pageLimit = 25;
         $search = trim($request->search);
-        /*
-        $signatoryData = DB::table('tblsignatories AS sig')
-                           ->select(DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'),
-                                    'sig.id', 'sig.position')
-                           ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'sig.emp_id');*/
-
         $signatoryData = Signatory::select('signatories.id', 'signatories.position')->addSelect([
             'name' =>  User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                            ->whereColumn('id', 'signatories.emp_id')
@@ -360,7 +380,7 @@ class LibrariesController extends Controller
 
         $signatoryData = $signatoryData->paginate($pageLimit);
 
-        return view('pages.signatories', [
+        return view('modules.library.signatory.index', [
             'search' => $search,
             'pageLimit' => $pageLimit,
             'list' => $signatoryData
@@ -395,7 +415,22 @@ class LibrariesController extends Controller
      *  Supplier Classification Module
     **/
     public function indexSupplierClassification(Request $request) {
+        $pageLimit = 25;
+        $search = trim($request->search);
+        $supplierClassData = new SupplierClassification;
 
+        if (!empty($search)) {
+            $supplierClassData = $supplierClassData::where('classification', 'LIKE', '%' . $search . '%')
+                                                   ->paginate($pageLimit);
+        }
+
+        $supplierClassData = $supplierClassData->paginate($pageLimit);
+
+        return view('modules.library.supplier-classification.index', [
+            'search' => $search,
+            'pageLimit' => $pageLimit,
+            'list' => $supplierClassData
+        ]);
     }
 
     public function showCreateSupplierClassification() {
@@ -426,7 +461,36 @@ class LibrariesController extends Controller
      *  Supplier Module
     **/
     public function indexSupplier(Request $request) {
+        $pageLimit = 25;
+        $search = trim($request->search);
+        $filter = $request['filter'];
+        $supplierData = DB::table('tblsuppliers as bid')
+                          ->select('bid.*', 'class.classification')
+                          ->join('tblsupplier_classifications as class', 'class.id', '=', 'bid.class_id');
+        $classifications = SupplierClassification::orderBy('classification')->get();
 
+        if (!empty($search)) {
+            $supplierData = $supplierData->where(function ($query)  use ($search) {
+                                   $query->where('bid.company_name', 'LIKE', '%' . $search . '%')
+                                         ->orWhere('bid.address', 'LIKE', '%' . $search . '%')
+                                         ->orWhere('bid.contact_person', 'LIKE', '%' . $search . '%')
+                                         ->orWhere('bid.mobile_no', 'LIKE', '%' . $search . '%')
+                                         ->orWhere('class.classification', 'LIKE', '%' . $search . '%');
+                               });
+        }
+
+        if (!empty($filter) && $filter != 0) {
+            $supplierData = $supplierData->where('bid.class_id', '=', $filter);
+        }
+
+        $supplierData = $supplierData->orderBy('bid.company_name')
+                                     ->paginate($pageLimit);
+
+        return view('modules.library.supplier.index', ['search' => $search,
+                                        'pageLimit' => $pageLimit,
+                                        'list' => $supplierData,
+                                        'classifications' => $classifications,
+                                        'filter' => $filter]);
     }
 
     public function showCreateSupplier() {
@@ -457,7 +521,20 @@ class LibrariesController extends Controller
      *  Item Unit Issue Module
     **/
     public function indexUnitissue(Request $request) {
+        $pageLimit = 25;
+        $search = trim($request->search);
+        $unitIssueData = new ItemUnitIssue;
 
+        if (!empty($search)) {
+            $unitIssueData = $unitIssueData::where('unit', 'LIKE', '%' . $search . '%');
+        }
+        $unitIssueData = $unitIssueData->paginate($pageLimit);
+
+        return view('modules.library.unit-issue.index', [
+            'search' => $search,
+            'pageLimit' => $pageLimit,
+            'list' => $unitIssueData
+        ]);
     }
 
     public function showCreateUnitissue() {
