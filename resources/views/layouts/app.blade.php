@@ -135,42 +135,30 @@
 
     <!-- JQuery -->
     <script type="text/javascript" src="{{ asset('plugins/mdb/js/jquery.min.js') }}"></script>
+
     <!-- Bootstrap tooltips -->
     <script type="text/javascript" src="{{ asset('plugins/mdb/js/popper.min.js') }}"></script>
+
     <!-- Bootstrap core JavaScript -->
     <script type="text/javascript" src="{{ asset('plugins/mdb/js/bootstrap.min.js') }}"></script>
+
     <!-- MDB core JavaScript -->
     <script type="text/javascript" src="{{ asset('plugins/mdb/js/mdb.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('plugins/mdb/js/bootstrap-select.min.js') }}"></script>
+
     <!-- Font awesome scripts -->
     <script type="text/javascript" src="{{ asset('plugins/fa/js/all.min.js') }}"></script>
+
     <!-- Moment scripts -->
     <script type="text/javascript" src="{{ asset('plugins/moment/moment-with-locales.min.js') }}"></script>
 
     <script type="text/javascript" src="{{ asset('plugins/sidebar/js/jquery.mCustomScrollbar.concat.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('plugins/sidebar/js/sidebar-main.js') }}"></script>
+
+    <script type="text/javascript" src="{{ asset('assets/js/global-variables.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/notification.js') }}"></script>
 
     <script type="text/javascript">
-        var baseURL = "{{ url('/') }}/";
-        var modalLoadingContent = "<div class='mt-5' style='height: 150px;'>"+
-				                      "<center>" +
-				                          "<div class='preloader-wrapper big active crazy'>" +
-				                              "<div class='spinner-layer spinner-blue-only'>" +
-				                                  "<div class='circle-clipper left'>" +
-				                                      "<div class='circle'></div>" +
-				                                  "</div>" +
-				                                  "<div class='gap-patch'>" +
-				                                      "<div class='circle'></div>" +
-				                                  "</div>" +
-				                                  "<div class='circle-clipper right'>" +
-				                                      "<div class='circle'></div>" +
-				                                  "</div>" +
-				                              "</div>" +
-				                          "</div><br>" +
-				                      "</center>" +
-                                  "</div>";
-
         $(function() {
             var datetime = null,
                     date = null

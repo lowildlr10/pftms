@@ -139,7 +139,7 @@ $(function() {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
 		$('#modal-body-create').load('pr/show-create', function() {
             $('#mdb-preloader').fadeOut(300);
-			$('#form-create').attr('action', 'pr/save');
+			//$('#form-create').attr('action', 'pr/save');
 		});
 		$("#central-create-modal").modal({keyboard: false, backdrop: 'static'})
 						.on('shown.bs.modal', function() {

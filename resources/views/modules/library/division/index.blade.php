@@ -1,18 +1,28 @@
 @extends('layouts.app')
 
+@section('custom-css')
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="{{ asset('plugins/mdb/css/addons/datatables.min.css') }}" rel="stylesheet">
+
+<!-- DataTables Select CSS -->
+<link rel="stylesheet" type="text/css" href="{{ asset('plugins/mdb/css/addons/datatables-select.min.css') }}" rel="stylesheet">
+
+@endsection
+
 @section('main-content')
 
 <div class="row wow animated fadeIn">
     <section class="mb-5 col-12 module-container">
-        <div class="card text-white mdb-color darken-3">
+        <div class="card mdb-color darken-3">
             <div class="card-body">
-                <h5 class="card-title">
+                <h5 class="card-title white-text">
                     <strong>
                         <i class="fas fa-book"></i> Libraries: Divisions
                     </strong>
                 </h5>
                 <hr class="white">
-                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1">
+                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text">
                     <li>
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
@@ -31,17 +41,17 @@
                                 narrower py-2 px-2 mb-1 d-flex justify-content-between
                                 align-items-center">
                         <div>
-                            <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
-                                    onclick="$(this).showCreate('division')">
+                            <a href="#" class="btn btn-outline-white btn-rounded btn-sm px-2"
+                               onclick="$(this).showCreate('{{ route('emp-division-show-create') }}');">
                                 <i class="fas fa-pencil-alt"></i> Create
-                            </button>
+                            </a>
                         </div>
                         <div>
                             <button class="btn btn-outline-white btn-rounded btn-sm px-2"
                                     data-target="#top-fluid-modal" data-toggle="modal">
                                 <i class="fas fa-search"></i>
                             </button>
-                            <a href="{{ url('libraries/divisions') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
+                            <a href="{{ route('emp-division') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
                             </a>
 
@@ -49,28 +59,18 @@
                     </div>
                     <!--/Card image-->
 
-                    <div class="px-1">
+                    <div class="px-2">
                         <div class="table-wrapper table-responsive border rounded">
-                            @if (!empty($search))
-                            <div class="hidden-xs my-2">
-                                <small class="red-text pl-3">
-                                    <i class="fas fa-search"></i> You searched for "{{ $search }}".
-                                </small>
-                                <a class="btn btn-sm btn-outline-red waves-effect my-0 py-0 px-1"
-                                   href="{{ url('libraries/divisions') }}">
-                                    <small><i class="fas fa-times"></i> Reset</small>
-                                </a>
-                            </div>
-                            @endif
 
                             <!--Table-->
-                            <table class="table module-table table-hover table-b table-sm mb-0">
+                            <table id="dtmaterial" class="table table-hover" cellspacing="0" width="100%">
 
                                 <!--Table head-->
                                 <thead class="mdb-color darken-3 white-text">
                                     <tr>
                                         <th class="th-md" width="3%">
-                                            <strong>#</strong>
+                                            <input type="checkbox" name="select_all" value="1"
+                                                   id="chk-select-all" class="select-checkbox">
                                         </th>
                                         <th class="th-md" width="91%">
                                             <strong>Division</strong>
@@ -83,71 +83,41 @@
 
                                 <!--Table body-->
                                 <tbody>
-                                    <form id="form-validation" method="POST" action="#">
-                                        @csrf
-                                        <input type="hidden" name="type" id="type">
-
-                                        @if (count($list) > 0)
-                                            @php $countItem = 0; @endphp
-
-                                            @foreach ($list as $listCtr => $division)
-                                                @php $countItem++; @endphp
-                                        <tr>
-                                            <td align="center">
-                                                {{ ($listCtr + 1) + (($list->currentpage() - 1) * $list->perpage()) }}
-                                            </td>
-                                            <td class="border-left">{{ $division->division_name }}</td>
-                                            <td align="center" class="border-left">
-                                                <a class="btn-floating btn-sm btn-orange p-2 waves-effect material-tooltip-main mr-0"
-                                                        onclick="$(this).showEdit('{{ $division->id }}', 'division')"
-                                                        data-toggle="tooltip" data-placement="left" title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                            </td>
-                                            <td align="center">
-                                                <a class="btn-floating btn-sm btn-red p-2 waves-effect material-tooltip-main mr-0"
-                                                   onclick="$(this).delete('{{ $division->id }}', 'division')"
-                                                   data-toggle="tooltip" data-placement="left" title="Delete">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                            @endforeach
-
-                                            @php $remainingItem = $pageLimit - $countItem; @endphp
-
-                                            @if ($remainingItem != 0)
-                                                @for ($itm = 1; $itm <= $remainingItem; $itm++)
-                                                   <tr><td colspan="4" style="border: 0;"></td></tr>
-                                                @endfor
-                                            @endif
-                                        @else
-                                        <tr>
-                                            <td class="p-5" colspan="4" align="center">
-                                                <h5 class="red-text">No data found.</h5>
-                                            </td>
-                                        </tr>
-
-                                            @php $remainingItem = $pageLimit - 1; @endphp
-                                        @endif
-
-                                        @if ($remainingItem != 0)
-                                            @for ($itm = 1; $itm <= $remainingItem; $itm++)
-                                        <tr><td colspan="4" style="border: 0;"></td></tr>
-                                            @endfor
-                                        @endif
-                                    </form>
+                                    @if (count($list) > 0)
+                                        @foreach ($list as $listCtr => $division)
+                                    <tr>
+                                        <td></td>
+                                        <td>{{ $division->division_name }}</td>
+                                        <td align="center">
+                                            <a class="btn-floating btn-sm btn-orange p-2 waves-effect material-tooltip-main mr-0"
+                                               onclick="$(this).showEdit('{{ route('emp-division-show-edit',
+                                                                                   ['id' => $division->id]) }}');"
+                                               data-toggle="tooltip" data-placement="left" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </td>
+                                        <td align="center">
+                                            <a class="btn-floating btn-sm btn-red p-2 waves-effect material-tooltip-main mr-0"
+                                               onclick="$(this).showDelete('{{ route('emp-division-delete', ['id' => $division->id]) }}',
+                                                                           '{{ $division->division_name }}');"
+                                               data-toggle="tooltip" data-placement="left" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                        @endforeach
+                                    @endif
                                 </tbody>
                                 <!--Table body-->
+
                             </table>
                             <!--Table-->
-                        </div>
-                        <div class="mt-3">
-                            {{ $list->links('pagination') }}
+
                         </div>
                     </div>
                 </div>
                 <!-- Table with panel -->
+
             </div>
         </div>
     </section>
@@ -155,24 +125,22 @@
 
 <!-- Modals -->
 @include('modals.search')
-@include('modals.smcard-central')
+@include('modals.sm-create')
+@include('modals.sm-edit')
+@include('modals.delete')
 
 @endsection
 
 @section('custom-js')
 
-<script src="{{ asset('assets/js/libraries.js') }}"></script>
-<script>
-    // Tooltips Initialization
-    $(function () {
-        var template = '<div class="tooltip md-tooltip">' +
-                       '<div class="tooltip-arrow md-arrow"></div>' +
-                       '<div class="tooltip-inner md-inner stylish-color"></div></div>';
-        $('.material-tooltip-main').tooltip({
-            template: template
-        });
-    });
-</script>
+<!-- DataTables JS -->
+<script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables.min.js') }}"></script>
+
+<!-- DataTables Select JS -->
+<script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables-select.min.js') }}"></script>
+
+<script src="{{ asset('assets/js/input-validation.js') }}"></script>
+<script src="{{ asset('assets/js/emp-division.js') }}"></script>
 
 @if (!empty(session("success")))
     @include('modals.alert')

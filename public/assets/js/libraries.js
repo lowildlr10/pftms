@@ -242,8 +242,34 @@ $(function() {
 		if (!withError) {
 			$('#form-create-update').submit();
 		}
+    }
+
+    $.fn.showCreate = function(type) {
+		if (type == 'employee') {
+			$('#modal-body-sm').load('../profile/create');
+		} else {
+			$('#modal-body-sm').load('create/' + type, function() {
+				$('#form-create-update').attr('action', 'store/' + type);
+
+				if (type == 'signatory') {
+					toggleSignatoryInputs();
+				} else if (type == 'supplier') {
+					toggleSupplierInputs();
+				}
+			});
+		}
+
+		$("#smcard-central-modal").modal({keyboard: false, backdrop: 'static'})
+						          .on('shown.bs.modal', function() {
+		    $('#btn-create-update').html('<i class="fas fa-pencil-alt"></i> Create')
+		    					   .removeClass('btn-orange')
+		    					   .addClass('btn-primary');
+		}).on('hidden.bs.modal', function() {
+		     $('#modal-body-sm').html(modalLoadingContent);
+		 });
 	}
 
+    /*
 	$.fn.showCreate = function(type) {
 		if (type == 'employee') {
 			$('#modal-body-sm').load('../profile/create');
@@ -267,7 +293,7 @@ $(function() {
 				   		}).on('hidden.bs.modal', function() {
 					        $('#modal-body-sm').html(modalLoadingContent);
 					    });
-	}
+	}*/
 
 	$.fn.showEdit = function(key, type) {
 		if (type == 'employee') {
