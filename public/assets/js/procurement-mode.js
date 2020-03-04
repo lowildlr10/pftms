@@ -4,11 +4,12 @@ $(function() {
                      '<div class="tooltip-inner md-inner stylish-color"></div></div>';
 
     $.fn.showCreate = function(url) {
-        $('#modal-body-create').load(url);
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-create').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+        });
         $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
-            $('#mdb-preloader').fadeOut(300);
             $('#create-title').html('Create Mode');
 		}).on('hidden.bs.modal', function() {
 		     $('#modal-create-body').html(modalLoadingContent);
@@ -24,11 +25,12 @@ $(function() {
     }
 
     $.fn.showEdit = function(url) {
-        $('#modal-body-edit').load(url);
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-edit').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+        });
         $("#modal-sm-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {
-            $('#mdb-preloader').fadeOut(300);
             $('#edit-title').html('Update Mode');
 		}).on('hidden.bs.modal', function() {
 		     $('#modal-edit-body').html(modalLoadingContent);
@@ -43,8 +45,8 @@ $(function() {
 		}
     }
 
-    $.fn.showDelete = function(url, divisionName) {
-		$('#modal-body-delete').html(`Are you sure you want to delete '${divisionName}'?`);
+    $.fn.showDelete = function(url, name) {
+		$('#modal-body-delete').html(`Are you sure you want to delete '${name}'?`);
         $("#modal-delete").modal({keyboard: false, backdrop: 'static'})
 						  .on('shown.bs.modal', function() {
             $('#delete-title').html('Delete Mode');

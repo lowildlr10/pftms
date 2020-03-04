@@ -68,10 +68,7 @@
                                 <!--Table head-->
                                 <thead class="mdb-color darken-3 white-text">
                                     <tr>
-                                        <th class="th-md" width="3%">
-                                            <input type="checkbox" name="select_all" value="1"
-                                                   id="chk-select-all" class="select-checkbox">
-                                        </th>
+                                        <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="91%">
                                             <strong>Division</strong>
                                         </th>

@@ -25,8 +25,9 @@ use App\Models\SupplierClassification;
 
 use DB;
 use Auth;
+use App\Plugin\DuplicateChecker;
 
-class LibrariesController extends Controller
+class LibraryController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -132,186 +133,6 @@ class LibrariesController extends Controller
             $msg = "Unknown error has occured. Please try again.";
             return redirect(url()->previous())->with('failed', $msg);
         }
-    }
-
-    /**
-     *  Region Module
-    **/
-    public function indexRegion(Request $request) {
-
-    }
-
-    public function showCreateRegion() {
-
-    }
-
-    public function showEditRegion($id) {
-
-    }
-
-    public function storeRegion(Request $request) {
-
-    }
-
-    public function updateRegion(Request $request, $id) {
-
-    }
-
-    public function deleteRegion($id) {
-
-    }
-
-    public function destroyRegion($id) {
-
-    }
-
-    /**
-     *  Province Module
-    **/
-    public function indexProvince(Request $request) {
-
-    }
-
-    public function showCreateProvince() {
-
-    }
-
-    public function showEditProvince($id) {
-
-    }
-
-    public function storeProvince(Request $request) {
-
-    }
-
-    public function updateProvince(Request $request, $id) {
-
-    }
-
-    public function deleteProvince($id) {
-
-    }
-
-    public function destroyProvince($id) {
-
-    }
-
-    /**
-     *  Employee Role Module
-    **/
-    public function indexRole(Request $request) {
-
-    }
-
-    public function showCreateRole() {
-
-    }
-
-    public function showEditRole($id) {
-
-    }
-
-    public function storeRole(Request $request) {
-
-    }
-
-    public function updateRole(Request $request, $id) {
-
-    }
-
-    public function deleteRole($id) {
-
-    }
-
-    public function destroyRole($id) {
-
-    }
-
-    /**
-     *  Employee Acount Module
-    **/
-    public function indexAccount(Request $request) {
-
-    }
-
-    public function showCreateAccount() {
-
-    }
-
-    public function showEditAccount($id) {
-
-    }
-
-    public function storeAccount(Request $request) {
-
-    }
-
-    public function updateAccount(Request $request, $id) {
-
-    }
-
-    public function deleteAccount($id) {
-
-    }
-
-    public function destroyAccount($id) {
-
-    }
-
-    /**
-     *  Employee Group Module
-    **/
-    public function indexGroup(Request $request) {
-        $search = trim($request->search);
-        $userGroupList = DB::table('tblemp_groups as group')
-                           ->select('group.id as group_id', 'group.group_name',
-                                    DB::raw("CONCAT(emp.firstname, ' ', emp.lastname,
-                                            '[ ', emp.position, ' ]') as group_head"))
-                           ->join('tblemp_accounts as emp', 'emp.id', '=', 'group.group_head');
-
-        if (!empty($search)) {
-            $userGroupList = $userGroupList->where(function ($query)  use ($search) {
-                                    $query->where('emp.emp_id', 'LIKE', '%' . $search . '%')
-                                          ->orWhere('emp.firstname', 'LIKE', '%' . $search . '%')
-                                          ->orWhere('emp.middlename', 'LIKE', '%' . $search . '%')
-                                          ->orWhere('emp.lastname', 'LIKE', '%' . $search . '%')
-                                          ->orWhere('emp.position', 'LIKE', '%' . $search . '%')
-                                          ->orWhere('group.group_name', 'LIKE', '%' . $search . '%');
-                                });
-        }
-
-        $userGroupList = $userGroupList->orderBy('group.group_name')
-                       ->paginate($pageLimit);
-
-        return view('modules.library.group.index', [
-            'search' => $search,
-            'pageLimit' => $pageLimit,
-            'list' => $userGroupList
-        ]);
-    }
-
-    public function showCreateGroup() {
-
-    }
-
-    public function showEditGroup($id) {
-
-    }
-
-    public function storeGroup(Request $request) {
-
-    }
-
-    public function updateGroup(Request $request, $id) {
-
-    }
-
-    public function deleteGroup($id) {
-
-    }
-
-    public function destroyGroup($id) {
-
     }
 
     /**
@@ -571,46 +392,96 @@ class LibrariesController extends Controller
      *  Supplier Classification Module
     **/
     public function indexSupplierClassification(Request $request) {
-        $pageLimit = 25;
-        $search = trim($request->search);
-        $supplierClassData = new SupplierClassification;
-
-        if (!empty($search)) {
-            $supplierClassData = $supplierClassData::where('classification', 'LIKE', '%' . $search . '%')
-                                                   ->paginate($pageLimit);
-        }
-
-        $supplierClassData = $supplierClassData->paginate($pageLimit);
+        $supplierClassData = SupplierClassification::orderBy('classification_name')
+                                                   ->get();
 
         return view('modules.library.supplier-classification.index', [
-            'search' => $search,
-            'pageLimit' => $pageLimit,
             'list' => $supplierClassData
         ]);
     }
 
     public function showCreateSupplierClassification() {
-
+        return view('modules.library.supplier-classification.create');
     }
 
     public function showEditSupplierClassification($id) {
+        $supplierClassData = SupplierClassification::find($id);
+        $classification = $supplierClassData->classification_name;
 
+        return view('modules.library.supplier-classification.update', [
+            'id' => $id,
+            'classification' => $classification
+        ]);
     }
 
     public function storeSupplierClassification(Request $request) {
+        $classificationName = $request->classification_name;
 
+        try {
+            if (!$this->checkDuplication('SupplierClassification', $classificationName)) {
+                $instanceSupClass = new SupplierClassification;
+                $instanceSupClass->classification_name = $classificationName;
+                $instanceSupClass->save();
+
+                $msg = "Supplier classification '$classificationName' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Supplier classification '$classificationName' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function updateSupplierClassification(Request $request, $id) {
+        $classificationName = $request->classification_name;
 
+        try {
+            if (!$this->checkDuplication('SupplierClassification', $classificationName)) {
+                $instanceSupClass = SupplierClassification::find($id);
+                $instanceSupClass->classification_name = $classificationName;
+                $instanceSupClass->save();
+
+                $msg = "Supplier classification '$classificationName' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Supplier classification '$classificationName' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function deleteSupplierClassification($id) {
+        try {
+            $instanceSupClass = SupplierClassification::find($id);
+            $classificationName = $instanceSupClass->classification_name;
+            $instanceSupClass->delete();
 
+            $msg = "Supplier classification '$classificationName' successfully deleted.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function destroySupplierClassification($id) {
+        try {
+            $instanceSupClass = SupplierClassification::find($id);
+            $classificationName = $instanceSupClass->classification_name;
+            $instanceSupClass->destroy();
 
+            $msg = "Supplier classification '$classificationName' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     /**
@@ -677,44 +548,96 @@ class LibrariesController extends Controller
      *  Item Unit Issue Module
     **/
     public function indexUnitissue(Request $request) {
-        $pageLimit = 25;
-        $search = trim($request->search);
-        $unitIssueData = new ItemUnitIssue;
-
-        if (!empty($search)) {
-            $unitIssueData = $unitIssueData::where('unit', 'LIKE', '%' . $search . '%');
-        }
-        $unitIssueData = $unitIssueData->paginate($pageLimit);
+        $unitIssueData = ItemUnitIssue::orderBy('unit_name')
+                                      ->get();
 
         return view('modules.library.unit-issue.index', [
-            'search' => $search,
-            'pageLimit' => $pageLimit,
             'list' => $unitIssueData
         ]);
     }
 
     public function showCreateUnitissue() {
-
+        return view('modules.library.unit-issue.create');
     }
 
     public function showEditUnitissue($id) {
+        $unitIssueData = ItemUnitIssue::find($id);
+        $unit = $unitIssueData->unit_name;
 
+        return view('modules.library.unit-issue.update', [
+            'id' => $id,
+            'unit' => $unit
+        ]);
     }
 
     public function storeUnitissue(Request $request) {
+        $unitName = $request->unit_name;
 
+        try {
+            if (!$this->checkDuplication('ItemUnitIssue', $unitName)) {
+                $instanceUnitIssue = new ItemUnitIssue;
+                $instanceUnitIssue->unit_name = $unitName;
+                $instanceUnitIssue->save();
+
+                $msg = "Unit of issue '$unitName' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Unit of issue '$unitName' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function updateUnitissue(Request $request, $id) {
+        $unitName = $request->unit_name;
 
+        try {
+            if (!$this->checkDuplication('ItemUnitIssue', $unitName)) {
+                $instanceUnitIssue = ItemUnitIssue::find($id);
+                $instanceUnitIssue->unit_name = $unitName;
+                $instanceUnitIssue->save();
+
+                $msg = "Unit of issue '$unitName' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Unit of issue '$unitName' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function deleteUnitissue($id) {
+        try {
+            $instanceUnitIssue = ItemUnitIssue::find($id);
+            $unitName = $instanceUnitIssue->unit_name;
+            $instanceUnitIssue->delete();
 
+            $msg = "Unit of issue '$unitName' successfully deleted.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function destroyUnitissue($id) {
+        try {
+            $instanceUnitIssue = ItemUnitIssue::find($id);
+            $unitName = $instanceUnitIssue->unit_name;
+            $instanceUnitIssue->destroy();
 
+            $msg = "Unit of issue '$unitName' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     /**
@@ -876,54 +799,60 @@ class LibrariesController extends Controller
     }
 
     public function checkDuplication($model, $data) {
-        $hasDuplicate = 0;
-
         switch ($model) {
             case 'EmpDivision':
                 $dataCount = EmpDivision::where('division_name', $data)
                                         ->orWhere('division_name', strtolower($data))
                                         ->orWhere('division_name', strtoupper($data))
                                         ->count();
-                $hasDuplicate = ($dataCount > 0) ? 1 : 0;
-                break;
-            case 'Region':
-                # code...
-                break;
-            case 'Province':
-                # code...
-                break;
-            case 'EmpRole':
-                # code...
-                break;
-            case 'EmpAccount':
-                # code...
-                break;
-            case 'EmpGroup':
-                # code...
                 break;
             case 'ItemClassification':
-                # code...
+                $dataCount = ItemClassification::where('classification_name', $data)
+                                        ->orWhere('classification_name', strtolower($data))
+                                        ->orWhere('classification_name', strtoupper($data))
+                                        ->count();
+                break;
+            case 'ProcurementMode':
+                $dataCount = ProcurementMode::where('mode_name', $data)
+                                        ->orWhere('mode_name', strtolower($data))
+                                        ->orWhere('mode_name', strtoupper($data))
+                                        ->count();
                 break;
             case 'FundingSource':
-                # code...
+                $dataCount = FundingSource::where('source_name', $data)
+                                        ->orWhere('source_name', strtolower($data))
+                                        ->orWhere('source_name', strtoupper($data))
+                                        ->count();
                 break;
             case 'Signatory':
-                # code...
+                $dataCount = Signatory::where('division_name', $data)
+                                        ->orWhere('division_name', strtolower($data))
+                                        ->orWhere('division_name', strtoupper($data))
+                                        ->count();
                 break;
             case 'SupplierClassification':
-                # code...
+                $dataCount = SupplierClassification::where('classification_name', $data)
+                                        ->orWhere('classification_name', strtolower($data))
+                                        ->orWhere('classification_name', strtoupper($data))
+                                        ->count();
                 break;
             case 'Supplier':
-                # code...
+                $dataCount = Supplier::where('division_name', $data)
+                                     ->orWhere('division_name', strtolower($data))
+                                     ->orWhere('division_name', strtoupper($data))
+                                     ->count();
                 break;
             case 'ItemUnitIssue':
-                # code...
+                $dataCount = ItemUnitIssue::where('unit_name', $data)
+                                        ->orWhere('unit_name', strtolower($data))
+                                        ->orWhere('unit_name', strtoupper($data))
+                                        ->count();
                 break;
             default:
-                # code...
+                $dataCount = 0;
                 break;
         }
 
-        return $hasDuplicate;
+        return ($dataCount > 0) ? 1 : 0;;
     }
 }

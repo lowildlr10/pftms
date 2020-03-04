@@ -5,12 +5,13 @@ $(function() {
 
     $.fn.showCreate = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
-        $('#modal-body-create').load(url,function() {
+        $('#modal-body-create').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
+            $('.mdb-select').materialSelect();
         });
         $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
-            $('#create-title').html('Create Funding Source');
+            $('#create-title').html('Create Province');
 		}).on('hidden.bs.modal', function() {
 		     $('#modal-create-body').html(modalLoadingContent);
 		});
@@ -28,10 +29,11 @@ $(function() {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
+            $('.mdb-select').materialSelect();
         });
         $("#modal-sm-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {
-            $('#edit-title').html('Update Funding Source');
+            $('#edit-title').html('Update Province');
 		}).on('hidden.bs.modal', function() {
 		     $('#modal-edit-body').html(modalLoadingContent);
 		});
@@ -49,7 +51,7 @@ $(function() {
 		$('#modal-body-delete').html(`Are you sure you want to delete '${name}'?`);
         $("#modal-delete").modal({keyboard: false, backdrop: 'static'})
 						  .on('shown.bs.modal', function() {
-            $('#delete-title').html('Delete Funding Source');
+            $('#delete-title').html('Delete Province');
             $('#form-delete').attr('action', url);
 		}).on('hidden.bs.modal', function() {
              $('#modal-delete-body').html('');

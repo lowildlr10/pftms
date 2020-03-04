@@ -2,7 +2,7 @@
     @csrf
 
     <div class="md-form">
-        <input type="text" id="reference-code" class="form-control required"
+        <input type="text" id="reference-code" class="form-control"
                name="reference_code" value="{{ $referenceCode }}">
         <label for="reference-code" class="{{ !empty($referenceCode) ? 'active' : '' }}">
             Reference Code

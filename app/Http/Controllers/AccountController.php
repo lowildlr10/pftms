@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\User;
+use App\Models\EmpRole;
+use App\Models\EmpGroup;
 use App\Division;
 use App\Province;
 use App\Region;
@@ -13,7 +15,7 @@ use Auth;
 use \Image;
 use DB;
 
-class ProfileController extends Controller
+class AccountController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -30,13 +32,12 @@ class ProfileController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        $empID = Auth::user()->emp_id;
-        $employee = User::where('emp_id', $empID)->first();
-        $divisions = Division::all();
-        $provinces = Province::all();
-        $regions = Region::all();
+    public function indexProfile() {
+        $id = Auth::user()->id;
+        $employee = User::find($id);
+        $divisions = Division::orderBy('division_name')->get();
+        $provinces = Province::orderBy('province_name')->get();
+        $regions = Region::orderBy('region_name')->get();
 
         if (Auth::user()->role != 1 && Auth::user()->role != 3 && Auth::user()->role != 4) {
             $roles = Role::where('id', Auth::user()->role)->get();
@@ -50,6 +51,38 @@ class ProfileController extends Controller
                                       'regions' => $regions,
                                       'roles' => $roles]);
     }
+
+    public function showCreateProfile() {
+
+    }
+
+    public function storeProfile(Request $request) {
+
+    }
+
+    public function showEditProfile() {
+        $id = Auth::user()->id;
+    }
+
+    public function updateProfile(Request $request) {
+        $id = Auth::user()->id;
+    }
+
+    public function destroyProfile(Request $request) {
+        $id = Auth::user()->id;
+
+        try {
+            $instanceUser = User::find($id);
+            $instanceUser->destroy();
+
+            //$msg = "Item classification '$className' successfully destroyed.";
+            //return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
 
     public function create() {
         $divisions = Division::all();
@@ -385,5 +418,216 @@ class ProfileController extends Controller
         }
 
         return $path;
+    }
+
+    /** Library for Roles, Groups, and Accounts */
+
+    /**
+     *  Employee Role Module
+    **/
+    public function indexRole(Request $request) {
+
+    }
+
+    public function showCreateRole() {
+
+    }
+
+    public function showEditRole($id) {
+
+    }
+
+    public function storeRole(Request $request) {
+
+    }
+
+    public function updateRole(Request $request, $id) {
+
+    }
+
+    public function deleteRole($id) {
+
+    }
+
+    public function destroyRole($id) {
+
+    }
+
+    /**
+     *  Employee Group Module
+    **/
+    public function indexGroup(Request $request) {
+        $userGroupData = EmpGroup::addSelect([
+            'head_name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                               ->whereColumn('id', 'emp_groups.group_head')
+                               ->limit(1)
+        ])->orderBy('group_name')->get();
+
+        return view('modules.library.group.index', [
+            'list' => $userGroupData
+        ]);
+    }
+
+    public function showCreateGroup() {
+        $usersData = User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
+                                  'position', 'id')
+                         ->orderBy('firstname')
+                         ->get();
+
+        return view('modules.library.group.create', [
+            'employees' => $usersData
+        ]);
+    }
+
+    public function showEditGroup($id) {
+        $usersData = User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
+                                  'position', 'id')
+                         ->orderBy('firstname')
+                         ->get();
+        $userGroupData = EmpGroup::find($id);
+        $groupName = $userGroupData->group_name;
+        $groupHead = $userGroupData->group_head;
+
+        return view('modules.library.group.update', [
+            'id' => $id,
+            'groupName' => $groupName,
+            'groupHead' => $groupHead,
+            'employees' => $usersData
+        ]);
+    }
+
+    public function storeGroup(Request $request) {
+        $groupName = $request->group_name;
+        $groupHead = $request->group_head;
+
+        try {
+            if (!$this->checkDuplication('EmpGroup', $groupName)) {
+                $instanceEmpGroup = new EmpGroup;
+                $instanceEmpGroup->group_name = $groupName;
+                $instanceEmpGroup->group_head = $groupHead;
+                $instanceEmpGroup->save();
+
+                $msg = "Employee group '$groupName' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Employee group '$groupName' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function updateGroup(Request $request, $id) {
+        $groupName = $request->group_name;
+        $groupHead = $request->group_head;
+
+        try {
+            if (!$this->checkDuplication('EmpGroup', $groupName)) {
+                $instanceEmpGroup = EmpGroup::find($id);
+                $instanceEmpGroup->group_name = $groupName;
+                $instanceEmpGroup->group_head = $groupHead;
+                $instanceEmpGroup->save();
+
+                $msg = "Employee group '$groupName' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Employee group '$groupName' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function deleteGroup($id) {
+        try {
+            $instanceEmpGroup = EmpGroup::find($id);
+            $groupName = $instanceEmpGroup->group_name;
+            $instanceEmpGroup->delete();
+
+            $msg = "Employee group '$groupName' successfully deleted.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function destroyGroup($id) {
+        try {
+            $instanceEmpGroup = EmpGroup::find($id);
+            $groupName = $instanceEmpGroup->group_name;
+            $instanceEmpGroup->destroy();
+
+            $msg = "Employee group '$groupName' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    /**
+     *  Employee Acount Module
+    **/
+    public function indexAccount(Request $request) {
+
+    }
+
+    public function showCreateAccount() {
+
+    }
+
+    public function showEditAccount($id) {
+
+    }
+
+    public function storeAccount(Request $request) {
+
+    }
+
+    public function updateAccount(Request $request, $id) {
+
+    }
+
+    public function deleteAccount($id) {
+
+    }
+
+    public function destroyAccount($id) {
+
+    }
+
+    public function checkDuplication($model, $data) {
+        switch ($model) {
+            case 'EmpRole':
+                $dataCount = EmpRole::where('role', $data)
+                                    ->orWhere('role', strtolower($data))
+                                    ->orWhere('role', strtoupper($data))
+                                    ->count();
+                break;
+            case 'EmpGroup':
+                $dataCount = EmpGroup::where('group_name', $data)
+                                     ->orWhere('group_name', strtolower($data))
+                                     ->orWhere('group_name', strtoupper($data))
+                                     ->count();
+                break;
+            case 'User':
+                $firstname = trim($data->firstname);
+                $lastname = trim($data->lastname);
+                $dataCount = User::where([
+                    ['firstname', 'LIKE', "%$firstname%"],
+                    ['lastname', 'LIKE', "%$lastname%"]
+                ])->count();
+                break;
+            default:
+                $dataCount = 0;
+                break;
+        }
+
+        return ($dataCount > 0) ? 1 : 0;;
     }
 }

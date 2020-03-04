@@ -55,7 +55,7 @@
             </div>
         </div>
         <!-- sidebar-menu  -->
-        <div class=" sidebar-item sidebar-menu">
+        <div class="sidebar-item sidebar-menu">
             <ul>
                 <li class="header-menu">
                     <span>General</span>
@@ -278,12 +278,12 @@
                 </li>
 
                 <li class="header-menu">
-                    <span>Extras</span>
+                    <span>System Library</span>
                 </li>
                 <li class="sidebar-dropdown">
                     <a href="#">
                         <i class="fas fa-book"></i>
-                        <span class="menu-text">Libraries</span>
+                        <span class="menu-text">Module Libraries</span>
                     </a>
                     <div class="sidebar-submenu">
                         <ul>
@@ -311,11 +311,41 @@
                             <li>
                                 <a href="{{ route('item-unit-issue') }}" class="waves-effect">Unit of Issues</a>
                             </li>
+                        </ul>
+                    </div>
+
+                    <a href="#">
+                        <i class="fas fa-users-cog"></i>
+                        <span class="menu-text">Account Management</span>
+                    </a>
+                    <div class="sidebar-submenu">
+                        <ul>
                             <li>
-                                <a href="{{ route('emp-account') }}" class="waves-effect">User Accounts</a>
+                                <a href="{{ route('emp-role') }}" class="waves-effect">Roles</a>
                             </li>
                             <li>
-                                <a href="{{ route('emp-group') }}" class="waves-effect">User Groups</a>
+                                <a href="{{ route('emp-group') }}" class="waves-effect">Groups</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('emp-account') }}" class="waves-effect">Accounts</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('emp-account') }}" class="waves-effect">User Logs</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <a href="#">
+                        <i class="fas fa-globe-asia"></i>
+                        <span class="menu-text">Places</span>
+                    </a>
+                    <div class="sidebar-submenu">
+                        <ul>
+                            <li>
+                                <a href="{{ route('region') }}" class="waves-effect">Region</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('province') }}" class="waves-effect">Province</a>
                             </li>
                         </ul>
                     </div>

@@ -19,7 +19,7 @@ const modalLoadingContent = "<div class='mt-5' style='height: 150px;'>"+
 
 // Material DataTables
 $(document).ready(function () {
-    const dtTable = $('#dtmaterial').dataTable({
+    const dtTable = $('#dtmaterial').DataTable({
         columnDefs: [{
             'targets': 0,
             'searchable': false,
@@ -58,14 +58,19 @@ $(document).ready(function () {
     $('.pagination .active .page-link').addClass('mdb-color');
     $('.dataTables_empty').addClass('text-center red-text p-4');
 
+    /*
     $('#search-box').keyup(function() {
         let searchVal = $(this).val();
-        dtTable.fnFilter(searchVal).draw();
-    }).search(function() {
+        //dtTable.fnFilter(searchVal).draw();
+        dtTable.search(searchVal).draw();
+        $('.dataTables_empty').addClass('text-center red-text p-4');
+    }).mouseup(function() {
+
+    });*/
+    $('#search-box').on('keyup mouseup change', function() {
         let searchVal = $(this).val();
-        dtTable.fnFilter(searchVal).draw();
-    }).mouseUp(function() {
-        let searchVal = $(this).val();
-        dtTable.fnFilter(searchVal).draw();
+        //dtTable.fnFilter(searchVal).draw();
+        dtTable.search(searchVal).draw();
+        $('.dataTables_empty').addClass('text-center red-text p-4');
     });
 });

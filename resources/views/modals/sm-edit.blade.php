@@ -2,7 +2,7 @@
      role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-top" role="document">
         <!--Content-->
-        <div class="modal-content">
+        <div class="modal-content" style="border-radius: .3em;">
             <!--Header-->
             <div class="modal-header stylish-color-dark white-text">
                 <h7 class="mt-1">
