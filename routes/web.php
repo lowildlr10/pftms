@@ -585,36 +585,6 @@ Route::group(['middlewareGroups' => ['web']], function () {
 
     /*===================== LIBRARIES =====================*/
 
-    // Employee Division Module
-    Route::any('libraries/emp-division', [
-        'uses' => 'LibraryController@indexDivision',
-
-    ])->name('emp-division');
-    Route::get('libraries/emp-division/show-create', [
-        'uses' => 'LibraryController@showCreateDivision',
-
-    ])->name('emp-division-show-create');
-    Route::post('libraries/emp-division/store', [
-        'uses' => 'LibraryController@storeDivision',
-
-    ])->name('emp-division-store');
-    Route::get('libraries/emp-division/show-edit/{id}', [
-        'uses' => 'LibraryController@showEditDivision',
-
-    ])->name('emp-division-show-edit');
-    Route::post('libraries/emp-division/update/{id}', [
-        'uses' => 'LibraryController@updateDivision',
-
-    ])->name('emp-division-update');
-    Route::post('libraries/emp-division/delete/{id}', [
-        'uses' => 'LibraryController@deleteDivision',
-
-    ])->name('emp-division-delete');
-    Route::post('libraries/emp-division/destroyy/{id}', [
-        'uses' => 'LibraryController@destroyDivision',
-
-    ])->name('emp-division-destroy');
-
     // Item Classification Module
     Route::any('libraries/item-classification', [
         'uses' => 'LibraryController@indexItemClassification',
@@ -886,6 +856,36 @@ Route::group(['middlewareGroups' => ['web']], function () {
     ])->name('paper-size-destroy');
 
     /*===================== ACCOUNT MANAGEMENT =====================*/
+
+    // Employee Division Module
+    Route::any('account-management/emp-division', [
+        'uses' => 'AccountController@indexDivision',
+
+    ])->name('emp-division');
+    Route::get('account-management/emp-division/show-create', [
+        'uses' => 'AccountController@showCreateDivision',
+
+    ])->name('emp-division-show-create');
+    Route::post('account-management/emp-division/store', [
+        'uses' => 'AccountController@storeDivision',
+
+    ])->name('emp-division-store');
+    Route::get('account-management/emp-division/show-edit/{id}', [
+        'uses' => 'AccountController@showEditDivision',
+
+    ])->name('emp-division-show-edit');
+    Route::post('account-management/emp-division/update/{id}', [
+        'uses' => 'AccountController@updateDivision',
+
+    ])->name('emp-division-update');
+    Route::post('account-management/emp-division/delete/{id}', [
+        'uses' => 'AccountController@deleteDivision',
+
+    ])->name('emp-division-delete');
+    Route::post('account-management/emp-division/destroyy/{id}', [
+        'uses' => 'AccountController@destroyDivision',
+
+    ])->name('emp-division-destroy');
 
     // Employee Role Module
     Route::any('account-management/emp-role', [
