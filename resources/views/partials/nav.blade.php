@@ -288,7 +288,7 @@
                     <div class="sidebar-submenu">
                         <ul>
                             <li>
-                                <a href="{{ route('emp-division') }}" class="waves-effect">Divisions</a>
+                                <a href="{{ route('inventory-classification') }}" class="waves-effect">Inventory Classifications</a>
                             </li>
                             <li>
                                 <a href="{{ route('item-classification') }}" class="waves-effect">Item Classifications</a>
@@ -311,6 +311,9 @@
                             <li>
                                 <a href="{{ route('item-unit-issue') }}" class="waves-effect">Unit of Issues</a>
                             </li>
+                            <li>
+                                <a href="{{ route('paper-size') }}" class="waves-effect">Paper Sizes</a>
+                            </li>
                         </ul>
                     </div>
 
@@ -320,6 +323,9 @@
                     </a>
                     <div class="sidebar-submenu">
                         <ul>
+                            <li>
+                                <a href="{{ route('emp-division') }}" class="waves-effect">Divisions</a>
+                            </li>
                             <li>
                                 <a href="{{ route('emp-role') }}" class="waves-effect">Roles</a>
                             </li>

@@ -72,6 +72,7 @@ class AccountController extends Controller
             'po_jo_signed' => 'signed',
             'po_jo_approve' => 'Approve',
             'po_jo_cancel' => 'Cancel',
+            'po_jo_uncancel' => 'Un-cancel',
             'po_jo_issue' => 'Issue',
             'po_jo_receive' => 'Receive',
             'po_jo_obligate' => 'delivery',
@@ -120,6 +121,11 @@ class AccountController extends Controller
         'track_dv_lddap' => 'Voucher Tracking - DV to LDDAP',
         'track_dis_sum' => 'Voucher Tracking - Disburse to Summary',
         'track_sum_bank' => 'Voucher Tracking - Summary to Bank',
+        'lib_inv_class' => 'Libraries - Inventory Classifications',
+            'inv_class_create' => 'Create',
+            'inv_class_update' => 'Update',
+            'inv_class_delete' => 'Delete',
+            'inv_class_destroy' => 'Destroy',
         'lib_item_class' => 'Libraries - Item Classifications',
             'item_class_create' => 'Create',
             'item_class_update' => 'Update',
@@ -155,6 +161,11 @@ class AccountController extends Controller
             'unit_issue_update' => 'Update',
             'unit_issue_delete' => 'Delete',
             'unit_issue_destroy' => 'Destroy',
+        'lib_paper_size' => 'Libraries - Paper Sizes',
+            'paper_size_create' => 'Create',
+            'paper_size_update' => 'Update',
+            'paper_size_delete' => 'Delete',
+            'paper_size_destroy' => 'Destroy',
         'acc_division' => 'Accounts Management - Divisions',
             'division_create' => 'Create',
             'division_update' => 'Update',
@@ -251,6 +262,7 @@ class AccountController extends Controller
             'po_jo_signed' => 'signed',
             'po_jo_approve' => 'approve',
             'po_jo_cancel' => 'cancel',
+            'po_jo_cancel' => 'uncancel',
             'po_jo_issue' => 'issue',
             'po_jo_receive' => 'receive',
             'po_jo_obligate' => 'delivery',
@@ -304,6 +316,12 @@ class AccountController extends Controller
         'track_dv_lddap' => [],
         'track_dis_sum' => [],
         'track_sum_bank' => [],
+        'lib_inv_class' => [
+            'inv_class_create' => 'create',
+            'inv_class_update' => 'update',
+            'inv_class_delete' => 'delete',
+            'inv_class_destroy' => 'destroy',
+        ],
         'lib_item_class' => [
             'item_class_create' => 'create',
             'item_class_update' => 'update',
@@ -345,6 +363,12 @@ class AccountController extends Controller
             'unit_issue_update' => 'update',
             'unit_issue_delete' => 'delete',
             'unit_issue_destroy' => 'destroy',
+        ],
+        'lib_paper_size' => [
+            'paper_size_create' => 'create',
+            'paper_size_update' => 'update',
+            'paper_size_delete' => 'delete',
+            'paper_size_destroy' => 'destroy',
         ],
         'acc_division' => [
             'division_create' => 'create',
@@ -846,17 +870,12 @@ class AccountController extends Controller
         $divisionName = $request->division_name;
 
         try {
-            if (!$this->checkDuplication('EmpDivision', $divisionName)) {
-                $instanceEmpDiv = EmpDivision::find($id);
-                $instanceEmpDiv->division_name = $divisionName;
-                $instanceEmpDiv->save();
+            $instanceEmpDiv = EmpDivision::find($id);
+            $instanceEmpDiv->division_name = $divisionName;
+            $instanceEmpDiv->save();
 
-                $msg = "Employee division '$divisionName' successfully updated.";
-                return redirect(url()->previous())->with('success', $msg);
-            } else {
-                $msg = "Employee division '$divisionName' has a duplicate.";
-                return redirect(url()->previous())->with('warning', $msg);
-            }
+            $msg = "Employee division '$divisionName' successfully updated.";
+            return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             return redirect(url()->previous())->with('failed', $msg);
@@ -957,18 +976,13 @@ class AccountController extends Controller
         $moduleAccess = preg_replace('/\s/', '', $moduleAccess );
 
         try {
-            if (!$this->checkDuplication('EmpRole', $roleName)) {
-                $instanceEmpRole = EmpRole::find($id);
-                $instanceEmpRole->role = $roleName;
-                $instanceEmpRole->module_access = $moduleAccess;
-                $instanceEmpRole->save();
+            $instanceEmpRole = EmpRole::find($id);
+            $instanceEmpRole->role = $roleName;
+            $instanceEmpRole->module_access = $moduleAccess;
+            $instanceEmpRole->save();
 
-                $msg = "Role '$roleName' successfully updated.";
-                return redirect(url()->previous())->with('success', $msg);
-            } else {
-                $msg = "Role '$roleName' has a duplicate.";
-                return redirect(url()->previous())->with('warning', $msg);
-            }
+            $msg = "Role '$roleName' successfully updated.";
+            return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             return redirect(url()->previous())->with('failed', $msg);
@@ -1074,18 +1088,13 @@ class AccountController extends Controller
         $groupHead = $request->group_head;
 
         try {
-            if (!$this->checkDuplication('EmpGroup', $groupName)) {
-                $instanceEmpGroup = EmpGroup::find($id);
-                $instanceEmpGroup->group_name = $groupName;
-                $instanceEmpGroup->group_head = $groupHead;
-                $instanceEmpGroup->save();
+            $instanceEmpGroup = EmpGroup::find($id);
+            $instanceEmpGroup->group_name = $groupName;
+            $instanceEmpGroup->group_head = $groupHead;
+            $instanceEmpGroup->save();
 
-                $msg = "Employee group '$groupName' successfully created.";
-                return redirect(url()->previous())->with('success', $msg);
-            } else {
-                $msg = "Employee group '$groupName' has a duplicate.";
-                return redirect(url()->previous())->with('warning', $msg);
-            }
+            $msg = "Employee group '$groupName' successfully created.";
+            return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             return redirect(url()->previous())->with('failed', $msg);

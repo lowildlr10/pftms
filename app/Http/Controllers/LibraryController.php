@@ -90,17 +90,12 @@ class LibraryController extends Controller
         $className = $request->classification_name;
 
         try {
-            if (!$this->checkDuplication('ItemClassification', $className)) {
-                $instanceItemClass = ItemClassification::find($id);
-                $instanceItemClass->classification_name = $className;
-                $instanceItemClass->save();
+            $instanceItemClass = ItemClassification::find($id);
+            $instanceItemClass->classification_name = $className;
+            $instanceItemClass->save();
 
-                $msg = "Item classification '$className' successfully updated.";
-                return redirect(url()->previous())->with('success', $msg);
-            } else {
-                $msg = "Item classification '$className' has a duplicate.";
-                return redirect(url()->previous())->with('warning', $msg);
-            }
+            $msg = "Item classification '$className' successfully updated.";
+            return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             return redirect(url()->previous())->with('failed', $msg);
@@ -191,18 +186,13 @@ class LibraryController extends Controller
         $sourceName = $request->source_name;
 
         try {
-            if (!$this->checkDuplication('FundingSource', $sourceName)) {
-                $instanceFundSrc = FundingSource::find($id);
-                $instanceFundSrc->reference_code = $referenceCode;
-                $instanceFundSrc->source_name = $sourceName;
-                $instanceFundSrc->save();
+            $instanceFundSrc = FundingSource::find($id);
+            $instanceFundSrc->reference_code = $referenceCode;
+            $instanceFundSrc->source_name = $sourceName;
+            $instanceFundSrc->save();
 
-                $msg = "Funding source '$sourceName' successfully created.";
-                return redirect(url()->previous())->with('success', $msg);
-            } else {
-                $msg = "Funding source '$sourceName' has a duplicate.";
-                return redirect(url()->previous())->with('warning', $msg);
-            }
+            $msg = "Funding source '$sourceName' successfully created.";
+            return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             return redirect(url()->previous())->with('failed', $msg);
@@ -343,17 +333,12 @@ class LibraryController extends Controller
         $classificationName = $request->classification_name;
 
         try {
-            if (!$this->checkDuplication('SupplierClassification', $classificationName)) {
-                $instanceSupClass = SupplierClassification::find($id);
-                $instanceSupClass->classification_name = $classificationName;
-                $instanceSupClass->save();
+            $instanceSupClass = SupplierClassification::find($id);
+            $instanceSupClass->classification_name = $classificationName;
+            $instanceSupClass->save();
 
-                $msg = "Supplier classification '$classificationName' successfully created.";
-                return redirect(url()->previous())->with('success', $msg);
-            } else {
-                $msg = "Supplier classification '$classificationName' has a duplicate.";
-                return redirect(url()->previous())->with('warning', $msg);
-            }
+            $msg = "Supplier classification '$classificationName' successfully created.";
+            return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             return redirect(url()->previous())->with('failed', $msg);
@@ -499,17 +484,12 @@ class LibraryController extends Controller
         $unitName = $request->unit_name;
 
         try {
-            if (!$this->checkDuplication('ItemUnitIssue', $unitName)) {
-                $instanceUnitIssue = ItemUnitIssue::find($id);
-                $instanceUnitIssue->unit_name = $unitName;
-                $instanceUnitIssue->save();
+            $instanceUnitIssue = ItemUnitIssue::find($id);
+            $instanceUnitIssue->unit_name = $unitName;
+            $instanceUnitIssue->save();
 
-                $msg = "Unit of issue '$unitName' successfully created.";
-                return redirect(url()->previous())->with('success', $msg);
-            } else {
-                $msg = "Unit of issue '$unitName' has a duplicate.";
-                return redirect(url()->previous())->with('warning', $msg);
-            }
+            $msg = "Unit of issue '$unitName' successfully created.";
+            return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             return redirect(url()->previous())->with('failed', $msg);
@@ -595,17 +575,12 @@ class LibraryController extends Controller
         $modeName = $request->mode_name;
 
         try {
-            if (!$this->checkDuplication('ProcurementMode', $modeName)) {
-                $instanceProcMode = ProcurementMode::find($id);
-                $instanceProcMode->mode_name = $modeName;
-                $instanceProcMode->save();
+            $instanceProcMode = ProcurementMode::find($id);
+            $instanceProcMode->mode_name = $modeName;
+            $instanceProcMode->save();
 
-                $msg = "Procurement mode '$modeName' successfully updated.";
-                return redirect(url()->previous())->with('success', $msg);
-            } else {
-                $msg = "Procurement mode '$modeName' has a duplicate.";
-                return redirect(url()->previous())->with('warning', $msg);
-            }
+            $msg = "Procurement mode '$modeName' successfully updated.";
+            return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             return redirect(url()->previous())->with('failed', $msg);
@@ -628,7 +603,7 @@ class LibraryController extends Controller
 
     public function destroyProcurementMode($id) {
         try {
-            $instanceProcMode = EmpDivision::find($id);
+            $instanceProcMode = ProcurementMode::find($id);
             $modeName = $instanceProcMode->mode_name;
             $instanceProcMode->destroy();
 
@@ -644,62 +619,200 @@ class LibraryController extends Controller
      *  Inventory Stock Classification Module
     **/
     public function indexInventoryClassification(Request $request) {
+        $inventoryData = InventoryClassification::orderBy('classification_name')
+                                                ->get();
 
+        return view('modules.library.inventory-classification.index', [
+            'list' => $inventoryData
+        ]);
     }
 
     public function showCreateInventoryClassification() {
-
+        return view('modules.library.inventory-classification.create');
     }
 
     public function showEditInventoryClassification($id) {
+        $inventoryData = InventoryClassification::find($id);
+        $className = $inventoryData->classification_name;
 
+        return view('modules.library.inventory-classification.update', [
+            'id' => $id,
+            'classification' => $className
+        ]);
     }
 
     public function storeInventoryClassification(Request $request) {
+        $className = $request->classification_name;
 
+        try {
+            if (!$this->checkDuplication('InventoryClassification', $className)) {
+                $instanceInvClass = new InventoryClassification;
+                $instanceInvClass->classification_name = $className;
+                $instanceInvClass->save();
+
+                $msg = "Inventory classification '$className' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Inventory classification '$className' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function updateInventoryClassification(Request $request, $id) {
+        $className = $request->classification_name;
 
+        try {
+            $instanceInvClass = InventoryClassification::find($id);
+            $instanceInvClass->classification_name = $className;
+            $instanceInvClass->save();
+
+            $msg = "Inventory classification '$className' successfully updated.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function deleteInventoryClassification($id) {
+        try {
+            $instanceInvClass = InventoryClassification::find($id);
+            $className = $instanceInvClass->classification_name;
+            $instanceInvClass->delete();
 
+            $msg = "Inventory classification '$className' successfully deleted.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function destroyInventoryClassification($id) {
+        try {
+            $instanceInvClass = InventoryClassification::find($id);
+            $className = $instanceInvClass->classification_name;
+            $instanceInvClass->destroy();
 
+            $msg = "Inventory classification '$className' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     /**
      *  Paper Size Module
     **/
     public function indexPaperSize(Request $request) {
+        $paperSizeData = PaperSize::orderBy('paper_type')
+                                  ->get();
 
+        return view('modules.library.paper-size.index', [
+            'list' => $paperSizeData
+        ]);
     }
 
     public function showCreatePaperSize() {
-
+        return view('modules.library.paper-size.create');
     }
 
     public function showEditPaperSize($id) {
+        $paperSizeData = PaperSize::find($id);
+        $paperType = $paperSizeData->paper_type;
+        $unit = $paperSizeData->unit;
+        $width = $paperSizeData->width;
+        $height = $paperSizeData->height;
 
+        return view('modules.library.paper-size.update', [
+            'id' => $id,
+            'paperType' => $paperType,
+            'unit' => $unit,
+            'width' => $width,
+            'height' => $height
+        ]);
     }
 
     public function storePaperSize(Request $request) {
+        $paperType = $request->paper_type;
+        $unit = $request->unit;
+        $width = $request->width;
+        $height = $request->height;
 
+        try {
+            if (!$this->checkDuplication('PaperSize', $paperType)) {
+                $instancePaperSize = new PaperSize;
+                $instancePaperSize->paper_type = $paperType;
+                $instancePaperSize->unit = $unit;
+                $instancePaperSize->width = $width;
+                $instancePaperSize->height = $height;
+                $instancePaperSize->save();
+
+                $msg = "Paper size '$paperType' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Paper size '$paperType' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function updatePaperSize(Request $request, $id) {
+        $paperType = $request->paper_type;
+        $unit = $request->unit;
+        $width = $request->width;
+        $height = $request->height;
 
+        try {
+            $instancePaperSize = PaperSize::find($id);
+            $instancePaperSize->paper_type = $paperType;
+                $instancePaperSize->unit = $unit;
+                $instancePaperSize->width = $width;
+                $instancePaperSize->height = $height;
+            $instancePaperSize->save();
+
+            $msg = "Paper size '$paperType' successfully updated.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function deletePaperSize($id) {
+        try {
+            $instancePaperSize = PaperSize::find($id);
+            $paperType = $instancePaperSize->paper_type;
+            $instancePaperSize->delete();
 
+            $msg = "Paper size '$paperType' successfully deleted.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function destroyPaperSize($id) {
+        try {
+            $instancePaperSize = PaperSize::find($id);
+            $paperType = $instancePaperSize->paper_type;
+            $instancePaperSize->destroy();
 
+            $msg = "Paper size '$paperType' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function checkDuplication($model, $data) {
@@ -712,9 +825,9 @@ class LibraryController extends Controller
                 break;
             case 'ItemClassification':
                 $dataCount = ItemClassification::where('classification_name', $data)
-                                        ->orWhere('classification_name', strtolower($data))
-                                        ->orWhere('classification_name', strtoupper($data))
-                                        ->count();
+                                               ->orWhere('classification_name', strtolower($data))
+                                               ->orWhere('classification_name', strtoupper($data))
+                                               ->count();
                 break;
             case 'ProcurementMode':
                 $dataCount = ProcurementMode::where('mode_name', $data)

@@ -69,17 +69,12 @@ class PlaceController extends Controller
         $regionName = $request->region_name;
 
         try {
-            if (!$this->checkDuplication('Region', $regionName)) {
-                $instanceRegion = Region::find($id);
-                $instanceRegion->region_name = $regionName;
-                $instanceRegion->save();
+            $instanceRegion = Region::find($id);
+            $instanceRegion->region_name = $regionName;
+            $instanceRegion->save();
 
-                $msg = "Region '$regionName' successfully created.";
-                return redirect(url()->previous())->with('success', $msg);
-            } else {
-                $msg = "Region '$regionName' has a duplicate.";
-                return redirect(url()->previous())->with('warning', $msg);
-            }
+            $msg = "Region '$regionName' successfully created.";
+            return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             return redirect(url()->previous())->with('failed', $msg);
@@ -183,18 +178,13 @@ class PlaceController extends Controller
         $region = $request->region;
 
         try {
-            if (!$this->checkDuplication('Province', $provinceName)) {
-                $instanceProvince = Province::find($id);
-                $instanceProvince->province_name = $provinceName;
-                $instanceProvince->region = $region;
-                $instanceProvince->save();
+            $instanceProvince = Province::find($id);
+            $instanceProvince->province_name = $provinceName;
+            $instanceProvince->region = $region;
+            $instanceProvince->save();
 
-                $msg = "Province '$provinceName' successfully created.";
-                return redirect(url()->previous())->with('success', $msg);
-            } else {
-                $msg = "Province '$provinceName' has a duplicate.";
-                return redirect(url()->previous())->with('warning', $msg);
-            }
+            $msg = "Province '$provinceName' successfully created.";
+            return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             return redirect(url()->previous())->with('failed', $msg);
