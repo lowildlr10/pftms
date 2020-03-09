@@ -26,7 +26,7 @@
             {!! $label[$parentID] !!}
         </label>
     </div>
-            @if (count($module) > 0)
+
     <div id="{{ $parentID }}-menu"
          style="display:{{
             (isset($moduleAccess->{$parentID}->is_allowed) &&
@@ -34,6 +34,24 @@
         }};">
         <hr class="my-1">
         <div class="pl-3">
+            @if (count($module) > 0)
+            <div class="custom-control custom-checkbox ">
+                <input type="checkbox" class="custom-control-input" id="sel-{{ $parentID }}">
+                <label class="custom-control-label" for="sel-{{ $parentID }}">
+                    <small><em>-- Select all action --</em></small>
+                </label>
+            </div>
+            @endif
+
+            <div class="custom-control custom-checkbox ">
+                <input type="checkbox" class="custom-control-input" id="allowed-{{ $parentID }}"
+                       checked disabled>
+                <label class="custom-control-label" for="allowed-{{ $parentID }}">
+                    Allowed (View/Read)
+                </label>
+            </div>
+
+            @if (count($module) > 0)
                 @foreach ($module as $accessID => $access)
             <div class="custom-control custom-checkbox ">
                 <input type="checkbox" class="custom-control-input" id="{{ $accessID }}"
@@ -45,9 +63,9 @@
                 </label>
             </div>
                 @endforeach
+            @endif
         </div>
     </div>
-            @endif
     <hr class="my-1">
         @endforeach
     @endif

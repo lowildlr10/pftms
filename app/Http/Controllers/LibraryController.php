@@ -29,6 +29,101 @@ use App\Plugin\DuplicateChecker;
 
 class LibraryController extends Controller
 {
+    protected $moduleLabels = [
+        'pr' => '',
+            'pr_approval' => 'Approval',
+            'pr_within_app' => 'Within APP',
+            'pr_funds_available' => 'Funds Available',
+            'pr_recommended_by' => 'Recommended By',
+        'rfq' => '',
+            'rfq_truly_yours' => 'Truly Yours',
+        'abs' => '',
+            'abs_chairperson' => 'Chairperson',
+            'abs_vice_chair' => 'Vice Chairperson',
+            'abs_member' => 'Member',
+        'po' => '',
+            'po_funds_available' => 'Chief Accountant/Head of Accounting Division/Funds Available',
+            'po_requisitioning' => 'Requisitioning Office/Dept.',
+            'po_approved' => 'Very Truly Yours/Approved',
+        'ors' => '',
+            'ors_approval' => 'Approval',
+            'ors_funds_available' => 'Funds Available',
+        'iar' => '',
+            'iar_inspection' => 'Inspection Office/Inspection Committee',
+            'iar_prop_supply' => 'Supply and/or Property Custodian',
+        'dv' => '',
+            'dv_supervisor' => 'Printed Name, Designation and Signature of Supervisor',
+            'dv_accounting' => 'Head, Accounting Unit/Authorized Representative',
+            'dv_agency_head' => 'Agency Head/Authorized Representative',
+        'ris' => '',
+            'ris_approved_by' => 'Approved By',
+            'ris_issued_by' => 'Issued By',
+        'par' => '',
+            'par_issued_by' => 'Issued By',
+        'ics' => '',
+            'ics_received_from' => 'Received From',
+        'lr' => '',
+            'lr_immediate_sup' => 'Immediate Supervisor',
+            'lr_accounting' => 'Head, Accounting Division Unit',
+        'lddap' => '',
+            'lddap_cert_correct' => 'Certified Correct',
+            'lddap_approval' => 'Approval',
+            'lddap_agency_auth' => 'Agency Authorized Signatories',
+    ];
+    protected $modules = [
+        'pr' => [
+            'pr_approval' => 'approval',
+            'pr_within_app' => 'within_app',
+            'pr_funds_available' => 'funds_available',
+            'pr_recommended_by' => 'recommended_by',
+        ],
+        'rfq' => [
+            'rfq_truly_yours' => 'truly_yours',
+        ],
+        'abs' => [
+            'abs_chairperson' => 'chairperson',
+            'abs_vice_chair' => 'vice_chair',
+            'abs_member' => 'member',
+        ],
+        'po' => [
+            'po_funds_available' => 'funds_available',
+            'po_requisitioning' => 'requisitioning',
+            'po_approved' => 'approved',
+        ],
+        'ors' => [
+            'ors_approval' => 'approval',
+            'ors_funds_available' => 'funds_available',
+        ],
+        'iar' => [
+            'iar_inspection' => 'inspection',
+            'iar_prop_supply' => 'prop_supply',
+        ],
+        'dv' => [
+            'dv_supervisor' => 'supervisor',
+            'dv_accounting' => 'accounting',
+            'dv_agency_head' => 'agency_head',
+        ],
+        'ris' => [
+            'ris_approved_by' => 'approved_by',
+            'ris_issued_by' => 'issued_by',
+        ],
+        'par' => [
+            'par_issued_by' => 'issued_by',
+        ],
+        'ics' => [
+            'ics_received_from' => 'received_from',
+        ],
+        'lr' => [
+            'lr_immediate_sup' => 'immediate_sup',
+            'lr_accounting' => 'accounting',
+        ],
+        'lddap' => [
+            'lddap_cert_correct' => 'cert_correct',
+            'lddap_approval' => 'approval',
+            'lddap_agency_auth' => 'agency_auth',
+        ],
+    ];
+
     /**
      * Create a new controller instance.
      *

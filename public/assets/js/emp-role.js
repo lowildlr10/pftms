@@ -91,25 +91,61 @@ $(function() {
         return jsonData;
     }
 
-    function toggleSignatoryInputs() {
+    function toggleRoleInputs() {
 		$.each(cBoxIDs, function(i, id) {
-			const moduleCbox = $(id);
+            const moduleCbox = $(id);
+            const menuGroup = $(id + '-menu');
+            const _id = id.replace('#', '');
+
+            const _selectAllCheck = '#sel-' + _id;
+            const selectAllCheck = $(_selectAllCheck);
+
+            const _allowedCheck = '#allowed-' + _id;
+            const allowedCheck = $(_allowedCheck);
 
 			moduleCbox.unbind('change').change(function() {
-                const menuGroup = $(id + '-menu');
-
 				if (moduleCbox.is(':checked')) {
-                    menuGroup.slideToggle(300);
-                    menuGroup.find('input').each(function() {
-                        $(this).prop("checked", false);
+                    menuGroup.slideToggle(300)
+                             .find('input').each(function() {
+                        $(this).prop("checked", false)
+                               .prop('indeterminate', false);
                     });
+                    allowedCheck.prop("checked", true);
 				} else {
-                    menuGroup.slideToggle(300);
-                    menuGroup.find('input').each(function() {
+                    menuGroup.slideToggle(300)
+                             .find('input').each(function() {
+                        $(this).prop("checked", false)
+                               .prop('indeterminate', false);
+                    });
+                    allowedCheck.prop("checked", false);
+                }
+            });
+
+            selectAllCheck.unbind('change').change(function() {
+                selectAllCheck.prop('indeterminate', false);
+
+                if (selectAllCheck.is(':checked')) {
+                    menuGroup.find('input').not(_allowedCheck).each(function() {
+                        $(this).prop("checked", true);
+                    });
+                } else {
+                    menuGroup.find('input').not(_allowedCheck).each(function() {
                         $(this).prop("checked", false);
                     });
-				}
-			});
+                }
+            });
+
+            menuGroup.find('input').not(_selectAllCheck)
+                     .not(_allowedCheck)
+                     .each(function() {
+                if ($(this).is(':checked')) {
+                    $(selectAllCheck).prop('indeterminate', true);
+                }
+
+                $(this).unbind('change').change(function() {
+                    $(selectAllCheck).prop('indeterminate', true);
+                });
+            });
 		});
 	}
 
@@ -117,13 +153,14 @@ $(function() {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-create').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
-            toggleSignatoryInputs();
+            $(this).slideToggle(500);
+            toggleRoleInputs();
         });
         $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
             $('#create-title').html('Create Role');
 		}).on('hidden.bs.modal', function() {
-		     $('#modal-create-body').html(modalLoadingContent);
+		     $('#modal-body-create').html('').css('display', 'none');
 		});
     }
 
@@ -141,13 +178,14 @@ $(function() {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
-            toggleSignatoryInputs();
+            $(this).slideToggle(500);
+            toggleRoleInputs();
         });
         $("#modal-sm-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {
             $('#edit-title').html('Update Role');
 		}).on('hidden.bs.modal', function() {
-		     $('#modal-edit-body').html(modalLoadingContent);
+             $('#modal-body-edit').html('').css('display', 'none');
 		});
     }
 

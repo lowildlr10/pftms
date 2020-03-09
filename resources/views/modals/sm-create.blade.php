@@ -18,7 +18,9 @@
             <!--Body-->
             <div class="modal-body rgba-stylish-light transparent">
                 <div class="card">
-                    <div class="card-body"><div id="modal-body-create"></div></div>
+                    <div class="card-body">
+                        <div id="modal-body-create" style="display: none;"></div>
+                    </div>
                 </div>
             </div>
 
