@@ -1,8 +1,10 @@
 function inputValidation(withError) {
-    var errorCount = 0;
+    let errorCount = 0;
+
     try {
         $(".required").not(".mdb-select").each(function() {
-            var inputField = $(this).val().replace(/^\s+|\s+$/g, "").length;
+            let inputField = $(this).val().replace(/^\s+|\s+$/g, "").length;
+
             if (inputField == 0) {
                 $(this).addClass("input-error-highlighter");
                 errorCount++;
@@ -17,7 +19,8 @@ function inputValidation(withError) {
             }
         });
         $("select.required").each(function() {
-            var inputField = $(this).val();
+            let inputField = $(this).val();
+
             if (!inputField) {
                 $(this).siblings('.select-dropdown').addClass("input-error-highlighter");
                 errorCount++;
@@ -27,10 +30,12 @@ function inputValidation(withError) {
         });
     } catch (error) {
     }
+
     if (errorCount == 0) {
         withError = false;
     } else {
         withError = true;
     }
+
     return withError;
 }

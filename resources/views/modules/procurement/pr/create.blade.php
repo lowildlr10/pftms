@@ -1,14 +1,16 @@
-<form id="form-create"
-      class="wow animated fadeIn"
-      method="POST"
-      action="{{ route('pr-store') }}">
+<form id="form-create" class="wow animated fadeIn" method="POST" action="{{ route('pr-store') }}">
     @csrf
 
     <div class="row">
         <div class="col-md-4">
             <div class="form-group">
                 <label>Office/Section<span class="red-text">*</span></label>
-                <input type="text" name="office" value="DOST-CAR" class="form-control">
+
+                @if ($toggle == 'create')
+                <input type="text" name="office" value="DOST-CAR" class="form-control z-depth-1">
+                @elseif ($toggle == 'edit')
+                <input type="text" name="office" value="{{ $pr->office }}" class="form-control z-depth-1">
+                @endif
             </div>
         </div>
         <div class="col-md-4">
@@ -16,11 +18,9 @@
                 <label>PR Number</label>
 
                 @if ($toggle == 'create')
-                <input name="pr_no" type="text" value="Auto Generated"
-                       class="form-control" disabled="disabled">
+                <input name="pr_no" type="text" value="Auto Generated" class="form-control" disabled="disabled">
                 @elseif ($toggle == 'edit')
-                <input name="pr_no" type="text" value="{{ $pr->pr_no }}"
-                       class="form-control" disabled="disabled">
+                <input name="pr_no" type="text" value="{{ $pr->pr_no }}" class="form-control" disabled="disabled">
                 @endif
             </div>
         </div>
@@ -29,9 +29,9 @@
                 <label>Date<span class="red-text">*</span></label>
 
                 @if ($toggle == 'create')
-                <input type="date" name="date_pr" class="form-control required">
+                <input type="date" name="date_pr" class="form-control z-depth-1 required">
                 @elseif ($toggle == 'edit')
-                <input type="date" name="date_pr" class="form-control required" value="{{ $pr->date_pr }}">
+                <input type="date" name="date_pr" class="form-control z-depth-1 required" value="{{ $pr->date_pr }}">
                 @endif
             </div>
         </div>

@@ -137,9 +137,9 @@ $(function() {
 	$.fn.showCreate = function() {
         $('#btn-create-update').html('<i class="fas fa-pencil-alt"></i> Create');
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
-		$('#modal-body-create').load('pr/create', function() {
+		$('#modal-body-create').load('pr/show-create', function() {
             $('#mdb-preloader').fadeOut(300);
-			$('#form-create').attr('action', 'pr/save');
+			//$('#form-create').attr('action', 'pr/save');
 		});
 		$("#central-create-modal").modal({keyboard: false, backdrop: 'static'})
 						.on('shown.bs.modal', function() {
@@ -167,7 +167,7 @@ $(function() {
 	$.fn.showEdit = function(id) {
         $('#btn-create-update').html('<i class="fas fa-edit"></i> Update');
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
-		$('#modal-body-edit').load('pr/edit/' + id, function() {
+		$('#modal-body-edit').load('pr/show-edit/' + id, function() {
             $('#mdb-preloader').fadeOut(300);
 			$('#form-create').attr('action', 'pr/update/' + id);
 		});
