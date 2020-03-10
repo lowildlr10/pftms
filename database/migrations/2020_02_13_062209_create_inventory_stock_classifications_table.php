@@ -17,7 +17,7 @@ class CreateInventoryStockClassificationsTable extends Migration
             $table->engine = 'InnoDB';
 
             $table->uuid('id')->primary();
-            $table->string('classification', 200);
+            $table->string('classification_name', 200);
             $table->softDeletes();
             $table->timestamps();
         });

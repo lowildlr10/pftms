@@ -17,9 +17,8 @@ class CreateSignatoriesTable extends Migration
             $table->engine = 'InnoDB';
 
             $table->uuid('id')->primary();
-            $table->uuid('emp_id');
+            $table->uuid('emp_id')->unique();
             $table->foreign('emp_id')->references('id')->on('emp_accounts');
-            $table->text('position');
             $table->text('module');
             $table->enum('is_active', ['y', 'n'])->default('n');
             $table->softDeletes();

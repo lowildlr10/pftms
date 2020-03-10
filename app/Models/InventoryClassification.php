@@ -24,11 +24,7 @@ class InventoryClassification extends Model
      */
     protected $fillable = [
         'id',
-        'date',
-        'emp_from',
-        'emp_to',
-        'action',
-        'remarks'
+        'classification_name',
     ];
 
     /**
