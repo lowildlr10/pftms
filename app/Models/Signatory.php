@@ -25,7 +25,6 @@ class Signatory extends Model
     protected $fillable = [
         'id',
         'emp_id',
-        'position',
         'module',
         'is_active'
     ];
