@@ -28,7 +28,7 @@ class Supplier extends Model
         'company_name',
         'date_filed',
         'address',
-        'name_bank',
+        'bank_name',
         'account_name',
         'account_no',
         'email',
