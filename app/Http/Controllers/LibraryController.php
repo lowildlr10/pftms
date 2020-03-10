@@ -554,9 +554,9 @@ class LibraryController extends Controller
     **/
     public function indexSupplier(Request $request) {
         $supplierData = Supplier::addSelect([
-            'classification' => InventoryClassification::select('classification_name')
-                                                       ->whereColumn('id', 'suppliers.classification')
-                                                       ->limit(1)
+            'classification' => SupplierClassification::select('classification_name')
+                                                          ->whereColumn('id', 'suppliers.classification')
+                                                          ->limit(1)
         ])->orderBy('company_name')->get();
 
         return view('modules.library.supplier.index', [
@@ -579,7 +579,9 @@ class LibraryController extends Controller
         $supplierData = Supplier::find($id);
         $classification = $supplierData->classification;
         $isActive = $supplierData->is_active;
-        $nameBank = $supplierData->name_bank;
+        $bankName = $supplierData->bank_name;
+        $accountName = $supplierData->account_name;
+        $accountNo = $supplierData->account_no;
         $companyName = $supplierData->company_name;
         $dateFiled = $supplierData->date_filed;
         $address = $supplierData->address;
@@ -637,11 +639,14 @@ class LibraryController extends Controller
             }
         }
 
-        return view('modules.library.supplier.updae', [
+        return view('modules.library.supplier.update', [
+            'id' => $id,
             'classifications' => $supClassData,
             'classification' => $classification,
             'isActive' => $isActive,
-            'nameBank' => $nameBank,
+            'bankName' => $bankName,
+            'accountName' => $accountName,
+            'accountNo' => $accountNo,
             'companyName' => $companyName,
             'dateFiled' => $dateFiled,
             'address' => $address,
@@ -657,8 +662,8 @@ class LibraryController extends Controller
             'natureBusinessOthers' => $natureBusinessOthers,
             'deliveryVehicleNo' => $deliveryVehicleNo,
             'productLines' => $productLines,
-            'creditAccomodation' => $creditAccomodationn,
-            'attachments' => $attachments,
+            'creditAccomodation' => $creditAccomodation,
+            'attachment' => $attachments,
             'attachmentOthers' => $attachmentOthers,
             'attachment1' => $attachment1,
             'attachment2' => $attachment2,
@@ -671,19 +676,156 @@ class LibraryController extends Controller
     }
 
     public function storeSupplier(Request $request) {
+        $classification = $request->classification;
+        $isActive = $request->is_active;
+        $bankName = $request->bank_name;
+        $accountName = $request->account_name;
+        $accountNo = $request->account_no;
+        $companyName = $request->company_name;
+        $dateFiled = $request->date_filed;
+        $address = $request->address;
+        $email = $request->email;
+        $websiteURL = $request->website_url;
+        $faxNo = $request->fax_no;
+        $telephoneNo = $request->telephone_no;
+        $mobileNo = $request->mobile_no;
+        $dateEstablished = $request->date_established;
+        $vatNo = $request->vat_no;
+        $contactPerson = $request->contact_person;
+        $natureBusiness = $request->nature_business;
+        $natureBusinessOthers = $request->nature_business_others;
+        $deliveryVehicleNo = $request->delivery_vehicle_no;
+        $productLines = $request->product_lines;
+        $creditAccomodation = $request->credit_accomodation;
+        $attachments = $request->attachment;
+        $attachmentOthers = $request->attachment_others;
 
+        try {
+            if (!$this->checkDuplication('Supplier', $companyName)) {
+                $instanceSuplier = new Supplier;
+                $instanceSuplier->classification = $classification;
+                $instanceSuplier->is_active = $isActive;
+                $instanceSuplier->bank_name = $bankName;
+                $instanceSuplier->account_name = $accountName;
+                $instanceSuplier->account_no = $accountNo;
+                $instanceSuplier->company_name = $companyName;
+                $instanceSuplier->date_filed = $dateFiled;
+                $instanceSuplier->address = $address;
+                $instanceSuplier->email = $email;
+                $instanceSuplier->website_url = $websiteURL;
+                $instanceSuplier->fax_no = $faxNo;
+                $instanceSuplier->telephone_no = $telephoneNo;
+                $instanceSuplier->mobile_no = $mobileNo;
+                $instanceSuplier->date_established = $dateEstablished;
+                $instanceSuplier->vat_no = $vatNo;
+                $instanceSuplier->contact_person = $contactPerson;
+                $instanceSuplier->nature_business = $natureBusiness;
+                $instanceSuplier->nature_business_others = $natureBusinessOthers;
+                $instanceSuplier->delivery_vehicle_no = $deliveryVehicleNo;
+                $instanceSuplier->product_lines = $productLines;
+                $instanceSuplier->credit_accomodation = $creditAccomodation;
+                $instanceSuplier->attachment = $attachments;
+                $instanceSuplier->attachment_others = $attachmentOthers;
+                $instanceSuplier->save();
+
+                $msg = "Supplier '$companyName' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Supplier '$companyName' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function updateSupplier(Request $request, $id) {
+        $classification = $request->classification;
+        $isActive = $request->is_active;
+        $bankName = $request->bank_name;
+        $accountName = $request->account_name;
+        $accountNo = $request->account_no;
+        $companyName = $request->company_name;
+        $dateFiled = $request->date_filed;
+        $address = $request->address;
+        $email = $request->email;
+        $websiteURL = $request->website_url;
+        $faxNo = $request->fax_no;
+        $telephoneNo = $request->telephone_no;
+        $mobileNo = $request->mobile_no;
+        $dateEstablished = $request->date_established;
+        $vatNo = $request->vat_no;
+        $contactPerson = $request->contact_person;
+        $natureBusiness = $request->nature_business;
+        $natureBusinessOthers = $request->nature_business_others;
+        $deliveryVehicleNo = $request->delivery_vehicle_no;
+        $productLines = $request->product_lines;
+        $creditAccomodation = $request->credit_accomodation;
+        $attachments = $request->attachment;
+        $attachmentOthers = $request->attachment_others;
 
+        try {
+            $instanceSuplier = Supplier::find($id);
+            $instanceSuplier->classification = $classification;
+            $instanceSuplier->is_active = $isActive;
+            $instanceSuplier->bank_name = $bankName;
+            $instanceSuplier->account_name = $accountName;
+            $instanceSuplier->account_no = $accountNo;
+            $instanceSuplier->company_name = $companyName;
+            $instanceSuplier->date_filed = $dateFiled;
+            $instanceSuplier->address = $address;
+            $instanceSuplier->email = $email;
+            $instanceSuplier->website_url = $websiteURL;
+            $instanceSuplier->fax_no = $faxNo;
+            $instanceSuplier->telephone_no = $telephoneNo;
+            $instanceSuplier->mobile_no = $mobileNo;
+            $instanceSuplier->date_established = $dateEstablished;
+            $instanceSuplier->vat_no = $vatNo;
+            $instanceSuplier->contact_person = $contactPerson;
+            $instanceSuplier->nature_business = $natureBusiness;
+            $instanceSuplier->nature_business_others = $natureBusinessOthers;
+            $instanceSuplier->delivery_vehicle_no = $deliveryVehicleNo;
+            $instanceSuplier->product_lines = $productLines;
+            $instanceSuplier->credit_accomodation = $creditAccomodation;
+            $instanceSuplier->attachment = $attachments;
+            $instanceSuplier->attachment_others = $attachmentOthers;
+            $instanceSuplier->save();
+
+            $msg = "Supplier '$companyName' successfully created.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function deleteSupplier($id) {
+        try {
+            $instanceSuplier = Supplier::find($id);
+            $companyName = $instanceSuplier->company_name;
+            $instanceSuplier->delete();
 
+            $msg = "Supplier '$companyName' successfully deleted.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function destroySupplier($id) {
+        try {
+            $instanceSuplier = Supplier::find($id);
+            $companyName = $instanceSuplier->company_name;
+            $instanceSuplier->destroy();
 
+            $msg = "Supplier '$companyName' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     /**

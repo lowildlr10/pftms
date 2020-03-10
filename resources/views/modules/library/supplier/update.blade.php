@@ -1,8 +1,8 @@
-<form id="form-update" method="POST" action="{{ route('supplier-update') }}">
+<form id="form-update" method="POST" action="{{ route('supplier-update', ['id' => $id]) }}">
     @csrf
 
     <div class="md-form">
-        <select class="mdb-select md-form" searchable="Search here.."
+        <select class="mdb-select md-form reuired" searchable="Search here.."
                 name="classification">
             <option value="" disabled selected>Choose supplier classification *</option>
 
@@ -17,8 +17,8 @@
     </div>
 
     <div class="md-form">
-        <select class="mdb-select md-form" searchable="Search here.."
-                name="classification">
+        <select class="mdb-select md-form reuired" searchable="Search here.."
+                name="is_active">
             <option value="" disabled selected>Choose active status *</option>
             <option value="y" {{ ($isActive == 'y') ? 'selected' : '' }}>Yes</option>
             <option value="n" {{ ($isActive == 'n') ? 'selected' : '' }}>No</option>
@@ -33,8 +33,8 @@
 
             <div class="md-form">
                 <input type="text" id="bank-name" class="form-control required"
-                       name="bank_name" value="{{ $nameBank }}">
-                <label for="bank-name" class="{{ !empty($nameBank) ? 'active' : '' }}">
+                       name="bank_name" value="{{ $bankName }}">
+                <label for="bank-name" class="{{ !empty($bankName) ? 'active' : '' }}">
                     Name of bank <span class="red-text">*</span>
                 </label>
             </div>
@@ -71,9 +71,9 @@
                 </label>
             </div>
             <div class="md-form">
-                <input type="text" id="date-filed" class="form-control required"
+                <input type="date" id="date-filed" class="form-control required"
                        name="date_filed" value="{{ $dateFiled }}">
-                <label for="date-filed">
+                <label for="date-filed" class="mt-3 {{ !empty($dateFiled) ? 'active' : '' }}"">
                     Date <span class="red-text">*</span>
                 </label>
             </div>
@@ -158,7 +158,8 @@
                     </option>
                 </select>
             </div>
-            <div id="field-nature-business-others" class="md-form" style="display: none;">
+            <div id="field-nature-business-others" class="md-form"
+                 style="display:{{ empty($natureBusinessOthers) ? 'none' : 'block' }};">
                 <input type="text" id="nature-business-others" class="form-control"
                        name="nature_business_others"  value="{{ $natureBusinessOthers }}">
                 <label for="nature-business-others" class="{{ !empty($natureBusinessOthers) ? 'active' : '' }}">
@@ -264,7 +265,8 @@
                     </label>
                 </div>
 
-                <div id="field-attachment-others" class="md-form" style="display: none;">
+                <div id="field-attachment-others" class="md-form"
+                     style="display:{{ empty($attachmentOthers) ? 'none' : 'block' }};">
                     <input type="text" id="attachment-others" class="form-control"
                            name="attachment_others" value="{{ $attachmentOthers }}">
                     <label for="attachment-others" class="{{ !empty($attachmentOthers) ? 'active' : '' }}">

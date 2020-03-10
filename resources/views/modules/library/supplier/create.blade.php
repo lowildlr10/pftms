@@ -2,7 +2,7 @@
     @csrf
 
     <div class="md-form">
-        <select class="mdb-select md-form" searchable="Search here.."
+        <select class="mdb-select md-form reuired" searchable="Search here.."
                 name="classification">
             <option value="" disabled selected>Choose supplier classification *</option>
 
@@ -17,8 +17,8 @@
     </div>
 
     <div class="md-form">
-        <select class="mdb-select md-form" searchable="Search here.."
-                name="classification">
+        <select class="mdb-select md-form reuired" searchable="Search here.."
+                name="is_active">
             <option value="" disabled selected>Choose active status *</option>
             <option value="y">Yes</option>
             <option value="n">No</option>
@@ -71,9 +71,9 @@
                 </label>
             </div>
             <div class="md-form">
-                <input type="text" id="date-filed" class="form-control required"
+                <input type="date" id="date-filed" class="form-control required"
                        name="date_filed">
-                <label for="date-filed">
+                <label for="date-filed" class="mt-3">
                     Date <span class="red-text">*</span>
                 </label>
             </div>
@@ -173,11 +173,11 @@
                 <select class="mdb-select md-form required" searchable="Search here.."
                         name="credit_accomodation">
                     <option value="" disabled selected>Choose nature of business *</option>
-                    <option value="90-days_above">90 Days and Above</option>
-                    <option value="60-days">60 Days</option>
-                    <option value="30-days">30 Days</option>
-                    <option value="15-days">15 Days</option>
-                    <option value="below-15-days">Below 15 Days</option>
+                    <option value="90_days_above">90 Days and Above</option>
+                    <option value="60_days">60 Days</option>
+                    <option value="30_days">30 Days</option>
+                    <option value="15_days">15 Days</option>
+                    <option value="below_15_days">Below 15 Days</option>
                 </select>
             </div>
         </div>

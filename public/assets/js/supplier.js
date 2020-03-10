@@ -12,11 +12,13 @@ $(function() {
             if (natureBusiness == 'others') {
                 $('#field-nature-business-others').slideToggle(300);
                 $('#nature-business-others').removeClass('input-error-highlighter')
-                                            .addClass('required');
+                                            .addClass('required')
+                                            .val('');
             } else {
                 $('#field-nature-business-others').slideUp(300);
                 $('#nature-business-others').removeClass('input-error-highlighter')
-                                            .removeClass('required');
+                                            .removeClass('required')
+                                            .val('');
             }
         });
 
@@ -24,11 +26,13 @@ $(function() {
             if ($(this).is(':checked')) {
                 $('#field-attachment-others').slideToggle(300);
                 $('#attachment-others').removeClass('input-error-highlighter')
-                                       .addClass('required');
+                                       .addClass('required')
+                                       .val('');
             } else {
                 $('#field-attachment-others').slideToggle(300);
                 $('#attachment-others').removeClass('input-error-highlighter')
-                                       .removeClass('required');
+                                       .removeClass('required')
+                                       .val('');
             }
         });
 
