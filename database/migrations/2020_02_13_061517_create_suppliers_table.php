@@ -22,7 +22,7 @@ class CreateSuppliersTable extends Migration
             $table->string('company_name');
             $table->date('date_filed')->nullable();
             $table->text('address')->nullable();
-            $table->string('name_bank')->nullable();
+            $table->string('bank_name')->nullable();
             $table->string('account_name')->nullable();
             $table->string('account_no')->nullable();
             $table->string('email', 191)->nullable();
@@ -42,8 +42,8 @@ class CreateSuppliersTable extends Migration
                                                  '30_days', '15_days', 'below_15_days']);
             $table->string('attachment', 20)->nullable();
             $table->string('attachment_others')->nullable();
-            $table->enum('is_active', ['y', 'n']);
-            $table->dateTime('blacklisted_at');
+            $table->enum('is_active', ['y', 'n'])->default('n');
+            $table->dateTime('blacklisted_at')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
