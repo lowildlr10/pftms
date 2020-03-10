@@ -7,12 +7,13 @@ $(function() {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-create').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
+            $(this).slideToggle(500);
         });
         $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
             $('#create-title').html('Create Classification');
 		}).on('hidden.bs.modal', function() {
-		     $('#modal-create-body').html(modalLoadingContent);
+            $('#modal-body-create').html('').css('display', 'none');
 		});
     }
 
@@ -28,12 +29,13 @@ $(function() {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
+            $(this).slideToggle(500);
         });
         $("#modal-sm-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {
             $('#edit-title').html('Update Classification');
 		}).on('hidden.bs.modal', function() {
-		     $('#modal-edit-body').html(modalLoadingContent);
+		    $('#modal-body-edit').html('').css('display', 'none');
 		});
     }
 

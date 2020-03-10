@@ -22,7 +22,7 @@
                     </strong>
                 </h5>
                 <hr class="white">
-                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1">
+                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text">
                     <li>
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
@@ -93,10 +93,10 @@
                                         @foreach ($list as $listCtr => $paper)
                                     <tr>
                                         <td></td>
-                                        <td class="border-left">{{ $paper->paper_type }}</td>
-                                        <td class="border-left">{{ $paper->unit }}</td>
-                                        <td class="border-left">{{ $paper->width }}</td>
-                                        <td class="border-left">{{ $paper->height }}</td>
+                                        <td>{{ $paper->paper_type }}</td>
+                                        <td>{{ $paper->unit }}</td>
+                                        <td>{{ $paper->width }}</td>
+                                        <td>{{ $paper->height }}</td>
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-orange p-2 waves-effect material-tooltip-main mr-0"
                                                onclick="$(this).showEdit('{{ route('paper-size-show-edit',

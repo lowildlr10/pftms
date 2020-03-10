@@ -8,12 +8,13 @@ $(function() {
         $('#modal-body-create').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $('.mdb-select').materialSelect();
+            $(this).slideToggle(500);
         });
         $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
             $('#create-title').html('Create Paper Size');
 		}).on('hidden.bs.modal', function() {
-		     $('#modal-create-body').html(modalLoadingContent);
+            $('#modal-body-create').html('').css('display', 'none');
 		});
     }
 
@@ -30,12 +31,13 @@ $(function() {
         $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $('.mdb-select').materialSelect();
+            $(this).slideToggle(500);
         });
         $("#modal-sm-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {
             $('#edit-title').html('Update Paper Size');
 		}).on('hidden.bs.modal', function() {
-		     $('#modal-edit-body').html(modalLoadingContent);
+		    $('#modal-body-edit').html('').css('display', 'none');
 		});
     }
 

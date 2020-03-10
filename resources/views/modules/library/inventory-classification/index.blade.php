@@ -22,7 +22,7 @@
                     </strong>
                 </h5>
                 <hr class="white">
-                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1">
+                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text">
                     <li>
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>

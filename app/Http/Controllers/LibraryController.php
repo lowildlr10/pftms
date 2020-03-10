@@ -378,7 +378,7 @@ class LibraryController extends Controller
         $module = trim($module);
         $module = preg_replace('/\s/', '', $module );
         $sigName =  User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
-                        ->where('emp_id', $empID)
+                        ->where('id', $empID)
                         ->first();
 
         try {
@@ -407,7 +407,7 @@ class LibraryController extends Controller
         $module = trim($module);
         $module = preg_replace('/\s/', '', $module );
         $sigName =  User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
-                        ->where('emp_id', $empID)
+                        ->where('id', $empID)
                         ->first();
 
         try {
@@ -429,7 +429,7 @@ class LibraryController extends Controller
             $instanceSignatory = Signatory::find($id);
             $empID = $instanceSignatory->emp_id;
             $sigName =  User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
-                            ->where('emp_id', $empID)
+                            ->where('id', $empID)
                             ->first();
             $instanceSignatory->delete();
 
@@ -446,7 +446,7 @@ class LibraryController extends Controller
             $instanceSignatory = Signatory::find($id);
             $empID = $instanceSignatory->emp_id;
             $sigName =  User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
-                            ->where('emp_id', $empID)
+                            ->where('id', $empID)
                             ->first();
             $instanceSignatory->destroy();
 
@@ -553,44 +553,121 @@ class LibraryController extends Controller
      *  Supplier Module
     **/
     public function indexSupplier(Request $request) {
-        $pageLimit = 25;
-        $search = trim($request->search);
-        $filter = $request['filter'];
-        $supplierData = DB::table('tblsuppliers as bid')
-                          ->select('bid.*', 'class.classification')
-                          ->join('tblsupplier_classifications as class', 'class.id', '=', 'bid.class_id');
-        $classifications = SupplierClassification::orderBy('classification')->get();
+        $supplierData = Supplier::addSelect([
+            'classification' => InventoryClassification::select('classification_name')
+                                                       ->whereColumn('id', 'suppliers.classification')
+                                                       ->limit(1)
+        ])->orderBy('company_name')->get();
 
-        if (!empty($search)) {
-            $supplierData = $supplierData->where(function ($query)  use ($search) {
-                                   $query->where('bid.company_name', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('bid.address', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('bid.contact_person', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('bid.mobile_no', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('class.classification', 'LIKE', '%' . $search . '%');
-                               });
-        }
-
-        if (!empty($filter) && $filter != 0) {
-            $supplierData = $supplierData->where('bid.class_id', '=', $filter);
-        }
-
-        $supplierData = $supplierData->orderBy('bid.company_name')
-                                     ->paginate($pageLimit);
-
-        return view('modules.library.supplier.index', ['search' => $search,
-                                        'pageLimit' => $pageLimit,
-                                        'list' => $supplierData,
-                                        'classifications' => $classifications,
-                                        'filter' => $filter]);
+        return view('modules.library.supplier.index', [
+            'list' => $supplierData
+        ]);
     }
 
     public function showCreateSupplier() {
+        $supClassData = SupplierClassification::orderBy('classification_name')
+                                              ->get();
 
+        return view('modules.library.supplier.create', [
+            'classifications' => $supClassData
+        ]);
     }
 
     public function showEditSupplier($id) {
+        $supClassData = SupplierClassification::orderBy('classification_name')
+                                              ->get();
+        $supplierData = Supplier::find($id);
+        $classification = $supplierData->classification;
+        $isActive = $supplierData->is_active;
+        $nameBank = $supplierData->name_bank;
+        $companyName = $supplierData->company_name;
+        $dateFiled = $supplierData->date_filed;
+        $address = $supplierData->address;
+        $email = $supplierData->email;
+        $websiteURL = $supplierData->website_url;
+        $faxNo = $supplierData->fax_no;
+        $telephoneNo = $supplierData->telephone_no;
+        $mobileNo = $supplierData->mobile_no;
+        $dateEstablished = $supplierData->date_established;
+        $vatNo = $supplierData->vat_no;
+        $contactPerson = $supplierData->contact_person;
+        $natureBusiness = $supplierData->nature_business;
+        $natureBusinessOthers = $supplierData->nature_business_others;
+        $deliveryVehicleNo = $supplierData->delivery_vehicle_no;
+        $productLines = $supplierData->product_lines;
+        $creditAccomodation = $supplierData->credit_accomodation;
+        $attachments = $supplierData->attachment;
+        $attachmentOthers = $supplierData->attachment_others;
 
+        $_attachments = explode('-', $attachments);
+        $attachment1 = 0;
+        $attachment2 = 0;
+        $attachment3 = 0;
+        $attachment4 = 0;
+        $attachment5 = 0;
+        $attachment6 = 0;
+        $attachment7 = 0;
+
+        foreach ($_attachments as $attachment) {
+            switch ($attachment) {
+                case '1':
+                    $attachment1 = 1;
+                    break;
+                case '2':
+                    $attachment2 = 1;
+                    break;
+                case '3':
+                    $attachment3 = 1;
+                    break;
+                case '4':
+                    $attachment4 = 1;
+                    break;
+                case '5':
+                    $attachment5 = 1;
+                    break;
+                case '6':
+                    $attachment6 = 1;
+                    break;
+                case '7':
+                    $attachment7 = 1;
+                    break;
+                default:
+                    # code...
+                    break;
+            }
+        }
+
+        return view('modules.library.supplier.updae', [
+            'classifications' => $supClassData,
+            'classification' => $classification,
+            'isActive' => $isActive,
+            'nameBank' => $nameBank,
+            'companyName' => $companyName,
+            'dateFiled' => $dateFiled,
+            'address' => $address,
+            'email' => $email,
+            'websiteURL' => $websiteURL,
+            'faxNo' => $faxNo,
+            'telephoneNo' => $telephoneNo,
+            'mobileNo' => $mobileNo,
+            'dateEstablished' => $dateEstablished,
+            'vatNo' => $vatNo,
+            'contactPerson' => $contactPerson,
+            'natureBusiness' => $natureBusiness,
+            'natureBusinessOthers' => $natureBusinessOthers,
+            'deliveryVehicleNo' => $deliveryVehicleNo,
+            'productLines' => $productLines,
+            'creditAccomodation' => $creditAccomodationn,
+            'attachments' => $attachments,
+            'attachmentOthers' => $attachmentOthers,
+            'attachment1' => $attachment1,
+            'attachment2' => $attachment2,
+            'attachment3' => $attachment3,
+            'attachment4' => $attachment4,
+            'attachment5' => $attachment5,
+            'attachment6' => $attachment6,
+            'attachment7' => $attachment7,
+        ]);
     }
 
     public function storeSupplier(Request $request) {
@@ -1007,39 +1084,37 @@ class LibraryController extends Controller
                 break;
             case 'ProcurementMode':
                 $dataCount = ProcurementMode::where('mode_name', $data)
-                                        ->orWhere('mode_name', strtolower($data))
-                                        ->orWhere('mode_name', strtoupper($data))
-                                        ->count();
+                                            ->orWhere('mode_name', strtolower($data))
+                                            ->orWhere('mode_name', strtoupper($data))
+                                            ->count();
                 break;
             case 'FundingSource':
                 $dataCount = FundingSource::where('source_name', $data)
-                                        ->orWhere('source_name', strtolower($data))
-                                        ->orWhere('source_name', strtoupper($data))
-                                        ->count();
+                                          ->orWhere('source_name', strtolower($data))
+                                          ->orWhere('source_name', strtoupper($data))
+                                          ->count();
                 break;
             case 'Signatory':
-                $dataCount = Signatory::where('division_name', $data)
-                                        ->orWhere('division_name', strtolower($data))
-                                        ->orWhere('division_name', strtoupper($data))
-                                        ->count();
+                $dataCount = Signatory::where('emp_id', $data)
+                                      ->count();
                 break;
             case 'SupplierClassification':
                 $dataCount = SupplierClassification::where('classification_name', $data)
-                                        ->orWhere('classification_name', strtolower($data))
-                                        ->orWhere('classification_name', strtoupper($data))
-                                        ->count();
+                                                   ->orWhere('classification_name', strtolower($data))
+                                                   ->orWhere('classification_name', strtoupper($data))
+                                                   ->count();
                 break;
             case 'Supplier':
-                $dataCount = Supplier::where('division_name', $data)
-                                     ->orWhere('division_name', strtolower($data))
-                                     ->orWhere('division_name', strtoupper($data))
+                $dataCount = Supplier::where('company_name', $data)
+                                     ->orWhere('company_name', strtolower($data))
+                                     ->orWhere('company_name', strtoupper($data))
                                      ->count();
                 break;
             case 'ItemUnitIssue':
                 $dataCount = ItemUnitIssue::where('unit_name', $data)
-                                        ->orWhere('unit_name', strtolower($data))
-                                        ->orWhere('unit_name', strtoupper($data))
-                                        ->count();
+                                          ->orWhere('unit_name', strtolower($data))
+                                          ->orWhere('unit_name', strtoupper($data))
+                                          ->count();
                 break;
             default:
                 $dataCount = 0;

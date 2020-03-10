@@ -158,7 +158,7 @@ $(function() {
 						     .on('shown.bs.modal', function() {
             $('#create-title').html('Create Role');
 		}).on('hidden.bs.modal', function() {
-		     $('#modal-body-create').html('').css('display', 'none');
+		    $('#modal-body-create').html('').css('display', 'none');
 		});
     }
 
@@ -183,7 +183,7 @@ $(function() {
 						   .on('shown.bs.modal', function() {
             $('#edit-title').html('Update Role');
 		}).on('hidden.bs.modal', function() {
-             $('#modal-body-edit').html('').css('display', 'none');
+            $('#modal-body-edit').html('').css('display', 'none');
 		});
     }
 

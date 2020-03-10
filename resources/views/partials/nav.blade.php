@@ -316,7 +316,9 @@
                             </li>
                         </ul>
                     </div>
+                </li>
 
+                <li class="sidebar-dropdown">
                     <a href="#">
                         <i class="fas fa-users-cog"></i>
                         <span class="menu-text">Account Management</span>
@@ -340,7 +342,9 @@
                             </li>
                         </ul>
                     </div>
+                </li>
 
+                <li class="sidebar-dropdown">
                     <a href="#">
                         <i class="fas fa-globe-asia"></i>
                         <span class="menu-text">Places</span>

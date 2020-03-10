@@ -1261,7 +1261,6 @@ Route::group(['middlewareGroups' => ['web']], function () {
     ])->name('province-update');
     Route::post('places/province/delete/{id}', [
         'uses' => 'PlaceController@deleteProvince',
-        'uses' => 'PlaceController@destroyProvince',
         'middleware' => 'moduleaccess',
         'module' => 'place_province',
         'access' => 'delete'

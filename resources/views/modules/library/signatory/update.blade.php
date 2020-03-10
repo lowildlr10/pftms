@@ -4,7 +4,7 @@
     <div class="md-form">
         <select class="mdb-select md-form required" searchable="Search here.."
                 name="emp_id">
-            <option value="" disabled selected>Choose employee</option>
+            <option value="" disabled selected>Choose employee *</option>
 
             @if (count($employees) > 0)
                 @foreach ($employees as $emp)
@@ -19,9 +19,9 @@
     <div class="md-form">
         <select class="mdb-select md-form required" searchable="Search here.."
                 name="is_active">
-            <option value="" disabled selected>Choose active status</option>
-            <option value="y" {{ $emp->id == $isActive ? 'selected' : '' }}>Yes</option>
-            <option value="n" {{ $emp->id == $isActive ? 'selected' : '' }}>No</option>
+            <option value="" disabled selected>Choose active status *</option>
+            <option value="y" {{ $isActive == 'y' ? 'selected' : '' }}>Yes</option>
+            <option value="n" {{ $isActive == 'n' ? 'selected' : '' }}>No</option>
         </select>
     </div>
 
@@ -54,8 +54,11 @@
                 <input type="text" id="{{ $parentID }}_designation"
                        class="form-control {{ isset($moduleAccess->{$parentID}->is_allowed) &&
                               ($moduleAccess->{$parentID}->is_allowed) ? 'required':'' }}"
-                       name="{{ $parentID }}_designation">
-                <label for="{{ $parentID }}_designation">
+                       name="{{ $parentID }}_designation"
+                       value="{{ $moduleAccess->{$parentID}->designation }}">
+                <label for="{{ $parentID }}_designation"
+                       class="{{ !empty($moduleAccess->{$parentID}->designation) ?
+                                  'active' : '' }}">
                     Insert designation <span class="red-text">*</span>
                 </label>
             </div>
