@@ -3,45 +3,18 @@ $(function() {
                      '<div class="tooltip-arrow md-arrow"></div>' +
                      '<div class="tooltip-inner md-inner stylish-color"></div></div>';
     const cBoxIDs = [
-        '#ca_ors_burs',
-        '#ca_dv',
-        '#ca_lr',
-        '#proc_pr',
-        '#proc_rfq',
-        '#proc_abstract',
-        '#proc_po_jo',
-        '#proc_ors_burs',
-        '#proc_iar',
-        '#proc_dv',
-        '#pay_lddap',
-        '#inv_stock',
-        '#track_pr_rfq',
-        '#track_rfq_abs',
-        '#track_abs_po',
-        '#track_po_ors',
-        '#track_po_iar',
-        '#track_iar_stock',
-        '#track_iar_dv',
-        '#track_ors_dv',
-        '#track_dv_lddap',
-        '#track_dis_sum',
-        '#track_sum_bank',
-        '#lib_inv_class',
-        '#lib_item_class',
-        '#lib_proc_mode',
-        '#lib_funding',
-        '#lib_signatory',
-        '#lib_sup_class',
-        '#lib_supplier',
-        '#lib_unit_issue',
-        '#lib_paper_size',
-        '#acc_division',
-        '#acc_role',
-        '#acc_group',
-        '#acc_account',
-        '#acc_user_log',
-        '#place_region',
-        '#place_province'
+        '#pr',
+        '#rfq',
+        '#abs',
+        '#po',
+        '#ors',
+        '#iar',
+        '#dv',
+        '#ris',
+        '#par',
+        '#ics',
+        '#lr',
+        '#lddap',
     ];
 
     function convertAccessToJson() {
@@ -53,11 +26,18 @@ $(function() {
             const parentModule = moduleCbox.val();
             let _jsonData = {};
 
+            const _id = id.replace('#', '');
+
+            const _designationInp = '#' + _id + '_designation';
+            const designationInp = $(_designationInp);
+
             if (parentModule) {
+                _jsonData['designation'] = designationInp.val() ? designationInp.val() : '';
+
                 if (moduleCbox.is(':checked')) {
                     _jsonData['is_allowed'] = 1;
 
-                    menuGroup.find('input').each(function() {
+                    menuGroup.find('input').not(_designationInp).each(function() {
                         const parentAttr = $(this).val();
 
                         if (parentAttr) {
@@ -71,7 +51,7 @@ $(function() {
                 } else {
                     _jsonData['is_allowed'] = 0;
 
-                    menuGroup.find('input').each(function() {
+                    menuGroup.find('input').not(_designationInp).each(function() {
                         const parentAttr = $(this).val();
 
                         if (parentAttr) {
@@ -89,11 +69,14 @@ $(function() {
         return jsonData;
     }
 
-    function toggleRoleInputs() {
+    function toggleSignatoryInputs() {
 		$.each(cBoxIDs, function(i, id) {
             const moduleCbox = $(id);
             const menuGroup = $(id + '-menu');
             const _id = id.replace('#', '');
+
+            const _designationInp = '#' + _id + '_designation';
+            const designationInp = $(_designationInp);
 
             const _selectAllCheck = '#sel-' + _id;
             const selectAllCheck = $(_selectAllCheck);
@@ -104,18 +87,24 @@ $(function() {
 			moduleCbox.unbind('change').change(function() {
 				if (moduleCbox.is(':checked')) {
                     menuGroup.slideToggle(300)
-                             .find('input').each(function() {
+                             .find('input')
+                             .not(_designationInp).each(function() {
                         $(this).prop("checked", false)
                                .prop('indeterminate', false);
                     });
                     allowedCheck.prop("checked", true);
+                    designationInp.addClass('required')
+                                  .removeClass('input-error-highlighter');
 				} else {
                     menuGroup.slideToggle(300)
-                             .find('input').each(function() {
+                             .find('input')
+                             .not(_designationInp).each(function() {
                         $(this).prop("checked", false)
                                .prop('indeterminate', false);
                     });
                     allowedCheck.prop("checked", false);
+                    designationInp.removeClass('required')
+                                  .removeClass('input-error-highlighter');
                 }
             });
 
@@ -151,12 +140,13 @@ $(function() {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-create').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
+            $('.mdb-select').materialSelect();
             $(this).slideToggle(500);
-            toggleRoleInputs();
+            toggleSignatoryInputs();
         });
         $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
-            $('#create-title').html('Create Role');
+            $('#create-title').html('Create Signatories');
 		}).on('hidden.bs.modal', function() {
 		     $('#modal-body-create').html('').css('display', 'none');
 		});
@@ -176,12 +166,13 @@ $(function() {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
+            $('.mdb-select').materialSelect();
             $(this).slideToggle(500);
-            toggleRoleInputs();
+            toggleSignatoryInputs();
         });
         $("#modal-sm-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {
-            $('#edit-title').html('Update Role');
+            $('#edit-title').html('Update Signatories');
 		}).on('hidden.bs.modal', function() {
              $('#modal-body-edit').html('').css('display', 'none');
 		});
@@ -201,7 +192,7 @@ $(function() {
 		$('#modal-body-delete').html(`Are you sure you want to delete '${name}'?`);
         $("#modal-delete").modal({keyboard: false, backdrop: 'static'})
 						  .on('shown.bs.modal', function() {
-            $('#delete-title').html('Delete Role');
+            $('#delete-title').html('Delete Signatories');
             $('#form-delete').attr('action', url);
 		}).on('hidden.bs.modal', function() {
              $('#modal-delete-body').html('');

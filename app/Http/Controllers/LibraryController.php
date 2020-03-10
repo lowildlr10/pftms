@@ -30,42 +30,42 @@ use App\Plugin\DuplicateChecker;
 class LibraryController extends Controller
 {
     protected $moduleLabels = [
-        'pr' => '',
+        'pr' => 'Purchase Request',
             'pr_approval' => 'Approval',
             'pr_within_app' => 'Within APP',
             'pr_funds_available' => 'Funds Available',
             'pr_recommended_by' => 'Recommended By',
-        'rfq' => '',
+        'rfq' => 'Request for Quotations',
             'rfq_truly_yours' => 'Truly Yours',
-        'abs' => '',
+        'abs' => 'Abstract of Quotation',
             'abs_chairperson' => 'Chairperson',
             'abs_vice_chair' => 'Vice Chairperson',
             'abs_member' => 'Member',
-        'po' => '',
+        'po' => 'Purchase/Job Order',
             'po_funds_available' => 'Chief Accountant/Head of Accounting Division/Funds Available',
             'po_requisitioning' => 'Requisitioning Office/Dept.',
             'po_approved' => 'Very Truly Yours/Approved',
-        'ors' => '',
+        'ors' => 'Obligation/Budget Utilization & Report Status',
             'ors_approval' => 'Approval',
             'ors_funds_available' => 'Funds Available',
-        'iar' => '',
+        'iar' => 'Inspection & Acceptance Report',
             'iar_inspection' => 'Inspection Office/Inspection Committee',
             'iar_prop_supply' => 'Supply and/or Property Custodian',
-        'dv' => '',
+        'dv' => 'Disbursement Voucher',
             'dv_supervisor' => 'Printed Name, Designation and Signature of Supervisor',
             'dv_accounting' => 'Head, Accounting Unit/Authorized Representative',
             'dv_agency_head' => 'Agency Head/Authorized Representative',
-        'ris' => '',
+        'ris' => 'Requisition & Issue Slip',
             'ris_approved_by' => 'Approved By',
             'ris_issued_by' => 'Issued By',
-        'par' => '',
+        'par' => 'Property Aknowledgement Receipt',
             'par_issued_by' => 'Issued By',
-        'ics' => '',
+        'ics' => 'Inventory Custodian Slip',
             'ics_received_from' => 'Received From',
-        'lr' => '',
+        'lr' => 'Liquidation Report',
             'lr_immediate_sup' => 'Immediate Supervisor',
             'lr_accounting' => 'Head, Accounting Division Unit',
-        'lddap' => '',
+        'lddap' => 'List of Due and Demandable Accounts Payable',
             'lddap_cert_correct' => 'Certified Correct',
             'lddap_approval' => 'Approval',
             'lddap_agency_auth' => 'Agency Authorized Signatories',
@@ -326,55 +326,136 @@ class LibraryController extends Controller
      *  Signatory Module
     **/
     public function indexSignatory(Request $request) {
-        $pageLimit = 25;
-        $search = trim($request->search);
-        $signatoryData = Signatory::select('signatories.id', 'signatories.position')->addSelect([
-            'name' =>  User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
-                           ->whereColumn('id', 'signatories.emp_id')
-                           ->limit(1)
-        ]);
-
-        if (!empty($search)) {
-            $signatoryData = $signatoryData->join('emp_accounts as emp', 'emp.id', '=', 'signatories.emp_id')
-                                           ->where(function ($query) use ($search) {
-                                 $query->where('signatories.position', 'LIKE', '%' . $search . '%')
-                                       ->orWhere('emp.firstname', 'LIKE', '%' . $search . '%')
-                                       ->orWhere('emp.middlename', 'LIKE', '%' . $search . '%')
-                                       ->orWhere('emp.lastname', 'LIKE', '%' . $search . '%');
-                             });
-        }
-
-        $signatoryData = $signatoryData->paginate($pageLimit);
+        $signatoryData = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->orderBy('id')->get();
 
         return view('modules.library.signatory.index', [
-            'search' => $search,
-            'pageLimit' => $pageLimit,
             'list' => $signatoryData
         ]);
     }
 
     public function showCreateSignatory() {
+        $usersData = User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
+                                  'id')
+                         ->orderBy('firstname')
+                         ->get();
 
+        return view('modules.library.signatory.create', [
+            'label' => $this->moduleLabels,
+            'modules' => $this->modules,
+            'employees' => $usersData
+        ]);
     }
 
     public function showEditSignatory($id) {
+        $signatoryData = Signatory::find($id);
+        $empID = $signatoryData->emp_id;
+        $isActive = $signatoryData->is_active;
+        $module = json_decode($signatoryData->module);
+        $usersData = User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
+                                  'id')
+                         ->orderBy('firstname')
+                         ->get();
 
+        return view('modules.library.signatory.update', [
+            'id' => $id,
+            'employees' => $usersData,
+            'empID' => $empID,
+            'moduleAccess' => $module,
+            'label' => $this->moduleLabels,
+            'modules' => $this->modules,
+            'isActive' => $isActive
+        ]);
     }
 
     public function storeSignatory(Request $request) {
+        $empID = $request->emp_id;
+        $module = $request->module;
+        $module = str_replace("\n", '', $module);
+        $module = trim($module);
+        $module = preg_replace('/\s/', '', $module );
+        $sigName =  User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                        ->where('emp_id', $empID)
+                        ->first();
 
+        try {
+            if (!$this->checkDuplication('Signatory', $empID)) {
+                $instanceSignatory = new Signatory;
+                $instanceSignatory->emp_id = $empID;
+                $instanceSignatory->module = $module;
+                $instanceSignatory->save();
+
+                $msg = "Signatory '".$sigName->name."' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Signatory '".$sigName->name."' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function updateSignatory(Request $request, $id) {
+        $empID = $request->emp_id;
+        $module = $request->module;
+        $module = str_replace("\n", '', $module);
+        $module = trim($module);
+        $module = preg_replace('/\s/', '', $module );
+        $sigName =  User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                        ->where('emp_id', $empID)
+                        ->first();
 
+        try {
+            $instanceSignatory = Signatory::find($id);
+            $instanceSignatory->emp_id = $empID;
+            $instanceSignatory->module = $module;
+            $instanceSignatory->save();
+
+            $msg = "Signatory '".$sigName->name."' successfully updated.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function deleteSignatory($id) {
+        try {
+            $instanceSignatory = Signatory::find($id);
+            $empID = $instanceSignatory->emp_id;
+            $sigName =  User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                            ->where('emp_id', $empID)
+                            ->first();
+            $instanceSignatory->delete();
 
+            $msg = "Signatory '".$sigName->name."' successfully deleted.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function destroySignatory($id) {
+        try {
+            $instanceSignatory = Signatory::find($id);
+            $empID = $instanceSignatory->emp_id;
+            $sigName =  User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                            ->where('emp_id', $empID)
+                            ->first();
+            $instanceSignatory->destroy();
 
+            $msg = "Signatory '".$sigName->name."' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     /**
