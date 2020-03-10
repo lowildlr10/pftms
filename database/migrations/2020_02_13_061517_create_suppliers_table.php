@@ -38,8 +38,8 @@ class CreateSuppliersTable extends Migration
             $table->string('nature_business_others')->nullable();
             $table->unsignedInteger('delivery_vehicle_no')->default(0);
             $table->string('product_lines')->nullable();
-            $table->enum('credit_accomodation', ['', '90-days_above', '60-days',
-                                                 '30-days', '15-days', 'below-15-days']);
+            $table->enum('credit_accomodation', ['', '90_days_above', '60_days',
+                                                 '30_days', '15_days', 'below_15_days']);
             $table->string('attachment', 20)->nullable();
             $table->string('attachment_others')->nullable();
             $table->enum('is_active', ['y', 'n']);
