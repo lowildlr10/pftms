@@ -1168,6 +1168,20 @@ Route::group(['middlewareGroups' => ['web']], function () {
         'access' => 'destroy'
     ])->name('emp-group-destroy');
 
+    // Employee Logs Module
+    Route::any('account-management/emp-log', [
+        'uses' => 'AccountController@indexLogs',
+        'middleware' => 'moduleaccess',
+        'module' => 'acc_user_log',
+        'access' => 'is_allowed'
+    ])->name('emp-log');
+    Route::post('account-management/emp-log/destroy/{id}', [
+        'uses' => 'AccountController@destroyLogs',
+        'middleware' => 'moduleaccess',
+        'module' => 'acc_user_log',
+        'access' => 'destroy'
+    ])->name('emp-log-destroy');
+
     // Profile
     Route::get('profile', 'AccountController@indexProfile')
          ->name('profile');

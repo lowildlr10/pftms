@@ -9,6 +9,7 @@ use App\User;
 use App\Models\EmpRole;
 use App\Models\EmpGroup;
 use App\Models\EmpDivision;
+use App\Models\EmpLog;
 use App\Models\Province;
 use App\Models\Region;
 
@@ -187,9 +188,6 @@ class AccountController extends Controller
             'account_delete' => 'Delete',
             'account_destroy' => 'Destroy',
         'acc_user_log' => 'Accounts Management - User Logs',
-            'user_log_create' => 'Create',
-            'user_log_update' => 'Update',
-            'user_log_delete' => 'Delete',
             'user_log_destroy' => 'Destroy',
         'place_region' => 'Places - Regions',
             'region_create' => 'Create',
@@ -395,9 +393,6 @@ class AccountController extends Controller
             'account_destroy' => 'destroy',
         ],
         'acc_user_log' => [
-            'user_log_create' => 'create',
-            'user_log_update' => 'update',
-            'user_log_delete' => 'delete',
             'user_log_destroy' => 'destroy',
         ],
         'place_region' => [
@@ -1158,6 +1153,34 @@ class AccountController extends Controller
 
     public function destroyAccount($id) {
 
+    }
+
+    /**
+     *  Employee Log Module
+    **/
+    public function indexLogs(Request $request) {
+        $userLogData = EmpLog::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'emp_logs.emp_id')
+                          ->limit(1)
+        ])->orderBy('created_at', 'desc')->get();
+
+        return view('modules.library.user-log.index', [
+            'list' => $userLogData
+        ]);
+    }
+
+    public function destroyLogs($id) {
+        try {
+            $instanceEmpLog = EmpLog::find($id);
+            $instanceEmpLog->destroy();
+
+            $msg = "Employee log '$id' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function checkDuplication($model, $data) {
