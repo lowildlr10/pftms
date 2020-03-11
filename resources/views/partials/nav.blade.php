@@ -338,7 +338,7 @@
                                 <a href="{{ route('emp-account') }}" class="waves-effect">Accounts</a>
                             </li>
                             <li>
-                                <a href="{{ route('emp-account') }}" class="waves-effect">User Logs</a>
+                                <a href="{{ route('emp-log') }}" class="waves-effect">User Logs</a>
                             </li>
                         </ul>
                     </div>

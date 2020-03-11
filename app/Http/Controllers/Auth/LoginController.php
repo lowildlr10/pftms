@@ -56,7 +56,13 @@ class LoginController extends Controller
         //return $request->only($this->username(), 'password');
         return ['username' => $request->{$this->username()},
                 'password' => $request->password,
-                'active' => 'y'];
+                'is_active' => 'y'];
+    }
+    protected function credentials(Request $request)
+    {
+        return ['username' => $request->{$this->username()},
+                'password' => $request->password,
+                'is_active' => 'y'];
     }
 
     /**
@@ -68,6 +74,7 @@ class LoginController extends Controller
      */
     protected function authenticated(Request $request, $user)
     {
+
         $user->last_login = Carbon::now();
         $user->save();
     }
