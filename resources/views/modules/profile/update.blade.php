@@ -118,7 +118,8 @@
                                         <div class="col-md-4">
                                             <div class="md-form">
                                                 <input type="text" name="middlename" class="form-control"
-                                                       value="{{ $middlename }}" id="middlename">
+                                                       value="{{ $middlename }}" class="{{ !empty($middlename) ? 'active' : '' }}"
+                                                       id="middlename">
                                                 <label for="middlename">
                                                     Middle Name
                                                 </label>
