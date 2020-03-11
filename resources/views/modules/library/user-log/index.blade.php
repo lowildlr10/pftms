@@ -109,7 +109,7 @@
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-red p-2 waves-effect material-tooltip-main mr-0"
                                                onclick="$(this).showDestroy('{{ route('emp-log-destroy', ['id' => $log->id]) }}',
-                                                                           '{{ $log->name }}');"
+                                                                            '{{ $log->name }}');"
                                                data-toggle="tooltip" data-placement="left" title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </a>
@@ -135,8 +135,6 @@
 
 <!-- Modals -->
 @include('modals.search')
-@include('modals.sm-create')
-@include('modals.sm-edit')
 @include('modals.delete')
 
 @endsection
@@ -151,6 +149,7 @@
 
 <script src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script src="{{ asset('assets/js/emp-log.js') }}"></script>
+<script src="{{ asset('assets/js/custom-datatables.js') }}"></script>
 
 @if (!empty(session("success")))
     @include('modals.alert')

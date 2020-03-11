@@ -142,6 +142,7 @@
 
 <script src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script src="{{ asset('assets/js/funding-source.js') }}"></script>
+<script src="{{ asset('assets/js/custom-datatables.js') }}"></script>
 
 @if (!empty(session("success")))
     @include('modals.alert')

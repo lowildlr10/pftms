@@ -15,7 +15,7 @@ $(function() {
 		});
     }
 
-    $.fn.destroy = function() {
+    $.fn.delete = function() {
         $('#form-delete').submit();
     }
 
