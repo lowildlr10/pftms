@@ -17,7 +17,7 @@ class CreateEmpLogsTable extends Migration
             $table->engine = 'InnoDB';
 
             $table->uuid('id')->primary();
-            $table->string('emp_id', 11);
+            $table->uuid('emp_id');
             $table->foreign('emp_id')->references('id')->on('emp_accounts');
             $table->text('message');
             $table->string('action_url')->nullable();

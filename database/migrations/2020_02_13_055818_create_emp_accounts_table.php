@@ -22,7 +22,7 @@ class CreateEmpAccountsTable extends Migration
             $table->uuid('province');
             $table->uuid('region');
             $table->uuid('group')->nullable();
-            $table->uuid('role');
+            $table->uuid('role')->nullable();
             $table->foreign('division')->references('id')->on('emp_divisions');
             $table->foreign('province')->references('id')->on('provinces');
             $table->foreign('region')->references('id')->on('regions');
