@@ -9,12 +9,13 @@ use App\User;
 use App\Models\EmpRole;
 use App\Models\EmpGroup;
 use App\Models\EmpDivision;
+use App\Models\EmpLog;
 use App\Models\Province;
 use App\Models\Region;
 
 use Auth;
-use \Image;
 use DB;
+use Intervention\Image\ImageManagerStatic as Image;
 
 class AccountController extends Controller
 {
@@ -187,9 +188,6 @@ class AccountController extends Controller
             'account_delete' => 'Delete',
             'account_destroy' => 'Destroy',
         'acc_user_log' => 'Accounts Management - User Logs',
-            'user_log_create' => 'Create',
-            'user_log_update' => 'Update',
-            'user_log_delete' => 'Delete',
             'user_log_destroy' => 'Destroy',
         'place_region' => 'Places - Regions',
             'region_create' => 'Create',
@@ -395,9 +393,6 @@ class AccountController extends Controller
             'account_destroy' => 'destroy',
         ],
         'acc_user_log' => [
-            'user_log_create' => 'create',
-            'user_log_update' => 'update',
-            'user_log_delete' => 'delete',
             'user_log_destroy' => 'destroy',
         ],
         'place_region' => [
@@ -419,10 +414,11 @@ class AccountController extends Controller
      *
      * @return void
      */
+    /*
     public function __construct()
     {
         $this->middleware('auth');
-    }
+    }*/
 
     /**
      * Display a listing of the resource.
@@ -431,390 +427,248 @@ class AccountController extends Controller
      */
     public function indexProfile() {
         $id = Auth::user()->id;
-        $employee = User::find($id);
-        $divisions = Division::orderBy('division_name')->get();
-        $provinces = Province::orderBy('province_name')->get();
-        $regions = Region::orderBy('region_name')->get();
+        $userData = User::addSelect([
+            'division' => EmpDivision::select('division_name')
+                                     ->whereColumn('id', 'emp_accounts.division')
+                                     ->limit(1),
+            'province' => Province::select('province_name')
+                                  ->whereColumn('id', 'emp_accounts.province')
+                                  ->limit(1),
+            'region' => Region::select('region_name')
+                              ->whereColumn('id', 'emp_accounts.region')
+                              ->limit(1),
+            'group' => EmpGroup::select('group_name')
+                              ->whereColumn('id', 'emp_accounts.group')
+                              ->limit(1),
+            'role' => EmpRole::select('role')
+                             ->whereColumn('id', 'emp_accounts.role')
+                             ->limit(1)
+        ])->where('id', $id)->first();
 
-        if (Auth::user()->role != 1 && Auth::user()->role != 3 && Auth::user()->role != 4) {
-            $roles = Role::where('id', Auth::user()->role)->get();
-        } else {
-            $roles = Role::all();
-        }
+        $employeeID = $userData->emp_id;
+        $division = $userData->division;
+        $province = $userData->province;
+        $region = $userData->region;
+        $group = $userData->group;
+        $role = $userData->role;
+        $firstname = $userData->firstname;
+        $middlename = $userData->middlename;
+        $lastname = $userData->lastname;
+        $gender = $userData->gender;
+        $position = $userData->position;
+        $employType = $userData->emp_type;
+        $username = $userData->username;
+        $email = $userData->email;
+        $address = $userData->address;
+        $mobileNo = $userData->mobile_no;
+        $avatar = $userData->avatar;
+        $signature = $userData->signature;
+        $lastLogin = $userData->last_login;
 
-        return view('pages.profile', ['employee' => $employee,
-                                      'divisions' => $divisions,
-                                      'provinces' => $provinces,
-                                      'regions' => $regions,
-                                      'roles' => $roles]);
+        return view('modules.profile.index', [
+            'employeeID' => $employeeID,
+            'division' => $division,
+            'province' => $province,
+            'region' => $region,
+            'role' => $role,
+            'firstname' => $firstname,
+            'middlename' => $middlename,
+            'lastname' => $lastname,
+            'gender' => $gender,
+            'position' => $position,
+            'employType' => $employType,
+            'username' => $username,
+            'email' => $email,
+            'address' => $address,
+            'mobileNo' => $mobileNo,
+            'avatar' => $avatar,
+            'signature' => $signature,
+            'lastLogin' => $lastLogin,
+        ]);
     }
 
     public function showCreateProfile() {
+        $divisions = EmpDivision::orderBy('division_name')->get();
+        $provinces = Province::orderBy('province_name')->get();
+        $regions = Region::orderBy('region_name')->get();
 
-    }
-
-    public function storeProfile(Request $request) {
-
+        return view('modules.profile.create', [
+            'divisions' => $divisions,
+            'provinces' => $provinces,
+            'regions' => $regions,
+        ]);
     }
 
     public function showEditProfile() {
         $id = Auth::user()->id;
+        $divisions = EmpDivision::orderBy('division_name')->get();
+        $provinces = Province::orderBy('province_name')->get();
+        $regions = Region::orderBy('region_name')->get();
+
+        $userData = User::find($id);
+        $employeeID = $userData->emp_id;
+        $division = $userData->division;
+        $province = $userData->province;
+        $region = $userData->region;
+        $firstname = $userData->firstname;
+        $middlename = $userData->middlename;
+        $lastname = $userData->lastname;
+        $gender = $userData->gender;
+        $position = $userData->position;
+        $employType = $userData->emp_type;
+        $username = $userData->username;
+        $email = $userData->email;
+        $address = $userData->address;
+        $mobileNo = $userData->mobile_no;
+        $avatar = $userData->avatar;
+        $signature = $userData->signature;
+
+        return view('modules.profile.update', [
+            'id' => $id,
+            'divisions' => $divisions,
+            'provinces' => $provinces,
+            'regions' => $regions,
+            'employeeID' => $employeeID,
+            'division' => $division,
+            'province' => $province,
+            'region' => $region,
+            'firstname' => $firstname,
+            'middlename' => $middlename,
+            'lastname' => $lastname,
+            'gender' => $gender,
+            'position' => $position,
+            'employType' => $employType,
+            'username' => $username,
+            'email' => $email,
+            'address' => $address,
+            'mobileNo' => $mobileNo,
+            'avatar' => $avatar,
+            'signature' => $signature,
+        ]);
     }
 
-    public function updateProfile(Request $request) {
-        $id = Auth::user()->id;
-    }
-
-    public function destroyProfile(Request $request) {
-        $id = Auth::user()->id;
+    public function storeProfile(Request $request) {
+        $empID = $request->emp_id;
+        $firstname = $request->firstname;
+        $middlename = $request->middlename;
+        $lastname = $request->lastname;
+        $address = $request->address;
+        $province = $request->province;
+        $region = $request->region;
+        $mobileNo = $request->mobile_no;
+        $email = $request->email;
+        $username = $request->username;
+        $password = $request->password;
+        $empType = $request->emp_type;
+        $position = $request->position;
+        $division = $request->division;
+        $gender = $request->gender;
+        $avatar = $request->file('avatar');
+        $signature = $request->file('signature');
 
         try {
-            $instanceUser = User::find($id);
-            $instanceUser->destroy();
+            $instanceEmpAccount = new User;
+            $instanceEmpAccount->emp_id = $empID;
+            $instanceEmpAccount->firstname = $firstname;
+            $instanceEmpAccount->middlename = $middlename;
+            $instanceEmpAccount->lastname = $lastname;
+            $instanceEmpAccount->address = $address;
+            $instanceEmpAccount->province = $province;
+            $instanceEmpAccount->region = $region;
+            $instanceEmpAccount->mobile_no = $mobileNo;
+            $instanceEmpAccount->email = $email;
+            $instanceEmpAccount->username = $username;
+            $instanceEmpAccount->emp_type = $empType;
+            $instanceEmpAccount->position = $position;
+            $instanceEmpAccount->division = $division;
+            $instanceEmpAccount->gender = $gender;
 
-            //$msg = "Item classification '$className' successfully destroyed.";
-            //return redirect(url()->previous())->with('success', $msg);
+            $pathAvatar = $this->uploadFile($request, 'avatar', $avatar, $instanceEmpAccount, $empID);
+            $pathSignature = $this->uploadFile($request, 'esignature', $signature, $instanceEmpAccount, $empID);
+
+            if (!empty($password)) {
+                $instanceEmpAccount->password = bcrypt($password);
+            }
+
+            if (!empty($pathAvatar)) {
+                $instanceEmpAccount->avatar = $pathAvatar;
+            }
+
+            if (!empty($pathSignature)) {
+                $instanceEmpAccount->signature = $pathSignature;
+            }
+
+            $instanceEmpAccount->save();
+
+            $msg = "Your profile is successfully created. Contact your
+                    administrator for your account approval.";
+            return redirect('login')->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             return redirect(url()->previous())->with('failed', $msg);
         }
     }
 
-
-    public function create() {
-        $divisions = Division::all();
-        $provinces = Province::all();
-        $regions = Region::all();
-        $roles = Role::all();
-        $userGroups = DB::table('tblemp_groups as group')
-                        ->select('group.id as group_id', DB::raw('CONCAT(emp.firstname, " ",
-                                 emp.lastname, " [ ", emp.position, " ]") as group_head'),
-                                 'group.group_name')
-                        ->join('tblemp_accounts as emp', 'emp.id', '=', 'group.group_head')
-                        ->orderBy('group.group_name')
-                        ->get();
-
-        $empID = "";
-        $firstname = "";
-        $middlename = "";
-        $lastname = "";
-        $address = "";
-        $province = "";
-        $region = "";
-        $mobileNo = "";
-        $email = "";
-        $username = "";
-        $password = "";
-        $role = "";
-        $empType = "";
-        $position = "";
-        $division = "";
-        $gender = "";
-        $active = "";
-        $avatar = "";
-        $signature = "";
-        $group = "";
-        $data = (object) ['emp_id' => $empID,
-                          'firstname' => $firstname,
-                          'middlename' => $middlename,
-                          'lastname' => $lastname,
-                          'address' => $address,
-                          'province_id' => $province,
-                          'region_id' => $region,
-                          'mobile_no' => $mobileNo,
-                          'email' => $email,
-                          'username' => $username,
-                          'password' => $password,
-                          'role' => $role,
-                          'emp_type' => $empType,
-                          'position' => $position,
-                          'division_id' => $division,
-                          'gender' => $gender,
-                          'active' => $active,
-                          'avatar' => $avatar,
-                          'signature' => $signature,
-                          'group' => $group];
-
-        return view('pages.create-edit-profile', ['divisions' => $divisions,
-                                                                'provinces' => $provinces,
-                                                                'regions' => $regions,
-                                                                'roles' => $roles,
-                                                                'userGroups' => $userGroups,
-                                                                'toggle' => 'create',
-                                                                'data' => $data]);
-    }
-
-    public function edit(Request $request, $empID) {
-        $emp = User::where('emp_id', $empID)->first();
-        $divisions = Division::all();
-        $provinces = Province::all();
-        $regions = Region::all();
-        $roles = Role::all();
-        $userGroups = DB::table('tblemp_groups as group')
-                        ->select('group.id as group_id', DB::raw('CONCAT(emp.firstname, " ",
-                                 emp.lastname, " [ ", emp.position, " ]") as group_head'),
-                                 'group.group_name')
-                        ->join('tblemp_accounts as emp', 'emp.id', '=', 'group.group_head')
-                        ->orderBy('group.group_name')
-                        ->get();
-
-        $empID = $emp->emp_id;
-        $firstname = $emp->firstname;
-        $middlename = $emp->middlename;
-        $lastname = $emp->lastname;
-        $address = $emp->address;
-        $province = $emp->province_id;
-        $region = $emp->region_id;
-        $mobileNo = $emp->mobile_no;
-        $email = $emp->email;
-        $username = $emp->username;
-        $password = "";
-        $role = $emp->role;
-        $empType = $emp->emp_type;
-        $position = $emp->position;
-        $division = $emp->division_id;
-        $gender = $emp->gender;
-        $active =  $emp->active;
-        $avatar = $emp->avatar;
-        $signature = $emp->signature;
-        $group = $emp->group;
-        $data = (object) ['emp_id' => $empID,
-                          'firstname' => $firstname,
-                          'middlename' => $middlename,
-                          'lastname' => $lastname,
-                          'address' => $address,
-                          'province_id' => $province,
-                          'region_id' => $region,
-                          'mobile_no' => $mobileNo,
-                          'email' => $email,
-                          'username' => $username,
-                          'password' => $password,
-                          'role' => $role,
-                          'emp_type' => $empType,
-                          'position' => $position,
-                          'division_id' => $division,
-                          'gender' => $gender,
-                          'active' => $active,
-                          'avatar' => $avatar,
-                          'signature' => $signature,
-                          'group' => $group];
-
-        return view('pages.create-edit-profile', ['divisions' => $divisions,
-                                                  'provinces' => $provinces,
-                                                  'regions' => $regions,
-                                                  'roles' => $roles,
-                                                  'userGroups' => $userGroups,
-                                                  'toggle' => 'update',
-                                                  'data' => $data]);
-    }
-
-    public function store(Request $request) {
-        $emp = new User;
-        $empID = $request['emp_id'];
-        $firstname = $request['firstname'];
-        $middlename = $request['middlename'];
-        $lastname = $request['lastname'];
-        $address = $request['address'];
-        $province = $request['province'];
-        $region = $request['region'];
-        $mobile_no = $request['mobile_no'];
-        $email = $request['email'];
-        $username = $request['username'];
-        $password = $request['password'];
-        $role = $request['role'];
-        $position = $request['position'];
-        $division = $request['division'];
-        $gender = $request['gender'];
-        $active = $request['active'];
-        $empType = $request['emp_type'];
-        $group = $request['group'];
-        $avatar = $request->file('avatar');
-        $signature = $request->file('signature');
-
-        $emp->emp_id = $empID;
-        $emp->firstname = $firstname;
-        $emp->middlename = $middlename;
-        $emp->lastname = $lastname;
-        $emp->address = $address;
-        $emp->region_id = $region;
-        $emp->province_id = $province;
-        $emp->mobile_no = $mobile_no;
-        $emp->email = $email;
-        $emp->username = $username;
-        $emp->role = $role;
-        $emp->emp_type = $empType;
-        $emp->position = $position;
-        $emp->division_id = $division;
-        $emp->gender = $gender;
-        $emp->active = $active;
-        $emp->group = $group;
-        $emp->password = bcrypt($password);
-
-        try {
-            $emp->emp_id = $empID;
-            $emp->firstname = $firstname;
-            $emp->middlename = $middlename;
-            $emp->lastname = $lastname;
-            $emp->address = $address;
-            $emp->region_id = $region;
-            $emp->province_id = $province;
-            $emp->mobile_no = $mobile_no;
-            $emp->email = $email;
-            $emp->username = $username;
-            $emp->role = $role;
-            $emp->position = $position;
-            $emp->division_id = $division;
-            $emp->gender = $gender;
-            $emp->active = $active;
-            $emp->password = bcrypt($password);
-            $emp->avatar = $this->uploadFile($request, 'avatar', $avatar, $emp);
-            $emp->signature = $this->uploadFile($request, 'esignature', $signature, $emp);
-            $emp->save();
-
-            $msg = "Successfully created the employee $empID.";
-            return redirect(url()->previous())->with('success', $msg);
-        } catch (Exception $e) {
-            $msg = "There is an error encountered creating the employee $empID.";
-            return redirect(url()->previous())->with('failed', "Successfully updated the employee $empID.");
-        }
-    }
-
-    public function update(Request $request, $empID) {
-        $emp = User::where('emp_id', $empID)->first();
-        $newEmpID = $request['emp_id'];
-        $firstname = $request['firstname'];
-        $middlename = $request['middlename'];
-        $lastname = $request['lastname'];
-        $address = $request['address'];
-        $province = $request['province'];
-        $region = $request['region'];
-        $mobile_no = $request['mobile_no'];
-        $email = $request['email'];
-        $username = $request['username'];
-        $password = $request['password'];
-        $role = $request['role'];
-        $empType = $request['emp_type'];
-        $position = $request['position'];
-        $division = $request['division'];
-        $gender = $request['gender'];
-        $active = $request['active'];
-        $group = !empty($request['group']) ? $request['group']: 0;
+    public function updateProfile(Request $request) {
+        $id = Auth::user()->id;
+        $empID = $request->emp_id;
+        $firstname = $request->firstname;
+        $middlename = $request->middlename;
+        $lastname = $request->lastname;
+        $address = $request->address;
+        $province = $request->province;
+        $region = $request->region;
+        $mobileNo = $request->mobile_no;
+        $email = $request->email;
+        $username = $request->username;
+        $password = $request->password;
+        $empType = $request->emp_type;
+        $position = $request->position;
+        $division = $request->division;
+        $gender = $request->gender;
         $avatar = $request->file('avatar');
         $signature = $request->file('signature');
 
         try {
-            $emp->emp_id = $newEmpID;
-            $emp->firstname = $firstname;
-            $emp->middlename = $middlename;
-            $emp->lastname = $lastname;
-            $emp->address = $address;
-            $emp->region_id = $region;
-            $emp->province_id = $province;
-            $emp->mobile_no = $mobile_no;
-            $emp->email = $email;
-            $emp->username = $username;
-            $emp->role = $role;
-            $emp->emp_type = $empType;
-            $emp->position = $position;
-            $emp->division_id = $division;
-            $emp->gender = $gender;
-            $emp->group = $group;
-            $pathAvatar = $this->uploadFile($request, 'avatar', $avatar, $emp, $newEmpID);
-            $pathSignature = $this->uploadFile($request, 'esignature', $signature, $emp, $newEmpID);
+            $instanceEmpAccount = User::find($id);
+            $instanceEmpAccount->emp_id = $empID;
+            $instanceEmpAccount->firstname = $firstname;
+            $instanceEmpAccount->middlename = $middlename;
+            $instanceEmpAccount->lastname = $lastname;
+            $instanceEmpAccount->address = $address;
+            $instanceEmpAccount->province = $province;
+            $instanceEmpAccount->region = $region;
+            $instanceEmpAccount->mobile_no = $mobileNo;
+            $instanceEmpAccount->email = $email;
+            $instanceEmpAccount->username = $username;
+            $instanceEmpAccount->emp_type = $empType;
+            $instanceEmpAccount->position = $position;
+            $instanceEmpAccount->division = $division;
+            $instanceEmpAccount->gender = $gender;
 
-            if (!empty($active)) {
-                $emp->active = $active;
-            }
+            $pathAvatar = $this->uploadFile($request, 'avatar', $avatar, $instanceEmpAccount, $empID);
+            $pathSignature = $this->uploadFile($request, 'esignature', $signature, $instanceEmpAccount, $empID);
 
             if (!empty($password)) {
-                $emp->password = bcrypt($password);
+                $instanceEmpAccount->password = bcrypt($password);
             }
 
             if (!empty($pathAvatar)) {
-                $emp->avatar = $pathAvatar;
+                $instanceEmpAccount->avatar = $pathAvatar;
             }
 
             if (!empty($pathSignature)) {
-                $emp->signature = $pathSignature;
+                $instanceEmpAccount->signature = $pathSignature;
             }
 
-            $emp->save();
+            $instanceEmpAccount->save();
 
-            $msg = "Successfully updated the employee $empID.";
+            $msg = "Profile successfully updated.";
             return redirect(url()->previous())->with('success', $msg);
-        } catch (Exception $e) {
-            $msg = "There is an error encountered updating the employee $empID.";
-            return redirect(url()->previous())->with('failed', "Successfully updated the employee $empID.");
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
         }
-    }
-
-    public function delete($empID) {
-        try {
-            $emp = User::where('emp_id', $empID)->first();
-            $_emp = User::where('emp_id', $empID)->delete();
-            $empID = $emp->emp_id;
-
-            $msg = "Successfully deleted the employee $empID.";
-            return redirect(url()->previous())->with('success', $msg);
-        } catch (Exception $e) {
-            $msg = "There is an error encountered deleting the employee $empID.";
-            return redirect(url()->previous())->with('failed', "Successfully updated the employee $empID.");
-        }
-    }
-
-    private function uploadFile($request, $type, $file, $db, $fileID = "") {
-        $path = "";
-
-        if (!empty($file)) {
-            switch ($type) {
-                case 'avatar':
-                    $this->validate($request, [
-                        'avatar' => 'dimensions:max_width=900,max_width=900|mimes:jpg,jpeg'
-                    ]);
-
-                    $newFileName = 'avatar-' . strtolower($fileID) . '.jpg';
-                    $exists = Storage::exists($db->avatar);
-
-                    $path = 'storage/images/employees/avatars/' . $newFileName;
-                    $image = Image::make($file)->fit(300, 300);
-                    Storage::put('public/images/employees/avatars/'.$newFileName, (string) $image->encode());
-
-                    if (!empty($db->avatar)) {
-                        if ($exists && ($db->avatar != $path)) {
-                            Storage::delete($db->avatar);
-                        }
-                    }
-
-                    break;
-
-                case 'esignature':
-                    $this->validate($request, [
-                        'signature' => 'image|mimes:png,jpg|max:512'
-                    ]);
-
-                    $newFileName = 'sig-' . strtolower($fileID) . '.png';
-                    $exists = Storage::exists($db->signature);
-
-                    $path = 'storage/images/employees/signatures/' . $newFileName;
-                    $request->file('signature')->storeAs(
-                                'public/images/employees/signatures', $newFileName
-                    );
-
-                    if (!empty($db->signature)) {
-                        if ($exists && ($path != $db->signature)) {
-                            Storage::delete($db->signature);
-                        }
-                    }
-
-                    break;
-
-                default:
-                    # code...
-                    break;
-                }
-        }
-
-        return $path;
     }
 
     /** Library for Roles, Groups, and Accounts */
@@ -1160,6 +1014,92 @@ class AccountController extends Controller
 
     }
 
+    /**
+     *  Employee Log Module
+    **/
+    public function indexLogs(Request $request) {
+        $userLogData = EmpLog::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'emp_logs.emp_id')
+                          ->limit(1)
+        ])->orderBy('created_at', 'desc')->get();
+
+        return view('modules.library.user-log.index', [
+            'list' => $userLogData
+        ]);
+    }
+
+    public function destroyLogs($id) {
+        try {
+            EmpLog::destroy($id);
+
+            $msg = "Employee log '$id' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    private function uploadFile($request, $type, $file, $db, $fileID = "") {
+        $path = "";
+
+        if (!empty($file)) {
+            Image::configure(['driver' => 'gd']);
+
+            switch ($type) {
+                case 'avatar':
+                    /*
+                    $this->validate($request, [
+                        'avatar' => 'mimes:jpg,jpeg'
+                    ]);*/
+
+                    $newFileName = 'avatar-' . strtolower($fileID) . '.jpg';
+                    $exists = Storage::exists($db->avatar);
+
+                    $path = 'storage/images/employees/avatars/' . $newFileName;
+                    $image = Image::make($file)->resize(300, 300);
+                    Storage::put('public/images/employees/avatars/'.$newFileName, (string) $image->encode());
+
+                    if (!empty($db->avatar)) {
+                        if ($exists && ($db->avatar != $path)) {
+                            Storage::delete($db->avatar);
+                        }
+                    }
+
+                    break;
+
+                case 'esignature':
+                    $this->validate($request, [
+                        'signature' => 'mimes:png'
+                    ]);
+
+                    $newFileName = 'sig-' . strtolower($fileID) . '.png';
+                    $exists = Storage::exists($db->signature);
+
+                    $path = 'storage/images/employees/signatures/' . $newFileName;
+                    $image = Image::make($file)->resize(null, 300, function ($constraint) {
+                        $constraint->aspectRatio();
+                    });
+                    Storage::put('public/images/employees/signatures/'.$newFileName, (string) $image->encode());
+
+                    if (!empty($db->signature)) {
+                        if ($exists && ($path != $db->signature)) {
+                            Storage::delete($db->signature);
+                        }
+                    }
+
+                    break;
+
+                default:
+                    # code...
+                    break;
+                }
+        }
+
+        return $path;
+    }
+
     public function checkDuplication($model, $data) {
         switch ($model) {
             case 'EmpRole':
@@ -1188,5 +1128,229 @@ class AccountController extends Controller
         }
 
         return ($dataCount > 0) ? 1 : 0;;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public function create() {
+        $divisions = Division::all();
+        $provinces = Province::all();
+        $regions = Region::all();
+        $roles = Role::all();
+        $userGroups = DB::table('tblemp_groups as group')
+                        ->select('group.id as group_id', DB::raw('CONCAT(emp.firstname, " ",
+                                 emp.lastname, " [ ", emp.position, " ]") as group_head'),
+                                 'group.group_name')
+                        ->join('tblemp_accounts as emp', 'emp.id', '=', 'group.group_head')
+                        ->orderBy('group.group_name')
+                        ->get();
+
+        $empID = "";
+        $firstname = "";
+        $middlename = "";
+        $lastname = "";
+        $address = "";
+        $province = "";
+        $region = "";
+        $mobileNo = "";
+        $email = "";
+        $username = "";
+        $password = "";
+        $role = "";
+        $empType = "";
+        $position = "";
+        $division = "";
+        $gender = "";
+        $active = "";
+        $avatar = "";
+        $signature = "";
+        $group = "";
+        $data = (object) ['emp_id' => $empID,
+                          'firstname' => $firstname,
+                          'middlename' => $middlename,
+                          'lastname' => $lastname,
+                          'address' => $address,
+                          'province_id' => $province,
+                          'region_id' => $region,
+                          'mobile_no' => $mobileNo,
+                          'email' => $email,
+                          'username' => $username,
+                          'password' => $password,
+                          'role' => $role,
+                          'emp_type' => $empType,
+                          'position' => $position,
+                          'division_id' => $division,
+                          'gender' => $gender,
+                          'active' => $active,
+                          'avatar' => $avatar,
+                          'signature' => $signature,
+                          'group' => $group];
+
+        return view('pages.create-edit-profile', ['divisions' => $divisions,
+                                                                'provinces' => $provinces,
+                                                                'regions' => $regions,
+                                                                'roles' => $roles,
+                                                                'userGroups' => $userGroups,
+                                                                'toggle' => 'create',
+                                                                'data' => $data]);
+    }
+
+    public function edit(Request $request, $empID) {
+        $emp = User::where('emp_id', $empID)->first();
+        $divisions = Division::all();
+        $provinces = Province::all();
+        $regions = Region::all();
+        $roles = Role::all();
+        $userGroups = DB::table('tblemp_groups as group')
+                        ->select('group.id as group_id', DB::raw('CONCAT(emp.firstname, " ",
+                                 emp.lastname, " [ ", emp.position, " ]") as group_head'),
+                                 'group.group_name')
+                        ->join('tblemp_accounts as emp', 'emp.id', '=', 'group.group_head')
+                        ->orderBy('group.group_name')
+                        ->get();
+
+        $empID = $emp->emp_id;
+        $firstname = $emp->firstname;
+        $middlename = $emp->middlename;
+        $lastname = $emp->lastname;
+        $address = $emp->address;
+        $province = $emp->province_id;
+        $region = $emp->region_id;
+        $mobileNo = $emp->mobile_no;
+        $email = $emp->email;
+        $username = $emp->username;
+        $password = "";
+        $role = $emp->role;
+        $empType = $emp->emp_type;
+        $position = $emp->position;
+        $division = $emp->division_id;
+        $gender = $emp->gender;
+        $active =  $emp->active;
+        $avatar = $emp->avatar;
+        $signature = $emp->signature;
+        $group = $emp->group;
+        $data = (object) ['emp_id' => $empID,
+                          'firstname' => $firstname,
+                          'middlename' => $middlename,
+                          'lastname' => $lastname,
+                          'address' => $address,
+                          'province_id' => $province,
+                          'region_id' => $region,
+                          'mobile_no' => $mobileNo,
+                          'email' => $email,
+                          'username' => $username,
+                          'password' => $password,
+                          'role' => $role,
+                          'emp_type' => $empType,
+                          'position' => $position,
+                          'division_id' => $division,
+                          'gender' => $gender,
+                          'active' => $active,
+                          'avatar' => $avatar,
+                          'signature' => $signature,
+                          'group' => $group];
+
+        return view('pages.create-edit-profile', ['divisions' => $divisions,
+                                                  'provinces' => $provinces,
+                                                  'regions' => $regions,
+                                                  'roles' => $roles,
+                                                  'userGroups' => $userGroups,
+                                                  'toggle' => 'update',
+                                                  'data' => $data]);
+    }
+
+    public function store(Request $request) {
+        $emp = new User;
+        $empID = $request['emp_id'];
+        $firstname = $request['firstname'];
+        $middlename = $request['middlename'];
+        $lastname = $request['lastname'];
+        $address = $request['address'];
+        $province = $request['province'];
+        $region = $request['region'];
+        $mobile_no = $request['mobile_no'];
+        $email = $request['email'];
+        $username = $request['username'];
+        $password = $request['password'];
+        $role = $request['role'];
+        $position = $request['position'];
+        $division = $request['division'];
+        $gender = $request['gender'];
+        $active = $request['active'];
+        $empType = $request['emp_type'];
+        $group = $request['group'];
+        $avatar = $request->file('avatar');
+        $signature = $request->file('signature');
+
+        $emp->emp_id = $empID;
+        $emp->firstname = $firstname;
+        $emp->middlename = $middlename;
+        $emp->lastname = $lastname;
+        $emp->address = $address;
+        $emp->region_id = $region;
+        $emp->province_id = $province;
+        $emp->mobile_no = $mobile_no;
+        $emp->email = $email;
+        $emp->username = $username;
+        $emp->role = $role;
+        $emp->emp_type = $empType;
+        $emp->position = $position;
+        $emp->division_id = $division;
+        $emp->gender = $gender;
+        $emp->active = $active;
+        $emp->group = $group;
+        $emp->password = bcrypt($password);
+
+        try {
+            $emp->emp_id = $empID;
+            $emp->firstname = $firstname;
+            $emp->middlename = $middlename;
+            $emp->lastname = $lastname;
+            $emp->address = $address;
+            $emp->region_id = $region;
+            $emp->province_id = $province;
+            $emp->mobile_no = $mobile_no;
+            $emp->email = $email;
+            $emp->username = $username;
+            $emp->role = $role;
+            $emp->position = $position;
+            $emp->division_id = $division;
+            $emp->gender = $gender;
+            $emp->active = $active;
+            $emp->password = bcrypt($password);
+            $emp->avatar = $this->uploadFile($request, 'avatar', $avatar, $emp);
+            $emp->signature = $this->uploadFile($request, 'esignature', $signature, $emp);
+            $emp->save();
+
+            $msg = "Successfully created the employee $empID.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (Exception $e) {
+            $msg = "There is an error encountered creating the employee $empID.";
+            return redirect(url()->previous())->with('failed', "Successfully updated the employee $empID.");
+        }
+    }
+
+    public function delete($empID) {
+        try {
+            $emp = User::where('emp_id', $empID)->first();
+            $_emp = User::where('emp_id', $empID)->delete();
+            $empID = $emp->emp_id;
+
+            $msg = "Successfully deleted the employee $empID.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (Exception $e) {
+            $msg = "There is an error encountered deleting the employee $empID.";
+            return redirect(url()->previous())->with('failed', "Successfully updated the employee $empID.");
+        }
     }
 }

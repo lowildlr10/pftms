@@ -48,7 +48,7 @@
                                 <hr>
                                 <div class="md-form">
                                     <i class="fa fa-user prefix mdb-color-text"></i>
-                                    <input type="text" id="form3" class="form-control{{ $errors->has('username') ? ' is-invalid' : '' }}"
+                                    <input type="text" id="username" class="form-control{{ $errors->has('username') ? ' is-invalid' : '' }}"
                                            name="username" value="{{ old('username') }}" autocomplete="off" required autofocus>
 
                                     @if ($errors->has('username'))
@@ -57,7 +57,7 @@
                                         </span>
                                     @endif
 
-                                    <label for="form3">
+                                    <label for="username">
                                         Username
                                     </label>
                                 </div>
@@ -89,12 +89,10 @@
                                     </a>
                                     <hr>
                                     <p class="d-none d-md-block">
-                                        <!--
                                         <strong>Not yet registered?</strong>
-                                        <a data-toggle="modal" data-target="#modalRegisterForm" class="btn btn-green btn-md">Click here to sign-up
-                                            <i class="fas fa-pen-square"></i>
+                                        <a class="btn btn-green btn-md" href="{{ route('profile-registration') }}">
+                                            <i class="fas fa-pen"></i> sign-up
                                         </a>
-                                        -->
                                     </p>
                                 </div>
                             </form>
@@ -175,5 +173,32 @@
     </div>
 </div>
 -->
+
+@endsection
+
+@section('custom-js')
+
+@if (!empty(session("success")))
+    @include('modals.alert')
+    <script type="text/javascript">
+        $(function() {
+            $('#modal-success').modal();
+        });
+    </script>
+@elseif (!empty(session("warning")))
+    @include('modals.alert')
+    <script type="text/javascript">
+        $(function() {
+            $('#modal-warning').modal();
+        });
+    </script>
+@elseif (!empty(session("failed")))
+    @include('modals.alert')
+    <script type="text/javascript">
+        $(function() {
+            $('#modal-failed').modal();
+        });
+    </script>
+@endif
 
 @endsection

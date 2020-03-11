@@ -113,13 +113,12 @@ class User extends Authenticatable
     }
 
     public function hasModuleAccess($role, $module, $access) {
+        if (!$role) {
+            return false;
+        }
+
         $roleData = $this->roles()->where('emp_roles.id', $role)->first();
         $jsonRole = json_decode($roleData->module_access);
-
-        /*
-        if (strtolower($roleData->role) === 'developer') {
-            return true;
-        }*/
 
         if (!isset($jsonRole->{$module})) {
             return false;
