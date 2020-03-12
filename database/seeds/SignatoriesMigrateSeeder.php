@@ -18,7 +18,20 @@ class SignatoriesMigrateSeeder extends Seeder
         $signatoryData = DB::connection('mysql-old-pftms')
                            ->table('tblsignatories')
                            ->get();
-        $signatories = [];
+        $signatories = [[
+            'emp_id' => '',
+            'is_active' => 'y',
+            'module' => [
+                'pr' => [
+                    'is_allowed' => 0,
+                    ''
+                ],
+                'rfq' => [
+                    'is_allowed' => 0,
+                    'signa' => ''
+                ]
+            ]
+        ]];
 
         foreach ($signatoryData as $sig) {
             $userData = DB::connection('mysql-old-pftms')
