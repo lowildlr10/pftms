@@ -1,24 +1,34 @@
 @extends('layouts.app')
 
+@section('custom-css')
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="{{ asset('plugins/mdb/css/addons/datatables.min.css') }}" rel="stylesheet">
+
+<!-- DataTables Select CSS -->
+<link rel="stylesheet" type="text/css" href="{{ asset('plugins/mdb/css/addons/datatables-select.min.css') }}" rel="stylesheet">
+
+@endsection
+
 @section('main-content')
 
 <div class="row wow animated fadeIn">
     <section class="mb-5 col-12 module-container">
-        <div class="card module-table-container text-white mdb-color darken-3">
+        <div class="card mdb-color darken-3">
             <div class="card-body">
-                <h5 class="card-title">
+                <h5 class="card-title white-text">
                     <strong>
-                        <i class="fas fa-shopping-cart"></i> Purchase Request & Status
+                        <i class="fas fa-shopping-cart"></i> Purchase Request
                     </strong>
                 </h5>
                 <hr class="white">
-                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1">
+                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text">
                     <li>
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
                     <li class="active">
-                        <a href="{{ url('procurement/pr') }}" class="waves-effect waves-light cyan-text">
-                            Purchase Request & Status
+                        <a href="{{ route('pr') }}" class="waves-effect waves-light cyan-text">
+                            Purchase Request
                         </a>
                     </li>
                 </ul>
@@ -32,8 +42,8 @@
                                 align-items-center">
                         <div>
                             <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
-                                    onclick="$(this).showCreate(); $('#create-title').text('CREATE NEW PURCHASE REQUEST');">
-                                    <i class="fas fa-cart-arrow-down"></i> Create
+                                    onclick="$(this).showCreate('{{ route('pr-show-create') }}');">
+                                <i class="fas fa-pencil-alt"></i> Create
                             </button>
                         </div>
                         <div>
@@ -41,7 +51,7 @@
                                     data-target="#top-fluid-modal" data-toggle="modal">
                                 <i class="fas fa-search"></i>
                             </button>
-                            <a href="{{ url('procurement/pr') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
+                            <a href="{{ route('pr') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
                             </a>
 
@@ -49,38 +59,25 @@
                     </div>
                     <!--/Card image-->
 
-                    <div class="px-1">
+                    <div class="px-2">
                         <div class="table-wrapper table-responsive border rounded">
-                            @if (!empty($search))
-                            <div class="hidden-xs my-2">
-                                <small class="red-text pl-3">
-                                    <i class="fas fa-search"></i> You searched for "{{ $search }}".
-                                </small>
-                                <a class="btn btn-sm btn-outline-red waves-effect my-0 py-0 px-1"
-                                   href="{{ url('procurement/pr') }}">
-                                    <small><i class="fas fa-times"></i> Reset</small>
-                                </a>
-                            </div>
-                            @endif
 
                             <!--Table-->
-                            <table class="table module-table table-hover table-b table-sm mb-0">
+                            <table id="dtmaterial" class="table table-hover" cellspacing="0" width="100%">
 
                                 <!--Table head-->
                                 <thead class="mdb-color darken-3 white-text">
                                     <tr class="hidden-xs">
                                         <th class="th-md" width="3%"></th>
-                                        <th class="th-md" width="3%" style="text-align: center;">
-                                            <strong>#</strong>
-                                        </th>
+                                        <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="8%">
                                             <strong>PR No</strong>
                                         </th>
                                         <th class="th-md" width="10%">
-                                            <strong>PR Date</strong>
+                                            <strong>Date</strong>
                                         </th>
                                         <th class="th-md" width="10%">
-                                            <strong>Charging</strong>
+                                            <strong>Funding/Charging</strong>
                                         </th>
                                         <th class="th-md" width="41%">
                                             <strong>Purpose</strong>
@@ -98,122 +95,62 @@
 
                                 <!--Table body-->
                                 <tbody>
-                                    <form id="form-validation" method="POST" action="#">
-                                        @csrf
-
-                                        <input type="hidden" name="type" id="type">
-
-                                        @if (count($list) > 0)
-                                            @php $countItem = 0; @endphp
-
-                                            @foreach ($list as $listCtr => $pr)
-                                                @php $countItem++; @endphp
-
-                                        <tr class="hidden-xs">
-                                            <td align="center">
-                                                @if ($pr->sID == 1)
-                                                <i class="fas fa-spinner fa-lg faa-spin fa-pulse material-tooltip-main"
-                                                   data-toggle="tooltip" data-placement="right" title="Pending"></i>
-                                                @elseif ($pr->sID == 2)
-                                                <i class="fas fa-thumbs-down fa-lg material-tooltip-main"
-                                                   data-toggle="tooltip" data-placement="right" title="Disapproved"></i>
-                                                @elseif ($pr->sID == 3)
-                                                <i class="fas fa-ban fa-lg text-danger material-tooltip-main"
-                                                   data-toggle="tooltip" data-placement="right" title="Cancelled"></i>
-                                                @elseif ($pr->sID == 4)
-                                                <i class="fas fa-door-closed fa-lg material-tooltip-main"
-                                                   data-toggle="tooltip" data-placement="right" title="Closed"></i>
-                                                @elseif ($pr->sID >= 5)
-                                                <i class="fas fa-thumbs-up fa-lg green-text material-tooltip-main"
-                                                   data-toggle="tooltip" data-placement="right" title="Approved"></i>
-                                                @endif
-                                            </td>
-                                            <td align="center" class="border-left">
-                                                {{ ($listCtr + 1) + (($list->currentpage() - 1) * $list->perpage()) }}
-                                            </td>
-                                            <td class="border-left">
-                                                {{ $pr->pr_no }}
-                                            </td>
-                                            <td class="border-left">{{ $pr->date_pr }}</td>
-                                            <td class="border-left">{{ $pr->project }}</td>
-                                            <td class="border-left">
-                                                <i class="fas fa-caret-right"></i> {{ substr($pr->purpose, 0, 150) }}...
-                                            </td>
-                                            <td class="border-left">{{ $pr->name }}</td>
-                                            <td align="center" class="border-left">
-                                                <a class="btn btn-link p-0" href="{{ url('procurement/pr/tracker/' . $pr->pr_no) }}">
-                                                    <strong><i class="far fa-eye"></i><br>{{ $pr->status }}</strong></td>
-                                                </a>
-                                            <td align="center" class="border-left">
-                                                <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
-                                                   data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal"
-                                                   data-toggle="tooltip" data-placement="left" title="Open">
-                                                    <i class="fas fa-folder-open"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                        <tr class="show-xs" hidden>
-                                            <td class="p-2" width="96%" colspan="8">
-                                                <p>
-                                                    {{ ($listCtr + 1) + (($list->currentpage() - 1) * $list->perpage()) }} ]
-                                                    <strong>PR NO:</strong> {{ $pr->pr_no }}
-                                                    [
-                                                    @if ($pr->sID == 1)
-                                                    <i class="fas fa-spinner fa-sm faa-spin fa-pulse"></i>
-                                                    @elseif ($pr->sID == 2)
-                                                    <i class="fas fa-thumbs-down fa-sm"></i>
-                                                    @elseif ($pr->sID == 3)
-                                                    <i class="fas fa-ban fa-sm text-danger"></i>
-                                                    @elseif ($pr->sID == 4)
-                                                    <i class="fas fa-door-closed fa-sm"></i>
-                                                    @elseif ($pr->sID >= 5)
-                                                    <i class="fas fa-thumbs-up fa-sm green-text"></i>
-                                                    @endif
-                                                    <strong> {{ $pr->status }} </strong>]
-                                                    <br>
-                                                    <i class="fas fa-caret-right"></i> {{ substr($pr->purpose, 0, 150) }}...
-                                                </p>
-                                            </td>
-                                            <td width="4%">
-                                                <a class="btn btn-sm btn-link waves-effect m-1 show-mobile"
-                                                    data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
-                                                    <i class="fas fa-folder-open"></i> Open
-                                                </a>
-                                            </td>
-                                        </tr>
-
-                                            @endforeach
-
-                                            @php $remainingItem = $pageLimit - $countItem; @endphp
-                                        @else
-                                        <tr>
-                                            <td class="p-5" colspan="9" align="center">
-                                                <h5 class="red-text">No data found.</h5>
-                                            </td>
-                                        </tr>
-
-                                            @php $remainingItem = $pageLimit - 1; @endphp
-                                        @endif
-
-                                        @if ($remainingItem != 0)
-                                            @for ($itm = 1; $itm <= $remainingItem; $itm++)
-                                        <tr><td colspan="9" style="border: 0;"></td></tr>
-                                            @endfor
-                                        @endif
-
-                                    </form>
+                                    @if (count($list) > 0)
+                                        @foreach ($list as $listCtr => $pr)
+                                    <tr>
+                                        <td align="center"></td>
+                                        <td align="center">
+                                            @if ($pr->status == 1)
+                                            <i class="fas fa-spinner fa-lg faa-spin fa-pulse material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Pending"></i>
+                                            @elseif ($pr->status == 2)
+                                            <i class="fas fa-thumbs-down fa-lg material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Disapproved"></i>
+                                            @elseif ($pr->status == 3)
+                                            <i class="fas fa-ban fa-lg text-danger material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Cancelled"></i>
+                                            @elseif ($pr->status == 4)
+                                            <i class="fas fa-door-closed fa-lg material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Closed"></i>
+                                            @elseif ($pr->status >= 5)
+                                            <i class="fas fa-thumbs-up fa-lg green-text material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Approved"></i>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            {{ $pr->pr_no }}
+                                        </td>
+                                        <td>{{ $pr->date_pr }}</td>
+                                        <td>{{ $pr->funding_source }}</td>
+                                        <td>
+                                            <i class="fas fa-caret-right"></i> {{ (strlen($pr->purpose) > 150) ? substr($pr->purpose, 0, 150).'...' : $pr->purpose }}
+                                        </td>
+                                        <td>{{ $pr->name }}</td>
+                                        <td align="center">
+                                            <a class="btn btn-link p-0" href="{{ route('pr-tracker', ['id' => $pr->pr_no]) }}">
+                                                <strong><i class="far fa-eye"></i><br>{{ $pr->status_name }}</strong></td>
+                                            </a>
+                                        <td align="center">
+                                            <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
+                                               data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal"
+                                               data-toggle="tooltip" data-placement="left" title="Open">
+                                                <i class="fas fa-folder-open"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                        @endforeach
+                                    @endif
                                 </tbody>
                                 <!--Table body-->
+
                             </table>
                             <!--Table-->
-                        </div>
 
-                        <div class="mt-3">
-                            {{ $list->links('pagination') }}
                         </div>
                     </div>
                 </div>
                 <!-- Table with panel -->
+
             </div>
         </div>
     </section>
@@ -251,13 +188,12 @@
                                 </button>
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showEdit('{{ $pr->id }}');
-                                                 $('#edit-title').text('EDIT PURCHASE REQUEST [ {{ $pr->pr_no }} ]');">
+                                        onclick="$(this).showEdit('{{ route('pr-show-edit',
+                                                                            ['id' => $pr->id]) }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
-                                @if ($pr->requested_by == Auth::user()->emp_id ||
-                                     Auth::user()->role == 1)
-                                    @if ($pr->sID == 1)
+                                @if (Auth::user->hasModuleAccess(Auth::user()->role, 'proc_pr', 'delete'))
+                                    @if ($pr->status == 1)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).delete('{{ $pr->id }}');">
@@ -299,7 +235,7 @@
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
                     @if (Auth::user()->role == 1 || Auth::user()->role == 2)
-                        @if ($pr->sID == 1)
+                        @if ($pr->status == 1)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-md btn-block btn-rounded"
                                 onclick="$(this).approve('{{ $pr->id }}');">
@@ -319,7 +255,7 @@
                         </button>
                     </li>
                         @endif
-                        @if ($pr->sID >= 5)
+                        @if ($pr->status >= 5)
                     <li class="list-group-item justify-content-between">
                         <a href="{{ url('procurement/rfq?search='.$pr->pr_no) }}"
                            class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
@@ -328,7 +264,7 @@
                     </li>
                         @endif
                     @else
-                        @if ($pr->sID >= 5)
+                        @if ($pr->status >= 5)
                     <li class="list-group-item justify-content-between">
                         <a href="{{ url('procurement/rfq?search='.$pr->pr_no) }}"
                            class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
@@ -336,7 +272,7 @@
                         </a>
                     </li>
                         @endif
-                        @if ($pr->sID != 3)
+                        @if ($pr->status != 3)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-red waves-effect btn-md btn-block btn-rounded"
                                 onclick="$(this).cancel('{{ $pr->id }}');">
@@ -368,25 +304,23 @@
 @include('modals.search')
 @include('modals.create')
 @include('modals.edit')
+@include('modals.delete')
 @include('modals.print')
 
 @endsection
 
 @section('custom-js')
 
+<!-- DataTables JS -->
+<script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables.min.js') }}"></script>
+
+<!-- DataTables Select JS -->
+<script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables-select.min.js') }}"></script>
+
+<script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/pr.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>
-<script>
-    // Tooltips Initialization
-    $(function () {
-        var template = '<div class="tooltip md-tooltip">' +
-                       '<div class="tooltip-arrow md-arrow"></div>' +
-                       '<div class="tooltip-inner md-inner stylish-color"></div></div>';
-        $('.material-tooltip-main').tooltip({
-            template: template
-        });
-    });
-</script>
+<script type="text/javascript" src="{{ asset('assets/js/custom-datatables.js') }}"></script>
 
 @if (!empty(session("success")))
     @include('modals.alert')
