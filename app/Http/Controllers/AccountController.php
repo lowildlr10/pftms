@@ -516,12 +516,12 @@ class AccountController extends Controller
     }
 
     public function showEditProfile($type = 'profile', $_id = '') {
-        $id = Auth::user()->id;
+        $id = $type == 'profile' ? Auth::user()->id : $_id;
         $divisions = EmpDivision::orderBy('division_name')->get();
         $provinces = Province::orderBy('province_name')->get();
         $regions = Region::orderBy('region_name')->get();
 
-        $userData = $type == 'profile' ? User::find($id) : User::find($_id);
+        $userData = User::find($id);
         $employeeID = $userData->emp_id;
         $division = $userData->division;
         $province = $userData->province;
