@@ -13,6 +13,15 @@ class DatabaseMigrateSeeder extends Seeder
     {
         $this->call([
 
+            /** Places Library */
+            RegionsTableSeeder::class,
+            ProvincesTableSeeder::class,
+
+            /** Account Management */
+            DivisionsTableSeeder::class,
+            RolesTableSeeder::class,
+            UsersMigrateSeeder::class,
+
             /** Modules Library */
             InventoryClassificationsMigrateSeeder::class,
             ItemClassificationsMigrateSeeder::class,
@@ -25,15 +34,6 @@ class DatabaseMigrateSeeder extends Seeder
             SuppliersMigrateSeeder::class,
             SignatoriesMigrateSeeder::class,
             UnitIssuesMigrateSeeder::class,
-
-            /** Places Library */
-            RegionsTableSeeder::class,
-            ProvincesTableSeeder::class,
-
-            /** Account Management */
-            DivisionsTableSeeder::class,
-            RolesTableSeeder::class,
-            UsersMigrateSeeder::class,
 
         ]);
     }
