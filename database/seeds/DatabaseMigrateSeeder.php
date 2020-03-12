@@ -12,12 +12,8 @@ class DatabaseMigrateSeeder extends Seeder
     public function run()
     {
         $this->call([
-            //DivisionsTableSeeder::class,
-            //RegionsTableSeeder::class,
-            //ProvincesTableSeeder::class,
-            //RolesTableSeeder::class,
 
-            //UsersMigrateSeeder::class,
+            /** Modules Library */
             //InventoryClassificationsMigrateSeeder::class,
             //ItemClassificationsMigrateSeeder::class,
             //ModuleClassificationsMigrateSeeder::class,
@@ -28,6 +24,17 @@ class DatabaseMigrateSeeder extends Seeder
             //SupplierClassificationsMigrateSeeder::class,
             //SuppliersMigrateSeeder::class,
             SignatoriesMigrateSeeder::class,
+            //UnitIssuesMigrateSeeder::class,
+
+            /** Places Library */
+            //RegionsTableSeeder::class,
+            //ProvincesTableSeeder::class,
+
+            /** Account Management */
+            //DivisionsTableSeeder::class,
+            //RolesTableSeeder::class,
+            //UsersMigrateSeeder::class,
+
         ]);
     }
 }
