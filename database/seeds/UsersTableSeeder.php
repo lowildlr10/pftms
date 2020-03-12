@@ -41,6 +41,7 @@ class UsersTableSeeder extends Seeder
         $user->password =  Hash::make('dostcarmis');
         $user->address = 'DOST-CAR Km.6 BSU Compound La Trinidad, Benguet';
         $user->mobile_no = '+639999999999';
+        $user->is_active = 'y';
         $user->save();
     }
 }

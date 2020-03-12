@@ -18,7 +18,7 @@ class CreateEmpRolesTable extends Migration
 
             $table->uuid('id')->primary();
             $table->string('role', 100);
-            $table->text('module_access');
+            $table->binary('module_access')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
