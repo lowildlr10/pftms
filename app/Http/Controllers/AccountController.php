@@ -987,9 +987,11 @@ class AccountController extends Controller
                                   'position', 'id')
                          ->orderBy('firstname')
                          ->get();
+        $divisionData = EmpDivision::orderBy('division_name')->get();
 
         return view('modules.library.group.create', [
-            'employees' => $usersData
+            'employees' => $usersData,
+            'divisions' => $divisionData
         ]);
     }
 
@@ -998,26 +1000,32 @@ class AccountController extends Controller
                                   'position', 'id')
                          ->orderBy('firstname')
                          ->get();
+        $divisionData = EmpDivision::orderBy('division_name')->get();
         $userGroupData = EmpGroup::find($id);
         $groupName = $userGroupData->group_name;
+        $division = unserialize($userGroupData->division_access);
         $groupHead = $userGroupData->group_head;
 
         return view('modules.library.group.update', [
             'id' => $id,
             'groupName' => $groupName,
             'groupHead' => $groupHead,
-            'employees' => $usersData
+            'employees' => $usersData,
+            'divisions' => $divisionData,
+            'divisionAccess' => $division
         ]);
     }
 
     public function storeGroup(Request $request) {
         $groupName = $request->group_name;
+        $divisions = $request->divisions ? serialize($request->divisions) : NULL;
         $groupHead = $request->group_head;
 
         try {
             if (!$this->checkDuplication('EmpGroup', $groupName)) {
                 $instanceEmpGroup = new EmpGroup;
                 $instanceEmpGroup->group_name = $groupName;
+                $instanceEmpGroup->division_access = $divisions;
                 $instanceEmpGroup->group_head = $groupHead;
                 $instanceEmpGroup->save();
 
@@ -1035,11 +1043,13 @@ class AccountController extends Controller
 
     public function updateGroup(Request $request, $id) {
         $groupName = $request->group_name;
+        $divisions = $request->divisions ? serialize($request->divisions) : NULL;
         $groupHead = $request->group_head;
 
         try {
             $instanceEmpGroup = EmpGroup::find($id);
             $instanceEmpGroup->group_name = $groupName;
+            $instanceEmpGroup->division_access = $divisions;
             $instanceEmpGroup->group_head = $groupHead;
             $instanceEmpGroup->save();
 
