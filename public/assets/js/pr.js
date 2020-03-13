@@ -3,9 +3,9 @@ $(function() {
                      '<div class="tooltip-arrow md-arrow"></div>' +
                      '<div class="tooltip-inner md-inner stylish-color"></div></div>';
 
-	$.fn.computeCost = function(cnt, obj) {
-		var objId;
-		var totalCost = 0;
+    $.fn.computeCost = function(cnt, obj) {
+		let objId;
+		let totalCost = 0;
 
 	    if (obj != null) {
 	      objId = obj;
@@ -25,58 +25,65 @@ $(function() {
 	}
 
 	$.fn.addRow = function(tableID) {
-		var table = $(tableID).get(0);
-		var rowCount = table.rows.length;
-		var row = table.insertRow(rowCount);
-		var iteration = rowCount;
-		var origCount = $('#item-count').get(0).value;
-		var conCount = eval(origCount) + 1;
-	    var colCount = table.rows[0].cells.length;
+		const table = $(tableID).get(0);
+		const rowCount = table.rows.length;
+		let row = table.insertRow(rowCount);
+		const iteration = rowCount;
+		const origCount = $('#item-count').get(0).value;
+		const conCount = eval(origCount) + 1;
+	    const colCount = table.rows[0].cells.length;
 
 		row.id = "row-" + (rowCount - 1);
 
-	    for (var i = 0; i < colCount; i++) {
-	        var newcell = row.insertCell(i);
+	    for (let i = 0; i < colCount; i++) {
+	        const newcell = row.insertCell(i);
 			$(newcell).html($(table.rows[1].cells[i]).html());
 
 			switch(i){
+                /*
 				case 0:
                     $(newcell).addClass('hidden-xs')
                               .find('input')
 							  .attr('id', 'id' + conCount)
                               .attr('name', 'id' + conCount);
-				break;
-				case 1:
+				break;*/
+				case 0:
 					$(newcell).find('select')
 							  .attr('id', 'unit' + conCount)
-							  .val('1');
+                              .val('1');
+                    $(`unit${conCount}`);
+
+                    /*
+                    $(newcell).find('input').not('select')
+							  .attr('id', 'id' + conCount)
+                              .attr('name', 'id' + conCount);*/
 				break;
-				case 2:
+				case 1:
 					$(newcell).find('textarea')
-							  .attr('id', 'item_description' + conCount)
+							  //.attr('id', 'item_description' + conCount)
 							  .val('');
 				break;
-				case 3:
+				case 2:
 					$(newcell).find('input')
 							  .attr('id', 'quantity' + conCount)
 							  .attr('onkeyup', '$(this).computeCost(' + conCount + ', "unit_cost' + conCount + '")')
 							  .attr('onchange', '$(this).computeCost(' + conCount + ', "unit_cost' + conCount + '")')
 							  .val('');
 				break;
-				case 4:
+				case 3:
 					$(newcell).find('input')
 							  .attr('id', 'unit_cost' + conCount)
 							  .attr('onkeyup', '$(this).computeCost(' + conCount + ', "unit_cost' + conCount + '")')
 							  .attr('onchange', '$(this).computeCost(' + conCount + ', "unit_cost' + conCount + '")')
 							  .val('');
 				break;
-				case 5:
+				case 4:
 					$(newcell).find('input')
 							  .attr('id', 'total_cost' + conCount)
-							  .attr('disabled', 'disabled')
+							  .attr('readonly', 'readonly')
 							  .val('');
 				break;
-				case 6:
+				case 5:
 					$(newcell).find('a')
 							  .attr('onclick', "$(this).deleteRow('item-pr-table', 'row-" + (rowCount - 1) + "')");
 				break;
@@ -88,7 +95,7 @@ $(function() {
 
 	$.fn.deleteRow = function(tableID, row) {
 		if (confirm('Are you sure you want to remove this item?')) {
-			var rowCount = $('#row-items tr').length;
+			const rowCount = $('#row-items tr').length;
 
 			if (rowCount > 1) {
 
@@ -99,102 +106,31 @@ $(function() {
 		}
 	}
 
-	$.fn.createUpdateDoc = function() {
-		var withError = inputValidation(false);
-
-		if (!withError) {
-			$('#form-create').submit();
-		}
-	}
-
-	$.fn.showCreate = function() {
-        $('#btn-create-update').html('<i class="fas fa-pencil-alt"></i> Create');
+	$.fn.showItem = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
-		$('#modal-body-create').load('pr/show-create', function() {
+        $('#modal-body-show').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
-			//$('#form-create').attr('action', 'pr/save');
+            $('.mdb-select').materialSelect();
+            $(this).slideToggle(500);
+        });
+        $("#modal-show").modal({keyboard: false, backdrop: 'static'})
+						.on('shown.bs.modal', function() {
+            $('#create-title').html('Create Purchase Request');
+		}).on('hidden.bs.modal', function() {
+		    $('#modal-body-show').html('').css('display', 'none');
 		});
-		$("#central-create-modal").modal({keyboard: false, backdrop: 'static'})
-						.on('shown.bs.modal', function() {
-				            $('.mdb-select-1').materialSelect();
-				   		}).on('hidden.bs.modal', function() {
-					        $('#modal-body-create').html(modalLoadingContent);
-					    });
-	}
-
-	$.fn.viewItems = function(id) {
-		$('#modal-body-content-2').load('pr/show/' + id);
-		$("#view-modal").modal({keyboard: false, backdrop: 'static'})
-						.on('shown.bs.modal', function() {
-
-				   		}).on('hidden.bs.modal', function() {
-					        $('#modal-body-content-2').html('<br><div class="progress">' +
-																  '<div class="progress-bar progress-bar-striped active" role="progressbar"' +
-																  'aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%">' +
-																    'Loading...' +
-																  '</div>' +
-															   '</div>');
-					    });
-	}
-
-	$.fn.showEdit = function(id) {
-        $('#btn-create-update').html('<i class="fas fa-edit"></i> Update');
-        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
-		$('#modal-body-edit').load('pr/show-edit/' + id, function() {
-            $('#mdb-preloader').fadeOut(300);
-			$('#form-create').attr('action', 'pr/update/' + id);
-		});
-		$("#central-edit-modal").modal()
-						.on('shown.bs.modal', function() {
-				            $('.mdb-select-1').materialSelect();
-				   		}).on('hidden.bs.modal', function() {
-					        $('#modal-body-edit').html(modalLoadingContent);
-					    });
-	}
-
-	$.fn.delete = function(id) {
-		if (confirm('Are you sure you want to delete this purchase request?')) {
-			$('#form-validation').attr('action', 'pr/delete/' + id).submit();
-		}
-	}
-
-	$.fn.approve = function(id) {
-		if (confirm('Are you sure you want to approve this purchase request?')) {
-			$('#form-validation').attr('action', 'pr/approve/' + id).submit();
-		}
-	}
-
-	$.fn.disapprove = function(id) {
-		if (confirm('Are you sure you want to disapprove this purchase request?')) {
-			$('#form-validation').attr('action', 'pr/disapprove/' + id).submit();
-		}
-	}
-
-	$.fn.cancel = function(id) {
-		if (confirm('Are you sure you want to cancel this purchase request?')) {
-			$('#form-validation').attr('action', 'pr/cancel/' + id).submit();
-		}
-	}
-
-    $('.mdb-select-filter').materialSelect();
-
-
-
-
-
-
-
+    }
 
     $.fn.showCreate = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-create').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
+            $('.mdb-select').materialSelect();
             $(this).slideToggle(500);
-            toggleRoleInputs();
         });
-        $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
+        $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
-            $('#create-title').html('Create Role');
+            $('#create-title').html('Create Purchase Request');
 		}).on('hidden.bs.modal', function() {
 		    $('#modal-body-create').html('').css('display', 'none');
 		});
@@ -202,10 +138,8 @@ $(function() {
 
     $.fn.store = function() {
         const withError = inputValidation(false);
-        const jsonData = convertAccessToJson();
 
 		if (!withError) {
-            $('#json-access').val(jsonData);
 			$('#form-store').submit();
         }
     }
@@ -214,12 +148,12 @@ $(function() {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
+            $('.mdb-select').materialSelect();
             $(this).slideToggle(500);
-            toggleRoleInputs();
         });
-        $("#modal-sm-edit").modal({keyboard: false, backdrop: 'static'})
+        $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {
-            $('#edit-title').html('Update Role');
+            $('#edit-title').html('Update Purchase Request');
 		}).on('hidden.bs.modal', function() {
             $('#modal-body-edit').html('').css('display', 'none');
 		});
@@ -227,10 +161,8 @@ $(function() {
 
     $.fn.update = function() {
         const withError = inputValidation(false);
-        const jsonData = convertAccessToJson();
 
 		if (!withError) {
-            $('#json-access').val(jsonData);
 			$('#form-update').submit();
 		}
     }
@@ -239,7 +171,7 @@ $(function() {
 		$('#modal-body-delete').html(`Are you sure you want to delete '${name}'?`);
         $("#modal-delete").modal({keyboard: false, backdrop: 'static'})
 						  .on('shown.bs.modal', function() {
-            $('#delete-title').html('Delete Role');
+            $('#delete-title').html('Delete Purchase Request');
             $('#form-delete').attr('action', url);
 		}).on('hidden.bs.modal', function() {
              $('#modal-delete-body').html('');
@@ -251,4 +183,55 @@ $(function() {
         $('#form-delete').submit();
     }
 
+    $.fn.showApprove = function(url, name) {
+		$('#modal-body-approve').html(`Are you sure you want to approve '${name}'?`);
+        $("#modal-approve").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#approve-title').html('Approve Purchase Request');
+            $('#form-approve').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-approve-body').html('');
+             $('#form-approve').attr('action', '#');
+		});
+    }
+
+    $.fn.approve = function() {
+        $('#form-approve').submit();
+    }
+
+	$.fn.showDisapprove = function(url, name) {
+		$('#modal-body-disapprove').html(`Are you sure you want to disapprove '${name}'?`);
+        $("#modal-disapprove").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#disapprove-title').html('Disapprove Purchase Request');
+            $('#form-disapprove').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-disapprove-body').html('');
+             $('#form-disapprove').attr('action', '#');
+		});
+    }
+
+    $.fn.disapprove = function() {
+        $('#form-disapprove').submit();
+    }
+
+    $.fn.cancel = function() {
+        $('#form-cancel').submit();
+    }
+
+	$.fn.showCancel = function(url, name) {
+		$('#modal-body-cancel').html(`Are you sure you want to cancel '${name}'?`);
+        $("#modal-cancel").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#cancel-title').html('Cancel Purchase Request');
+            $('#form-cancel').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-cancel-body').html('');
+             $('#form-cancel').attr('action', '#');
+		});
+    }
+
+    $('.material-tooltip-main').tooltip({
+        template: template
+    });
 });

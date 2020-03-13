@@ -1,4 +1,4 @@
-<div class="modal fade top" id="modal-delete" tabindex="-1"
+<div class="modal fade top" id="modal-approve" tabindex="-1"
      role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-top" role="document">
         <!--Content-->
@@ -7,7 +7,7 @@
             <div class="modal-header danger-color-dark white-text">
                 <h7 class="mt-1">
                     <i class="fas fa-trash"></i>
-                    <span id="delete-title"></span>
+                    <span id="approve-title"></span>
                 </h7>
                 <button type="button" class="close white-text" data-dismiss="modal"
                         aria-label="Close">
@@ -17,15 +17,15 @@
 
             <!--Body-->
             <div class="modal-body p-4">
-                <h6 id="modal-body-delete"></h6>
-                <form id="form-delete" action="#" method="POST">@csrf</form>
+                <h6 id="modal-body-approve"></h6>
+                <form id="form-approve" action="#" method="POST">@csrf</form>
             </div>
 
             <!--Footer-->
             <div class="modal-footer p-1">
                 <button type="button" class="btn btn-red btn-sm waves-effect waves-light"
-                        onclick="$(this).delete();">
-                        <i class="fas fa-trash"></i> Delete
+                        onclick="$(this).approve();">
+                        <i class="fas fa-trash"></i> Approve
                 </button>
                 <button type="button" class="btn btn btn-light btn-sm waves-effect" data-dismiss="modal">
                     <i class="far fa-window-close"></i> Close

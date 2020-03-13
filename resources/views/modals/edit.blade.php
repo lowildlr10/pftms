@@ -1,4 +1,4 @@
-<div class="modal custom-fullwidth-modal fade top" id="central-edit-modal" tabindex="-1"
+<div class="modal custom-fullwidth-modal fade top" id="modal-lg-edit" tabindex="-1"
      role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-full-height modal-top" role="document">
         <!--Content-->
@@ -17,23 +17,9 @@
 
             <!--Body-->
             <div class="modal-body rgba-grey-slight">
-                <div id="modal-body-edit">
-                    <div class="mt-5" style="height: 150px;">
-                        <center>
-                            <div class="preloader-wrapper big active crazy">
-                                <div class="spinner-layer spinner-blue-only">
-                                    <div class="circle-clipper left">
-                                        <div class="circle"></div>
-                                    </div>
-                                    <div class="gap-patch">
-                                        <div class="circle"></div>
-                                    </div>
-                                    <div class="circle-clipper right">
-                                        <div class="circle"></div>
-                                    </div>
-                                </div>
-                            </div><br>
-                        </center>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="modal-body-edit" style="display: none;"></div>
                     </div>
                 </div>
             </div>
@@ -41,11 +27,11 @@
             <!--Footer-->
             <div class="modal-footer rgba-stylish-strong p-1">
                 <button type="button" class="btn btn-orange btn-sm waves-effect waves-light"
-                        onclick="$(this).createUpdateDoc();">
+                        onclick="$(this).update();">
                     <i class="fas fa-edit"></i> Update
                 </button>
                 <button type="button" class="btn btn btn-light btn-sm waves-effect" data-dismiss="modal">
-                    <i class="far fa-window-close"></i> Cancel
+                    <i class="far fa-window-close"></i> Close
                 </button>
             </div>
         </div>

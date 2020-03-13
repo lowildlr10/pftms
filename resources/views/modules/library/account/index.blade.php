@@ -69,10 +69,11 @@
                                 <thead class="mdb-color darken-3 white-text">
                                     <tr>
                                         <th class="th-md" width="3%"></th>
+                                        <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="10%">
                                             <strong>ID</strong>
                                         </th>
-                                        <th class="th-md" width="25%">
+                                        <th class="th-md" width="22%">
                                             <strong>Full Name</strong>
                                         </th>
                                         <th class="th-md" width="10%">
@@ -99,6 +100,13 @@
                                         @foreach ($list as $listCtr => $user)
                                     <tr>
                                         <td></td>
+                                        <td>
+                                            {!! $user->is_active == 'y' ?
+                                            '<i class="fas fa-user-check green-text material-tooltip-main"
+                                                data-toggle="tooltip" data-placement="left" title="Active"></i>' :
+                                            '<i class="fas fa-user-times red-text material-tooltip-main"
+                                                data-toggle="tooltip" data-placement="left" title="Inactive"></i>' !!}
+                                        </td>
                                         <td>{{ $user->emp_id }}</td>
                                         <td>
                                             {{ $user->firstname }}{{ !empty($user->middlename) ? ' '.$user->middlename[0].'. ' : ' ' }}{{ $user->lastname }}
