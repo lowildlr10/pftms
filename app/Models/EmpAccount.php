@@ -32,13 +32,20 @@ class User extends Authenticatable
         'province',
         'region',
         'group',
+        'role',
         'firstname',
         'middlename',
         'lastname',
         'gender',
         'position',
         'emp_type',
-        'username'
+        'username',
+        'email',
+        'address',
+        'mobile_no',
+        'is_active',
+        'avatar',
+        'signature'
     ];
 
     /**

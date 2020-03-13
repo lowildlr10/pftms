@@ -226,7 +226,8 @@
 
                                                     <div class="col-md-6">
                                                         <div class="md-form">
-                                                            <input id="password" type="password" name="password" class="form-control">
+                                                            <input id="password" type="password" name="password"
+                                                                   class="form-control required">
                                                             <label for="password">
                                                                 Password  <span class="red-text">*</span>
                                                             </label>

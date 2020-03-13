@@ -84,15 +84,22 @@
                                     <button class="btn btn-mdb-color btn-md">
                                         <i class="fas fa-door-open"></i> Log-in
                                     </button>
+                                    <a class="btn btn-link btn-md" href="{{ route('profile-registration') }}">
+                                        Click Here to Register
+                                    </a>
+                                    <!--
                                     <a class="btn btn-link btn-md" href="{{ route('password.request') }}">
                                         {{ __('Forgot Your Password?') }}
                                     </a>
+                                    -->
                                     <hr>
-                                    <p class="d-none d-md-block">
+                                    <p class="d-none d-block m-0">
+                                        <!--
                                         <strong>Not yet registered?</strong>
-                                        <a class="btn btn-green btn-md" href="{{ route('profile-registration') }}">
-                                            <i class="fas fa-pen"></i> sign-up
+                                        <a class="btn btn-link btn-md" href="{{ route('profile-registration') }}">
+                                            Click Here to Register
                                         </a>
+                                        -->
                                     </p>
                                 </div>
                             </form>

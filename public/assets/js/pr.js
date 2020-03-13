@@ -1,34 +1,7 @@
 $(function() {
-	function inputValidation(withError) {
-		var errorCount = 0;
-
-        $(".required").each(function() {
-            var inputField = $(this).val().replace(/^\s+|\s+$/g, "").length;
-            console.log($(this));
-
-			if (inputField == 0) {
-				$(this).addClass("input-error-highlighter");
-				errorCount++;
-			} else {
-				$(".input-quantity").each(function() {
-					if ($(this).val() == "0") {
-			            $(this).addClass("input-error-highlighter");
-			            errorCount++;
-			        }
-				});
-
-				$(this).removeClass("input-error-highlighter");
-			}
-		});
-
-		if (errorCount == 0) {
-			withError = false;
-		} else {
-			withError = true;
-		}
-
-		return withError;
-	}
+	const template = '<div class="tooltip md-tooltip">' +
+                     '<div class="tooltip-arrow md-arrow"></div>' +
+                     '<div class="tooltip-inner md-inner stylish-color"></div></div>';
 
 	$.fn.computeCost = function(cnt, obj) {
 		var objId;
@@ -203,6 +176,79 @@ $(function() {
 		}
 	}
 
-	$('.mdb-select-filter').materialSelect();
+    $('.mdb-select-filter').materialSelect();
+
+
+
+
+
+
+
+
+    $.fn.showCreate = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-create').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $(this).slideToggle(500);
+            toggleRoleInputs();
+        });
+        $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
+						     .on('shown.bs.modal', function() {
+            $('#create-title').html('Create Role');
+		}).on('hidden.bs.modal', function() {
+		    $('#modal-body-create').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.store = function() {
+        const withError = inputValidation(false);
+        const jsonData = convertAccessToJson();
+
+		if (!withError) {
+            $('#json-access').val(jsonData);
+			$('#form-store').submit();
+        }
+    }
+
+    $.fn.showEdit = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-edit').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $(this).slideToggle(500);
+            toggleRoleInputs();
+        });
+        $("#modal-sm-edit").modal({keyboard: false, backdrop: 'static'})
+						   .on('shown.bs.modal', function() {
+            $('#edit-title').html('Update Role');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-edit').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.update = function() {
+        const withError = inputValidation(false);
+        const jsonData = convertAccessToJson();
+
+		if (!withError) {
+            $('#json-access').val(jsonData);
+			$('#form-update').submit();
+		}
+    }
+
+    $.fn.showDelete = function(url, name) {
+		$('#modal-body-delete').html(`Are you sure you want to delete '${name}'?`);
+        $("#modal-delete").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#delete-title').html('Delete Role');
+            $('#form-delete').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-delete-body').html('');
+             $('#form-delete').attr('action', '#');
+		});
+    }
+
+    $.fn.delete = function() {
+        $('#form-delete').submit();
+    }
 
 });

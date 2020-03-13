@@ -9,6 +9,34 @@
         </label>
     </div>
 
+    <span class="d-block text-center">
+        <strong class="text-black-50">* EMPLOYEE DIVISION ACCESS *</strong>
+        <input type="hidden" name="module_access" id="json-access">
+    </span>
+    <hr class="my-2">
+
+    @if (count($divisions) > 0)
+    <div id="division-menu">
+        <div class="custom-control custom-checkbox ">
+            <input type="checkbox" class="custom-control-input" id="sel-all">
+            <label class="custom-control-label" for="sel-all">
+                <small><em>-- Select all division --</em></small>
+            </label>
+        </div>
+
+        @foreach ($divisions as $ctr => $div)
+        <div class="custom-control custom-checkbox ">
+            <input type="checkbox" class="custom-control-input" id="chk-{{ $ctr }}"
+                value="{{ $div->id }}" name="divisions[]">
+            <label class="custom-control-label" for="chk-{{ $ctr }}">
+                {!! $div->division_name !!}
+            </label>
+        </div>
+        @endforeach
+    </div>
+    <hr class="my-2">
+    @endif
+
     <div class="md-form">
         <select class="mdb-select md-form" searchable="Search here.."
                 name="group_head">

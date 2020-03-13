@@ -425,7 +425,7 @@ class AccountController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function indexProfile() {
+    public function indexProfile($type = 'profile') {
         $id = Auth::user()->id;
         $userData = User::addSelect([
             'division' => EmpDivision::select('division_name')
@@ -487,20 +487,36 @@ class AccountController extends Controller
         ]);
     }
 
-    public function showCreateProfile() {
+    public function showCreateProfile($type = 'profile') {
         $divisions = EmpDivision::orderBy('division_name')->get();
         $provinces = Province::orderBy('province_name')->get();
         $regions = Region::orderBy('region_name')->get();
 
-        return view('modules.profile.create', [
+        $viewDir = 'modules.profile.create';
+        $flashData = [
             'divisions' => $divisions,
             'provinces' => $provinces,
-            'regions' => $regions,
-        ]);
+            'regions' => $regions
+        ];
+
+        if ($type != 'profile') {
+            $roles = EmpRole::orderBy('role')->get();
+            $groups = EmpGroup::orderBy('group_name')->get();
+            $viewDir = 'modules.library.account.create';
+            $flashData['roles'] = $roles;
+            $flashData['groups'] = $groups;
+
+            return (object) [
+                'view_dir' => $viewDir,
+                'flash_data' => $flashData
+            ];
+        }
+
+        return view($viewDir, $flashData);
     }
 
-    public function showEditProfile() {
-        $id = Auth::user()->id;
+    public function showEditProfile($type = 'profile', $_id = '') {
+        $id = $type == 'profile' ? Auth::user()->id : $_id;
         $divisions = EmpDivision::orderBy('division_name')->get();
         $provinces = Province::orderBy('province_name')->get();
         $regions = Region::orderBy('region_name')->get();
@@ -523,7 +539,7 @@ class AccountController extends Controller
         $avatar = $userData->avatar;
         $signature = $userData->signature;
 
-        return view('modules.profile.update', [
+        $flashData = [
             'id' => $id,
             'divisions' => $divisions,
             'provinces' => $provinces,
@@ -544,10 +560,43 @@ class AccountController extends Controller
             'mobileNo' => $mobileNo,
             'avatar' => $avatar,
             'signature' => $signature,
-        ]);
+        ];
+
+        if ($type != 'profile') {
+            $roles = EmpRole::orderBy('role')->get();
+            $groups = EmpGroup::orderBy('group_name')->get();
+            $viewDir = 'modules.library.account.update';
+            $role = $userData->role;
+            $group = $userData->group;
+            $isActive = $userData->is_active;
+            $flashData['roles'] = $roles;
+            $flashData['groups'] = $groups;
+            $flashData['role'] = $role;
+            $flashData['group'] = $group;
+            $flashData['isActive'] = $isActive;
+
+            return (object) [
+                'view_dir' => $viewDir,
+                'flash_data' => $flashData
+            ];
+        }
+
+        return view('modules.profile.update', $flashData);
     }
 
-    public function storeProfile(Request $request) {
+    public function storeProfile(Request $request, $type = 'profile') {
+        $data = $this->storeUser($request);
+
+        return redirect('login')->with($data->alert_type, $data->msg);
+    }
+
+    public function updateProfile(Request $request) {
+        $data = $this->updateUser($request);
+
+        return redirect(url()->previous())->with($data->alert_type, $data->msg);
+    }
+
+    private function storeUser($request, $type = 'profile') {
         $empID = $request->emp_id;
         $firstname = $request->firstname;
         $middlename = $request->middlename;
@@ -566,6 +615,12 @@ class AccountController extends Controller
         $avatar = $request->file('avatar');
         $signature = $request->file('signature');
 
+        if ($type != 'profile') {
+            $role = $request->role;
+            $group = $request->group;
+            $isActive = $request->is_active;
+        }
+
         try {
             $instanceEmpAccount = new User;
             $instanceEmpAccount->emp_id = $empID;
@@ -582,6 +637,15 @@ class AccountController extends Controller
             $instanceEmpAccount->position = $position;
             $instanceEmpAccount->division = $division;
             $instanceEmpAccount->gender = $gender;
+
+            if ($type != 'profile') {
+                $instanceEmpAccount->role = $role;
+                $instanceEmpAccount->group = $group;
+                $instanceEmpAccount->is_active = $isActive;
+            }
+
+            $msgAlertType = '';
+            $msg = '';
 
             $pathAvatar = $this->uploadFile($request, 'avatar', $avatar, $instanceEmpAccount, $empID);
             $pathSignature = $this->uploadFile($request, 'esignature', $signature, $instanceEmpAccount, $empID);
@@ -600,16 +664,24 @@ class AccountController extends Controller
 
             $instanceEmpAccount->save();
 
-            $msg = "Your profile is successfully created. Contact your
-                    administrator for your account approval.";
-            return redirect('login')->with('success', $msg);
+            $msgAlertType = 'success';
+            $msg = $type == 'profile' ?
+                   "Profile successfully created. Please contact your
+                    administrator for your account approval." :
+                    "User account of '$firstname' with an employee ID of
+                    '$empID' successfully created.";
         } catch (\Throwable $th) {
+            $msgAlertType = 'failed';
             $msg = "Unknown error has occured. Please try again.";
-            return redirect(url()->previous())->with('failed', $msg);
         }
+
+        return (object) [
+            'alert_type' => $msgAlertType,
+            'msg' => $msg
+        ];
     }
 
-    public function updateProfile(Request $request) {
+    private function updateUser($request, $type = 'profile', $_id = '') {
         $id = Auth::user()->id;
         $empID = $request->emp_id;
         $firstname = $request->firstname;
@@ -629,6 +701,16 @@ class AccountController extends Controller
         $avatar = $request->file('avatar');
         $signature = $request->file('signature');
 
+        if ($type != 'profile') {
+            $id = $_id;
+            $role = $request->role;
+            $group = $request->group;
+            $isActive = $request->is_active;
+        }
+
+        $msgAlertType = '';
+        $msg = '';
+
         try {
             $instanceEmpAccount = User::find($id);
             $instanceEmpAccount->emp_id = $empID;
@@ -645,6 +727,12 @@ class AccountController extends Controller
             $instanceEmpAccount->position = $position;
             $instanceEmpAccount->division = $division;
             $instanceEmpAccount->gender = $gender;
+
+            if ($type != 'profile') {
+                $instanceEmpAccount->role = $role;
+                $instanceEmpAccount->group = $group;
+                $instanceEmpAccount->is_active = $isActive;
+            }
 
             $pathAvatar = $this->uploadFile($request, 'avatar', $avatar, $instanceEmpAccount, $empID);
             $pathSignature = $this->uploadFile($request, 'esignature', $signature, $instanceEmpAccount, $empID);
@@ -663,12 +751,20 @@ class AccountController extends Controller
 
             $instanceEmpAccount->save();
 
-            $msg = "Profile successfully updated.";
-            return redirect(url()->previous())->with('success', $msg);
+            $msgAlertType = 'success';
+            $msg = $type == 'profile' ?
+                   'Profile successfully updated.' :
+                    "User account of '$firstname' with an employee ID of
+                    '$empID' successfully updated.";
         } catch (\Throwable $th) {
+            $msgAlertType = 'failed';
             $msg = "Unknown error has occured. Please try again.";
-            return redirect(url()->previous())->with('failed', $msg);
         }
+
+        return (object) [
+            'alert_type' => $msgAlertType,
+            'msg' => $msg
+        ];
     }
 
     /** Library for Roles, Groups, and Accounts */
@@ -891,9 +987,11 @@ class AccountController extends Controller
                                   'position', 'id')
                          ->orderBy('firstname')
                          ->get();
+        $divisionData = EmpDivision::orderBy('division_name')->get();
 
         return view('modules.library.group.create', [
-            'employees' => $usersData
+            'employees' => $usersData,
+            'divisions' => $divisionData
         ]);
     }
 
@@ -902,26 +1000,32 @@ class AccountController extends Controller
                                   'position', 'id')
                          ->orderBy('firstname')
                          ->get();
+        $divisionData = EmpDivision::orderBy('division_name')->get();
         $userGroupData = EmpGroup::find($id);
         $groupName = $userGroupData->group_name;
+        $division = unserialize($userGroupData->division_access);
         $groupHead = $userGroupData->group_head;
 
         return view('modules.library.group.update', [
             'id' => $id,
             'groupName' => $groupName,
             'groupHead' => $groupHead,
-            'employees' => $usersData
+            'employees' => $usersData,
+            'divisions' => $divisionData,
+            'divisionAccess' => $division
         ]);
     }
 
     public function storeGroup(Request $request) {
         $groupName = $request->group_name;
+        $divisions = $request->divisions ? serialize($request->divisions) : NULL;
         $groupHead = $request->group_head;
 
         try {
             if (!$this->checkDuplication('EmpGroup', $groupName)) {
                 $instanceEmpGroup = new EmpGroup;
                 $instanceEmpGroup->group_name = $groupName;
+                $instanceEmpGroup->division_access = $divisions;
                 $instanceEmpGroup->group_head = $groupHead;
                 $instanceEmpGroup->save();
 
@@ -939,11 +1043,13 @@ class AccountController extends Controller
 
     public function updateGroup(Request $request, $id) {
         $groupName = $request->group_name;
+        $divisions = $request->divisions ? serialize($request->divisions) : NULL;
         $groupHead = $request->group_head;
 
         try {
             $instanceEmpGroup = EmpGroup::find($id);
             $instanceEmpGroup->group_name = $groupName;
+            $instanceEmpGroup->division_access = $divisions;
             $instanceEmpGroup->group_head = $groupHead;
             $instanceEmpGroup->save();
 
@@ -987,31 +1093,71 @@ class AccountController extends Controller
      *  Employee Acount Module
     **/
     public function indexAccount(Request $request) {
+        $userData = User::addSelect([
+            'division' => EmpDivision::select('division_name')
+                          ->whereColumn('id', 'emp_accounts.division')
+                          ->limit(1)
+        ])->orderBy('firstname', 'desc')->get();
 
+        return view('modules.library.account.index', [
+            'list' => $userData
+        ]);
     }
 
     public function showCreateAccount() {
+        $data = $this->showCreateProfile('account');
 
+        $viewDir = $data->view_dir;
+        $flashData = $data->flash_data;
+
+        return view($viewDir, $flashData);
     }
 
     public function showEditAccount($id) {
+        $data = $this->showEditProfile('account', $id);
 
+        $viewDir = $data->view_dir;
+        $flashData = $data->flash_data;
+
+        return view($viewDir, $flashData);
     }
 
     public function storeAccount(Request $request) {
+        $data = $this->storeUser($request, 'account');
 
+        return redirect(url()->previous())->with($data->alert_type, $data->msg);
     }
 
     public function updateAccount(Request $request, $id) {
+        $data = $this->updateUser($request, 'account', $id);
 
+        return redirect(url()->previous())->with($data->alert_type, $data->msg);
     }
 
     public function deleteAccount($id) {
+        try {
+            $instanceUser = User::find($id);
+            $firstname = $instanceUser->firstname;
+            $instanceUser->delete();
 
+            $msg = "User '$firstname' successfully deleted.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     public function destroyAccount($id) {
+        try {
+            User::destroy($id);
 
+            $msg = "User '$id' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     /**
@@ -1128,229 +1274,5 @@ class AccountController extends Controller
         }
 
         return ($dataCount > 0) ? 1 : 0;;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public function create() {
-        $divisions = Division::all();
-        $provinces = Province::all();
-        $regions = Region::all();
-        $roles = Role::all();
-        $userGroups = DB::table('tblemp_groups as group')
-                        ->select('group.id as group_id', DB::raw('CONCAT(emp.firstname, " ",
-                                 emp.lastname, " [ ", emp.position, " ]") as group_head'),
-                                 'group.group_name')
-                        ->join('tblemp_accounts as emp', 'emp.id', '=', 'group.group_head')
-                        ->orderBy('group.group_name')
-                        ->get();
-
-        $empID = "";
-        $firstname = "";
-        $middlename = "";
-        $lastname = "";
-        $address = "";
-        $province = "";
-        $region = "";
-        $mobileNo = "";
-        $email = "";
-        $username = "";
-        $password = "";
-        $role = "";
-        $empType = "";
-        $position = "";
-        $division = "";
-        $gender = "";
-        $active = "";
-        $avatar = "";
-        $signature = "";
-        $group = "";
-        $data = (object) ['emp_id' => $empID,
-                          'firstname' => $firstname,
-                          'middlename' => $middlename,
-                          'lastname' => $lastname,
-                          'address' => $address,
-                          'province_id' => $province,
-                          'region_id' => $region,
-                          'mobile_no' => $mobileNo,
-                          'email' => $email,
-                          'username' => $username,
-                          'password' => $password,
-                          'role' => $role,
-                          'emp_type' => $empType,
-                          'position' => $position,
-                          'division_id' => $division,
-                          'gender' => $gender,
-                          'active' => $active,
-                          'avatar' => $avatar,
-                          'signature' => $signature,
-                          'group' => $group];
-
-        return view('pages.create-edit-profile', ['divisions' => $divisions,
-                                                                'provinces' => $provinces,
-                                                                'regions' => $regions,
-                                                                'roles' => $roles,
-                                                                'userGroups' => $userGroups,
-                                                                'toggle' => 'create',
-                                                                'data' => $data]);
-    }
-
-    public function edit(Request $request, $empID) {
-        $emp = User::where('emp_id', $empID)->first();
-        $divisions = Division::all();
-        $provinces = Province::all();
-        $regions = Region::all();
-        $roles = Role::all();
-        $userGroups = DB::table('tblemp_groups as group')
-                        ->select('group.id as group_id', DB::raw('CONCAT(emp.firstname, " ",
-                                 emp.lastname, " [ ", emp.position, " ]") as group_head'),
-                                 'group.group_name')
-                        ->join('tblemp_accounts as emp', 'emp.id', '=', 'group.group_head')
-                        ->orderBy('group.group_name')
-                        ->get();
-
-        $empID = $emp->emp_id;
-        $firstname = $emp->firstname;
-        $middlename = $emp->middlename;
-        $lastname = $emp->lastname;
-        $address = $emp->address;
-        $province = $emp->province_id;
-        $region = $emp->region_id;
-        $mobileNo = $emp->mobile_no;
-        $email = $emp->email;
-        $username = $emp->username;
-        $password = "";
-        $role = $emp->role;
-        $empType = $emp->emp_type;
-        $position = $emp->position;
-        $division = $emp->division_id;
-        $gender = $emp->gender;
-        $active =  $emp->active;
-        $avatar = $emp->avatar;
-        $signature = $emp->signature;
-        $group = $emp->group;
-        $data = (object) ['emp_id' => $empID,
-                          'firstname' => $firstname,
-                          'middlename' => $middlename,
-                          'lastname' => $lastname,
-                          'address' => $address,
-                          'province_id' => $province,
-                          'region_id' => $region,
-                          'mobile_no' => $mobileNo,
-                          'email' => $email,
-                          'username' => $username,
-                          'password' => $password,
-                          'role' => $role,
-                          'emp_type' => $empType,
-                          'position' => $position,
-                          'division_id' => $division,
-                          'gender' => $gender,
-                          'active' => $active,
-                          'avatar' => $avatar,
-                          'signature' => $signature,
-                          'group' => $group];
-
-        return view('pages.create-edit-profile', ['divisions' => $divisions,
-                                                  'provinces' => $provinces,
-                                                  'regions' => $regions,
-                                                  'roles' => $roles,
-                                                  'userGroups' => $userGroups,
-                                                  'toggle' => 'update',
-                                                  'data' => $data]);
-    }
-
-    public function store(Request $request) {
-        $emp = new User;
-        $empID = $request['emp_id'];
-        $firstname = $request['firstname'];
-        $middlename = $request['middlename'];
-        $lastname = $request['lastname'];
-        $address = $request['address'];
-        $province = $request['province'];
-        $region = $request['region'];
-        $mobile_no = $request['mobile_no'];
-        $email = $request['email'];
-        $username = $request['username'];
-        $password = $request['password'];
-        $role = $request['role'];
-        $position = $request['position'];
-        $division = $request['division'];
-        $gender = $request['gender'];
-        $active = $request['active'];
-        $empType = $request['emp_type'];
-        $group = $request['group'];
-        $avatar = $request->file('avatar');
-        $signature = $request->file('signature');
-
-        $emp->emp_id = $empID;
-        $emp->firstname = $firstname;
-        $emp->middlename = $middlename;
-        $emp->lastname = $lastname;
-        $emp->address = $address;
-        $emp->region_id = $region;
-        $emp->province_id = $province;
-        $emp->mobile_no = $mobile_no;
-        $emp->email = $email;
-        $emp->username = $username;
-        $emp->role = $role;
-        $emp->emp_type = $empType;
-        $emp->position = $position;
-        $emp->division_id = $division;
-        $emp->gender = $gender;
-        $emp->active = $active;
-        $emp->group = $group;
-        $emp->password = bcrypt($password);
-
-        try {
-            $emp->emp_id = $empID;
-            $emp->firstname = $firstname;
-            $emp->middlename = $middlename;
-            $emp->lastname = $lastname;
-            $emp->address = $address;
-            $emp->region_id = $region;
-            $emp->province_id = $province;
-            $emp->mobile_no = $mobile_no;
-            $emp->email = $email;
-            $emp->username = $username;
-            $emp->role = $role;
-            $emp->position = $position;
-            $emp->division_id = $division;
-            $emp->gender = $gender;
-            $emp->active = $active;
-            $emp->password = bcrypt($password);
-            $emp->avatar = $this->uploadFile($request, 'avatar', $avatar, $emp);
-            $emp->signature = $this->uploadFile($request, 'esignature', $signature, $emp);
-            $emp->save();
-
-            $msg = "Successfully created the employee $empID.";
-            return redirect(url()->previous())->with('success', $msg);
-        } catch (Exception $e) {
-            $msg = "There is an error encountered creating the employee $empID.";
-            return redirect(url()->previous())->with('failed', "Successfully updated the employee $empID.");
-        }
-    }
-
-    public function delete($empID) {
-        try {
-            $emp = User::where('emp_id', $empID)->first();
-            $_emp = User::where('emp_id', $empID)->delete();
-            $empID = $emp->emp_id;
-
-            $msg = "Successfully deleted the employee $empID.";
-            return redirect(url()->previous())->with('success', $msg);
-        } catch (Exception $e) {
-            $msg = "There is an error encountered deleting the employee $empID.";
-            return redirect(url()->previous())->with('failed', "Successfully updated the employee $empID.");
-        }
     }
 }
