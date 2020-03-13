@@ -41,10 +41,12 @@
                                 narrower py-2 px-2 mb-1 d-flex justify-content-between
                                 align-items-center">
                         <div>
+                            @if ($isAllowedCreate)
                             <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
                                     onclick="$(this).showCreate('{{ route('pr-show-create') }}');">
                                 <i class="fas fa-pencil-alt"></i> Create
                             </button>
+                            @endif
                         </div>
                         <div>
                             <button class="btn btn-outline-white btn-rounded btn-sm px-2"
@@ -123,11 +125,14 @@
                                         <td>{{ $pr->date_pr }}</td>
                                         <td>{{ $pr->funding_source }}</td>
                                         <td>
-                                            <i class="fas fa-caret-right"></i> {{ (strlen($pr->purpose) > 150) ? substr($pr->purpose, 0, 150).'...' : $pr->purpose }}
+                                            <i class="fas fa-caret-right"></i> {{
+                                                (strlen($pr->purpose) > 150) ?
+                                                substr($pr->purpose, 0, 150).'...' : $pr->purpose
+                                            }}
                                         </td>
                                         <td>{{ $pr->name }}</td>
                                         <td align="center">
-                                            <a class="btn btn-link p-0" href="{{ route('pr-tracker', ['id' => $pr->pr_no]) }}">
+                                            <a class="btn btn-link p-0" href="{{ route('pr-tracker', ['prNo' => $pr->pr_no]) }}">
                                                 <strong><i class="far fa-eye"></i><br>{{ $pr->status_name }}</strong></td>
                                             </a>
                                         <td align="center">
@@ -166,10 +171,10 @@
         <div class="modal-content">
             <!--Header-->
             <div class="modal-header stylish-color-dark white-text">
-                <h6>
+                <h7>
                     <i class="fas fa-shopping-cart"></i>
                     <strong>PR NO: {{ $pr->pr_no }}</strong>
-                </h6>
+                </h7>
                 <button type="button" class="close white-text" data-dismiss="modal"
                         aria-label="Close">
                     &times;
@@ -186,17 +191,21 @@
                                         onclick="$(this).showPrint('{{ $pr->id }}', 'pr');">
                                     <i class="fas fa-print blue-text"></i> Print PR
                                 </button>
+
+                                @if ($isAllowedUpdate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showEdit('{{ route('pr-show-edit',
-                                                                            ['id' => $pr->id]) }}');">
+                                        onclick="$(this).showEdit('{{ route('pr-show-edit', ['id' => $pr->id]) }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
-                                @if (Auth::user->hasModuleAccess(Auth::user()->role, 'proc_pr', 'delete'))
+                                @endif
+
+                                @if ($isAllowedDelete)
                                     @if ($pr->status == 1)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).delete('{{ $pr->id }}');">
+                                        onclick="$(this).showDelete('{{ route('pr-delete', ['id' => $pr->id]) }}',
+                                                                              '{{ $pr->pr_no }}');">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
                                     @else
@@ -213,18 +222,21 @@
                     <div class="card-body">
                         <p>
                             <strong>PR Date: </strong> {{ $pr->date_pr }}<br>
-                            <strong>Charging: </strong> {{ $pr->project }}<br>
-                            <strong>Purpose: </strong> {{ $pr->purpose }}<br>
+                            <strong>Charging: </strong> {{ $pr->funding_source }}<br>
+                            <strong>Purpose: </strong> {{
+                                (strlen($pr->purpose) > 150) ?
+                                substr($pr->purpose, 0, 150).'...' : $pr->purpose
+                            }}<br>
                             <strong>Requested By: </strong> {{ $pr->name }}<br>
                         </p>
                         <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
                                 btn-block waves-effect mb-2"
-                                onclick="$(this).showPrint('{{ $pr->id }}', 'pr');">
+                                onclick="$(this).showItem('{{ route('pr-show-items', ['id' => $pr->id]) }}');">
                             <i class="far fa-list-alt fa-lg"></i> View Items
                         </button>
                         <a class="btn btn-sm btn-outline-mdb-color btn-rounded
                                   btn-block waves-effect"
-                           href="{{ url('procurement/pr/tracker/' . $pr->pr_no) }}">
+                           href="{{ route('pr-tracker', ['prNo' => $pr->pr_no] ) }}">
                             <i class="far fa-eye"></i> Track PR Status
                         </a>
                     </div>
@@ -234,20 +246,27 @@
                     <li class="list-group-item justify-content-between">
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
-                    @if (Auth::user()->role == 1 || Auth::user()->role == 2)
-                        @if ($pr->status == 1)
+
+                    @if ($pr->status == 1)
+                        @if ($isAllowedApprove)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-md btn-block btn-rounded"
                                 onclick="$(this).approve('{{ $pr->id }}');">
                             <i class="fas fa-thumbs-up"></i> Approve
                         </button>
                     </li>
+                        @endif
+
+                        @if ($isAllowedApprove)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-black waves-effect btn-md btn-block btn-rounded"
                                 onclick="$(this).disapprove('{{ $pr->id }}');">
                             <i class="fas fa-thumbs-down"></i> Disapprove
                         </button>
                     </li>
+                        @endif
+
+                        @if ($isAllowedCancel)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-red waves-effect btn-md btn-block btn-rounded"
                                 onclick="$(this).cancel('{{ $pr->id }}');">
@@ -255,36 +274,17 @@
                         </button>
                     </li>
                         @endif
-                        @if ($pr->status >= 5)
+                    @endif
+
+                    @if ($pr->status >= 5)
+                        @if ($isAllowedRFQ)
                     <li class="list-group-item justify-content-between">
-                        <a href="{{ url('procurement/rfq?search='.$pr->pr_no) }}"
+                        <a href="{{ redirect(route('rfq'))->with('search', $pr->pr_no) }}"
                            class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
                             Generate RFQ <i class="fas fa-angle-double-right"></i>
                         </a>
                     </li>
                         @endif
-                    @else
-                        @if ($pr->status >= 5)
-                    <li class="list-group-item justify-content-between">
-                        <a href="{{ url('procurement/rfq?search='.$pr->pr_no) }}"
-                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
-                            Generate RFQ <i class="fas fa-angle-double-right"></i>
-                        </a>
-                    </li>
-                        @endif
-                        @if ($pr->status != 3)
-                    <li class="list-group-item justify-content-between">
-                        <button type="button" class="btn btn-outline-red waves-effect btn-md btn-block btn-rounded"
-                                onclick="$(this).cancel('{{ $pr->id }}');">
-                            <i class="fas fa-ban"></i> Cancel
-                        </button>
-                    </li>
-                        @endif
-                    <li class="list-group-item justify-content-between">
-                        <h6 class="red-text">
-                            <i class="fas fa-asterisk"></i> Other feature is disabled for this account.
-                        </h6>
-                    </li>
                     @endif
                 </ul>
             </div>
@@ -305,6 +305,9 @@
 @include('modals.create')
 @include('modals.edit')
 @include('modals.delete')
+@include('modals.approve')
+@include('modals.disapprove')
+@include('modals.cancel')
 @include('modals.print')
 
 @endsection

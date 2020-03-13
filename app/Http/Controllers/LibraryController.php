@@ -377,7 +377,7 @@ class LibraryController extends Controller
         $module = $request->module;
         $module = str_replace("\n", '', $module);
         $module = trim($module);
-        $module = preg_replace('/\s/', '', $module );
+        //$module = preg_replace('/\s/', '', $module );
         $sigName =  User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                         ->where('id', $empID)
                         ->first();
@@ -406,7 +406,7 @@ class LibraryController extends Controller
         $module = $request->module;
         $module = str_replace("\n", '', $module);
         $module = trim($module);
-        $module = preg_replace('/\s/', '', $module );
+        //$module = preg_replace('/\s/', '', $module );
         $sigName =  User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                         ->where('id', $empID)
                         ->first();

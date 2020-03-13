@@ -242,7 +242,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'uses' => 'PurchaseRequestController@delete',
         'module' => 'proc_pr',
         'access' => 'delete'
-    ]);
+    ])->name('pr-delete');
     Route::post('procurement/pr/approve/{id}', [
         'uses' => 'PurchaseRequestController@approve',
         'module' => 'proc_pr',
