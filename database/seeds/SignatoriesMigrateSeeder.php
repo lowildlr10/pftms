@@ -65,7 +65,7 @@ class SignatoriesMigrateSeeder extends Seeder
                 if (!array_key_exists($empID, $modules)) {
                     $modules[$empID] = [
                         'pr' => [
-                            'is_allowed' => 0,
+                            'is_allowed' => $isPR,
                             'designation' => $isPR ? $designation : '',
                             'approval' => $prSignType == 'approval' ? 1 : 0,
                             'within_app' => $prSignType == 'within-app' ? 1 : 0,
@@ -73,67 +73,67 @@ class SignatoriesMigrateSeeder extends Seeder
                             'recommended_by' => $prSignType == 'recommended-by' ? 1 : 0,
                         ],
                         'rfq' => [
-                            'is_allowed' => 0,
+                            'is_allowed' => $isRFQ,
                             'designation' => $isRFQ ? $designation : '',
                             'truly_yours' => $isRFQ ? 1 : 0,
                         ],
                         'abs' => [
-                            'is_allowed' => 0,
+                            'is_allowed' => $isABS,
                             'designation' => $isABS ? $designation : '',
                             'chairperson' => $absSignType == 'chairperson' ? 1 : 0,
                             'vice_chair' => $absSignType == 'vice-chairperson' ? 1 : 0,
                             'member' => $absSignType == 'member' ? 1 : 0,
                         ],
                         'po' => [
-                            'is_allowed' => 0,
+                            'is_allowed' => $isPO,
                             'designation' => $isPO ? $designation : '',
                             'funds_available' => $poSignType == 'accountant' ? 1 : 0,
                             'requisitioning' => $poSignType == 'requisitioning' ? 1 : 0,
                             'approved' => $poSignType == 'approval' ? 1 : 0,
                         ],
                         'ors' => [
-                            'is_allowed' => 0,
+                            'is_allowed' => $isORS,
                             'designation' => $isORS ? $designation : '',
                             'approval' => $orsSignType == 'approval' ? 1 : 0,
                             'funds_available' => $orsSignType == 'budget' ? 1 : 0,
                         ],
                         'iar' => [
-                            'is_allowed' => 0,
+                            'is_allowed' => $isIAR,
                             'designation' => $isIAR ? $designation : '',
                             'inspection' => $iarSignType == 'inspector' ? 1 : 0,
                             'prop_supply' => $iarSignType == 'custodian' ? 1 : 0,
                         ],
                         'dv' => [
-                            'is_allowed' => 0,
+                            'is_allowed' => $isDV,
                             'designation' => $isDV ? $designation : '',
                             'supervisor' => $dvSignType == 'supervisor' ? 1 : 0,
                             'accounting' => $dvSignType == 'accountant' ? 1 : 0,
                             'agency_head' => $dvSignType == 'agency-head' ? 1 : 0,
                         ],
                         'ris' => [
-                            'is_allowed' => 0,
+                            'is_allowed' => $isRIS,
                             'designation' => $isRIS ? $designation : '',
                             'approved_by' => $risSignType == 'approval' ? 1 : 0,
                             'issued_by' => $risSignType == 'issuer' ? 1 : 0,
                         ],
                         'par' => [
-                            'is_allowed' => 0,
+                            'is_allowed' => $isPAR,
                             'designation' => $isPAR ? $designation : '',
                             'issued_by' => $parSignType == 'issuer' ? 1 : 0,
                         ],
                         'ics' => [
-                            'is_allowed' => 0,
+                            'is_allowed' => $isICS,
                             'designation' => $isICS ? $designation : '',
                             'received_from' => $icsSignType == 'issuer' ? 1 : 0,
                         ],
                         'lr' => [
-                            'is_allowed' => 0,
+                            'is_allowed' => $isLR,
                             'designation' => $isLR ? $designation : '',
                             'immediate_sup' => $lrSignType == 'supervisor' ? 1 : 0,
                             'accounting' => $lrSignType == 'accountant' ? 1 : 0,
                         ],
                         'lddap' => [
-                            'is_allowed' => 0,
+                            'is_allowed' => $isLDDAP,
                             'designation' => $isLDDAP ? $designation : '',
                             'cert_correct' => $lddapSignType == 'cert_correct' ? 1 : 0,
                             'approval' => $lddapSignType == 'approval' ? 1 : 0,
@@ -204,15 +204,19 @@ class SignatoriesMigrateSeeder extends Seeder
 
                     switch ($prSignType) {
                         case 'approval':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['pr']['approval'] = 1;
                             break;
                         case 'within-app':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['pr']['within_app'] = 1;
                             break;
                         case 'funds-available':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['pr']['funds_available'] = 1;
                             break;
                         case 'recommended-by':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['pr']['recommended_by'] = 1;
                             break;
                         default:
@@ -221,12 +225,15 @@ class SignatoriesMigrateSeeder extends Seeder
 
                     switch ($absSignType) {
                         case 'chairperson':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['abs']['chairperson'] = 1;
                             break;
                         case 'vice-chairperson':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['abs']['vice_chair'] = 1;
                             break;
                         case 'member':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['abs']['member'] = 1;
                             break;
                         default:
@@ -235,12 +242,15 @@ class SignatoriesMigrateSeeder extends Seeder
 
                     switch ($poSignType) {
                         case 'accountant':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['po']['funds_available'] = 1;
                             break;
                         case 'requisitioning':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['po']['requisitioning'] = 1;
                             break;
                         case 'approval':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['po']['approved'] = 1;
                             break;
                         default:
@@ -249,9 +259,11 @@ class SignatoriesMigrateSeeder extends Seeder
 
                     switch ($orsSignType) {
                         case 'approval':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['ors']['approval'] = 1;
                             break;
                         case 'budget':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['ors']['funds_available'] = 1;
                             break;
                         default:
@@ -260,9 +272,11 @@ class SignatoriesMigrateSeeder extends Seeder
 
                     switch ($iarSignType) {
                         case 'inspector':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['iar']['inspection'] = 1;
                             break;
                         case 'custodian':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['iar']['prop_supply'] = 1;
                             break;
                         default:
@@ -271,12 +285,15 @@ class SignatoriesMigrateSeeder extends Seeder
 
                     switch ($dvSignType) {
                         case 'supervisor':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['dv']['supervisor'] = 1;
                             break;
                         case 'accountant':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['dv']['accounting'] = 1;
                             break;
                         case 'agency-head':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['dv']['agency_head'] = 1;
                             break;
                         default:
@@ -285,9 +302,11 @@ class SignatoriesMigrateSeeder extends Seeder
 
                     switch ($risSignType) {
                         case 'approval':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['ris']['approved_by'] = 1;
                             break;
                         case 'issuer':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['ris']['issued_by'] = 1;
                             break;
                         default:
@@ -296,6 +315,7 @@ class SignatoriesMigrateSeeder extends Seeder
 
                     switch ($parSignType) {
                         case 'issuer':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['par']['issued_by'] = 1;
                             break;
                         default:
@@ -304,6 +324,7 @@ class SignatoriesMigrateSeeder extends Seeder
 
                     switch ($icsSignType) {
                         case 'issuer':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['ics']['received_from'] = 1;
                             break;
                         default:
@@ -312,9 +333,11 @@ class SignatoriesMigrateSeeder extends Seeder
 
                     switch ($lrSignType) {
                         case 'supervisor':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['lr']['immediate_sup'] = 1;
                             break;
                         case 'accountant':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['lr']['accounting'] = 1;
                             break;
                         default:
@@ -323,12 +346,15 @@ class SignatoriesMigrateSeeder extends Seeder
 
                     switch ($lddapSignType) {
                         case 'cert_correct':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['lddap']['cert_correct'] = 1;
                             break;
                         case 'approval':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['lddap']['approval'] = 1;
                             break;
                         case 'agency_authorized':
+                            $modules[$empID]['pr']['is_allowed'] = 1;
                             $modules[$empID]['lddap']['agency_auth'] = 1;
                             break;
                         default:
