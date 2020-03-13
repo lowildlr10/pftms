@@ -15,10 +15,11 @@ class CreateEmpGroupsTable extends Migration
     {
         Schema::create('emp_groups', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            
+
             $table->uuid('id')->primary();
             $table->string('group_name');
             $table->uuid('group_head')->nullable();
+            $table->binary('division_access')->nullable();
             $table->foreign('group_head')->references('id')->on('emp_accounts');
             $table->softDeletes();
             $table->timestamps();

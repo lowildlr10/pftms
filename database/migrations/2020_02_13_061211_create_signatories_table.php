@@ -19,7 +19,7 @@ class CreateSignatoriesTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('emp_id')->unique();
             $table->foreign('emp_id')->references('id')->on('emp_accounts');
-            $table->text('module');
+            $table->binary('module')->nullable();
             $table->enum('is_active', ['y', 'n'])->default('n');
             $table->softDeletes();
             $table->timestamps();
