@@ -158,11 +158,19 @@ class User extends Authenticatable
     }
 
     public function log($request, $msg) {
+        $empID = $this->id;
+        $requestURI = $request->getRequestUri();
+        $method = $request->getMethod();
+        $host = $request->header('host');
+        $userAgent = $request->header('User-Agent');
+
         $instanceEmpLog = new Log;
-        $info = $request->header('User-Agent');
-
-        dd($request);
-
-        //$instanceEmpLog->save();
+        $instanceEmpLog->emp_id = $empID;
+        $instanceEmpLog->request = $requestURI;
+        $instanceEmpLog->method = $method;
+        $instanceEmpLog->host = $host;
+        $instanceEmpLog->user_agent = $userAgent;
+        $instanceEmpLog->remarks = $msg;
+        $instanceEmpLog->save();
     }
 }

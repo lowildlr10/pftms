@@ -1103,7 +1103,7 @@ class AccountController extends Controller
             'division' => EmpDivision::select('division_name')
                           ->whereColumn('id', 'emp_accounts.division')
                           ->limit(1)
-        ])->orderBy('firstname', 'desc')->get();
+        ])->orderBy('firstname')->get();
 
         return view('modules.library.account.index', [
             'list' => $userData
@@ -1174,7 +1174,7 @@ class AccountController extends Controller
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'emp_logs.emp_id')
                           ->limit(1)
-        ])->orderBy('created_at', 'desc')->get();
+        ])->orderBy('logged_at', 'desc')->get();
 
         return view('modules.library.user-log.index', [
             'list' => $userLogData

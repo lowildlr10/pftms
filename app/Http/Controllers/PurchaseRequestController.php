@@ -22,7 +22,6 @@ use App\Models\Signatory;
 use App\Models\EmpLog;
 use App\Models\DocumentLog;
 use App\Models\PaperSize;
-use Carbon\Carbon;
 use DB;
 use Auth;
 
@@ -101,12 +100,17 @@ class PurchaseRequestController extends Controller
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
         $fundingSources = FundingSource::orderBy('source_name')->get();
-        $divisions = EmpDivision::orderBy('division_name')->get();
+        $divisions = $roleHasOrdinary ?
+                    EmpDivision::where('id', Auth::user()->division)
+                               ->orderBy('division_name')
+                               ->get() :
+                     EmpDivision::orderBy('division_name')->get();
         $users = $roleHasOrdinary ?
+                User::where('id', Auth::user()->id)
+                    ->orderBy('firstname')
+                    ->get() :
                 User::where('is_active', 'y')
-                    ->orderBy('firstname')->get() :
-                User::orderBy('firstname')
-                    ->get();
+                    ->orderBy('firstname')->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -225,9 +229,10 @@ class PurchaseRequestController extends Controller
                 $prNo = $currentYearMonth . '001';
             }
 
-            if (!$this->checkDuplication('PurchaseRequest', $prNo)) {
+            $instancePR = new PurchaseRequest;
+
+            if (!$instancePR->checkDuplication($prNo)) {
                 // Storing main PR data
-                $instancePR = new PurchaseRequest;
                 $instancePR->date_pr = $prDate;
                 $instancePR->pr_no = $prNo;
                 $instancePR->funding_source = $projectID;
@@ -238,7 +243,6 @@ class PurchaseRequestController extends Controller
                 $instancePR->approved_by = $approvedBy;
                 $instancePR->recommended_by = $recommendedBy;
                 $instancePR->office = $office;
-                $instancePR->code = $this->generateTrackerCode('pr', $prNo, 3);
                 $instancePR->status = 1;
                 $instancePR->save();
 
@@ -263,15 +267,11 @@ class PurchaseRequestController extends Controller
                     $instancePRItem->save();
                 }
 
-                /*
-                $this->notifyForApproval($prNo, $requestedBy);
-
-                $logEmpMessage = "created a new purchase request $prNo.";
-                $this->logEmployeeHistory($logEmpMessage);
-
-                $this->logTrackerHistory($pr->code, Auth::user()->emp_id, 0, 'issued');*/
+                //$this->notifyForApproval($prNo, $requestedBy);
+                $prData->logDocument($prID, Auth::user()->id, NULL, 'issued');
 
                 $msg = "Purchase Request '$prNo' successfully created.";
+                Auth::user()->log($request, $msg);
                 return redirect(url()->previous())->with('success', $msg);
             } else {
                 $msg = "Purchase Request '$prNo' has a duplicate.";
@@ -437,27 +437,7 @@ class PurchaseRequestController extends Controller
 
     }
 
-    private function checkDuplication($model, $data) {
-        switch ($model) {
-            case 'PurchaseRequest':
-                $dataCount = PurchaseRequest::where('pr_no', $data)
-                                            ->count();
-                break;
 
-            default:
-                $dataCount = 0;
-                break;
-        }
-
-        return ($dataCount > 0) ? 1 : 0;;
-    }
-
-    private function generateTrackerCode($modAbbr, $pKey, $modClass) {
-        $modAbbr = strtoupper($modAbbr);
-        $pKey = strtoupper($pKey);
-
-        return $modAbbr . "-" . $pKey . "-" . $modClass . "-" . date('mdY');
-    }
 
 
 
@@ -979,218 +959,5 @@ class PurchaseRequestController extends Controller
                           'msg' => $msgNotif,
                           'redirect' => 'procurement/pr?search=' . $prNo];
         $user->notify(new PurchaseReqAction($data));
-    }
-
-
-
-    private function logEmployeeHistory($msg, $emp = "") {
-        $empLog = new EmployeeLog;
-        $empLog->emp_id = empty($emp) ? Auth::user()->emp_id: $emp;
-        $empLog->message = $msg;
-        $empLog->save();
-    }
-
-    private function logTrackerHistory($code, $empFrom, $empTo, $action, $remarks = "") {
-        $docHistory = new DocumentLogHistory;
-        $docHistory->code = $code;
-        $docHistory->date = Carbon::now();
-        $docHistory->emp_from = $empFrom;
-        $docHistory->emp_to = $empTo;
-        $docHistory->action = $action;
-        $docHistory->remarks = $remarks;
-        $docHistory->save();
-    }
-
-    private function getEmployeeName($empID) {
-        $employee = DB::table('emp_accounts')
-                      ->where('emp_id', $empID)
-                      ->first();
-        $fullname = "";
-
-        if ($employee) {
-            if (!empty($employee->middlename)) {
-                $fullname = $employee->firstname . " " . $employee->middlename[0] . ". " .
-                            $employee->lastname;
-            } else {
-                $fullname = $employee->firstname . " " . $employee->lastname;
-            }
-
-            $fullname = strtoupper($fullname);
-        }
-
-        return $fullname;
-    }
-
-    private function checkDocStatus($code) {
-        $logs = DB::table('tbldocument_logs_history')
-                 ->where('code', $code)
-                 ->orderBy('created_at', 'desc')
-                 ->get();
-        $currentStatus = (object) ["issued_by" => NULL,
-                                    "issued_to" => NULL,
-                                    "date_issued" => NULL,
-                                    "received_by" => NULL,
-                                    "date_received" => NULL,
-                                    "issued_back_by" => NULL,
-                                    "date_issued_back" => NULL,
-                                    "received_back_by" => NULL,
-                                    "date_received_back" => NULL,
-                                    "issued_remarks" => NULL,
-                                    "issued_back_remarks" => NULL,
-                                    "issued_remarks" => NULL,
-                                    "issued_back_remarks" => NULL];
-
-        if (count($logs) > 0) {
-            foreach ($logs as $log) {
-                if ($log->action != "-") {
-                    switch ($log->action) {
-                        case 'issued':
-                            $currentStatus->issued_remarks = $log->remarks;
-                            $currentStatus->issued_by = $this->getEmployeeName($log->emp_from);
-                            $currentStatus->issued_to = $this->getEmployeeName($log->emp_to);
-                            $currentStatus->date_issued = $log->date;
-                            $currentStatus->remarks = $log->remarks;
-                            break;
-
-                        case 'received':
-                            $currentStatus->received_by = $this->getEmployeeName($log->emp_from);
-                            $currentStatus->date_received = $log->date;
-                            break;
-
-                        case 'issued_back':
-                            $currentStatus->issued_back_remarks = $log->remarks;
-                            $currentStatus->issued_back_by = $this->getEmployeeName($log->emp_from);
-                            $currentStatus->date_issued_back = $log->date;
-                            $currentStatus->remarks = $log->remarks;
-                            break;
-
-                        case 'received_back':
-                            $currentStatus->received_back_by = $this->getEmployeeName($log->emp_from);
-                            $currentStatus->date_received_back = $log->date;
-                            break;
-
-                        default:
-                            # code...
-                            break;
-                    }
-                } else {
-                    break;
-                }
-            }
-        }
-
-        return $currentStatus;
-    }
-
-    // For debugging purposes
-    public function tableUpdate() {
-        $po = DB::table('tblpo_jo')->get();
-
-        foreach ($po as $dat) {
-            $poNo = $dat->po_no;
-            $dateCleared = $dat->date_po_approved;
-            if (!empty($dateCleared)) {
-                DB::table('tblpo_jo')
-                  ->where('po_no', $poNo)
-                  ->update(['date_accountant_signed' => $dateCleared]);
-            }
-        }
-
-        /*
-        $pr = PurchaseRequest::all();
-        $canvass = Canvass::all();
-        $abstract = Abstracts::all();
-        $po = DB::table('tblpo_jo')->get();
-        $ors = OrsBurs::all();
-        $iar = DB::table('tbliar')->get();
-        $dv = DisbursementVoucher::all();
-        $inv = InventoryStock::all();
-
-        $tableArray = ['PR' => $pr,
-                       'RFQ' => $canvass,
-                       'ABSTRACT' => $abstract,
-                       'PO-JO' => $po,
-                       'ORS-BURS' => $ors,
-                       'IAR' => $iar,
-                       'DV' => $dv,
-                       'STOCK' => $inv];
-
-        foreach ($tableArray as $key => $table) {
-            foreach ($table as $data) {
-                switch ($key) {
-                    case 'PR':
-                        $primaryID = $data->id;
-                        $documentType = $key;
-                        break;
-
-                    case 'RFQ':
-                        $primaryID = $data->pr_id;
-                        $documentType = $key;
-                        break;
-
-                    case 'ABSTRACT':
-                        $primaryID = $data->pr_id;
-                        $documentType = $key;
-                        break;
-
-                    case 'PO-JO':
-                        $primaryID = $data->po_no;
-                        $documentType = $data->document_abrv;
-                        $data = PurchaseOrder::where('po_no', $primaryID)
-                                             ->first();
-                        break;
-
-                    case 'ORS-BURS':
-                        $primaryID = $data->id;
-                        $documentType = $data->document_type;
-                        break;
-
-                    case 'IAR':
-                        $primaryID = $data->iar_no;
-                        $documentType = $key;
-                        $data = InspectionAcceptance::where('iar_no', $primaryID)
-                                                    ->first();
-                        break;
-
-                    case 'DV':
-                        $primaryID = $data->id;
-                        $documentType = $key;
-                        break;
-
-                    case 'STOCK':
-                        $primaryID = $data->id;
-                        $documentType = $key;
-                        break;
-
-                    default:
-                        # code...
-                        break;
-                }
-
-                $doc = DB::table('tbldocument_logs')
-                         ->select('code', 'created_at')
-                         ->where('primary_id', $primaryID)
-                         ->where('document_type', $documentType)
-                         ->first();
-
-                if ($doc) {
-                    if (empty($data->created_at)) {
-                        $data->created_at = $doc->created_at;
-                    }
-
-                    if ($key != "STOCK") {
-                        $data->code = $doc->code;
-                        $data->save();
-                    }
-                }
-
-                if ($key == 'STOCK') {
-                    if (empty($data->code)) {
-                        $data->code = $this->generateTrackerCode($key, $data->inventory_no, 5);
-                        $data->save();
-                    }
-                }
-             }
-        }*/
     }
 }
