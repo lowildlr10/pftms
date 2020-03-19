@@ -42,9 +42,17 @@ class RolesTableSeeder extends Seeder
             $rol->modules = trim($rol->modules);
             $rol->modules = preg_replace('/\s/', '', $rol->modules );
 
+            if ($rol->role == 'Ordinary User') {
+                $isOrdinary = 'y';
+            } else {
+                $isOrdinary = 'n';
+            }
+
+
             $role = new EmpRole;
             $role->role = $rol->role;
             $role->module_access = $rol->modules;
+            $role->is_ordinary = $isOrdinary;
             $role->save();
         }
     }

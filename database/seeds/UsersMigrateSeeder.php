@@ -52,7 +52,7 @@ class UsersMigrateSeeder extends Seeder
             $roleData = DB::connection('mysql-old-pftms')->table('tblemp_role')->where('id', $usr->role)->first();
             $empRole = EmpRole::where('role', 'like', "%".$roleData->role."%")->first();
 
-            $user->role = $empRole->id;
+            $user->roles = serialize([$empRole->id]);
             $user->region = $region->id;
             $user->province = $province->id;
             $user->division = $empDivision->id;

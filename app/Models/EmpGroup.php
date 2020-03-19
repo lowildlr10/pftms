@@ -25,6 +25,7 @@ class EmpGroup extends Model
     protected $fillable = [
         'id',
         'group_name',
+        'division_access',
         'group_head'
     ];
 

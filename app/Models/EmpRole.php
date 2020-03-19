@@ -25,7 +25,8 @@ class EmpRole extends Model
     protected $fillable = [
         'id',
         'role',
-        'module_access'
+        'module_access',
+        'is_ordinary'
     ];
 
     /**
