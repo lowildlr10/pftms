@@ -566,8 +566,8 @@ class AccountController extends Controller
             $roles = EmpRole::orderBy('role')->get();
             $groups = EmpGroup::orderBy('group_name')->get();
             $viewDir = 'modules.library.account.update';
-            $role = $userData->role;
-            $group = $userData->group;
+            $role = !empty($userData->roles) ? unserialize($userData->roles) : [];
+            $group = !empty($userData->groups) ? unserialize($userData->groups) : [];
             $isActive = $userData->is_active;
             $flashData['roles'] = $roles;
             $flashData['groups'] = $groups;
@@ -616,8 +616,8 @@ class AccountController extends Controller
         $signature = $request->file('signature');
 
         if ($type != 'profile') {
-            $role = $request->role;
-            $group = $request->group;
+            $roles = $request->roles ? serialize($request->roles) : NULL;
+            $groups = $request->groups ? serialize($request->groups) : NULL;
             $isActive = $request->is_active;
         }
 
@@ -639,8 +639,8 @@ class AccountController extends Controller
             $instanceEmpAccount->gender = $gender;
 
             if ($type != 'profile') {
-                $instanceEmpAccount->role = $role;
-                $instanceEmpAccount->group = $group;
+                $instanceEmpAccount->roles = $roles;
+                $instanceEmpAccount->groups = $groups;
                 $instanceEmpAccount->is_active = $isActive;
             }
 
@@ -703,8 +703,8 @@ class AccountController extends Controller
 
         if ($type != 'profile') {
             $id = $_id;
-            $role = $request->role;
-            $group = $request->group;
+            $roles = $request->roles ? serialize($request->roles) : NULL;
+            $groups = $request->groups ? serialize($request->groups) : NULL;
             $isActive = $request->is_active;
         }
 
@@ -729,8 +729,8 @@ class AccountController extends Controller
             $instanceEmpAccount->gender = $gender;
 
             if ($type != 'profile') {
-                $instanceEmpAccount->role = $role;
-                $instanceEmpAccount->group = $group;
+                $instanceEmpAccount->roles = $roles;
+                $instanceEmpAccount->groups = $groups;
                 $instanceEmpAccount->is_active = $isActive;
             }
 
@@ -881,6 +881,7 @@ class AccountController extends Controller
     public function showEditRole($id) {
         $userRoleData = EmpRole::find($id);
         $role = $userRoleData->role;
+        $isOrdinary = $userRoleData->is_ordinary;
         $module = json_decode($userRoleData->module_access);
 
         return view('modules.library.role.update', [
@@ -888,12 +889,14 @@ class AccountController extends Controller
             'role' => $role,
             'moduleAccess' => $module,
             'label' => $this->moduleLabels,
-            'modules' => $this->modules
+            'modules' => $this->modules,
+            'isOrdinary' => $isOrdinary
         ]);
     }
 
     public function storeRole(Request $request) {
         $roleName = $request->role;
+        $isOrdinary = $request->is_ordinary;
         $moduleAccess = $request->module_access;
         $moduleAccess = str_replace("\n", '', $moduleAccess);
         $moduleAccess = trim($moduleAccess);
@@ -903,6 +906,7 @@ class AccountController extends Controller
             if (!$this->checkDuplication('EmpRole', $roleName)) {
                 $instanceEmpRole = new EmpRole;
                 $instanceEmpRole->role = $roleName;
+                $instanceEmpRole->is_ordinary = $isOrdinary;
                 $instanceEmpRole->module_access = $moduleAccess;
                 $instanceEmpRole->save();
 
@@ -920,6 +924,7 @@ class AccountController extends Controller
 
     public function updateRole(Request $request, $id) {
         $roleName = $request->role;
+        $isOrdinary = $request->is_ordinary;
         $moduleAccess = $request->module_access;
         $moduleAccess = str_replace("\n", '', $moduleAccess);
         $moduleAccess = trim($moduleAccess);
@@ -928,6 +933,7 @@ class AccountController extends Controller
         try {
             $instanceEmpRole = EmpRole::find($id);
             $instanceEmpRole->role = $roleName;
+            $instanceEmpRole->is_ordinary = $isOrdinary;
             $instanceEmpRole->module_access = $moduleAccess;
             $instanceEmpRole->save();
 
@@ -1012,7 +1018,7 @@ class AccountController extends Controller
             'groupHead' => $groupHead,
             'employees' => $usersData,
             'divisions' => $divisionData,
-            'divisionAccess' => $division
+            'divisionAccess' => $division,
         ]);
     }
 
@@ -1049,6 +1055,7 @@ class AccountController extends Controller
         try {
             $instanceEmpGroup = EmpGroup::find($id);
             $instanceEmpGroup->group_name = $groupName;
+            $instanceEmpGroup->is_ordinary = $isOrdinary;
             $instanceEmpGroup->division_access = $divisions;
             $instanceEmpGroup->group_head = $groupHead;
             $instanceEmpGroup->save();

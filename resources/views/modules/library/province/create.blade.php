@@ -5,7 +5,7 @@
         <select class="mdb-select md-form required" searchable="Search here.."
                 name="region">
             <option value="" disabled selected>
-                Choose region *
+                Choose region
             </option>
 
             @if (count($regions) > 0)
@@ -14,6 +14,9 @@
                 @endforeach
             @endif
         </select>
+        <label class="mdb-main-label">
+            Region <span class="red-text">*</span>
+        </label>
     </div>
 
     <div class="md-form">

@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
+use App\Models\EmpRole as Role;
 
 class User extends Authenticatable
 {
@@ -32,7 +33,7 @@ class User extends Authenticatable
         'province',
         'region',
         'groups',
-        'role',
+        'roles',
         'firstname',
         'middlename',
         'lastname',
@@ -86,7 +87,7 @@ class User extends Authenticatable
 
     public function roles()
     {
-        return $this->belongsToMany('App\Models\EmpRole', 'emp_accounts', 'id', 'role');
+        return $this->belongsToMany('App\Models\EmpRole', 'emp_accounts', 'id', 'roles');
     }
 
     public function hasAnyRole($roles)
@@ -119,22 +120,30 @@ class User extends Authenticatable
         return false;
     }
 
-    public function hasModuleAccess($roleID, $module, $access) {
-        if (!$roleID) {
+    public function hasModuleAccess($roleIDs, $module, $access) {
+        $roleIDs = unserialize($roleIDs);
+
+        if (!is_array($roleIDs) && empty($roleIDs)) {
             return false;
         }
 
-        $roleData = $this->roles()->where('emp_roles.id', $roleID)->first();
-        $jsonRole = json_decode($roleData->module_access);
+        foreach ($roleIDs as $roleID) {
+            $roleData = Role::find($roleID);
+            $jsonRole = json_decode($roleData->module_access);
 
-        if (!isset($jsonRole->{$module})) {
-            return false;
+            if (!isset($jsonRole->{$module})) {
+                return false;
+            }
+
+            if (!isset($jsonRole->{$module}->{$access})) {
+                return false;
+            }
+
+            if ($jsonRole->{$module}->{$access}) {
+                return true;
+            }
         }
 
-        if (!isset($jsonRole->{$module}->{$access})) {
-            return false;
-        }
-
-        return $jsonRole->{$module}->{$access} ? true : false;
+        return false;
     }
 }

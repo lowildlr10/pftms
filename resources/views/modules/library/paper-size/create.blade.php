@@ -12,11 +12,14 @@
     <div class="md-form">
         <select class="mdb-select md-form required" searchable="Search here.."
                 name="unit">
-            <option value="" disabled selected>Choose a unit *</option>
+            <option value="" disabled selected>Choose a unit</option>
             <option value="mm">mm</option>
             <option value="cm">cm</option>
             <option value="in">inch</option>
         </select>
+        <label class="mdb-main-label">
+            Unit <span class="red-text">*</span>
+        </label>
     </div>
 
     <div class="md-form">

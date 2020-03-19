@@ -152,6 +152,7 @@ $(function() {
         $('#modal-body-create').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $(this).slideToggle(500);
+            $('.mdb-select').materialSelect();
             toggleRoleInputs();
         });
         $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
@@ -177,6 +178,7 @@ $(function() {
         $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $(this).slideToggle(500);
+            $('.mdb-select').materialSelect();
             toggleRoleInputs();
         });
         $("#modal-sm-edit").modal({keyboard: false, backdrop: 'static'})

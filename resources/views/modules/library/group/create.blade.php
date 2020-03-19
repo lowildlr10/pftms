@@ -51,5 +51,8 @@
                 @endforeach
             @endif
         </select>
+        <label class="mdb-main-label">
+            Group Head
+        </label>
     </div>
 </form>
