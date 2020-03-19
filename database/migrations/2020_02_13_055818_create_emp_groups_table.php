@@ -24,10 +24,6 @@ class CreateEmpGroupsTable extends Migration
             $table->softDeletes();
             $table->timestamps();
         });
-
-        Schema::table('emp_accounts', function (Blueprint $table) {
-            $table->foreign('group')->references('id')->on('emp_groups');
-        });
     }
 
     /**

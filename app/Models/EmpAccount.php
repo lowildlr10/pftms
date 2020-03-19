@@ -31,7 +31,7 @@ class User extends Authenticatable
         'division',
         'province',
         'region',
-        'group',
+        'groups',
         'role',
         'firstname',
         'middlename',
