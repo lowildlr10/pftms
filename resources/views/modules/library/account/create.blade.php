@@ -175,7 +175,7 @@
 
                     <div class="col-md-12">
                         <div class="md-form">
-                            <input id="password" type="password" name="password" class="form-control">
+                            <input id="password" type="password" name="password" class="form-control required">
                             <label for="password">
                                 Password  <span class="red-text">*</span>
                             </label>
@@ -185,8 +185,8 @@
                     <div class="col-md-12">
                         <div class="md-form">
                             <select class="mdb-select md-form required" searchable="Search here.."
-                                    name="role">
-                                <option value="" disabled selected>Choose a role *</option>
+                                    name="roles[]" multiple>
+                                <option value="" disabled selected>Choose a role/s</option>
 
                                 @if (!empty($roles))
                                     @foreach ($roles as $rol)
@@ -194,15 +194,17 @@
                                     @endforeach
                                 @endif
                             </select>
+                            <label class="mdb-main-label">
+                                Roles <span class="red-text">*</span>
+                            </label>
                         </div>
                     </div>
 
                     <div class="col-md-12">
                         <div class="md-form">
                             <select class="mdb-select md-form" searchable="Search here.."
-                                    name="group">
-                                <option value="" disabled selected>Choose a group</option>
-                                <option value=""> -- None -- </option>
+                                    name="groups[]" multiple>
+                                <option value="" disabled selected>Choose a group/s</option>
 
                                 @if (!empty($groups))
                                     @foreach ($groups as $grp)
@@ -210,6 +212,9 @@
                                     @endforeach
                                 @endif
                             </select>
+                            <label class="mdb-main-label">
+                                Groups
+                            </label>
                         </div>
                     </div>
 
@@ -217,10 +222,13 @@
                         <div class="md-form">
                             <select class="mdb-select md-form required" searchable="Search here.."
                                     name="is_active">
-                                <option value="" disabled selected>Is active? *</option>
+                                <option value="" disabled selected>Choose active status</option>
                                 <option value="y">Yes</option>
                                 <option value="n">No</option>
                             </select>
+                            <label class="mdb-main-label">
+                                Active Status <span class="red-text">*</span>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -256,6 +264,9 @@
                                     @endforeach
                                 @endif
                             </select>
+                            <label class="mdb-main-label">
+                                Division <span class="red-text">*</span>
+                            </label>
                         </div>
                     </div>
 
@@ -263,10 +274,13 @@
                         <div class="md-form">
                             <select class="mdb-select md-form required" searchable="Search here.."
                                     name="emp_type">
-                                <option value="" disabled selected>Choose an employment type *</option>
+                                <option value="" disabled selected>Choose an employment type</option>
                                 <option value="regular">Regular</option>
                                 <option value="contractual">Contractual</option>
                             </select>
+                            <label class="mdb-main-label">
+                                Employement Status <span class="red-text">*</span>
+                            </label>
                         </div>
                     </div>
 
@@ -274,10 +288,13 @@
                         <div class="md-form">
                             <select class="mdb-select md-form required" searchable="Search here.."
                                     name="gender">
-                                <option value="" disabled selected>Choose a gender *</option>
+                                <option value="" disabled selected>Choose a gender</option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
                             </select>
+                            <label class="mdb-main-label">
+                                Gender <span class="red-text">*</span>
+                            </label>
                         </div>
                     </div>
                 </div>

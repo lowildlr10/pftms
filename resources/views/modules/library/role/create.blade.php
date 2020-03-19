@@ -9,6 +9,18 @@
         </label>
     </div>
 
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_ordinary">
+            <option value="" disabled selected>Choose a value</option>
+            <option value="y">Yes</option>
+            <option value="n">No</option>
+        </select>
+        <label class="mdb-main-label">
+            Is an Ordinary Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
     <span class="d-block text-center">
         <strong class="text-black-50">* MODULE ACCESS *</strong>
         <input type="hidden" name="module_access" id="json-access">

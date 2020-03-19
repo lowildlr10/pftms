@@ -205,35 +205,40 @@
                     <div class="col-md-12">
                         <div class="md-form">
                             <select class="mdb-select md-form required" searchable="Search here.."
-                                    name="role">
-                                <option value="" disabled selected>Choose a role *</option>
+                                    name="roles[]" multiple>
+                                <option value="" disabled selected>Choose a role/s</option>
 
                                 @if (!empty($roles))
                                     @foreach ($roles as $rol)
-                                <option value="{{ $rol->id }}" {{ $rol->id == $role ? 'selected': '' }}>
+                                <option value="{{ $rol->id }}" {{ in_array($rol->id, $role) ? 'selected': '' }}>
                                     {{ $rol->role }}
                                 </option>
                                     @endforeach
                                 @endif
                             </select>
+                            <label class="mdb-main-label">
+                                Roles <span class="red-text">*</span>
+                            </label>
                         </div>
                     </div>
 
                     <div class="col-md-12">
                         <div class="md-form">
                             <select class="mdb-select md-form" searchable="Search here.."
-                                    name="group">
-                                <option value="" disabled selected>Choose a group</option>
-                                <option value=""> -- None -- </option>
+                                    name="groups[]" multiple>
+                                <option value="" disabled selected>Choose a group/s</option>
 
                                 @if (!empty($groups))
                                     @foreach ($groups as $grp)
-                                <option value="{{ $grp->id }}" {{ $grp->id == $group ? 'selected': '' }}>
+                                <option value="{{ $grp->id }}" {{ in_array($grp->id, $group) ? 'selected': '' }}>
                                     {{ $grp->group_name }}
                                 </option>
                                     @endforeach
                                 @endif
                             </select>
+                            <label class="mdb-main-label">
+                                Groups
+                            </label>
                         </div>
                     </div>
 
@@ -241,7 +246,7 @@
                         <div class="md-form">
                             <select class="mdb-select md-form required" searchable="Search here.."
                                     name="is_active">
-                                <option value="" disabled selected>Is active? *</option>
+                                <option value="" disabled selected>Choose active status</option>
                                 <option value="y" {{ $isActive == 'y' ? 'selected': '' }}>
                                     Yes
                                 </option>
@@ -249,6 +254,9 @@
                                     No
                                 </option>
                             </select>
+                            <label class="mdb-main-label">
+                                Active Status <span class="red-text">*</span>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -286,6 +294,9 @@
                                     @endforeach
                                 @endif
                             </select>
+                            <label class="mdb-main-label">
+                                Division <span class="red-text">*</span>
+                            </label>
                         </div>
                     </div>
 
@@ -316,6 +327,9 @@
                                     Female
                                 </option>
                             </select>
+                            <label class="mdb-main-label">
+                                Gender <span class="red-text">*</span>
+                            </label>
                         </div>
                     </div>
                 </div>

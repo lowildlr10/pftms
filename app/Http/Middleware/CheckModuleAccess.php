@@ -16,7 +16,7 @@ class CheckModuleAccess
     public function handle($request, Closure $next)
     {
         $actions = $request->route()->getAction();
-        $role = $request->user()->role ? $request->user()->role : null;
+        $role = $request->user()->roles ? $request->user()->roles : null;
         $module = isset($actions['module']) ? $actions['module'] : null;
         $access = isset($actions['access']) ? $actions['access'] : null;
 
