@@ -46,18 +46,20 @@ class PurchaseRequestController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request) {
-        // Logged-in account module access
-        $isAllowedCreate = Auth::user()->hasModuleAccess(Auth::user()->role, 'proc_pr', 'create');
-        $isAllowedUpdate = Auth::user()->hasModuleAccess(Auth::user()->role, 'proc_pr', 'update');
-        $isAllowedDelete = Auth::user()->hasModuleAccess(Auth::user()->role, 'proc_pr', 'delete');
-        $isAllowedDestroy = Auth::user()->hasModuleAccess(Auth::user()->role, 'proc_pr', 'destroy');
-        $isAllowedCancel = Auth::user()->hasModuleAccess(Auth::user()->role, 'proc_pr', 'cancel');
-        $isAllowedApprove = Auth::user()->hasModuleAccess(Auth::user()->role, 'proc_pr', 'approve');
-        $isAllowedDisapprove = Auth::user()->hasModuleAccess(Auth::user()->role, 'proc_pr', 'disapprove');
-        $isAllowedRFQ = Auth::user()->hasModuleAccess(Auth::user()->role, 'proc_rfq', 'is_allowed');
+        Auth::user()->log($request, 'sdasd');
+        // Get module access
+        $module = 'proc_pr';
+        $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
+        $isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
+        $isAllowedCancel = Auth::user()->getModuleAccess($module, 'cancel');
+        $isAllowedApprove = Auth::user()->getModuleAccess($module, 'approve');
+        $isAllowedDisapprove = Auth::user()->getModuleAccess($module, 'disapprove');
+        $isAllowedRFQ = Auth::user()->getModuleAccess($module, 'is_allowed');
 
-        $empGroupData = EmpGroup::find(Auth::user()->group);
-        $empDivisionAccess = $empGroupData ? unserialize($empGroupData->division_access) : [];
+        // User groups
+        $empDivisionAccess = Auth::user()->getDivisionAccess();
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
@@ -96,10 +98,15 @@ class PurchaseRequestController extends Controller
     public function showCreate() {
         $itemNo = 0;
         $status = 1;
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
         $fundingSources = FundingSource::orderBy('source_name')->get();
         $divisions = EmpDivision::orderBy('division_name')->get();
-        $users = User::orderBy('firstname')->get();
+        $users = $roleHasOrdinary ?
+                User::where('is_active', 'y')
+                    ->orderBy('firstname')->get() :
+                User::orderBy('firstname')
+                    ->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -1074,7 +1081,6 @@ class PurchaseRequestController extends Controller
 
         return $currentStatus;
     }
-
 
     // For debugging purposes
     public function tableUpdate() {

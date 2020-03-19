@@ -1055,7 +1055,6 @@ class AccountController extends Controller
         try {
             $instanceEmpGroup = EmpGroup::find($id);
             $instanceEmpGroup->group_name = $groupName;
-            $instanceEmpGroup->is_ordinary = $isOrdinary;
             $instanceEmpGroup->division_access = $divisions;
             $instanceEmpGroup->group_head = $groupHead;
             $instanceEmpGroup->save();

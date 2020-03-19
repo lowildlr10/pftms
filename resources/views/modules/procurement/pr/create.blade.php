@@ -51,7 +51,7 @@
                                     Unit Cost <span class="red-text">*</span>
                                 </th>
                                 <th class="text-center" width="17%">
-                                    Total Cost <span class="red-text">*</span>
+                                    Total Cost
                                 </th>
                                 <th></th>
                             </tr>
@@ -141,6 +141,9 @@
                         @endforeach
                     @endif
                 </select>
+                <label class="mdb-main-label">
+                    Funding/Charging Soruce
+                </label>
             </div>
         </div>
     </div>
@@ -167,7 +170,7 @@
             <div class="md-form">
                 <select class="mdb-select md-form required" searchable="Search here.."
                         name="requested_by">
-                    <option value="" disabled selected>Choose a requestor *</option>
+                    <option value="" disabled selected>Choose a requestor</option>
 
                     @if (count($users) > 0)
                         @foreach ($users as $emp)
@@ -177,12 +180,15 @@
                         @endforeach
                     @endif
                 </select>
+                <label class="mdb-main-label">
+                    Requestor <span class="red-text">*</span>
+                </label>
             </div>
 
             <div class="md-form">
                 <select class="mdb-select md-form required" searchable="Search here.."
                         name="division">
-                    <option value="" disabled selected>Choose a division *</option>
+                    <option value="" disabled selected>Choose a division</option>
 
                     @if (count($divisions) > 0)
                         @foreach ($divisions as $div)
@@ -192,13 +198,16 @@
                         @endforeach
                     @endif
                 </select>
+                <label class="mdb-main-label">
+                    Division <span class="red-text">*</span>
+                </label>
             </div>
         </div>
         <div class="col-md-6">
             <div class="md-form">
                 <select class="mdb-select md-form required" searchable="Search here.."
                         name="approved_by">
-                    <option value="" disabled selected>Choose a approval *</option>
+                    <option value="" disabled selected>Choose a approval</option>
 
                     @if (count($signatories) > 0)
                         @foreach ($signatories as $sig)
@@ -210,12 +219,15 @@
                         @endforeach
                     @endif
                 </select>
+                <label class="mdb-main-label">
+                    Approved By <span class="red-text">*</span>
+                </label>
             </div>
 
             <div class="md-form">
                 <select class="mdb-select md-form required" searchable="Search here.."
                         name="recommended_by">
-                    <option value="" disabled selected>Choose a recommended by *</option>
+                    <option value="" disabled selected>Choose a recommended by</option>
 
                     @if (count($signatories) > 0)
                         @foreach ($signatories as $sig)
@@ -227,6 +239,9 @@
                         @endforeach
                     @endif
                 </select>
+                <label class="mdb-main-label">
+                    Recommended By <span class="red-text">*</span>
+                </label>
             </div>
         </div>
     </div>
