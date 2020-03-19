@@ -20,7 +20,6 @@ class CreateInspectionAcceptanceReportsTable extends Migration
             $table->string('iar_no', 15)->unique();
             $table->string('po_no', 15);
             $table->foreign('po_no')->references('po_no')->on('purchase_job_orders');
-            $table->string('code');
             $table->uuid('pr_id');
             $table->foreign('pr_id')->references('id')->on('purchase_requests');
             $table->uuid('ors_id');

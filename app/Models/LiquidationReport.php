@@ -24,7 +24,6 @@ class LiquidationReport extends Model
      */
     protected $fillable = [
         'id',
-        'code',
         'period_covered',
         'entity_name',
         'serial_no',

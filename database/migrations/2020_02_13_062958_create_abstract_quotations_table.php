@@ -18,7 +18,6 @@ class CreateAbstractQuotationsTable extends Migration
 
             $table->uuid('id')->primary();
             $table->uuid('pr_id');
-            $table->string('code');
             $table->foreign('pr_id')->references('id')->on('purchase_requests');
             $table->date('date_abstract')->nullable();
             $table->dateTime('date_abstract_approved')->nullable();

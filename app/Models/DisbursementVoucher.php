@@ -25,7 +25,6 @@ class DisbursementVoucher extends Model
     protected $fillable = [
         'id',
         'pr_id',
-        'code',
         'ors_id',
         'dv_no',
         'date_dv',

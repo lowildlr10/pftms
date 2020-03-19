@@ -25,7 +25,6 @@ class RequestQuotation extends Model
     protected $fillable = [
         'id',
         'pr_id',
-        'code',
         'date_canvass',
         'sig_rfq',
         'canvassed_by',

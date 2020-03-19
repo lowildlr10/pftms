@@ -17,7 +17,6 @@ class CreateLiquidationReportsTable extends Migration
             $table->engine = 'InnoDB';
 
             $table->uuid('id')->primary();
-            $table->string('code');
             $table->string('period_covered')->nullable();
             $table->string('entity_name')->nullable();
             $table->string('serial_no')->nullable();

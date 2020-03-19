@@ -17,7 +17,6 @@ class CreateListDemandPayablesTable extends Migration
             $table->engine = 'InnoDB';
 
             $table->uuid('id')->primary();
-            $table->string('code');
             $table->uuid('dv_id')->nullable();
             $table->foreign('dv_id')->references('id')->on('disbursement_vouchers');
             $table->dateTime('date_for_approval')->nullable();

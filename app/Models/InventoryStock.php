@@ -24,7 +24,6 @@ class InventoryStock extends Model
      */
     protected $fillable = [
         'id',
-        'code',
         'pr_id',
         'po_item_id',
         'po_no',

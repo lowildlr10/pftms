@@ -25,7 +25,6 @@ class AbstractQuotation extends Model
     protected $fillable = [
         'id',
         'pr_id',
-        'code',
         'date_abstract',
         'date_abstract_approved',
         'mode_procurement',

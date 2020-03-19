@@ -18,7 +18,6 @@ class CreateRequestQuotationsTable extends Migration
 
             $table->uuid('id')->primary();
             $table->uuid('pr_id');
-            $table->string('code');
             $table->foreign('pr_id')->references('id')->on('purchase_requests');
             $table->date('date_canvass')->nullable();
             $table->uuid('sig_rfq')->nullable();

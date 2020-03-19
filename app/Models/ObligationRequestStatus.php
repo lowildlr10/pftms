@@ -24,7 +24,6 @@ class ObligationRequestStatus extends Model
      */
     protected $fillable = [
         'id',
-        'code',
         'pr_id',
         'po_no',
         'transaction_type',
