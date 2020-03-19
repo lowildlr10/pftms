@@ -19,13 +19,12 @@ class CreateEmpLogsTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('emp_id');
             $table->foreign('emp_id')->references('id')->on('emp_accounts');
-            $table->text('message');
-            $table->string('action_url')->nullable();
+            $table->string('request')->nullable();
             $table->string('method')->nullable();
-            $table->string('ip_add')->nullable();
-            $table->string('browser')->nullable();
-            $table->string('os')->nullable();
-            $table->timestamps();
+            $table->string('host')->nullable();
+            $table->string('user_agent')->nullable();
+            $table->text('remarks');
+            $table->timestamp('logged_at');
         });
     }
 

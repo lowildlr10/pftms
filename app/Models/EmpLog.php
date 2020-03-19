@@ -7,6 +7,8 @@ use Webpatser\Uuid\Uuid;
 
 class EmpLog extends Model
 {
+    const CREATED_AT = 'logged_at';
+
     /**
      * The table associated with the model.
      *
@@ -22,12 +24,11 @@ class EmpLog extends Model
     protected $fillable = [
         'id',
         'emp_id',
-        'message',
-        'action_url',
+        'request',
         'method',
-        'ip_add',
-        'browser',
-        'os'
+        'host',
+        'user_agent',
+        'remarks'
     ];
 
     /**
@@ -46,5 +47,9 @@ class EmpLog extends Model
 
     public static function generateUuid() {
          return Uuid::generate();
+    }
+
+    public function getUpdatedAtColumn() {
+        return null;
     }
 }
