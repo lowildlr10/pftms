@@ -14,15 +14,21 @@
                 @endforeach
             @endif
         </select>
+        <label class="mdb-main-label">
+            Employee <span class="red-text">*</span>
+        </label>
     </div>
 
     <div class="md-form">
         <select class="mdb-select md-form required" searchable="Search here.."
                 name="is_active">
-            <option value="" disabled selected>Choose active status *</option>
+            <option value="" disabled selected>Choose active status</option>
             <option value="y">Yes</option>
             <option value="n">No</option>
         </select>
+        <label class="mdb-main-label">
+            Active Status <span class="red-text">*</span>
+        </label>
     </div>
 
     <span class="d-block text-center">

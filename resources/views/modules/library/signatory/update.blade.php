@@ -4,7 +4,7 @@
     <div class="md-form">
         <select class="mdb-select md-form required" searchable="Search here.."
                 name="emp_id">
-            <option value="" disabled selected>Choose employee *</option>
+            <option value="" disabled selected>Choose employee</option>
 
             @if (count($employees) > 0)
                 @foreach ($employees as $emp)
@@ -14,6 +14,9 @@
                 @endforeach
             @endif
         </select>
+        <label class="mdb-main-label">
+            Employee <span class="red-text">*</span>
+        </label>
     </div>
 
     <div class="md-form">
@@ -23,6 +26,9 @@
             <option value="y" {{ $isActive == 'y' ? 'selected' : '' }}>Yes</option>
             <option value="n" {{ $isActive == 'n' ? 'selected' : '' }}>No</option>
         </select>
+        <label class="mdb-main-label">
+            Active Status <span class="red-text">*</span>
+        </label>
     </div>
 
     <span class="d-block text-center">

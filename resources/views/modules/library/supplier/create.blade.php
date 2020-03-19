@@ -14,6 +14,9 @@
                 @endforeach
             @endif
         </select>
+        <label class="mdb-main-label">
+            Classification <span class="red-text">*</span>
+        </label>
     </div>
 
     <div class="md-form">
@@ -23,6 +26,9 @@
             <option value="y">Yes</option>
             <option value="n">No</option>
         </select>
+        <label class="mdb-main-label">
+            Active Status <span class="red-text">*</span>
+        </label>
     </div>
 
     <div class="card">
@@ -141,12 +147,15 @@
             <div class="md-form">
                 <select class="mdb-select md-form required" searchable="Search here.."
                         id="nature-business" name="nature_business">
-                    <option value="" disabled selected>Choose nature of business *</option>
+                    <option value="" disabled selected>Choose nature of business</option>
                     <option value="manufacturer">Manufacturer</option>
                     <option value="trading_firms">Trading Firms</option>
                     <option value="service_contractor">Service Contractors</option>
                     <option value="others">Others</option>
                 </select>
+                <label class="mdb-main-label">
+                    Nature of Business <span class="red-text">*</span>
+                </label>
             </div>
             <div id="field-nature-business-others" class="md-form" style="display: none;">
                 <input type="text" id="nature-business-others" class="form-control"
@@ -172,13 +181,16 @@
             <div class="md-form">
                 <select class="mdb-select md-form required" searchable="Search here.."
                         name="credit_accomodation">
-                    <option value="" disabled selected>Choose nature of business *</option>
+                    <option value="" disabled selected>Choose a credit accommodation</option>
                     <option value="90_days_above">90 Days and Above</option>
                     <option value="60_days">60 Days</option>
                     <option value="30_days">30 Days</option>
                     <option value="15_days">15 Days</option>
                     <option value="below_15_days">Below 15 Days</option>
                 </select>
+                <label class="mdb-main-label">
+                    Credit Accommodation <span class="red-text">*</span>
+                </label>
             </div>
         </div>
     </div>

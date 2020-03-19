@@ -23,6 +23,9 @@
             <option value="y" {{ ($isActive == 'y') ? 'selected' : '' }}>Yes</option>
             <option value="n" {{ ($isActive == 'n') ? 'selected' : '' }}>No</option>
         </select>
+        <label class="mdb-main-label">
+            Active Status <span class="red-text">*</span>
+        </label>
     </div>
 
     <div class="card">
@@ -157,6 +160,9 @@
                         Others
                     </option>
                 </select>
+                <label class="mdb-main-label">
+                    Nature of Business <span class="red-text">*</span>
+                </label>
             </div>
             <div id="field-nature-business-others" class="md-form"
                  style="display:{{ empty($natureBusinessOthers) ? 'none' : 'block' }};">
@@ -183,7 +189,7 @@
             <div class="md-form">
                 <select class="mdb-select md-form required" searchable="Search here.."
                         name="credit_accomodation">
-                    <option value="" disabled selected>Choose nature of business *</option>
+                    <option value="" disabled selected>Choose a credit accommodation *</option>
                     <option value="90_days_above" {{ ($creditAccomodation == '90_days_above') ? 'selected' : '' }}>
                         90 Days and Above
                     </option>
@@ -200,6 +206,9 @@
                         Below 15 Days
                     </option>
                 </select>
+                <label class="mdb-main-label">
+                    Credit Accommodation <span class="red-text">*</span>
+                </label>
             </div>
         </div>
     </div>

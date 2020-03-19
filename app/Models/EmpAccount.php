@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 use App\Models\EmpRole as Role;
+use App\Models\EmpGroup as Group;
+use App\Models\EmpLog as Log;
 
 class User extends Authenticatable
 {
@@ -85,41 +87,6 @@ class User extends Authenticatable
          return Uuid::generate();
     }
 
-    public function roles()
-    {
-        return $this->belongsToMany('App\Models\EmpRole', 'emp_accounts', 'id', 'roles');
-    }
-
-    public function hasAnyRole($roles)
-    {
-        if (is_array($roles)) {
-            foreach ($roles as $role) {
-                if ($this->hasRole($role)) {
-                    return true;
-                }
-            }
-        } else {
-            if ($this->hasRole($roles)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public function isActive() {
-        return $this->active;
-    }
-
-    public function hasRole($role)
-    {
-        if ($this->roles()->where('emp_roles.role', $role)->first()) {
-            return true;
-        }
-
-        return false;
-    }
-
     public function hasModuleAccess($roleIDs, $module, $access) {
         $roleIDs = unserialize($roleIDs);
 
@@ -145,5 +112,57 @@ class User extends Authenticatable
         }
 
         return false;
+    }
+
+    public function getModuleAccess($module, $action) {
+        return $this->hasModuleAccess($this->roles, $module, $action);
+    }
+
+    public function getDivisionAccess() {
+        $divisionAccess = [];
+        $userGroups = !empty($this->groups) ? unserialize($this->groups) : [];
+        $empGroupData = Group::whereIn('id', $userGroups)->get();
+
+        if (!empty($empGroupData)) {
+            foreach ($empGroupData as $group) {
+                $_divisionAccess = !empty($group->division_access) ?
+                                   unserialize($group->division_access) : [];
+
+                if (!empty($_divisionAccess)) {
+                    foreach ($_divisionAccess as $access) {
+                        $divisionAccess[] = $access;
+                    }
+                }
+            }
+        }
+
+        return $divisionAccess;
+    }
+
+    public function hasOrdinaryRole() {
+        $roles = !empty($this->roles) ? unserialize($this->roles) : [];
+
+        if (empty($roles)) {
+            return true;
+        } else {
+            foreach ($roles as $role) {
+                $roleData = Role::find($role);
+
+                if ($roleData->is_ordinary == 'n') {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public function log($request, $msg) {
+        $instanceEmpLog = new Log;
+        $info = $request->header('User-Agent');
+
+        dd($request);
+
+        //$instanceEmpLog->save();
     }
 }

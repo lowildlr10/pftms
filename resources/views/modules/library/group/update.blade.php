@@ -41,7 +41,7 @@
         <select class="mdb-select md-form" searchable="Search here.."
                 name="group_head">
             <option value="" disabled selected>Choose group head</option>
-            <option>-- None --</option>
+            <option value="">-- None --</option>
 
             @if (count($employees) > 0)
                 @foreach ($employees as $emp)
