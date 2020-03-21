@@ -26,7 +26,7 @@ class CreatePurchaseRequestItemsTable extends Migration
             $table->text('item_description');
             $table->double('est_unit_cost', 50, 2)->default(0.00);
             $table->double('est_total_cost', 50, 2)->default(0.00);
-            $table->uuid('awarded_to');
+            $table->uuid('awarded_to')->nullable();
             $table->foreign('awarded_to')->references('id')->on('suppliers');
             $table->text('awarded_remarks')->nullable();
             $table->unsignedInteger('group_no')->default(0);

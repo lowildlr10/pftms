@@ -24,7 +24,6 @@ class ListDemandPayable extends Model
      */
     protected $fillable = [
         'id',
-        'code',
         'dv_id',
         'date_for_approval',
         'date_approved',

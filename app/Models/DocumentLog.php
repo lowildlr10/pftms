@@ -20,8 +20,8 @@ class DocumentLog extends Model
      * @var array
      */
     protected $fillable = [
-        'code',
-        'date',
+        'doc_id',
+        'logged_at',
         'emp_from',
         'emp_to',
         'action',

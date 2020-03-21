@@ -19,7 +19,6 @@ class CreatePurchaseJobOrdersTable extends Migration
             $table->uuid('id')->primary();
             $table->string('po_no', 15)->unique();
             $table->uuid('pr_id');
-            $table->string('code');
             $table->foreign('pr_id')->references('id')->on('purchase_requests');
             $table->date('date_po')->nullable();
             $table->dateTime('date_po_approved')->nullable();

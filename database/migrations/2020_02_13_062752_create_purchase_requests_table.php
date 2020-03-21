@@ -18,7 +18,6 @@ class CreatePurchaseRequestsTable extends Migration
 
             $table->uuid('id')->primary();
             $table->string('pr_no', 100)->unique();
-            $table->string('code');
             $table->date('date_pr');
             $table->dateTime('date_pr_approved')->nullable();
             $table->dateTime('date_pr_disapproved')->nullable();

@@ -17,8 +17,8 @@ class CreateDocumentLogsTable extends Migration
             $table->engine = 'InnoDB';
 
             $table->uuid('id')->primary();
-            $table->string('code');
-            $table->dateTime('date');
+            $table->string('doc_id');
+            $table->dateTime('logged_at');
             $table->uuid('emp_from')->nullable();
             $table->foreign('emp_from')->references('id')->on('emp_accounts');
             $table->uuid('emp_to')->nullable();

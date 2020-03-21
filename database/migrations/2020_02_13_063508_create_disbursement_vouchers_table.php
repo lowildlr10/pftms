@@ -17,7 +17,6 @@ class CreateDisbursementVouchersTable extends Migration
             $table->engine = 'InnoDB';
 
             $table->uuid('id')->primary();
-            $table->string('code');
             $table->uuid('pr_id')->nullable();
             $table->foreign('pr_id')->references('id')->on('purchase_requests');
             $table->uuid('ors_id');

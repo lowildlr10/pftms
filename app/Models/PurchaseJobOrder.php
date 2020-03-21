@@ -26,7 +26,6 @@ class PurchaseJobOrder extends Model
         'id',
         'po_no',
         'pr_id',
-        'code',
         'date_po',
         'date_po_approved',
         'date_cancelled',
