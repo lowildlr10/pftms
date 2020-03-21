@@ -7,7 +7,9 @@ use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestItem;
 use App\Models\RequestQuotation;
 use App\Models\AbstractQuotation;
+use App\Models\AbstractQuotationItem;
 use App\Models\PurchaseJobOrder;
+use App\Models\PurchaseJobOrderItem;
 use App\Models\ObligationRequestStatus;
 use App\Models\InspectionAcceptance;
 use App\Models\DisbursementVoucher;
@@ -19,13 +21,12 @@ use App\Models\EmpDivision;
 use App\Models\ItemUnitIssue;
 use App\Models\FundingSource;
 use App\Models\Signatory;
-use App\Models\EmpLog;
-use App\Models\DocumentLog;
+use App\Models\DocumentLog as DocLog;
 use App\Models\PaperSize;
+use App\Models\Supplier;
 use DB;
 use Auth;
-
-use App\Notifications\PurchaseReqAction;
+use Carbon\Carbon;
 
 class PurchaseRequestController extends Controller
 {
@@ -34,9 +35,8 @@ class PurchaseRequestController extends Controller
      *
      * @return void
      */
-    public function __construct()
-    {
-        $this->middleware('auth');
+    public function __construct() {
+        //$this->middleware('auth');
     }
 
     /**
@@ -44,8 +44,9 @@ class PurchaseRequestController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request) {
-        Auth::user()->log($request, 'sdasd');
+    public function index($keyword = '') {
+        $keyword = trim($keyword);
+
         // Get module access
         $module = 'proc_pr';
         $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
@@ -55,10 +56,12 @@ class PurchaseRequestController extends Controller
         $isAllowedCancel = Auth::user()->getModuleAccess($module, 'cancel');
         $isAllowedApprove = Auth::user()->getModuleAccess($module, 'approve');
         $isAllowedDisapprove = Auth::user()->getModuleAccess($module, 'disapprove');
-        $isAllowedRFQ = Auth::user()->getModuleAccess($module, 'is_allowed');
+        $isAllowedRFQ = Auth::user()->getModuleAccess('proc_rfq', 'is_allowed');
 
         // User groups
-        $empDivisionAccess = Auth::user()->getDivisionAccess();
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
+                             [Auth::user()->division];
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
@@ -73,7 +76,17 @@ class PurchaseRequestController extends Controller
                                 ->select('status_name')
                                 ->whereColumn('id', 'purchase_requests.status')
                                 ->limit(1),
-        ])->whereIn('division', $empDivisionAccess)->orderBy('pr_no')->get();
+        ])->whereIn('division', $empDivisionAccess);
+
+        if ($roleHasOrdinary) {
+            $prData = $prData->where('requested_by', Auth::user()->id);
+        }
+
+        if (!empty($keyword)) {
+            $prData = $prData->where('id', $keyword);
+        }
+
+        $prData = $prData->orderBy('pr_no', 'desc')->get();
 
         return view('modules.procurement.pr.index', [
             'list' => $prData,
@@ -90,408 +103,22 @@ class PurchaseRequestController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function showCreate() {
-        $itemNo = 0;
-        $status = 1;
-        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
-        $fundingSources = FundingSource::orderBy('source_name')->get();
-        $divisions = $roleHasOrdinary ?
-                    EmpDivision::where('id', Auth::user()->division)
-                               ->orderBy('division_name')
-                               ->get() :
-                     EmpDivision::orderBy('division_name')->get();
-        $users = $roleHasOrdinary ?
-                User::where('id', Auth::user()->id)
-                    ->orderBy('firstname')
-                    ->get() :
-                User::where('is_active', 'y')
-                    ->orderBy('firstname')->get();
-        $signatories = Signatory::addSelect([
-            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
-                          ->whereColumn('id', 'signatories.emp_id')
-                          ->limit(1)
-        ])->where('is_active', 'y')->get();
-
-        foreach ($signatories as $sig) {
-            $sig->module = json_decode($sig->module);
-        }
-
-        return view('modules.procurement.pr.create', [
-            'users' => $users,
-            'signatories' => $signatories,
-            'unitIssues' => $unitIssues,
-            'fundingSources' => $fundingSources,
-            'divisions' => $divisions,
-            'itemNo' => $itemNo,
-            'status' => $status
-        ]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function showEdit($id) {
-        $itemNo = 0;
-        $toggle = "edit";
-        $unitIssue = UnitIssue::all();
-        $projects = Projects::all();
-        $division = Division::all();
-        $approvedBy = DB::table('signatories AS sig')
-                         ->select('sig.id', 'sig.position', 'sig.pr_sign_type', 'sig.active',
-                                   DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                         ->join('emp_accounts AS emp', 'emp.emp_id', '=', 'sig.emp_id')
-                         ->orderBy('emp.firstname')
-                         ->where([['sig.p_req', 'y'],
-                                  ['sig.active', 'y']])
-                         ->get();
-        $pr = DB::table('purchase_requests')
-                ->where('id', $id)
-                ->first();
-        $prItems = DB::table('purchase_requests_items')
-                     ->where('pr_id', $id)
-                     ->orderByRaw('LENGTH(item_id)')
-                     ->orderBy('item_id')
-                     ->get();
-
-        if (Auth::user()->role == 1 || Auth::user()->role == 2 || Auth::user()->role == 5) {
-            $requestedBy = User::orderBy('firstname')->get();
-        } else {
-            $requestedBy = User::where('emp_id', Auth::user()->emp_id)->get();
-        }
-
-        return view('modules.procuremnt.pr.update', [
-            'requestedBy' => $requestedBy,
-            'approvedBy' => $approvedBy,
-            'unitIssue' => $unitIssue,
-            'projects' => $projects,
-            'divisions' => $division,
-            'itemNo' => $itemNo,
-            'id' => $id,
-            'toggle' => $toggle,
-            'pr' => $pr,
-            'prItems' => $prItems
-        ]);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request) {
-        // Parent variables
-        $prDate = $request->date_pr;
-        $prNo = '';
-        $divisionID = $request->division;
-        $purpose = $request->purpose;
-        $remarks = $request->remarks;
-        $projectID = $request->project;
-        $requestedBy = $request->requested_by;
-        $approvedBy = $request->approved_by;
-        $recommendedBy = $request->recommended_by;
-        $office = $request->office;
-
-        // PR Item variables
-        $unitIssues = $request->unit;
-        $itemDescriptions = $request->item_description;
-        $quantities = $request->quantity;
-        $unitCosts = $request->unit_cost;
-        $totalCosts = $request->total_cost;
-
-        try {
-            // Auto Generate pr_no if empty
-            $prSequence = PurchaseRequest::select('id', 'pr_no')
-                                         ->orderBy('pr_no')
-                                         ->get();
-            $currentYearMonth = date('y') . date('m');
-
-            if (count($prSequence) > 0) {
-                $prNumber = "";
-
-                foreach ($prSequence as $key => $_prNumber) {
-                    if (substr($_prNumber->pr_no, 0, 4) == $currentYearMonth) {
-                        $prNumber = $_prNumber->pr_no;
-                    }
-                }
-
-                $prSequenceNumber = (int)substr($prNumber, 4) + 1;
-                $prNo = $currentYearMonth . str_pad($prSequenceNumber, 3, '0', STR_PAD_LEFT);
-            } else {
-                $prNo = $currentYearMonth . '001';
-            }
-
-            $instancePR = new PurchaseRequest;
-
-            if (!$instancePR->checkDuplication($prNo)) {
-                // Storing main PR data
-                $instancePR->date_pr = $prDate;
-                $instancePR->pr_no = $prNo;
-                $instancePR->funding_source = $projectID;
-                $instancePR->purpose = $purpose;
-                $instancePR->remarks = $remarks;
-                $instancePR->division = $divisionID;
-                $instancePR->requested_by = $requestedBy;
-                $instancePR->approved_by = $approvedBy;
-                $instancePR->recommended_by = $recommendedBy;
-                $instancePR->office = $office;
-                $instancePR->status = 1;
-                $instancePR->save();
-
-                // Storing PR Items data
-                $prData = PurchaseRequest::where('pr_no', $prNo)->first();
-                $prID = $prData->id;
-
-                foreach ($unitIssues as $arrayKey => $unit) {
-                    $description = $itemDescriptions[$arrayKey];
-                    $quantity = $quantities[$arrayKey];
-                    $unitCost = $unitCosts[$arrayKey];
-                    $totalCost =  $quantity * $unitCost;
-
-                    $instancePRItem = new PurchaseRequestItem;
-                    $instancePRItem->pr_id = $prID;
-                    $instancePRItem->item_no = $arrayKey + 1;
-                    $instancePRItem->quantity = $quantity;
-                    $instancePRItem->unit_issue = $unit;
-                    $instancePRItem->item_description = $description;
-                    $instancePRItem->est_unit_cost = $unitCost;
-                    $instancePRItem->est_total_cost = $totalCost;
-                    $instancePRItem->save();
-                }
-
-                //$this->notifyForApproval($prNo, $requestedBy);
-                $prData->logDocument($prID, Auth::user()->id, NULL, 'issued');
-
-                $msg = "Purchase Request '$prNo' successfully created.";
-                Auth::user()->log($request, $msg);
-                return redirect(url()->previous())->with('success', $msg);
-            } else {
-                $msg = "Purchase Request '$prNo' has a duplicate.";
-                return redirect(url()->previous())->with('warning', $msg);
-            }
-        } catch (\Throwable $th) {
-            $msg = "Unknown error has occured. Please try again.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        $pr = PurchaseRequest::where('id', $id)->first();
-        $canvass = Canvass::where('pr_id', $id)->first();
-        $prNo = $pr->pr_no;
-
-        $prDate = $request['date_pr'];
-        $divisionID = $request['division'];
-        $purpose = $request['purpose'];
-        $remarks = $request['remarks'];
-        $projectID = $request['project'];
-        $requestedBy = $request['requested_by'];
-        $approvedBy = $request['approved_by'];
-        //$sigApp = $request['sig_app'];
-        //$sigFundsAvailable = $request['sig_funds_available'];
-        $recommendedBy = $request['recommended_by'];
-        $office = $request['office'];
-
-        // PR items variables
-        $itemIDs = $request['item_id'];
-        $unitIssue = $request['unit'];
-        $itemDescription = $request['item_description'];
-        $quantity = $request['quantity'];
-        $unitCost = $request['unit_cost'];
-        $totalCost = $request['total_cost'];
-
-        // Save data
-        try {
-            $pr->date_pr = $prDate;
-            $pr->date_pr = $prDate;
-            $pr->project_id = $projectID;
-            $pr->purpose = $purpose;
-            $pr->remarks = $remarks;
-            $pr->pr_division_id = $divisionID;
-            $pr->requested_by = $requestedBy;
-            $pr->approved_by = $approvedBy;
-            //$pr->sig_app = $sigApp;
-            //$pr->sig_funds_available = $sigFundsAvailable;
-            $pr->recommended_by = $recommendedBy;
-            $pr->office = $office;
-
-            // Delete other dependent documents
-            if ($pr->status >= 5) {
-                Canvass::where('pr_id', $id)->forceDelete();
-                Abstracts::where('pr_id', $id)->forceDelete();
-                DB::table('tblabstract_items')->where('pr_id', $id)->delete();
-                PurchaseOrder::where('pr_id', $id)->forceDelete();
-                DB::table('tblpo_jo_items')->where('pr_id', $id)->delete();
-                OrsBurs::where('pr_id', $id)->forceDelete();
-                InspectionAcceptance::where('pr_id', $id)->forceDelete();
-                DisbursementVoucher::where('pr_id', $id)->forceDelete();
-                InventoryStock::where('pr_id', $id)->forceDelete();
-                DB::table('tblinventory_stocks_issue')->where('pr_id', $id)->delete();
-            }
-
-            // Update pr items
-            foreach ($unitIssue as $arrayKey => $unit) {
-                $description = $itemDescription[$arrayKey];
-                $qnty = $quantity[$arrayKey];
-                $unCost = $unitCost[$arrayKey];
-                $totCost =  $qnty * $unCost;
-
-                if ($pr->status < 5) {
-                    $itemID = $id . "-" . ($arrayKey + 1);
-
-                    if ($arrayKey == 0) {
-                        DB::table('purchase_requests_items')->where('pr_id', $id)->delete();
-                    }
-
-                    DB::table('purchase_requests_items')->insert(
-                        ['item_id' => $itemID,
-                         'pr_id' => $id,
-                         'quantity' => $qnty,
-                         'unit_issue' => $unit,
-                         'item_description' => $description,
-                         'est_unit_cost' => $unCost,
-                         'est_total_cost' => $totCost]
-                    );
-                } else {
-                    $itemID = $itemIDs[$arrayKey];
-                    $itemIDsCount = count($itemIDs) - 1;
-
-                    if ($itemIDsCount == $arrayKey) {
-                        $pr->status = 1;
-                        $this->notifyForApproval($prNo, $requestedBy);
-                    }
-
-                    DB::table('purchase_requests_items')
-                      ->where('item_id', $itemID)
-                      ->update([
-                            'quantity' => $qnty,
-                            'unit_issue' => $unit,
-                            'item_description' => $description,
-                            'est_unit_cost' => $unCost,
-                            'est_total_cost' => $totCost
-                        ]
-                    );
-                }
-            }
-
-            $pr->save();
-
-            $sig = DB::table('purchase_requests as pr')
-                     ->join('signatories as sig', 'sig.id', '=', 'pr.sig_app')
-                     ->where('sig.id', 53)
-                     ->first();
-
-            $this->logTrackerHistory($pr->code, Auth::user()->emp_id, 0, '-');
-            $this->logTrackerHistory($pr->code, Auth::user()->emp_id, $sig->emp_id, 'issued');
-
-            $logEmpMessage = "updated the purchase request $prNo.";
-            $this->logEmployeeHistory($logEmpMessage);
-
-            $msg = "Purchase Request $prNo successfully updated.";
-            return redirect(url('procurement/pr?search=' . $prNo))->with('success', $msg);
-        } catch (Exception $e) {
-            $msg = "There is an error encountered updating the Purchase Request $prNo.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
-    }
-
-    public function delete($id) {
-        $pr = PurchaseRequest::where('id', $id)->first();
-        $prNo = $pr->pr_no;
-
-        try {
-            PurchaseRequest::where('id', $id)->delete();
-            Canvass::where('pr_id', $id)->delete();
-            Abstracts::where('pr_id', $id)->delete();
-            PurchaseOrder::where('pr_id', $id)->delete();
-            OrsBurs::where('pr_id', $id)->delete();
-            InspectionAcceptance::where('pr_id', $id)->delete();
-            DisbursementVoucher::where('pr_id', $id)->delete();
-            InventoryStock::where('pr_id', $id)->delete();
-
-            $logEmpMessage = "deleted the purchase request $prNo.";
-            $this->logEmployeeHistory($logEmpMessage);
-
-            $msg = "Purchase Request $prNo successfully deleted.";
-            return redirect(url()->previous())->with('success', $msg);
-        } catch (Exception $e) {
-            $msg = "There is an error encountered deleting the Purchase Request $prNo.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
-
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
      * Display the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function showItems($id, Request $request) {
-        $awardedTo = $request['awarded'];
-        $toggle = $request['toggle'];
-        $poNo = $request['po_no'];
-        $countPO = 0;
+    public function showItems($id) {
+        $prItemData = PurchaseRequestItem::addSelect([
+            'unit_issue' => ItemUnitIssue::select('unit_name')
+                                         ->whereColumn('id', 'purchase_request_items.unit_issue')
+                                         ->limit(1),
+            'awarded_to' => Supplier::select('company_name')
+                                    ->whereColumn('id', 'purchase_request_items.awarded_to')
+                                    ->limit(0)
+        ])->where('pr_id', $id)->orderBy('item_no')->get();
 
-        if ($toggle == "po") {
-            $countPO = DB::table('tblpo_jo_items')
-                         ->where('po_no', $poNo)
-                         ->count();
-
-            if ($countPO > 0) {
-                $items = DB::table('tblpo_jo_items as po')
-                           ->join('tblunit_issue AS unit', 'unit.id','=', 'po.unit_issue')
-                           ->where('po.po_no', $poNo);
-            } else {
-                $items = DB::table('purchase_requests_items AS itm')
-                           ->join('tblunit_issue AS unit', 'unit.id','=', 'itm.unit_issue')
-                           ->where('itm.pr_id', $id)
-                           ->where('itm.awarded_to', $awardedTo);
-            }
-        } else {
-            $items = DB::table('purchase_requests_items AS itm')
-                       ->join('tblunit_issue AS unit', 'unit.id','=', 'itm.unit_issue')
-                       ->where('itm.pr_id', $id);
-        }
-
-        $items = $items->get();
-
-        return view('pages.view-pr-items', ['prItems' => $items,
-                                            'toggle' => $toggle,
-                                            'countPO' => $countPO]);
+        return view('modules.procurement.pr.show-item', ['prItems' => $prItemData]);
     }
 
     public function showTrackPR($prNo) {
@@ -826,138 +453,430 @@ class PurchaseRequestController extends Controller
         }
     }
 
-    public function approve($id) {
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function showCreate() {
+        $itemNo = 0;
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
+        $fundingSources = FundingSource::orderBy('source_name')->get();
+        $divisions = $roleHasOrdinary ?
+                    EmpDivision::where('id', Auth::user()->division)
+                               ->orderBy('division_name')
+                               ->get() :
+                     EmpDivision::orderBy('division_name')->get();
+        $users = $roleHasOrdinary ?
+                User::where('id', Auth::user()->id)
+                    ->orderBy('firstname')
+                    ->get() :
+                User::where('is_active', 'y')
+                    ->orderBy('firstname')->get();
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
+        }
+
+        return view('modules.procurement.pr.create', [
+            'users' => $users,
+            'signatories' => $signatories,
+            'unitIssues' => $unitIssues,
+            'fundingSources' => $fundingSources,
+            'divisions' => $divisions,
+            'itemNo' => $itemNo,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showEdit($id) {
+        $prData = PurchaseRequest::where('id', $id)->first();
+        $prItemData = PurchaseRequestItem::where('pr_id', $id)
+                                         ->orderBy('item_no')
+                                         ->get();
+        $itemNo = $prItemData->count();
+        $office = $prData->office;
+        $prNo = $prData->pr_no;
+        $prDate = $prData->date_pr;
+        $fundingSource = $prData->funding_source;
+        $purpose = $prData->purpose;
+        $remarks = $prData->remarks;
+        $requestedBy = $prData->requested_by;
+        $division = $prData->division;
+        $approvedBy = $prData->approved_by;
+        $recommendedBy = $prData->recommended_by;
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
+        $fundingSources = FundingSource::orderBy('source_name')->get();
+        $divisions = $roleHasOrdinary ?
+                    EmpDivision::where('id', Auth::user()->division)
+                               ->orderBy('division_name')
+                               ->get() :
+                     EmpDivision::orderBy('division_name')->get();
+        $users = $roleHasOrdinary ?
+                User::where('id', Auth::user()->id)
+                    ->orderBy('firstname')
+                    ->get() :
+                User::where('is_active', 'y')
+                    ->orderBy('firstname')->get();
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
+        }
+
+        return view('modules.procurement.pr.update', [
+            'id' => $id,
+            'users' => $users,
+            'signatories' => $signatories,
+            'unitIssues' => $unitIssues,
+            'fundingSources' => $fundingSources,
+            'divisions' => $divisions,
+            'itemNo' => $itemNo,
+            'office' => $office,
+            'prNo' => $prNo,
+            'prDate' => $prDate,
+            'fundingSource' => $fundingSource,
+            'purpose' => $purpose,
+            'remarks' => $remarks,
+            'requestedBy' => $requestedBy,
+            'division' => $division,
+            'approvedBy' => $approvedBy,
+            'recommendedBy' => $recommendedBy,
+            'prItems' => $prItemData
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request) {
+        $instanceDocLog = new DocLog;
+
+        // Parent variables
+        $prDate = $request->date_pr;
+        $divisionID = $request->division;
+        $purpose = $request->purpose;
+        $remarks = $request->remarks;
+        $projectID = $request->project;
+        $requestedBy = $request->requested_by;
+        $approvedBy = $request->approved_by;
+        $recommendedBy = $request->recommended_by;
+        $office = $request->office;
+
+        // PR Item variables
+        $unitIssues = $request->unit;
+        $itemDescriptions = $request->item_description;
+        $quantities = $request->quantity;
+        $unitCosts = $request->unit_cost;
+        $totalCosts = $request->total_cost;
+
         try {
-            $pr = PurchaseRequest::where('id', $id)->first();
-            $pr->date_pr_approve = Carbon::now();
-            $pr->status = 5;
-            $pr->save();
+            // Auto Generate pr_no if empty
+            $prSequence = PurchaseRequest::select('id', 'pr_no')
+                                         ->orderBy('pr_no')
+                                         ->get();
+            $currentYearMonth = date('y') . date('m');
 
-            $prNo = $pr->pr_no;
-            $canvass = Canvass::where('pr_id', $id)->first();
+            if (count($prSequence) > 0) {
+                $prNumber = "";
 
-            if (!$canvass) {
-                $code = $this->generateTrackerCode('rfq', $id, 3);
-                $canvass = new Canvass;
-                $canvass->pr_id = $id;
-                $canvass->code = $code;
-                $canvass->save();
+                foreach ($prSequence as $key => $_prNumber) {
+                    if (substr($_prNumber->pr_no, 0, 4) == $currentYearMonth) {
+                        $prNumber = $_prNumber->pr_no;
+                    }
+                }
 
-                $code = $pr->code;
-                $this->logTrackerHistory($code, Auth::user()->emp_id, 0, 'received');
+                $prSequenceNumber = (int)substr($prNumber, 4) + 1;
+                $prNo = $currentYearMonth . str_pad($prSequenceNumber, 3, '0', STR_PAD_LEFT);
+            } else {
+                $prNo = $currentYearMonth . '001';
             }
 
-            $this->notifyApproved($prNo, $pr->requested_by);
+            $instancePR = new PurchaseRequest;
 
-            $logEmpMessage = "approved the purchase request $prNo.";
-            $this->logEmployeeHistory($logEmpMessage);
+            if (!$instancePR->checkDuplication($prNo)) {
+                // Storing main PR data
+                $instancePR->date_pr = $prDate;
+                $instancePR->pr_no = $prNo;
+                $instancePR->funding_source = $projectID;
+                $instancePR->purpose = $purpose;
+                $instancePR->remarks = $remarks;
+                $instancePR->division = $divisionID;
+                $instancePR->requested_by = $requestedBy;
+                $instancePR->approved_by = $approvedBy;
+                $instancePR->recommended_by = $recommendedBy;
+                $instancePR->office = $office;
+                $instancePR->status = 1;
+                $instancePR->save();
 
-            $msg = "Purchase Request $prNo is now approved.";
-            return redirect(url('procurement/pr?search=' . $prNo))->with('success', $msg);
-        } catch (Exception $e) {
-            $msg = "There is an error encountered while approving the Purchase Request $prNo.";
+                // Storing PR Items data
+                $prData = PurchaseRequest::where('pr_no', $prNo)->first();
+                $prID = $prData->id;
+
+                foreach ($unitIssues as $arrayKey => $unit) {
+                    $description = $itemDescriptions[$arrayKey];
+                    $quantity = $quantities[$arrayKey];
+                    $unitCost = $unitCosts[$arrayKey];
+                    $totalCost =  $quantity * $unitCost;
+
+                    $instancePRItem = new PurchaseRequestItem;
+                    $instancePRItem->pr_id = $prID;
+                    $instancePRItem->item_no = $arrayKey + 1;
+                    $instancePRItem->quantity = $quantity;
+                    $instancePRItem->unit_issue = $unit;
+                    $instancePRItem->item_description = $description;
+                    $instancePRItem->est_unit_cost = $unitCost;
+                    $instancePRItem->est_total_cost = $totalCost;
+                    $instancePRItem->save();
+                }
+
+                $instancePR->notifyForApproval($prNo, $requestedBy);
+                $instanceDocLog->logDocument($prID, Auth::user()->id, NULL, 'issued');
+
+                $msg = "Purchase Request '$prNo' successfully created.";
+                Auth::user()->log($request, $msg);
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Purchase Request '$prNo' has a duplicate.";
+                Auth::user()->log($request, $msg);
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
             return redirect(url()->previous())->with('failed', $msg);
         }
-
     }
 
-    public function disapprove($id) {
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id) {
+        $instanceDocLog = new DocLog;
+
+        // Parent variables
+        $prDate = $request->date_pr;
+        $divisionID = $request->division;
+        $purpose = $request->purpose;
+        $remarks = $request->remarks;
+        $projectID = $request->project;
+        $requestedBy = $request->requested_by;
+        $approvedBy = $request->approved_by;
+        $recommendedBy = $request->recommended_by;
+        $office = $request->office;
+
+        // PR items variables
+        $itemIDs = $request->item_id;
+        $unitIssues = $request->unit;
+        $itemDescriptions = $request->item_description;
+        $quantities = $request->quantity;
+        $unitCosts = $request->unit_cost;
+        $totalCosts = $request->total_cost;
+
         try {
-            $pr = PurchaseRequest::where('id', $id)->first();
-            $pr->date_pr_disapprove = Carbon::now();
-            $pr->status = 2;
-            $pr->save();
+            $instancePR = PurchaseRequest::find($id);
+            $instancePR->date_pr = $prDate;
+            $instancePR->funding_source = $projectID;
+            $instancePR->purpose = $purpose;
+            $instancePR->remarks = $remarks;
+            $instancePR->division = $divisionID;
+            $instancePR->requested_by = $requestedBy;
+            $instancePR->approved_by = $approvedBy;
+            $instancePR->recommended_by = $recommendedBy;
+            $instancePR->office = $office;
 
-            $prNo = $pr->pr_no;
-            $code = $pr->code;
-            $this->logTrackerHistory($code, Auth::user()->emp_id, 0, '-');
+            $prNo = $instancePR->pr_no;
+            $prData = PurchaseRequest::where('id', $id)->first();
 
-            $this->notifyDisapproved($prNo, $pr->requested_by);
+            // Delete other dependent documents
+            if ($instancePR->status >= 5) {
+                RequestQuotation::where('pr_id', $id)->forceDelete();
+                AbstractQuotation::where('pr_id', $id)->forceDelete();
+                AbstractQuotationItem::where('pr_id', $id)->delete();
+                PurchaseOrder::where('pr_id', $id)->forceDelete();
+                PurchaseOrderItem::where('pr_id', $id)->delete();
+                ObligationRequestStatus::where('pr_id', $id)->forceDelete();
+                InspectionAcceptance::where('pr_id', $id)->forceDelete();
+                DisbursementVoucher::where('pr_id', $id)->forceDelete();
+                InventoryStock::where('pr_id', $id)->forceDelete();
+                InventoryStockIssue::where('pr_id', $id)->delete();
+            }
 
-            $logEmpMessage = "disapproved the purchase request $prNo.";
-            $this->logEmployeeHistory($logEmpMessage);
+            // Update pr items
+            foreach ($unitIssues as $arrayKey => $unit) {
+                $itemID = $itemIDs[$arrayKey];
+                $description = $itemDescriptions[$arrayKey];
+                $quantity = $quantities[$arrayKey];
+                $unitCost = $unitCosts[$arrayKey];
+                $totalCost =  $quantity * $unitCost;
 
-            $msg = "Purchase request $prNo is now disapproved.";
-            return redirect(url('procurement/pr?search=' . $prNo))->with('success', $msg);
-        } catch (Exception $e) {
-            $msg = "There is an error encountered while disapproving the Purchase Request $prNo.";
+                if ($instancePR->status < 5) {
+                    if ($arrayKey == 0) {
+                        PurchaseRequestItem::where('pr_id', $id)->delete();
+                    }
+
+                    $instancePRItem = new PurchaseRequestItem;
+                    $instancePRItem->pr_id = $id;
+                    $instancePRItem->item_no = $arrayKey + 1;
+                    $instancePRItem->quantity = $quantity;
+                    $instancePRItem->unit_issue = $unit;
+                    $instancePRItem->item_description = $description;
+                    $instancePRItem->est_unit_cost = $unitCost;
+                    $instancePRItem->est_total_cost = $totalCost;
+                    $instancePRItem->save();
+                } else {
+                    $instancePRItem = PurchaseRequestItem::find($itemID);
+                    $instancePRItem->quantity = $quantity;
+                    $instancePRItem->unit_issue = $unit;
+                    $instancePRItem->item_description = $description;
+                    $instancePRItem->est_unit_cost = $unitCost;
+                    $instancePRItem->est_total_cost = $totalCost;
+                    $instancePRItem->save();
+
+                    if ($itemIDsCount == $arrayKey) {
+                        $instancePRItem->status = 1;
+                        $instancePR->notifyForApproval($prNo, $requestedBy);
+                        $instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
+                        $instanceDocLog->logDocument($id, Auth::user()->id, NULL, 'issued');
+                    }
+                }
+            }
+
+            $instancePR->save();
+
+            $msg = "Purchase Request '$prNo' successfully updated.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
     }
 
-    public function cancel($id) {
+    public function delete(Request $request, $id) {
         try {
-            $pr = PurchaseRequest::where('id', $id)->first();
-            $pr->date_pr_cancel = Carbon::now();
-            $pr->status = 3;
-            $pr->save();
+            $instancePR = PurchaseRequest::find($id);
+            $prNo = $instancePR->pr_no;
+            $instancePR->delete();
 
-            $prNo = $pr->pr_no;
-            $code = $pr->code;
-            $this->logTrackerHistory($code, Auth::user()->emp_id, 0, '-');
+            RequestQuotation::where('pr_id', $id)->delete();
+            AbstractQuotation::where('pr_id', $id)->delete();
+            PurchaseJobOrder::where('pr_id', $id)->delete();
+            ObligationRequestStatus::where('pr_id', $id)->delete();
+            InspectionAcceptance::where('pr_id', $id)->delete();
+            DisbursementVoucher::where('pr_id', $id)->delete();
+            InventoryStock::where('pr_id', $id)->delete();
 
-            $this->notifyCancelled($prNo, $pr->requested_by);
-
-            $logEmpMessage = "cancelled the purchase request $prNo.";
-            $this->logEmployeeHistory($logEmpMessage);
-
-            $msg = "Purchase request $prNo is now cancelled.";
-            return redirect(url('procurement/pr?search=' . $prNo))->with('success', $msg);
-        } catch (Exception $e) {
-            $msg = "There is an error encountered while disapproving the Purchase Request $prNo.";
+            $msg = "Purchase request '$prNo' successfully deleted.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
 
     }
 
-    private function notifyForApproval($prNo, $requestedBy) {
-        $users = User::whereIn('role', [1, 2])
-                     ->where('active', 'y')
-                     ->get();
+    public function approve(Request $request, $id) {
+        try {
+            $instanceDocLog = new DocLog;
+            $instanceRFQ = RequestQuotation::where('pr_id', $id)->first();
+            $instancePR = PurchaseRequest::find($id);
+            $prNo = $instancePR->pr_no;
+            $requestedBy = $instancePR->requested_by;
+            $instancePR->date_pr_approved = Carbon::now();
+            $instancePR->status = 5;
+            $instancePR->save();
 
-        foreach ($users as $user) {
-            $userData = User::where('emp_id', $requestedBy)
-                            ->select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
-                            ->first();
-            $msgNotif = "<strong>".$userData->name."</strong> created a new
-                         <strong>Purchase Request<br>" . $prNo . "</strong>";
-            $data = (object) ['pr_no' => $prNo,
-                              'msg' => $msgNotif,
-                              'redirect' => 'procurement/pr?search=' . $prNo];
-            $user->notify(new PurchaseReqAction($data));
+            if (!$instanceRFQ) {
+                $instanceRFQ = new RequestQuotation;
+                $instanceRFQ->pr_id = $id;
+                $instanceRFQ->save();
+
+                $rfqData = RequestQuotation::where('pr_id', $id)->first();
+                $rfqID = $rfqData->id;
+                $instanceDocLog->logDocument($id, Auth::user()->id, NULL, 'received');
+            }
+
+            $instancePR->notifyApproved($prNo, $requestedBy);
+
+            $msg = "Purchase request '$prNo' successfully approved.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
         }
     }
 
-    private function notifyApproved($prNo, $requestedBy) {
-        $user = User::where('emp_id', $requestedBy)
-                    ->first();
-        $msgNotif = "Your <strong>Purchase Request " . $prNo . "</strong> is now <br>
-                     <strong>Approved</strong>.";
-        $data = (object) ['pr_no' => $prNo,
-                          'msg' => $msgNotif,
-                          'redirect' => 'procurement/pr?search=' . $prNo];
-        $user->notify(new PurchaseReqAction($data));
+    public function disapprove(Request $request, $id) {
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePR = PurchaseRequest::find($id);
+            $prNo = $instancePR->pr_no;
+            $requestedBy = $instancePR->requested_by;
+            $instancePR->date_pr_disapproved = Carbon::now();
+            $instancePR->status = 2;
+            $instancePR->save();
+
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
+            $instancePR->notifyDisapproved($prNo, $requestedBy);
+
+            $msg = "Purchase request '$prNo' successfully disapproved.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
-    private function notifyDisapproved($prNo, $requestedBy) {
-        $user = User::where('emp_id', $requestedBy)
-                    ->first();
-        $msgNotif = "Your <strong>Purchase Request " . $prNo . "</strong> has been <br>
-                     <strong>Disapproved</strong>.";
-        $data = (object) ['pr_no' => $prNo,
-                          'msg' => $msgNotif,
-                          'redirect' => 'procurement/pr?search=' . $prNo];
-        $user->notify(new PurchaseReqAction($data));
-    }
+    public function cancel(Request $request, $id) {
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePR = PurchaseRequest::find($id);
+            $prNo = $instancePR->pr_no;
+            $requestedBy = $instancePR->requested_by;
+            $instancePR->date_pr_cancelled = Carbon::now();
+            $instancePR->status = 3;
+            $instancePR->save();
 
-    private function notifyCancelled($prNo, $requestedBy) {
-        $user = User::where('emp_id', $requestedBy)
-                    ->first();
-        $msgNotif = "Your <strong>Purchase Request " . $prNo . "</strong> has been <br>
-                     Cancelled.";
-        $data = (object) ['pr_no' => $prNo,
-                          'msg' => $msgNotif,
-                          'redirect' => 'procurement/pr?search=' . $prNo];
-        $user->notify(new PurchaseReqAction($data));
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
+            $instancePR->notifyCancelled($prNo, $requestedBy);
+
+            $msg = "Purchase request '$prNo' successfully cancelled.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 }

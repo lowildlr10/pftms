@@ -42,6 +42,6 @@ class NotificationController extends Controller
     }
 
     public function showAllNotifications() {
-        return view('pages.view-all-notifications');
+        return view('modules.notification.index');
     }
 }

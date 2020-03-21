@@ -60,7 +60,7 @@
                         <tbody id="row-items">
                             <tr id="row-0">
                                 <td>
-                                    <input type="hidden" name="id0" id="id0">
+                                    <input type="hidden" name="item_id[]">
                                     <div class="md-form my-0 py-0">
                                         <select class="mdb-select md-form required" searchable="Search here.."
                                                 name="unit[]">

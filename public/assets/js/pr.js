@@ -40,27 +40,18 @@ $(function() {
 			$(newcell).html($(table.rows[1].cells[i]).html());
 
 			switch(i){
-                /*
-				case 0:
-                    $(newcell).addClass('hidden-xs')
-                              .find('input')
-							  .attr('id', 'id' + conCount)
-                              .attr('name', 'id' + conCount);
-				break;*/
 				case 0:
 					$(newcell).find('select')
 							  .attr('id', 'unit' + conCount)
                               .val('1');
-                    $(`unit${conCount}`);
+                    $(`unit${conCount}`).val('1');
 
-                    /*
-                    $(newcell).find('input').not('select')
-							  .attr('id', 'id' + conCount)
-                              .attr('name', 'id' + conCount);*/
+                    $(newcell).find('input')
+							  .attr('name', 'item_id[]')
+                              .val('');
 				break;
 				case 1:
 					$(newcell).find('textarea')
-							  //.attr('id', 'item_description' + conCount)
 							  .val('');
 				break;
 				case 2:
@@ -115,7 +106,7 @@ $(function() {
         });
         $("#modal-show").modal({keyboard: false, backdrop: 'static'})
 						.on('shown.bs.modal', function() {
-            $('#create-title').html('Create Purchase Request');
+            $('#show-title').html('View Items');
 		}).on('hidden.bs.modal', function() {
 		    $('#modal-body-show').html('').css('display', 'none');
 		});
@@ -215,10 +206,6 @@ $(function() {
         $('#form-disapprove').submit();
     }
 
-    $.fn.cancel = function() {
-        $('#form-cancel').submit();
-    }
-
 	$.fn.showCancel = function(url, name) {
 		$('#modal-body-cancel').html(`Are you sure you want to cancel '${name}'?`);
         $("#modal-cancel").modal({keyboard: false, backdrop: 'static'})
@@ -229,6 +216,10 @@ $(function() {
              $('#modal-cancel-body').html('');
              $('#form-cancel').attr('action', '#');
 		});
+    }
+
+    $.fn.cancel = function() {
+        $('#form-cancel').submit();
     }
 
     $('.material-tooltip-main').tooltip({
