@@ -66,23 +66,20 @@
                                         <th class="th-md" width="15%">
                                             <strong>Employee</strong>
                                         </th>
-                                        <th class="th-md" width="20%">
-                                            <strong>Message</strong>
-                                        </th>
                                         <th class="th-md" width="13%">
-                                            <strong>Action</strong>
+                                            <strong>Request</strong>
                                         </th>
                                         <th class="th-md" width="9%">
                                             <strong>Method</strong>
                                         </th>
                                         <th class="th-md" width="9%">
-                                            <strong>IP</strong>
+                                            <strong>Host</strong>
                                         </th>
-                                        <th class="th-md" width="9%">
-                                            <strong>Browser</strong>
+                                        <th class="th-md" width="18%">
+                                            <strong>User Agent</strong>
                                         </th>
-                                        <th class="th-md" width="9%">
-                                            <strong>OS</strong>
+                                        <th class="th-md" width="20%">
+                                            <strong>Remarks</strong>
                                         </th>
                                         <th class="th-md" width="10%">
                                             <strong>Logged At</strong>
@@ -99,13 +96,12 @@
                                     <tr>
                                         <td></td>
                                         <td>{{ $log->name }}</td>
-                                        <td>{{ $log->message }}</td>
-                                        <td>{{ $log->action_url }}</td>
+                                        <td>{{ $log->request }}</td>
                                         <td>{{ $log->method }}</td>
-                                        <td>{{ $log->ip_add }}</td>
-                                        <td>{{ $log->browser }}</td>
-                                        <td>{{ $log->os }}</td>
-                                        <td>{{ $log->created_at }}</td>
+                                        <td>{{ $log->host }}</td>
+                                        <td>{{ $log->user_agent }}</td>
+                                        <td>{{ $log->remarks }}</td>
+                                        <td>{{ $log->logged_at }}</td>
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-red p-2 waves-effect material-tooltip-main mr-0"
                                                onclick="$(this).showDestroy('{{ route('emp-log-destroy', ['id' => $log->id]) }}',

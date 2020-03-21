@@ -155,10 +155,11 @@
     <script type="text/javascript" src="{{ asset('plugins/sidebar/js/jquery.mCustomScrollbar.concat.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('plugins/sidebar/js/sidebar-main.js') }}"></script>
 
-    <script type="text/javascript" src="{{ asset('assets/js/global-variables.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/notification.js') }}"></script>
 
     <script type="text/javascript">
+        const baseURL = "{{ url('/') }}/";
+
         $(function() {
             var datetime = null,
                     date = null
@@ -175,6 +176,10 @@
                 setInterval(update, 1000);
             });
             $('.preloader').fadeOut();
+
+            $.fn.redirectToDoc = function(url) {
+                $('#search-keyword').attr('action', url).submit();
+            }
         });
     </script>
 

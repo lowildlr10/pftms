@@ -208,11 +208,16 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     /*===================== PROCUREMENT ROUTES =====================*/
 
     // Purchase Request Module
-    Route::any('procurement/pr', [
+    Route::get('procurement/pr', [
         'uses' => 'PurchaseRequestController@index',
         'module' => 'proc_pr',
         'access' => 'is_allowed'
     ])->name('pr');
+    Route::post('procurement/pr/{keyword}', [
+        'uses' => 'PurchaseRequestController@index',
+        'module' => 'proc_pr',
+        'access' => 'is_allowed'
+    ])->name('pr-search');
     Route::get('procurement/pr/show-create', [
         'uses' => 'PurchaseRequestController@showCreate',
         'module' => 'proc_pr',
@@ -226,7 +231,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     Route::get('procurement/pr/show-items/{id}', [
         'uses' => 'PurchaseRequestController@showItems',
         'module' => 'proc_pr',
-        'access' => 'read'
+        'access' => 'is_allowed'
     ])->name('pr-show-items');
     Route::get('procurement/pr/show-edit/{id}', [
         'uses' => 'PurchaseRequestController@showEdit',
@@ -265,33 +270,38 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     ])->name('pr-tracker');
 
     // Request for Quotation Module
-    Route::any('procurement/rfq', [
-        'uses' => 'CanvassController@index',
+    Route::get('procurement/rfq', [
+        'uses' => 'RequestQuotationController@index',
         'module' => 'proc_rfq',
         'access' => 'is_allowed'
     ])->name('rfq');
+    Route::post('procurement/rfq/{keyword}', [
+        'uses' => 'RequestQuotationController@index',
+        'module' => 'proc_rfq',
+        'access' => 'is_allowed'
+    ])->name('rfq-search');
     Route::get('procurement/rfq/show-edit/{id}', [
-        'uses' => 'CanvassController@showEdit',
+        'uses' => 'RequestQuotationController@showEdit',
         'module' => 'proc_rfq',
         'access' => 'update'
     ])->name('rfq-show-edit');
     Route::post('procurement/rfq/update/{id}', [
-        'uses' => 'CanvassController@update',
+        'uses' => 'RequestQuotationController@update',
         'module' => 'proc_rfq',
         'access' => 'update'
     ])->name('rfq-update');
     Route::get('procurement/rfq/show-issue/{id}', [
-        'uses' => 'CanvassController@showIssue',
+        'uses' => 'RequestQuotationController@showIssue',
         'module' => 'proc_rfq',
         'access' => 'issue'
     ])->name('rfq-show-issue');
     Route::post('procurement/rfq/issue/{id}', [
-        'uses' => 'CanvassController@issue',
+        'uses' => 'RequestQuotationController@issue',
         'module' => 'proc_rfq',
         'access' => 'issue'
     ])->name('rfq-issue');
     Route::post('procurement/rfq/receive/{id}', [
-        'uses' => 'CanvassController@receive',
+        'uses' => 'RequestQuotationController@receive',
         'module' => 'proc_rfq',
         'access' => 'receive'
     ])->name('rfq-receive');

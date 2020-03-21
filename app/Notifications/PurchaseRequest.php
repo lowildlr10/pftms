@@ -16,9 +16,9 @@ class PurchaseRequest extends Notification
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($_data)
     {
-        //
+        $this->data = $_data;
     }
 
     /**
@@ -29,7 +29,7 @@ class PurchaseRequest extends Notification
      */
     public function via($notifiable)
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
@@ -68,9 +68,11 @@ class PurchaseRequest extends Notification
     public function toDatabase($notifiable)
     {
         return [
+            'pr_id' => $this->data->pr_id,
             'pr_no' => $this->data->pr_no,
-            'msg' => $this->data->msg,
-            'redirect' => $this->data->redirect
+            'module' => $this->data->module,
+            'type' => $this->data->type,
+            'msg' => $this->data->msg
         ];
     }
 }

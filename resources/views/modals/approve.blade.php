@@ -4,9 +4,9 @@
         <!--Content-->
         <div class="modal-content">
             <!--Header-->
-            <div class="modal-header danger-color-dark white-text">
+            <div class="modal-header success-color-dark white-text">
                 <h7 class="mt-1">
-                    <i class="fas fa-trash"></i>
+                    <i class="fas fa-thumbs-up"></i>
                     <span id="approve-title"></span>
                 </h7>
                 <button type="button" class="close white-text" data-dismiss="modal"
@@ -23,9 +23,9 @@
 
             <!--Footer-->
             <div class="modal-footer p-1">
-                <button type="button" class="btn btn-red btn-sm waves-effect waves-light"
+                <button type="button" class="btn btn-green btn-sm waves-effect waves-light"
                         onclick="$(this).approve();">
-                        <i class="fas fa-trash"></i> Approve
+                        <i class="fas fa-thumbs-up"></i> Approve
                 </button>
                 <button type="button" class="btn btn btn-light btn-sm waves-effect" data-dismiss="modal">
                     <i class="far fa-window-close"></i> Close

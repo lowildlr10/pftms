@@ -4,9 +4,9 @@
         <!--Content-->
         <div class="modal-content">
             <!--Header-->
-            <div class="modal-header danger-color-dark white-text">
+            <div class="modal-header unique-color-dark white-text">
                 <h7 class="mt-1">
-                    <i class="fas fa-trash"></i>
+                    <i class="fas fa-list-ol"></i>
                     <span id="show-title"></span>
                 </h7>
                 <button type="button" class="close white-text" data-dismiss="modal"

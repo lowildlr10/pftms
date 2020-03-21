@@ -35,3 +35,7 @@
 
     </div>
 </div>
+
+<form action="#" method="POST" id="search-keyword">
+    @csrf
+</form>

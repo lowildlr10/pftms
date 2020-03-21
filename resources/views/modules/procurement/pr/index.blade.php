@@ -133,7 +133,7 @@
                                         <td>{{ $pr->name }}</td>
                                         <td align="center">
                                             <a class="btn btn-link p-0" href="{{ route('pr-tracker', ['prNo' => $pr->pr_no]) }}">
-                                                <strong><i class="far fa-eye"></i><br>{{ $pr->status_name }}</strong></td>
+                                                <strong>{{ $pr->status_name }}</strong></td>
                                             </a>
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
@@ -251,7 +251,8 @@
                         @if ($isAllowedApprove)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-md btn-block btn-rounded"
-                                onclick="$(this).approve('{{ $pr->id }}');">
+                                onclick="$(this).showApprove('{{ route('pr-approve', ['id' => $pr->id]) }}',
+                                                             '{{ $pr->pr_no }}');">
                             <i class="fas fa-thumbs-up"></i> Approve
                         </button>
                     </li>
@@ -260,7 +261,8 @@
                         @if ($isAllowedApprove)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-black waves-effect btn-md btn-block btn-rounded"
-                                onclick="$(this).disapprove('{{ $pr->id }}');">
+                                onclick="$(this).showDisapprove('{{ route('pr-disapprove', ['id' => $pr->id]) }}',
+                                                                '{{ $pr->pr_no }}');">
                             <i class="fas fa-thumbs-down"></i> Disapprove
                         </button>
                     </li>
@@ -269,7 +271,8 @@
                         @if ($isAllowedCancel)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-red waves-effect btn-md btn-block btn-rounded"
-                                onclick="$(this).cancel('{{ $pr->id }}');">
+                                onclick="$(this).showCancel('{{ route('pr-cancel', ['id' => $pr->id]) }}',
+                                                            '{{ $pr->pr_no }}');">
                             <i class="fas fa-ban"></i> Cancel
                         </button>
                     </li>
@@ -279,12 +282,21 @@
                     @if ($pr->status >= 5)
                         @if ($isAllowedRFQ)
                     <li class="list-group-item justify-content-between">
-                        <a href="{{ redirect(route('rfq'))->with('search', $pr->pr_no) }}"
+                        <a onclick="$(this).redirectToDoc('{{ route('rfq-search',
+                                    ['keyword' => $pr->id]) }}');"
                            class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
                             Generate RFQ <i class="fas fa-angle-double-right"></i>
                         </a>
                     </li>
                         @endif
+                    @endif
+
+                    @if ($pr->status > 1 && $pr->status < 5)
+                    <ul class="list-group z-depth-0">
+                        <li class="list-group-item justify-content-between text-center">
+                            No more available actions.
+                        </li>
+                    </ul>
                     @endif
                 </ul>
             </div>
@@ -302,6 +314,7 @@
 @endif
 
 @include('modals.search')
+@include('modals.show')
 @include('modals.create')
 @include('modals.edit')
 @include('modals.delete')

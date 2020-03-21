@@ -4,9 +4,9 @@
         <!--Content-->
         <div class="modal-content">
             <!--Header-->
-            <div class="modal-header danger-color-dark white-text">
+            <div class="modal-header rgba-red-strong white-text">
                 <h7 class="mt-1">
-                    <i class="fas fa-trash"></i>
+                    <i class="fas fa-ban"></i>
                     <span id="cancel-title"></span>
                 </h7>
                 <button type="button" class="close white-text" data-dismiss="modal"
@@ -23,9 +23,9 @@
 
             <!--Footer-->
             <div class="modal-footer p-1">
-                <button type="button" class="btn btn-red btn-sm waves-effect waves-light"
+                <button type="button" class="btn btn-danger btn-sm waves-effect waves-light"
                         onclick="$(this).cancel();">
-                        <i class="fas fa-trash"></i> Cancel
+                        <i class="fas fa-ban"></i> Cancel
                 </button>
                 <button type="button" class="btn btn btn-light btn-sm waves-effect" data-dismiss="modal">
                     <i class="far fa-window-close"></i> Close
