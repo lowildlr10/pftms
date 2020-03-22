@@ -18,14 +18,19 @@ class CreateNotificationsTable extends Migration
 
             $table->uuid('id')->primary();
             $table->string('type');
-            //$table->morphs('notifiable');
-            $table->string('notifiable_type');
-            $table->uuid('notifiable_id');
-            // Don't forget to add the indexes
-            $table->index(['notifiable_type', 'notifiable_id']);
+            $table->morphs('notifiable');
             $table->text('data');
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
+        });
+
+        Schema::table('notifications', function (Blueprint $table) {
+            $table->dropColumn('notifiable_id');
+        });
+
+        Schema::table('notifications', function (Blueprint $table) {
+            $table->uuid('notifiable_id');
+            $table->index(['notifiable_id']);
         });
     }
 
