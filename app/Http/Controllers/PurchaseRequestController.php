@@ -44,8 +44,8 @@ class PurchaseRequestController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($keyword = '') {
-        $keyword = trim($keyword);
+    public function index(Request $request) {
+        $keyword = trim($request->keyword);
 
         // Get module access
         $module = 'proc_pr';
@@ -90,6 +90,7 @@ class PurchaseRequestController extends Controller
 
         return view('modules.procurement.pr.index', [
             'list' => $prData,
+            'keyword' => $keyword,
             'paperSizes' => $paperSizes,
             'isAllowedCreate' => $isAllowedCreate,
             'isAllowedUpdate' => $isAllowedUpdate,
@@ -662,6 +663,7 @@ class PurchaseRequestController extends Controller
             }
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
     }

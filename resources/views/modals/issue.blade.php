@@ -1,14 +1,14 @@
-<div class="modal custom-fullwidth-modal fade" id="central-issue-modal" tabindex="-1"
-     role="dialog" style="display: none;">
-    <div class="modal-dialog modal-full-height modal-top" role="document">
+<div class="modal fade top" id="modal-issue" tabindex="-1"
+     role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-top" role="document">
         <!--Content-->
         <div class="modal-content">
             <!--Header-->
             <div class="modal-header stylish-color-dark white-text">
-                <h6>
-                        <i class="fas fa-paper-plane"></i>
+                <h7 class="mt-1">
+                    <i class="fas fa-paper-plane"></i>
                     <span id="issue-title"></span>
-                </h6>
+                </h7>
                 <button type="button" class="close white-text" data-dismiss="modal"
                         aria-label="Close">
                     &times;
@@ -16,32 +16,18 @@
             </div>
 
             <!--Body-->
-            <div class="modal-body">
-                <div id="modal-body-issue">
-                    <div class="mt-5" style="height: 150px;">
-                        <center>
-                            <div class="preloader-wrapper big active crazy">
-                                <div class="spinner-layer spinner-blue-only">
-                                    <div class="circle-clipper left">
-                                        <div class="circle"></div>
-                                    </div>
-                                    <div class="gap-patch">
-                                        <div class="circle"></div>
-                                    </div>
-                                    <div class="circle-clipper right">
-                                        <div class="circle"></div>
-                                    </div>
-                                </div>
-                            </div><br>
-                        </center>
+            <div class="modal-body p-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="modal-body-issue" style="display: none;"></div>
                     </div>
                 </div>
             </div>
 
             <!--Footer-->
-            <div class="modal-footer rgba-stylish-strong p-1">
+            <div class="modal-footer p-1">
                 <button type="button" class="btn btn-orange btn-sm waves-effect waves-light"
-                        onclick="$(this).issueDoc();">
+                        onclick="$(this).issue();">
                     <i class="fas fa-paper-plane"></i> Issue
                 </button>
                 <button type="button" class="btn btn btn-light btn-sm waves-effect" data-dismiss="modal">
@@ -52,3 +38,4 @@
         <!--/.Content-->
     </div>
 </div>
+

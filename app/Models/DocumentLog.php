@@ -59,6 +59,15 @@ class DocumentLog extends Model
         $instanceDocLog->save();
     }
 
+    public function checkDocGenerated($docID) {
+        $logCount = $this::where([
+            ['doc_id', $docID],
+            ['action', 'document_generated']
+        ])->orderBy('logged_at', 'desc')->count();
+
+        return $logCount ? 1 : 0;
+    }
+
     public function checkDocStatus($docID) {
         $logs = $this::where('doc_id', $docID)
                      ->orderBy('created_at', 'desc')

@@ -3,20 +3,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\PaperSize;
 
-use App\PurchaseRequest;
-use App\Canvass;
-use App\Abstracts;
-use App\PurchaseOrder;
-use App\OrsBurs;
-use App\InspectionAcceptance;
-use App\DisbursementVoucher;
-use App\InventoryStock;
+use App\Models\PurchaseRequest;
+use App\Models\PurchaseRequestItem;
+use App\Models\RequestQuotation;
+use App\Models\AbstractQuotation;
+use App\Models\AbstractQuotationItem;
+use App\Models\PurchaseJobOrder;
+use App\Models\PurchaseJobOrderItem;
+use App\Models\ObligationRequestStatus;
+use App\Models\InspectionAcceptance;
+use App\Models\DisbursementVoucher;
+use App\Models\InventoryStock;
 
-use App\AbstractItem;
-use App\DocumentLogHistory;
-use App\EmployeeLog;
+use App\Models\DocumentLog as DocLog;
+use App\Models\EmpLog;
+use App\Models\PaperSize;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -35,34 +37,33 @@ class PrintController extends Controller
      *
      * @return void
      */
-    public function __construct()
-    {
-
+    public function __construct() {
         $this->middleware('auth');
     }
 
     public function index(Request $request, $key) {
-        $empLog = new EmployeeLog;
+        $instanceDocLog = new DocLog;
+
         $action = "document_generated";
-        $test = $request['test'];
-        $paperSize = $request['paper_size'];
-        $documentType = $request['document_type'];
+        $test = $request->test;
+        $paperSize = $request->paper_size;
+        $documentType = $request->document_type;
         $pageWidth = $this->getPaperSize($paperSize)->width;
         $pageHeight = $this->getPaperSize($paperSize)->height;
-        $increaseFontSize = $request['font_scale'] / 100;
-        $previewToggle = $request['preview_toggle'];
-        $otherParam = $request['other_param'];
+        $pageHUnit = $this->getPaperSize($paperSize)->unit;
+        $increaseFontSize = $request->font_scale / 100;
+        $previewToggle = $request->preview_toggle;
+        $otherParam = $request->other_param;
 
         switch ($documentType) {
             case 'pr':
                 $data = $this->getDataPR($key);
 
                 if ($test == 'true') {
-                    $code = $this->getDocCode($key, $documentType);
-                    $this->logTrackerHistory($code, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
                     $prNo =  $data->pr->pr_no;
-                    $logEmpMessage = "generated the purchase request $prNo.";
-                    $this->logEmployeeHistory($logEmpMessage);
+                    $msg = "Generated the Purchase Request '$prNo' document.";
+                    Auth::user()->log($msg);
                 } else {
                     $this->generatePR($data, $documentType, $increaseFontSize,
                                       $pageHeight, $pageWidth, $previewToggle);
@@ -74,11 +75,10 @@ class PrintController extends Controller
                 $data = $this->getDataRFQ($key);
 
                 if ($test == 'true') {
-                    $code = $this->getDocCode($key, $documentType);
-                    $this->logTrackerHistory($code, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($code, Auth::user()->emp_id, 0, $action);
                     $prNo =  $data->pr->pr_no;
-                    $logEmpMessage = "generated the request for quotation $prNo.";
-                    $this->logEmployeeHistory($logEmpMessage);
+                    $msg = "Generated the Request for Quotation '$prNo' document.";
+                    Auth::user()->log($msg);
                 } else {
                     $this->generateRFQ($data, $documentType, $increaseFontSize,
                                        $pageHeight, $pageWidth, $previewToggle);
@@ -90,11 +90,10 @@ class PrintController extends Controller
                 $data = $this->getDataAbstract($key, $pageHeight);
 
                 if ($test == 'true') {
-                    $code = $this->getDocCode($key, $documentType);
-                    $this->logTrackerHistory($code, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
                     $prNo =  $data->abstract->pr_no;
-                    $logEmpMessage = "generated the abstract of quotation $prNo.";
-                    $this->logEmployeeHistory($logEmpMessage);
+                    $msg = "generated the abstract of quotation $prNo.";
+                    Auth::user()->log($msg);
                 } else {
                     $this->generateAbstract($data, $documentType, $increaseFontSize,
                                             $pageHeight, $pageWidth, $previewToggle);
@@ -108,10 +107,10 @@ class PrintController extends Controller
                 if ($data->toggle == 'po') {
                     if ($test == 'true') {
                         $code = $this->getDocCode($key, 'po');
-                        $this->logTrackerHistory($code, Auth::user()->emp_id, 0, $action);
+                        $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
                         $poNo =  $data->po->po_no;
-                        $logEmpMessage = "generated the purchase order $poNo.";
-                        $this->logEmployeeHistory($logEmpMessage);
+                        $msg = "generated the purchase order $poNo.";
+                        Auth::user()->log($msg);
                     } else {
                         $this->generatePO($data, $documentType, $increaseFontSize,
                                           $pageHeight, $pageWidth, $previewToggle);
@@ -119,10 +118,10 @@ class PrintController extends Controller
                 } else if ($data->toggle == 'jo') {
                     if ($test == 'true') {
                         $code = $this->getDocCode($key, 'po');
-                        $this->logTrackerHistory($code, Auth::user()->emp_id, 0, $action);
+                        $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
                         $joNo =  $data->jo->po_no;
-                        $logEmpMessage = "generated the job order $joNo.";
-                        $this->logEmployeeHistory($logEmpMessage);
+                        $msg = "generated the job order $joNo.";
+                        Auth::user()->log($msg);
                     } else {
                         $this->generateJO($data, $documentType, $increaseFontSize,
                                           $pageHeight, $pageWidth, $previewToggle);
@@ -136,12 +135,12 @@ class PrintController extends Controller
 
                 if ($test == 'true') {
                     $code = $this->getDocCode($key, 'ors');
-                    $this->logTrackerHistory($code, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
                     $docType = ($data->ors->document_type == 'ors') ?
                                'obligation and request status': 'budget utilization and request status';
                     $orsID =  $data->ors->id;
-                    $logEmpMessage = "generated the $docType $orsID.";
-                    $this->logEmployeeHistory($logEmpMessage);
+                    $msg = "generated the $docType $orsID.";
+                    Auth::user()->log($msg);
                 } else {
                     if (strtolower($data->ors->document_type) == 'ors') {
                         $this->generateORS($data, $data->ors->document_type, $increaseFontSize,
@@ -159,12 +158,12 @@ class PrintController extends Controller
 
                 if ($test == 'true') {
                     $code = $this->getDocCode($key, 'ors');
-                    $this->logTrackerHistory($code, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
                     $docType = ($data->ors->document_type == 'ors') ?
                                'obligation and request status': 'budget utilization and request status';
                     $orsID =  $data->ors->id;
-                    $logEmpMessage = "generated the $docType $orsID.";
-                    $this->logEmployeeHistory($logEmpMessage);
+                    $msg = "generated the $docType $orsID.";
+                    Auth::user()->log($msg);
                 } else {
                     if (strtolower($data->ors->document_type) == 'ors') {
                         $this->generateORS($data, $data->ors->document_type, $increaseFontSize,
@@ -181,11 +180,10 @@ class PrintController extends Controller
                 $data = $this->getDataIAR($key);
 
                 if ($test == 'true') {
-                    $code = $this->getDocCode($key, $documentType);
-                    $this->logTrackerHistory($code, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
                     $iarNo =  $data->iar->iar_no;
-                    $logEmpMessage = "generated the inspection and acceptance report $iarNo.";
-                    $this->logEmployeeHistory($logEmpMessage);
+                    $msg = "generated the inspection and acceptance report $iarNo.";
+                    Auth::user()->log($msg);
                 } else {
                     $this->generateIAR($data, $documentType, $increaseFontSize,
                                        $pageHeight, $pageWidth, $previewToggle);
@@ -197,11 +195,10 @@ class PrintController extends Controller
                 $data = $this->getDataDV($key, 'procurement');
 
                 if ($test == 'true') {
-                    $code = $this->getDocCode($key, $documentType);
-                    $this->logTrackerHistory($code, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
                     $dvID =  $data->dv->id;
-                    $logEmpMessage = "generated the disbursement voucher $dvID.";
-                    $this->logEmployeeHistory($logEmpMessage);
+                    $msg = "generated the disbursement voucher $dvID.";
+                    Auth::user()->log($msg);
                 } else {
                     $this->generateDV($data, $documentType, $increaseFontSize,
                                   $pageHeight, $pageWidth, $previewToggle);
@@ -214,10 +211,10 @@ class PrintController extends Controller
 
                 if ($test == 'true') {
                     $code = $this->getDocCode($key, 'dv');
-                    $this->logTrackerHistory($code, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
                     $dvID =  $data->dv->id;
-                    $logEmpMessage = "generated the disbursement voucher $dvID.";
-                    $this->logEmployeeHistory($logEmpMessage);
+                    $msg = "generated the disbursement voucher $dvID.";
+                    Auth::user()->log($msg);
                 } else {
                     $this->generateDV($data, $documentType, $increaseFontSize,
                                       $pageHeight, $pageWidth, $previewToggle);
@@ -230,10 +227,10 @@ class PrintController extends Controller
 
                 if ($test == 'true') {
                     $code = $this->getDocCode($key, 'liquidation');
-                    $this->logTrackerHistory($code, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
                     $liqID =  $data->liq->id;
-                    $logEmpMessage = "generated the disbursement voucher $liqID.";
-                    $this->logEmployeeHistory($logEmpMessage);
+                    $msg = "generated the disbursement voucher $liqID.";
+                    Auth::user()->log($msg);
                 } else {
                     $this->generateLiquidation($data, $documentType, $increaseFontSize,
                                                $pageHeight, $pageWidth, $previewToggle);
@@ -246,10 +243,10 @@ class PrintController extends Controller
 
                     if ($test == 'true') {
                         //$code = $this->getDocCode($key, 'lddap');
-                        //$this->logTrackerHistory($code, Auth::user()->emp_id, 0, $action);
+                        //$instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
                         //$lddapID =  $data->lddap->id;
-                        //$logEmpMessage = "generated the disbursement voucher $lddapID.";
-                        //$this->logEmployeeHistory($logEmpMessage);
+                        //$msg = "generated the disbursement voucher $lddapID.";
+                        //Auth::user()->log($msg);
                     } else {
                         $this->generateLDDAP($data, $documentType, $increaseFontSize,
                                              $pageHeight, $pageWidth, $previewToggle);
@@ -262,9 +259,9 @@ class PrintController extends Controller
 
                 if ($test == 'true') {
                     $code = $this->getDocCode($key, 'stock');
-                    $this->logTrackerHistory($code, Auth::user()->emp_id, 0, $action);
-                    $logEmpMessage = "generated the property acknowledgement report $key.";
-                    $this->logEmployeeHistory($logEmpMessage);
+                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                    $msg = "generated the property acknowledgement report $key.";
+                    Auth::user()->log($msg);
                 } else {
                     $this->generatePAR($data, $documentType, $increaseFontSize,
                                        $pageHeight, $pageWidth, $previewToggle);
@@ -277,9 +274,9 @@ class PrintController extends Controller
 
                 if ($test == 'true') {
                     $code = $this->getDocCode($key, 'stock');
-                    $this->logTrackerHistory($code, Auth::user()->emp_id, 0, $action);
-                    $logEmpMessage = "generated the requisition and issue slip $key.";
-                    $this->logEmployeeHistory($logEmpMessage);
+                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                    $msg = "generated the requisition and issue slip $key.";
+                    Auth::user()->log($msg);
                 } else {
                     $this->generateRIS($data, $documentType, $increaseFontSize,
                                        $pageHeight, $pageWidth, $previewToggle);
@@ -292,9 +289,9 @@ class PrintController extends Controller
 
                 if ($test == 'true') {
                     $code = $this->getDocCode($key, 'stock');
-                    $this->logTrackerHistory($code, Auth::user()->emp_id, 0, $action);
-                    $logEmpMessage = "generated the inventory custodian slip $key.";
-                    $this->logEmployeeHistory($logEmpMessage);
+                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                    $msg = "generated the inventory custodian slip $key.";
+                    Auth::user()->log($msg);
                 } else {
                     $this->generateICS($data, $documentType, $increaseFontSize,
                                        $pageHeight, $pageWidth, $previewToggle);
@@ -406,10 +403,12 @@ class PrintController extends Controller
         $paper = PaperSize::where('id', $paperSize)->first();
         $width = !empty($paper->width) ? $paper->width : 0;
         $height = !empty($paper->height) ? $paper->height : 0;
+        $unit = !empty($paper->unit) ? $paper->unit : '';
         $isNull = !$paper ? true : false;
 
         return (object) ['width' => $width,
                          'height' => $height,
+                         'unit' => $unit,
                          'isNull' => $isNull];
     }
 
@@ -1798,8 +1797,9 @@ class PrintController extends Controller
     }
 
     private function getDataRFQ($id) {
-        $rfq = Canvass::where('pr_id', $id)->first();
-        $pr = $this->getDataPR($id)->pr;
+        $instanceRFQ = RequestQuotation::find($id);
+        $prID = $instanceRFQ->pr_id;
+        $instancePR = $this->getDataPR($prID)->pr;
         $sigRFQ = $this->getSignatory($rfq->sig_rfq);
         $groupNumbers = $this->getItemGroup($id);
 

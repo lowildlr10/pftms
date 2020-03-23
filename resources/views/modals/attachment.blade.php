@@ -47,7 +47,7 @@
                                                 <i class="fas fa-file-import"></i> Import
                                             </span>
                                             <input id="attachment" name="attachment[]" type="file" accept="application/pdf"
-                                                   multiple>
+                                                   onchange="$(this).initUpload('proc-rfq')" multiple>
                                         </div>
                                         <div class="file-path-wrapper">
                                             <input class="file-path validate" type="text"

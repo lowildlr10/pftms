@@ -161,11 +161,10 @@
         const baseURL = "{{ url('/') }}/";
 
         $(function() {
-            var datetime = null,
-                    date = null
-                    dateTimeIco = '<i class="fas fa-clock"></i> ';
-
-            var update = function () {
+            let datetime = null,
+                    date = null;
+            const dateTimeIco = '<i class="fas fa-clock"></i> ';
+            const update = function () {
                 date = moment(new Date())
                 datetime.html(dateTimeIco + date.format('MMMM D, YYYY HH:mm:ss'));
             };
@@ -177,7 +176,8 @@
             });
             $('.preloader').fadeOut();
 
-            $.fn.redirectToDoc = function(url) {
+            $.fn.redirectToDoc = function(url, keyword) {
+                $('#keyword').val(keyword);
                 $('#search-keyword').attr('action', url).submit();
             }
         });

@@ -189,18 +189,6 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('notification/mark-as-read/{notifID}', 'NotificationController@makeAsRead');
     Route::get('notification/display', 'NotificationController@displayNotifications');
     Route::get('notification/show-all', 'NotificationController@showAllNotifications');
-
-    /*
-    // PIS to PFMS Database Migrator
-    Route::get('migrator', [
-        'uses' => 'DatabaseMigratorController@index',
-    ]);
-    Route::post('migrator/temp-pis-import', [
-        'uses' => 'DatabaseMigratorController@migrate',
-    ]);
-    Route::any('migrator/migrate-data-modules/{type}', [
-        'uses' => 'DatabaseMigratorController@migratePIS_PFMS',
-    ]);*/
 });
 
 Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
@@ -208,12 +196,12 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     /*===================== PROCUREMENT ROUTES =====================*/
 
     // Purchase Request Module
-    Route::get('procurement/pr', [
+    Route::any('procurement/pr', [
         'uses' => 'PurchaseRequestController@index',
         'module' => 'proc_pr',
         'access' => 'is_allowed'
     ])->name('pr');
-    Route::post('procurement/pr/{keyword}', [
+    Route::post('procurement/pr/s/{keyword}', [
         'uses' => 'PurchaseRequestController@index',
         'module' => 'proc_pr',
         'access' => 'is_allowed'
@@ -270,16 +258,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     ])->name('pr-tracker');
 
     // Request for Quotation Module
-    Route::get('procurement/rfq', [
+    Route::any('procurement/rfq', [
         'uses' => 'RequestQuotationController@index',
         'module' => 'proc_rfq',
         'access' => 'is_allowed'
     ])->name('rfq');
-    Route::post('procurement/rfq/{keyword}', [
-        'uses' => 'RequestQuotationController@index',
-        'module' => 'proc_rfq',
-        'access' => 'is_allowed'
-    ])->name('rfq-search');
     Route::get('procurement/rfq/show-edit/{id}', [
         'uses' => 'RequestQuotationController@showEdit',
         'module' => 'proc_rfq',

@@ -16,8 +16,8 @@
                     <div class="card p-5">
                         @if (count(Auth::user()->notifications) > 0)
                             @foreach(Auth::user()->notifications as $notification)
-                    <a class="dropdown-item" onclick="$(this).redirectToDoc('{{ route('pr-search',
-                                                      ['keyword' => $notification->data['pr_id']]) }}');">
+                    <a class="dropdown-item" onclick="$(this).redirectToDoc('{{ route('pr') }}',
+                                                      '{{ $notification->data['pr_id'] }}');">
                             <div class="notification-content">
                                 <div class="content">
                                     <div class="notification-detail">
