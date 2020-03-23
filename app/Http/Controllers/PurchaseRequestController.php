@@ -649,15 +649,15 @@ class PurchaseRequestController extends Controller
                     $instancePRItem->save();
                 }
 
-                $instancePR->notifyForApproval($prNo, $requestedBy);
-                $instanceDocLog->logDocument($prID, Auth::user()->id, NULL, 'issued');
+                //$instancePR->notifyForApproval($prNo, $requestedBy);
+                //$instanceDocLog->logDocument($prID, Auth::user()->id, NULL, 'issued');
 
                 $msg = "Purchase Request '$prNo' successfully created.";
-                Auth::user()->log($request, $msg);
+                //Auth::user()->log($request, $msg);
                 return redirect(url()->previous())->with('success', $msg);
             } else {
                 $msg = "Purchase Request '$prNo' has a duplicate.";
-                Auth::user()->log($request, $msg);
+                //Auth::user()->log($request, $msg);
                 return redirect(url()->previous())->with('warning', $msg);
             }
         } catch (\Throwable $th) {
