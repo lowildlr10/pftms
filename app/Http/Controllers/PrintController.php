@@ -18,6 +18,8 @@ use App\Models\InventoryStock;
 
 use App\Models\DocumentLog as DocLog;
 use App\Models\EmpLog;
+use App\Models\Signatory;
+use App\User;
 use App\Models\PaperSize;
 use Carbon\Carbon;
 use Auth;
@@ -26,9 +28,11 @@ use DB;
 use \DateTime;
 //use App\Classes\PDF;
 //use App\Classes\Barcode;
-use App\Classes\DocumentPDF\PDF;
 use App\LiquidationReport;
 use App\ListDueDemandAccPay;
+
+use App\Plugins\PDFGenerator\DocPurchaseRequest;
+use App\Plugins\PDFGenerator\DocRequestQuotation;
 
 class PrintController extends Controller
 {
@@ -50,264 +54,326 @@ class PrintController extends Controller
         $documentType = $request->document_type;
         $pageWidth = $this->getPaperSize($paperSize)->width;
         $pageHeight = $this->getPaperSize($paperSize)->height;
-        $pageHUnit = $this->getPaperSize($paperSize)->unit;
-        $increaseFontSize = $request->font_scale / 100;
+        $pageUnit = $this->getPaperSize($paperSize)->unit;
+        $fontScale = $request->font_scale / 100;
         $previewToggle = $request->preview_toggle;
         $otherParam = $request->other_param;
 
         switch ($documentType) {
-            case 'pr':
+            case 'proc_pr':
                 $data = $this->getDataPR($key);
+                $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                     $prNo =  $data->pr->pr_no;
                     $msg = "Generated the Purchase Request '$prNo' document.";
-                    Auth::user()->log($msg);
+                    Auth::user()->log($request, $msg);
                 } else {
-                    $this->generatePR($data, $documentType, $increaseFontSize,
-                                      $pageHeight, $pageWidth, $previewToggle);
+                    $this->generatePR(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
-
                 break;
-
-            case 'rfq':
+            case 'proc_rfq':
                 $data = $this->getDataRFQ($key);
+                $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-                    $instanceDocLog->logDocument($code, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                     $prNo =  $data->pr->pr_no;
                     $msg = "Generated the Request for Quotation '$prNo' document.";
-                    Auth::user()->log($msg);
+                    Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateRFQ($data, $documentType, $increaseFontSize,
-                                       $pageHeight, $pageWidth, $previewToggle);
+                    $this->generateRFQ(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
-
                 break;
-
-            case 'abstract':
+            case 'proc_abstract':
                 $data = $this->getDataAbstract($key, $pageHeight);
+                $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                     $prNo =  $data->abstract->pr_no;
                     $msg = "generated the abstract of quotation $prNo.";
-                    Auth::user()->log($msg);
+                    Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateAbstract($data, $documentType, $increaseFontSize,
-                                            $pageHeight, $pageWidth, $previewToggle);
+                    $this->generateAbstract(
+                        $data,
+                        $documentType,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
 
                 break;
 
-            case 'po-jo':
+            case 'proc_po_jo':
                 $data = $this->getDataPO_JO($key);
+                $data->doc_type = $documentType;
 
                 if ($data->toggle == 'po') {
                     if ($test == 'true') {
                         $code = $this->getDocCode($key, 'po');
-                        $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                        $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                         $poNo =  $data->po->po_no;
                         $msg = "generated the purchase order $poNo.";
-                        Auth::user()->log($msg);
+                        Auth::user()->log($request, $msg);
                     } else {
-                        $this->generatePO($data, $documentType, $increaseFontSize,
-                                          $pageHeight, $pageWidth, $previewToggle);
+                        $this->generatePO(
+                            $data,
+                            $documentType,
+                            $fontScale,
+                            $pageHeight,
+                            $pageWidth,
+                            $pageUnit,
+                            $previewToggle
+                        );
                     }
                 } else if ($data->toggle == 'jo') {
                     if ($test == 'true') {
                         $code = $this->getDocCode($key, 'po');
-                        $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                        $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                         $joNo =  $data->jo->po_no;
                         $msg = "generated the job order $joNo.";
-                        Auth::user()->log($msg);
+                        Auth::user()->log($request, $msg);
                     } else {
-                        $this->generateJO($data, $documentType, $increaseFontSize,
-                                          $pageHeight, $pageWidth, $previewToggle);
+                        $this->generateJO(
+                            $data,
+                            $documentType,
+                            $fontScale,
+                            $pageHeight,
+                            $pageWidth,
+                            $pageUnit,
+                            $previewToggle
+                        );
                     }
                 }
 
                 break;
 
-            case 'ors-burs':
+            case 'proc_ors_burs':
                 $data = $this->getDataORS_BURS($key, 'procurement');
+                $data->doc_type = $documentType;
 
                 if ($test == 'true') {
                     $code = $this->getDocCode($key, 'ors');
-                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                     $docType = ($data->ors->document_type == 'ors') ?
                                'obligation and request status': 'budget utilization and request status';
                     $orsID =  $data->ors->id;
                     $msg = "generated the $docType $orsID.";
-                    Auth::user()->log($msg);
+                    Auth::user()->log($request, $msg);
                 } else {
                     if (strtolower($data->ors->document_type) == 'ors') {
-                        $this->generateORS($data, $data->ors->document_type, $increaseFontSize,
+                        $this->generateORS(
+                            $data,
+                            $data->ors->document_type,
+                            $fontScale,
+                            $pageHeight,
+                            $pageWidth,
+                            $pageUnit,
+                            $previewToggle
+                        );
+                        $this->generateORS($data, $data->ors->document_type, $fontScale,
                                            $pageHeight, $pageWidth, $previewToggle);
                     } else if (strtolower($data->ors->document_type) == 'burs') {
-                        $this->generateBURS($data, $data->ors->document_type, $increaseFontSize,
+                        $this->generateJO(
+                            $data,
+                            $documentType,
+                            $fontScale,
+                            $pageHeight,
+                            $pageWidth,
+                            $pageUnit,
+                            $previewToggle
+                        );
+                        $this->generateBURS($data, $data->ors->document_type, $fontScale,
                                             $pageHeight, $pageWidth, $previewToggle);
                     }
                 }
 
                 break;
 
-            case 'cashadvance-ors-burs':
+            case 'ca_ors_burs':
                 $data = $this->getDataORS_BURS($key, 'cashadvance');
+                $data->doc_type = $documentType;
 
                 if ($test == 'true') {
                     $code = $this->getDocCode($key, 'ors');
-                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                     $docType = ($data->ors->document_type == 'ors') ?
                                'obligation and request status': 'budget utilization and request status';
                     $orsID =  $data->ors->id;
                     $msg = "generated the $docType $orsID.";
-                    Auth::user()->log($msg);
+                    Auth::user()->log($request, $msg);
                 } else {
                     if (strtolower($data->ors->document_type) == 'ors') {
-                        $this->generateORS($data, $data->ors->document_type, $increaseFontSize,
+                        $this->generateORS($data, $data->ors->document_type, $fontScale,
                                            $pageHeight, $pageWidth, $previewToggle);
                     } else if (strtolower($data->ors->document_type) == 'burs') {
-                        $this->generateBURS($data, $data->ors->document_type, $increaseFontSize,
+                        $this->generateBURS($data, $data->ors->document_type, $fontScale,
                                             $pageHeight, $pageWidth, $previewToggle);
                     }
                 }
 
                 break;
 
-            case 'iar':
+            case 'proc_iar':
                 $data = $this->getDataIAR($key);
+                $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                     $iarNo =  $data->iar->iar_no;
                     $msg = "generated the inspection and acceptance report $iarNo.";
-                    Auth::user()->log($msg);
+                    Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateIAR($data, $documentType, $increaseFontSize,
+                    $this->generateIAR($data, $documentType, $fontScale,
                                        $pageHeight, $pageWidth, $previewToggle);
                 }
 
                 break;
 
-            case 'dv':
+            case 'proc_dv':
                 $data = $this->getDataDV($key, 'procurement');
+                $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                     $dvID =  $data->dv->id;
                     $msg = "generated the disbursement voucher $dvID.";
-                    Auth::user()->log($msg);
+                    Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateDV($data, $documentType, $increaseFontSize,
+                    $this->generateDV($data, $documentType, $fontScale,
                                   $pageHeight, $pageWidth, $previewToggle);
                 }
 
                 break;
 
-            case 'cashadvance-dv':
+            case 'ca_dv':
                 $data = $this->getDataDV($key, 'cashadvance');
+                $data->doc_type = $documentType;
 
                 if ($test == 'true') {
                     $code = $this->getDocCode($key, 'dv');
-                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                     $dvID =  $data->dv->id;
                     $msg = "generated the disbursement voucher $dvID.";
-                    Auth::user()->log($msg);
+                    Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateDV($data, $documentType, $increaseFontSize,
+                    $this->generateDV($data, $documentType, $fontScale,
                                       $pageHeight, $pageWidth, $previewToggle);
                 }
 
                 break;
 
-            case 'liquidation':
+            case 'ca_lr':
                 $data = $this->getDataLiquidation($key);
+                $data->doc_type = $documentType;
 
                 if ($test == 'true') {
                     $code = $this->getDocCode($key, 'liquidation');
-                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                     $liqID =  $data->liq->id;
                     $msg = "generated the disbursement voucher $liqID.";
-                    Auth::user()->log($msg);
+                    Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateLiquidation($data, $documentType, $increaseFontSize,
+                    $this->generateLiquidation($data, $documentType, $fontScale,
                                                $pageHeight, $pageWidth, $previewToggle);
                 }
 
                 break;
 
-                case 'lddap':
+                case 'pay_lddap':
                     $data = $this->getDataLDDAP($key);
+                    $data->doc_type = $documentType;
 
                     if ($test == 'true') {
                         //$code = $this->getDocCode($key, 'lddap');
-                        //$instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                        //$instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                         //$lddapID =  $data->lddap->id;
                         //$msg = "generated the disbursement voucher $lddapID.";
-                        //Auth::user()->log($msg);
+                        //Auth::user()->log($request, $msg);
                     } else {
-                        $this->generateLDDAP($data, $documentType, $increaseFontSize,
+                        $this->generateLDDAP($data, $documentType, $fontScale,
                                              $pageHeight, $pageWidth, $previewToggle);
                     }
 
                     break;
 
-            case 'par':
+            case 'inv_par':
                 $data = $this->getDataPAR($key, $otherParam);
+                $data->doc_type = $documentType;
 
                 if ($test == 'true') {
                     $code = $this->getDocCode($key, 'stock');
-                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                     $msg = "generated the property acknowledgement report $key.";
-                    Auth::user()->log($msg);
+                    Auth::user()->log($request, $msg);
                 } else {
-                    $this->generatePAR($data, $documentType, $increaseFontSize,
+                    $this->generatePAR($data, $documentType, $fontScale,
                                        $pageHeight, $pageWidth, $previewToggle);
                 }
 
                 break;
 
-            case 'ris':
+            case 'inv_ris':
                 $data = $this->getDataRIS($key, $otherParam);
+                $data->doc_type = $documentType;
 
                 if ($test == 'true') {
                     $code = $this->getDocCode($key, 'stock');
-                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                     $msg = "generated the requisition and issue slip $key.";
-                    Auth::user()->log($msg);
+                    Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateRIS($data, $documentType, $increaseFontSize,
+                    $this->generateRIS($data, $documentType, $fontScale,
                                        $pageHeight, $pageWidth, $previewToggle);
                 }
 
                 break;
 
-            case 'ics':
+            case 'inv_ics':
                 $data = $this->getDataICS($key, $otherParam);
+                $data->doc_type = $documentType;
 
                 if ($test == 'true') {
                     $code = $this->getDocCode($key, 'stock');
-                    $instanceDocLog->logDocument($key, Auth::user()->emp_id, 0, $action);
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                     $msg = "generated the inventory custodian slip $key.";
-                    Auth::user()->log($msg);
+                    Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateICS($data, $documentType, $increaseFontSize,
+                    $this->generateICS($data, $documentType, $fontScale,
                                        $pageHeight, $pageWidth, $previewToggle);
                 }
 
                 break;
 
-            case 'label':
+            case 'inv_label':
                 $data = $this->getDataPropertyLabel($key, $otherParam);
+                $data->doc_type = $documentType;
 
                 if ($test == 'true') {
 
                 } else {
                     $pageHeight = 53.27;
                     $pageWidth = 103.76125;
-                    $this->generatePropertyLabel($data, $documentType, $increaseFontSize,
+                    $this->generatePropertyLabel($data, $documentType, $fontScale,
                                                  $pageHeight, $pageWidth, $previewToggle);
                 }
 
@@ -399,8 +465,8 @@ class PrintController extends Controller
         return $code;
     }
 
-    private function getPaperSize($paperSize) {
-        $paper = PaperSize::where('id', $paperSize)->first();
+    private function getPaperSize($id) {
+        $paper = PaperSize::find($id);
         $width = !empty($paper->width) ? $paper->width : 0;
         $height = !empty($paper->height) ? $paper->height : 0;
         $unit = !empty($paper->unit) ? $paper->unit : '';
@@ -428,71 +494,12 @@ class PrintController extends Controller
     }
 
     private function getItemGroup($id) {
-        $groupNumbers = DB::table('tblpr_items')
-                          ->select('group_no')
-                          ->where('pr_id', $id)
-                          ->distinct()
-                          ->orderBy('group_no', 'asc')
-                          ->get();
-
+        $groupNumbers = PurchaseRequestItem::select('group_no')
+                                           ->where('pr_id', $id)
+                                           ->distinct()
+                                           ->orderBy('group_no', 'asc')
+                                           ->get();
         return $groupNumbers;
-    }
-
-    private function getEmployee($empID) {
-        $employee = DB::table('tblemp_accounts')
-                      ->where('emp_id', $empID)
-                      ->first();
-        $fullname = "";
-        $position = "";
-        $signature = "";
-
-        if ($employee) {
-            $position = strtoupper($employee->position);
-            $signature = $employee->signature;
-
-            if (!empty($employee->middlename)) {
-                $fullname = $employee->firstname . " " . $employee->middlename[0] . ". " .
-                            $employee->lastname;
-            } else {
-                $fullname = $employee->firstname . " " . $employee->lastname;
-            }
-
-            $fullname = strtoupper($fullname);
-        }
-
-        return (object)['name' => $fullname,
-                        'position' => $position,
-                        'signature' => $signature];
-    }
-
-    private function getSignatory($sigID) {
-        $signatory = DB::table('tblsignatories AS sig')
-                       ->select('emp.firstname', 'emp.middlename', 'emp.lastname',
-                                'sig.position', 'emp.signature')
-                       ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'sig.emp_id')
-                       ->where('sig.id', $sigID)
-                       ->first();
-        $fullname = "";
-        $position = "";
-        $signature = "";
-
-        if ($signatory) {
-            $position = strtoupper($signatory->position);
-            $signature = $signatory->signature;
-
-            if (!empty($signatory->middlename)) {
-                $fullname = $signatory->firstname . " " . $signatory->middlename[0] . ". " .
-                            $signatory->lastname;
-            } else {
-                $fullname = $signatory->firstname . " " . $signatory->lastname;
-            }
-
-            $fullname = strtoupper($fullname);
-        }
-
-        return (object)['name' => $fullname,
-                        'position' => $position,
-                        'signature' => $signature];
     }
 
     private function getDataPropertyLabel($inventoryID, $empID) {
@@ -1800,18 +1807,17 @@ class PrintController extends Controller
         $instanceRFQ = RequestQuotation::find($id);
         $prID = $instanceRFQ->pr_id;
         $instancePR = $this->getDataPR($prID)->pr;
-        $sigRFQ = $this->getSignatory($rfq->sig_rfq);
-        $groupNumbers = $this->getItemGroup($id);
+        $instanceSignatory = new Signatory;
+        $sigRFQ = $instanceSignatory->getSignatory($instanceRFQ->sig_rfq);
+        $groupNumbers = $this->getItemGroup($prID);
 
         foreach ($groupNumbers as $groupNo) {
             $tableData = [];
-            $prItems = DB::table('tblpr_items as item')
-                         ->join('tblunit_issue as unit', 'unit.id', '=', 'item.unit_issue')
-                         ->where('item.pr_id', $id)
-                         ->where('item.group_no', $groupNo->group_no)
-                         ->orderByRaw('LENGTH(item.item_id)')
-                         ->orderBy('item.item_id')
-                         ->get();
+            $prItems = DB::table('purchase_request_items as item')
+                     ->join('item_unit_issues as unit', 'unit.id', '=', 'item.unit_issue')
+                     ->where('item.pr_id', $id)
+                     ->orderBy('item.item_no')
+                     ->get();
 
             foreach ($prItems as $key => $item) {
                 if (strpos($item->item_description, "\n") !== FALSE) {
@@ -1821,7 +1827,7 @@ class PrintController extends Controller
 
                 $tableData[] = (object)[$key + 1,
                                         $item->quantity,
-                                        $item->unit,
+                                        $item->unit_name,
                                         $item->item_description,
                                         number_format($item->est_unit_cost, 2),
                                         ''];
@@ -1860,29 +1866,25 @@ class PrintController extends Controller
             $groupNo->table_data = (object)$data;
         }
 
-        return (object)['pr' => $pr,
+        return (object)['pr' => $instancePR,
                         'group_no' => $groupNumbers,
-                        'rfq' => $rfq,
+                        'rfq' => $instanceRFQ,
                         'sig_rfq' => $sigRFQ];
     }
 
     private function getDataPR($id) {
         $tableData = [];
         $total = 0;
-        $pr = DB::table('tblpr')
-                ->where('id', $id)
-                ->first();
-        $prItems = DB::table('tblpr_items as item')
-                     ->join('tblunit_issue as unit', 'unit.id', '=', 'item.unit_issue')
+        $instancePR = PurchaseRequest::find($id);
+        $instanceSignatory = new Signatory;
+        $prItems = DB::table('purchase_request_items as item')
+                     ->join('item_unit_issues as unit', 'unit.id', '=', 'item.unit_issue')
                      ->where('item.pr_id', $id)
-                     ->orderByRaw('LENGTH(item.item_id)')
-                     ->orderBy('item.item_id')
+                     ->orderBy('item.item_no')
                      ->get();
-        $requestedBy = $this->getEmployee($pr->requested_by);
-        $approvedBy = $this->getSignatory($pr->approved_by);
-        //$sigAPP = $this->getSignatory($pr->sig_app);
-        //$sigFundsAvailable = $this->getSignatory($pr->sig_funds_available);
-        $recommendedBy = $this->getSignatory($pr->recommended_by);
+        $requestedBy = Auth::user()->getEmployee($instancePR->requested_by);
+        $approvedBy = $instanceSignatory->getSignatory($instancePR->approved_by);
+        $recommendedBy = $instanceSignatory->getSignatory($instancePR->recommended_by);
 
         foreach ($prItems as $item) {
             if (strpos($item->item_description, "\n") !== FALSE) {
@@ -1891,7 +1893,7 @@ class PrintController extends Controller
             }
 
             $tableData[] = ['',
-                            $item->unit,
+                            $item->unit_name,
                             $item->item_description,
                             $item->quantity,
                             number_format($item->est_unit_cost, 2),
@@ -1931,12 +1933,10 @@ class PrintController extends Controller
             ]
         ];
 
-        return (object)['pr' => $pr,
+        return (object)['pr' => $instancePR,
                         'table_data' => $data,
                         'requested_by' => $requestedBy,
                         'approved_by' => $approvedBy,
-                        //'sig_app' => $sigAPP,
-                        //'sig_funds_available' => $sigFundsAvailable,
                         'recommended_by' => $recommendedBy];
     }
 
@@ -1959,15 +1959,17 @@ class PrintController extends Controller
     private function printDocument($pdf, $docTitle, $previewToggle) {
         if ($previewToggle == 'download') {
             $pdf->Output($docTitle . '.pdf', 'D');
-        } else if ($previewToggle == 'preview'){
+        } else {
             $pdf->Output($docTitle . '.pdf', 'I');
         }
     }
 
-    private function generatePR($data, $documentType, $increaseFontSize, $pageHeight, $pageWidth, $previewToggle) {
+    private function generatePR($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new PDF('P', 'mm', $pageSize);
+        $pdf = new DocPurchaseRequest('P', $pageUnit, $pageSize);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "FM-FAS-PUR F05";
         $docRev = "Revision 2";
         $docRevDate = "05-24-19";
@@ -1977,11 +1979,9 @@ class PrintController extends Controller
         $docSubject = "Purchase Request";
         $docKeywords = "PR, pr, purchase, request, purchase request";
 
-        $prDate = "";
-
         if (!empty($data->pr->date_pr)) {
-            $prDate = new DateTime($data->pr->date_pr);
-            $prDate = $prDate->format('F j, Y');
+            $data->pr->date_pr = new DateTime($data->pr->date_pr);
+            $data->pr->date_pr = $data->pr->date_pr->format('F j, Y');
         }
 
         //Set document information
@@ -1989,16 +1989,18 @@ class PrintController extends Controller
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        include app_path() . "/Classes/DocumentPDF/Documents/doc_purchase_request.php";
+        $pdf->printPurchaseRequest($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateRFQ($data, $documentType, $increaseFontSize, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateRFQ($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new PDF('P', 'mm', $pageSize);
+        $pdf = new DocRequestQuotation('P', $pageUnit, $pageSize);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "FM-FAS-PUR F06";
         $docRev = "Revision 1";
         $docRevDate = "02-28-18";
@@ -2008,11 +2010,9 @@ class PrintController extends Controller
         $docSubject = "Request for Quotation";
         $docKeywords = "RFQ, rfq, quotation, request, request for quotation";
 
-        $rfqDate = "";
-
         if (!empty($data->rfq->date_canvass)) {
-            $rfqDate = new DateTime($data->rfq->date_canvass);
-            $rfqDate = $rfqDate->format('F j, Y');
+            $data->rfq->date_canvass = new DateTime($data->rfq->date_canvass);
+            $data->rfq->date_canvass = $data->rfq->date_canvass->format('F j, Y');
         }
 
         //Set document information
@@ -2020,13 +2020,13 @@ class PrintController extends Controller
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        include app_path() . "/Classes/DocumentPDF/Documents/doc_request_quotation.php";
+        $pdf->printRequestQuotation($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateAbstract($data, $documentType, $increaseFontSize, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateAbstract($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new PDF('L', 'mm', $pageSize);
@@ -2070,7 +2070,7 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generatePO($data, $documentType, $increaseFontSize, $pageHeight, $pageWidth, $previewToggle) {
+    private function generatePO($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new PDF('P', 'mm', $pageSize);
@@ -2103,7 +2103,7 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateJO($data, $documentType, $increaseFontSize, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateJO($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new PDF('P', 'mm', $pageSize);
@@ -2139,7 +2139,7 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateORS($data, $documentType, $increaseFontSize, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateORS($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new PDF('P', 'mm', $pageSize);
@@ -2183,7 +2183,7 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateBURS($data, $documentType, $increaseFontSize, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateBURS($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new PDF('P', 'mm', $pageSize);
@@ -2227,7 +2227,7 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateIAR($data, $documentType, $increaseFontSize, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateIAR($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new PDF('P', 'mm', $pageSize);
@@ -2274,7 +2274,7 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateDV($data, $documentType, $increaseFontSize, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateDV($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new PDF('P', 'mm', $pageSize);
@@ -2312,7 +2312,7 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateLiquidation($data, $documentType, $increaseFontSize, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateLiquidation($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new PDF('P', 'mm', $pageSize);
@@ -2379,7 +2379,7 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateLDDAP($data, $documentType, $increaseFontSize, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateLDDAP($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new PDF('P', 'mm', $pageSize);
@@ -2477,7 +2477,7 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generatePAR($data, $documentType, $increaseFontSize, $pageHeight, $pageWidth, $previewToggle) {
+    private function generatePAR($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new PDF('P', 'mm', $pageSize);
@@ -2508,7 +2508,7 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateRIS($data, $documentType, $increaseFontSize, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateRIS($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new PDF('P', 'mm', $pageSize);
@@ -2532,7 +2532,7 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateICS($data, $documentType, $increaseFontSize, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateICS($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new PDF('P', 'mm', $pageSize);
@@ -2563,7 +2563,7 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generatePropertyLabel($_data, $docType, $increaseFontSize, $pageHeight, $pageWidth, $previewToggle) {
+    private function generatePropertyLabel($_data, $docType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new PDF('L', 'mm', $pageSize);
         $pdf->setHeaderLR(false, false);

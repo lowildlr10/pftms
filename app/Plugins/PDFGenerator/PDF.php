@@ -1,16 +1,17 @@
 <?php
 
-namespace App\Classes\DocumentPDF;
+namespace App\Plugins\PDFGenerator;
 
 use \TCPDF;
- 
+
 class PDF extends TCPDF {
     // variable to store widths and aligns of cells, and line height
-    var $headerIcon = true;
-    var $headerVerRev = true;
-    var $docCode;
-    var $docRev;
-    var $docRevDate;
+    public $headerIcon = true;
+    public $headerVerRev = true;
+    public $docCode;
+    public $docRev;
+    public $docRevDate;
+    public $fontScale = 0;
 
     /*
     //Set the array of column alignments
@@ -30,7 +31,7 @@ class PDF extends TCPDF {
                 case 'c':
                     $formatedAlign[] = "center";
                     break;
-                
+
                 default:
                     $formatedAlign[] = "center";
                     break;
@@ -55,6 +56,10 @@ class PDF extends TCPDF {
     public function setHeaderLR($set1, $set2) {
         $this->headerIcon = $set1;
         $this->headerVerRev = $set2;
+    }
+
+    public function setFontScale($fontScale) {
+        $this->fontScale = $fontScale;
     }
 
     private function htmlFontStyle($key) {
@@ -93,7 +98,7 @@ class PDF extends TCPDF {
 
                 foreach ($dat['data'] as $row) {
                     $html .= '<tr>';
-                    
+
                     foreach ($row as $key => $val) {
                         $html .= '<th width="'.$widths[$key].'%">'.$val.'</th>';
                     }
@@ -118,14 +123,14 @@ class PDF extends TCPDF {
                         if (count($arrKey) > 1) {
                             $_columnDataKeys = [];
 
-                            for ($i = $arrKey[0]; $i <= $arrKey[1]; $i++) { 
+                            for ($i = $arrKey[0]; $i <= $arrKey[1]; $i++) {
                                 $_columnDataKeys[] = (int)$i;
                             }
 
                             $columnDataKeys[] = $_columnDataKeys;
                         } else {
                             $columnDataKeys[] = [(int)$arrKey[0]];
-                        }  
+                        }
                     }
                 }
 
@@ -144,18 +149,18 @@ class PDF extends TCPDF {
                                         $align = $aligns[$_cK];
                                         $fontStyle = $this->htmlFontStyle(trim($dat['font-styles'][$_cK]));
                                     }
-                                    
+
                                     $widthPercent += floatval($dat['widths'][$_cK]);
                                 }
                             }
-                            
+
                             $html .= '<td '.$fontStyle.' width="'.$widthPercent.'%" colspan="'.
                                      $colSpanCount.'" align="'. $align .'">'.$val.'</td>';
                         }
                     } else {
                         foreach ($row as $key => $val) {
                             $fontStyle = $this->htmlFontStyle(trim($dat['font-styles'][$key]));
-                            $html .= '<td '.$fontStyle.' width="'.$widths[$key].'%" align="'. 
+                            $html .= '<td '.$fontStyle.' width="'.$widths[$key].'%" align="'.
                                      $aligns[$key] .'">'.$val.'</td>';
                         }
                     }
@@ -200,8 +205,8 @@ class PDF extends TCPDF {
                     "verify_peer" => false,
                     "verify_peer_name" => false,
                 ],
-            ]; 
-            $img = file_get_contents(url('images/logo/dostlogo.png'), false, 
+            ];
+            $img = file_get_contents(url('images/logo/dostlogo.png'), false,
                                      stream_context_create($arrContextOptions));
             $this->Image('@'.$img, $xCoor + 1, $yCoor, 16, 0);
 
@@ -262,7 +267,7 @@ class PDF extends TCPDF {
         // Select helvetica italic 8
         $this->SetFont('helvetica', '', 10);
         // Print current and total page numbers
-        
+
         //$this->Cell(0,10,'Page '.$this->PageNo().'/{nb}',0,0,'C');
 
         $this->Cell(0, 4, 'This document shall be deemed uncontrolled unless labelled "CONTROLLED"', 0, 0, 'C');
@@ -274,7 +279,7 @@ class PDF extends TCPDF {
         $this->ln();
 
         $this->SetFont('helvetica', 'I', 7);
-        
+
         $PageNo = 'Page '.$this->getAliasNumPage().' of '.$this->getAliasNbPages();
         $this->Cell(0, 3, $PageNo, 0, 0, 'R');
     }

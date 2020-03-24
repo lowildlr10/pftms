@@ -61,13 +61,16 @@ class RequestQuotationController extends Controller
 
         $rfqData = RequestQuotation::whereHas('pr', function($query)
                     use ($empDivisionAccess) {
-            $query->whereIn('division', $empDivisionAccess)
-                  ->orderBy('pr_no', 'desc');
+            $query->whereIn('division', $empDivisionAccess);
         });
 
         if ($roleHasOrdinary) {
             $rfqData = $rfqData->whereHas('pr', function($query) {
                 $query->where('requested_by', Auth::user()->id);
+            });
+        } else {
+            $rfqData = $rfqData->whereHas('pr', function($query) {
+                $query->orWhere('requested_by', Auth::user()->id);
             });
         }
 
@@ -75,13 +78,18 @@ class RequestQuotationController extends Controller
             $rfqData = $rfqData->where('id', $keyword);
         }
 
+        $rfqData = RequestQuotation::whereHas('pr', function($query)
+                    use ($empDivisionAccess) {
+            $query->orderBy('pr_no', 'desc');
+        });
+
         $rfqData = $rfqData->get();
 
         foreach ($rfqData as $rfq) {
             $instanceFundSource = FundingSource::find($rfq->pr->funding_source);
             $fundingSource = !empty($instanceFundSource->source_name) ?
                               $instanceFundSource->source_name : '';
-            $requestedBy = Auth::user()->getEmployeeName($rfq->pr->requested_by);
+            $requestedBy = Auth::user()->getEmployee($rfq->pr->requested_by)->name;
 
             $rfq->doc_status = $instanceDocLog->checkDocStatus($rfq->id);
             $rfq->pr->funding_source = $fundingSource;
@@ -206,25 +214,32 @@ class RequestQuotationController extends Controller
         ]);
     }
 
+    public function showReceive($id) {
+        return view('modules.procurement.rfq.receive', [
+            'id' => $id,
+        ]);
+    }
+
     public function issue(Request $request, $id) {
         $issuedTo = $request->issued_to;
         $remarks = $request->remarks;
 
         try {
             $instanceDocLog = new DocLog;
-            $instanceRFQ = RequestQuotation::find($id);
+            $instanceRFQ = RequestQuotation::with('pr')->where('id', $id)->first();
             $prID = $instanceRFQ->pr_id;
-
-            $instancePR = PurchaseRequest::find($prID);
-            $prNo = $instancePR->pr_no;
+            $prNo = $instanceRFQ->pr->pr_no;
+            $requestedBy = $instanceRFQ->pr->requested_by;
 
             $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
             $docStatus = $instanceDocLog->checkDocStatus($id);
 
             if (empty($docStatus->date_issued)) {
                 if ($isDocGenerated) {
-                    $instanceDocLog->logTrackerHistory($id, Auth::user()->emp_id, $issuedTo, "issued", $remarks);
-                    $issuedToName = Auth::user()->getEmployeeName($issuedTo);
+                    $instanceDocLog->logDocument($id, Auth::user()->id, $issuedTo, "issued", $remarks);
+                    $issuedToName = Auth::user()->getEmployee($issuedTo)->name;
+
+                    $instanceRFQ->notifyIssued($id, $issuedTo, $requestedBy);
 
                     $msg = "Request for Quotation '$prNo' successfully issued to $issuedToName.";
                     Auth::user()->log($request, $msg);
@@ -247,44 +262,42 @@ class RequestQuotationController extends Controller
     }
 
     public function receive(Request $request, $id) {
-        $pr = PurchaseRequest::where('id', $id)->first();
-        $prNo = $pr->pr_no;
+        $remarks = $request->remarks;
 
         try {
-            $rfq = Canvass::where('pr_id', $id)->first();
-            $code = $rfq->code;
-            $docStatus = $this->checkDocStatus($code);
+            $instanceDocLog = new DocLog;
+            $docStatus = $instanceDocLog->checkDocStatus($id);
+            $instanceRFQ = RequestQuotation::with('pr')->where('id', $id)->first();
+            $prID = $instanceRFQ->pr_id;
+            $prNo = $instanceRFQ->pr->pr_no;
+            $requestedBy = $instanceRFQ->pr->requested_by;
+            $responsiblePerson = $docStatus->issued_to_id;
 
-            if (!empty($docStatus->date_issued)) {
-                $this->logTrackerHistory($code, Auth::user()->emp_id, 0, "received");
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received", $remarks);
+            $instanceAbstract = AbstractQuotation::where('pr_id', $prID)->first();
 
-                $abstract = DB::table('tblabstract')
-                               ->where('pr_id', $id)
-                               ->first();
+            if (!$instanceAbstract) {
+                $instanceAbstract = new AbstractQuotation;
+                $instanceAbstract->pr_id = $prID;
+                $instanceAbstract->save();
 
-                if (!$abstract) {
-                    $abstract = new Abstracts;
-                    $abstract->pr_id = $id;
-                    $abstract->code = $this->generateTrackerCode('ABSTRACT', $id, 3);
-                    $abstract->save();
+                $abstractData = AbstractQuotation::where('pr_id', $prID)->first();
+                $abstractID = $abstractData->id;
 
-                    $code = $abstract->code;
-                    $this->logTrackerHistory($code, Auth::user()->emp_id, 0, "issued");
-                } else {
-                    Abstracts::where('pr_id', $id)->restore();
-                }
-
-                $logEmpMessage = "received the request for quotation $prNo.";
-                $this->logEmployeeHistory($logEmpMessage);
-
-                $msg = "Request for Quotation $prNo is now set to received and ready for abstract.";
-                return redirect(url('procurement/rfq?search=' . $prNo))->with('success', $msg);
+                $instanceDocLog->logDocument($abstractID, Auth::user()->id, NULL, "issued");
             } else {
-                $msg = "You should issue this Request for Quotation $prNo first.";
-                return redirect(url('procurement/rfq?search=' . $prNo))->with('warning', $msg);
+                AbstractQuotation::where('pr_id', $id)->restore();
             }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered receiving the Request for Quotation $prNo.";
+
+            $instanceRFQ->notifyReceived($id, Auth::user()->id, $responsiblePerson, $requestedBy);
+
+            $msg = "Request for Quotation '$prNo' successfully received and ready for Abstract
+                    of Quotation.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
     }

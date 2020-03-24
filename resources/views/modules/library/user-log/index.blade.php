@@ -40,6 +40,7 @@
                     <div class="gradient-card-header unique-color
                                 narrower py-2 px-2 mb-1 d-flex justify-content-between
                                 align-items-center">
+                        <div></div>
                         <div>
                             <button class="btn btn-outline-white btn-rounded btn-sm px-2"
                                     data-target="#top-fluid-modal" data-toggle="modal">
@@ -48,7 +49,6 @@
                             <a href="{{ route('emp-log') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
                             </a>
-
                         </div>
                     </div>
                     <!--/Card image-->

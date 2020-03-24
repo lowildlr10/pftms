@@ -41,10 +41,16 @@ $(function() {
 
 			switch(i){
 				case 0:
-					$(newcell).find('select')
-							  .attr('id', 'unit' + conCount)
-                              .val('1');
-                    $(`unit${conCount}`).val('1');
+                    /*
+					$(newcell).find('select.crud-select')
+                              .attr('id', 'unit' + conCount);
+
+                    $(`#unit${conCount}`).materialSelect({destroy : true});
+                    $(`#unit${conCount}`).materialSelect();*/
+
+                    $(newcell).find('div.md-form').first().append($(newcell).find('select'));
+                    $(newcell).find('div.select-wrapper').remove();
+                    $(newcell).find('select').attr('id', 'unit' + conCount).val('').materialSelect();
 
                     $(newcell).find('input')
 							  .attr('name', 'item_id[]')
@@ -89,8 +95,9 @@ $(function() {
 			const rowCount = $('#row-items tr').length;
 
 			if (rowCount > 1) {
-
-				$('#' + row).remove();
+                $('#' + row).fadeOut(300, function() {
+                    $(this).remove();
+                });
 			} else {
 				alert('Cannot delete all the rows.');
 			}
@@ -101,7 +108,7 @@ $(function() {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-show').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
-            $('.mdb-select').materialSelect();
+            $('.crud-select').materialSelect();
             $(this).slideToggle(500);
         });
         $("#modal-show").modal({keyboard: false, backdrop: 'static'})
@@ -116,7 +123,7 @@ $(function() {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-create').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
-            $('.mdb-select').materialSelect();
+            $('.crud-select').materialSelect();
             $(this).slideToggle(500);
         });
         $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
@@ -139,7 +146,7 @@ $(function() {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
-            $('.mdb-select').materialSelect();
+            $('.crud-select').materialSelect();
             $(this).slideToggle(500);
         });
         $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})

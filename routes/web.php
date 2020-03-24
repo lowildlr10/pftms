@@ -283,6 +283,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'proc_rfq',
         'access' => 'issue'
     ])->name('rfq-issue');
+    Route::get('procurement/rfq/show-receive/{id}', [
+        'uses' => 'RequestQuotationController@showReceive',
+        'module' => 'proc_rfq',
+        'access' => 'receive'
+    ])->name('rfq-show-receive');
     Route::post('procurement/rfq/receive/{id}', [
         'uses' => 'RequestQuotationController@receive',
         'module' => 'proc_rfq',

@@ -14,6 +14,7 @@ use App\Models\ObligationRequestStatus;
 use App\Models\InspectionAcceptance;
 use App\Models\DisbursementVoucher;
 use App\Models\InventoryStock;
+use App\Models\InventoryStockIssue;
 
 use App\User;
 use App\Models\EmpGroup;
@@ -80,6 +81,8 @@ class PurchaseRequestController extends Controller
 
         if ($roleHasOrdinary) {
             $prData = $prData->where('requested_by', Auth::user()->id);
+        } else {
+            $prData = $prData->orWhere('requested_by', Auth::user()->id);
         }
 
         if (!empty($keyword)) {
@@ -717,8 +720,8 @@ class PurchaseRequestController extends Controller
                 RequestQuotation::where('pr_id', $id)->forceDelete();
                 AbstractQuotation::where('pr_id', $id)->forceDelete();
                 AbstractQuotationItem::where('pr_id', $id)->delete();
-                PurchaseOrder::where('pr_id', $id)->forceDelete();
-                PurchaseOrderItem::where('pr_id', $id)->delete();
+                PurchaseJobOrder::where('pr_id', $id)->forceDelete();
+                PurchaseJobOrderItem::where('pr_id', $id)->delete();
                 ObligationRequestStatus::where('pr_id', $id)->forceDelete();
                 InspectionAcceptance::where('pr_id', $id)->forceDelete();
                 DisbursementVoucher::where('pr_id', $id)->forceDelete();
@@ -729,6 +732,7 @@ class PurchaseRequestController extends Controller
             // Update pr items
             foreach ($unitIssues as $arrayKey => $unit) {
                 $itemID = $itemIDs[$arrayKey];
+                $itemCount = count($itemIDs) - 1;
                 $description = $itemDescriptions[$arrayKey];
                 $quantity = $quantities[$arrayKey];
                 $unitCost = $unitCosts[$arrayKey];
@@ -757,7 +761,7 @@ class PurchaseRequestController extends Controller
                     $instancePRItem->est_total_cost = $totalCost;
                     $instancePRItem->save();
 
-                    if ($itemIDsCount == $arrayKey) {
+                    if ($itemCount == $arrayKey) {
                         $instancePRItem->status = 1;
                         $instancePR->notifyForApproval($prNo, $requestedBy);
                         $instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');

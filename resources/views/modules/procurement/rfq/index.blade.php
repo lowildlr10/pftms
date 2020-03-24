@@ -178,7 +178,7 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $rfq->id }}', 'rfq');">
+                                        onclick="$(this).showPrint('{{ $rfq->id }}', 'proc_rfq');">
                                     <i class="fas fa-print blue-text"></i> Print PR
                                 </button>
 
@@ -252,7 +252,7 @@
                         @if ($isAllowedReceive)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showReceive('{{ route('rfq-receive', ['id' => $rfq->id]) }}');">
+                                onclick="$(this).showReceive('{{ route('rfq-show-receive', ['id' => $rfq->id]) }}');">
                             <i class="fas fa-hand-holding"></i> Receive
                         </button>
                     </li>
@@ -292,6 +292,7 @@
 @include('modals.show')
 @include('modals.edit')
 @include('modals.issue')
+@include('modals.receive')
 @include('modals.print')
 @include('modals.attachment')
 

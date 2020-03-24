@@ -49,7 +49,7 @@
                             <td>{{ $key + 1 }}</td>
                             <td>
                                 <div class="md-form my-0 py-0">
-                                    <select class="mdb-select md-form required" searchable="Search here.." disabled>
+                                    <select class="mdb-select crud-select md-form required" searchable="Search here.." disabled>
                                         <option value="" disabled selected>Choose a Unit</option>
 
                                         @if (count($unitIssues) > 0)
@@ -91,7 +91,7 @@
                             <td>
                                 <input type="hidden" name="pr_item_id[]" value="{{ $item->id }}">
                                 <div class="md-form my-0 py-0">
-                                    <select class="mdb-select md-form required" searchable="Search here.."
+                                    <select class="mdb-select crud-select md-form required" searchable="Search here.."
                                             name="canvass_group[]">
                                         <option value="" disabled selected>Choose a value</option>
 
@@ -115,7 +115,7 @@
     <div class="row">
         <div class="col-md-6">
             <div class="md-form">
-                <select class="mdb-select md-form required" searchable="Search here.."
+                <select class="mdb-select crud-select md-form required" searchable="Search here.."
                         name="canvassed_by">
                     <option value="" disabled selected>Choose a canvasser</option>
 
@@ -134,7 +134,7 @@
         </div>
         <div class="col-md-6">
             <div class="md-form">
-                <select class="mdb-select md-form required" searchable="Search here.."
+                <select class="mdb-select crud-select md-form required" searchable="Search here.."
                         name="sig_rfq">
                     <option value="" disabled selected>Choose a signatory</option>
 

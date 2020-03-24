@@ -188,7 +188,7 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $pr->id }}', 'pr');">
+                                        onclick="$(this).showPrint('{{ $pr->id }}', 'proc_pr');">
                                     <i class="fas fa-print blue-text"></i> Print PR
                                 </button>
 

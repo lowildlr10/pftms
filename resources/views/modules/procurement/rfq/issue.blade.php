@@ -4,7 +4,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="md-form">
-                <select class="mdb-select md-form required" searchable="Search here.."
+                <select class="mdb-select crud-select md-form required" searchable="Search here.."
                         name="issued_to">
                     <option value="" disabled selected>Choose an issuee</option>
                     <option value="">-- None --</option>
