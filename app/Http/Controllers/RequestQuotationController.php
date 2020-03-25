@@ -39,8 +39,8 @@ class RequestQuotationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($keyword = '') {
-        $keyword = trim($keyword);
+    public function index(Request $request) {
+        $keyword = trim($request->keyword);
         $instanceDocLog = new DocLog;
 
         // Get module access
@@ -49,7 +49,7 @@ class RequestQuotationController extends Controller
         $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
         $isAllowedIssue = Auth::user()->getModuleAccess($module, 'issue');
         $isAllowedReceive = Auth::user()->getModuleAccess($module, 'receive');
-        $isAllowedAbstract = Auth::user()->getModuleAccess('proc_abs', 'is_allowed');
+        $isAllowedAbstract = Auth::user()->getModuleAccess('proc_abstract', 'is_allowed');
 
         // User groups
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
@@ -75,10 +75,10 @@ class RequestQuotationController extends Controller
         }
 
         if (!empty($keyword)) {
-            $rfqData = $rfqData->where('id', $keyword);
+            $rfqData = $rfqData->where('pr_id', $keyword);
         }
 
-        $rfqData = RequestQuotation::whereHas('pr', function($query)
+        $rfqData = $rfqData->whereHas('pr', function($query)
                     use ($empDivisionAccess) {
             $query->orderBy('pr_no', 'desc');
         });

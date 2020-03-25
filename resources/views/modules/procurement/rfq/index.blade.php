@@ -179,7 +179,7 @@
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showPrint('{{ $rfq->id }}', 'proc_rfq');">
-                                    <i class="fas fa-print blue-text"></i> Print PR
+                                    <i class="fas fa-print blue-text"></i> Print RFQ
                                 </button>
 
                                 @if ($isAllowedUpdate)
@@ -235,6 +235,12 @@
                 <ul class="list-group z-depth-1">
                     <li class="list-group-item justify-content-between">
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
+                    </li>
+                    <li class="list-group-item justify-content-between">
+                        <a onclick="$(this).redirectToDoc('{{ route('pr') }}', '{{ $rfq->pr_id }}');"
+                          class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
+                            <i class="fas fa-angle-double-left"></i> Regenerate PR
+                        </a>
                     </li>
 
                     @if (empty($rfq->doc_status->date_issued) &&

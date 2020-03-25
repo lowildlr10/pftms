@@ -329,7 +329,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'uses' => 'AbstractController@storeUpdate',
         'module' => 'proc_abstract',
         'access' => 'update'
-    ])->name('abstract-store');
+    ])->name('abstract-show-edit');
     Route::post('procurement/abstract/update-items/{id}', [
         'uses' => 'AbstractController@updateItems',
         'module' => 'proc_abstract',

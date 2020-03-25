@@ -713,7 +713,6 @@ class PurchaseRequestController extends Controller
             $instancePR->office = $office;
 
             $prNo = $instancePR->pr_no;
-            $prData = PurchaseRequest::where('id', $id)->first();
 
             // Delete other dependent documents
             if ($instancePR->status >= 5) {
@@ -753,20 +752,23 @@ class PurchaseRequestController extends Controller
                     $instancePRItem->est_total_cost = $totalCost;
                     $instancePRItem->save();
                 } else {
+                    if ($itemCount == $arrayKey) {
+                        $instancePR->status = 1;
+                        $instancePR->notifyForApproval($prNo, $requestedBy);
+                        $instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
+                        $instanceDocLog->logDocument($id, Auth::user()->id, NULL, 'issued');
+                    }
+
                     $instancePRItem = PurchaseRequestItem::find($itemID);
+                    $instancePRItem = $instancePRItem ? $instancePRItem : new PurchaseRequestItem;
+                    $instancePRItem->pr_id = $id;
+                    $instancePRItem->item_no = $arrayKey + 1;
                     $instancePRItem->quantity = $quantity;
                     $instancePRItem->unit_issue = $unit;
                     $instancePRItem->item_description = $description;
                     $instancePRItem->est_unit_cost = $unitCost;
                     $instancePRItem->est_total_cost = $totalCost;
                     $instancePRItem->save();
-
-                    if ($itemCount == $arrayKey) {
-                        $instancePRItem->status = 1;
-                        $instancePR->notifyForApproval($prNo, $requestedBy);
-                        $instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
-                        $instanceDocLog->logDocument($id, Auth::user()->id, NULL, 'issued');
-                    }
                 }
             }
 

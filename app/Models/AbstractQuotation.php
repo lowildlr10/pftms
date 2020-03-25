@@ -56,4 +56,8 @@ class AbstractQuotation extends Model
     public static function generateUuid() {
          return Uuid::generate();
     }
+
+    public function pr() {
+        return $this->belongsTo('App\Models\PurchaseRequest', 'pr_id', 'id');
+    }
 }

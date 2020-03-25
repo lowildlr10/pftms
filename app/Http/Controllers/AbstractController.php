@@ -3,20 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\PurchaseRequest;
-use App\Abstracts;
-use App\AbstractItem;
-use App\PurchaseOrder;
-use App\OrsBurs;
-use App\InspectionAcceptance;
-use App\DisbursementVoucher;
-use App\InventoryStock;
+use App\Models\PurchaseRequest;
+use App\Models\AbstractQuotation;
+use App\Models\AbstractQuotationItem;
+use App\Models\PurchaseJobOrder;
+use App\Models\ObligationRequestStatus;
+use App\Models\InspectionAcceptance;
+use App\Models\DisbursementVoucher;
+use App\Models\InventoryStock;
 
-use App\EmployeeLog;
-use App\DocumentLogHistory;
-use App\PaperSize;
-use App\Supplier;
-use App\ModeProcurement;
+use App\User;
+use App\Models\FundingSource;
+use App\Models\DocumentLog as DocLog;
+use App\Models\PaperSize;
+use App\Models\Supplier;
+use App\Models\ItemUnitIssue;
+use App\Models\Signatory;
+use App\Models\ProcurementMode;
 use Carbon\Carbon;
 use DB;
 use Auth;
@@ -28,9 +31,8 @@ class AbstractController extends Controller
      *
      * @return void
      */
-    public function __construct()
-    {
-        $this->middleware('auth');
+    public function __construct() {
+        //$this->middleware('auth');
     }
 
     /**
@@ -38,51 +40,61 @@ class AbstractController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
-    {
-        $pageLimit = 25;
-        $search = trim($request['search']);
-        $paperSizes = PaperSize::all();
-        $abstractList = DB::table('tblabstract AS abstract')
-                          ->select('pr.*', 'status.id AS sID', 'proj.project',
-                                    DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                          ->join('tblpr AS pr', 'pr.id', '=', 'abstract.pr_id')
-                          ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'pr.requested_by')
-                          ->join('tblpr_status AS status', 'status.id', '=', 'pr.status')
-                          ->leftJoin('tblprojects AS proj', 'proj.id', '=', 'pr.project_id')
-                          ->whereNull('abstract.deleted_at');
+    public function index(Request $request) {
+        $keyword = trim($request->keyword);
+        $instanceDocLog = new DocLog;
 
-        if (!empty($search)) {
-            $abstractList = $abstractList->where(function ($query)  use ($search) {
-                                   $query->where('pr.pr_no', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('pr.date_pr', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('pr.purpose', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.firstname', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.middlename', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.lastname', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('pr.code', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('abstract.code', 'LIKE', '%' . $search . '%');
-                               });
+        // Get module access
+        $module = 'proc_abstract';
+        $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
+        $isAllowedApprove = Auth::user()->getModuleAccess($module, 'approve_po_jo');
+        $isAllowedPO = Auth::user()->getModuleAccess('proc_po_jo', 'is_allowed');
+
+        // User groups
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
+                             [Auth::user()->division];
+
+        // Main data
+        $paperSizes = PaperSize::orderBy('paper_type')->get();
+
+        $absData = AbstractQuotation::whereHas('pr', function($query)
+                    use ($empDivisionAccess) {
+            $query->whereIn('division', $empDivisionAccess);
+        });
+
+        if ($roleHasOrdinary) {
+            $absData = $absData->whereHas('pr', function($query) {
+                $query->where('requested_by', Auth::user()->id);
+            });
+        } else {
+            $absData = $absData->whereHas('pr', function($query) {
+                $query->orWhere('requested_by', Auth::user()->id);
+            });
         }
 
-        if (Auth::user()->role == 3 || Auth::user()->role == 4 || Auth::user()->role == 6) {
-            $abstractList = $abstractList->where('requested_by', Auth::user()->emp_id);
+        if (!empty($keyword)) {
+            $absData = $absData->where('pr_id', $keyword);
         }
 
-        if (Auth::user()->role == 5) {
-            $abstractList = $abstractList->where('emp.division_id', Auth::user()->division_id);
-        }
+        $absData = $absData->whereHas('pr', function($query)
+                    use ($empDivisionAccess) {
+            $query->orderBy('pr_no', 'desc');
+        });
 
-        $abstractList = $abstractList->orderBy('pr.id', 'desc')
-                                     ->paginate($pageLimit);
+        $absData = $absData->get();
 
-        foreach ($abstractList as $list) {
+        foreach ($absData as $abs) {
+            $instanceFundSource = FundingSource::find($abs->pr->funding_source);
+            $fundingSource = !empty($instanceFundSource->source_name) ?
+                              $instanceFundSource->source_name : '';
+            $requestedBy = Auth::user()->getEmployee($abs->pr->requested_by)->name;
             $toggle = "create";
-            $countAbstract = DB::table('tblabstract_items')
-                               ->select('awarded_to')
-                               ->where('pr_id', $list->id)
-                               ->distinct()
-                               ->count();
+            $countAbstract = AbstractQuotationItem::where('pr_id', $abs->pr_id)
+                                                  ->distinct()
+                                                  ->count();
 
             if ($countAbstract > 0) {
                 $toggle = "edit";
@@ -90,14 +102,21 @@ class AbstractController extends Controller
                 $toggle = "create";
             }
 
-            $list->toggle = $toggle;
-            $list->document_status = $this->checkDocStatus($list->code);
+            $abs->toggle = $toggle;
+            $abs->doc_status = $instanceDocLog->checkDocStatus($abs->id);
+            $abs->pr->funding_source = $fundingSource;
+            $abs->pr->requested_by = $requestedBy;
         }
 
-        return view('pages.abstract', ['search' => $search,
-                                       'list' => $abstractList,
-                                       'pageLimit' => $pageLimit,
-                                       'paperSizes' => $paperSizes]);
+        return view('modules.procurement.abstract.index', [
+            'list' => $absData,
+            'paperSizes' => $paperSizes,
+            'isAllowedCreate' => $isAllowedCreate,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedDelete' => $isAllowedDelete,
+            'isAllowedApprove' => $isAllowedApprove,
+            'isAllowedPO' => $isAllowedPO,
+        ]);
     }
 
     /**
@@ -105,8 +124,7 @@ class AbstractController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request, $id)
-    {
+    public function showCreate(Request $request, $id) {
         $prNo = $request['pr_no'];
         $toggle = $request['toggle'];
         $abstractData = Abstracts::where('pr_id', $id)->first();
@@ -878,93 +896,4 @@ class AbstractController extends Controller
             }
         }
     }
-
-    private function checkDocGenerated($code) {
-        $logs = DB::table('tbldocument_logs_history')
-                  ->where([
-                        ['code', $code],
-                        ['action', 'document_generated']
-                    ])
-                  ->orderBy('logshist.created_at', 'desc')
-                  ->count();
-
-        return $logs;
-    }
-
-    private function checkDocStatus($code) {
-        $logs = DB::table('tbldocument_logs_history')
-                  ->where('code', $code)
-                  ->orderBy('created_at', 'desc')
-                  ->get();
-        $currentStatus = (object) ["issued_by" => NULL,
-                                   "date_issued" => NULL,
-                                   "received_by" => NULL,
-                                   "date_received" => NULL,
-                                   "issued_back_by" => NULL,
-                                   "date_issued_back" => NULL,
-                                   "received_back_by" => NULL,
-                                   "date_received_back" => NULL];
-
-        if (count($logs) > 0) {
-            foreach ($logs as $log) {
-                if ($log->action != "-") {
-                    switch ($log->action) {
-                        case 'issued':
-                            $currentStatus->issued_by = $log->action;
-                            $currentStatus->date_issued = $log->date;
-                            break;
-
-                        case 'received':
-                            $currentStatus->received_by = $log->action;
-                            $currentStatus->date_received = $log->date;
-                            break;
-
-                        case 'issued_back':
-                            $currentStatus->issued_back_by = $log->action;
-                            $currentStatus->date_issued_back = $log->date;
-                            break;
-
-                        case 'received_back':
-                            $currentStatus->received_back_by = $log->action;
-                            $currentStatus->date_received_back = $log->date;
-                            break;
-
-                        default:
-                            # code...
-                            break;
-                    }
-                } else {
-                    break;
-                }
-            }
-        }
-
-        return $currentStatus;
-    }
-
-    private function generateTrackerCode($modAbbr, $pKey, $modClass) {
-        $modAbbr = strtoupper($modAbbr);
-        $pKey = strtoupper($pKey);
-
-        return $modAbbr . "-" . $pKey . "-" . $modClass . "-" . date('mdY');
-    }
-
-    private function logEmployeeHistory($msg, $emp = "") {
-        $empLog = new EmployeeLog;
-        $empLog->emp_id = empty($emp) ? Auth::user()->emp_id: $emp;
-        $empLog->message = $msg;
-        $empLog->save();
-    }
-
-    /*
-    private function logTrackerHistory($code, $empFrom, $empTo, $action, $remarks = "") {
-        $docHistory = new DocumentLogHistory;
-        $docHistory->code = $code;
-        $docHistory->date = Carbon::now();
-        $docHistory->emp_from = $empFrom;
-        $docHistory->emp_to = $empTo;
-        $docHistory->action = $action;
-        $docHistory->remarks = $remarks;
-        $docHistory->save();
-    }*/
 }
