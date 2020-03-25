@@ -21,7 +21,7 @@ class CreateAbstractQuotationsTable extends Migration
             $table->foreign('pr_id')->references('id')->on('purchase_requests');
             $table->date('date_abstract')->nullable();
             $table->dateTime('date_abstract_approved')->nullable();
-            $table->uuid('mode_procurement');
+            $table->uuid('mode_procurement')->nullable();
             $table->foreign('mode_procurement')->references('id')->on('procurement_modes');
             $table->uuid('sig_chairperson')->nullable();
             $table->foreign('sig_chairperson')->references('id')->on('signatories');
@@ -35,7 +35,6 @@ class CreateAbstractQuotationsTable extends Migration
             $table->foreign('sig_third_member')->references('id')->on('signatories');
             $table->uuid('sig_end_user')->nullable();
             $table->foreign('sig_end_user')->references('id')->on('emp_accounts');
-            $table->string('document_abrv', 20)->default('ABSTRACT');
             $table->softDeletes();
             $table->timestamps();
         });

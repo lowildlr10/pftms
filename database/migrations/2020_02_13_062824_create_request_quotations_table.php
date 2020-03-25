@@ -24,7 +24,6 @@ class CreateRequestQuotationsTable extends Migration
             $table->foreign('sig_rfq')->references('id')->on('signatories');
             $table->uuid('canvassed_by')->nullable();
             $table->foreign('canvassed_by')->references('id')->on('emp_accounts');
-            $table->string('document_abrv', 20)->default('RFQ');
             $table->softDeletes();
             $table->timestamps();
         });
