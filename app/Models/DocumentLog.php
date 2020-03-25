@@ -59,52 +59,56 @@ class DocumentLog extends Model
         $instanceDocLog->save();
     }
 
+    public function checkDocGenerated($docID) {
+        $logCount = $this::where([
+            ['doc_id', $docID],
+            ['action', 'document_generated']
+        ])->orderBy('logged_at', 'desc')->count();
+
+        return $logCount ? 1 : 0;
+    }
+
     public function checkDocStatus($docID) {
         $logs = $this::where('doc_id', $docID)
-                     ->orderBy('created_at', 'desc')
+                     ->orderBy('logged_at', 'desc')
                      ->get();
         $user = new User;
-        $currentStatus = (object) ["issued_by" => NULL,
-                                    "issued_to" => NULL,
-                                    "date_issued" => NULL,
-                                    "received_by" => NULL,
-                                    "date_received" => NULL,
-                                    "issued_back_by" => NULL,
-                                    "date_issued_back" => NULL,
-                                    "received_back_by" => NULL,
-                                    "date_received_back" => NULL,
-                                    "issued_remarks" => NULL,
-                                    "issued_back_remarks" => NULL,
-                                    "issued_remarks" => NULL,
-                                    "issued_back_remarks" => NULL];
+        $currentStatus = (object) [];
 
         if (count($logs) > 0) {
             foreach ($logs as $log) {
                 if ($log->action != "-") {
                     switch ($log->action) {
                         case 'issued':
-                            $currentStatus->issued_remarks = $log->remarks;
-                            $currentStatus->issued_by = $user->getEmployeeName($log->emp_from);
-                            $currentStatus->issued_to = $user->getEmployeeName($log->emp_to);
+                            $currentStatus->issued_by = $user->getEmployee($log->emp_from)->name;
+                            $currentStatus->issued_to = $user->getEmployee($log->emp_to)->name;
+                            $currentStatus->issued_by_id = $log->emp_from;
+                            $currentStatus->issued_to_id = $log->emp_to;
                             $currentStatus->date_issued = $log->logged_at;
-                            $currentStatus->remarks = $log->remarks;
+                            $currentStatus->issued_remarks = $log->remarks;
                             break;
 
                         case 'received':
-                            $currentStatus->received_by = $user->getEmployeeName($log->emp_from);
+                            $currentStatus->received_by = $user->getEmployee($log->emp_from)->name;
+                            $currentStatus->received_by_id = $log->emp_from;
                             $currentStatus->date_received = $log->logged_at;
+                            $currentStatus->received_remarks = $log->remarks;
                             break;
 
                         case 'issued_back':
-                            $currentStatus->issued_back_remarks = $log->remarks;
-                            $currentStatus->issued_back_by = $user->getEmployeeName($log->emp_from);
+                            $currentStatus->issued_back_by = $user->getEmployee($log->emp_from)->name;
+                            $currentStatus->issued_back_to = $user->getEmployee($log->emp_to)->name;
+                            $currentStatus->issued_back_by_id = $log->emp_from;
+                            $currentStatus->issued_back_to_id = $log->emp_to;
                             $currentStatus->date_issued_back = $log->logged_at;
-                            $currentStatus->remarks = $log->remarks;
+                            $currentStatus->issued_back_remarks = $log->remarks;
                             break;
 
                         case 'received_back':
-                            $currentStatus->received_back_by = $user->getEmployeeName($log->emp_from);
+                            $currentStatus->received_back_by = $user->getEmployee($log->emp_from)->name;
+                            $currentStatus->received_back_by_id = $log->emp_from;
                             $currentStatus->date_received_back = $log->logged_at;
+                            $currentStatus->received_back_remarks = $log->remarks;
                             break;
 
                         default:

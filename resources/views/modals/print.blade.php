@@ -1,11 +1,14 @@
 <div class="modal fade" id="print-modal" tabindex="-1"
-     role="dialog" data-keyboard="false" style="display: none;">
+     role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-notify modal-info" role="document" style="max-width: 950px;">
         <!--Content-->
         <div class="modal-content">
             <!--Header-->
-            <div class="modal-header mdb-color">
-                <p class="heading lead"><i class="fas fa-print"></i> <label id="print-title"></label></p>
+            <div class="modal-header mdb-color  white-text">
+                <h7 class="mt-1">
+                    <i class="fas fa-print"></i>
+                    <span id="print-title"></span>
+                </h7>
 
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true" class="white-text">×</span>
@@ -18,30 +21,34 @@
                     <div class="col-md-3">
                         <label><i class="fas fa-cog"></i> Settings</label>
                         <hr>
-                        <div class="form-group">
-                            <label>Select Paper Size:</label>
-                            <select id="paper-size" class="mdb-select-print md-form colorful-select dropdown-primary">
+                        <div class="md-form">
+                            <select id="paper-size" class="mdb-select md-form required">
+                                <option value="0">-- Choose a paper type --</option>
 
-                                @if (!empty($paperSizes) && isset($paperSizes))
+                                @if (isset($paperSizes) && count($paperSizes) > 0)
                                     @foreach ($paperSizes as $paper)
-                                <option value="{{ $paper->id }}">{{ $paper->paper_size }}</option>
+                                <option value="{{ $paper->id }}">
+                                    {{ $paper->paper_type }} ({{ $paper->width }}x{{ $paper->height }}{{ $paper->unit }})
+                                </option>
                                     @endforeach
                                 @endif
-
                             </select>
-                        </div>
-                        <div class="form-group">
-                            <label>
-                                Increase/Decrease Font Size by: ( <span id="incrdec-disp">0</span>% )
+                            <label class="mdb-main-label">
+                                Paper Type <span class="red-text">*</span>
                             </label>
+                        </div>
+                        <div class="md-form">
                             <input type="number" id="font-size" class="form-control" min="-100" max="100" value="0"
                                    onchange="$('#incrdec-disp').text($(this).val());">
+                            <label for="font-size" class="active">
+                                Font Scaling: <span id="incrdec-disp">0</span>% <span class="red-text">*</span>
+                            </label>
                         </div>
                         <input type="hidden" name="other_param" id="other_param">
                     </div>
                     <div class="col-md-9">
                         <div id="modal-print-content">
-                            <object class="border border-primary" type="application/pdf"
+                            <object class="border border-primary z-depth-1-half" type="application/pdf"
                                     width="100%" height="650">
                                 <form method="POST" target="_blank">
                                     @csrf

@@ -178,14 +178,14 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $rfq->id }}', 'pr');">
-                                    <i class="fas fa-print blue-text"></i> Print PR
+                                        onclick="$(this).showPrint('{{ $rfq->id }}', 'proc_rfq');">
+                                    <i class="fas fa-print blue-text"></i> Print RFQ
                                 </button>
 
                                 @if ($isAllowedUpdate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showEdit('{{ route('pr-show-edit', ['id' => $rfq->id]) }}');">
+                                        onclick="$(this).showEdit('{{ route('rfq-show-edit', ['id' => $rfq->id]) }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
                                 @endif
@@ -226,7 +226,7 @@
                         </button>
                         <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
                                 btn-block waves-effect mb-2"
-                                onclick="$(this).showAttachment('{{ $rfq->id }}');">
+                                onclick="$(this).showAttachment('{{ $rfq->id }}', 'proc-rfq');">
                             <i class="fas fa-paperclip fa-lg"></i> View Attachment
                         </button>
                     </div>
@@ -235,6 +235,12 @@
                 <ul class="list-group z-depth-1">
                     <li class="list-group-item justify-content-between">
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
+                    </li>
+                    <li class="list-group-item justify-content-between">
+                        <a onclick="$(this).redirectToDoc('{{ route('pr') }}', '{{ $rfq->pr_id }}');"
+                          class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
+                            <i class="fas fa-angle-double-left"></i> Regenerate PR
+                        </a>
                     </li>
 
                     @if (empty($rfq->doc_status->date_issued) &&
@@ -252,7 +258,7 @@
                         @if ($isAllowedReceive)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showReceive('{{ route('rfq-receive', ['id' => $rfq->id]) }}');">
+                                onclick="$(this).showReceive('{{ route('rfq-show-receive', ['id' => $rfq->id]) }}');">
                             <i class="fas fa-hand-holding"></i> Receive
                         </button>
                     </li>
@@ -260,8 +266,7 @@
                     @else
                         @if ($isAllowedAbstract)
                     <li class="list-group-item justify-content-between">
-                        <a onclick="$(this).redirectToDoc('{{ route('rfq-search',
-                                   ['keyword' => $rfq->pr_id]) }}');"
+                        <a onclick="$(this).redirectToDoc('{{ route('abstract') }}', '{{ $rfq->pr_id }}');"
                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
                             Generate Abstract <i class="fas fa-angle-double-right"></i>
                         </a>
@@ -291,13 +296,11 @@
 
 @include('modals.search')
 @include('modals.show')
-@include('modals.create')
 @include('modals.edit')
-@include('modals.delete')
-@include('modals.approve')
-@include('modals.disapprove')
-@include('modals.cancel')
+@include('modals.issue')
+@include('modals.receive')
 @include('modals.print')
+@include('modals.attachment')
 
 @endsection
 
@@ -312,6 +315,7 @@
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/rfq.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/attachment.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/custom-datatables.js') }}"></script>
 
 @if (!empty(session("success")))

@@ -188,7 +188,7 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $pr->id }}', 'pr');">
+                                        onclick="$(this).showPrint('{{ $pr->id }}', 'proc_pr');">
                                     <i class="fas fa-print blue-text"></i> Print PR
                                 </button>
 
@@ -282,8 +282,7 @@
                     @if ($pr->status >= 5)
                         @if ($isAllowedRFQ)
                     <li class="list-group-item justify-content-between">
-                        <a onclick="$(this).redirectToDoc('{{ route('rfq-search',
-                                    ['keyword' => $pr->id]) }}');"
+                        <a onclick="$(this).redirectToDoc('{{ route('rfq') }}', '{{ $pr->id }}');"
                            class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
                             Generate RFQ <i class="fas fa-angle-double-right"></i>
                         </a>

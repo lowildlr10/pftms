@@ -14,6 +14,7 @@ use App\Models\ObligationRequestStatus;
 use App\Models\InspectionAcceptance;
 use App\Models\DisbursementVoucher;
 use App\Models\InventoryStock;
+use App\Models\InventoryStockIssue;
 
 use App\User;
 use App\Models\EmpGroup;
@@ -44,8 +45,8 @@ class PurchaseRequestController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($keyword = '') {
-        $keyword = trim($keyword);
+    public function index(Request $request) {
+        $keyword = trim($request->keyword);
 
         // Get module access
         $module = 'proc_pr';
@@ -80,6 +81,8 @@ class PurchaseRequestController extends Controller
 
         if ($roleHasOrdinary) {
             $prData = $prData->where('requested_by', Auth::user()->id);
+        } else {
+            $prData = $prData->orWhere('requested_by', Auth::user()->id);
         }
 
         if (!empty($keyword)) {
@@ -90,6 +93,7 @@ class PurchaseRequestController extends Controller
 
         return view('modules.procurement.pr.index', [
             'list' => $prData,
+            'keyword' => $keyword,
             'paperSizes' => $paperSizes,
             'isAllowedCreate' => $isAllowedCreate,
             'isAllowedUpdate' => $isAllowedUpdate,
@@ -662,6 +666,7 @@ class PurchaseRequestController extends Controller
             }
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
     }
@@ -708,15 +713,14 @@ class PurchaseRequestController extends Controller
             $instancePR->office = $office;
 
             $prNo = $instancePR->pr_no;
-            $prData = PurchaseRequest::where('id', $id)->first();
 
             // Delete other dependent documents
             if ($instancePR->status >= 5) {
                 RequestQuotation::where('pr_id', $id)->forceDelete();
                 AbstractQuotation::where('pr_id', $id)->forceDelete();
                 AbstractQuotationItem::where('pr_id', $id)->delete();
-                PurchaseOrder::where('pr_id', $id)->forceDelete();
-                PurchaseOrderItem::where('pr_id', $id)->delete();
+                PurchaseJobOrder::where('pr_id', $id)->forceDelete();
+                PurchaseJobOrderItem::where('pr_id', $id)->delete();
                 ObligationRequestStatus::where('pr_id', $id)->forceDelete();
                 InspectionAcceptance::where('pr_id', $id)->forceDelete();
                 DisbursementVoucher::where('pr_id', $id)->forceDelete();
@@ -727,6 +731,7 @@ class PurchaseRequestController extends Controller
             // Update pr items
             foreach ($unitIssues as $arrayKey => $unit) {
                 $itemID = $itemIDs[$arrayKey];
+                $itemCount = count($itemIDs) - 1;
                 $description = $itemDescriptions[$arrayKey];
                 $quantity = $quantities[$arrayKey];
                 $unitCost = $unitCosts[$arrayKey];
@@ -747,20 +752,23 @@ class PurchaseRequestController extends Controller
                     $instancePRItem->est_total_cost = $totalCost;
                     $instancePRItem->save();
                 } else {
+                    if ($itemCount == $arrayKey) {
+                        $instancePR->status = 1;
+                        $instancePR->notifyForApproval($prNo, $requestedBy);
+                        $instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
+                        $instanceDocLog->logDocument($id, Auth::user()->id, NULL, 'issued');
+                    }
+
                     $instancePRItem = PurchaseRequestItem::find($itemID);
+                    $instancePRItem = $instancePRItem ? $instancePRItem : new PurchaseRequestItem;
+                    $instancePRItem->pr_id = $id;
+                    $instancePRItem->item_no = $arrayKey + 1;
                     $instancePRItem->quantity = $quantity;
                     $instancePRItem->unit_issue = $unit;
                     $instancePRItem->item_description = $description;
                     $instancePRItem->est_unit_cost = $unitCost;
                     $instancePRItem->est_total_cost = $totalCost;
                     $instancePRItem->save();
-
-                    if ($itemIDsCount == $arrayKey) {
-                        $instancePRItem->status = 1;
-                        $instancePR->notifyForApproval($prNo, $requestedBy);
-                        $instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
-                        $instanceDocLog->logDocument($id, Auth::user()->id, NULL, 'issued');
-                    }
                 }
             }
 

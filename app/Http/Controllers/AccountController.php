@@ -65,6 +65,7 @@ class AccountController extends Controller
         'proc_abstract' => 'Procurement - Abstract of Quotation',
             'abstract_create' => 'Create',
             'abstract_update' => 'Update',
+            'abstract_delete' => 'Delete',
             'abstract_approve_po_jo' => 'Set to Approved for PO/JO',
         'proc_po_jo' => 'Procurement - Purchase/Job Order',
             'po_jo_update' => 'Update',
@@ -251,6 +252,7 @@ class AccountController extends Controller
         'proc_abstract' => [
             'abstract_create' => 'create',
             'abstract_update' => 'update',
+            'abstract_delete' => 'delete',
             'abstract_approve_po_jo' => 'approve_po_jo',
         ],
         'proc_po_jo' => [

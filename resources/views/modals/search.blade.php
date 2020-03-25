@@ -15,7 +15,8 @@
                                     <i class="fa fa-search" aria-hidden="true"></i>
                                     <input name="search" class="form-control ml-3 w-75" type="search"
                                            placeholder="Search" id="search-box"
-                                           autocomplete="off" aria-controls="dtmaterial">
+                                           autocomplete="off" aria-controls="dtmaterial"
+                                           value="{{ !empty($keyword) ? $keyword : '' }}">
                                 </div>
                             </div>
                         </div>
@@ -38,4 +39,5 @@
 
 <form action="#" method="POST" id="search-keyword">
     @csrf
+    <input type="hidden" id="keyword" name="keyword">
 </form>

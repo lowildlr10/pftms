@@ -43,7 +43,7 @@ class HomeController extends Controller
     }
 
     private function getDataProcurement() {
-        if (Auth::user()->role == 1 || Auth::user()->role == 2) {
+        if (!Auth::user()->hasOrdinaryRole()) {
             //$pendingLastMonth = '';
             $prPendingTotal = PurchaseRequest::where('status', 1)->count();
             $prApprovedTotal = PurchaseRequest::where('status', '>=', 5)->count();
@@ -57,24 +57,26 @@ class HomeController extends Controller
                                 ->count();
         } else {
             //$pendingLastMonth = '';
-            $prPendingTotal = PurchaseRequest::where([['status', 1],
-                                                ['requested_by', Auth::user()->emp_id]
-                                                ])
-                                             ->count();
-            $prApprovedTotal = PurchaseRequest::where([['status', '>=', 5],
-                                                ['requested_by', Auth::user()->emp_id]
-                                                ])
-                                             ->count();
+            $prPendingTotal = PurchaseRequest::where([
+                ['status', 1],
+                ['requested_by', Auth::user()->emp_id]
+            ])->count();
+            $prApprovedTotal = PurchaseRequest::where([
+                ['status', '>=', 5],
+                ['requested_by', Auth::user()->emp_id]
+            ])->count();
             $poForDeliveryTot = DB::table('purchase_job_orders as po')
                                   ->join('purchase_requests as pr', 'pr.id', '=', 'po.pr_id')
-                                  ->where([['po.status', 8],
-                                          ['pr.requested_by', Auth::user()->emp_id]])
-                                  ->count();
+                                  ->where([
+                ['po.status', 8],
+                ['pr.requested_by', Auth::user()->emp_id]
+            ])->count();
             $poDeliveredTot = DB::table('purchase_job_orders as po')
                                 ->join('purchase_requests as pr', 'pr.id', '=', 'po.pr_id')
-                                ->where([['po.status', '>=', 9],
-                                         ['pr.requested_by', Auth::user()->emp_id]])
-                                ->count();
+                                ->where([
+                ['po.status', '>=', 9],
+                ['pr.requested_by', Auth::user()->emp_id]
+            ])->count();
         }
 
         $prPendingTotal = number_format($prPendingTotal);

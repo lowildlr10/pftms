@@ -7,7 +7,7 @@ $(function() {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-show').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
-            $('.mdb-select').materialSelect();
+            $('.crud-select').materialSelect();
             $(this).slideToggle(500);
         });
         $("#modal-show").modal({keyboard: false, backdrop: 'static'})
@@ -22,7 +22,7 @@ $(function() {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
-            $('.mdb-select').materialSelect();
+            $('.crud-select').materialSelect();
             $(this).slideToggle(500);
         });
         $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
@@ -43,16 +43,16 @@ $(function() {
 
     $.fn.showIssue = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
-        $('#modal-body-edit').load(url, function() {
+        $('#modal-body-issue').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
-            $('.mdb-select').materialSelect();
+            $('.crud-select').materialSelect();
             $(this).slideToggle(500);
         });
-        $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
-						   .on('shown.bs.modal', function() {
-            $('#edit-title').html('Update Purchase Request');
+        $("#modal-issue").modal({keyboard: false, backdrop: 'static'})
+						 .on('shown.bs.modal', function() {
+            $('#issue-title').html('Issue Request for Quotation');
 		}).on('hidden.bs.modal', function() {
-            $('#modal-body-edit').html('').css('display', 'none');
+            $('#modal-body-issue').html('').css('display', 'none');
 		});
     }
 
@@ -64,15 +64,17 @@ $(function() {
 		}
     }
 
-    $.fn.showReceive = function(url, name) {
-		$('#modal-body-approve').html(`Are you sure you want to approve '${name}'?`);
-        $("#modal-approve").modal({keyboard: false, backdrop: 'static'})
-						  .on('shown.bs.modal', function() {
-            $('#approve-title').html('Approve Purchase Request');
-            $('#form-approve').attr('action', url);
+    $.fn.showReceive = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-receive').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $(this).slideToggle(500);
+        });
+        $("#modal-receive").modal({keyboard: false, backdrop: 'static'})
+						 .on('shown.bs.modal', function() {
+            $('#receive-title').html('Receive Request for Quotation');
 		}).on('hidden.bs.modal', function() {
-             $('#modal-approve-body').html('');
-             $('#form-approve').attr('action', '#');
+            $('#modal-body-receive').html('').css('display', 'none');
 		});
     }
 

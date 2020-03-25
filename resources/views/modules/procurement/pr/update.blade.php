@@ -64,10 +64,8 @@
                                 <td>
                                     <input type="hidden" name="item_id[]" value="{{ $item->id }}">
                                     <div class="md-form my-0 py-0">
-                                        <select class="mdb-select md-form required" searchable="Search here.."
-                                                name="unit[]">
-                                            <option value="" disabled selected>Choose a Unit</option>
-
+                                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                                                name="unit[]" id="unit{{ $itemCtr }}">
                                             @if (count($unitIssues) > 0)
                                                 @foreach ($unitIssues as $unit)
                                             <option value="{{ $unit->id }}" {{ $unit->id == $item->unit_issue ? 'selected' : '' }}>
@@ -135,7 +133,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="md-form">
-                <select class="mdb-select md-form" searchable="Search here.."
+                <select class="mdb-select crud-select md-form" searchable="Search here.."
                         name="project">
                     <option value="" disabled selected>Choose a funding/charging</option>
                     <option value="">-- None --</option>
@@ -179,7 +177,7 @@
     <div class="row">
         <div class="col-md-6">
             <div class="md-form">
-                <select class="mdb-select md-form required" searchable="Search here.."
+                <select class="mdb-select crud-select md-form required" searchable="Search here.."
                         name="requested_by">
                     <option value="" disabled selected>Choose a requestor</option>
 
@@ -197,7 +195,7 @@
             </div>
 
             <div class="md-form">
-                <select class="mdb-select md-form required" searchable="Search here.."
+                <select class="mdb-select crud-select md-form required" searchable="Search here.."
                         name="division">
                     <option value="" disabled selected>Choose a division</option>
 
@@ -216,7 +214,7 @@
         </div>
         <div class="col-md-6">
             <div class="md-form">
-                <select class="mdb-select md-form required" searchable="Search here.."
+                <select class="mdb-select crud-select md-form required" searchable="Search here.."
                         name="approved_by">
                     <option value="" disabled selected>Choose a approval</option>
 
@@ -236,7 +234,7 @@
             </div>
 
             <div class="md-form">
-                <select class="mdb-select md-form required" searchable="Search here.."
+                <select class="mdb-select crud-select md-form required" searchable="Search here.."
                         name="recommended_by">
                     <option value="" disabled selected>Choose a recommended by</option>
 

@@ -1,0 +1,153 @@
+<?php
+
+/* ------------------------------------- Start of Config ------------------------------------- */
+
+//set default monospaced font
+$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+//Set margins
+$pdf->SetMargins(10, 35, 10);
+$pdf->SetHeaderMargin(10);
+
+//Set auto page breaks
+$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+
+//Set image scale factor
+$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+
+//Set some language-dependent strings (optional)
+if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+    require_once(dirname(__FILE__).'/lang/eng.php');
+    $pdf->setLanguageArray($l);
+}
+
+//Set default font subsetting mode
+$pdf->setFontSubsetting(true);
+
+/* ------------------------------------- End of Config ------------------------------------- */
+
+//Add a page
+$pdf->AddPage();
+
+/* ------------------------------------- Start of Doc ------------------------------------- */
+
+//Title
+$pdf->SetFont('Times', 'B', 14 + ($increaseFontSize * 14));
+$pdf->Cell(0, '5', "PURCHASE REQUEST", "0", "", "C");
+$pdf->Ln(10);
+
+//Table header
+$pdf->SetFont('Times', 'BI', 10 + ($increaseFontSize * 10));
+$pdf->Cell($pageWidth * 0.114, '5', "Fund Cluster:", "", "", "L");
+$pdf->SetFont('Times', 'BIU', 10 + ($increaseFontSize * 10));
+$pdf->Cell(0, '5', "01", "", "", "L");
+$pdf->Ln(6);
+
+$pdf->SetFont('Times', '', 10 + ($increaseFontSize * 10));
+$pdf->Cell($pageWidth * 0.224, '6', "Office/Section : ", "TLR", "", "L");
+$pdf->SetFont('Times', 'B', 10 + ($increaseFontSize * 10));
+$pdf->Cell($pageWidth * 0.3712, '6', "PR No.: " . $data->pr->pr_no, "TLR", "", "L");
+$pdf->Cell(0, '6', "Date: " . $data->pr->date_pr, "TLR", "", "L");
+$pdf->Ln();
+
+$pdf->Cell($pageWidth * 0.224, '7', $data->pr->office, "BLR", "", "C");
+$pdf->Cell($pageWidth * 0.3712, '7', "Responsibility Center Code : 19 001 03000 14", "B", "", "L");
+$pdf->Cell(0, '7', "", "BLR", "", "L");
+$pdf->Ln();
+
+//Table data
+$pdf->SetFont('Times', '', 10 + ($increaseFontSize * 10));
+$pdf->htmlTable($data->table_data);
+
+//Table footer
+$pdf->MultiCell(0, 5, 'Purpose: ' . $data->pr->purpose, 'BLR', 'L');
+
+$pdf->Cell($pageWidth * 0.138, '5', "", "TLR", "", "L");
+$pdf->Cell($pageWidth * 0.362, '5', "Requested by: ", "TLR", "", "L");
+$pdf->Cell(0, '5', "Approved by: ", "TLR", "", "L");
+$pdf->Ln();
+
+$pdf->Cell($pageWidth * 0.138, '5', "Signature : ", "LR", "", "L");
+$pdf->Cell($pageWidth * 0.362, '5', "", "LR", "", "L");
+$pdf->Cell(0, '5', "", "LR", "", "L");
+$pdf->Ln();
+
+$pdf->Cell($pageWidth * 0.138, '5', "Printed Name : ", "LR", "", "L");
+$pdf->SetFont('Times', 'B', 10 + ($increaseFontSize * 10));
+$pdf->Cell($pageWidth * 0.362, '5', $data->requested_by->name, "LR", "", "C");
+$pdf->Cell(0, '5', $data->approved_by->name, "LR", "", "C");
+$pdf->Ln();
+
+$pdf->SetFont('Times', '', 10 + ($increaseFontSize * 10));
+$pdf->Cell($pageWidth * 0.138, '5', "Designation : ", "LR", "", "L");
+
+$xCoor = $pdf->GetX();
+$yCoor = $pdf->GetY();
+
+if (!empty($data->requested_by->signature)) {
+    $pdf->Image(url($data->requested_by->signature), 
+                $xCoor + (($pageWidth * 0.362) / 3) + 3, $yCoor - 11, 18, 0, 'PNG');
+}
+
+$pdf->Cell($pageWidth * 0.362, '5', $data->requested_by->position, "LR", "", "C");
+$pdf->Cell(0, '5', $data->approved_by->position, "LR", "", "C");
+$pdf->Ln();
+
+
+$pdf->Cell($pageWidth * 0.138, '6', "", "LR", "", "L");
+$pdf->Cell($pageWidth * 0.362, '6', "", "LR", "", "C");
+$pdf->Cell(0, '6', "", "LR", "", "C");
+$pdf->Ln();
+
+$pdf->Cell($pageWidth * 0.138, '5', "", "LR", "", "L");
+$pdf->Cell($pageWidth * 0.362, '5', "", "LR", "", "L");
+$pdf->SetFont('Times', 'IB', 10 + ($increaseFontSize * 10));
+$pdf->Cell(0, '5', "Within APP: ", "LR", "", "L");
+$pdf->Ln();
+
+$pdf->Cell($pageWidth * 0.138, '5', "", "LR", "", "L");
+$pdf->Cell($pageWidth * 0.362, '5', "", "LR", "", "C");
+$pdf->Cell(0, '5', "", "LR", "", "C");
+$pdf->Ln();
+
+$pdf->SetFont('Times', 'B', 10 + ($increaseFontSize * 10));
+$pdf->Cell($pageWidth * 0.138, '5', "", "LR", "", "L");
+$pdf->Cell($pageWidth * 0.362, '5', "", "LR", "", "C");
+$pdf->Cell(0, '5', $data->sig_app->name, "LR", "", "C");
+$pdf->Ln();
+
+$pdf->Cell($pageWidth * 0.138, '5', "", "LR", "", "L");
+$pdf->Cell($pageWidth * 0.362, '5', "", "LR", "", "C");
+$pdf->Cell(0, '5', $data->sig_app->position, "LR", "", "C");
+$pdf->Ln();
+
+$pdf->Cell($pageWidth * 0.138, '5', "", "LR", "", "L");
+$pdf->Cell($pageWidth * 0.362, '5', "", "LR", "", "C");
+$pdf->SetFont('Times', 'IB', 10 + ($increaseFontSize * 10));
+$pdf->Cell(0, '5', "Certified Funds Available: ", "LR", "", "L");
+$pdf->Ln();
+
+$pdf->Cell($pageWidth * 0.138, '5', "", "LR", "", "L");
+$pdf->Cell($pageWidth * 0.362, '5', "", "LR", "", "C");
+$pdf->Cell(0, '5', "", "LR", "", "C");
+$pdf->Ln();
+
+$pdf->SetFont('Times', 'B', 10 + ($increaseFontSize * 10));
+$pdf->Cell($pageWidth * 0.138, '5', "", "LR", "", "L");
+$pdf->Cell($pageWidth * 0.362, '5', "", "LR", "", "C");
+$pdf->Cell(0, '5', $data->sig_funds_available->name, "LR", "", "C");
+$pdf->Ln();
+
+$pdf->Cell($pageWidth * 0.138, '5', "", "LR", "", "L");
+$pdf->Cell($pageWidth * 0.362, '5', "", "LR", "", "C");
+$pdf->SetFont('Times', '', 10 + ($increaseFontSize * 10));
+$pdf->Cell(0, '5', $data->sig_funds_available->position, "LR", "", "C");
+$pdf->Ln();
+
+$pdf->Cell($pageWidth * 0.138, '5', "", "BLR", "", "L");
+$pdf->Cell($pageWidth * 0.362, '5', "", "BLR", "", "C");
+$pdf->SetFont('Times', 'IB', 10 + ($increaseFontSize * 10));
+$pdf->Cell(0, '5', "Reference:______________________________", "BLR", "", "L");
+$pdf->Ln();
+
+/* ------------------------------------- End of Doc ------------------------------------- */

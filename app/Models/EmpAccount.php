@@ -162,15 +162,28 @@ class User extends Authenticatable
         return true;
     }
 
-    public function getEmployeeName($id) {
-        $userData = $this::find($id);
-        $firstname = $userData->firstname;
-        $middleInitial = !empty($userData->middlename) ?
-                         ' '.$userData->middlename[0].'. ' : ' ';
-        $lastname = $userData->lastname;
-        $fullname = $firstname.$middleInitial.$lastname;
+    public function getEmployee($id) {
+        $userData = User::find($id);
 
-        return $fullname;
+        if ($userData) {
+            $firstname = $userData->firstname;
+            $middleInitial = !empty($userData->middlename) ?
+                            ' '.$userData->middlename[0].'. ' : ' ';
+            $lastname = $userData->lastname;
+            $fullname = $firstname.$middleInitial.$lastname;
+            $position = $userData->position;
+            $signature = $userData->signature;
+        } else {
+            $fullname = '';
+            $position = '';
+            $signature = '';
+        }
+
+        return (object) [
+            'name' => $fullname,
+            'position' => $position,
+            'signature' => $signature
+        ];
     }
 
     public function log($request, $msg) {
