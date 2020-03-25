@@ -46,6 +46,8 @@ class RFQsMigrateSeeder extends Seeder
             $instanceRFQ->updated_at = $rfq->updated_at;
             $instanceRFQ->save();
 
+            $rfqData = DB::table('request_quotations')->where('pr_id', $instancePR->id)->first();
+
             $docLogData = DB::connection('mysql-old-pftms')
                             ->table('tbldocument_logs_history')
                             ->where('code', $code)
@@ -56,7 +58,7 @@ class RFQsMigrateSeeder extends Seeder
                 $empToData = User::where('emp_id', $log->emp_to)->first();
 
                 $instanceDocLog = new DocLog;
-                $instanceDocLog->doc_id = $prData->id;
+                $instanceDocLog->doc_id = $rfqData->id;
                 $instanceDocLog->logged_at = $log->date;
                 $instanceDocLog->emp_from = $empFromData ? $empFromData->id :
                                             NULL;
