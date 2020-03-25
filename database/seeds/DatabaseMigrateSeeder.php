@@ -35,6 +35,9 @@ class DatabaseMigrateSeeder extends Seeder
             SignatoriesMigrateSeeder::class,
             UnitIssuesMigrateSeeder::class,
 
+            /** Purchase Request */
+            PRsMigrateSeeder::class,
+            RFQsMigrateSeeder::class,
         ]);
     }
 }

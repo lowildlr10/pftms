@@ -1,6 +1,11 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use App\Models\PurchaseRequest;
+use App\Models\RequestQuotation;
+use App\User;
+use App\Models\Signatory;
+use App\Models\DocumentLog as DocLog;
 
 class RFQsMigrateSeeder extends Seeder
 {
@@ -11,6 +16,58 @@ class RFQsMigrateSeeder extends Seeder
      */
     public function run()
     {
-        //
+        $rfqsData = DB::connection('mysql-old-pftms')
+                      ->table('tblcanvass')
+                      ->get();
+
+        foreach ($rfqsData as $rfq) {
+            $code = $rfq->code;
+            $prID = $rfq->pr_id;
+            $prData = DB::connection('mysql-old-pftms')
+                        ->table('tblpr')
+                        ->where('id', $prID)
+                        ->first();
+            $prNo = $prData->pr_no;
+            $instancePR = DB::table('purchase_requests')->where('pr_no', $prNo)->first();
+            $_sigRFQData = DB::connection('mysql-old-pftms')
+                                    ->table('tblsignatories')
+                                    ->where('id', $rfq->sig_rfq)
+                                    ->first();
+            $sigRFQData = $_sigRFQData ?
+                          Signatory::where('emp_id', $_sigRFQData->emp_id)->first() :
+                          NULL;
+
+            $instanceRFQ = new RequestQuotation;
+            $instanceRFQ->pr_id = $instancePR->id;
+            $instanceRFQ->date_canvass = $rfq->date_canvass;
+            $instanceRFQ->sig_rfq = $sigRFQData ? $sigRFQData->id : NULL;
+            $instanceRFQ->deleted_at = $rfq->deleted_at;
+            $instanceRFQ->created_at = $rfq->created_at;
+            $instanceRFQ->updated_at = $rfq->updated_at;
+            $instanceRFQ->save();
+
+            $docLogData = DB::connection('mysql-old-pftms')
+                            ->table('tbldocument_logs_history')
+                            ->where('code', $code)
+                            ->get();
+
+            foreach ($docLogData as $log) {
+                $empFromData = User::where('emp_id', $log->emp_from)->first();
+                $empToData = User::where('emp_id', $log->emp_to)->first();
+
+                $instanceDocLog = new DocLog;
+                $instanceDocLog->doc_id = $prData->id;
+                $instanceDocLog->logged_at = $log->date;
+                $instanceDocLog->emp_from = $empFromData ? $empFromData->id :
+                                            NULL;
+                $instanceDocLog->emp_to = $empToData ? $empToData->id :
+                                          NULL;
+                $instanceDocLog->action = $log->action;
+                $instanceDocLog->remarks = $log->remarks;
+                $instanceDocLog->created_at = $log->created_at;
+                $instanceDocLog->updated_at = $log->updated_at;
+                $instanceDocLog->save();
+            }
+        }
     }
 }

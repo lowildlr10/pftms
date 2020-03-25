@@ -21,7 +21,7 @@ class CreatePurchaseRequestItemsTable extends Migration
             $table->foreign('pr_id')->references('id')->on('purchase_requests');
             $table->unsignedInteger('item_no');
             $table->unsignedInteger('quantity');
-            $table->uuid('unit_issue');
+            $table->uuid('unit_issue')->nullable();
             $table->foreign('unit_issue')->references('id')->on('item_unit_issues');
             $table->text('item_description');
             $table->double('est_unit_cost', 50, 2)->default(0.00);
