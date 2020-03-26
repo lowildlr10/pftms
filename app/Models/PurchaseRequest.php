@@ -8,10 +8,11 @@ use Webpatser\Uuid\Uuid;
 use App\User;
 use App\Models\DocumentLog as DocLog;
 use App\Notifications\PurchaseRequest as Notif;
+use Kyslik\ColumnSortable\Sortable;
 
 class PurchaseRequest extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Sortable;
 
     /**
      * The table associated with the model.
@@ -64,9 +65,42 @@ class PurchaseRequest extends Model
          return Uuid::generate();
     }
 
+    /**
+     * Get the phone record associated with the purchase request.
+     */
     public function rfq() {
-        return $this->hasMany('App\Models\RequestQuotation', 'pr_id');
+        return $this->hasOne('App\Models\RequestQuotation', 'pr_id', 'id');
     }
+
+    public function abstract() {
+        return $this->hasOne('App\Models\AbstractQuotation', 'pr_id', 'id');
+    }
+
+    public function funding() {
+        return $this->hasOne('App\Models\FundingSource', 'id', 'funding_source');
+    }
+
+    public function requestor() {
+        return $this->hasOne('App\User', 'id', 'requested_by');
+    }
+
+    public function stat() {
+        return $this->hasOne('App\Models\ProcurementStatus', 'id', 'status');
+    }
+
+    public function items() {
+        return $this->hasMany('App\Models\PurchaseRequestItem', 'pr_id', 'id');
+    }
+
+    public function division() {
+        return $this->hasOne('App\Models\EmpDivision', 'id', 'division');
+    }
+
+    public $sortable = [
+        'pr_no',
+        'date_pr',
+        'purpose',
+    ];
 
     public function checkDuplication($data) {
         $dataCount = $this::where('pr_no', $data)

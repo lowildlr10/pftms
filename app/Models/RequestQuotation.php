@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 use App\Notifications\RequestQuotation as Notif;
 use App\User;
+use Kyslik\ColumnSortable\Sortable;
 
 class RequestQuotation extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Sortable;
 
     /**
      * The table associated with the model.
@@ -30,7 +31,6 @@ class RequestQuotation extends Model
         'date_canvass',
         'sig_rfq',
         'canvassed_by',
-        'document_abrv'
     ];
 
     /**
@@ -51,9 +51,24 @@ class RequestQuotation extends Model
          return Uuid::generate();
     }
 
+    /**
+     * Get the phone record associated with the request for quotation.
+     */
     public function pr() {
         return $this->belongsTo('App\Models\PurchaseRequest', 'pr_id', 'id');
     }
+
+    public function signatory() {
+        return $this->hasOne('App\Models\Signatory', 'id', 'sig_rfq');
+    }
+
+    public function canvasser() {
+        return $this->hasOne('App\User', 'id', 'canvassed_by');
+    }
+
+    public $sortable = [
+        'date_canvass',
+    ];
 
     public function notifyIssued($id, $responsiblePerson, $requestedBy) {
         $rfqData = $this::with('pr')->where('id', $id)->first();

@@ -10,11 +10,11 @@ use Webpatser\Uuid\Uuid;
 use App\Models\EmpRole as Role;
 use App\Models\EmpGroup as Group;
 use App\Models\EmpLog as Log;
+use Kyslik\ColumnSortable\Sortable;
 
 class User extends Authenticatable
 {
-    use Notifiable;
-    use SoftDeletes;
+    use SoftDeletes, Notifiable, Sortable;
 
     /**
      * The table associated with the model.
@@ -86,6 +86,12 @@ class User extends Authenticatable
     public static function generateUuid() {
          return Uuid::generate();
     }
+
+    public $sortable = [
+        'firstname',
+        'middlename',
+        'lastname'
+    ];
 
     public function hasModuleAccess($roleIDs, $module, $access) {
         $roleIDs = unserialize($roleIDs);

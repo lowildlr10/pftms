@@ -38,7 +38,7 @@ class HomeController extends Controller
 
         $pr = $this->getDataProcurement();
 
-        return view('pages.dashboard', ['fullname' => $fullname,
+        return view('dashboard.index', ['fullname' => $fullname,
                                         'pr' => $pr]);
     }
 

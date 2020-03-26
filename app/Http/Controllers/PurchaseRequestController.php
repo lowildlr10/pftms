@@ -66,30 +66,39 @@ class PurchaseRequestController extends Controller
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
-        $prData = PurchaseRequest::addSelect([
-            'funding_source' => FundingSource::select('source_name')
-                                       ->whereColumn('id', 'purchase_requests.funding_source')
-                                       ->limit(1),
-            'name' =>  User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
-                           ->whereColumn('id', 'purchase_requests.requested_by')
-                           ->limit(1),
-            'status_name' =>  DB::table('procurement_status')
-                                ->select('status_name')
-                                ->whereColumn('id', 'purchase_requests.status')
-                                ->limit(1),
-        ])->whereIn('division', $empDivisionAccess);
+        $prData = PurchaseRequest::with(['funding', 'requestor', 'stat'])
+                                 ->whereHas('division', function($query)
+                                            use($empDivisionAccess) {
+            $query->whereIn('id', $empDivisionAccess);
+        });
 
         if ($roleHasOrdinary) {
             $prData = $prData->where('requested_by', Auth::user()->id);
-        } else {
-            $prData = $prData->orWhere('requested_by', Auth::user()->id);
         }
 
         if (!empty($keyword)) {
-            $prData = $prData->where('id', $keyword);
+            $prData = $prData->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('pr_no', 'like', "%$keyword%")
+                    ->orWhere('date_pr', 'like', "%$keyword%")
+                    ->orWhere('purpose', 'like', "%$keyword%")
+                    ->orWhereHas('funding', function($query) use ($keyword) {
+                        $query->where('source_name', 'like', "%$keyword%");
+                    })->orWhereHas('stat', function($query) use ($keyword) {
+                        $query->where('status_name', 'like', "%$keyword%");
+                    })->orWhereHas('requestor', function($query) use ($keyword) {
+                        $query->where('firstname', 'like', "%$keyword%")
+                              ->orWhere('middlename', 'like', "%$keyword%")
+                              ->orWhere('lastname', 'like', "%$keyword%");
+                    })->orWhereHas('items', function($query) use ($keyword) {
+                        $query->where('item_description', 'like', "%$keyword%");
+                    })->orWhereHas('division', function($query) use ($keyword) {
+                        $query->where('division_name', 'like', "%$keyword%");
+                    });
+            });
         }
 
-        $prData = $prData->orderBy('pr_no', 'desc')->get();
+        $prData = $prData->sortable(['pr_no' => 'desc'])->paginate(20);
 
         return view('modules.procurement.pr.index', [
             'list' => $prData,

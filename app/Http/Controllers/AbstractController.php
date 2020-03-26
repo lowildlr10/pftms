@@ -42,7 +42,6 @@ class AbstractController extends Controller
      */
     public function index(Request $request) {
         $keyword = trim($request->keyword);
-        $instanceDocLog = new DocLog;
 
         // Get module access
         $module = 'proc_abstract';
@@ -59,38 +58,45 @@ class AbstractController extends Controller
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
-
-        $absData = AbstractQuotation::whereHas('pr', function($query)
-                    use ($empDivisionAccess) {
-            $query->whereIn('division', $empDivisionAccess);
+        $absData = PurchaseRequest::with(['funding', 'requestor', 'rfq'])
+                                  ->whereHas('division', function($query)
+                                            use($empDivisionAccess) {
+            $query->whereIn('id', $empDivisionAccess);
+        })->whereHas('abstract', function($query) {
+            $query->whereNotNull('id');
         });
 
         if ($roleHasOrdinary) {
-            $absData = $absData->whereHas('pr', function($query) {
-                $query->where('requested_by', Auth::user()->id);
-            });
-        } else {
-            $absData = $absData->whereHas('pr', function($query) {
-                $query->orWhere('requested_by', Auth::user()->id);
-            });
+            $absData = $absData->where('requested_by', Auth::user()->id);
         }
 
         if (!empty($keyword)) {
-            $absData = $absData->where('pr_id', $keyword);
+            $absData = $absData->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('pr_no', 'like', "%$keyword%")
+                    ->orWhere('date_pr', 'like', "%$keyword%")
+                    ->orWhere('purpose', 'like', "%$keyword%")
+                    ->orWhereHas('funding', function($query) use ($keyword) {
+                        $query->where('source_name', 'like', "%$keyword%");
+                    })->orWhereHas('stat', function($query) use ($keyword) {
+                        $query->where('status_name', 'like', "%$keyword%");
+                    })->orWhereHas('requestor', function($query) use ($keyword) {
+                        $query->where('firstname', 'like', "%$keyword%")
+                              ->orWhere('middlename', 'like', "%$keyword%")
+                              ->orWhere('lastname', 'like', "%$keyword%");
+                    })->orWhereHas('items', function($query) use ($keyword) {
+                        $query->where('item_description', 'like', "%$keyword%");
+                    })->orWhereHas('division', function($query) use ($keyword) {
+                        $query->where('division_name', 'like', "%$keyword%");
+                    })->orWhereHas('abstract', function($query) use ($keyword) {
+                        $query->where('date_abstract', 'like', "%$keyword%");
+                    });
+            });
         }
 
-        $absData = $absData->whereHas('pr', function($query)
-                    use ($empDivisionAccess) {
-            $query->orderBy('pr_no', 'desc');
-        });
-
-        $absData = $absData->get();
+        $absData = $absData->sortable(['pr_no' => 'desc'])->paginate(20);
 
         foreach ($absData as $abs) {
-            $instanceFundSource = FundingSource::find($abs->pr->funding_source);
-            $fundingSource = !empty($instanceFundSource->source_name) ?
-                              $instanceFundSource->source_name : '';
-            $requestedBy = Auth::user()->getEmployee($abs->pr->requested_by)->name;
             $toggle = "create";
             $countAbstract = AbstractQuotationItem::where('pr_id', $abs->pr_id)
                                                   ->distinct()
@@ -103,13 +109,11 @@ class AbstractController extends Controller
             }
 
             $abs->toggle = $toggle;
-            $abs->doc_status = $instanceDocLog->checkDocStatus($abs->id);
-            $abs->pr->funding_source = $fundingSource;
-            $abs->pr->requested_by = $requestedBy;
         }
 
         return view('modules.procurement.abstract.index', [
             'list' => $absData,
+            'keyword' => $keyword,
             'paperSizes' => $paperSizes,
             'isAllowedCreate' => $isAllowedCreate,
             'isAllowedUpdate' => $isAllowedUpdate,
@@ -127,10 +131,10 @@ class AbstractController extends Controller
     public function showCreate(Request $request, $id) {
         $prNo = $request['pr_no'];
         $toggle = $request['toggle'];
-        $abstractData = Abstracts::where('pr_id', $id)->first();
+        $abstractData = AbstractQuotation::where('pr_id', $id)->first();
 
         if (!$abstractData) {
-            $abstractNew = new Abstracts;
+            $abstractNew = new AbstractQuotation;
             $abstractNew->pr_id = $id;
             $abstractNew->save();
 
@@ -138,16 +142,14 @@ class AbstractController extends Controller
         }
 
         $supplierList = Supplier::orderBy('company_name')->get();
-        $modeProcurement = ModeProcurement::all();
-        $signatories = DB::table('tblsignatories AS sig')
+        $modeProcurement = ProcurementMode::all();
+        $signatories = DB::table('signatories AS sig')
                          ->select('sig.id', 'sig.position', 'sig.abstract_sign_type', 'sig.active',
                                    DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                         ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'sig.emp_id')
-                         ->where([['sig.abs', 'y'],
-                                  ['sig.active', 'y']])
+                         ->join('emp_accounts AS emp', 'emp.emp_id', '=', 'sig.emp_id')
                          ->orderBy('emp.firstname')
                          ->get();
-        $employees = DB::table('tblemp_accounts')
+        $employees = DB::table('emp_accounts')
                        ->select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
                                 'emp_id', 'position')
                        ->orderBy('firstname')
@@ -155,29 +157,33 @@ class AbstractController extends Controller
         $endUser = PurchaseRequest::where('id', $id)->first()->requested_by;
         $items = $this->getAbstractTable($id);
 
-        return view('pages.create-edit-abstract', ['prID' => $id,
-                                                   'prNo' => $prNo,
-                                                   'toggle' => $toggle,
-                                                   'abstractData' => $abstractData,
-                                                   'list' => $items,
-                                                   'supplierList' => $supplierList,
-                                                   'signatories' => $signatories,
-                                                   'employees' => $employees,
-                                                   'mode' => $modeProcurement,
-                                                   'endUser' => $endUser]);
+        return view('pages.create-edit-abstract', [
+            'prID' => $id,
+            'prNo' => $prNo,
+            'toggle' => $toggle,
+            'abstractData' => $abstractData,
+            'list' => $items,
+            'supplierList' => $supplierList,
+            'signatories' => $signatories,
+            'employees' => $employees,
+            'mode' => $modeProcurement,
+            'endUser' => $endUser
+        ]);
     }
 
     public function getSegment(Request $request, $id) {
         $supplierList = Supplier::orderBy('company_name')->get();
-        $bidderCount = $request['bidder_count'];
-        $groupKey = $request['group_key'];
-        $groupNo = $request['group_no'];
+        $bidderCount = $request->bidder_count;
+        $groupKey = $request->group_key;
+        $groupNo = $request->group_no;
         $items = $this->getAbstractTable($id, $groupNo, 'single');
 
-        return view('pages.create-edit-abstract-segment', ['list' => $items,
-                                                                  'supplierList' => $supplierList,
-                                                                  'bidderCount' => $bidderCount,
-                                                                  'groupKey' => $groupKey]);
+        return view('pages.create-edit-abstract-segment', [
+            'list' => $items,
+            'supplierList' => $supplierList,
+            'bidderCount' => $bidderCount,
+            'groupKey' => $groupKey
+        ]);
     }
 
     private function getAbstractTable($id, $groupNo = 0, $toggle = "multiple") {
