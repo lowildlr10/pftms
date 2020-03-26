@@ -51,13 +51,14 @@
                         <div></div>
                         <div>
                             <button class="btn btn-outline-white btn-rounded btn-sm px-2"
-                                    data-target="#top-fluid-modal" data-toggle="modal">
-                                <i class="fas fa-search"></i>
+                                    data-target="#top-fluid-modal" data-toggle="modal"
+                                    onclick="$('#search').focus()">
+                                <i class="fas fa-search"></i> {{ !empty($keyword) ? (strlen($keyword) > 15) ?
+                                'Search: '.substr($keyword, 0, 15).'...' : 'Search: '.$keyword : '' }}
                             </button>
                             <a href="{{ route('rfq') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
                             </a>
-
                         </div>
                     </div>
                     <!--/Card image-->
@@ -74,19 +75,19 @@
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="8%">
-                                            <strong>PR No</strong>
+                                            @sortablelink('pr_no', 'PR No', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="10%">
-                                            <strong>Date</strong>
+                                            @sortablelink('rfq.date_canvass', 'RFQ Date', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="10%">
-                                            <strong>Funding/Charging</strong>
+                                            @sortablelink('funding.source_name', 'Funding/Charging', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="50%">
-                                            <strong>Purpose</strong>
+                                            @sortablelink('purpose', 'Purpose', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="13%">
-                                            <strong>Requested By</strong>
+                                            @sortablelink('requestor.firstname', 'Requested By', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="3%"></th>
                                     </tr>
@@ -114,17 +115,17 @@
                                             @endif
                                         </td>
                                         <td>
-                                            {{ $rfq->pr->pr_no }}
+                                            {{ $rfq->pr_no }}
                                         </td>
-                                        <td>{{ $rfq->pr->date_pr }}</td>
-                                        <td>{{ $rfq->pr->funding_source }}</td>
+                                        <td>{{ $rfq->rfq['date_canvass'] }}</td>
+                                        <td>{{ $rfq->funding['source_name'] }}</td>
                                         <td>
                                             <i class="fas fa-caret-right"></i> {{
-                                                (strlen($rfq->pr->purpose) > 150) ?
-                                                substr($rfq->pr->purpose, 0, 150).'...' : $rfq->pr->purpose
+                                                (strlen($rfq->purpose) > 150) ?
+                                                substr($rfq->purpose, 0, 150).'...' : $rfq->purpose
                                             }}
                                         </td>
-                                        <td>{{ $rfq->pr->requested_by }}</td>
+                                        <td>{{ Auth::user()->getEmployee($rfq->requestor['id'])->name }}</td>
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
                                                data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal"
@@ -134,6 +135,14 @@
                                         </td>
                                     </tr>
                                         @endforeach
+                                    @else
+                                    <tr>
+                                        <td colspan="8" class="text-center py-5">
+                                            <h6 class="red-text">
+                                                No available data.
+                                            </h6>
+                                        </td>
+                                    </tr>
                                     @endif
                                 </tbody>
                                 <!--Table body-->
@@ -142,6 +151,10 @@
                             <!--Table-->
 
                         </div>
+                    </div>
+
+                    <div class="mt-3">
+                        {!! $list->appends(\Request::except('page'))->render('pagination') !!}
                     </div>
                 </div>
                 <!-- Table with panel -->
@@ -163,7 +176,7 @@
             <div class="modal-header stylish-color-dark white-text">
                 <h7>
                     <i class="fas fa-shopping-cart"></i>
-                    <strong>QUOTATION NO: {{ $rfq->pr->pr_no }}</strong>
+                    <strong>QUOTATION NO: {{ $rfq->pr_no }}</strong>
                 </h7>
                 <button type="button" class="close white-text" data-dismiss="modal"
                         aria-label="Close">
@@ -178,50 +191,34 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $rfq->id }}', 'proc_rfq');">
+                                        onclick="$(this).showPrint('{{ $rfq->rfq->id }}', 'proc_rfq');">
                                     <i class="fas fa-print blue-text"></i> Print RFQ
                                 </button>
 
                                 @if ($isAllowedUpdate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showEdit('{{ route('rfq-show-edit', ['id' => $rfq->id]) }}');">
+                                        onclick="$(this).showEdit('{{ route('rfq-show-edit', ['id' => $rfq->rfq['id']]) }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
-                                @endif
-
-                                @if ($isAllowedDelete)
-                                    @if ($rfq->status == 1)
-                                <button type="button" class="btn btn-outline-mdb-color
-                                        btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showDelete('{{ route('pr-delete', ['id' => $rfq->id]) }}',
-                                                                              '{{ $rfq->pr_no }}');">
-                                    <i class="fas fa-trash-alt red-text"></i> Delete
-                                </button>
-                                    @else
-                                <button type="button" class="btn btn-outline-mdb-color
-                                        btn-sm px-2 waves-effect waves-light"
-                                        disabled="disabled">
-                                    <i class="fas fa-trash-alt red-text"></i> Delete
-                                </button>
-                                    @endif
                                 @endif
                             </div>
                         </div>
                     </div>
                     <div class="card-body">
                         <p>
-                            <strong>PR Date: </strong> {{ $rfq->pr->date_pr }}<br>
-                            <strong>Charging: </strong> {{ $rfq->pr->funding_source }}<br>
+                            <strong>PR Date: </strong> {{ $rfq->date_pr }}<br>
+                            <strong>RFQ Date: </strong> {{ $rfq->rfq['date_canvass'] }}<br>
+                            <strong>Charging: </strong> {{ $rfq->funding['source_name'] }}<br>
                             <strong>Purpose: </strong> {{
-                                (strlen($rfq->pr->purpose) > 150) ?
-                                substr($rfq->pr->purpose, 0, 150).'...' : $rfq->pr->purpose
+                                (strlen($rfq->purpose) > 150) ?
+                                substr($rfq->purpose, 0, 150).'...' : $rfq->purpose
                             }}<br>
-                            <strong>Requested By: </strong> {{ $rfq->pr->requested_by }}<br>
+                            <strong>Requested By: </strong> {{ Auth::user()->getEmployee($rfq->requestor['id'])->name }}<br>
                         </p>
                         <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
                                 btn-block waves-effect mb-2"
-                                onclick="$(this).showItem('{{ route('pr-show-items', ['id' => $rfq->pr_id]) }}');">
+                                onclick="$(this).showItem('{{ route('pr-show-items', ['id' => $rfq->id]) }}');">
                             <i class="far fa-list-alt fa-lg"></i> View Items
                         </button>
                         <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
@@ -237,7 +234,7 @@
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
                     <li class="list-group-item justify-content-between">
-                        <a onclick="$(this).redirectToDoc('{{ route('pr') }}', '{{ $rfq->pr_id }}');"
+                        <a onclick="$(this).redirectToDoc('{{ route('pr') }}', '{{ $rfq->id }}');"
                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
                             <i class="fas fa-angle-double-left"></i> Regenerate PR
                         </a>
@@ -248,7 +245,7 @@
                         @if ($isAllowedIssue)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-orange waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showIssue('{{ route('rfq-show-issue', ['id' => $rfq->id]) }}');">
+                                onclick="$(this).showIssue('{{ route('rfq-show-issue', ['id' => $rfq->rfq['id']]) }}');">
                             <i class="fas fa-paper-plane"></i> Issue
                         </button>
                     </li>
@@ -258,7 +255,7 @@
                         @if ($isAllowedReceive)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showReceive('{{ route('rfq-show-receive', ['id' => $rfq->id]) }}');">
+                                onclick="$(this).showReceive('{{ route('rfq-show-receive', ['id' => $rfq->rfq['id']]) }}');">
                             <i class="fas fa-hand-holding"></i> Receive
                         </button>
                     </li>
@@ -266,7 +263,7 @@
                     @else
                         @if ($isAllowedAbstract)
                     <li class="list-group-item justify-content-between">
-                        <a onclick="$(this).redirectToDoc('{{ route('abstract') }}', '{{ $rfq->pr_id }}');"
+                        <a onclick="$(this).redirectToDoc('{{ route('abstract') }}', '{{ $rfq->id }}');"
                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
                             Generate Abstract <i class="fas fa-angle-double-right"></i>
                         </a>
@@ -294,7 +291,7 @@
     @endforeach
 @endif
 
-@include('modals.search')
+@include('modals.search-post')
 @include('modals.show')
 @include('modals.edit')
 @include('modals.issue')
@@ -306,17 +303,10 @@
 
 @section('custom-js')
 
-<!-- DataTables JS -->
-<script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables.min.js') }}"></script>
-
-<!-- DataTables Select JS -->
-<script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables-select.min.js') }}"></script>
-
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/rfq.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/attachment.js') }}"></script>
-<script type="text/javascript" src="{{ asset('assets/js/custom-datatables.js') }}"></script>
 
 @if (!empty(session("success")))
     @include('modals.alert')

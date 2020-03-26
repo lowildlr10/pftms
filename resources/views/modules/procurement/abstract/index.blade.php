@@ -59,8 +59,10 @@
                         <div></div>
                         <div>
                             <button class="btn btn-outline-white btn-rounded btn-sm px-2"
-                                    data-target="#top-fluid-modal" data-toggle="modal">
-                                <i class="fas fa-search"></i>
+                                    data-target="#top-fluid-modal" data-toggle="modal"
+                                    onclick="$('#search').focus()">
+                                <i class="fas fa-search"></i> {{ !empty($keyword) ? (strlen($keyword) > 15) ?
+                                'Search: '.substr($keyword, 0, 15).'...' : 'Search: '.$keyword : '' }}
                             </button>
                             <a href="{{ route('abstract') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
@@ -82,19 +84,19 @@
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="8%">
-                                            <strong>PR No</strong>
+                                            @sortablelink('pr_no', 'PR No', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="10%">
-                                            <strong>Date</strong>
+                                            @sortablelink('rfq.date_abstract', 'RFQ Date', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="10%">
-                                            <strong>Funding/Charging</strong>
+                                            @sortablelink('funding.source_name', 'Funding/Charging', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="50%">
-                                            <strong>Purpose</strong>
+                                            @sortablelink('purpose', 'Purpose', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="13%">
-                                            <strong>Requested By</strong>
+                                            @sortablelink('requestor.firstname', 'Requested By', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="3%"></th>
                                     </tr>
@@ -108,7 +110,7 @@
                                     <tr>
                                         <td align="center"></td>
                                         <td align="center">
-                                            @if($abs->pr->status >= 6)
+                                            @if($abs->status >= 6)
                                             <i class="fas fa-trophy fa-lg text-success material-tooltip-main"
                                                data-toggle="tooltip" data-placement="right" title="Approved for PO/JO"></i>
                                             @else
@@ -117,17 +119,17 @@
                                             @endif
                                         </td>
                                         <td>
-                                            {{ $abs->pr->pr_no }}
+                                            {{ $abs->pr_no }}
                                         </td>
-                                        <td>{{ $abs->pr->date_pr }}</td>
-                                        <td>{{ $abs->pr->funding_source }}</td>
+                                        <td>{{ $abs->abstracttract['date_abstract'] }}</td>
+                                        <td>{{ $abs->funding['source_name'] }}</td>
                                         <td>
                                             <i class="fas fa-caret-right"></i> {{
-                                                (strlen($abs->pr->purpose) > 150) ?
-                                                substr($abs->pr->purpose, 0, 150).'...' : $abs->pr->purpose
+                                                (strlen($abs->purpose) > 150) ?
+                                                 substr($abs->purpose, 0, 150).'...' : $abs->purpose
                                             }}
                                         </td>
-                                        <td>{{ $abs->pr->requested_by }}</td>
+                                        <td>{{ Auth::user()->getEmployee($abs->requestor['id'])->name }}</td>
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
                                                data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal"
@@ -137,6 +139,14 @@
                                         </td>
                                     </tr>
                                         @endforeach
+                                    @else
+                                    <tr>
+                                        <td colspan="8" class="text-center py-5">
+                                            <h6 class="red-text">
+                                                No available data.
+                                            </h6>
+                                        </td>
+                                    </tr>
                                     @endif
                                 </tbody>
                                 <!--Table body-->
@@ -145,6 +155,10 @@
                             <!--Table-->
 
                         </div>
+                    </div>
+
+                    <div class="mt-3">
+                        {!! $list->appends(\Request::except('page'))->render('pagination') !!}
                     </div>
                 </div>
                 <!-- Table with panel -->
@@ -166,7 +180,7 @@
             <div class="modal-header stylish-color-dark white-text">
                 <h7>
                     <i class="fas fa-shopping-cart"></i>
-                    <strong>PR NO: {{ $abs->pr->pr_no }}</strong>
+                    <strong>PR NO: {{ $abs->pr_no }}</strong>
                 </h7>
                 <button type="button" class="close white-text" data-dismiss="modal"
                         aria-label="Close">
@@ -181,20 +195,20 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $abs->id }}', 'proc_abstract');">
+                                        onclick="$(this).showPrint('{{ $abs->abstract['id'] }}', 'proc_abstract');">
                                     <i class="fas fa-print blue-text"></i> Print Abstract
                                 </button>
 
                                 @if ($abs->toggle == 'create' && $isAllowedCreate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showCreate('{{ route('abstract-show-create', ['id' => $abs->id]) }}');">
+                                        onclick="$(this).showCreate('{{ $abs->id }}', '{{ $abs->pr_no }}', '{{ $abs->toggle }}');">
                                     <i class="fas fa-pencil-alt green-text"></i> Create
                                 </button>
                                 @elseif ($abs->toggle == 'edit' && $isAllowedUpdate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showEdit('{{ route('abstract-show-edit', ['id' => $abs->id]) }}');">
+                                        onclick="$(this).showEdit('{{ route('abstract-show-edit', ['id' => $abs->abstract['id']]) }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
                                 @endif
@@ -207,7 +221,7 @@
                                 @elseif ($abs->toggle == 'edit' && $isAllowedDelete)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showDelete('{{ route('abstract-delete', ['id' => $abs->id]) }}',
+                                        onclick="$(this).showDelete('{{ route('abstract-delete', ['id' => $abs->abstract['id']]) }}',
                                                                               '{{ $abs->pr_no }}');">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
@@ -217,17 +231,19 @@
                     </div>
                     <div class="card-body">
                         <p>
-                            <strong>PR Date: </strong> {{ $abs->pr->date_pr }}<br>
-                            <strong>Charging: </strong> {{ $abs->pr->funding_source }}<br>
+                            <strong>PR Date: </strong> {{ $abs->date_pr }}<br>
+                            <strong>RFQ Date: </strong> {{ $abs->rfq['date_canvass'] }}<br>
+                            <strong>Abstract Date: </strong> {{ $abs->abstract['date_abstract'] }}<br>
+                            <strong>Charging: </strong> {{ $abs->funding['source_name'] }}<br>
                             <strong>Purpose: </strong> {{
-                                (strlen($abs->pr->purpose) > 150) ?
-                                substr($abs->pr->purpose, 0, 150).'...' : $abs->pr->purpose
+                                (strlen($abs->purpose) > 150) ?
+                                substr($abs->purpose, 0, 150).'...' : $abs->purpose
                             }}<br>
-                            <strong>Requested By: </strong> {{ $abs->pr->requested_by }}<br>
+                            <strong>Requested By: </strong> {{ Auth::user()->getEmployee($abs->requestor['id'])->name }}<br>
                         </p>
                         <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
                                 btn-block waves-effect mb-2"
-                                onclick="$(this).showItem('{{ route('pr-show-items', ['id' => $abs->pr_id]) }}');">
+                                onclick="$(this).showItem('{{ route('pr-show-items', ['id' => $abs->id]) }}');">
                             <i class="far fa-list-alt fa-lg"></i> View Items
                         </button>
                     </div>
@@ -238,16 +254,16 @@
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
                     <li class="list-group-item justify-content-between">
-                        <a onclick="$(this).redirectToDoc('{{ route('rfq') }}', '{{ $abs->pr_id }}');"
+                        <a onclick="$(this).redirectToDoc('{{ route('rfq') }}', '{{ $abs->id }}');"
                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
                             <i class="fas fa-angle-double-left"></i> Regenerate RFQ
                         </a>
                     </li>
 
-                    @if ($abs->pr->status >= 6)
+                    @if ($abs->status >= 6)
                         @if ($isAllowedPO)
                     <li class="list-group-item justify-content-between">
-                        <a onclick="$(this).redirectToDoc('{{ route('po-jo') }}', '{{ $abs->pr_id }}');"
+                        <a onclick="$(this).redirectToDoc('{{ route('po-jo') }}', '{{ $abs->id }}');"
                            class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
                             Generate PO/JO <i class="fas fa-angle-double-right"></i>
                         </a>
@@ -261,8 +277,8 @@
                         @if ($isAllowedApprove)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-md btn-block btn-rounded"
-                                onclick="$(this).showApprove('{{ route('abstract-approve', ['id' => $abs->id]) }}',
-                                                             '{{ $abs->pr->pr_no }}');">
+                                onclick="$(this).showApprove('{{ route('abstract-approve', ['id' => $abs->abstract['id']]) }}',
+                                                             '{{ $abs->pr_no }}');">
                             <i class="fas fa-trophy"></i> To PO/JO
                         </button>
                     </li>
@@ -283,7 +299,7 @@
     @endforeach
 @endif
 
-@include('modals.search')
+@include('modals.search-post')
 @include('modals.create')
 @include('modals.edit')
 @include('modals.delete')
@@ -293,16 +309,9 @@
 
 @section('custom-js')
 
-<!-- DataTables JS -->
-<script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables.min.js') }}"></script>
-
-<!-- DataTables Select JS -->
-<script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables-select.min.js') }}"></script>
-
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/abstract.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>
-<script type="text/javascript" src="{{ asset('assets/js/custom-datatables.js') }}"></script>
 
 @if (!empty(session("success")))
     @include('modals.alert')

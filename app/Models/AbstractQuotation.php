@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
+use Kyslik\ColumnSortable\Sortable;
 
 class AbstractQuotation extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Sortable;
 
     /**
      * The table associated with the model.
@@ -25,7 +26,6 @@ class AbstractQuotation extends Model
     protected $fillable = [
         'id',
         'pr_id',
-        'code',
         'date_abstract',
         'date_abstract_approved',
         'mode_procurement',
@@ -36,7 +36,6 @@ class AbstractQuotation extends Model
         'sig_third_member',
         'sig_end_user',
         'sig_app',
-        'document_abrv'
     ];
 
     /**
@@ -57,7 +56,38 @@ class AbstractQuotation extends Model
          return Uuid::generate();
     }
 
+    /**
+     * Get the phone record associated with the request for quotation.
+     */
     public function pr() {
         return $this->belongsTo('App\Models\PurchaseRequest', 'pr_id', 'id');
     }
+
+    public function chairperson() {
+        return $this->hasOne('App\Models\Signatory', 'id', 'sig_chairperson');
+    }
+
+    public function vicechairperson() {
+        return $this->hasOne('App\Models\Signatory', 'id', 'sig_vice_chairperson');
+    }
+
+    public function member1() {
+        return $this->hasOne('App\Models\Signatory', 'id', 'sig_first_member');
+    }
+
+    public function member2() {
+        return $this->hasOne('App\Models\Signatory', 'id', 'sig_second_member');
+    }
+
+    public function member3() {
+        return $this->hasOne('App\Models\Signatory', 'id', 'sig_third_member');
+    }
+
+    public function enduser() {
+        return $this->hasOne('App\User', 'id', 'sig_end_user');
+    }
+
+    public $sortable = [
+        'date_abstract',
+    ];
 }

@@ -50,13 +50,14 @@
                         </div>
                         <div>
                             <button class="btn btn-outline-white btn-rounded btn-sm px-2"
-                                    data-target="#top-fluid-modal" data-toggle="modal">
-                                <i class="fas fa-search"></i>
+                                    data-target="#top-fluid-modal" data-toggle="modal"
+                                    onclick="$('#search').focus()">
+                                <i class="fas fa-search"></i> {{ !empty($keyword) ? (strlen($keyword) > 15) ?
+                                'Search: '.substr($keyword, 0, 15).'...' : 'Search: '.$keyword : '' }}
                             </button>
                             <a href="{{ route('pr') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
                             </a>
-
                         </div>
                     </div>
                     <!--/Card image-->
@@ -73,22 +74,22 @@
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="8%">
-                                            <strong>PR No</strong>
+                                            @sortablelink('pr_no', 'PR No', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="10%">
-                                            <strong>Date</strong>
+                                            @sortablelink('date_pr', 'PR Date', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="10%">
-                                            <strong>Funding/Charging</strong>
+                                            @sortablelink('funding.source_name', 'Funding/Charging', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="41%">
-                                            <strong>Purpose</strong>
+                                            @sortablelink('purpose', 'Purpose', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="13%">
-                                            <strong>Requested By</strong>
+                                            @sortablelink('requestor.firstname', 'Requested By', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="9%">
-                                            <strong>Status</strong>
+                                            @sortablelink('stat.status_name', 'Status', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="3%"></th>
                                     </tr>
@@ -102,19 +103,19 @@
                                     <tr>
                                         <td align="center"></td>
                                         <td align="center">
-                                            @if ($pr->status == 1)
+                                            @if ($pr->stat['id'] == 1)
                                             <i class="fas fa-spinner fa-lg faa-spin fa-pulse material-tooltip-main"
                                                data-toggle="tooltip" data-placement="right" title="Pending"></i>
-                                            @elseif ($pr->status == 2)
+                                            @elseif ($pr->stat['id'] == 2)
                                             <i class="fas fa-thumbs-down fa-lg material-tooltip-main"
                                                data-toggle="tooltip" data-placement="right" title="Disapproved"></i>
-                                            @elseif ($pr->status == 3)
+                                            @elseif ($pr->stat['id'] == 3)
                                             <i class="fas fa-ban fa-lg text-danger material-tooltip-main"
                                                data-toggle="tooltip" data-placement="right" title="Cancelled"></i>
-                                            @elseif ($pr->status == 4)
+                                            @elseif ($pr->stat['id'] == 4)
                                             <i class="fas fa-door-closed fa-lg material-tooltip-main"
                                                data-toggle="tooltip" data-placement="right" title="Closed"></i>
-                                            @elseif ($pr->status >= 5)
+                                            @elseif ($pr->stat['id'] >= 5)
                                             <i class="fas fa-thumbs-up fa-lg green-text material-tooltip-main"
                                                data-toggle="tooltip" data-placement="right" title="Approved"></i>
                                             @endif
@@ -123,17 +124,17 @@
                                             {{ $pr->pr_no }}
                                         </td>
                                         <td>{{ $pr->date_pr }}</td>
-                                        <td>{{ $pr->funding_source }}</td>
+                                        <td>{{ $pr->funding['source_name'] }}</td>
                                         <td>
                                             <i class="fas fa-caret-right"></i> {{
                                                 (strlen($pr->purpose) > 150) ?
                                                 substr($pr->purpose, 0, 150).'...' : $pr->purpose
                                             }}
                                         </td>
-                                        <td>{{ $pr->name }}</td>
+                                        <td>{{ Auth::user()->getEmployee($pr->requestor['id'])->name }}</td>
                                         <td align="center">
                                             <a class="btn btn-link p-0" href="{{ route('pr-tracker', ['prNo' => $pr->pr_no]) }}">
-                                                <strong>{{ $pr->status_name }}</strong></td>
+                                                <strong>{{ $pr->stat['status_name'] }}</strong></td>
                                             </a>
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
@@ -144,6 +145,14 @@
                                         </td>
                                     </tr>
                                         @endforeach
+                                    @else
+                                    <tr>
+                                        <td colspan="9" class="text-center py-5">
+                                            <h6 class="red-text">
+                                                No available data.
+                                            </h6>
+                                        </td>
+                                    </tr>
                                     @endif
                                 </tbody>
                                 <!--Table body-->
@@ -152,6 +161,10 @@
                             <!--Table-->
 
                         </div>
+                    </div>
+
+                    <div class="mt-3">
+                        {!! $list->appends(\Request::except('page'))->render('pagination') !!}
                     </div>
                 </div>
                 <!-- Table with panel -->
@@ -222,12 +235,12 @@
                     <div class="card-body">
                         <p>
                             <strong>PR Date: </strong> {{ $pr->date_pr }}<br>
-                            <strong>Charging: </strong> {{ $pr->funding_source }}<br>
+                            <strong>Charging: </strong> {{ $pr->funding['source_name'] }}<br>
                             <strong>Purpose: </strong> {{
                                 (strlen($pr->purpose) > 150) ?
                                 substr($pr->purpose, 0, 150).'...' : $pr->purpose
                             }}<br>
-                            <strong>Requested By: </strong> {{ $pr->name }}<br>
+                            <strong>Requested By: </strong> {{ Auth::user()->getEmployee($pr->requestor['id'])->name }}<br>
                         </p>
                         <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
                                 btn-block waves-effect mb-2"
@@ -312,7 +325,7 @@
     @endforeach
 @endif
 
-@include('modals.search')
+@include('modals.search-post')
 @include('modals.show')
 @include('modals.create')
 @include('modals.edit')
@@ -326,16 +339,9 @@
 
 @section('custom-js')
 
-<!-- DataTables JS -->
-<script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables.min.js') }}"></script>
-
-<!-- DataTables Select JS -->
-<script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables-select.min.js') }}"></script>
-
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/pr.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>
-<script type="text/javascript" src="{{ asset('assets/js/custom-datatables.js') }}"></script>
 
 @if (!empty(session("success")))
     @include('modals.alert')

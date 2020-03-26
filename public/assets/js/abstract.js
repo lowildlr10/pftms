@@ -220,7 +220,7 @@ $(function() {
         });
     }
 
-	$.fn.viewCreate = function(id, prNo, toggle) {
+	$.fn.showCreate = function(id, prNo, toggle) {
 		var elementBodyID = "#modal-body-create";
 		var elementModalID = "#central-create-modal";
 
@@ -237,7 +237,7 @@ $(function() {
         });
 
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
-		$(elementBodyID).load('abstract/create/' + id +
+		$(elementBodyID).load('abstract/show-create/' + id +
 							  '?pr_no=' + prNo + '&toggle=' + toggle,
 										function() {
             $('#mdb-preloader').fadeOut(300);

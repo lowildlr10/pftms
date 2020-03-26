@@ -46,7 +46,6 @@ class RequestQuotationController extends Controller
         // Get module access
         $module = 'proc_rfq';
         $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
-        $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
         $isAllowedIssue = Auth::user()->getModuleAccess($module, 'issue');
         $isAllowedReceive = Auth::user()->getModuleAccess($module, 'receive');
         $isAllowedAbstract = Auth::user()->getModuleAccess('proc_abstract', 'is_allowed');
@@ -58,49 +57,53 @@ class RequestQuotationController extends Controller
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
-
-        $rfqData = RequestQuotation::whereHas('pr', function($query)
-                    use ($empDivisionAccess) {
-            $query->whereIn('division', $empDivisionAccess);
+        $rfqData = PurchaseRequest::with(['funding', 'requestor'])
+                                  ->whereHas('division', function($query)
+                                            use($empDivisionAccess) {
+            $query->whereIn('id', $empDivisionAccess);
+        })->whereHas('rfq', function($query) {
+            $query->whereNotNull('id');
         });
 
         if ($roleHasOrdinary) {
-            $rfqData = $rfqData->whereHas('pr', function($query) {
-                $query->where('requested_by', Auth::user()->id);
-            });
-        } else {
-            $rfqData = $rfqData->whereHas('pr', function($query) {
-                $query->orWhere('requested_by', Auth::user()->id);
-            });
+            $rfqData = $rfqData->where('requested_by', Auth::user()->id);
         }
 
         if (!empty($keyword)) {
-            $rfqData = $rfqData->where('pr_id', $keyword);
+            $rfqData = $rfqData->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('pr_no', 'like', "%$keyword%")
+                    ->orWhere('date_pr', 'like', "%$keyword%")
+                    ->orWhere('purpose', 'like', "%$keyword%")
+                    ->orWhereHas('funding', function($query) use ($keyword) {
+                        $query->where('source_name', 'like', "%$keyword%");
+                    })->orWhereHas('stat', function($query) use ($keyword) {
+                        $query->where('status_name', 'like', "%$keyword%");
+                    })->orWhereHas('requestor', function($query) use ($keyword) {
+                        $query->where('firstname', 'like', "%$keyword%")
+                              ->orWhere('middlename', 'like', "%$keyword%")
+                              ->orWhere('lastname', 'like', "%$keyword%");
+                    })->orWhereHas('items', function($query) use ($keyword) {
+                        $query->where('item_description', 'like', "%$keyword%");
+                    })->orWhereHas('division', function($query) use ($keyword) {
+                        $query->where('division_name', 'like', "%$keyword%");
+                    })->orWhereHas('rfq', function($query) use ($keyword) {
+                        $query->where('date_canvass', 'like', "%$keyword%");
+                    });
+            });
         }
 
-        $rfqData = $rfqData->whereHas('pr', function($query)
-                    use ($empDivisionAccess) {
-            $query->orderBy('pr_no', 'desc');
-        });
-
-        $rfqData = $rfqData->get();
+        $rfqData = $rfqData->sortable(['pr_no' => 'desc'])->paginate(20);
 
         foreach ($rfqData as $rfq) {
-            $instanceFundSource = FundingSource::find($rfq->pr->funding_source);
-            $fundingSource = !empty($instanceFundSource->source_name) ?
-                              $instanceFundSource->source_name : '';
-            $requestedBy = Auth::user()->getEmployee($rfq->pr->requested_by)->name;
-
-            $rfq->doc_status = $instanceDocLog->checkDocStatus($rfq->id);
-            $rfq->pr->funding_source = $fundingSource;
-            $rfq->pr->requested_by = $requestedBy;
+            $rfq->doc_status = $instanceDocLog->checkDocStatus($rfq->rfq['id']);
         }
 
         return view('modules.procurement.rfq.index', [
             'list' => $rfqData,
+            'keyword' => $keyword,
             'paperSizes' => $paperSizes,
             'isAllowedUpdate' => $isAllowedUpdate,
-            'isAllowedDelete' => $isAllowedDelete,
             'isAllowedIssue' => $isAllowedIssue,
             'isAllowedReceive' => $isAllowedReceive,
             'isAllowedAbstract' => $isAllowedAbstract,
