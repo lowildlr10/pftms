@@ -46,16 +46,46 @@ class PurchaseRequestItem extends Model
     *
     * @var bool
     */
-   public $incrementing = false;
+    public $incrementing = false;
 
-   public static function boot() {
+    public static function boot() {
         parent::boot();
         self::creating(function($model) {
             $model->id = self::generateUuid();
         });
-   }
+    }
 
-   public static function generateUuid() {
+    public static function generateUuid() {
         return Uuid::generate();
-   }
+    }
+
+    public function getItemGroupNo($prID) {
+        $itemData = $this::select('group_no')
+                         ->where('pr_id', $prID)
+                         ->first();
+
+        return $itemData ? $itemData->group_no : NULL;
+    }
+
+    public function getItemGroupNos($prID) {
+        $data = [];
+        $_data = [];
+        $groupNumbers = $this::select('group_no')
+                             ->where('pr_id', $id)
+                             ->orderBy('group_no')
+                             ->distinct()
+                             ->get();
+
+        foreach ($groupNumbers as $grpNo) {
+            $_data[] = $grpNo->group_no;
+        }
+
+        $_data = array_unique($_data);
+
+        foreach ($_data as $value) {
+            $data[] = $value;
+        }
+
+        return json_encode($data);
+    }
 }

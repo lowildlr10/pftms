@@ -202,13 +202,15 @@
                                 @if ($abs->toggle == 'create' && $isAllowedCreate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showCreate('{{ $abs->id }}', '{{ $abs->pr_no }}', '{{ $abs->toggle }}');">
+                                        onclick="$(this).showCreate('{{ route('abstract-show-create', ['id' => $abs->abstract['id']]) }}',
+                                                                    '{{ $abs->abstract['id'] }}');">
                                     <i class="fas fa-pencil-alt green-text"></i> Create
                                 </button>
                                 @elseif ($abs->toggle == 'edit' && $isAllowedUpdate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showEdit('{{ route('abstract-show-edit', ['id' => $abs->abstract['id']]) }}');">
+                                        onclick="$(this).showEdit('{{ route('abstract-show-edit', ['id' => $abs->abstract['id']]) }}',
+                                                                  '{{ $abs->abstract['id'] }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
                                 @endif
@@ -302,6 +304,7 @@
 @include('modals.search-post')
 @include('modals.create')
 @include('modals.edit')
+@include('modals.approve')
 @include('modals.delete')
 @include('modals.print')
 

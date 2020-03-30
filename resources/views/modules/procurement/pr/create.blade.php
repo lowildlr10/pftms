@@ -244,9 +244,5 @@
         </div>
     </div>
 
-    <div class="row">
-
-    </div>
-
     <input id="item-count" value="{{ $itemNo }}" type="hidden">
 </form>
