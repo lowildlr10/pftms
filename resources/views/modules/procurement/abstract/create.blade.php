@@ -34,8 +34,8 @@
                     @foreach ($abstractItems as $grpCtr => $abstract)
                 <table class="table table-bordered table-segment-group">
                     <tr style="vertical-align: middle;">
-                        <th class="mdb-color darken-2 py-0">
-                            <div class="md-form">
+                        <th class="blue lighten-5 py-0">
+                            <div class="md-form grp-group">
                                 <input type="hidden" class="grp_no" name="group_no[{{ $grpCtr }}]"
                                        value="{{ $abstract->group_no }}">
                                 <input type="hidden" class="grp_key" name="group_key[{{ $grpCtr }}]" value="{{ $grpCtr }}">
@@ -44,13 +44,13 @@
                                         name="bidder_count[{{ $grpCtr }}]">
                                     <option value="0" disabled selected>Choose a number of supplier</option>
 
-                                    @for ($countSupplier = 1; $countSupplier <= 5; $countSupplier++)
+                                    @for ($countSupplier = 1; $countSupplier <= 6; $countSupplier++)
                                         <option value="{{ $countSupplier }}">
                                             Number of Supplier: {{ $countSupplier }}
                                         </option>
                                     @endfor
                                 </select>
-                                <label for="bidder_count_{{ $grpCtr }}">
+                                <label class="mdb-main-label" for="bidder_count_{{ $grpCtr }}">
                                     <i class="fas fa-sitemap"></i>
                                     Group No: {{ $abstract->group_no }}  <span class="red-text">*</span>
                                 </label>
@@ -59,20 +59,20 @@
                     </tr>
                     <tr style="vertical-align: middle;">
                         <td class="p-0">
-                            <div id="container_{{ $grpCtr + 1 }}">
-                                <table class="table table-bordered m-0">
+                            <div id="container_{{ $grpCtr + 1 }}" class="item-segment">
+                                <table class="table table-bordered m-0 mb-0">
                                     <tr class="header-group">
-                                        <th style="text-align:center;" width="3%">
-                                            <strong>#</strong>
+                                        <th class="text-center font-weight-bold" width="3%">
+                                            #
                                         </th>
-                                        <th style="text-align:center;" width="71%">
-                                            <strong>Item Description</strong>
+                                        <th class="text-center font-weight-bold" width="71%">
+                                            Item Description
                                         </th>
-                                        <th style="text-align:center;" width="10%">
-                                            <strong>Unit</strong>
+                                        <th class="text-center font-weight-bold" width="10%">
+                                            Unit
                                         </th>
-                                        <th style="text-align:center;" width="16%">
-                                            <strong>ABC (UNIT)</strong>
+                                        <th class="text-center font-weight-bold" width="16%">
+                                            ABC (UNIT)
                                         </th>
                                     </tr>
 
@@ -85,7 +85,11 @@
                                                    name="item_id[{{ $grpCtr }}][{{ $listCtr }}]"
                                                    value="{{ $item->item_id }}" class="item_id">
                                         </td>
-                                        <td>{{ substr($item->item_description, 0, 300) }}...</td>
+                                        <td>
+                                            {{ (strlen($item->item_description) > 150) ?
+                                                substr($item->item_description, 0, 150).'...' : $item->item_description  }}
+                                            ({{ $item->quantity }} {{ $item->quantity > 1 ? 'pcs.' : 'pc.' }})
+                                        </td>
                                         <td align="center">{{ $item->unit_name }}</td>
                                         <td align="center">{{ $item->est_unit_cost }}</td>
                                     </tr>
@@ -239,8 +243,8 @@
 <form id="form-store" method="POST" action="{{ route('abstract-store', ['id' => $id]) }}">
     @csrf
 
-    <input type="hidden" id="pr_no" name="pr_no" value="">
-    <input type="hidden" id="pr_id" name="pr_id" value="">
+    <input type="hidden" id="abstract_id" name="abstract_id" value="{{ $id }}">
+    <input type="hidden" id="toggle" name="toggle" value="store">
 
     <input type="hidden" name="date_abstract">
     <input type="hidden" name="mode_procurement">

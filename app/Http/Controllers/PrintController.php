@@ -1815,7 +1815,7 @@ class PrintController extends Controller
             $tableData = [];
             $prItems = DB::table('purchase_request_items as item')
                      ->join('item_unit_issues as unit', 'unit.id', '=', 'item.unit_issue')
-                     ->where('item.pr_id', $id)
+                     ->where('item.pr_id', $prID)
                      ->orderBy('item.item_no')
                      ->get();
 

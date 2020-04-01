@@ -27,6 +27,11 @@ use Auth;
 
 class AbstractQuotationController extends Controller
 {
+    protected $poLetters = [
+        'A','B','C','D','E','F','G','H','I','J','K','L','M',
+        'N','O','P','Q','R','S','T','U','V','W','X','Y','Z'
+    ];
+
     /**
      * Display a listing of the resource.
      *
@@ -89,15 +94,12 @@ class AbstractQuotationController extends Controller
         $absData = $absData->sortable(['pr_no' => 'desc'])->paginate(20);
 
         foreach ($absData as $abs) {
-            $toggle = "create";
-            $countAbstract = AbstractQuotationItem::where('pr_id', $abs->pr_id)
-                                                  ->distinct()
-                                                  ->count();
+            $toggle = "store";
+            $countItems = AbstractQuotationItem::where('abstract_id', $abs->abstract['id'])
+                                               ->count();
 
-            if ($countAbstract > 0) {
-                $toggle = "edit";
-            } else {
-                $toggle = "create";
+            if ($countItems > 0) {
+                $toggle = "update";
             }
 
             $abs->toggle = $toggle;
@@ -123,7 +125,25 @@ class AbstractQuotationController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showItemSegment(Request $request, $id) {
+        $instanceAbstract = AbstractQuotation::with('pr')->find($id);
+        $prID = $instanceAbstract->pr->id;
+        $supplierList = Supplier::orderBy('company_name')->get();
+        $bidderCount = $request->bidder_count;
+        $groupKey = $request->group_key;
+        $groupNo = $request->group_no;
+        $items = $this->getAbstractTable($prID, $groupNo, 'single');
 
+        return view('modules.procurement.abstract.item-segment', [
+            'list' => $items,
+            'supplierList' => $supplierList,
+            'bidderCount' => $bidderCount,
+            'groupKey' => $groupKey,
+            'counter' => 1,
+            'currentFirstItemNo' => 1,
+            'currentLastItemNo' => 0,
+            'totalItemCount' => 0,
+            'pages' => [],
+        ]);
     }
 
     /**
@@ -135,7 +155,6 @@ class AbstractQuotationController extends Controller
     public function showCreate($id) {
         $instanceAbstract = AbstractQuotation::with('pr')->find($id);
         $prID = $instanceAbstract->pr->id;
-        $prNo = $instanceAbstract->pr->pr_no;
         $items = $this->getAbstractTable($prID);
         $suppliers = Supplier::orderBy('company_name')->get();
         $procurementModes = ProcurementMode::orderBy('mode_name')->get();
@@ -153,13 +172,63 @@ class AbstractQuotationController extends Controller
 
         return view('modules.procurement.abstract.create', [
             'id' => $id,
-            'prID' => $prID,
             'suppliers' => $suppliers,
             'procurementModes' => $procurementModes,
             'users' => $users,
             'signatories' => $signatories,
             'abstractItems' => $items
         ]);
+    }
+
+    /**
+     * Store/Update resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @param  string  $toggle
+     * @return \Illuminate\Http\Response
+     */
+    private function storeUpdateAbstract($request, $id, $toggle) {
+        $sigChairperson = $request->sig_chairperson;
+        $sigViceChairperson = $request->sig_vice_chairperson;
+        $sigFirstMember = $request->sig_first_member;
+        $sigSecondMember = $request->sig_second_member;
+        $sigThirdMember = $request->sig_third_member;
+        $endUser = $request->sig_end_user;
+        $abstractDate = $request->date_abstract;
+        $modeProcurement = $request->mode_procurement;
+
+        try {
+            $instanceAbstract = AbstractQuotation::with('pr')->find($id)->first();
+            $prNo = $instanceAbstract->pr->pr_no;
+            $instanceAbstract->sig_chairperson = $sigChairperson;
+            $instanceAbstract->sig_vice_chairperson = $sigViceChairperson;
+            $instanceAbstract->sig_first_member = $sigFirstMember;
+            $instanceAbstract->sig_second_member = $sigSecondMember;
+            $instanceAbstract->sig_third_member = $sigThirdMember;
+            $instanceAbstract->sig_end_user = $endUser;
+            $instanceAbstract->date_abstract = $abstractDate;
+            $instanceAbstract->mode_procurement = $modeProcurement;
+            $instanceAbstract->save();
+
+            if ($toggle == 'store') {
+                $msg = "Abstract of Quotation for quotation number '$prNo' successfully created.";
+            } else {
+                $msg = "Abstract of Quotation for quotation number '$prNo' successfully updated.";
+            }
+
+            return (object) [
+                'msg' => $msg,
+                'alert_type' => 'success'
+            ];
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+
+            return (object) [
+                'msg' => $msg,
+                'alert_type' => 'failed'
+            ];
+        }
     }
 
     /**
@@ -170,7 +239,9 @@ class AbstractQuotationController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request, $id) {
-        //
+        $response = $this->storeUpdateAbstract($request, $id, 'store');
+        Auth::user()->log($request, $response->msg);
+        return redirect(url()->previous())->with($response->alert_type, $response->msg);
     }
 
     /**
@@ -181,7 +252,47 @@ class AbstractQuotationController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function storeItems(Request $request, $id) {
-        //
+        $json = json_decode($request->json_data);
+        $prIDItem = $json->pr_item_id;
+        $bidderCount = $json->bidder_count;
+
+        $selectedSuppliers = json_decode($json->select_suppliers);
+
+        $unitCosts = json_decode($json->unit_costs);
+        $totalCosts = json_decode($json->total_costs);
+        $specifications = json_decode($json->specifications);
+        $remarks = json_decode($json->remarks);
+
+        $awardedTo = $json->awarded_to;
+        $documentType = $json->document_type;
+        $awardedRemark = $json->awarded_remark;
+
+        $instanceAbstract = AbstractQuotation::with('pr')->find($id)->first();
+        $prID = $instanceAbstract->pr->id;
+
+        foreach ($selectedSuppliers as $selectedCtr => $selectedsuplier) {
+            $selectedSuplier = $selectedsuplier->selected_supplier;
+
+            foreach ($unitCosts as $columnCtr => $unitcost) {
+                if ($columnCtr == $selectedCtr) {
+                    $unitCost = $unitcost->unit_cost;
+                    $totalCost = $totalCosts[$columnCtr]->total_cost;
+                    $specification = $specifications[$columnCtr]->specification;
+                    $remark = $remarks[$columnCtr]->remarks;
+
+                    $instanceAbsItem = new AbstractQuotationItem;
+                    $instanceAbsItem->abstract_id = $id;
+                    $instanceAbsItem->pr_id = $prID;
+                    $instanceAbsItem->pr_item_id = $prIDItem;
+                    $instanceAbsItem->supplier = $selectedSuplier;
+                    $instanceAbsItem->specification = $specification;
+                    $instanceAbsItem->remarks = $remark;
+                    $instanceAbsItem->unit_cost = $unitCost;
+                    $instanceAbsItem->total_cost = $totalCost;
+                    $instanceAbsItem->save();
+                }
+            }
+        }
     }
 
     /**
@@ -190,8 +301,48 @@ class AbstractQuotationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id) {
-        //
+    public function showEdit($id) {
+        $instanceAbstract = AbstractQuotation::with('pr')->find($id);
+        $prID = $instanceAbstract->pr->id;
+        $abstractDate = $instanceAbstract->date_abstract;
+        $procurementMode = $instanceAbstract->mode_procurement;
+        $chairperson = $instanceAbstract->sig_chairperson;
+        $viceChairperson = $instanceAbstract->sig_vice_chairperson;
+        $firstMember = $instanceAbstract->sig_first_member;
+        $secondMember = $instanceAbstract->sig_second_member;
+        $thirdMember = $instanceAbstract->sig_third_member;
+        $endUser = $instanceAbstract->sig_end_user;
+        $items = $this->getAbstractTable($prID);
+        $suppliers = Supplier::orderBy('company_name')->get();
+        $procurementModes = ProcurementMode::orderBy('mode_name')->get();
+        $users = User::where('is_active', 'y')
+                     ->orderBy('firstname')->get();
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
+        }
+
+        return view('modules.procurement.abstract.update', [
+            'id' => $id,
+            'suppliers' => $suppliers,
+            'procurementModes' => $procurementModes,
+            'users' => $users,
+            'signatories' => $signatories,
+            'abstractItems' => $items,
+            'abstractDate' => $abstractDate,
+            'procurementMode' => $procurementMode,
+            'chairperson' => $chairperson,
+            'viceChairperson' => $viceChairperson,
+            'firstMember' => $firstMember,
+            'secondMember' => $secondMember,
+            'thirdMember' => $thirdMember,
+            'endUser' => $endUser,
+        ]);
     }
 
     /**
@@ -202,7 +353,9 @@ class AbstractQuotationController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id) {
-        //
+        $response = $this->storeUpdateAbstract($request, $id, 'update');
+        Auth::user()->log($request, $response->msg);
+        return redirect(url()->previous())->with($response->alert_type, $response->msg);
     }
 
     /**
@@ -222,8 +375,20 @@ class AbstractQuotationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function deleteItems($id) {
-        //
+    public function deleteItems(Request $request, $id) {
+        try {
+            $instanceAbstract = AbstractQuotation::with('pr')->find($id);
+            $prNo = $instanceAbstract->pr->pr_no;
+            AbstractQuotationItem::where('abstract_id', $id)->delete();
+
+            $msg = "Abstract of Quotation items for quotation number '$prNo' successfully deleted.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
     /**
@@ -317,7 +482,8 @@ class AbstractQuotationController extends Controller
             $pritems = DB::table('purchase_request_items as item')
                          ->select('bid.company_name', 'item.awarded_remarks', 'item.est_unit_cost',
                                   'unit.unit_name', 'item.id as item_id', 'item.item_description',
-                                  'item.quantity', 'item.awarded_to', 'item.document_type')
+                                  'item.quantity', 'item.awarded_to', 'item.document_type',
+                                  'item.item_no')
                          ->leftJoin('suppliers as bid', 'bid.id', '=', 'item.awarded_to')
                          ->join('item_unit_issues as unit', 'unit.id', '=', 'item.unit_issue')
                          ->where([['item.group_no', $item->group_no],
@@ -350,6 +516,7 @@ class AbstractQuotationController extends Controller
                 }
 
                 $arrayPrItems[] = (object)['item_id' => $pr->item_id,
+                                           'item_no' => $pr->item_no,
                                            'item_description' => $pr->item_description,
                                            'est_unit_cost' => $pr->est_unit_cost,
                                            'unit_name' => $pr->unit_name,
@@ -364,6 +531,7 @@ class AbstractQuotationController extends Controller
             $item->suppliers = (object)$arraySuppliers;
             $item->pr_items = (object)$arrayPrItems;
             $item->bidder_count = $bidderCount;
+            $item->pr_item_count = $pritems->count();
         }
 
         return $items;

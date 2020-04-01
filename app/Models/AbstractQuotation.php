@@ -63,30 +63,6 @@ class AbstractQuotation extends Model
         return $this->belongsTo('App\Models\PurchaseRequest', 'pr_id', 'id');
     }
 
-    public function chairperson() {
-        return $this->hasOne('App\Models\Signatory', 'id', 'sig_chairperson');
-    }
-
-    public function vicechairperson() {
-        return $this->hasOne('App\Models\Signatory', 'id', 'sig_vice_chairperson');
-    }
-
-    public function member1() {
-        return $this->hasOne('App\Models\Signatory', 'id', 'sig_first_member');
-    }
-
-    public function member2() {
-        return $this->hasOne('App\Models\Signatory', 'id', 'sig_second_member');
-    }
-
-    public function member3() {
-        return $this->hasOne('App\Models\Signatory', 'id', 'sig_third_member');
-    }
-
-    public function enduser() {
-        return $this->hasOne('App\User', 'id', 'sig_end_user');
-    }
-
     public $sortable = [
         'date_abstract',
     ];

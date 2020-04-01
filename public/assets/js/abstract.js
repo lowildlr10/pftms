@@ -9,6 +9,136 @@ $(function() {
         }
     });
 
+    function storeAbstractItems(abstractID, toggle, formData) {
+        const storeDataURL = toggle == 'store' ?
+                             `${baseURL}/procurement/abstract/store-items/${abstractID}` :
+                             `${baseURL}/procurement/abstract/update-items/${abstractID}`;
+        $.ajax({
+		    url: storeDataURL,
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            //async: false,
+            data: formData,
+            //dataType: 'json',
+		    success: function(response) {
+                console.log(response);
+            },
+            fail: function(xhr, textStatus, errorThrown) {
+                console.log('fail');
+                storeAbstractItems(abstractID, toggle, jsonData);
+		    },
+		    error: function(data) {
+                console.log('error');
+                storeAbstractItems(abstractID, toggle, jsonData);
+		    }
+        });
+    }
+
+    function processData() {
+        const abstractID = $('#abstract_id').val(),
+              toggle = $('#toggle').val(),
+              dateAbstract = $('#date_abstract').val(),
+              modeProcurement = $('#mode_procurement').val(),
+              sigChairperson = $('#sig_chairperson').val(),
+              sigViceChairperson = $('#sig_vice_chairperson').val(),
+              sigFirstPerson = $('#sig_first_member').val(),
+              sigSecondPerson = $('#sig_second_member').val(),
+              sigThirdPerson = $('#sig_third_member').val(),
+              sigEndUser = $('#sig_end_user').val();
+
+        $("input[name=date_abstract]").val(dateAbstract);
+        $("input[name=mode_procurement]").val(modeProcurement);
+        $("input[name=sig_chairperson]").val(sigChairperson);
+        $("input[name=sig_vice_chairperson]").val(sigViceChairperson);
+        $("input[name=sig_first_member]").val(sigFirstPerson);
+        $("input[name=sig_second_member]").val(sigSecondPerson);
+        $("input[name=sig_third_member]").val(sigThirdPerson);
+        $("input[name=sig_end_user]").val(sigEndUser);
+
+        $('select.sel-bidder-count').each(function(grpKey, elemSelBidder) {
+            const bidderCount = parseInt($(elemSelBidder).val());
+
+            if (!empty(bidderCount) && bidderCount > 0) {
+                let selectedSuppliers = [];
+                const containerID = '#container_' + (grpKey + 1);
+
+                $(containerID).find('.sel-supplier').each(function() {
+                    const selectedSupplier = $(this).val();
+                    selectedSuppliers.push({'selected_supplier' : selectedSupplier});
+                });
+
+                $(containerID).find('tbody.table-data').each(function(tblIndex, tableBody) {
+                    $(tableBody).find('tr').each(function(rowCtr, elemRow) {
+                        let jsonData = {},
+                            prItemID = "",
+                            abstractitemIDs = [],
+                            unitCosts = [],
+                            totalCosts = [],
+                            specifications = [],
+                            remarks = [],
+                            awardedTo = 0,
+                            documentType = "",
+                            awardedRemark = "",
+                            formData = new FormData();
+
+                        prItemID = $(elemRow).find('.item-id').val();
+                        jsonData['select_suppliers'] = JSON.stringify(selectedSuppliers);
+                        jsonData['bidder_count'] = bidderCount;
+                        jsonData['pr_item_id'] = prItemID;
+
+                        $(elemRow).find('.abstract-item-id').each(function() {
+                            const abstractitemID = $(this).val();
+                            abstractitemIDs.push({'abs_item_id' : abstractitemID});
+                        });
+
+                        jsonData['abstract_item_ids'] = JSON.stringify(abstractitemIDs);
+
+                        $(elemRow).find('.unit-cost').each(function() {
+                            const unitCost = parseFloat($(this).val());
+                            unitCosts.push({'unit_cost' : unitCost});
+                        });
+
+                        jsonData['unit_costs'] = JSON.stringify(unitCosts);
+
+                        $(elemRow).find('.total-cost').each(function() {
+                            const totalCost = parseFloat($(this).val());
+                            totalCosts.push({'total_cost' : totalCost});
+                        });
+
+                        jsonData['total_costs'] = JSON.stringify(totalCosts);
+
+                        $(elemRow).find('.specification').each(function() {
+                            const specification = $(this).val();
+                            specifications.push({'specification' : specification});
+                        });
+
+                        jsonData['specifications'] = JSON.stringify(specifications);
+
+                        $(elemRow).find('.remarks').each(function() {
+                            const remark = $(this).val();
+                            remarks.push({'remarks' : remark});
+                        });
+
+                        jsonData['remarks'] = JSON.stringify(remarks);
+
+                        awardedTo = parseInt($(elemRow).find('.awarded-to').val());
+                        documentType = $(elemRow).find('.document-type').val();
+                        awardedRemark = $(elemRow).find('.awarded-remarks').val();
+
+                        jsonData['awarded_to'] = awardedTo;
+                        jsonData['document_type'] = documentType;
+                        jsonData['awarded_remark'] = awardedRemark;
+
+                        formData.append('json_data', JSON.stringify(jsonData));
+
+                        storeAbstractItems(abstractID, toggle, formData);
+                    });
+                });
+            }
+        });
+    }
+
     function multiplyInputs(element) {
 		const unitCost = parseFloat(element.val()),
 		      quantity = parseInt(element.prev('input').val());
@@ -19,8 +149,13 @@ $(function() {
 		}
 
 		element.closest('td')
-			   .find('.total-cost')
-			   .val(totalCost.toFixed(2));
+               .find('.total-cost')
+               .val(totalCost.toFixed(2));
+
+        element.closest('td')
+               .find('.total-cost')
+               .next('label')
+               .addClass('active');
 	}
 
     function setMultiplyTwoInputs() {
@@ -40,13 +175,14 @@ $(function() {
 
 			headerGroup.find('.sel-supplier').each(function(index) {
 				const selectedSupplier = $(this);
-				let oldValue = 0;
+				let oldValue = '';
 
-				selectedSupplier.unbind('click').click(function() {
+				selectedSupplier.click(function() {
 				    oldValue = selectedSupplier.val();
-				}).unbind('change').change(function() {
+				}).change(function() {
 					const supplierID = selectedSupplier.val();
-					let selectHtmlValues = '<option value="">-- No awardee --</option>',
+                    let selectHtmlValues = '<option value="" disabled selected>Choose an awardee</option>' +
+                                           '<option value="">-- No awardee --</option>',
                         hasDuplicate = false;
 
 					headerGroup.find('.sel-supplier').each(function(index2) {
@@ -75,63 +211,41 @@ $(function() {
     }
 
     function initInputs(id) {
-        $("input[name=has_vice_chair]").unbind('click').click(function() {
-            if ($("input[name=has_vice_chair]:checked").val() == 'n') {
-                $('#sig_vice_chairman').attr('disabled', 'disabled');
-            } else {
-                $('#sig_vice_chairman').removeAttr('disabled');
-            }
-        });
-
-        $("input[name=has_sec_member]").unbind('click').click(function() {
-            if ($("input[name=has_sec_member]:checked").val() == 'n') {
-                $('#sig_second_member').attr('disabled', 'disabled')
-                                       .removeClass('required')
-                                       .val('');
-                $('input[name=has_alt_member][value="n"]').prop('checked', true);
-                $('#sig_alternate').attr('disabled', 'disabled')
-                                   .removeClass('required')
-                                   .val('');
-            } else {
-                $('#sig_second_member').removeAttr('disabled')
-                                       .addClass('required');
-            }
-        });
-
-        $("input[name=has_alt_member]").unbind('click').click(function() {
-            if ($("input[name=has_sec_member]:checked").val() == 'y') {
-                if ($("input[name=has_alt_member]:checked").val() == 'n') {
-                    $('#sig_alternate').attr('disabled', 'disabled')
-                                       .removeClass('required')
-                                       .val('');
-                } else {
-                    $('#sig_alternate').removeAttr('disabled')
-                                       .addClass('required');
-                }
-            } else {
-                $('input[name=has_alt_member][value="n"]').prop('checked', true);
-            }
-        });
-
         $('.sel-bidder-count').each(function() {
-            $(this).unbind('change').change(function() {
+            $(this).change(function() {
                 const bidderCount = $(this).val(),
-                      groupKey = $(this).closest('div').find('.grp_key').val(),
-                      groupNo = $(this).closest('div').find('.grp_no').val();
-                      urlSegment = `${baseURL}/abstract/item-segment/${id}?bidder_count=${bidderCount}
-                                    &group_key=${groupKey}&group_no=${groupNo}`;
+                      groupKey = $(this).closest('.grp-group').find('.grp_key').val(),
+                      groupNo = $(this).closest('.grp-group').find('.grp_no').val();
+                      urlSegment = `${baseURL}/procurement/abstract/item-segment/${id}`+
+                                   `?bidder_count=${bidderCount}&group_key=${groupKey}&group_no=${groupNo}`;
 
-                $(this).closest('tr').next('tr').find('div')
-                                     .html('')
-                                     .load(urlSegment, function() {
-                    setMultiplyTwoInputs();
-                    checkSelectUniqueness();
-                });
+                if (!empty(bidderCount)) {
+                    $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+                    $(this).closest('tr').next('tr')
+                                         .find('div')
+                                         .html('<div class="col"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
+                    let loadSegment = $(this).closest('tr').next('tr').find('div').load(urlSegment, function() {
+                        $('#mdb-preloader').fadeOut(300);
+                        //$('.sel-supplier').materialSelect();
+                        //$('.awarded-to').materialSelect();
+                        //$('.document-type').materialSelect();
+                        setMultiplyTwoInputs();
+                        checkSelectUniqueness();
+                    });
+
+                    loadSegment.onreadystatechange = null;
+                    loadSegment.abort = null;
+                    loadSegment = null;
+                }
             });
         });
 
         setMultiplyTwoInputs();
         checkSelectUniqueness();
+    }
+
+    $.fn.setSupplierHeaderName = function(elemClass, text) {
+        $(elemClass).html(text);
     }
 
     $.fn.showCreate = function(url, id) {
@@ -155,7 +269,14 @@ $(function() {
         const withError = inputValidation(false);
 
 		if (!withError) {
-			$('#form-store').submit();
+			$('#mdb-preloader').css('background', '#000000ab')
+                               .fadeIn(300, function() {
+                processData();
+
+                $(document).ajaxStop(function() {
+                    $('#form-store').submit();
+                });
+            });
 		}
     }
 
@@ -180,7 +301,11 @@ $(function() {
         const withError = inputValidation(false);
 
 		if (!withError) {
-			$('#form-update').submit();
+			$('#mdb-preloader').css('background', '#000000ab')
+                               .fadeIn(300, function() {
+                processData();
+                $('#form-update').submit();
+            });
 		}
     }
 
