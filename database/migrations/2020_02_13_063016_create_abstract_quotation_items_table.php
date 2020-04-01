@@ -17,11 +17,12 @@ class CreateAbstractQuotationItemsTable extends Migration
             $table->engine = 'InnoDB';
 
             $table->uuid('id')->primary();
+            $table->uuid('abstract_id');
+            $table->foreign('abstract_id')->references('id')->on('abstract_quotations');
             $table->uuid('pr_id');
             $table->foreign('pr_id')->references('id')->on('purchase_requests');
             $table->uuid('pr_item_id');
             $table->foreign('pr_item_id')->references('id')->on('purchase_request_items');
-            $table->unsignedInteger('item_no');
             $table->uuid('supplier');
             $table->foreign('supplier')->references('id')->on('suppliers');
             $table->text('specification')->nullable();
