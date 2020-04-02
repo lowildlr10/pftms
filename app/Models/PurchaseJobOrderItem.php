@@ -41,6 +41,13 @@ class PurchaseJobOrderItem extends Model
      */
     public $incrementing = false;
 
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
+
     public static function boot() {
          parent::boot();
          self::creating(function($model) {

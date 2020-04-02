@@ -33,6 +33,7 @@ use App\ListDueDemandAccPay;
 
 use App\Plugins\PDFGenerator\DocPurchaseRequest;
 use App\Plugins\PDFGenerator\DocRequestQuotation;
+use App\Plugins\PDFGenerator\DocAbstractQuotation;
 
 class PrintController extends Controller
 {
@@ -107,12 +108,11 @@ class PrintController extends Controller
                 if ($test == 'true') {
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                     $prNo =  $data->abstract->pr_no;
-                    $msg = "generated the abstract of quotation $prNo.";
+                    $msg = "Generated the abstract of quotation $prNo.";
                     Auth::user()->log($request, $msg);
                 } else {
                     $this->generateAbstract(
                         $data,
-                        $documentType,
                         $fontScale,
                         $pageHeight,
                         $pageWidth,
@@ -120,9 +120,7 @@ class PrintController extends Controller
                         $previewToggle
                     );
                 }
-
                 break;
-
             case 'proc_po_jo':
                 $data = $this->getDataPO_JO($key);
                 $data->doc_type = $documentType;
@@ -478,18 +476,14 @@ class PrintController extends Controller
                          'isNull' => $isNull];
     }
 
-    public function getBidderCount($groupNo, $id) {
+    private function getBidderCount($groupNo, $prID) {
         $bidderCount = 0;
-        $itemID = DB::table('tblpr_items')->select('item_id')
-                                          ->where('pr_id', $id)
-                                          ->where('group_no', $groupNo)
-                                          ->orderBy('item_id')
-                                          ->first();
-        $bidderCount = AbstractItem::where('pr_id', $id)
-                                    ->where('pr_id', $id)
-                                    ->where('pr_item_id', $itemID->item_id)
-                                    ->count();
-
+        $itemID = PurchaseRequestItem::select('item_id')
+                                     ->where([
+            ['pr_id', $prID], ['group_no', $groupNo]
+        ])->orderBy('item_no')->first();
+        $bidderCount = AbstractQuotationItem::where('pr_item_id', $itemID->id)
+                                            ->count();
         return $bidderCount;
     }
 
@@ -1639,44 +1633,44 @@ class PrintController extends Controller
     }
 
     private function getDataAbstract($id, $pageHeight) {
-        $abstract = DB::table('tblabstract as abstract')
-                      ->join('tblpr as pr', 'pr.id', '=', 'abstract.pr_id')
-                      ->join('tblmode_procurement as mode', 'mode.id', '=', 'abstract.mode_procurement_id')
-                      ->where('abstract.pr_id', $id)->first();
-        $items = $this->getItemGroup($id);
-        $prData = $this->getDataPR($id)->pr;
+        $abstract = DB::table('abstract_quotations as abstract')
+                      ->join('purchase_requests as pr', 'pr.id', '=', 'abstract.pr_id')
+                      ->join('procurement_modes as mode', 'mode.id', '=', 'abstract.mode_procurement')
+                      ->where('abstract.id', $id)->first();
+        $items = $this->getItemGroup($abstract->pr_id);
+        $prData = $this->getDataPR($abstract->pr_id)->pr;
 
-        $chairperson = $this->getSignatory($abstract->sig_chairperson)->name;
-        $viceChairperson = $this->getSignatory($abstract->sig_vice_chairperson)->name;
-        $member1 = $this->getSignatory($abstract->sig_first_member)->name;
-        $member2 = $this->getSignatory($abstract->sig_second_member)->name;
-        $member3 = $this->getSignatory($abstract->sig_third_member)->name;
-        $endUser = $this->getEmployee($abstract->sig_end_user)->name;
+        $instanceSignatory = new Signatory;
+        $chairperson = $instanceSignatory->getSignatory($abstract->sig_chairperson)->fullname;
+        $viceChairperson = $instanceSignatory->getSignatory($abstract->sig_vice_chairperson)->fullname;
+        $member1 = $instanceSignatory->getSignatory($abstract->sig_first_member)->fullname;
+        $member2 = $instanceSignatory->getSignatory($abstract->sig_second_member)->fullname;
+        $member3 = $instanceSignatory->getSignatory($abstract->sig_third_member)->fullname;
+        $endUser = $instanceSignatory->getEmployee($abstract->sig_end_user)->fullname;
 
         foreach ($items as $item) {
             $arraySuppliers = [];
             $tableData = [];
-            $suppliers = DB::table('tblabstract_items as abs')
+            $suppliers = DB::table('abstract_quotation_items as abs')
                            ->select('bid.id', 'bid.company_name')
-                           ->join('tblpr_items as item', 'item.item_id', '=', 'abs.pr_item_id')
-                           ->join('tblsuppliers as bid', 'bid.id', '=', 'abs.supplier_id')
+                           ->join('purchase_request_items as item', 'item.id', '=', 'abs.pr_item_id')
+                           ->join('suppliers as bid', 'bid.id', '=', 'abs.supplier')
                            ->where([['item.group_no', $item->group_no],
-                                    ['item.pr_id', $id]])
+                                    ['item.pr_id', $abstract->pr_id]])
                            ->orderBy('bid.id')
                            ->distinct()
                            ->get();
-            $pritems = DB::table('tblpr_items as item')
+            $pritems = DB::table('purchase_request_items as item')
                          ->select('bid.company_name', 'item.awarded_remarks', 'item.quantity',
-                                  'unit.unit', 'item.item_id', 'item.est_unit_cost',
+                                  'unit.unit', 'item.id as item_id', 'item.est_unit_cost',
                                   'item.item_description')
-                         ->leftJoin('tblsuppliers as bid', 'bid.id', '=', 'item.awarded_to')
-                         ->join('tblunit_issue as unit', 'unit.id', '=', 'item.unit_issue')
+                         ->leftJoin('suppliers as bid', 'bid.id', '=', 'item.awarded_to')
+                         ->join('item_unit_issues as unit', 'unit.id', '=', 'item.unit_issue')
                          ->where('item.group_no', $item->group_no)
-                         ->where('item.pr_id', $id)
-                         ->orderByRaw('LENGTH(item.item_id)')
-                         ->orderBy('item.item_id')
+                         ->where('item.pr_id', $abstract->pr_id)
+                         ->orderBy('item.item_no')
                          ->get();
-            $bidderCount = $this->getBidderCount($item->group_no, $id);
+            $bidderCount = $this->getBidderCount($item->group_no, $abstract->pr_id);
 
             foreach ($suppliers as $bid) {
                 $arraySuppliers[] = (object)['company_name' => $bid->company_name];
@@ -1689,11 +1683,11 @@ class PrintController extends Controller
                     $pr->item_description = str_replace($searchStr, '<br>', $pr->item_description);
                 }
 
-                $abstractItems = DB::table('tblabstract_items as abs')
-                                   ->join('tblpr_items as item', 'item.item_id', '=', 'abs.pr_item_id')
+                $abstractItems = DB::table('abstract_quotation_items as abs')
+                                   ->join('purchase_request_items as item', 'item.id', '=', 'abs.pr_item_id')
                                    ->where([['item.pr_id', $id],
-                                            ['item.item_id', $pr->item_id]])
-                                   ->orderBy('abs.supplier_id')
+                                            ['item.id', $pr->item_id]])
+                                   ->orderBy('abs.supplier')
                                    ->get();
                 $_tableData = [$ctrItem + 1,
                                $pr->quantity,
@@ -2026,10 +2020,10 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateAbstract($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateAbstract($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new PDF('L', 'mm', $pageSize);
+        $pdf = new DocAbstractQuotation('L', $pageUnit, $pageSize);
         $docCode = "FM-FAS-PUR F07";
         $docRev = "Revision 2";
         $docRevDate = "11-16-18";
@@ -2039,32 +2033,17 @@ class PrintController extends Controller
         $docSubject = "Abstract of Quotation";
         $docKeywords = "Abstract, abstract, quotation, abstract of quotation";
 
-        $prNo = $data->pr->pr_no;
-        $chairperson = $data->sig_chairperson;
-        $viceChairperson = $data->sig_vice_chairperson;
-        $member1 = $data->sig_first_member;
-        $member2 = $data->sig_second_member;
-        $member3 = $data->sig_third_member;
-        $endUser = $data->sig_end_user;
-        $abstractDate = "";
-        $modeProcurement =  $data->abstract->mode;
-
         if (!empty($data->abstract->date_abstract)) {
-            $abstractDate = new DateTime($data->abstract->date_abstract);
-            $abstractDate = $abstractDate->format('F j, Y');
+            $data->abstract->date_abstract = new DateTime($data->abstract->date_abstract);
+            $data->abstract->date_abstract = $data->abstract->date_abstract->format('F j, Y');
         }
-
-        $abstractSigs = [$chairperson, $viceChairperson, $member1,
-                         $member2, $member3, $endUser];
-        $sigPosition = ["Chairperson", "Vice Chairperson", "Member",
-                        "Member", "Member", "End-user"];
 
         //Set document information
         $this->setDocumentInfo($pdf, $docCode, $docRev, $docRevDate, $docTitle,
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        include app_path() . "/Classes/DocumentPDF/Documents/doc_abstract_quotation.php";
+        $pdf->printAbstractQuotation($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);

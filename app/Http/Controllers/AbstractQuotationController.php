@@ -8,6 +8,7 @@ use App\Models\PurchaseRequestItem;
 use App\Models\AbstractQuotation;
 use App\Models\AbstractQuotationItem;
 use App\Models\PurchaseJobOrder;
+use App\Models\PurchaseJobOrderItem;
 use App\Models\ObligationRequestStatus;
 use App\Models\InspectionAcceptance;
 use App\Models\DisbursementVoucher;
@@ -86,7 +87,8 @@ class AbstractQuotationController extends Controller
                     })->orWhereHas('division', function($query) use ($keyword) {
                         $query->where('division_name', 'like', "%$keyword%");
                     })->orWhereHas('abstract', function($query) use ($keyword) {
-                        $query->where('date_abstract', 'like', "%$keyword%");
+                        $query->where('date_abstract', 'like', "%$keyword%")
+                              ->orWhere('id', 'like', "%$keyword%");
                     });
             });
         }
@@ -134,7 +136,7 @@ class AbstractQuotationController extends Controller
         $items = $this->getAbstractTable($prID, $groupNo, 'single');
 
         return view('modules.procurement.abstract.item-segment', [
-            'list' => $items,
+            'abstractItems' => $items,
             'supplierList' => $supplierList,
             'bidderCount' => $bidderCount,
             'groupKey' => $groupKey,
@@ -198,6 +200,9 @@ class AbstractQuotationController extends Controller
         $abstractDate = $request->date_abstract;
         $modeProcurement = $request->mode_procurement;
 
+        $sigSecondMember = !empty($sigSecondMember) ? $sigSecondMember : NULL;
+        $sigThirdMember = !empty($sigThirdMember) ? $sigThirdMember : NULL;
+
         try {
             $instanceAbstract = AbstractQuotation::with('pr')->find($id)->first();
             $prNo = $instanceAbstract->pr->pr_no;
@@ -241,7 +246,8 @@ class AbstractQuotationController extends Controller
     public function store(Request $request, $id) {
         $response = $this->storeUpdateAbstract($request, $id, 'store');
         Auth::user()->log($request, $response->msg);
-        return redirect(url()->previous())->with($response->alert_type, $response->msg);
+        return redirect()->route('abstract', ['keyword' => $id])
+                         ->with($response->alert_type, $response->msg);
     }
 
     /**
@@ -253,45 +259,54 @@ class AbstractQuotationController extends Controller
      */
     public function storeItems(Request $request, $id) {
         $json = json_decode($request->json_data);
-        $prIDItem = $json->pr_item_id;
-        $bidderCount = $json->bidder_count;
+        $bidderCount = (int) $json->bidder_count;
 
-        $selectedSuppliers = json_decode($json->select_suppliers);
+        if ($bidderCount > 0) {
+            $prIDItem = $json->pr_item_id;
 
-        $unitCosts = json_decode($json->unit_costs);
-        $totalCosts = json_decode($json->total_costs);
-        $specifications = json_decode($json->specifications);
-        $remarks = json_decode($json->remarks);
+            $selectedSuppliers = json_decode($json->select_suppliers);
 
-        $awardedTo = $json->awarded_to;
-        $documentType = $json->document_type;
-        $awardedRemark = $json->awarded_remark;
+            $unitCosts = json_decode($json->unit_costs);
+            $totalCosts = json_decode($json->total_costs);
+            $specifications = json_decode($json->specifications);
+            $remarks = json_decode($json->remarks);
 
-        $instanceAbstract = AbstractQuotation::with('pr')->find($id)->first();
-        $prID = $instanceAbstract->pr->id;
+            $awardedTo = $json->awarded_to;
+            $documentType = $json->document_type;
+            $awardedRemark = $json->awarded_remark;
 
-        foreach ($selectedSuppliers as $selectedCtr => $selectedsuplier) {
-            $selectedSuplier = $selectedsuplier->selected_supplier;
+            $instanceAbstract = AbstractQuotation::with('pr')->find($id)->first();
+            $prID = $instanceAbstract->pr->id;
 
-            foreach ($unitCosts as $columnCtr => $unitcost) {
-                if ($columnCtr == $selectedCtr) {
-                    $unitCost = $unitcost->unit_cost;
-                    $totalCost = $totalCosts[$columnCtr]->total_cost;
-                    $specification = $specifications[$columnCtr]->specification;
-                    $remark = $remarks[$columnCtr]->remarks;
+            foreach ($selectedSuppliers as $selectedCtr => $selectedsuplier) {
+                $selectedSuplier = $selectedsuplier->selected_supplier;
 
-                    $instanceAbsItem = new AbstractQuotationItem;
-                    $instanceAbsItem->abstract_id = $id;
-                    $instanceAbsItem->pr_id = $prID;
-                    $instanceAbsItem->pr_item_id = $prIDItem;
-                    $instanceAbsItem->supplier = $selectedSuplier;
-                    $instanceAbsItem->specification = $specification;
-                    $instanceAbsItem->remarks = $remark;
-                    $instanceAbsItem->unit_cost = $unitCost;
-                    $instanceAbsItem->total_cost = $totalCost;
-                    $instanceAbsItem->save();
+                foreach ($unitCosts as $columnCtr => $unitcost) {
+                    if ($columnCtr == $selectedCtr) {
+                        $unitCost = $unitcost->unit_cost;
+                        $totalCost = $totalCosts[$columnCtr]->total_cost;
+                        $specification = $specifications[$columnCtr]->specification;
+                        $remark = $remarks[$columnCtr]->remarks;
+
+                        $instanceAbsItem = new AbstractQuotationItem;
+                        $instanceAbsItem->abstract_id = $id;
+                        $instanceAbsItem->pr_id = $prID;
+                        $instanceAbsItem->pr_item_id = $prIDItem;
+                        $instanceAbsItem->supplier = $selectedSuplier;
+                        $instanceAbsItem->specification = $specification;
+                        $instanceAbsItem->remarks = $remark;
+                        $instanceAbsItem->unit_cost = $unitCost;
+                        $instanceAbsItem->total_cost = $totalCost;
+                        $instanceAbsItem->save();
+                    }
                 }
             }
+
+            $instancePRItem = PurchaseRequestItem::find($prIDItem);
+            $instancePRItem->awarded_to = $awardedTo;
+            $instancePRItem->document_type = $documentType;
+            $instancePRItem->awarded_remarks = $awardedRemark;
+            $instancePRItem->save();
         }
     }
 
@@ -355,7 +370,8 @@ class AbstractQuotationController extends Controller
     public function update(Request $request, $id) {
         $response = $this->storeUpdateAbstract($request, $id, 'update');
         Auth::user()->log($request, $response->msg);
-        return redirect(url()->previous())->with($response->alert_type, $response->msg);
+        return redirect()->route('abstract', ['keyword' => $id])
+                         ->with($response->alert_type, $response->msg);
     }
 
     /**
@@ -366,7 +382,112 @@ class AbstractQuotationController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function updateItems(Request $request, $id) {
-        //
+        $json = json_decode($request->json_data);
+        $bidderCount = (int) $json->bidder_count;
+
+        if ($bidderCount > 0) {
+            $prIDItem = $json->pr_item_id;
+
+            $selectedSuppliers = json_decode($json->select_suppliers);
+
+            $abstractItemIDs = json_decode($json->abstract_item_ids);
+            $unitCosts = json_decode($json->unit_costs);
+            $totalCosts = json_decode($json->total_costs);
+            $specifications = json_decode($json->specifications);
+            $remarks = json_decode($json->remarks);
+
+            $awardedTo = $json->awarded_to;
+            $documentType = $json->document_type;
+            $awardedRemark = $json->awarded_remark;
+
+            $instanceAbstract = AbstractQuotation::with('pr')->find($id)->first();
+            $prID = $instanceAbstract->pr->id;
+            $prNo = $instanceAbstract->pr->pr_no;
+
+            $groupNo = $this->getGroupNo($prIDItem);
+            $oldBidderCount = $this->getBidderCount($groupNo, $prID, 'this', $prIDItem);
+
+            foreach ($selectedSuppliers as $selectedCtr => $selectedsuplier) {
+                $selectedSuplier = $selectedsuplier->selected_supplier;
+
+                foreach ($unitCosts as $columnCtr => $unitcost) {
+                    if ($columnCtr == $selectedCtr) {
+                        $unitCost = $unitcost->unit_cost;
+                        $totalCost = $totalCosts[$columnCtr]->total_cost;
+                        $specification = $specifications[$columnCtr]->specification;
+                        $remark = $remarks[$columnCtr]->remarks;
+
+                        if ($bidderCount == $oldBidderCount) {
+                            $absItemID = $abstractItemIDs[$columnCtr]->abs_item_id;
+                            $instanceAbsItem = AbstractQuotationItem::find($absItemID);
+                        } else {
+                            if ($columnCtr == 0) {
+                                AbstractQuotationItem::where('pr_item_id', $prIDItem)->delete();
+                            }
+
+                            $instanceAbsItem = new AbstractQuotationItem;
+                            $instanceAbsItem->abstract_id = $id;
+                            $instanceAbsItem->pr_id = $prID;
+                            $instanceAbsItem->pr_item_id = $prIDItem;
+                        }
+
+                        $instanceAbsItem->supplier = $selectedSuplier;
+                        $instanceAbsItem->specification = $specification;
+                        $instanceAbsItem->remarks = $remark;
+                        $instanceAbsItem->unit_cost = $unitCost;
+                        $instanceAbsItem->total_cost = $totalCost;
+                        $instanceAbsItem->save();
+                    }
+                }
+            }
+
+            $instancePRItem = PurchaseRequestItem::find($prIDItem);
+            $instancePRItem->awarded_to = $awardedTo;
+            $instancePRItem->document_type = $documentType;
+            $instancePRItem->awarded_remarks = $awardedRemark;
+            $instancePRItem->save();
+
+            $poCount = PurchaseJobOrder::where('pr_id', $prID)->count();
+
+            if ($poCount > 0 && $instanceAbstract->pr->status >= 6) {
+                $newPONo = "$prNo-".$this->poLetters[$poCount];
+
+                $instancePO = PurchaseJobOrder::where([
+                    ['pr_id', $prID], ['awarded_to', $awardedTo]
+                ])->whereNull('date_po_approved')->first();
+
+                if ($instancePO) {
+                    $instancePOItem = PurchaseJobOrderItem::where('po_no', $instancePO->po_no)
+                                                          ->first();
+                    $_instancePRItem = PurchaseRequestItem::find($instancePOItem->pr_item_id);
+
+                    if ($_instancePRItem->group_no == $instancePRItem->group_no) {
+                        $this->addItemPO(
+                            $instancePO->po_no,
+                            $prID,
+                            $instancePRItem->id,
+                            $awardedTo
+                        );
+                    } else {
+                        $this->createDocumentPO($newPONo, $prID, $documentType, $awardedTo, []);
+                        $this->addItemPO(
+                            $newPONo,
+                            $prID,
+                            $instancePRItem->id,
+                            $awardedTo
+                        );
+                    }
+                } else {
+                    $this->createDocumentPO($newPONo, $prID, $documentType, $awardedTo, []);
+                    $this->addItemPO(
+                        $newPONo,
+                        $prID,
+                        $instancePRItem->id,
+                        $awardedTo
+                    );
+                }
+            }
+        }
     }
 
     /**
@@ -383,11 +504,13 @@ class AbstractQuotationController extends Controller
 
             $msg = "Abstract of Quotation items for quotation number '$prNo' successfully deleted.";
             Auth::user()->log($request, $msg);
-            return redirect(url()->previous())->with('success', $msg);
+            return redirect()->route('abstract', ['keyword' => $id])
+                             ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
-            return redirect(url()->previous())->with('failed', $msg);
+            return redirect()->route('abstract', ['keyword' => $id])
+                             ->with('failed', $msg);
         }
     }
 
@@ -401,36 +524,151 @@ class AbstractQuotationController extends Controller
     public function approveForPO(Request $request, $id) {
         try {
             $instanceDocLog = new DocLog;
-            $instanceAbstract = AbstractQuotation::find($id);
-            $prID = $instancePR->pr_id;
-            $prNo = $instancePR->pr_no;
+            $instanceAbstract = AbstractQuotation::with('pr')->find($id);
+            $prID = $instanceAbstract->pr->id;
+            $prNo = $instanceAbstract->pr->pr_no;
             $instancePR = PurchaseRequest::find($prID);
 
-            $requestedBy = $instancePR->requested_by;
-            $instancePR->date_pr_approved = Carbon::now();
-            $instancePR->status = 5;
-            $instancePR->save();
+            $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
+            $prItemGroups = $this->getGroups($prID);
 
-            if (!$instanceAbstract) {
-                $instanceAbstract = new RequestQuotation;
-                $instanceAbstract->pr_id = $id;
+            if ($isDocGenerated) {
+                $instanceAbstract->date_abstract_approved = Carbon::now();
                 $instanceAbstract->save();
 
-                $rfqData = RequestQuotation::where('pr_id', $id)->first();
-                $rfqID = $rfqData->id;
-                $instanceDocLog->logDocument($id, Auth::user()->id, NULL, 'received');
+                foreach ($prItemGroups as $groupCtr => $group) {
+                    $itemWinner = PurchaseRequestItem::select('awarded_to', 'document_type')
+                                                    ->where([
+                        ['pr_id', $prID], ['group_no', $groupCtr]
+                    ])->whereNotNull('awarded_to')->distinct()->get();
+                    $winnerCount = $itemWinner->count();
+
+                    if ($winnerCount > 0) {
+                        foreach ($itemWinner as $win) {
+                            $poNo = "$prNo-".$this->poLetters[$groupCtr];
+                            $awardedTo = $win->awarded_to;
+                            $documentType = $win->document_type;
+                            $countPO = PurchaseJobOrder::where('po_no', $poNo)->count();
+                            $instancePRItems = PurchaseRequestItem::where([
+                                ['pr_id', $prID],
+                                ['awarded_to', $awardedTo],
+                                ['group_no', $group]
+                            ])->orderBy('item_no')->get();
+
+                            if ($countPO > 0) {
+                                $instancePO = PurchaseJobOrder::where('po_no', $poNo)->first();
+                                $instancePO->document_type = $documentType;
+                                $instancePO->awarded_to = $awardedTo;
+                                $instancePO->with_ors_burs = 'n';
+                                $instancePO->save();
+
+                                foreach ($instancePRItems as $item) {
+                                    $prItemID = $item->id;
+                                    $this->addItemPO($poNo, $prID, $prItemID, $awardedTo);
+                                }
+                            } else {
+                                $this->createDocumentPO($poNo, $prID, $documentType, $awardedTo, $instancePRItems);
+                            }
+                        }
+                    }
+                }
+
+                $instancePR->status = 6;
+                $instancePR->save();
+
+                $instanceAbstract->notifyApprovedForPO($id, Auth::user()->id);
+
+                $msg = "Abstract of Quotation '$prNo' successfully approved for Po/JO.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('abstract', ['keyword' => $id])
+                                 ->with('success', $msg);
+            } else {
+                $msg = "Document for Abstract of Quotation '$prNo' should be generated first.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('abstract', ['keyword' => $id])
+                                 ->with('warning', $msg);
             }
-
-            $instancePR->notifyApproved($prNo, $requestedBy);
-
-            $msg = "Purchase request '$prNo' successfully approved.";
-            Auth::user()->log($request, $msg);
-            return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
-            return redirect(url()->previous())->with('failed', $msg);
+            return redirect()->route('abstract', ['keyword' => $id])
+                             ->with('failed', $msg);
         }
+    }
+
+    private function createDocumentPO($poNo, $prID, $documentType, $awardedTo, $prItems) {
+        $instancePO = new PurchaseJobOrder;
+        $instancePO->po_no = $poNo;
+        $instancePO->pr_id = $prID;
+        $instancePO->document_type = $documentType;
+        $instancePO->awarded_to = $awardedTo;
+        $instancePO->save();
+
+        foreach ($prItems as $item) {
+            $prItemID = $item->id;
+            $this->addItemPO($poNo, $prID, $prItemID, $awardedTo);
+        }
+    }
+
+    private function addItemPO($poNo, $prID, $prItemID, $awardedTo) {
+        $instanceAbstract = AbstractQuotation::where([
+            ['pr_item_id', $prItemID], ['supplier', $awardedTo]
+        ])->first();
+        $instancePRItem = PurchaseRequestItem::find($prItemID);
+        $quantity = $instancePRItem->quantity;
+        $itemDescription = $instancePRItem->item_description;
+        $unitIssue = $instancePRItem->unit_issue;
+        $unitCost = $instanceAbsItem->unit_cost;
+        $totaltCost = $instanceAbsItem->total_cost;
+
+        $poItemCount = PurchaseJobOrderItem::where('pr_item_id', $prItemID)
+                                           ->count();
+
+        if ($poItemCount > 0) {
+            $instancePOItem = PurchaseJobOrderItem::where('pr_item_id', $prItemID)
+                                                  ->first();
+        } else {
+            $instancePOItem = new PurchaseJobOrderItem;
+        }
+
+        $instancePOItem->po_no = $poNo;
+        $instancePOItem->pr_id = $prID;
+        $instancePOItem->pr_item_id = $prItemID;
+        $instancePOItem->quantity = $quantity;
+        $instancePOItem->unit_issue = $unitIssue;
+        $instancePOItem->item_description = $itemDescription;
+        $instancePOItem->unit_cost = $unitCost;
+        $instancePOItem->total_cost = $totalCost;
+        $instancePRItem->save();
+
+    }
+
+    public function getGroups($prID) {
+        $data = [];
+        $groups = PurchaseRequestItem::select('group_no')
+                                     ->where('pr_id', $prID)
+                                     ->distinct()
+                                     ->orderBy('group_no')
+                                     ->get();
+
+        foreach ($groups as $group) {
+            $data[] = $group->group_no;
+        }
+
+        $_data = array_unique($data);
+        $data = [];
+
+        foreach ($_data as $group) {
+            $data[] = $group;
+        }
+
+        return $data;
+    }
+
+    private function getGroupNo($id) {
+        $prItem = PurchaseRequestItem::select('group_no')
+                                     ->find($id);
+        return $prItem->group_no;
     }
 
     private function getBidderCount($groupNo, $prID, $type = 'all', $optionalParam = '') {
@@ -501,14 +739,17 @@ class AbstractQuotationController extends Controller
             foreach ($pritems as $pr) {
                 $arrayAbstractItems = [];
                 $abstractItems = DB::table('abstract_quotation_items as abs')
+                                   ->select('abs.id', 'abs.unit_cost', 'abs.total_cost', 'abs.specification',
+                                            'abs.remarks')
                                    ->join('purchase_request_items as item', 'item.id', '=', 'abs.pr_item_id')
+                                   ->join('suppliers as bid', 'bid.id', '=', 'abs.supplier')
                                    ->where([['item.pr_id', $prID],
                                             ['item.id', $pr->item_id]])
-                                   ->orderBy('abs.supplier')
+                                   ->orderBy('bid.company_name')
                                    ->get();
 
                 foreach ($abstractItems as $abs) {
-                    $arrayAbstractItems[] = (object)['abstract_id' => $abs->abstract_id,
+                    $arrayAbstractItems[] = (object)['id' => $abs->id,
                                                      'unit_cost' => $abs->unit_cost,
                                                      'total_cost' => $abs->total_cost,
                                                      'specification' => $abs->specification,
@@ -525,6 +766,7 @@ class AbstractQuotationController extends Controller
                                            'company_name' => $pr->company_name,
                                            'awarded_remarks' => $pr->awarded_remarks,
                                            'abstract_items' => (object)$arrayAbstractItems,
+                                           'abstract_item_count' => $abstractItems->count(),
                                            'document_type' => $pr->document_type];
             }
 

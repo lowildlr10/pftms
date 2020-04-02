@@ -26,11 +26,11 @@ $(function() {
             },
             fail: function(xhr, textStatus, errorThrown) {
                 console.log('fail');
-                storeAbstractItems(abstractID, toggle, jsonData);
+                storeAbstractItems(abstractID, toggle, formData);
 		    },
 		    error: function(data) {
                 console.log('error');
-                storeAbstractItems(abstractID, toggle, jsonData);
+                storeAbstractItems(abstractID, toggle, formData);
 		    }
         });
     }
@@ -95,14 +95,14 @@ $(function() {
                         jsonData['abstract_item_ids'] = JSON.stringify(abstractitemIDs);
 
                         $(elemRow).find('.unit-cost').each(function() {
-                            const unitCost = parseFloat($(this).val());
+                            const unitCost = parseFloat($(this).val()).toFixed(2);
                             unitCosts.push({'unit_cost' : unitCost});
                         });
 
                         jsonData['unit_costs'] = JSON.stringify(unitCosts);
 
                         $(elemRow).find('.total-cost').each(function() {
-                            const totalCost = parseFloat($(this).val());
+                            const totalCost = parseFloat($(this).val()).toFixed(2);
                             totalCosts.push({'total_cost' : totalCost});
                         });
 
@@ -122,7 +122,7 @@ $(function() {
 
                         jsonData['remarks'] = JSON.stringify(remarks);
 
-                        awardedTo = parseInt($(elemRow).find('.awarded-to').val());
+                        awardedTo = $(elemRow).find('.awarded-to').val();
                         documentType = $(elemRow).find('.document-type').val();
                         awardedRemark = $(elemRow).find('.awarded-remarks').val();
 
@@ -135,6 +135,13 @@ $(function() {
                         storeAbstractItems(abstractID, toggle, formData);
                     });
                 });
+            } else {
+                let jsonData = {},
+                    formData = new FormData();
+
+                jsonData['bidder_count'] = 0;
+                formData.append('json_data', JSON.stringify(jsonData));
+                storeAbstractItems(abstractID, toggle, formData);
             }
         });
     }
@@ -223,7 +230,7 @@ $(function() {
                     $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
                     $(this).closest('tr').next('tr')
                                          .find('div')
-                                         .html('<div class="col"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
+                                         .html('<div class="col p-4"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
                     let loadSegment = $(this).closest('tr').next('tr').find('div').load(urlSegment, function() {
                         $('#mdb-preloader').fadeOut(300);
                         //$('.sel-supplier').materialSelect();
@@ -272,7 +279,6 @@ $(function() {
 			$('#mdb-preloader').css('background', '#000000ab')
                                .fadeIn(300, function() {
                 processData();
-
                 $(document).ajaxStop(function() {
                     $('#form-store').submit();
                 });

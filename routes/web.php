@@ -359,7 +359,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     Route::post('procurement/abstract/approve/{id}', [
         'uses' => 'AbstractQuotationController@approveForPO',
         'module' => 'proc_abstract',
-        'access' => 'approve'
+        'access' => 'approve_po_jo'
     ])->name('abstract-approve');
 
     // Purchase and Job Order Module

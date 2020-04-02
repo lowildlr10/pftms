@@ -1,4 +1,10 @@
 
+.md-outline.select-wrapper+label {
+    top: .5em !important;
+    z-index: 2 !important;
+}
+
+
 .btn-menu-1 {
 	width: 100%;
 }
@@ -269,7 +275,6 @@ html, body, header, .view {
     width: 6px;
     height: 6px;
 }
-
 
 /* Extra Small devices (landscape phones, atmost 575px) */
 @media (max-width: 575px) {

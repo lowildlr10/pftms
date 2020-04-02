@@ -1,5 +1,5 @@
-@if (!empty($list))
-    @foreach ($list as $ctrItem => $abstract)
+@if (count($abstractItems) > 0)
+    @foreach ($abstractItems as $ctrItem => $abstract)
         @if (isset($abstract->pr_item_count) && $abstract->pr_item_count)
 
 <ul class="nav nav-tabs mdb-color lighten-5" role="tablist">
@@ -103,9 +103,6 @@
             </th>
                 @endfor
             @endif
-            @if ($bidderCount == 0)
-            <th class="text-center font-weight-bold" width="320px"></th>
-            @endif
         </tr>
     </thead>
     <tbody>
@@ -134,8 +131,8 @@
                                             @endforeach
                                     </th>
                                         @endfor
-                                    @endif
                                     <th class="text-center font-weight-bold" width="320px">Awarded To</th>
+                                    @endif
                                 </tr>
                             </thead>
 
@@ -160,7 +157,7 @@
                                                 @for ($key = 0; $key < $bidderCount; $key++)
                                     <td width="320px">
                                         <div class="md-form form-sm">
-                                            <input class=".quantity" type="hidden" value="{{ $item->quantity }}">
+                                            <input class="quantity" type="hidden" value="{{ $item->quantity }}">
                                             <input type="number" class="form-control form-control-sm unit-cost required"
                                                 id="unit_cost-{{ $groupKey }}-{{ $listCtr }}-{{ $key }}" min="0">
                                             <label for="unit_cost-{{ $groupKey }}-{{ $listCtr }}-{{ $key }}">
@@ -217,9 +214,8 @@
                                             <label class="mdb-main-label">
                                                 Document Type <span class="red-text">*</span>
                                             </label>
-                                            <select class="browser-default custom-select document-type required"
+                                            <select class="browser-default custom-select document-type"
                                                     searchable="Search here..">
-                                                <option value="" disabled selected>Choose a document type</option>
                                                 <option value="po">
                                                     Purchase Order (PO)
                                                 </option>
@@ -236,10 +232,6 @@
                                                 Remarks
                                             </label>
                                         </div>
-                                    </td>
-                                            @else
-                                    <td align="center">
-                                        <i class="fas fa-spinner fa-spin"></i> Loading...
                                     </td>
                                             @endif
                                 </tr>

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
+use App\Notifications\AbstractQuotation as Notif;
 use Kyslik\ColumnSortable\Sortable;
 
 class AbstractQuotation extends Model
@@ -66,4 +67,25 @@ class AbstractQuotation extends Model
     public $sortable = [
         'date_abstract',
     ];
+
+    public function notifyApprovedForPO($id, $currentUser) {
+        $absData = $this::with('pr')->find($id);
+        $prID = $absData->pr_id;
+        $prNo = $absData->pr->pr_no;
+        $requestedBy = $absData->pr->requested_by;
+        $user = User::find($requestedBy);
+        $currentUseryName = $user->getEmployee($currentUser)->name;
+        $requestedByName = $user->getEmployee($requestedBy)->name;
+        $msgNotif = "Your Abstract of Quotation '$prNo' has been
+                    approved for PO/JO.";
+        $data = (object) [
+            'abstract_id' => $id,
+            'pr_id' => $prID,
+            'pr_no' => $prNo,
+            'module' => 'proc-abstract',
+            'type' => 'approved',
+            'msg' => $msgNotif,
+        ];
+        $user->notify(new Notif($data));
+    }
 }

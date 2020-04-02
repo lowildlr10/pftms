@@ -200,11 +200,13 @@ class RequestQuotationController extends Controller
 
             $msg = "Request for Quotation '$prNo' successfully updated.";
             Auth::user()->log($request, $msg);
-            return redirect(url()->previous())->with('success', $msg);
+            return redirect()->route('rfq', ['keyword' => $id])
+                             ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
-            return redirect(url()->previous())->with('failed', $msg);
+            return redirect()->route('rfq', ['keyword' => $id])
+                             ->with('failed', $msg);
         }
     }
 
@@ -246,21 +248,25 @@ class RequestQuotationController extends Controller
 
                     $msg = "Request for Quotation '$prNo' successfully issued to $issuedToName.";
                     Auth::user()->log($request, $msg);
-                    return redirect(url()->previous())->with('success', $msg);
+                    return redirect()->route('rfq', ['keyword' => $id])
+                                     ->with('success', $msg);
                 } else {
                     $msg = "Document for Request for Quotation '$prNo' should be generated first.";
                     Auth::user()->log($request, $msg);
-                    return redirect(url()->previous())->with('warning', $msg);
+                    return redirect()->route('rfq', ['keyword' => $id])
+                                     ->with('warning', $msg);
                 }
             } else {
                 $msg = "Request for Quotation '$prNo' already issued.";
                 Auth::user()->log($request, $msg);
-                return redirect(url()->previous())->with('warning', $msg);
+                return redirect()->route('rfq', ['keyword' => $id])
+                                 ->with('warning', $msg);
             }
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
-            return redirect(url()->previous())->with('failed', $msg);
+            return redirect()->route('rfq', ['keyword' => $id])
+                             ->with('failed', $msg);
         }
     }
 
@@ -297,11 +303,13 @@ class RequestQuotationController extends Controller
             $msg = "Request for Quotation '$prNo' successfully received and ready for Abstract
                     of Quotation.";
             Auth::user()->log($request, $msg);
-            return redirect(url()->previous())->with('success', $msg);
+            return redirect()->route('rfq', ['keyword' => $id])
+                             ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
-            return redirect(url()->previous())->with('failed', $msg);
+            return redirect()->route('rfq', ['keyword' => $id])
+                             ->with('failed', $msg);
         }
     }
 }

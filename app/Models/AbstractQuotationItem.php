@@ -14,13 +14,6 @@ class AbstractQuotationItem extends Model
      */
     protected $table = 'abstract_quotation_items';
 
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'abstract_id';
-
      /**
      * The attributes that are mass assignable.
      *

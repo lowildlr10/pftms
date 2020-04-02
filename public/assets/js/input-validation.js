@@ -21,7 +21,7 @@ function inputValidation(withError) {
         $("select.required").each(function() {
             let inputField = $(this).val();
 
-            if (!inputField) {
+            if (!inputField || empty(inputField)) {
                 $(this).siblings('.select-dropdown').addClass("input-error-highlighter");
                 errorCount++;
             } else {

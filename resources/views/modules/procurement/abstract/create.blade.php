@@ -12,7 +12,7 @@
             <div class="md-form">
                 <select class="mdb-select crud-select md-form required" searchable="Search here.."
                         id="mode_procurement">
-                    <option value="" disabled selected>Choose a mode of procurement</option>
+                    <option value="0" disabled selected>Choose a mode of procurement</option>
 
                     @if (!empty($procurementModes))
                         @foreach ($procurementModes as $mode)
@@ -39,10 +39,10 @@
                                 <input type="hidden" class="grp_no" name="group_no[{{ $grpCtr }}]"
                                        value="{{ $abstract->group_no }}">
                                 <input type="hidden" class="grp_key" name="group_key[{{ $grpCtr }}]" value="{{ $grpCtr }}">
-                                <select class="sel-bidder-count mdb-select crud-select md-form required"
+                                <select class="sel-bidder-count mdb-select crud-select md-form"
                                         searchable="Search here.." id="bidder_count_{{ $grpCtr }}"
                                         name="bidder_count[{{ $grpCtr }}]">
-                                    <option value="0" disabled selected>Choose a number of supplier</option>
+                                    <option value="0" disabled selected>Choose the number of supplier</option>
 
                                     @for ($countSupplier = 1; $countSupplier <= 6; $countSupplier++)
                                         <option value="{{ $countSupplier }}">
@@ -52,7 +52,7 @@
                                 </select>
                                 <label class="mdb-main-label" for="bidder_count_{{ $grpCtr }}">
                                     <i class="fas fa-sitemap"></i>
-                                    Group No: {{ $abstract->group_no }}  <span class="red-text">*</span>
+                                    Group No: {{ $abstract->group_no + 1 }} <span class="red-text">*</span>
                                 </label>
                             </div>
                         </th>
@@ -112,7 +112,7 @@
             <div class="md-form">
                 <select class="sig-abstracts mdb-select crud-select md-form required"
                         searchable="Search here.." id="sig_chairperson">
-                    <option value="" disabled selected>Choose a chairperson</option>
+                    <option value="0" disabled selected>Choose a chairperson</option>
 
                     @if (count($signatories) > 0)
                         @foreach ($signatories as $sig)
@@ -134,7 +134,7 @@
             <div class="md-form">
                 <select class="sig-abstracts mdb-select crud-select md-form required"
                         searchable="Search here.." id="sig_vice_chairperson">
-                    <option value="" disabled selected>Choose a vice chairperson</option>
+                    <option value="0" disabled selected>Choose a vice chairperson</option>
 
                     @if (count($signatories) > 0)
                         @foreach ($signatories as $sig)
@@ -156,7 +156,7 @@
             <div class="md-form">
                 <select class="sig-abstracts mdb-select crud-select md-form required"
                         searchable="Search here.." id="sig_first_member">
-                    <option value="" disabled selected>Choose a first member</option>
+                    <option value="0" disabled selected>Choose a first member</option>
 
                     @if (count($signatories) > 0)
                         @foreach ($signatories as $sig)
@@ -178,7 +178,8 @@
             <div class="md-form">
                 <select class="sig-abstracts mdb-select crud-select md-form "
                         searchable="Search here.." id="sig_second_member">
-                    <option value="" disabled selected>Choose a second member</option>
+                    <option value="0" disabled selected>Choose a second member</option>
+                    <option value="">-- None --</option>
 
                     @if (count($signatories) > 0)
                         @foreach ($signatories as $sig)
@@ -200,7 +201,8 @@
             <div class="md-form">
                 <select class="sig-abstracts mdb-select crud-select md-form"
                         searchable="Search here.." id="sig_third_member">
-                    <option value="" disabled selected>Choose a third member</option>
+                    <option value="0" disabled selected>Choose a third member</option>
+                    <option value="">-- None --</option>
 
                     @if (count($signatories) > 0)
                         @foreach ($signatories as $sig)
@@ -222,7 +224,7 @@
             <div class="md-form">
                 <select class="sig-abstracts mdb-select crud-select md-form required"
                         searchable="Search here.." id="sig_end_user">
-                    <option value="" disabled selected>Choose an end user </option>
+                    <option value="0" disabled selected>Choose an end user </option>
 
                     @if (count($users) > 0)
                         @foreach ($users as $emp)
