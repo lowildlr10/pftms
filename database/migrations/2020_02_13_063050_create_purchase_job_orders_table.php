@@ -43,7 +43,7 @@ class CreatePurchaseJobOrdersTable extends Migration
             $table->enum('with_ors_burs', ['y', 'n'])->default('n');
             $table->unsignedBigInteger('status');
             $table->foreign('status')->references('id')->on('procurement_status');
-            $table->enum('document_abrv', ['po', 'jo']);
+            $table->enum('document_type', ['po', 'jo']);
             $table->softDeletes();
             $table->timestamps();
         });

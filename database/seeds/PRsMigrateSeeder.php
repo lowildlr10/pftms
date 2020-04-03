@@ -20,8 +20,8 @@ class PRsMigrateSeeder extends Seeder
     public function run()
     {
         $prsData = DB::connection('mysql-old-pftms')
-                       ->table('tblpr')
-                       ->get();
+                     ->table('tblpr')
+                     ->get();
 
         foreach ($prsData as $pr) {
             $code = $pr->code;
@@ -33,33 +33,49 @@ class PRsMigrateSeeder extends Seeder
                                ->first();
             $divisionData = EmpDivision::where('division_name', $_divisionData->division)->first();
             $requestedByData = User::where('emp_id', $pr->requested_by)->first();
-            $_sigApprovedByData = DB::connection('mysql-old-pftms')
-                                    ->table('tblsignatories')
-                                    ->where('id', $pr->approved_by)
-                                    ->first();
+
+            $__sigApprovedByData = DB::connection('mysql-old-pftms')
+                                     ->table('tblsignatories')
+                                     ->where('id', $pr->approved_by)
+                                     ->first();
+            $_sigApprovedByData = $__sigApprovedByData ?
+                                  User::where('emp_id', $__sigApprovedByData->emp_id)->first() :
+                                  NULL;
             $sigApprovedByData = $_sigApprovedByData ?
-                                 Signatory::where('emp_id', $_sigApprovedByData->emp_id)->first() :
+                                 Signatory::where('emp_id', $_sigApprovedByData->id)->first() :
                                  NULL;
-            $_sigAPPData = DB::connection('mysql-old-pftms')
-                         ->table('tblsignatories')
-                         ->where('id', $pr->sig_app)
-                         ->first();
+
+            $__sigAPPData = DB::connection('mysql-old-pftms')
+                             ->table('tblsignatories')
+                             ->where('id', $pr->sig_app)
+                             ->first();
+            $_sigAPPData = $__sigAPPData ?
+                           User::where('emp_id', $__sigAPPData->emp_id)->first() :
+                           NULL;
             $sigAPPData = $_sigAPPData ?
-                          Signatory::where('emp_id', $_sigAPPData->emp_id)->first() :
+                          Signatory::where('emp_id', $_sigAPPData->id)->first() :
                           NULL;
-            $_sigFundsAvailableData = DB::connection('mysql-old-pftms')
-                                        ->table('tblsignatories')
-                                        ->where('id', $pr->sig_funds_available)
-                                        ->first();
-            $sigFundsAvailableData =  $_sigFundsAvailableData ?
-                                      Signatory::where('emp_id', $_sigFundsAvailableData->emp_id)->first() :
+
+            $__sigFundsAvailableData = DB::connection('mysql-old-pftms')
+                                         ->table('tblsignatories')
+                                         ->where('id', $pr->sig_funds_available)
+                                         ->first();
+            $_sigFundsAvailableData = $__sigFundsAvailableData ?
+                                      User::where('emp_id', $__sigFundsAvailableData->emp_id)->first() :
                                       NULL;
-            $_sigRecommendedByData = DB::connection('mysql-old-pftms')
-                                       ->table('tblsignatories')
-                                       ->where('id', $pr->recommended_by)
-                                       ->first();
+            $sigFundsAvailableData =  $_sigFundsAvailableData ?
+                                      Signatory::where('emp_id', $_sigFundsAvailableData->id)->first() :
+                                      NULL;
+
+            $__sigRecommendedByData = DB::connection('mysql-old-pftms')
+                                        ->table('tblsignatories')
+                                        ->where('id', $pr->recommended_by)
+                                        ->first();
+            $_sigRecommendedByData = $__sigRecommendedByData ?
+                                      User::where('emp_id', $__sigRecommendedByData->emp_id)->first() :
+                                      NULL;
             $sigRecommendedByData = $_sigRecommendedByData ?
-                                    Signatory::where('emp_id', $_sigRecommendedByData->emp_id)->first() :
+                                    Signatory::where('emp_id', $_sigRecommendedByData->id)->first() :
                                     NULL;
 
 
