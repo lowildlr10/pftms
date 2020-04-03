@@ -25,11 +25,11 @@ class CreatePurchaseJobOrdersTable extends Migration
             $table->dateTime('date_cancelled')->nullable();
             $table->uuid('awarded_to');
             $table->foreign('awarded_to')->references('id')->on('suppliers');
-            $table->string('place_delivery');
-            $table->string('date_delivery');
-            $table->string('delivery_term');
-            $table->string('payment_term');
-            $table->string('amount_words');
+            $table->string('place_delivery')->nullable();
+            $table->string('date_delivery')->nullable();
+            $table->string('delivery_term')->nullable();
+            $table->string('payment_term')->nullable();
+            $table->string('amount_words')->nullable();
             $table->double('grand_total', 50, 2)->default(0.00);
             $table->string('fund_cluster', 50)->nullable();
             $table->uuid('sig_department')->nullable();
