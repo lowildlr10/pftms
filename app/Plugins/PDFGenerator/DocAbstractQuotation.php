@@ -9,13 +9,16 @@ class DocAbstractQuotation extends PDF {
         $fontScale = $this->fontScale;
 
         $prNo = $data->pr->pr_no;
-        $chairperson = $data->sig_chairperson;
-        $viceChairperson = $data->sig_vice_chairperson;
-        $member1 = $data->sig_first_member;
-        $member2 = $data->sig_second_member;
-        $member3 = $data->sig_third_member;
-        $endUser = $data->sig_end_user;
-        $modeProcurement =  $data->abstract->mode_procurement;
+        $abstractDate = $data->abstract->date_abstract;
+
+
+        $chairperson = $data->sig_chairperson->name;
+        $viceChairperson = $data->sig_vice_chairperson->name;
+        $member1 = $data->sig_first_member->name;
+        $member2 = $data->sig_second_member->name;
+        $member3 = $data->sig_third_member->name;
+        $endUser = $data->sig_end_user->name;
+        $modeProcurement =  $data->abstract->mode_name;
 
         $abstractSigs = [$chairperson, $viceChairperson, $member1,
                          $member2, $member3, $endUser];
@@ -25,26 +28,26 @@ class DocAbstractQuotation extends PDF {
         /* ------------------------------------- Start of Config ------------------------------------- */
 
         //set default monospaced font
-        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+        $this->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
         //Set margins
-        $pdf->SetMargins(10, 35, 10);
-        $pdf->SetHeaderMargin(10);
+        $this->SetMargins(10, 35, 10);
+        $this->SetHeaderMargin(10);
 
         //Set auto page breaks
-        $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+        $this->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
 
         //Set image scale factor
-        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+        $this->setImageScale(PDF_IMAGE_SCALE_RATIO);
 
         //Set some language-dependent strings (optional)
         if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
             require_once(dirname(__FILE__).'/lang/eng.php');
-            $pdf->setLanguageArray($l);
+            $this->setLanguageArray($l);
         }
 
         //Set default font subsetting mode
-        $pdf->setFontSubsetting(true);
+        $this->setFontSubsetting(true);
 
         /* ------------------------------------- End of Config ------------------------------------- */
 
@@ -62,66 +65,66 @@ class DocAbstractQuotation extends PDF {
             }
 
             if ($bidderCount > 0) {
-                $pdf->AddPage();
+                $this->AddPage();
 
         /* ------------------------------------- Start of Doc ------------------------------------- */
 
                 // TABLE TITLE
-                $pdf->SetFont('helvetica', 'B', 10 + ($increaseFontSize * 10));
-                $pdf->Cell($pageHeight * 0.948, 5, 'ABSTRACT OF QUOTATION', "", "",'C');
-                $pdf->Ln(10);
+                $this->SetFont('helvetica', 'B', 10 + ($fontScale * 10));
+                $this->Cell($pageHeight * 0.948, 5, 'ABSTRACT OF QUOTATION', "", "",'C');
+                $this->Ln(10);
 
-                $x = $pdf->GetX();
-                $y = $pdf->GetY();
+                $x = $this->GetX();
+                $y = $this->GetY();
 
                 // Row group
-                $pdf->SetFont('helvetica', 'BI', 9 + ($increaseFontSize * 9));
-                $pdf->MultiCell($totalWidth1 / 2, 5.25, "Purchase Request No.: $prNo \nPMO/End-User : $endUser", "LTB", "L", "");
-                $pdf->SetXY($x + ($totalWidth1 / 2), $y);
-                $pdf->MultiCell($totalWidth1 / 2, 5.25, "Date Prepared: $abstractDate " .
+                $this->SetFont('helvetica', 'BI', 9 + ($fontScale * 9));
+                $this->MultiCell($totalWidth1 / 2, 5.25, "Purchase Request No.: $prNo \nPMO/End-User : $endUser", "LTB", "L", "");
+                $this->SetXY($x + ($totalWidth1 / 2), $y);
+                $this->MultiCell($totalWidth1 / 2, 5.25, "Date Prepared: $abstractDate " .
                                                     "\n" .
                                                     "Mode of Procurement : $modeProcurement ", "RTB", "R", "");
-                $pdf->SetXY($x + $totalWidth1, $y);
-                $pdf->SetFont('helvetica', 'BI', 8 + ($increaseFontSize * 8));
-                $pdf->setCellHeightRatio(0.95);
-                $pdf->MultiCell(0, 3.5, "based on the canvasses submitted,\n WE, the members of the " .
+                $this->SetXY($x + $totalWidth1, $y);
+                $this->SetFont('helvetica', 'BI', 8 + ($fontScale * 8));
+                $this->setCellHeightRatio(0.95);
+                $this->MultiCell(0, 3.5, "based on the canvasses submitted,\n WE, the members of the " .
                                                     "Bids and\n Awards Committee (BAC) ", "TR", "C", "");
 
                 // Row group
-                $pdf->SetFont('helvetica', '', 8 + ($increaseFontSize * 8));
-                $pdf->Cell($totalWidth1 * 0.04, 4, '', 'LR', '', 'C');
-                $pdf->Cell($totalWidth1 * 0.04, 4, '', 'R', '', 'C');
-                $pdf->Cell($totalWidth1 * 0.04, 4, '', 'R', '', 'C');
-                $pdf->Cell($totalWidth1 * 0.13, 4, '', 'R', '', 'C');
-                $pdf->Cell($totalWidth1 * 0.04, 4, '', 'R', '', 'C');
-                $pdf->SetFont('helvetica', 'BI', 8 + ($increaseFontSize * 8));
-                $pdf->Cell($bidderTotalWidth, 3.6, "BIDDER'S QUOTATION AND OFFER", 'RB', '', 'C');
-                $pdf->SetFont('helvetica', 'BI', 9 + ($increaseFontSize * 9));
-                $pdf->MultiCell(0, 3.5, "RECOMMEND the following", "R", "C", "");
+                $this->SetFont('helvetica', '', 8 + ($fontScale * 8));
+                $this->Cell($totalWidth1 * 0.04, 4, '', 'LR', '', 'C');
+                $this->Cell($totalWidth1 * 0.04, 4, '', 'R', '', 'C');
+                $this->Cell($totalWidth1 * 0.04, 4, '', 'R', '', 'C');
+                $this->Cell($totalWidth1 * 0.13, 4, '', 'R', '', 'C');
+                $this->Cell($totalWidth1 * 0.04, 4, '', 'R', '', 'C');
+                $this->SetFont('helvetica', 'BI', 8 + ($fontScale * 8));
+                $this->Cell($bidderTotalWidth, 3.6, "BIDDER'S QUOTATION AND OFFER", 'RB', '', 'C');
+                $this->SetFont('helvetica', 'BI', 9 + ($fontScale * 9));
+                $this->MultiCell(0, 3.5, "RECOMMEND the following", "R", "C", "");
 
 
                 // Row group
-                $pdf->SetFont('helvetica', '', 8 + ($increaseFontSize * 8));
-                $pdf->Cell($totalWidth1 * 0.04, 3.6, 'ITEM', 'LR', '', 'C');
-                $pdf->Cell($totalWidth1 * 0.04, 3.6, 'QTY', 'R', '', 'C');
-                $pdf->Cell($totalWidth1 * 0.04, 3.6, 'UNIT', 'R', '', 'C');
-                $pdf->Cell($totalWidth1 * 0.13, 3.6, 'P A R T I C U L A R S', 'R', '', 'C');
-                $pdf->Cell($totalWidth1 * 0.04, 3.6, 'ABC', 'R', '', 'C');
+                $this->SetFont('helvetica', '', 8 + ($fontScale * 8));
+                $this->Cell($totalWidth1 * 0.04, 3.6, 'ITEM', 'LR', '', 'C');
+                $this->Cell($totalWidth1 * 0.04, 3.6, 'QTY', 'R', '', 'C');
+                $this->Cell($totalWidth1 * 0.04, 3.6, 'UNIT', 'R', '', 'C');
+                $this->Cell($totalWidth1 * 0.13, 3.6, 'P A R T I C U L A R S', 'R', '', 'C');
+                $this->Cell($totalWidth1 * 0.04, 3.6, 'ABC', 'R', '', 'C');
 
                 for ($bidCount = 1; $bidCount <= $bidderCount; $bidCount++) {
-                    $pdf->Cell($bidderWidth, 3.6, '', 'R', '', 'C');
+                    $this->Cell($bidderWidth, 3.6, '', 'R', '', 'C');
                 }
 
-                $pdf->SetFont('helvetica', 'BI', 9 + ($increaseFontSize * 9));
-                $pdf->MultiCell(0, 3.5, "items to be AWARDED as", "R", "C", "");
+                $this->SetFont('helvetica', 'BI', 9 + ($fontScale * 9));
+                $this->MultiCell(0, 3.5, "items to be AWARDED as", "R", "C", "");
 
                 // Row group
-                $pdf->SetFont('helvetica', '', 8 + ($increaseFontSize * 8));
-                $pdf->Cell($totalWidth1 * 0.04, 3.6, 'NO.', 'LR', '', 'C');
-                $pdf->Cell($totalWidth1 * 0.04, 3.6, '', 'R', '', 'C');
-                $pdf->Cell($totalWidth1 * 0.04, 3.6, '', 'R', '', 'C');
-                $pdf->Cell($totalWidth1 * 0.13, 3.6, '', 'R', '', 'C');
-                $pdf->Cell($totalWidth1 * 0.04, 3.6, '(Unit', 'R', '', 'C');
+                $this->SetFont('helvetica', '', 8 + ($fontScale * 8));
+                $this->Cell($totalWidth1 * 0.04, 3.6, 'NO.', 'LR', '', 'C');
+                $this->Cell($totalWidth1 * 0.04, 3.6, '', 'R', '', 'C');
+                $this->Cell($totalWidth1 * 0.04, 3.6, '', 'R', '', 'C');
+                $this->Cell($totalWidth1 * 0.13, 3.6, '', 'R', '', 'C');
+                $this->Cell($totalWidth1 * 0.04, 3.6, '(Unit', 'R', '', 'C');
 
                 foreach ($abstract->suppliers as $list) {
                     $strLength = strlen($list->company_name);
@@ -129,97 +132,97 @@ class DocAbstractQuotation extends PDF {
 
                     if ($bidderCount == 3) {
                         if ($strLength > 30) {
-                            $pdf->Cell($bidderWidth, 3.6, substr(strtoupper($list->company_name), 0, 30) .
+                            $this->Cell($bidderWidth, 3.6, substr(strtoupper($list->company_name), 0, 30) .
                                     '...', 'RB', '', 'C');
                         } else {
-                            $pdf->Cell($bidderWidth, 3.6, strtoupper($list->company_name), 'RB', '', 'C');
+                            $this->Cell($bidderWidth, 3.6, strtoupper($list->company_name), 'RB', '', 'C');
                         }
                     } else if ($bidderCount == 4) {
                         if ($strLength > 20) {
-                            $pdf->Cell($bidderWidth, 3.6, substr(strtoupper($list->company_name), 0, 20) .
+                            $this->Cell($bidderWidth, 3.6, substr(strtoupper($list->company_name), 0, 20) .
                                     '...', 'RB', '', 'C');
                         } else {
-                            $pdf->Cell($bidderWidth, 3.6, strtoupper($list->company_name), 'RB', '', 'C');
+                            $this->Cell($bidderWidth, 3.6, strtoupper($list->company_name), 'RB', '', 'C');
                         }
                     } else if ($bidderCount >= 5) {
                         if ($strLength > 15) {
-                            $pdf->Cell($bidderWidth, 3.6, substr(strtoupper($list->company_name), 0, 15) .
+                            $this->Cell($bidderWidth, 3.6, substr(strtoupper($list->company_name), 0, 15) .
                                     '...', 'RB', '', 'C');
                         } else {
-                            $pdf->Cell($bidderWidth, 3.6, strtoupper($list->company_name), 'RB', '', 'C');
+                            $this->Cell($bidderWidth, 3.6, strtoupper($list->company_name), 'RB', '', 'C');
                         }
                     }
                 }
 
-                $pdf->SetFont('helvetica', 'BI', 9 + ($increaseFontSize * 9));
-                $pdf->MultiCell(0, 3.5, "follows:", "RB", "C", "");
+                $this->SetFont('helvetica', 'BI', 9 + ($fontScale * 9));
+                $this->MultiCell(0, 3.5, "follows:", "RB", "C", "");
 
                 // Row group
-                $pdf->SetFont('helvetica', '', 8 + ($increaseFontSize * 8));
-                $pdf->Cell($totalWidth1 * 0.04, 3.6, '', 'LRB', '', 'C');
-                $pdf->Cell($totalWidth1 * 0.04, 3.6, '', 'RB', '', 'C');
-                $pdf->Cell($totalWidth1 * 0.04, 3.6, '', 'RB', '', 'C');
-                $pdf->Cell($totalWidth1 * 0.13, 3.6, '', 'RB', '', 'C');
-                $pdf->Cell($totalWidth1 * 0.04, 3.6, 'Cost)', 'RB', '', 'C');
+                $this->SetFont('helvetica', '', 8 + ($fontScale * 8));
+                $this->Cell($totalWidth1 * 0.04, 3.6, '', 'LRB', '', 'C');
+                $this->Cell($totalWidth1 * 0.04, 3.6, '', 'RB', '', 'C');
+                $this->Cell($totalWidth1 * 0.04, 3.6, '', 'RB', '', 'C');
+                $this->Cell($totalWidth1 * 0.13, 3.6, '', 'RB', '', 'C');
+                $this->Cell($totalWidth1 * 0.04, 3.6, 'Cost)', 'RB', '', 'C');
 
                 for ($bidCount = 1; $bidCount <= $bidderCount; $bidCount++) {
                     if ($bidderCount == 3) {
-                        $pdf->SetFont('helvetica', '', 8 + ($increaseFontSize * 8));
+                        $this->SetFont('helvetica', '', 8 + ($fontScale * 8));
                     } else if ($bidderCount == 4) {
-                        $pdf->SetFont('helvetica', '', 7 + ($increaseFontSize * 7));
+                        $this->SetFont('helvetica', '', 7 + ($fontScale * 7));
                     } else if ($bidderCount >= 5) {
-                        $pdf->SetFont('helvetica', '', 5.5 + ($increaseFontSize * 5.5));
+                        $this->SetFont('helvetica', '', 5.5 + ($fontScale * 5.5));
                     }
 
-                    $pdf->Cell($bidderWidth * 0.25, 3.6, 'Unit Cost', 'RB', '', 'C');
-                    $pdf->Cell($bidderWidth * 0.25, 3.6, 'Total Cost', 'RB', '', 'C');
+                    $this->Cell($bidderWidth * 0.25, 3.6, 'Unit Cost', 'RB', '', 'C');
+                    $this->Cell($bidderWidth * 0.25, 3.6, 'Total Cost', 'RB', '', 'C');
 
                     if ($bidderCount == 3) {
-                        $pdf->SetFont('helvetica', 'BI', 8 + ($increaseFontSize * 8));
+                        $this->SetFont('helvetica', 'BI', 8 + ($fontScale * 8));
                     } else if ($bidderCount == 4) {
-                        $pdf->SetFont('helvetica', 'BI', 7 + ($increaseFontSize * 7));
+                        $this->SetFont('helvetica', 'BI', 7 + ($fontScale * 7));
                     } else if ($bidderCount >= 5) {
-                        $pdf->SetFont('helvetica', 'BI', 5.5 + ($increaseFontSize * 5.5));
+                        $this->SetFont('helvetica', 'BI', 5.5 + ($fontScale * 5.5));
                     }
 
-                    $pdf->Cell($bidderWidth * 0.5, 3.6, 'Specification', 'RB', '', 'C');
+                    $this->Cell($bidderWidth * 0.5, 3.6, 'Specification', 'RB', '', 'C');
                 }
 
-                $pdf->Cell(0, 3.6, '', 'RB', '', 'C');
-                $pdf->Ln();
+                $this->Cell(0, 3.6, '', 'RB', '', 'C');
+                $this->Ln();
 
                 //Table data
-                $pdf->SetFont('helvetica', '', 8 + ($increaseFontSize * 8));
-                $pdf->htmlTable($abstract->table_data);
+                $this->SetFont('helvetica', '', 8 + ($fontScale * 8));
+                $this->htmlTable($abstract->table_data);
 
-                $pdf->Ln(2.5);
-                $pdf->SetFont('helvetica', '', 8 + ($increaseFontSize * 8));
-                $pdf->Cell(0, 0, "We hereby certify that we have witnessed the opening of bids/quotations and that the prices/quotations contained herein are the true and correct.");
-                $pdf->Ln(5);
+                $this->Ln(2.5);
+                $this->SetFont('helvetica', '', 8 + ($fontScale * 8));
+                $this->Cell(0, 0, "We hereby certify that we have witnessed the opening of bids/quotations and that the prices/quotations contained herein are the true and correct.");
+                $this->Ln(5);
 
                 // Recommendation
-                $pdf->SetFont('helvetica', 'BI', 9 + ($increaseFontSize * 9));
-                $pdf->Cell($totalWidth1 + $totalWidth2, 5, "Recommendation:", '', 0, 'L', 0);
-                $pdf->Ln(5);
+                $this->SetFont('helvetica', 'BI', 9 + ($fontScale * 9));
+                $this->Cell($totalWidth1 + $totalWidth2, 5, "Recommendation:", '', 0, 'L', 0);
+                $this->Ln(5);
 
-                $pdf->Cell(0, 2, "", 'B', 1, 'L', 0);
-                $pdf->Cell(0, 2, "", 'B', 1, 'L', 0);
-                $pdf->Cell(0, 2, "", 'B', 1, 'L', 0);
-                $pdf->Cell(0, 2, "", 'B', 1, 'L', 0);
-                $pdf->Ln(5);
+                $this->Cell(0, 2, "", 'B', 1, 'L', 0);
+                $this->Cell(0, 2, "", 'B', 1, 'L', 0);
+                $this->Cell(0, 2, "", 'B', 1, 'L', 0);
+                $this->Cell(0, 2, "", 'B', 1, 'L', 0);
+                $this->Ln(5);
 
                 // Bids and Committee awardee
-                $pdf->SetFont('helvetica', 'B', 10 + ($increaseFontSize * 10));
-                $pdf->SetTextColor(0, 0, 0);
-                $pdf->Ln(5); // LINE BREAK
+                $this->SetFont('helvetica', 'B', 10 + ($fontScale * 10));
+                $this->SetTextColor(0, 0, 0);
+                $this->Ln(5); // LINE BREAK
 
-                $pdf->Cell($totalWidthDisplay * 0.83, 5, "BIDS AND AWARDS COMITTEE:", '', 0, 'L', 0);
-                $pdf->SetFont('helvetica', '', 10 + ($increaseFontSize * 10));
-                $pdf->Cell($totalWidthDisplay * 0.32, 5, "", '', 0, 'L', 0);
-                $pdf->Ln(); // LINE BREAK
-                $pdf->SetFont('helvetica', 'B', 9 + ($increaseFontSize * 9));
-                $pdf->Cell(0, 8, " ", '', 0, 'L', 0);
-                $pdf->Ln(); // LINE BREAK
+                $this->Cell($totalWidthDisplay * 0.83, 5, "BIDS AND AWARDS COMITTEE:", '', 0, 'L', 0);
+                $this->SetFont('helvetica', '', 10 + ($fontScale * 10));
+                $this->Cell($totalWidthDisplay * 0.32, 5, "", '', 0, 'L', 0);
+                $this->Ln(); // LINE BREAK
+                $this->SetFont('helvetica', 'B', 9 + ($fontScale * 9));
+                $this->Cell(0, 8, " ", '', 0, 'L', 0);
+                $this->Ln(); // LINE BREAK
 
 
                 $signatoryIDs = [];
@@ -236,20 +239,20 @@ class DocAbstractQuotation extends PDF {
 
                 foreach ($abstractSigs as $absSigCtr => $absSig) {
                     if (!empty($absSig)) {
-                        $pdf->Cell($columWidthSpace, 5);
-                        $pdf->Cell($columWidth, 5, $absSig, 'B', 0, 'C');
-                        $pdf->Cell($columWidthSpace, 5);
+                        $this->Cell($columWidthSpace, 5);
+                        $this->Cell($columWidth, 5, $absSig, 'B', 0, 'C');
+                        $this->Cell($columWidthSpace, 5);
                     }
                 }
 
-                $pdf->SetFont('helvetica', '', 9 + ($increaseFontSize * 9));
-                $pdf->Ln(); // LINE BREAK
+                $this->SetFont('helvetica', '', 9 + ($fontScale * 9));
+                $this->Ln(); // LINE BREAK
 
                 foreach ($sigPosition as $titleCtr => $title) {
                     if (in_array($titleCtr, $signatoryIDs)) {
-                        $pdf->Cell($columWidthSpace, 5);
-                        $pdf->Cell($columWidth, 5, $title, 0, 0, 'C');
-                        $pdf->Cell($columWidthSpace, 5);
+                        $this->Cell($columWidthSpace, 5);
+                        $this->Cell($columWidth, 5, $title, 0, 0, 'C');
+                        $this->Cell($columWidthSpace, 5);
                     }
                 }
             }

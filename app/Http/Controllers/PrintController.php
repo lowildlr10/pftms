@@ -478,7 +478,7 @@ class PrintController extends Controller
 
     private function getBidderCount($groupNo, $prID) {
         $bidderCount = 0;
-        $itemID = PurchaseRequestItem::select('item_id')
+        $itemID = PurchaseRequestItem::select('id')
                                      ->where([
             ['pr_id', $prID], ['group_no', $groupNo]
         ])->orderBy('item_no')->first();
@@ -1641,12 +1641,12 @@ class PrintController extends Controller
         $prData = $this->getDataPR($abstract->pr_id)->pr;
 
         $instanceSignatory = new Signatory;
-        $chairperson = $instanceSignatory->getSignatory($abstract->sig_chairperson)->fullname;
-        $viceChairperson = $instanceSignatory->getSignatory($abstract->sig_vice_chairperson)->fullname;
-        $member1 = $instanceSignatory->getSignatory($abstract->sig_first_member)->fullname;
-        $member2 = $instanceSignatory->getSignatory($abstract->sig_second_member)->fullname;
-        $member3 = $instanceSignatory->getSignatory($abstract->sig_third_member)->fullname;
-        $endUser = $instanceSignatory->getEmployee($abstract->sig_end_user)->fullname;
+        $chairperson = $instanceSignatory->getSignatory($abstract->sig_chairperson);
+        $viceChairperson = $instanceSignatory->getSignatory($abstract->sig_vice_chairperson);
+        $member1 = $instanceSignatory->getSignatory($abstract->sig_first_member);
+        $member2 = $instanceSignatory->getSignatory($abstract->sig_second_member);
+        $member3 = $instanceSignatory->getSignatory($abstract->sig_third_member);
+        $endUser = Auth::user()->getEmployee($abstract->sig_end_user);
 
         foreach ($items as $item) {
             $arraySuppliers = [];
@@ -1657,17 +1657,17 @@ class PrintController extends Controller
                            ->join('suppliers as bid', 'bid.id', '=', 'abs.supplier')
                            ->where([['item.group_no', $item->group_no],
                                     ['item.pr_id', $abstract->pr_id]])
-                           ->orderBy('bid.id')
+                           ->orderBy('bid.company_name')
                            ->distinct()
                            ->get();
             $pritems = DB::table('purchase_request_items as item')
                          ->select('bid.company_name', 'item.awarded_remarks', 'item.quantity',
-                                  'unit.unit', 'item.id as item_id', 'item.est_unit_cost',
+                                  'unit.unit_name', 'item.id as item_id', 'item.est_unit_cost',
                                   'item.item_description')
                          ->leftJoin('suppliers as bid', 'bid.id', '=', 'item.awarded_to')
                          ->join('item_unit_issues as unit', 'unit.id', '=', 'item.unit_issue')
-                         ->where('item.group_no', $item->group_no)
-                         ->where('item.pr_id', $abstract->pr_id)
+                         ->where([['item.group_no', $item->group_no],
+                                  ['item.pr_id', $abstract->pr_id]])
                          ->orderBy('item.item_no')
                          ->get();
             $bidderCount = $this->getBidderCount($item->group_no, $abstract->pr_id);
@@ -1685,13 +1685,14 @@ class PrintController extends Controller
 
                 $abstractItems = DB::table('abstract_quotation_items as abs')
                                    ->join('purchase_request_items as item', 'item.id', '=', 'abs.pr_item_id')
-                                   ->where([['item.pr_id', $id],
+                                   ->join('suppliers as bid', 'bid.id', '=', 'abs.supplier')
+                                   ->where([['item.pr_id', $abstract->pr_id],
                                             ['item.id', $pr->item_id]])
-                                   ->orderBy('abs.supplier')
+                                   ->orderBy('bid.company_name')
                                    ->get();
                 $_tableData = [$ctrItem + 1,
                                $pr->quantity,
-                               $pr->unit,
+                               $pr->unit_name,
                                $pr->item_description,
                                number_format($pr->est_unit_cost, 2)];
 

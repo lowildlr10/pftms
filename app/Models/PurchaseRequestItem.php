@@ -88,4 +88,11 @@ class PurchaseRequestItem extends Model
 
         return json_encode($data);
     }
+
+    /**
+     * Get the phone record associated with the purchase request
+     */
+    public function pr() {
+        return $this->belongsTo('App\Models\PurchaseRequest', 'pr_id', 'id');
+    }
 }
