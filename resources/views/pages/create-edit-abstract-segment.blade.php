@@ -13,8 +13,8 @@
 
         <th style="text-align:center;" width="320px">
             <div class="form-group">
-                <select class="browser-default custom-select sel-supplier" name="selected_supplier[{{ $groupKey }}][{{ $key }}]">
-
+                <select class="browser-default custom-select sel-supplier"
+                        name="selected_supplier[{{ $groupKey }}][{{ $key }}]">
                     @if (!empty($supplierList))
                         @foreach ($supplierList as $supplierCounter => $bid)
                             @if ($key == $supplierCounter)

@@ -17,14 +17,14 @@
             <div class="user-pic">
                 <a href="{{ url('profile') }}">
                 @if (Auth::user()->gender == 'male' && empty(Auth::user()->avatar))
-                    <img class="img-responsive img-rounded" alt="avatar"
+                    <img class="img-responsive img-rounded z-depth-2" alt="avatar"
                          src="{{ asset('images/avatar/male.png') }}">
                 @elseif (Auth::user()->gender == 'female' && empty(Auth::user()->avatar))
-                    <img class="img-responsive img-rounded" alt="avatar"
+                    <img class="img-responsive img-rounded z-depth-2" alt="avatar"
                          src="{{ asset('images/avatar/female.png') }}" alt="avatar">
                 @else
                     @if (!empty(Auth::user()->avatar))
-                    <img class="img-responsive img-rounded" alt="avatar"
+                    <img class="img-responsive img-rounded z-depth-2" alt="avatar"
                          src="{{ url(Auth::user()->avatar) }}" alt="avatar">
                     @endif
                 @endif

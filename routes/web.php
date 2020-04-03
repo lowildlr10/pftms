@@ -157,6 +157,19 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('voucher-tracking/{toggle}', 'VoucherLogController@index');
     Route::get('voucher-tracking/generate-table/{toggle}', 'VoucherLogController@show');
 
+
+
+
+
+
+
+
+
+
+
+
+
+
     /*===================== ACCOUNT MANAGEMENT ROUTES =====================*/
 
     // Profile Module
@@ -172,6 +185,9 @@ Route::middleware(['web', 'auth'])->group(function () {
          ->name('profile-destroy');
 
     /*===================== OTHER ROUTES =====================*/
+
+    // Search all
+    Route::post('search', 'HomeController@indexSearchAll')->name('search-all');
 
     // Dashboard Module
     Route::get('/', 'HomeController@index')->name('dashboard');
@@ -296,54 +312,54 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
 
     // Abstract of Quotation Module
     Route::any('procurement/abstract', [
-        'uses' => 'AbstractController@index',
+        'uses' => 'AbstractQuotationController@index',
         'module' => 'proc_abstract',
         'access' => 'is_allowed'
     ])->name('abstract');
-    Route::get('procurement/abstract/segment/{id}', [
-        'uses' => 'AbstractController@getSegment',
+    Route::get('procurement/abstract/item-segment/{id}', [
+        'uses' => 'AbstractQuotationController@showItemSegment',
         'module' => 'proc_abstract',
         'access' => 'is_allowed'
     ])->name('abstract-segment');
     Route::get('procurement/abstract/show-create/{id}', [
-        'uses' => 'AbstractController@showCreate',
+        'uses' => 'AbstractQuotationController@showCreate',
         'module' => 'proc_abstract',
         'access' => 'create'
     ])->name('abstract-show-create');
     Route::post('procurement/abstract/store/{id}', [
-        'uses' => 'AbstractController@store',
+        'uses' => 'AbstractQuotationController@store',
         'module' => 'proc_abstract',
         'access' => 'create'
     ])->name('abstract-store');
     Route::post('procurement/abstract/store-items/{id}', [
-        'uses' => 'AbstractController@storeItems',
+        'uses' => 'AbstractQuotationController@storeItems',
         'module' => 'proc_abstract',
         'access' => 'create'
     ])->name('abstract-store-items');
     Route::get('procurement/abstract/show-edit/{id}', [
-        'uses' => 'AbstractController@showEdit',
+        'uses' => 'AbstractQuotationController@showEdit',
         'module' => 'proc_abstract',
         'access' => 'update'
     ])->name('abstract-show-edit');
-    Route::post('procurement/abstract/store-update/{id}', [
-        'uses' => 'AbstractController@storeUpdate',
-        'module' => 'proc_abstract',
-        'access' => 'update'
-    ])->name('abstract-show-edit');
-    Route::post('procurement/abstract/update-items/{id}', [
-        'uses' => 'AbstractController@updateItems',
+    Route::post('procurement/abstract/update/{id}', [
+        'uses' => 'AbstractQuotationController@update',
         'module' => 'proc_abstract',
         'access' => 'update'
     ])->name('abstract-update');
-    Route::post('procurement/abstract/delete/{id}', [
-        'uses' => 'AbstractController@delete',
+    Route::post('procurement/abstract/update-items/{id}', [
+        'uses' => 'AbstractQuotationController@updateItems',
+        'module' => 'proc_abstract',
+        'access' => 'update'
+    ])->name('abstract-update-items');
+    Route::post('procurement/abstract/delete-items/{id}', [
+        'uses' => 'AbstractQuotationController@deleteItems',
         'module' => 'proc_abstract',
         'access' => 'delete'
-    ])->name('abstract-delete');
+    ])->name('abstract-delete-items');
     Route::post('procurement/abstract/approve/{id}', [
-        'uses' => 'AbstractController@approve',
+        'uses' => 'AbstractQuotationController@approveForPO',
         'module' => 'proc_abstract',
-        'access' => 'approve'
+        'access' => 'approve_po_jo'
     ])->name('abstract-approve');
 
     // Purchase and Job Order Module

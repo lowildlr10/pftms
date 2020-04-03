@@ -42,6 +42,12 @@ class HomeController extends Controller
                                         'pr' => $pr]);
     }
 
+    public function indexSearchAll(Request $request) {
+        $search = trim($request->search);
+
+        return view();
+    }
+
     private function getDataProcurement() {
         if (!Auth::user()->hasOrdinaryRole()) {
             //$pendingLastMonth = '';

@@ -438,21 +438,13 @@ class AccountController extends Controller
                                   ->limit(1),
             'region' => Region::select('region_name')
                               ->whereColumn('id', 'emp_accounts.region')
-                              ->limit(1),
-            'group' => EmpGroup::select('group_name')
-                              ->whereColumn('id', 'emp_accounts.group')
-                              ->limit(1),
-            'role' => EmpRole::select('role')
-                             ->whereColumn('id', 'emp_accounts.role')
-                             ->limit(1)
+                              ->limit(1)
         ])->where('id', $id)->first();
 
         $employeeID = $userData->emp_id;
         $division = $userData->division;
         $province = $userData->province;
         $region = $userData->region;
-        $group = $userData->group;
-        $role = $userData->role;
         $firstname = $userData->firstname;
         $middlename = $userData->middlename;
         $lastname = $userData->lastname;
@@ -472,7 +464,6 @@ class AccountController extends Controller
             'division' => $division,
             'province' => $province,
             'region' => $region,
-            'role' => $role,
             'firstname' => $firstname,
             'middlename' => $middlename,
             'lastname' => $lastname,

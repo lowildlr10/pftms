@@ -41,13 +41,6 @@ $(function() {
 
 			switch(i){
 				case 0:
-                    /*
-					$(newcell).find('select.crud-select')
-                              .attr('id', 'unit' + conCount);
-
-                    $(`#unit${conCount}`).materialSelect({destroy : true});
-                    $(`#unit${conCount}`).materialSelect();*/
-
                     $(newcell).find('div.md-form').first().append($(newcell).find('select'));
                     $(newcell).find('div.select-wrapper').remove();
                     $(newcell).find('select').attr('id', 'unit' + conCount).val('').materialSelect();

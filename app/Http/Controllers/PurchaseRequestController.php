@@ -670,8 +670,9 @@ class PurchaseRequestController extends Controller
                 return redirect(url()->previous())->with('success', $msg);
             } else {
                 $msg = "Purchase Request '$prNo' has a duplicate.";
-                //Auth::user()->log($request, $msg);
-                return redirect(url()->previous())->with('warning', $msg);
+                Auth::user()->log($request, $msg);
+                return redirect()->route('pr', ['keyword' => $prID])
+                                 ->with('warning', $msg);
             }
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
@@ -785,7 +786,8 @@ class PurchaseRequestController extends Controller
 
             $msg = "Purchase Request '$prNo' successfully updated.";
             Auth::user()->log($request, $msg);
-            return redirect(url()->previous())->with('success', $msg);
+            return redirect()->route('pr', ['keyword' => $id])
+                             ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
@@ -843,7 +845,8 @@ class PurchaseRequestController extends Controller
 
             $msg = "Purchase request '$prNo' successfully approved.";
             Auth::user()->log($request, $msg);
-            return redirect(url()->previous())->with('success', $msg);
+            return redirect()->route('abstract', ['keyword' => $id])
+                             ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
@@ -866,7 +869,8 @@ class PurchaseRequestController extends Controller
 
             $msg = "Purchase request '$prNo' successfully disapproved.";
             Auth::user()->log($request, $msg);
-            return redirect(url()->previous())->with('success', $msg);
+            return redirect()->route('pr', ['keyword' => $id])
+                             ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
@@ -889,7 +893,8 @@ class PurchaseRequestController extends Controller
 
             $msg = "Purchase request '$prNo' successfully cancelled.";
             Auth::user()->log($request, $msg);
-            return redirect(url()->previous())->with('success', $msg);
+            return redirect()->route('pr', ['keyword' => $id])
+                             ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);

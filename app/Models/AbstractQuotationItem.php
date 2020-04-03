@@ -14,13 +14,6 @@ class AbstractQuotationItem extends Model
      */
     protected $table = 'abstract_quotation_items';
 
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'abstract_id';
-
      /**
      * The attributes that are mass assignable.
      *
@@ -43,6 +36,13 @@ class AbstractQuotationItem extends Model
      * @var bool
      */
     public $incrementing = false;
+
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
 
     public static function boot() {
          parent::boot();

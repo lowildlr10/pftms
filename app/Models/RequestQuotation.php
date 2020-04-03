@@ -71,7 +71,7 @@ class RequestQuotation extends Model
     ];
 
     public function notifyIssued($id, $responsiblePerson, $requestedBy) {
-        $rfqData = $this::with('pr')->where('id', $id)->first();
+        $rfqData = $this::with('pr')->find($id);
         $prID = $rfqData->pr_id;
         $prNo = $rfqData->pr->pr_no;
 
@@ -117,7 +117,7 @@ class RequestQuotation extends Model
     }
 
     public function notifyReceived($id, $receivedBy, $responsiblePerson, $requestedBy) {
-        $rfqData = $this::with('pr')->where('id', $id)->first();
+        $rfqData = $this::with('pr')->find($id);
         $prID = $rfqData->pr_id;
         $prNo = $rfqData->pr->pr_no;
         $user = new User;

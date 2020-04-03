@@ -154,15 +154,6 @@
                                             <label for="username">User Name</label>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <div class="md-form">
-                                                <input type="text" class="form-control"
-                                                       value="{{ $role }}" id="role" readonly>
-                                                <label for="role">Role</label>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>

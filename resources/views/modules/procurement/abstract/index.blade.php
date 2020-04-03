@@ -199,29 +199,32 @@
                                     <i class="fas fa-print blue-text"></i> Print Abstract
                                 </button>
 
-                                @if ($abs->toggle == 'create' && $isAllowedCreate)
+                                @if ($abs->toggle == 'store' && $isAllowedCreate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showCreate('{{ $abs->id }}', '{{ $abs->pr_no }}', '{{ $abs->toggle }}');">
+                                        onclick="$(this).showCreate('{{ route('abstract-show-create', ['id' => $abs->abstract['id']]) }}',
+                                                                    '{{ $abs->abstract['id'] }}');">
                                     <i class="fas fa-pencil-alt green-text"></i> Create
                                 </button>
-                                @elseif ($abs->toggle == 'edit' && $isAllowedUpdate)
+                                @elseif ($abs->toggle == 'update' && $isAllowedUpdate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showEdit('{{ route('abstract-show-edit', ['id' => $abs->abstract['id']]) }}');">
+                                        onclick="$(this).showEdit('{{ route('abstract-show-edit', ['id' => $abs->abstract['id']]) }}',
+                                                                  '{{ $abs->abstract['id'] }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
                                 @endif
-                                @if ($abs->toggle == 'create' && $isAllowedDelete)
+                                @if ($abs->toggle == 'store' && $isAllowedDelete)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         disabled="disabled">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
-                                @elseif ($abs->toggle == 'edit' && $isAllowedDelete)
+                                @elseif ($abs->toggle == 'update' && $isAllowedDelete)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showDelete('{{ route('abstract-delete', ['id' => $abs->abstract['id']]) }}',
+                                        onclick="$(this).showDelete('{{ route('abstract-delete-items',
+                                                                              ['id' => $abs->abstract['id']]) }}',
                                                                               '{{ $abs->pr_no }}');">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
@@ -302,6 +305,7 @@
 @include('modals.search-post')
 @include('modals.create')
 @include('modals.edit')
+@include('modals.approve')
 @include('modals.delete')
 @include('modals.print')
 
