@@ -64,10 +64,6 @@ class AbstractQuotationController extends Controller
             $query->whereNotNull('id');
         });
 
-        if ($roleHasOrdinary) {
-            $absData = $absData->where('requested_by', Auth::user()->id);
-        }
-
         if (!empty($keyword)) {
             $absData = $absData->where(function($qry) use ($keyword) {
                 $qry->where('id', 'like', "%$keyword%")

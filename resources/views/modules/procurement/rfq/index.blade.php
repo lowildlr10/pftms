@@ -1,15 +1,5 @@
 @extends('layouts.app')
 
-@section('custom-css')
-
-<!-- DataTables CSS -->
-<link rel="stylesheet" type="text/css" href="{{ asset('plugins/mdb/css/addons/datatables.min.css') }}" rel="stylesheet">
-
-<!-- DataTables Select CSS -->
-<link rel="stylesheet" type="text/css" href="{{ asset('plugins/mdb/css/addons/datatables-select.min.css') }}" rel="stylesheet">
-
-@endsection
-
 @section('main-content')
 
 <div class="row wow animated fadeIn">

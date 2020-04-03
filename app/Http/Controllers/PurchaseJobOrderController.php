@@ -3,16 +3,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\PurchaseRequest;
+use App\Models\PurchaseRequestItem;
+use App\Models\AbstractQuotation;
+use App\Models\AbstractQuotationItem;
+use App\Models\PurchaseJobOrder;
+use App\Models\PurchaseJobOrderItem;
+use App\Models\ObligationRequestStatus;
+use App\Models\InspectionAcceptance;
+use App\Models\DisbursementVoucher;
+use App\Models\InventoryStock;
+
 use App\User;
-use App\PurchaseOrder;
-use App\UnitIssue;
-use App\OrsBurs;
-use App\InspectionAcceptance;
-use App\DisbursementVoucher;
-use App\InventoryStock;
-use App\EmployeeLog;
-use App\DocumentLogHistory;
-use App\PaperSize;
+use App\Models\DocumentLog as DocLog;
+use App\Models\PaperSize;
+use App\Models\Supplier;
+use App\Models\Signatory;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -20,123 +26,107 @@ use DB;
 class PurchaseJobOrderController extends Controller
 {
     /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
-    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
-    {
-        $pageLimit = 10;
-        $search = trim($request['search']);
-        $paperSizes = PaperSize::all();
-        $prList = DB::table('tblpr as pr')
-                    ->select('pr.*', 'proj.project',
-                              DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                    ->join('tblpo_jo as po', 'po.pr_id', '=', 'pr.id')
-                    ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'pr.requested_by')
-                    ->join('tblpr_status AS status', 'status.id', '=', 'pr.status')
-                    ->leftJoin('tblprojects AS proj', 'proj.id', '=', 'pr.project_id')
-                    ->whereNull('pr.deleted_at')
-                    ->where('status.id', '>', 5);
+    public function index(Request $request) {
+        $keyword = trim($request->keyword);
+        $instanceDocLog = new DocLog;
 
-        if (!empty($search)) {
-            $prList = $prList->where(function ($query) use ($search) {
-                                   $query->where('pr.pr_no', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('po.po_no', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('pr.date_pr', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('pr.purpose', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.firstname', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.middlename', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.lastname', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('pr.code', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('po.code', 'LIKE', '%' . $search . '%');
-                               });
+        // Get module access
+        $module = 'proc_po_jo';
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedAccountantSigned = Auth::user()->getModuleAccess($module, 'accountant_signed');
+        $isAllowedApprove = Auth::user()->getModuleAccess($module, 'approve');
+        $isAllowedIssue = Auth::user()->getModuleAccess($module, 'issue');
+        $isAllowedReceive = Auth::user()->getModuleAccess($module, 'receive');
+        $isAllowedCancel = Auth::user()->getModuleAccess($module, 'cancel');
+        $isAllowedUncancel = Auth::user()->getModuleAccess($module, 'uncancel');
+        $isAllowedDelivery = Auth::user()->getModuleAccess($module, 'delivery');
+        $isAllowedInspection = Auth::user()->getModuleAccess($module, 'inspection');
+        $isAllowedORSCreate = Auth::user()->getModuleAccess('proc_ors_burs', 'create');
+        $isAllowedORS = Auth::user()->getModuleAccess('proc_ors_burs', 'is_allowed');
+        $isAllowedIAR = Auth::user()->getModuleAccess('proc_iar', 'is_allowed');
+
+        // User groups
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
+                             [Auth::user()->division];
+
+        // Main data
+        $paperSizes = PaperSize::orderBy('paper_type')->get();
+        $poData = PurchaseRequest::with(['funding', 'requestor'])
+                                 ->whereHas('division', function($query)
+                                            use($empDivisionAccess) {
+            $query->whereIn('id', $empDivisionAccess);
+        })->whereHas('po', function($query) {
+            $query->whereNotNull('id');
+        });
+
+        if (!empty($keyword)) {
+            $poData = $poData->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('pr_no', 'like', "%$keyword%")
+                    ->orWhere('date_pr', 'like', "%$keyword%")
+                    ->orWhere('purpose', 'like', "%$keyword%")
+                    ->orWhereHas('funding', function($query) use ($keyword) {
+                        $query->where('source_name', 'like', "%$keyword%");
+                    })->orWhereHas('stat', function($query) use ($keyword) {
+                        $query->where('status_name', 'like', "%$keyword%");
+                    })->orWhereHas('requestor', function($query) use ($keyword) {
+                        $query->where('firstname', 'like', "%$keyword%")
+                              ->orWhere('middlename', 'like', "%$keyword%")
+                              ->orWhere('lastname', 'like', "%$keyword%");
+                    })->orWhereHas('items', function($query) use ($keyword) {
+                        $query->where('item_description', 'like', "%$keyword%");
+                    })->orWhereHas('division', function($query) use ($keyword) {
+                        $query->where('division_name', 'like', "%$keyword%");
+                    })->orWhereHas('po', function($query) use ($keyword) {
+                        $query->where('po_no', 'like', "%$keyword%")
+                              ->orWhere('date_po', 'like', "%$keyword%")
+                              ->orWhere('date_po_approved', 'like', "%$keyword%")
+                              ->orWhere('date_cancelled', 'like', "%$keyword%")
+                              ->orWhere('place_delivery', 'like', "%$keyword%")
+                              ->orWhere('date_delivery', 'like', "%$keyword%")
+                              ->orWhere('delivery_term', 'like', "%$keyword%")
+                              ->orWhere('payment_term', 'like', "%$keyword%")
+                              ->orWhere('amount_words', 'like', "%$keyword%")
+                              ->orWhere('grand_total', 'like', "%$keyword%")
+                              ->orWhere('fund_cluster', 'like', "%$keyword%");
+                    });
+            });
         }
 
-        if (Auth::user()->role == 3 || Auth::user()->role == 4 || Auth::user()->role == 6) {
-            $prList = $prList->where('requested_by', Auth::user()->emp_id);
-        }
+        $poData = $poData->sortable(['pr_no' => 'desc'])->paginate(20);
 
-        if (Auth::user()->role == 5) {
-            $prList = $prList->where('emp.division_id', Auth::user()->division_id);
-        }
+        foreach ($poData as $po) {
+            foreach ($po->po as $poDat) {
+                $poDat->doc_status = $instanceDocLog->checkDocStatus($poDat->id);
 
-        $prList = $prList->orderBy('pr.id', 'desc')
-                         ->distinct()
-                         ->paginate($pageLimit, ['pr.id']);
-
-        foreach ($prList as $list) {
-            //$type = "po";
-            $poItem = [];
-            $suppliers = DB::table('tblpo_jo as po')
-                           ->select('po.awarded_to', 'bidder.company_name', 'po.po_no', 'po.for_approval',
-                                    'status.id AS sID', 'po.document_abrv', 'po.date_po_approved',
-                                    'po.date_accountant_signed', 'po.code', 'po.with_ors_burs',
-                                    'po.date_cancelled', 'po.date_po', 'po.created_at')
-                           ->join('tblsuppliers as bidder', 'bidder.id', '=', 'po.awarded_to')
-                           ->join('tblpr_status AS status', 'status.id', '=', 'po.status')
-                           ->where([['po.pr_id', $list->id], ['po.awarded_to', '<>', 0]])
-                           ->whereNotNull('po.awarded_to')
-                           ->whereNull('po.deleted_at')
-                           ->orderBy('po.po_no');
-
-            if (!empty($search)) {
-                $suppliers = $suppliers->where('po.po_no', 'LIKE', '%' . $search . '%')
-                                       ->orWhere('po.code', 'LIKE', '%' . $search . '%');
+                $instanceSupplier = Supplier::find($poDat->awarded_to);
+                $companyName = $instanceSupplier->company_name;
+                $poDat->company_name = $companyName;
             }
-
-            $suppliers = $suppliers->get();
-
-            foreach ($suppliers as $bid) {
-                $ors = OrsBurs::where('po_no', $bid->po_no)->first();
-                $orsDateIssued = "";
-                $prItemCount = DB::table('tblpr_items')
-                                 ->where([['pr_id', $list->id], ['awarded_to', $bid->awarded_to]])
-                                 ->count();
-
-                if (!empty($ors->date_issued)) {
-                    $orsDateIssued = $ors->date_issued;
-                } else {
-                    $orsDateIssued = NULL;
-                }
-
-                $type = strtolower($bid->document_abrv);
-                $logshist = $this->checkDocStatus($bid->code);
-                $poItem[] = (object)['po_no' => $bid->po_no,
-                                     'date_po' => $bid->date_po,
-                                     'date_issued' => $logshist->date_issued,
-                                     'date_received' => $logshist->date_received,
-                                     'awarded_to' => $bid->awarded_to,
-                                     'company_name' => $bid->company_name,
-                                     'type' => $type,
-                                     'status_id' => $bid->sID,
-                                     'ors_date_issue' => $orsDateIssued,
-                                     'for_approval' => $bid->for_approval,
-                                     'with_ors_burs' => $bid->with_ors_burs,
-                                     'date_po_approved' => $bid->date_po_approved,
-                                     'date_accountant_signed' => $bid->date_accountant_signed,
-                                     'item_count' => $prItemCount,
-                                     'date_cancelled' => $bid->date_cancelled,
-                                     'created_at' => $bid->created_at];
-            }
-
-            $list->po_item = $poItem;
         }
 
-        return view('pages.po-jo', ['search' => $search,
-                                    'list' => $prList,
-                                    'pageLimit' => $pageLimit,
-                                    'paperSizes' => $paperSizes]);
+        return view('modules.procurement.po-jo.index', [
+            'list' => $poData,
+            'keyword' => $keyword,
+            'paperSizes' => $paperSizes,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedAccountantSigned' => $isAllowedAccountantSigned,
+            'isAllowedApprove' => $isAllowedApprove,
+            'isAllowedIssue' => $isAllowedIssue,
+            'isAllowedReceive' => $isAllowedReceive,
+            'isAllowedCancel' => $isAllowedCancel,
+            'isAllowedUncancel' => $isAllowedUncancel,
+            'isAllowedDelivery' => $isAllowedDelivery,
+            'isAllowedInspection' => $isAllowedInspection,
+            'isAllowedORSCreate' => $isAllowedORSCreate,
+            'isAllowedORS' => $isAllowedORS,
+            'isAllowedIAR' => $isAllowedIAR,
+        ]);
     }
 
     /**
