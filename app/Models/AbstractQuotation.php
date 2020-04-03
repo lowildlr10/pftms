@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 use App\Notifications\AbstractQuotation as Notif;
+use App\User;
 use Kyslik\ColumnSortable\Sortable;
 
 class AbstractQuotation extends Model

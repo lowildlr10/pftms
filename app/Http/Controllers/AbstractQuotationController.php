@@ -303,7 +303,7 @@ class AbstractQuotationController extends Controller
             }
 
             $instancePRItem = PurchaseRequestItem::find($prIDItem);
-            $instancePRItem->awarded_to = $awardedTo;
+            $instancePRItem->awarded_to = $awardedTo ? $awardedTo : NULL;
             $instancePRItem->document_type = $documentType;
             $instancePRItem->awarded_remarks = $awardedRemark;
             $instancePRItem->save();
@@ -442,51 +442,70 @@ class AbstractQuotationController extends Controller
             }
 
             $instancePRItem = PurchaseRequestItem::find($prIDItem);
-            $instancePRItem->awarded_to = $awardedTo;
-            $instancePRItem->document_type = $documentType;
-            $instancePRItem->awarded_remarks = $awardedRemark;
-            $instancePRItem->save();
-
             $poCount = PurchaseJobOrder::where('pr_id', $prID)->count();
 
             if ($poCount > 0 && $instanceAbstract->pr->status >= 6) {
-                $newPONo = "$prNo-".$this->poLetters[$poCount];
+                $instancePOItem = PurchaseJobOrderItem::with('po')
+                                                      ->where('pr_item_id', $prIDItem)
+                                                      ->first();
 
-                $instancePO = PurchaseJobOrder::where([
-                    ['pr_id', $prID], ['awarded_to', $awardedTo]
-                ])->whereNull('date_po_approved')->first();
-
-                if ($instancePO) {
-                    $instancePOItem = PurchaseJobOrderItem::where('po_no', $instancePO->po_no)
-                                                          ->first();
-                    $_instancePRItem = PurchaseRequestItem::find($instancePOItem->pr_item_id);
-
-                    if ($_instancePRItem->group_no == $instancePRItem->group_no) {
-                        $this->addItemPO(
-                            $instancePO->po_no,
-                            $prID,
-                            $instancePRItem->id,
-                            $awardedTo
-                        );
+                if ($instancePOItem) {
+                    if (!empty($awardedTo)) {
+                        if ($awardedTo != $instancePOItem->po->awarded_to) {
+                            $this->processPOItemData($prID, $prIDItem, $awardedTo, $poCount, $documentType);
+                        }
                     } else {
-                        $this->createDocumentPO($newPONo, $prID, $documentType, $awardedTo, []);
-                        $this->addItemPO(
-                            $newPONo,
-                            $prID,
-                            $instancePRItem->id,
-                            $awardedTo
-                        );
+                        PurchaseJobOrderItem::where('pr_item_id', $prIDItem)
+                                            ->delete();
                     }
                 } else {
-                    $this->createDocumentPO($newPONo, $prID, $documentType, $awardedTo, []);
-                    $this->addItemPO(
-                        $newPONo,
-                        $prID,
-                        $instancePRItem->id,
-                        $awardedTo
-                    );
+                    if (!empty($awardedTo)) {
+                        $this->processPOItemData($prID, $prIDItem, $awardedTo, $poCount, $documentType);
+                    }
                 }
             }
+
+            $instancePRItem->awarded_to = $awardedTo ? $awardedTo : NULL;
+            $instancePRItem->document_type = $documentType;
+            $instancePRItem->awarded_remarks = $awardedRemark;
+            $instancePRItem->save();
+        }
+    }
+
+    private function processPOItemData($prID, $prIDItem, $awardedTo, $poCount, $documentType) {
+        $instancePRItem = PurchaseRequestItem::with('pr')->find($prIDItem);
+        $prNo = $instancePRItem->pr->pr_no;
+        $instancePOs = PurchaseJobOrder::where([
+            ['pr_id', $prID], ['awarded_to', $awardedTo]
+        ])->whereNull('date_po_approved')->get();
+        $hasParentPO = false;
+
+        foreach ($instancePOs as $instancePO) {
+            $_instancePOItem = PurchaseJobOrderItem::with('pritem')
+                                                   ->where('po_no', $instancePO->po_no)
+                                                   ->first();
+
+            if ($_instancePOItem->pritem->group_no == $instancePRItem->group_no) {
+                $this->addItemPO(
+                    $instancePO->po_no,
+                    $prID,
+                    $prIDItem,
+                    $awardedTo
+                );
+                $hasParentPO = true;
+                break;
+            }
+        }
+
+        if (!$hasParentPO) {
+            $newPONo = "$prNo-".$this->poLetters[$poCount];
+            $this->createDocumentPO($newPONo, $prID, $documentType, $awardedTo, []);
+            $this->addItemPO(
+                $newPONo,
+                $prID,
+                $prIDItem,
+                $awardedTo
+            );
         }
     }
 
@@ -531,6 +550,7 @@ class AbstractQuotationController extends Controller
 
             $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
             $prItemGroups = $this->getGroups($prID);
+            $winCounter = 0;
 
             if ($isDocGenerated) {
                 $instanceAbstract->date_abstract_approved = Carbon::now();
@@ -538,14 +558,14 @@ class AbstractQuotationController extends Controller
 
                 foreach ($prItemGroups as $groupCtr => $group) {
                     $itemWinner = PurchaseRequestItem::select('awarded_to', 'document_type')
-                                                    ->where([
-                        ['pr_id', $prID], ['group_no', $groupCtr]
+                                                     ->where([
+                        ['pr_id', $prID], ['group_no', $group]
                     ])->whereNotNull('awarded_to')->distinct()->get();
                     $winnerCount = $itemWinner->count();
 
                     if ($winnerCount > 0) {
                         foreach ($itemWinner as $win) {
-                            $poNo = "$prNo-".$this->poLetters[$groupCtr];
+                            $poNo = "$prNo-".$this->poLetters[$winCounter];
                             $awardedTo = $win->awarded_to;
                             $documentType = $win->document_type;
                             $countPO = PurchaseJobOrder::where('po_no', $poNo)->count();
@@ -560,6 +580,7 @@ class AbstractQuotationController extends Controller
                                 $instancePO->document_type = $documentType;
                                 $instancePO->awarded_to = $awardedTo;
                                 $instancePO->with_ors_burs = 'n';
+                                $instancePO->status = 6;
                                 $instancePO->save();
 
                                 foreach ($instancePRItems as $item) {
@@ -569,6 +590,8 @@ class AbstractQuotationController extends Controller
                             } else {
                                 $this->createDocumentPO($poNo, $prID, $documentType, $awardedTo, $instancePRItems);
                             }
+
+                            $winCounter++;
                         }
                     }
                 }
@@ -602,6 +625,7 @@ class AbstractQuotationController extends Controller
         $instancePO->pr_id = $prID;
         $instancePO->document_type = $documentType;
         $instancePO->awarded_to = $awardedTo;
+        $instancePO->status = 6;
         $instancePO->save();
 
         foreach ($prItems as $item) {
@@ -611,15 +635,18 @@ class AbstractQuotationController extends Controller
     }
 
     private function addItemPO($poNo, $prID, $prItemID, $awardedTo) {
-        $instanceAbstract = AbstractQuotation::where([
+        $instanceAbsItem = AbstractQuotationItem::where([
             ['pr_item_id', $prItemID], ['supplier', $awardedTo]
         ])->first();
         $instancePRItem = PurchaseRequestItem::find($prItemID);
+        $itemNo = $instancePRItem->item_no;
         $quantity = $instancePRItem->quantity;
         $itemDescription = $instancePRItem->item_description;
         $unitIssue = $instancePRItem->unit_issue;
         $unitCost = $instanceAbsItem->unit_cost;
-        $totaltCost = $instanceAbsItem->total_cost;
+        $totalCost = $instanceAbsItem->total_cost;
+        $specification = $instanceAbsItem->specification;
+        $specification = !empty($specification) ? "($specification)" : '=';
 
         $poItemCount = PurchaseJobOrderItem::where('pr_item_id', $prItemID)
                                            ->count();
@@ -634,12 +661,13 @@ class AbstractQuotationController extends Controller
         $instancePOItem->po_no = $poNo;
         $instancePOItem->pr_id = $prID;
         $instancePOItem->pr_item_id = $prItemID;
+        $instancePOItem->item_no = $itemNo;
         $instancePOItem->quantity = $quantity;
         $instancePOItem->unit_issue = $unitIssue;
-        $instancePOItem->item_description = $itemDescription;
+        $instancePOItem->item_description = "$itemDescription $specification";
         $instancePOItem->unit_cost = $unitCost;
         $instancePOItem->total_cost = $totalCost;
-        $instancePRItem->save();
+        $instancePOItem->save();
 
     }
 
@@ -728,7 +756,6 @@ class AbstractQuotationController extends Controller
                                   ['item.pr_id', $prID]])
                          ->orderBy('item.item_no')
                          ->get();
-
             $bidderCount = $this->getBidderCount($item->group_no, $prID);
 
             foreach ($suppliers as $bid) {

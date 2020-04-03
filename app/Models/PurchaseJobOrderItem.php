@@ -58,4 +58,19 @@ class PurchaseJobOrderItem extends Model
     public static function generateUuid() {
          return Uuid::generate();
     }
+
+    /**
+     * Get the phone record associated with the purchase request
+     */
+    public function pr() {
+        return $this->belongsTo('App\Models\PurchaseRequest', 'pr_id', 'id');
+    }
+
+    public function pritem() {
+        return $this->belongsTo('App\Models\PurchaseRequestItem', 'pr_item_id', 'id');
+    }
+
+    public function po() {
+        return $this->belongsTo('App\Models\PurchaseJobOrder', 'po_no', 'po_no');
+    }
 }
