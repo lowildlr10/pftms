@@ -1,38 +1,12 @@
 $(function() {
-	function inputValidation(withError) {
-		var errorCount = 0;
-
-        $(".required").each(function() {
-			var inputField = $(this).val().replace(/^\s+|\s+$/g, "").length;
-
-			if (inputField == 0) {
-				$(this).addClass("input-error-highlighter");
-				errorCount++;
-			} else {
-				$(".input-quantity").each(function() {
-					if ($(this).val() == "0") {
-			            $(this).addClass("input-error-highlighter");
-			            errorCount++;
-			        }
-				});
-
-				$(this).removeClass("input-error-highlighter");
-			}
-		});
-
-		if (errorCount == 0) {
-			withError = false;
-		} else {
-			withError = true;
-		}
-
-		return withError;
-	}
+    const template = '<div class="tooltip md-tooltip">' +
+                     '<div class="tooltip-arrow md-arrow"></div>' +
+                     '<div class="tooltip-inner md-inner stylish-color"></div></div>';
 
 	$.fn.computeCost = function(cnt, obj, t = 1) {
-		var grandTotal = 0;
-		var objId;
-		var totalCost = 0;
+		let grandTotal = 0,
+		    objId,
+		    totalCost = 0;
 
 		if (t == 1) {
 			if (obj != null) {
@@ -52,132 +26,257 @@ $(function() {
 			$('#total_cost' + cnt).val(totalCost.toFixed(2));
 		}
 
-		$("input[name='total_cost[]']").each(function() {
-            var isExcluded = $(this).closest('td').siblings().find('.exclude').val();
+		$(".total-cost").each(function() {
+            const isExcluded = $(this).closest('td')
+                                      .siblings()
+                                      .find('select.exclude')
+                                      .val();
 
             if (isExcluded == 'n') {
                 grandTotal += parseFloat($(this).val());
             }
 		});
 
-		$("input[name='grand_total']").val(grandTotal.toFixed(2));
+		$("#grand-total").val(grandTotal.toFixed(2));
 	}
 
-	$.fn.viewItems = function(id, poNo, awardedTo, toggle = "po") {
-		$('#modal-body-content-2').load('pr/show/' + id +
-										'?awarded=' + awardedTo + '&toggle=' + toggle +
-										'&po_no=' + poNo);
-		$("#view-modal").modal({keyboard: false, backdrop: 'static'})
-						.on('shown.bs.modal', function() {
-
-				   		}).on('hidden.bs.modal', function() {
-					        $('#modal-body-content-2').html(modalLoadingContent);
-					    });
-	}
-
-	$.fn.viewIssue = function(poNo) {
-		$('#modal-body-content-3').load('po-jo/show-issue/' + poNo);
-		$("#view-modal-issue").modal({keyboard: false, backdrop: 'static'})
-						.on('shown.bs.modal', function() {
-
-				   		}).on('hidden.bs.modal', function() {
-					        $('#modal-body-content-1').html(modalLoadingContent);
-					    });
-	}
-
-	$.fn.viewCreate = function(poNo, toggle) {
+	$.fn.showItem = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
-
-		if (toggle == 'po') {
-			$('#modal-body-edit').load('po-jo/show/' + poNo + '?toggle=po', function() {
-                $('#mdb-preloader').fadeOut(300);
-            });
-		} else if (toggle == 'jo') {
-			$('#modal-body-edit').load('po-jo/show/' + poNo + '?toggle=jo', function() {
-                $('#mdb-preloader').fadeOut(300);
-            });
-		}
-
-		$('#btn-create-update').attr('onclick', '$(this).update("' + poNo + '","' + toggle + '")');
-		$("#central-edit-modal").modal()
+        $('#modal-body-show').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $(this).slideToggle(500);
+        });
+        $("#modal-show").modal({keyboard: false, backdrop: 'static'})
 						.on('shown.bs.modal', function() {
+            $('#show-title').html('View Items');
+		}).on('hidden.bs.modal', function() {
+		    $('#modal-body-show').html('').css('display', 'none');
+		});
+    }
 
-				   		}).on('hidden.bs.modal', function() {
-					        $('#modal-body-edit').html(modalLoadingContent);
-					    });
-	}
+    $.fn.showCreate = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-create').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $(this).slideToggle(500);
+        });
+        $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
+						     .on('shown.bs.modal', function() {
+            $('#create-title').html('Create Purchase/Job Order');
+		}).on('hidden.bs.modal', function() {
+		    $('#modal-body-create').html('').css('display', 'none');
+		});
+    }
 
-	$.fn.viewIssue = function(poNo, toggle) {
-		$('#modal-body-sm').load('po-jo/show-issue/' + poNo);
-		$("#smcard-central-modal").modal()
-						.on('shown.bs.modal', function() {
-
-				   		}).on('hidden.bs.modal', function() {
-					        $('#modal-body-sm').html(modalLoadingContent);
-					    });
-	}
-
-	$.fn.createUpdateDoc = function(poNo, toggle) {
-		var withError = inputValidation(false);
+    $.fn.store = function() {
+        const withError = inputValidation(false);
 
 		if (!withError) {
-			$('#form-create').submit();
-		}
-	}
+			$('#form-store').submit();
+        }
+    }
 
-    $.fn.accountantSigned = function(poNo) {
-		if (confirm('Set to cleared/signed by accountant this PO/JO [' + poNo + '] ?')) {
-			$('#form-validation').attr('action', 'po-jo/accountant-signed/' + poNo).submit();
-		}
-	}
+    $.fn.showEdit = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-edit').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $(this).slideToggle(500);
+        });
+        $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
+						   .on('shown.bs.modal', function() {
+            $('#edit-title').html('Update Purchase/Job Order');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-edit').html('').css('display', 'none');
+		});
+    }
 
-	$.fn.approve = function(poNo) {
-		if (confirm('Approve PO/JO [' + poNo + '] ?')) {
-			$('#form-validation').attr('action', 'po-jo/approve/' + poNo).submit();
-		}
-	}
-
-	$.fn.issue = function(poNo) {
-		var withError = inputValidation(false);
+    $.fn.update = function() {
+        const withError = inputValidation(false);
 
 		if (!withError) {
-			$('#form-po-jo-issue').submit();
-		}
-	}
-
-	$.fn.receive = function(poNo) {
-		if (confirm('Receive PO/JO [' + poNo + '] ?')) {
-			$('#form-validation').attr('action', 'po-jo/receive/' + poNo).submit();
-		}
-	}
-
-	$.fn.cancel = function(poNo) {
-		if (confirm('Cancel this PO/JO [' + poNo + '] ?')) {
-			$('#form-validation').attr('action', 'po-jo/cancel/' + poNo).submit();
+			$('#form-update').submit();
 		}
     }
 
-    $.fn.unCancel = function(poNo) {
-		if (confirm('Uncancel this PO/JO [' + poNo + '] ?')) {
-			$('#form-validation').attr('action', 'po-jo/uncancel/' + poNo).submit();
-		}
-	}
+    $.fn.showDelete = function(url, name) {
+		$('#modal-body-delete').html(`Are you sure you want to delete this ${name} `+
+                                     `document?`);
+        $("#modal-delete").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#delete-title').html('Delete Purchase/Job Order');
+            $('#form-delete').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-delete-body').html('');
+             $('#form-delete').attr('action', '#');
+		});
+    }
 
-	$.fn.createORS_BURS = function(poNo) {
-		if (confirm('Create the ORS/BURS for this PO/JO  [' + poNo + '] ?')) {
-			$('#form-validation').attr('action', 'po-jo/create-ors-burs/' + poNo).submit();
-		}
-	}
+    $.fn.delete = function() {
+        $('#form-delete').submit();
+    }
 
-	$.fn.toDelivery = function(poNo) {
-		if (confirm("Set this PO/JO No: " + poNo + " for delivery?")) {
-			$('#form-validation').attr('action', 'po-jo/delivery/' + poNo).submit();
-		}
-	}
+    $.fn.showIssue = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-issue').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $(this).slideToggle(500);
+        });
+        $("#modal-issue").modal({keyboard: false, backdrop: 'static'})
+						 .on('shown.bs.modal', function() {
+            $('#issue-title').html('Issue Purchase/Job Order');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-issue').html('').css('display', 'none');
+		});
+    }
 
-	$.fn.toInspection = function(poNo) {
-		if (confirm("Set this PO/JO No: " + poNo + " for inspection?")) {
-			$('#form-validation').attr('action', 'po-jo/inspection/' + poNo).submit();
+    $.fn.issue = function() {
+        const withError = inputValidation(false);
+
+		if (!withError) {
+			$('#form-issue').submit();
 		}
-	}
+    }
+
+    $.fn.showReceive = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-receive').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $(this).slideToggle(500);
+        });
+        $("#modal-receive").modal({keyboard: false, backdrop: 'static'})
+						 .on('shown.bs.modal', function() {
+            $('#receive-title').html('Receive Purchase/Job Order');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-receive').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.receive = function() {
+        $('#form-receive').submit();
+    }
+
+    $.fn.showAccountantSigned = function(url, name) {
+        $('#modal-body-accountant-signed').html(`Are you sure you want to set this ${name} `+
+                                                `document to 'Cleared/Signed by Accountant'?`);
+        $("#modal-accountant-signed").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#accountant-signed-title').html('PO/JO Cleared/Signed by Accountant');
+            $('#form-accountant-signed').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-accountant-signed-body').html('');
+             $('#form-accountant-signed').attr('action', '#');
+		});
+    }
+
+    $.fn.accountantSigned = function() {
+        $('#form-accountant-signed').submit();
+    }
+
+    $.fn.showApprove = function(url, name) {
+        $('#modal-body-approve').html(`Are you sure you want to set this ${name} `+
+                                      `document to 'Approved'?`);
+        $("#modal-approve").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#approve-title').html('Approve Purchase/Job Order');
+            $('#form-approve').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-approve-body').html('');
+             $('#form-approve').attr('action', '#');
+		});
+    }
+
+    $.fn.approve = function() {
+        $('#form-approve').submit();
+    }
+
+    $.fn.showCancel = function(url, name) {
+		$('#modal-body-cancel').html(`Are you sure you want to cancel '${name}'?`);
+        $("#modal-cancel").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#cancel-title').html('Cancel Purchase/Job Order');
+            $('#form-cancel').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-cancel-body').html('');
+             $('#form-cancel').attr('action', '#');
+		});
+    }
+
+    $.fn.cancel = function() {
+        $('#form-cancel').submit();
+    }
+
+    $.fn.showUncancel = function(url, name) {
+		$('#modal-body-uncancel').html(`Are you sure you want to uncancel '${name}'?`);
+        $("#modal-uncancel").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#uncancel-title').html('Uncancel Purchase/Job Order');
+            $('#form-uncancel').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-uncancel-body').html('');
+             $('#form-uncancel').attr('action', '#');
+		});
+    }
+
+    $.fn.unCancel = function() {
+        $('#form-uncancel').submit();
+    }
+
+    $.fn.showCreateORS = function(url, name) {
+        $('#modal-body-create-ors').html(`Are you sure you want to create the ORS/BURS `+
+                                         `document for this ${name} document?`);
+        $("#modal-create-ors").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#create-ors-title').html('Create ORS/BURS for PO/JO');
+            $('#form-create-ors').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-create-ors-body').html('');
+             $('#form-create-ors').attr('action', '#');
+		});
+    }
+
+    $.fn.createORS = function() {
+        $('#form-create-ors').submit();
+    }
+
+    $.fn.showForDelivery = function(url, name) {
+        $('#modal-body-delivery').html(`Are you sure you want to set this ${name} `+
+                                       `document to 'For Delivery'?`);
+        $("#modal-delivery").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#delivery-title').html('PO/JO For Delivery');
+            $('#form-delivery').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-delivery-body').html('');
+             $('#form-delivery').attr('action', '#');
+		});
+    }
+
+    $.fn.forDelivery = function() {
+        $('#form-delivery').submit();
+    }
+
+    $.fn.showForInspection = function(url, name) {
+        $('#modal-body-inspection').html(`Are you sure you want to set this ${name} `+
+                                      `document to 'For Inspection'?`);
+        $("#modal-inspection").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#inspection-title').html('PO/JO For Inspection');
+            $('#form-inspection').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-inspection-body').html('');
+             $('#form-inspection').attr('action', '#');
+		});
+    }
+
+    $.fn.forInspection = function() {
+        $('#form-inspection').submit();
+    }
+
+    $('.material-tooltip-main').tooltip({
+        template: template
+    });
 });

@@ -4,8 +4,8 @@ $(function() {
                      '<div class="tooltip-inner md-inner stylish-color"></div></div>';
 
     $.fn.computeCost = function(cnt, obj) {
-		let objId;
-		let totalCost = 0;
+		let objId,
+		    totalCost = 0;
 
 	    if (obj != null) {
 	      objId = obj;

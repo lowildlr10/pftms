@@ -125,12 +125,9 @@
                                         </td>
                                         <td>{{ Auth::user()->getEmployee($pr->requestor['id'])->name }}</td>
                                     </tr>
-                                    <tr>
-                                        <td colspan="7" class="heavy-rain-gradient"></td>
-                                    </tr>
                                     <tr class="blue-grey lighten-2">
                                         <td colspan="7">
-                                            <div class="card card-cascade narrower mx-3 my-2">
+                                            <div class="card card-cascade narrower mx-3 my-2 z-depth-4">
                                                 <div class="card-body p-2">
                                                     <table class="table table table-sm z-depth-1 mb-0">
 
@@ -144,7 +141,6 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-
                                                             @foreach ($pr->po as $listCtr1 => $item)
                                                             <tr class="row-item">
                                                                 <td align="center">
@@ -199,6 +195,14 @@
                                                             </tr>
                                                             @endforeach
 
+                                                            <tr class="row-item">
+                                                                <td colspan="4">
+                                                                    <button class="btn btn-outline-mdb-color btn-block btn-sm waves-effect py-3"
+                                                                            onclick="$(this).showCreate('{{ route('po-jo-show-create', ['prID' => $pr->id]) }}');">
+                                                                        <i class="fas fa-plus"></i> Add PO/JO Document
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
                                                         </tbody>
                                                         @endif
 
@@ -206,9 +210,6 @@
                                                 </div>
                                             </div>
                                         </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="7" class="heavy-rain-gradient"></td>
                                     </tr>
                                         @endforeach
                                     @else
@@ -271,10 +272,19 @@
                                 </button>
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).viewCreate('{{ $item->po_no }}', '{{ $item->document_type }}');
-                                                 $('#edit-title').text('EDIT {{ strtoupper($item->document_type) }} [ {{ $item->po_no }} ]');">
+                                        onclick="$(this).showEdit('{{ route('po-jo-show-edit', ['id' => $item->id]) }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
+
+                                @if ($isAllowedDelete)
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light"
+                                        onclick="$(this).showDelete('{{ route('po-jo-delete',
+                                                                              ['id' => $item->id]) }}',
+                                                                              `{{ strtoupper($item->document_type).' '.$item->po_no }}`);">
+                                    <i class="fas fa-trash-alt red-text"></i> Delete
+                                </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -345,7 +355,7 @@
                         </button>
                     </li>
                     @elseif (!empty($item->date_accountant_signed) && !empty($item->date_po_approved))
-                        @if (!empty($item->date_issued) && $item->status_id != 3)
+                        @if (!empty($item->doc_status->date_issued) && $item->status != 3)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-danger waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).cancel('{{ $item->po_no }}');">
@@ -361,24 +371,24 @@
                         </a>
                     </li>
                     -->
-                                @if ($item->status_id == 7)
+                                @if ($item->status == 7)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-black waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).toDelivery('{{ $item->po_no }}');">
                             <i class="fas fa-truck"></i> For Delivery
                         </button>
                     </li>
-                                @elseif ($item->status_id == 8)
+                                @elseif ($item->status == 8)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-indigo waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).toInspection('{{ $item->po_no }}');">
                             <i class="fas fa-search"></i> Inspection
                         </button>
                     </li>
-                                @elseif ($item->status_id >= 9)
+                                @elseif ($item->status >= 9)
                     <li class="list-group-item justify-content-between">
                         <a type="button" class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded"
-                           href="{{ url('procurement/iar?search='.$pr->pr_no) }}">
+                           onclick="$(this).redirectToDoc('{{ route('iar') }}', '{{ $item->pr_id }}');">
                             Generate IAR <i class="fas fa-angle-double-right"></i>
                         </a>
                     </li>
@@ -394,15 +404,15 @@
                     -->
                             @endif
                         @endif
-                        @if (empty($item->date_issued) && empty($item->date_received))
+                        @if (empty($item->doc_status->date_issued) && empty($item->doc_status->date_received))
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-warning waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).viewIssue('{{ $item->po_no }}', '{{ $item->document_type }}');">
                             <i class="fas fa-paper-plane orange-text"></i> Issue
                         </button>
                     </li>
-                        @elseif (!empty($item->date_issued) && empty($item->date_received))
-                            @if ($item->status_id != 3)
+                        @elseif (!empty($item->doc_status->date_issued) && empty($item->doc_status->date_received))
+                            @if ($item->status != 3)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).receive('{{ $item->po_no }}');">
@@ -430,9 +440,9 @@
 @endif
 
 @include('modals.search-post')
-@include('modals.create')
+@include('modals.sm-create')
 @include('modals.edit')
-@include('modals.delete')
+@include('modals.delete-destroy')
 @include('modals.approve')
 @include('modals.cancel')
 @include('modals.issue')

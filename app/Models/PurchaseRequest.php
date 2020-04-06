@@ -97,7 +97,7 @@ class PurchaseRequest extends Model
     }
 
     public function po() {
-        return $this->hasMany('App\Models\PurchaseJobOrder', 'pr_id', 'id');
+        return $this->hasMany('App\Models\PurchaseJobOrder', 'pr_id', 'id')->orderBy('po_no');
     }
 
     public $sortable = [

@@ -7,6 +7,7 @@ $(function() {
         '#rfq',
         '#abs',
         '#po',
+        '#jo',
         '#ors',
         '#iar',
         '#dv',

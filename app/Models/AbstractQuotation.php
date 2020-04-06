@@ -65,6 +65,10 @@ class AbstractQuotation extends Model
         return $this->belongsTo('App\Models\PurchaseRequest', 'pr_id', 'id');
     }
 
+    public function modeproc() {
+        return $this->hasOne('App\Models\ProcurementMode', 'id', 'mode_procurement');
+    }
+
     public $sortable = [
         'date_abstract',
     ];

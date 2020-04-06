@@ -71,4 +71,16 @@ class PurchaseJobOrder extends Model
     public function pr() {
         return $this->belongsTo('App\Models\PurchaseRequest', 'pr_id', 'id');
     }
+
+    public function poitems() {
+        return $this->hasMany('App\Models\PurchaseJobOrderItem', 'po_no', 'po_no')->orderBy('item_no');
+    }
+
+    public function awardee() {
+        return $this->hasOne('App\Models\Supplier', 'id', 'awarded_to');
+    }
+
+    public function ors() {
+        return $this->hasOne('App\Models\ObligationRequestStatus', 'po_no', 'po_no');
+    }
 }

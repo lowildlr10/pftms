@@ -61,7 +61,8 @@
                        class="form-control {{ isset($moduleAccess->{$parentID}->is_allowed) &&
                               ($moduleAccess->{$parentID}->is_allowed) ? 'required':'' }}"
                        name="{{ $parentID }}_designation"
-                       value="{{ $moduleAccess->{$parentID}->designation }}">
+                       value="{{ isset($moduleAccess->{$parentID}->designation) ?
+                                 $moduleAccess->{$parentID}->designation : NULL }}">
                 <label for="{{ $parentID }}_designation"
                        class="{{ !empty($moduleAccess->{$parentID}->designation) ?
                                   'active' : '' }}">

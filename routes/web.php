@@ -31,18 +31,18 @@ Route::middleware(['web', 'auth'])->group(function () {
     /*===================== CASH ADVANCE, REIMBURSEMENT, & LIQUIDATION ROUTES =====================*/
 
     // Obligation and Request Status/BURS
-    Route::any('cadv-reim-liquidation/ors-burs', 'OrsBursController@indexCashAdvLiquidation');
-    Route::get('cadv-reim-liquidation/ors-burs/create', 'OrsBursController@showCreate');
-    Route::post('cadv-reim-liquidation/ors-burs/store', 'OrsBursController@store');
-    Route::get('cadv-reim-liquidation/ors-burs/edit/{key}', 'OrsBursController@showEdit');
-    Route::post('cadv-reim-liquidation/ors-burs/update/{key}', 'OrsBursController@update');
-    Route::get('cadv-reim-liquidation/ors-burs/show-issue/{key}', 'OrsBursController@showIssuedTo');
-    Route::post('cadv-reim-liquidation/ors-burs/create-dv/{id}', 'OrsBursController@createDV');
-    Route::post('cadv-reim-liquidation/ors-burs/delete/{id}', 'OrsBursController@delete');
-    Route::post('cadv-reim-liquidation/ors-burs/issue/{id}', 'OrsBursController@issue');
-    Route::post('cadv-reim-liquidation/ors-burs/receive/{id}', 'OrsBursController@receive');
+    Route::any('cadv-reim-liquidation/ors-burs', 'ObligationRequestStatusController@indexCashAdvLiquidation');
+    Route::get('cadv-reim-liquidation/ors-burs/create', 'ObligationRequestStatusController@showCreate');
+    Route::post('cadv-reim-liquidation/ors-burs/store', 'ObligationRequestStatusController@store');
+    Route::get('cadv-reim-liquidation/ors-burs/edit/{key}', 'ObligationRequestStatusController@showEdit');
+    Route::post('cadv-reim-liquidation/ors-burs/update/{key}', 'ObligationRequestStatusController@update');
+    Route::get('cadv-reim-liquidation/ors-burs/show-issue/{key}', 'ObligationRequestStatusController@showIssuedTo');
+    Route::post('cadv-reim-liquidation/ors-burs/create-dv/{id}', 'ObligationRequestStatusController@createDV');
+    Route::post('cadv-reim-liquidation/ors-burs/delete/{id}', 'ObligationRequestStatusController@delete');
+    Route::post('cadv-reim-liquidation/ors-burs/issue/{id}', 'ObligationRequestStatusController@issue');
+    Route::post('cadv-reim-liquidation/ors-burs/receive/{id}', 'ObligationRequestStatusController@receive');
     Route::post('cadv-reim-liquidation/ors-burs/obligate/{id}', [
-        'uses' => 'OrsBursController@obligate',
+        'uses' => 'ObligationRequestStatusController@obligate',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Budget Officer']
     ]);
@@ -368,6 +368,16 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'proc_po_jo',
         'access' => 'is_allowed'
     ])->name('po-jo');
+    Route::get('procurement/po-jo/show-create/{prID}', [
+        'uses' => 'PurchaseJobOrderController@showCreate',
+        'module' => 'proc_po_jo',
+        'access' => 'create'
+    ])->name('po-jo-show-create');
+    Route::post('procurement/po-jo/store/{prID}', [
+        'uses' => 'PurchaseJobOrderController@store',
+        'module' => 'proc_po_jo',
+        'access' => 'create'
+    ])->name('po-jo-store');
     Route::get('procurement/po-jo/show-edit/{id}', [
         'uses' => 'PurchaseJobOrderController@showEdit',
         'module' => 'proc_po_jo',
@@ -378,6 +388,16 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'proc_po_jo',
         'access' => 'update'
     ])->name('po-jo-update');
+    Route::post('procurement/po-jo/delete/{id}', [
+        'uses' => 'PurchaseJobOrderController@delete',
+        'module' => 'proc_po_jo',
+        'access' => 'delete'
+    ])->name('po-jo-delete');
+    Route::post('procurement/po-jo/destroy/{id}', [
+        'uses' => 'PurchaseJobOrderController@destroy',
+        'module' => 'proc_po_jo',
+        'access' => 'destroy'
+    ])->name('po-jo-destroy');
     Route::post('procurement/po-jo/accountant-signed/{id}', [
         'uses' => 'PurchaseJobOrderController@accountantSigned',
         'module' => 'proc_po_jo',
@@ -413,11 +433,6 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'proc_po_jo',
         'access' => 'uncancel'
     ])->name('po-jo-uncancel');
-    Route::post('procurement/ors-burs/create-ors-burs/{id}', [
-        'uses' => 'PurchaseJobOrderController@createORS_BURS',
-        'module' => 'proc_ors_burs',
-        'access' => 'create'
-    ])->name('po-jo-create-ors-burs');
     Route::post('procurement/po-jo/delivery/{id}', [
         'uses' => 'PurchaseJobOrderController@delivery',
         'module' => 'proc_po_jo',
@@ -431,37 +446,42 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
 
     // Obligation and Request Status/BURS Module
     Route::any('procurement/ors-burs', [
-        'uses' => 'OrsBursController@index',
+        'uses' => 'ObligationRequestStatusController@index',
         'module' => 'proc_ors_burs',
         'access' => 'is_allowed'
     ])->name('proc-ors-burs');
+    Route::post('procurement/ors-burs/create-ors-burs/{id}', [
+        'uses' => 'ObligationRequestStatusController@storeORSFromPO',
+        'module' => 'proc_ors_burs',
+        'access' => 'create'
+    ])->name('po-jo-create-ors-burs');
     Route::get('procurement/ors-burs/show-edit/{id}', [
-        'uses' => 'OrsBursController@showEdit',
+        'uses' => 'ObligationRequestStatusController@showEdit',
         'module' => 'proc_ors_burs',
         'access' => 'update'
     ])->name('proc-ors-burs-show-edit');
     Route::post('procurement/ors-burs/update/{id}', [
-        'uses' => 'OrsBursController@update',
+        'uses' => 'ObligationRequestStatusController@update',
         'module' => 'proc_ors_burs',
         'access' => 'update'
     ])->name('proc-ors-burs-update');
     Route::get('procurement/ors-burs/show-issue/{id}', [
-        'uses' => 'OrsBursController@showIssue',
+        'uses' => 'ObligationRequestStatusController@showIssue',
         'module' => 'proc_ors_burs',
         'access' => 'issue'
     ])->name('proc-ors-burs-show-issue');
     Route::post('procurement/ors-burs/issue/{id}', [
-        'uses' => 'OrsBursController@issue',
+        'uses' => 'ObligationRequestStatusController@issue',
         'module' => 'proc_ors_burs',
         'access' => 'issue'
     ])->name('proc-ors-burs-issue');
     Route::post('procurement/ors-burs/receive/{id}', [
-        'uses' => 'OrsBursController@receive',
+        'uses' => 'ObligationRequestStatusController@receive',
         'module' => 'proc_ors_burs',
         'access' => 'receive'
     ])->name('proc-ors-burs-receive');
     Route::post('procurement/ors-burs/obligate/{id}', [
-        'uses' => 'OrsBursController@obligate',
+        'uses' => 'ObligationRequestStatusController@obligate',
         'module' => 'proc_ors_burs',
         'access' => 'obligate'
     ])->name('proc-ors-burs-obligate');
