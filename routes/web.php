@@ -446,11 +446,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
 
     // Obligation and Request Status/BURS Module
     Route::any('procurement/ors-burs', [
-        'uses' => 'ObligationRequestStatusController@index',
+        'uses' => 'ObligationRequestStatusController@indexProc',
         'module' => 'proc_ors_burs',
         'access' => 'is_allowed'
     ])->name('proc-ors-burs');
-    Route::post('procurement/ors-burs/create-ors-burs/{id}', [
+    Route::post('procurement/ors-burs/create-ors-burs/{poID}', [
         'uses' => 'ObligationRequestStatusController@storeORSFromPO',
         'module' => 'proc_ors_burs',
         'access' => 'create'

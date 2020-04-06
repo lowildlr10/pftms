@@ -2,9 +2,9 @@
     @csrf
 
     <div class="md-form">
-        <select class="mdb-select crud-select md-form" searchable="Search here.."
+        <select class="mdb-select crud-select md-form required" searchable="Search here.."
                 name="awarded_to">
-            <option value="0" disabled selected>Choose a awardee</option>
+            <option value="" disabled selected>Choose a awardee</option>
 
             @if (count($suppliers) > 0)
                 @foreach ($suppliers as $bid)
@@ -20,9 +20,9 @@
     </div>
 
     <div class="md-form">
-        <select class="mdb-select crud-select md-form" searchable="Search here.."
+        <select class="mdb-select crud-select md-form required" searchable="Search here.."
                 name="document_type">
-            <option value="0" disabled selected>Choose the document type</option>
+            <option value="" disabled selected>Choose the document type</option>
 
             <option value="po">Purchase Order (PO)</option>
             <option value="jo">Job Order (JO)</option>

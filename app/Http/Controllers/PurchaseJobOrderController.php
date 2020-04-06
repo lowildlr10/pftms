@@ -183,7 +183,7 @@ class PurchaseJobOrderController extends Controller
         $awardedTo = $request->awarded_to;
         $documentType = $request->document_type;
 
-
+        try {
             $instancePR = PurchaseRequest::find($prID);
             $prNo = $instancePR->pr_no;
 
@@ -209,7 +209,6 @@ class PurchaseJobOrderController extends Controller
                                      ->with('success', $msg);
                 }
             }
-        try {
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
@@ -382,11 +381,21 @@ class PurchaseJobOrderController extends Controller
             try {
                 $instancePO = PurchaseJobOrder::find($id);
                 $documentType = $instancePO->document_type;
+                $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';
                 $poNo = $instancePO->po_no;
                 $prID = $instancePO->pr_id;
+                $countPOItem = PurchaseJobOrderItem::where('po_no', $poNo)->count();
+
+                if ($countPOItem > 0) {
+                    $msg = "Transfer first the item/s of $documentType '$poNo' to other document.";
+                    Auth::user()->log($request, $msg);
+
+                    return redirect()->route('po-jo', ['keyword' => $prID])
+                                     ->with('warning', $msg);
+                }
+
                 $instancePO->delete();
 
-                $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';
                 $msg = "$documentType '$poNo' successfully deleted.";
                 Auth::user()->log($request, $msg);
                 return redirect()->route('po-jo', ['keyword' => $prID])
@@ -410,11 +419,24 @@ class PurchaseJobOrderController extends Controller
         try {
             $instancePO = PurchaseJobOrder::find($id);
             $documentType = $instancePO->document_type;
+            $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';
             $prID = $instancePO->pr_id;
             $poNo = $instancePO->po_no;
+            $countPOItem = PurchaseJobOrderItem::where('po_no', $poNo)->count();
+
+            if ($countPOItem > 0) {
+                $msg = "Transfer first the item/s of $documentType '$poNo' to other document.";
+                Auth::user()->log($request, $msg);
+
+                return (object) [
+                    'msg' => $msg,
+                    'alert_type' => 'warning',
+                    'pr_id' => $prID
+                ];
+            }
+
             $instancePO->forceDelete();
 
-            $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';
             $msg = "$documentType '$poNo' permanently deleted.";
             Auth::user()->log($request, $msg);
 

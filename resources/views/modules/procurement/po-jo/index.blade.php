@@ -129,7 +129,7 @@
                                         <td colspan="7">
                                             <div class="card card-cascade narrower mx-3 my-2 z-depth-4">
                                                 <div class="card-body p-2">
-                                                    <table class="table table table-sm z-depth-1 mb-0">
+                                                    <table class="table table-sm z-depth-1 mb-0">
 
                                                         @if (count($pr->po) > 0)
                                                         <thead class="mdb-color darken-1 white-text">
@@ -196,7 +196,7 @@
                                                             @endforeach
 
                                                             <tr class="row-item">
-                                                                <td colspan="4">
+                                                                <td colspan="4" class="p-0">
                                                                     <button class="btn btn-outline-mdb-color btn-block btn-sm waves-effect py-3"
                                                                             onclick="$(this).showCreate('{{ route('po-jo-show-create', ['prID' => $pr->id]) }}');">
                                                                         <i class="fas fa-plus"></i> Add PO/JO Document
@@ -290,11 +290,15 @@
                     </div>
                     <div class="card-body">
                         <p>
-                            <strong>PO/JO Date: </strong> {{ $item->date_po }}<br>
-                            <strong>Charging: </strong> {{ $pr->project }}<br>
-                            <strong>Purpose: </strong> {{ $pr->purpose }}<br>
+                            <strong>PR Date: </strong> {{ $pr->date_pr }}<br>
+                            <strong>{{ strtoupper($item->document_type) }} Date: </strong> {{ $item->date_po }}<br>
+                            <strong>Charging: </strong> {{ $pr->funding['source_name'] }}<br>
+                            <strong>Purpose: </strong> {{
+                                (strlen($pr->purpose) > 150) ?
+                                substr($pr->purpose, 0, 150).'...' : $pr->purpose
+                            }}<br>
                             <strong>Awarded To: </strong> {{ $item->company_name }}<br>
-                            <strong>Requested By: </strong> {{ $pr->name }}<br>
+                            <strong>Requested By: </strong> {{ Auth::user()->getEmployee($pr->requestor['id'])->name }}<br>
                         </p>
                         <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
                                 btn-block waves-effect mb-2"
@@ -324,21 +328,24 @@
                     </li>
                     @endif
 
-                    @if ($item->with_ors_burs == 'y')
+                    @if ($isAllowedORSCreate)
+                        @if ($item->with_ors_burs == 'y')
                     <li class="list-group-item justify-content-between">
                         <a type="button" class="btn btn-outline-warning waves-effect btn-block btn-md btn-rounded"
                            href="{{ url('procurement/ors-burs?search='.$item->po_no) }}">
                             <i class="fas fa-file-signature orange-text"></i> Edit ORS/BURS
                         </a>
                     </li>
-                    @else
+                        @else
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).createORS_BURS('{{ $item->po_no }}');">
                             <i class="fas fa-pencil-alt green-text"></i> Create ORS/BURS
                         </button>
                     </li>
+                        @endif
                     @endif
+
 
                     @if (empty($item->date_accountant_signed) && empty($item->date_po_approved))
                     <li class="list-group-item justify-content-between">

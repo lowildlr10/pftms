@@ -11,7 +11,15 @@
                 </label>
             </div>
         </div>
-        <div class="col-md-6"></div>
+        <div class="col-md-6">
+            <div class="md-form">
+                <input type="text" id="company-name" class="form-control form-sm"
+                       value="{{ $companyName }}" readonly>
+                <label for="company-name" class="{{ !empty($companyName) ? 'active' : '' }}">
+                    TO
+                </label>
+            </div>
+        </div>
     </div>
 
     <div class="row">
@@ -24,23 +32,6 @@
                 </label>
             </div>
         </div>
-        <div class="col-md-6"></div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="md-form">
-                <input type="text" id="company-name" class="form-control form-sm"
-                       value="{{ $companyName }}" readonly>
-                <label for="company-name" class="{{ !empty($companyName) ? 'active' : '' }}">
-                    TO
-                </label>
-            </div>
-        </div>
-        <div class="col-md-6"></div>
-    </div>
-
-    <div class="row">
         <div class="col-md-6">
             <div class="md-form">
                 <input type="text" id="company-address" class="form-control form-sm"
@@ -50,7 +41,6 @@
                 </label>
             </div>
         </div>
-        <div class="col-md-6"></div>
     </div>
 
     <hr>
@@ -178,8 +168,12 @@
                                 <td align="center" colspan="8">*** Nothing Follows ***</td>
                             </tr>
                             <tr>
-                                <td colspan="5"><strong>Total Amount</strong></td>
-                                <td colspan="3">
+                                <td colspan="4" class="text-center" style="vertical-align: middle;">
+                                    <strong class="font-weight-bold">
+                                        <em>TOTAL AMOUNT</em>
+                                    </strong>
+                                </td>
+                                <td colspan="4">
                                     <div class="md-form">
                                         <input type="number" id="grand-total" class="form-control form-sm required"
                                                value="{{ $grandTotal }}" name="grand_total">
@@ -272,14 +266,14 @@
             <div class="md-form">
                 <div class="md-form">
                     <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                            name="sig_funds_available">
+                            name="sig_department">
                         <option value="" disabled selected>Choose a signatory</option>
 
                         @if (count($signatories) > 0)
                             @foreach ($signatories as $sig)
-                                @if ($sig->module->po->funds_available)
-                        <option value="{{ $sig->id }}" {{ $sig->id == $sigFundsAvailable ? 'selected' : '' }}>
-                            {!! $sig->name !!} [{!! $sig->module->po->designation !!}]
+                                @if ($sig->module->jo->requisitioning)
+                        <option value="{{ $sig->id }}" {{ $sig->id == $sigDepartment ? 'selected' : '' }}>
+                            {!! $sig->name !!} [{!! $sig->module->jo->designation !!}]
                         </option>
                                 @endif
                             @endforeach
@@ -300,9 +294,9 @@
 
                         @if (count($signatories) > 0)
                             @foreach ($signatories as $sig)
-                                @if ($sig->module->po->approved)
+                                @if ($sig->module->jo->approved)
                         <option value="{{ $sig->id }}" {{ $sig->id == $sigApproval ? 'selected' : '' }}>
-                            {!! $sig->name !!} [{!! $sig->module->po->designation !!}]
+                            {!! $sig->name !!} [{!! $sig->module->jo->designation !!}]
                         </option>
                                 @endif
                             @endforeach
@@ -326,9 +320,9 @@
 
                         @if (count($signatories) > 0)
                             @foreach ($signatories as $sig)
-                                @if ($sig->module->po->funds_available)
+                                @if ($sig->module->jo->funds_available)
                         <option value="{{ $sig->id }}" {{ $sig->id == $sigFundsAvailable ? 'selected' : '' }}>
-                            {!! $sig->name !!} [{!! $sig->module->po->designation !!}]
+                            {!! $sig->name !!} [{!! $sig->module->jo->designation !!}]
                         </option>
                                 @endif
                             @endforeach

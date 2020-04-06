@@ -3,15 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\OrsBurs;
-use App\PurchaseOrder;
-use App\DisbursementVoucher;
-use App\Supplier;
-use App\EmployeeLog;
-use App\DocumentLogHistory;
-use App\LiquidationReport;
-use App\PaperSize;
+use App\Models\PurchaseRequest;
+use App\Models\PurchaseRequestItem;
+use App\Models\AbstractQuotation;
+use App\Models\AbstractQuotationItem;
+use App\Models\PurchaseJobOrder;
+use App\Models\PurchaseJobOrderItem;
+use App\Models\ObligationRequestStatus;
+use App\Models\InspectionAcceptance;
+use App\Models\DisbursementVoucher;
+use App\Models\InventoryStock;
+
 use App\User;
+use App\Models\DocumentLog as DocLog;
+use App\Models\PaperSize;
+use App\Models\Supplier;
+use App\Models\Signatory;
+use App\Models\ItemUnitIssue;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -33,9 +41,11 @@ class OrsBursController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
-    {
-        $pageLimit = 25;
+    public function indexProc(Request $request) {
+        $keyword = trim($request->keyword);
+        $instanceDocLog = new DocLog;
+
+
         $search = trim($request['search']);
         $paperSizes = PaperSize::all();
         $orsList = DB::table('tblors_burs as ors')
@@ -89,7 +99,7 @@ class OrsBursController extends Controller
                                        'colSpan' => 8]);
     }
 
-    public function indexCashAdvLiquidation(Request $request)
+    public function indexCA(Request $request)
     {
         $isOrdinaryUser = true;
         $pageLimit = 50;
@@ -157,6 +167,21 @@ class OrsBursController extends Controller
                                        'paperSizes' => $paperSizes,
                                        'type' => 'cashadvance',
                                        'colSpan' => 5]);
+    }
+
+    public function storeORSFromPO($poID) {
+        try {
+            $instancePO = PurchaseJobOrder::find($poID);
+            $poNo = $instancePO->po_no;
+            $grandTotal = $instancePO->grand_total;
+            $countORS = ObligationRequestStatus::where('po_no', $poNo)->count();
+
+            if ($countORS == 0 && $grandTotal > 0) {
+
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
     }
 
     /**
