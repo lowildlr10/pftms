@@ -22,7 +22,7 @@ class CreateObligationRequestStatusTable extends Migration
             $table->string('po_no', 15)->nullable();
             $table->foreign('po_no')->references('po_no')->on('purchase_job_orders');
             $table->enum('transaction_type', ['cash_advance', 'reimbursement', 'others'])->default('others');
-            $table->enum('document_type', ['ORS', 'BURS'])->default('ORS');
+            $table->enum('document_type', ['ors', 'burs'])->default('ors');
             $table->string('fund_cluster', 50)->nullable();
             $table->string('serial_no')->nullable();
             $table->date('date_ors_burs')->nullable();
@@ -43,7 +43,7 @@ class CreateObligationRequestStatusTable extends Migration
             $table->foreign('sig_accounting')->references('id')->on('signatories');
             $table->uuid('sig_agency_head')->nullable();
             $table->foreign('sig_agency_head')->references('id')->on('signatories');
-            $table->uuid('obligated_by');
+            $table->uuid('obligated_by')->nullable();
             $table->foreign('obligated_by')->references('id')->on('emp_accounts');
             $table->date('date_certified_1')->nullable();
             $table->date('date_certified_2')->nullable();
