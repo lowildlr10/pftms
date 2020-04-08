@@ -58,13 +58,13 @@ class Signatory extends Model
         if ($signatoryData) {
             $signatoryData->module = json_decode($signatoryData->module);
             $userData = $signatoryData->user;
-            $firstname = $userData->firstname;
-            $middleInitial = !empty($userData->middlename) ?
-                            ' '.$userData->middlename[0].'. ' : ' ';
-            $lastname = $userData->lastname;
+            $firstname = $userData['firstname'];
+            $middleInitial = !empty($userData['middlename']) ?
+                            ' '.$userData['middlename'][0].'. ' : ' ';
+            $lastname = $userData['lastname'];
             $fullname = $firstname.$middleInitial.$lastname;
-            $position = $userData->position;
-            $signature = $userData->signature;
+            $position = $userData['position'];
+            $signature = $userData['signature'];
             $prDesignation = $signatoryData->module->pr->designation;
             $rfqDesignation = $signatoryData->module->rfq->designation;
             $absDesignation = $signatoryData->module->abs->designation;

@@ -475,11 +475,41 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'proc_ors_burs',
         'access' => 'issue'
     ])->name('proc-ors-burs-issue');
+    Route::get('procurement/ors-burs/show-receive/{id}', [
+        'uses' => 'ObligationRequestStatusController@showReceive',
+        'module' => 'proc_ors_burs',
+        'access' => 'receive'
+    ])->name('proc-ors-burs-show-receive');
     Route::post('procurement/ors-burs/receive/{id}', [
         'uses' => 'ObligationRequestStatusController@receive',
         'module' => 'proc_ors_burs',
         'access' => 'receive'
     ])->name('proc-ors-burs-receive');
+    Route::get('procurement/ors-burs/show-issue-back/{id}', [
+        'uses' => 'ObligationRequestStatusController@showIssueback',
+        'module' => 'proc_ors_burs',
+        'access' => 'issue_back'
+    ])->name('proc-ors-burs-show-issue-back');
+    Route::post('procurement/ors-burs/issue-back/{id}', [
+        'uses' => 'ObligationRequestStatusController@issueBack',
+        'module' => 'proc_ors_burs',
+        'access' => 'issue_back'
+    ])->name('proc-ors-burs-issue-back');
+    Route::get('procurement/ors-burs/show-receive-back/{id}', [
+        'uses' => 'ObligationRequestStatusController@showReceiveBack',
+        'module' => 'proc_ors_burs',
+        'access' => 'receive_back'
+    ])->name('proc-ors-burs-show-receive-back');
+    Route::post('procurement/ors-burs/receive-back/{id}', [
+        'uses' => 'ObligationRequestStatusController@receiveBack',
+        'module' => 'proc_ors_burs',
+        'access' => 'receive_back'
+    ])->name('proc-ors-burs-receive-back');
+    Route::get('procurement/ors-burs/show-obligate/{id}', [
+        'uses' => 'ObligationRequestStatusController@showObligate',
+        'module' => 'proc_ors_burs',
+        'access' => 'obligate'
+    ])->name('proc-ors-burs-show-obligate');
     Route::post('procurement/ors-burs/obligate/{id}', [
         'uses' => 'ObligationRequestStatusController@obligate',
         'module' => 'proc_ors_burs',

@@ -845,7 +845,7 @@ class PurchaseRequestController extends Controller
 
             $msg = "Purchase request '$prNo' successfully approved.";
             Auth::user()->log($request, $msg);
-            return redirect()->route('abstract', ['keyword' => $id])
+            return redirect()->route('rfq', ['keyword' => $id])
                              ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";

@@ -126,25 +126,37 @@
                     <table id="item-pr-table" class="table z-depth-1 m-0">
                         <thead class="mdb-color white-text">
                             <tr id="pr-item-header">
-                                <th class="text-center" style="vertical-align: middle;" width="5%">Stock/Property No.</th>
-                                <th class="text-center" style="vertical-align: middle;" width="11%">Unit</th>
-                                <th class="text-center" style="vertical-align: middle;" width="35%">Desciption</th>
-                                <th class="text-center" style="vertical-align: middle;" width="8%">Quantity</th>
-                                <th class="text-center" style="vertical-align: middle;" width="13%">Unit Cost</th>
-                                <th class="text-center" style="vertical-align: middle;" width="13%">Amount</th>
+                                <th class="text-center" style="vertical-align: middle;" width="5%">
+                                    Stock/Property No.
+                                </th>
+                                <th class="text-center" style="vertical-align: middle;" width="11%">
+                                    Unit <span class="red-text">*</span>
+                                </th>
+                                <th class="text-center" style="vertical-align: middle;" width="35%">
+                                    Desciption <span class="red-text">*</span>
+                                </th>
+                                <th class="text-center" style="vertical-align: middle;" width="8%">
+                                    Quantity <span class="red-text">*</span>
+                                </th>
+                                <th class="text-center" style="vertical-align: middle;" width="13%">
+                                    Unit Cost <span class="red-text">*</span>
+                                </th>
+                                <th class="text-center" style="vertical-align: middle;" width="13%">
+                                    Amount <span class="red-text">*</span>
+                                </th>
                                 <th class="text-center" style="vertical-align: middle;" width="9%" class="pt-1">
                                     <small>
                                         You can move the item to other <br>
                                         PO/JO by selecting different <br>
                                         PO/JO number.
-                                    </small>
+                                    </small> <span class="red-text">*</span>
                                 </th>
                                 <th class="text-center" style="vertical-align: middle;" width="6%" class="pt-1">
                                     <small>
                                         You can exclude <br>
                                         the item by <br>
                                         selecting 'Yes'
-                                    </small>
+                                    </small> <span class="red-text">*</span>
                                 </th>
                             </tr>
                         </thead>

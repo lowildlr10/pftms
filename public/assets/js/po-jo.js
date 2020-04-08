@@ -148,7 +148,7 @@ $(function() {
             $(this).slideToggle(500);
         });
         $("#modal-receive").modal({keyboard: false, backdrop: 'static'})
-						 .on('shown.bs.modal', function() {
+						   .on('shown.bs.modal', function() {
             $('#receive-title').html('Receive Purchase/Job Order');
 		}).on('hidden.bs.modal', function() {
             $('#modal-body-receive').html('').css('display', 'none');

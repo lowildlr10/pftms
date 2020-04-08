@@ -24,7 +24,7 @@ use Carbon\Carbon;
 use Auth;
 use DB;
 
-class OrsBursController extends Controller
+class ObligationRequestStatusController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -41,66 +41,64 @@ class OrsBursController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
     public function indexProc(Request $request) {
-        $keyword = trim($request->keyword);
-        $instanceDocLog = new DocLog;
+        $data = $this->getIndexData($request, 'procurement');
 
+        // Get module access
+        $module = 'proc_ors_burs';
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedIssue = Auth::user()->getModuleAccess($module, 'issue');
+        $isAllowedIssueBack = Auth::user()->getModuleAccess($module, 'issue_back');
+        $isAllowedReceive = Auth::user()->getModuleAccess($module, 'receive');
+        $isAllowedReceiveBack = Auth::user()->getModuleAccess($module, 'receive_back');
+        $isAllowedObligate = Auth::user()->getModuleAccess($module, 'obligate');
+        $isAllowedPO = Auth::user()->getModuleAccess('proc_po_jo', 'is_allowed');
 
-        $search = trim($request['search']);
-        $paperSizes = PaperSize::all();
-        $orsList = DB::table('tblors_burs as ors')
-        			 ->select('ors.*', 'ors.id as ors_id', 'bid.company_name', 'bid.address',
-        					   DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'),
-        					  'proj.project', 'status.id AS sID', 'ors.date_ors_burs')
-        			 ->join('tblpr as pr', 'pr.id', '=', 'ors.pr_id')
-                     ->join('tblpo_jo as po', 'po.po_no', '=', 'ors.po_no')
-                     ->join('tblpr_status AS status', 'status.id', '=', 'po.status')
-        			 ->join('tblsuppliers as bid', 'bid.id', '=', 'ors.payee')
-        			 ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'pr.requested_by')
-        			 ->leftJoin('tblprojects AS proj', 'proj.id', '=', 'pr.project_id')
-                     ->where('ors.module_class_id', 3)
-                     ->where('po.status', '<>', 3)
-        			 ->whereNull('ors.deleted_at');
-
-        if (!empty($search)) {
-            $orsList = $orsList->where(function ($query)  use ($search) {
-                                   $query->where('ors.po_no', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('ors.particulars', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.firstname', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.middlename', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.lastname', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('bid.company_name', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('ors.document_type', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('ors.code', 'LIKE', '%' . $search . '%');
-                               });
-        }
-
-        if (Auth::user()->role == 3 || Auth::user()->role == 6) {
-            $orsList = $orsList->where('requested_by', Auth::user()->emp_id);
-        }
-
-        if (Auth::user()->role == 5) {
-            $orsList = $orsList->where('emp.division_id', Auth::user()->division_id);
-        }
-
-        $orsList = $orsList->orderBy('pr.id', 'desc')
-                           ->paginate($pageLimit);
-
-        foreach ($orsList as $list) {
-            $list->document_status = $this->checkDocStatus($list->code);
-            $list->display_menu = true;
-        }
-
-        return view('pages.ors-burs', ['search' => $search,
-                                       'list' => $orsList,
-                                       'pageLimit' => $pageLimit,
-                                       'paperSizes' => $paperSizes,
-                                       'type' => 'procurement',
-                                       'colSpan' => 8]);
+        return view('modules.procurement.ors-burs.index', [
+            'list' => $data->ors_data,
+            'keyword' => $data->keyword,
+            'paperSizes' => $data->paper_sizes,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedObligate' => $isAllowedObligate,
+            'isAllowedIssue' => $isAllowedIssue,
+            'isAllowedIssueBack'=> $isAllowedIssueBack,
+            'isAllowedReceive' => $isAllowedReceive,
+            'isAllowedReceiveBack'=> $isAllowedReceiveBack,
+            'isAllowedPO' => $isAllowedPO,
+        ]);
     }
 
-    public function indexCA(Request $request)
-    {
+    public function indexCA(Request $request) {
+        $data = $this->getIndexData($request, 'cashadvance');
+
+        // Get module access
+        $module = 'ca_ors_burs';
+        $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedIssue = Auth::user()->getModuleAccess($module, 'issue');
+        $isAllowedIssueBack = Auth::user()->getModuleAccess($module, 'issue_back');
+        $isAllowedReceive = Auth::user()->getModuleAccess($module, 'receive');
+        $isAllowedReceiveBack = Auth::user()->getModuleAccess($module, 'receive_back');
+        $isAllowedObligate = Auth::user()->getModuleAccess($module, 'obligate');
+        $isAllowedDV = Auth::user()->getModuleAccess('ca_dv', 'obligate');
+
+        return view('modules.procurement.ors-burs.index', [
+            'list' => $data->ors_data,
+            'keyword' => $data->keyword,
+            'paperSizes' => $data->paper_sizes,
+            'isAllowedCreate' => $isAllowedCreate,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedObligate' => $isAllowedObligate,
+            'isAllowedIssue' => $isAllowedIssue,
+            'isAllowedIssueBack'=> $isAllowedIssueBack,
+            'isAllowedReceive' => $isAllowedReceive,
+            'isAllowedReceiveBack'=> $isAllowedReceiveBack,
+            'isAllowedPO' => $isAllowedPO,
+        ]);
+
+
+        /*
         $isOrdinaryUser = true;
         $pageLimit = 50;
         $search = trim($request['search']);
@@ -166,678 +164,444 @@ class OrsBursController extends Controller
                                        'pageLimit' => $pageLimit,
                                        'paperSizes' => $paperSizes,
                                        'type' => 'cashadvance',
-                                       'colSpan' => 5]);
+                                       'colSpan' => 5]);*/
     }
 
-    public function storeORSFromPO($poID) {
+    private function getIndexData($request, $type) {
+        $keyword = trim($request->keyword);
+        $instanceDocLog = new DocLog;
+
+        // User groups
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
+                             [Auth::user()->division];
+
+        // Main data
+        $paperSizes = PaperSize::orderBy('paper_type')->get();
+        $orsData = PurchaseJobOrder::with('bidpayee')->whereHas('pr', function($query)
+                                             use($empDivisionAccess) {
+            $query->whereIn('division', $empDivisionAccess);
+        })->whereHas('ors', function($query) {
+            $query->whereNull('deleted_at');
+        });
+
+        if (!empty($keyword)) {
+            $orsData = $orsData->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('po_no', 'like', "%$keyword%")
+                    ->orWhere('date_po', 'like', "%$keyword%")
+                    ->orWhere('grand_total', 'like', "%$keyword%")
+                    ->orWhere('document_type', 'like', "%$keyword%")
+                    ->orWhereHas('stat', function($query) use ($keyword) {
+                        $query->where('status_name', 'like', "%$keyword%");
+                    })->orWhereHas('bidpayee', function($query) use ($keyword) {
+                        $query->where('company_name', 'like', "%$keyword%")
+                              ->orWhere('address', 'like', "%$keyword%");
+                    })->orWhereHas('poitems', function($query) use ($keyword) {
+                        $query->where('item_description', 'like', "%$keyword%");
+                    })->orWhereHas('ors', function($query) use ($keyword) {
+                        $query->where('id', 'like', "%$keyword%")
+                              ->orWhere('particulars', 'like', "%$keyword%")
+                              ->orWhere('document_type', 'like', "%$keyword%")
+                              ->orWhere('transaction_type', 'like', "%$keyword%")
+                              ->orWhere('serial_no', 'like', "%$keyword%")
+                              ->orWhere('date_ors_burs', 'like', "%$keyword%")
+                              ->orWhere('date_obligated', 'like', "%$keyword%")
+                              ->orWhere('responsibility_center', 'like', "%$keyword%")
+                              ->orWhere('uacs_object_code', 'like', "%$keyword%")
+                              ->orWhere('amount', 'like', "%$keyword%")
+                              ->orWhere('office', 'like', "%$keyword%")
+                              ->orWhere('address', 'like', "%$keyword%")
+                              ->orWhere('fund_cluster', 'like', "%$keyword%");
+                    });
+            });
+        }
+
+        $orsData = $orsData->sortable(['po_no' => 'desc'])->paginate(15);
+
+        foreach ($orsData as $orsDat) {
+            $orsDat->doc_status = $instanceDocLog->checkDocStatus($orsDat->ors['id']);
+        }
+
+        return (object) [
+            'keyword' => $keyword,
+            'ors_data' => $orsData,
+            'paper_sizes' => $paperSizes
+        ];
+    }
+
+    /**
+     * Store a newly created resource from PO/JO in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  uuid $poID
+     * @return \Illuminate\Http\Response
+     */
+    public function storeORSFromPO(Request $request, $poID) {
+        $orsDocumentType = $request->ors_document_type;
+
         try {
             $instancePO = PurchaseJobOrder::find($poID);
             $poNo = $instancePO->po_no;
+            $prID = $instancePO->pr_id;
+            $documentType = $instancePO->document_type;
+            $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';
             $grandTotal = $instancePO->grand_total;
             $countORS = ObligationRequestStatus::where('po_no', $poNo)->count();
 
             if ($countORS == 0 && $grandTotal > 0) {
+                $instanceORS = new ObligationRequestStatus;
+                $instanceORS->pr_id = $prID;
+                $instanceORS->po_no = $poNo;
+                $instanceORS->responsibility_center = "19 001 03000 14";
+                $instanceORS->particulars = "To obligate...";
+                $instanceORS->mfo_pap = "3-Regional Office\nA.III.c.1\nA.III.b.1\nA.III.c.2";
+                $instanceORS->payee = $instancePO->awarded_to;
+                $instanceORS->amount = $instancePO->grand_total;
+                $instanceORS->module_class = 3;
+                $instanceORS->save();
 
+                $instancePO->for_approval = 'y';
+                $instancePO->with_ors_burs = 'y';
+                $instancePO->save();
+
+                $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';
+                $msg = "$documentType '$poNo' successfully created the ORS/BURS document.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('proc-ors-burs', ['keyword' => $poNo])
+                                 ->with('success', $msg);
+            } else {
+                $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';
+                $msg = "$documentType '$poNo' should have a grand total greater than 0 and
+                        no existing ORS/BURS document.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('po-jo', ['keyword' => $poNo])
+                                 ->with('warning', $msg);
+            }
+
+            if ($ountORS > 0) {
+                ObligationRequestStatus::where('po_no', $poNo)->restore();
             }
         } catch (\Throwable $th) {
-            //throw $th;
+            $instanceORS = PurchaseJobOrder::find($poID);
+            $poNo = $instanceORS->po_no;
+
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('po-jo', ['keyword' => $poNo])
+                             ->with('failed', $msg);
         }
     }
 
     /**
-     * Display the specified resource.
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request) {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function showCreate(Request $request) {
-        $moduleType = $request->module_type;
-        $actionURL = "";
-        $signatories = DB::table('tblsignatories AS sig')
-                         ->select('sig.id', 'sig.position', 'sig.ors_burs_sign_type', 'sig.active',
-                                  DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                         ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'sig.emp_id')
-                         ->where([['sig.ors', 'y'],
-                                  ['sig.active', 'y']])
-                         ->orderBy('emp.firstname')
-                         ->get();
-
-        switch ($moduleType) {
-            case 'cashadvance':
-                if (Auth::user()->role != 1 && Auth::user()->role != 3 && Auth::user()->role != 4) {
-                    $payees = DB::table('tblemp_accounts')
-                                ->select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
-                                        'position', 'emp_id')
-                                ->where('emp_id', Auth::user()->emp_id)
-                                ->orderBy('firstname')
-                                ->get();
-                } else {
-                    $payees = DB::table('tblemp_accounts')
-                                ->select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
-                                         'position', 'emp_id')
-                                ->where('active', 'y')
-                                ->orderBy('firstname')
-                                ->get();
-                }
-
-                $actionURL = url('cadv-reim-liquidation/ors-burs/store');
-                break;
-
-            case 'procurement':
-                $payees = Supplier::all();
-                $actionURL = url('procurement/ors-burs/store');
-                break;
-
-            default:
-                # code...
-                break;
-        }
-
-        return view('pages.create-ors-burs', ['actionURL' => $actionURL,
-                                              'moduleType' => $moduleType,
-                                              'payees' => $payees,
-                                              'signatories' => $signatories]);
+    public function showEdit($id) {
+        //
     }
 
-    public function showEdit(Request $request, $key) {
-        $moduleType = $request->module_type;
-        $actionURL = "";
-        $signatories = DB::table('tblsignatories AS sig')
-                         ->select('sig.id', 'sig.position', 'sig.ors_burs_sign_type', 'sig.active',
-                                  DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                         ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'sig.emp_id')
-                         ->where([['sig.ors', 'y'],
-                                  ['sig.active', 'y']])
-                         ->orderBy('emp.firstname')
-                         ->get();
-
-        switch ($moduleType) {
-            case 'cashadvance':
-                $ors = DB::table('tblors_burs as ors')
-                         ->select('ors.*', DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                         ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'ors.payee')
-                         ->where([['ors.id', $key],
-                                  ['module_class_id', 2]])
-                         ->first();
-
-                if (Auth::user()->role == 1 || Auth::user()->role == 3 || Auth::user()->role == 4) {
-                    $payees = DB::table('tblemp_accounts')
-                                ->select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
-                                         'position', 'emp_id')
-                                ->where('active', 'y')
-                                ->orderBy('firstname')
-                                ->get();
-                } else {
-                    $payees = DB::table('tblemp_accounts')
-                                ->select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
-                                         'position', 'emp_id')
-                                ->where('emp_id', Auth::user()->emp_id)
-                                ->orderBy('firstname')
-                                ->get();
-                }
-
-                $actionURL = url('cadv-reim-liquidation/ors-burs/update/' . $key);
-                break;
-            case 'procurement':
-                $payees = Supplier::all();
-                $ors = DB::table('tblors_burs as ors')
-                         ->join('tblsuppliers as bid', 'bid.id', '=', 'ors.payee')
-                         ->where([['ors.id', $key],
-                                  ['module_class_id', 3]])
-                         ->first();
-                $actionURL = url('procurement/ors-burs/update/' . $key);
-                break;
-            default:
-                # code...
-                break;
-        }
-
-        return view('pages.edit-ors-burs', ['ors' => $ors,
-                                            'actionURL' => $actionURL,
-                                            'moduleType' => $moduleType,
-                                            'payees' => $payees,
-                                            'signatories' => $signatories]);
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id) {
+        //
     }
 
-    public function store(Request $request) {
-        $documentType = $request->document_type;
-        $moduleType = $request->module_type;
-        $transactionType = !empty($request->transaction_type) ? $request->transaction_type: 'others';
-        $getLastID = OrsBurs::orderBy('id', 'desc')->first();
-        $pKey = $getLastID->id + 1;
-        $docType = $this->getDocumentName($documentType);
+    /**
+     * Soft deletes the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function delete(Request $request, $id) {
+        $isDestroy = $request->destroy;
 
-        if ($moduleType == 'cashadvance') {
-            $moduleClassID = 2;
-            $redirectURL = "cadv-reim-liquidation/ors-burs?search=" . $pKey;
-        } else if ($moduleType == 'procurement') {
-            $moduleClassID = 3;
-            $redirectURL = "procurement/ors-burs?search=" . $pKey;
+        if ($isDestroy) {
+            $response = $this->destroy($request, $id);
+
+            return redirect(url()->previous())
+                                 ->with($response->alert_type, $response->msg);
+        } else {
+            try {
+                $instanceORS = ObligationRequestStatus::find($id);
+                $documentType = $instanceORS->document_type;
+                $documentType = $documentType == 'ors' ? 'Obligation & Request Status' :
+                                                 'Budget Utilization & Request Status';
+                $instanceORS->delete();
+
+                $msg = "$documentType '$id' successfully deleted.";
+                Auth::user()->log($request, $msg);
+                return redirect(url()->previous())
+                                     ->with('success', $msg);
+            } catch (\Throwable $th) {
+                $msg = "Unknown error has occured. Please try again.";
+                Auth::user()->log($request, $msg);
+                return redirect(url()->previous())
+                                     ->with('failed', $msg);
+            }
         }
+    }
 
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($request, $id) {
         try {
-            $serialNo = $request->serial_no;
-            $dateORS_BURS = !empty($request->date_ors_burs) ? $request->date_ors_burs: NULL;
-            $fundCluster = $request->fund_cluster;
-            $payee = $request->payee;
-            $office = $request->office;
-            $address = $request->address;
-            $responsibilityCenter = $request->responsibility_center;
-            $particulars = $request->particulars;
-            $mfoPAP = $request->mfo_pap;
-            $uacsObjectCode = $request->uacs_object_code;
-            $amount = $request->amount;
-            $sigCertified1 = !empty($request->sig_agency_head) ? $request->sig_agency_head: NULL;
-            $sigCertified2 = !empty($request->sig_budget) ? $request->sig_budget: NULL;
-            $dateCertified1 = !empty($request->date_certified_1) ? $request->date_certified_1: NULL;
-            $dateCertified2 = !empty($request->date_certified_2) ? $request->date_certified_2: NULL;
+            $instanceORS = PurchaseJobOrder::find($id);
+            $documentType = $instanceORS->document_type;
+            $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';
+            $instanceORS->forceDelete();
 
-            $ors = new OrsBurs;
-            $ors->document_type = $documentType;
-            $ors->transaction_type = $transactionType;
-            $ors->serial_no = $serialNo;
-            $ors->date_ors_burs = $dateORS_BURS;
-            $ors->fund_cluster = $fundCluster;
-            $ors->payee = $payee;
-            $ors->office = $office;
-            $ors->address = $address;
-            $ors->responsibility_center = $responsibilityCenter;
-            $ors->particulars = $particulars;
-            $ors->mfo_pap = $mfoPAP;
-            $ors->uacs_object_code = $uacsObjectCode;
-            $ors->amount = $amount;
-            $ors->sig_certified_1 = $sigCertified1;
-            $ors->sig_certified_2 = $sigCertified2;
-            $ors->date_certified_1 = $dateCertified1;
-            $ors->date_certified_2 = $dateCertified2;
-            $ors->module_class_id = $moduleClassID;
-            $ors->code = $this->generateTrackerCode($documentType, $pKey, $moduleClassID);
-            $ors->save();
+            $msg = "$documentType '$id' permanently deleted.";
+            Auth::user()->log($request, $msg);
 
-            $logEmpMessage = "saved the " . strtolower($docType) . " $pKey.";
-            $this->logEmployeeHistory($logEmpMessage);
+            return (object) [
+                'msg' => $msg,
+                'alert_type' => 'success',
+                'pr_id' => $prID
+            ];
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
 
-            $msg = "$docType $pKey successfully saved.";
-            return redirect(url($redirectURL))->with('success', $msg);
-        } catch (Exception $e) {
-            $msg = "There is an error encountered updating the $docType $pKey.";
-            return redirect(url()->previous())->with('failed', $msg);
+            return (object) [
+                'msg' => $msg,
+                'alert_type' => 'failed'
+            ];
         }
     }
 
-    public function update(Request $request, $key) {
-        $documentType = $request->document_type;
-        $moduleType = $request->module_type;
-        $transactionType = !empty($request->transaction_type) ? $request->transaction_type: 'others';
-        $docType = $this->getDocumentName($documentType);
-        $_ors = OrsBurs::where('id', $key)->first();
-        $ors = OrsBurs::where('id', $key)->first();
-
-        try {
-            $oldCode = $ors->code;
-            $serialNo = $request->serial_no;
-            $dateORS_BURS = !empty($request->date_ors_burs) ? $request->date_ors_burs: NULL;
-            $fundCluster = $request->fund_cluster;
-            $office = $request->office;
-            $address = $request->address;
-            $responsibilityCenter = $request->responsibility_center;
-            $particulars = $request->particulars;
-            $mfoPAP = $request->mfo_pap;
-            $uacsObjectCode = $request->uacs_object_code;
-            $amount = $request->amount;
-            $sigCertified1 = !empty($request->sig_certified_1) ? $request->sig_certified_1: NULL;
-            $sigCertified2 = !empty($request->sig_certified_2) ? $request->sig_certified_2: NULL;
-            $dateCertified1 = !empty($request->date_certified_1) ? $request->date_certified_1: NULL;
-            $dateCertified2 = !empty($request->date_certified_2) ? $request->date_certified_2: NULL;
-
-            if (strpos($oldCode, strtoupper($documentType)) === false) {
-                $newCode = str_replace($ors->document_type,
-                                       strtoupper($documentType),
-                                       $oldCode);
-                $docHistory = DocumentLogHistory::where('code', $oldCode)->get();
-
-                foreach ($docHistory as $dHist) {
-                    $dHist->code = $newCode;
-                    $dHist->save();
-                }
-            } else {
-                $newCode = $oldCode;
-            }
-
-            if ($moduleType == 'cashadvance') {
-                $ors->amount = $amount;
-                $pKey = $_ors->id;
-                $redirectURL = "cadv-reim-liquidation/ors-burs?search=" . $pKey;
-            } else if ($moduleType == 'procurement') {
-                $pKey = $_ors->po_no;
-                $redirectURL = "procurement/ors-burs?search=" . $pKey;
-            }
-
-            $ors->document_type = $documentType;
-            $ors->transaction_type = $transactionType;
-            $ors->serial_no = $serialNo;
-            $ors->date_ors_burs = $dateORS_BURS;
-            $ors->fund_cluster = $fundCluster;
-            $ors->office = $office;
-            $ors->address = $address;
-            $ors->responsibility_center = $responsibilityCenter;
-            $ors->particulars = $particulars;
-            $ors->mfo_pap = $mfoPAP;
-            $ors->uacs_object_code = $uacsObjectCode;
-            $ors->sig_certified_1 = $sigCertified1;
-            $ors->sig_certified_2 = $sigCertified2;
-            $ors->date_certified_1 = $dateCertified1;
-            $ors->date_certified_2 = $dateCertified2;
-            $ors->code = $newCode;
-            $ors->save();
-
-            $logEmpMessage = "updated the " . strtolower($docType) . " $pKey.";
-            $this->logEmployeeHistory($logEmpMessage);
-
-            $msg = "$docType $pKey successfully updated.";
-            return redirect(url($redirectURL))->with('success', $msg);
-        } catch (Exception $e) {
-            $msg = "There is an error encountered updating the $docType $pKey.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
-    }
-
-    public function showIssuedTo(Request $request, $id) {
-        $issuedTo = User::orderBy('firstname')->get();
-        $ors = DB::table('tblors_burs')->where('id', $id)->first();
-        $issueBack = (int)$request['back'];
-
-        return view('pages.view-ors-burs-issue', ['key' => $id,
-                                                  'issuedTo' => $issuedTo,
-                                                  'type' => $ors->document_type,
-                                                  'issueBack' => $issueBack]);
-    }
-
-    public function showReceived(Request $request, $id) {
-        $issuedTo = User::orderBy('firstname')->get();
-        $ors = DB::table('tblors_burs')->where('id', $id)->first();
-        $issueBack = (int)$request['back'];
-
-        return view('pages.view-ors-burs-issue', ['key' => $id,
-                                                  'issuedTo' => $issuedTo,
-                                                  'type' => $ors->document_type,
-                                                  'issueBack' => $issueBack]);
-    }
-
-    public function delete($id) {
-        $ors = OrsBurs::where('id', $id)->first();
-        $dv = DisbursementVoucher::where('ors_id', $id)->first();
-        $dvID = !empty($dv) ? $dv->id: 0;
-        $liq = LiquidationReport::where('dv_id', $dvID)->first();
-        $liqID = !empty($liq) ? $liq->id: 0;
-        $docType = $this->getDocumentName($ors->document_type);
-        $pKey = $ors->id;
-
-        try {
-            OrsBurs::where('id', $id)->delete();
-            $msg = "$docType $pKey successfully deleted.";
-            $logEmpMessage = "deleted the " . strtolower($docType) . " $pKey.";
-
-            if ($dv) {
-                DisbursementVoucher::where('ors_id', $id)->delete();
-                $msg = "$docType $pKey and Disbursement Voucher $dvID successfully deleted.";
-                $logEmpMessage = "deleted the " . strtolower($docType) .
-                                 " $pKey and disbursement voucher $dvID.";
-            }
-
-            if ($liq) {
-                LiquidationReport::where('dv_id', $dv->id)->delete();
-                $msg = "$docType $pKey, Disbursement Voucher $dvID, and
-                        Liquidation Report $liqID successfully deleted.";
-                $logEmpMessage = "deleted the " . strtolower($docType) .
-                                 " $pKey, disbursement voucher $dvID, and
-                                 liquidation report $liqID.";
-            }
-
-            $this->logEmployeeHistory($logEmpMessage);
-
-            return redirect(url()->previous())->with('success', $msg);
-        } catch (Exception $e) {
-            $msg = "There is an error encountered deleting the $docType $pKey.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
+    public function showIssue($id) {
+        return view('modules.procurement.ors-burs.issue', [
+            'id' => $id
+        ]);
     }
 
     public function issue(Request $request, $id) {
-        $ors = OrsBurs::where('id', $id)->first();
-        $docType = $this->getDocumentName($ors->document_type);
-
-        if ($ors->module_class_id == 3) {
-            $pKey = $ors->po_no;
-            $redirectURL = "procurement/ors-burs?search=" . $pKey;
-        } else if ($ors->module_class_id == 2) {
-            $pKey = $ors->id;
-            $redirectURL = "cadv-reim-liquidation/ors-burs?search=" . $pKey;
-        }
+        $remarks = $request->remarks;
 
         try {
-            $issueBack = $request['back'];
-            $remarks = $request['remarks'];
-            $issuedTo = $request['issued_to'];
+            $instanceDocLog = new DocLog;
+            $instanceORS = ObligationRequestStatus::find($id);
+            $moduleClass = $instanceORS->module_class;
+            $documentType = $instanceORS->document_type;
+            $documentType = $documentType == 'ors' ? 'Obligation Request & Status' :
+                                             'Budget Utilization Request & Status';
 
-            $code = $ors->code;
-            $isDocGenerated = $this->checkDocGenerated($code);
-            $docStatus = $this->checkDocStatus($code);
+            $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
+            $docStatus = $instanceDocLog->checkDocStatus($id);
 
-            if (!$issueBack) {
-                if (empty($docStatus->date_issued)) {
-                    if ($isDocGenerated) {
-                        $this->logTrackerHistory($code, Auth::user()->emp_id, $issuedTo, "issued", $remarks);
+            if ($moduleClass == 3) {
+                $routeName = 'proc-ors-burs';
+            } else if ($moduleClass == 2) {
+                $routeName = 'ca-ors-burs';
+            }
 
-                        $logEmpMessage = "issued the " . strtolower($docType) . " $pKey.";
-                        $this->logEmployeeHistory($logEmpMessage);
+            if (empty($docStatus->date_issued)) {
+                if ($isDocGenerated) {
+                    $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "issued", $remarks);
 
-                        $msg = "$docType $pKey is now set to issued.";
-                        return redirect(url($redirectURL))->with('success', $msg);
-                    } else {
-                        $msg = "Generate first the $docType $pKey document.";
-                        return redirect(url($redirectURL))->with('warning', $msg);
-                    }
+                    $instanceORS->notifyIssued($id, Auth::user()->id);
+
+                    $msg = "$documentType '$id' successfully issued to accounting unit.";
+                    Auth::user()->log($request, $msg);
+                    return redirect()->route($routeName, ['keyword' => $id])
+                                     ->with('success', $msg);
                 } else {
-                    $msg = "$docType $docType is already issued.";
-                    return redirect(url($redirectURL))->with('warning', $msg);
+                    $msg = "Document for $documentType '$id' should be generated first.";
+                    Auth::user()->log($request, $msg);
+                    return redirect()->route($routeName, ['keyword' => $id])
+                                     ->with('warning', $msg);
                 }
             } else {
-                $issueBackResponse = $this->issueBack($pKey, $code, $docType, $docStatus,
-                                                      $issuedTo, $remarks);
-
-                if ($issueBackResponse->status == 'success') {
-                    return redirect(url($redirectURL))->with('success', $issueBackResponse->msg);
-                } else {
-                    return redirect(url()->previous())->with('failed', $issueBackResponse->msg);
-                }
+                $msg = "$documentType '$id' already issued.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route($routeName, ['keyword' => $id])
+                                 ->with('warning', $msg);
             }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered issuing the $docType $pKey.";
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
     }
 
-    private function issueBack($pKey, $code, $docType, $docStatus, $issuedTo, $remarks) {
-        if (empty($docStatus->date_issued_back)) {
-            $this->logTrackerHistory($code, Auth::user()->emp_id, $issuedTo, "issued_back", $remarks);
-
-            $logEmpMessage = "issued back the " . strtolower($docType) . " $pKey.";
-            $this->logEmployeeHistory($logEmpMessage);
-
-            $msg = "Issued back the $docType $pKey document.";
-            $status = "success";
-        } else {
-            $msg = "There is an error encountered issuing back the $docType $pKey.";
-            $status = "failed";
-        }
-
-        return (object) ['msg' => $msg,
-                         'status' => $status];
+    public function showReceive($id) {
+        return view('modules.procurement.ors-burs.receive', [
+            'id' => $id
+        ]);
     }
 
     public function receive(Request $request, $id) {
-        $ors = OrsBurs::where('id', $id)->first();
-        $docType = $this->getDocumentName($ors->document_type);
-
-        if ($ors->module_class_id == 3) {
-            $pKey = $ors->po_no;
-            $redirectURL = "procurement/ors-burs?search=" . $pKey;
-        } else if ($ors->module_class_id == 2) {
-            $pKey = $ors->id;
-            $redirectURL = "cadv-reim-liquidation/ors-burs?search=" . $pKey;
-        }
+        $remarks = $request->remarks;
 
         try {
-            $receiveBack = $request['back'];
-            $code = $ors->code;
-            $isDocGenerated = $this->checkDocGenerated($code);
-            $docStatus = $this->checkDocStatus($code);
+            $instanceDocLog = new DocLog;
+            $instanceORS = ObligationRequestStatus::find($id);
+            $moduleClass = $instanceORS->module_class;
+            $documentType = $instanceORS->document_type;
+            $documentType = $documentType == 'ors' ? 'Obligation Request & Status' :
+                                             'Budget Utilization Request & Status';
 
-            if (!$receiveBack) {
-                if (!empty($docStatus->date_issued) && empty($docStatus->date_received)) {
-                    if ($isDocGenerated) {
-                        $this->logTrackerHistory($code, Auth::user()->emp_id, 0, "received");
-
-                        $logEmpMessage = "received the $docType $pKey.";
-                        $this->logEmployeeHistory($logEmpMessage);
-
-                        $msg = "$docType $pKey is now set to received.";
-                        return redirect(url($redirectURL))->with('success', $msg);
-                    } else {
-                        $msg = "Generate first the $docType $pKey document.";
-                        return redirect(url($redirectURL))->with('warning', $msg);
-                    }
-                } else {
-                    $msg = "$docType $pKey is already received.";
-                    return redirect(url($redirectURL))->with('warning', $msg);
-                }
-            } else {
-                $receiveBackResponse = $this->receiveBack($pKey, $code, $docType, $docStatus);
-
-                if ($receiveBackResponse->status == 'success') {
-                    return redirect(url($redirectURL))->with('success', $receiveBackResponse->msg);
-                } else {
-                    return redirect(url()->previous())->with('failed', $receiveBackResponse->msg);
-                }
+            if ($moduleClass == 3) {
+                $routeName = 'proc-ors-burs';
+            } else if ($moduleClass == 2) {
+                $routeName = 'ca-ors-burs';
             }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered receiving the $docType $pKey.";
+
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received", $remarks);
+            $instanceORS->notifyReceived($id, Auth::user()->id);
+
+            $msg = "$documentType '$id' successfully received.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
     }
 
-    public function receiveBack($pKey, $code, $docType, $docStatus) {
-        if (!empty($docStatus->date_issued_back) && empty($docStatus->date_received_back)) {
-            $this->logTrackerHistory($code, Auth::user()->emp_id, 0, "-");
-            $this->logTrackerHistory($code, Auth::user()->emp_id, 0, "received_back");
-
-            $logEmpMessage = "received back the $docType $pKey.";
-            $this->logEmployeeHistory($logEmpMessage);
-
-            $msg = "Received back the $docType $pKey document.";
-            $status = "success";
-        } else {
-            $msg = "There is an error encountered issuing back the $docType $pKey.";
-            $status = "failed";
-        }
-
-        return (object) ['msg' => $msg,
-                         'status' => $status];
+    public function showIssueBack($id) {
+        return view('modules.procurement.ors-burs.issue-back', [
+            'id' => $id
+        ]);
     }
 
-    public function createDV($id) {
-        $ors = OrsBurs::where('id', $id)->first();
-        $getLastID = DisbursementVoucher::orderBy('id', 'desc')->first();
-        $code = $ors->code;
-        $dvKey = $getLastID->id + 1;
+    public function issueBack(Request $request, $id) {
+        $remarks = $request->remarks;
 
         try {
-            $docType = $this->getDocumentName($ors->document_type);
-            $pKey = $ors->id;
-            $isDocGenerated = $this->checkDocGenerated($code);
-            $redirectURL = "cadv-reim-liquidation/ors-burs?search=" . $pKey;
+            $instanceDocLog = new DocLog;
+            $instanceORS = ObligationRequestStatus::find($id);
+            $moduleClass = $instanceORS->module_class;
+            $documentType = $instanceORS->document_type;
+            $documentType = $documentType == 'ors' ? 'Obligation Request & Status' :
+                                             'Budget Utilization Request & Status';
 
-            if ($isDocGenerated) {
-                if ($ors->module_class_id == 2) {
-                    $dv = new DisbursementVoucher;
-                    $dv->ors_id = $ors->id;
-                    $dv->module_class_id = $ors->module_class_id;
-                    $dv->particulars = "To payment of...";
-                    $dv->code = $this->generateTrackerCode('DV', $dvKey, 2);
-                    $dv->save();
-
-                    $logEmpMessage = "created the disbursement voucher $dvKey.";
-                    $this->logEmployeeHistory($logEmpMessage);
-
-                    $redirectURL = "cadv-reim-liquidation/dv?search=" . $dvKey;
-                    $msg = "Disbursement Voucher $dvKey successfully created.";
-                    return redirect(url($redirectURL))->with('success', $msg);
-                }
-            } else {
-                $msg = "Generate first the $docType $pKey document.";
-                return redirect(url($redirectURL))->with('warning', $msg);
+            if ($moduleClass == 3) {
+                $routeName = 'proc-ors-burs';
+            } else if ($moduleClass == 2) {
+                $routeName = 'ca-ors-burs';
             }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered creating the
-                    Disbursement Voucher $dvKey.";
+
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "issued_back", $remarks);
+            $instanceORS->notifyIssuedBack($id, Auth::user()->id);
+
+            $msg = "$documentType '$id' successfully issued back.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
     }
 
-    public function obligate($id) {
-        $ors = OrsBurs::where('id', $id)->first();
-        $po = PurchaseOrder::where('po_no', $ors->po_no)->first();
-        $code = $ors->code;
-        $docType = $this->getDocumentName($ors->document_type);
-        $isDocGenerated = $this->checkDocGenerated($code);
+    public function showReceiveBack($id) {
+        return view('modules.procurement.ors-burs.receive-back', [
+            'id' => $id
+        ]);
+    }
 
-        if ($ors->module_class_id == 3) {
-            $pKey = $ors->po_no;
-            $redirectURL = "procurement/ors-burs?search=" . $pKey;
-        } else if ($ors->module_class_id == 2) {
-            $pKey = $ors->id;
-            $redirectURL = "cadv-reim-liquidation/ors-burs?search=" . $pKey;
-        }
+    public function receiveBack(Request $request, $id) {
+        $remarks = $request->remarks;
 
         try {
-            if ($isDocGenerated) {
-                if (empty($ors->date_obligated)) {
-                    if ($ors->module_class_id == 2) {
+            $instanceDocLog = new DocLog;
+            $instanceORS = ObligationRequestStatus::find($id);
+            $moduleClass = $instanceORS->module_class;
+            $documentType = $instanceORS->document_type;
+            $documentType = $documentType == 'ors' ? 'Obligation Request & Status' :
+                                             'Budget Utilization Request & Status';
 
-                    } else {
-                        if (isset($po)) {
-                            $po->status = 7;
-                            $po->save();
-                        }
-                    }
-
-                    $ors->obligated_by = Auth::user()->emp_id;
-                    $ors->date_obligated = date('Y-m-d H:i:s');
-                    $ors->save();
-
-                    $logEmpMessage = "obligated the " . strtolower($docType) . " $pKey.";
-                    $this->logEmployeeHistory($logEmpMessage);
-
-                    $msg = "$docType $pKey is now set to obligated.";
-                    return redirect(url($redirectURL))->with('success', $msg);
-                } else {
-                    $msg = "$docType $pKey is already obligated.";
-                    return redirect(url($redirectURL))->with('warning', $msg);
-                }
-            } else {
-                $msg = "Generate first the $docType $pKey document.";
-                return redirect(url($redirectURL))->with('warning', $msg);
+            if ($moduleClass == 3) {
+                $routeName = 'proc-ors-burs';
+            } else if ($moduleClass == 2) {
+                $routeName = 'ca-ors-burs';
             }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered obligating the $docType $pKey.";
+
+            $instanceDocLog->logDocument($id, NULL, NULL, "-", NULL);
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received_back", $remarks);
+
+            $msg = "$documentType '$id' successfully received back.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
     }
 
-    private function getDocumentName($docName) {
-        $docName = strtoupper($docName);
-
-        if ($docName == 'ORS') {
-            $documentName = "Obligation Request and Status";
-        } else if ($docName == 'BURS') {
-            $documentName = "Budget Utilization Request and Status";
-        } else {
-            $documentName = "Obligation/Budget Utilization Request and Status";
-        }
-
-        return $documentName;
+    public function showObligate($id) {
+        $instanceORS = ObligationRequestStatus::find($id);
+        $serialNo = $instanceORS->serial_no;
+        return view('modules.procurement.ors-burs.obligate', [
+            'id' => $id,
+            'serialNo' => $serialNo
+        ]);
     }
 
-    private function checkDocGenerated($code) {
-        $logs = DB::table('tbldocument_logs_history')
-                  ->where([
-                        ['code', $code],
-                        ['action', 'document_generated']
-                    ])
-                  ->orderBy('logshist.created_at', 'desc')
-                  ->count();
+    public function obligate(Request $request, $id) {
+        $serialNo = $request->serial_no;
 
-        return $logs;
-    }
+        try {
+            $instanceDocLog = new DocLog;
+            $instanceORS = ObligationRequestStatus::with('po')->find($id);
+            $moduleClass = $instanceORS->module_class;
+            $documentType = $instanceORS->document_type;
+            $documentType = $documentType == 'ors' ? 'Obligation Request & Status' :
+                                             'Budget Utilization Request & Status';
 
-    private function checkDocStatus($code) {
-        $logs = DB::table('tbldocument_logs_history')
-                  ->where('code', $code)
-                  ->orderBy('created_at', 'desc')
-                  ->get();
-        $currentStatus = (object) ["issued_by" => NULL,
-                                   "date_issued" => NULL,
-                                   "received_by" => NULL,
-                                   "date_received" => NULL,
-                                   "issued_back_by" => NULL,
-                                   "date_issued_back" => NULL,
-                                   "received_back_by" => NULL,
-                                   "date_received_back" => NULL,
-                                   "issued_remarks" => NULL,
-                                   "issued_back_remarks" => NULL];
-
-        if (count($logs) > 0) {
-            foreach ($logs as $log) {
-                if ($log->action != "-") {
-                    switch ($log->action) {
-                        case 'issued':
-                            $currentStatus->issued_remarks = $log->remarks;
-                            $currentStatus->issued_by = $log->action;
-                            $currentStatus->date_issued = $log->created_at;
-                            break;
-
-                        case 'received':
-                            $currentStatus->received_by = $log->action;
-                            $currentStatus->date_received = $log->created_at;
-                            break;
-
-                        case 'issued_back':
-                            $currentStatus->issued_back_remarks = $log->remarks;
-                            $currentStatus->issued_back_by = $log->action;
-                            $currentStatus->date_issued_back = $log->created_at;
-                            break;
-
-                        case 'received_back':
-                            $currentStatus->received_back_by = $log->action;
-                            $currentStatus->date_received_back = $log->created_at;
-                            break;
-
-                        default:
-                            # code...
-                            break;
-                    }
-                } else {
-                    break;
-                }
+            if ($moduleClass == 3) {
+                $routeName = 'proc-ors-burs';
+                $instancePO = PurchaseJobOrder::find($instanceORS->po->id);
+                $instancePO->status = 7;
+                $instancePO->save();
+            } else if ($moduleClass == 2) {
+                $routeName = 'ca-ors-burs';
             }
+
+            $instanceORS->date_obligated = Carbon::now();
+            $instanceORS->obligated_by = Auth::user()->id;
+            $instanceORS->serial_no = $serialNo;
+            $instanceORS->save();
+
+            $instanceORS->notifyObligated($id, Auth::user()->id);
+
+            $msg = "$documentType with a serial number of '$serialNo'
+                    is successfully obligated.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
         }
-
-        return $currentStatus;
-    }
-
-    private function generateTrackerCode($modAbbr, $pKey, $modClass) {
-        $modAbbr = strtoupper($modAbbr);
-        $pKey = strtoupper($pKey);
-
-        return $modAbbr . "-" . $pKey . "-" . $modClass . "-" . date('mdY');
-    }
-
-    private function logEmployeeHistory($msg, $emp = "") {
-        $empLog = new EmployeeLog;
-        $empLog->emp_id = empty($emp) ? Auth::user()->emp_id: $emp;
-        $empLog->message = $msg;
-        $empLog->save();
-    }
-
-    private function logTrackerHistory($code, $empFrom, $empTo, $action, $remarks = "") {
-        $docHistory = new DocumentLogHistory;
-        $docHistory->code = $code;
-        $docHistory->date = Carbon::now();
-        $docHistory->emp_from = $empFrom;
-        $docHistory->emp_to = $empTo;
-        $docHistory->action = $action;
-        $docHistory->remarks = $remarks;
-        $docHistory->save();
     }
 }

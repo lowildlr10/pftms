@@ -1809,10 +1809,10 @@ class PrintController extends Controller
         foreach ($groupNumbers as $groupNo) {
             $tableData = [];
             $prItems = DB::table('purchase_request_items as item')
-                     ->join('item_unit_issues as unit', 'unit.id', '=', 'item.unit_issue')
-                     ->where('item.pr_id', $prID)
-                     ->orderBy('item.item_no')
-                     ->get();
+                         ->join('item_unit_issues as unit', 'unit.id', '=', 'item.unit_issue')
+                         ->where([['item.pr_id', $prID], ['item.group_no', $groupNo->group_no]])
+                         ->orderBy('item.item_no')
+                         ->get();
 
             foreach ($prItems as $key => $item) {
                 if (strpos($item->item_description, "\n") !== FALSE) {

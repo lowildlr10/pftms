@@ -62,7 +62,7 @@
                                 <i class="fas fa-search"></i> {{ !empty($keyword) ? (strlen($keyword) > 15) ?
                                 'Search: '.substr($keyword, 0, 15).'...' : 'Search: '.$keyword : '' }}
                             </button>
-                            <a href="{{ route('abstract') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
+                            <a href="{{ route('po-jo') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
                             </a>
                         </div>
@@ -322,7 +322,8 @@
                     @if (!empty($item->date_cancelled))
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-black waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).unCancel('{{ $item->po_no }}');">
+                                onclick="$(this).showUncancel('{{ route('po-jo-uncancel', ['id' => $item->id]) }}',
+                                                              `{{ strtoupper($item->document_type).' '.$item->po_no }}`);">
                             <i class="fas fa-lock-open fa-lg black-text"></i> Uncancel Document
                         </button>
                     </li>
@@ -332,32 +333,34 @@
                         @if ($item->with_ors_burs == 'y')
                     <li class="list-group-item justify-content-between">
                         <a type="button" class="btn btn-outline-warning waves-effect btn-block btn-md btn-rounded"
-                           href="{{ url('procurement/ors-burs?search='.$item->po_no) }}">
+                           onclick="$(this).redirectToDoc('{{ route('proc-ors-burs') }}', '{{ $item->po_no }}');">
                             <i class="fas fa-file-signature orange-text"></i> Edit ORS/BURS
                         </a>
                     </li>
                         @else
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).createORS_BURS('{{ $item->po_no }}');">
+                                onclick="$(this).showCreateORS('{{ route('po-jo-create-ors-burs', ['poID' => $item->id]) }}',
+                                                               `{{ strtoupper($item->document_type).' '.$item->po_no }}`);">
                             <i class="fas fa-pencil-alt green-text"></i> Create ORS/BURS
                         </button>
                     </li>
                         @endif
                     @endif
 
-
                     @if (empty($item->date_accountant_signed) && empty($item->date_po_approved))
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).accountantSigned('{{ $item->po_no }}');">
+                                onclick="$(this).showAccountantSigned('{{ route('po-jo-accountant-signed', ['id' => $item->id]) }}',
+                                                                      `{{ strtoupper($item->document_type).' '.$item->po_no }}`);">
                             <i class="fas fa-signature green-text"></i> Cleared/Signed by Accountant
                         </button>
                     </li>
                     @elseif (!empty($item->date_accountant_signed) && empty($item->date_po_approved))
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).approve('{{ $item->po_no }}');">
+                                onclick="$(this).showApprove('{{ route('po-jo-approve', ['id' => $item->id]) }}',
+                                                             `{{ strtoupper($item->document_type).' '.$item->po_no }}`);">
                             <i class="fas fa-thumbs-up green-text"></i> Approve
                         </button>
                     </li>
@@ -365,7 +368,8 @@
                         @if (!empty($item->doc_status->date_issued) && $item->status != 3)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-danger waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).cancel('{{ $item->po_no }}');">
+                                onclick="$(this).showCancel('{{ route('po-jo-cancel', ['id' => $item->id]) }}',
+                                                            `{{ strtoupper($item->document_type).' '.$item->po_no }}`);">
                             <i class="fas fa-ban fa-lg red-text"></i> Cancel
                         </button>
                     </li>
@@ -381,14 +385,16 @@
                                 @if ($item->status == 7)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-black waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).toDelivery('{{ $item->po_no }}');">
+                                onclick="$(this).showForDelivery('{{ route('po-jo-delivery', ['id' => $item->id]) }}',
+                                                                 `{{ strtoupper($item->document_type).' '.$item->po_no }}`);">
                             <i class="fas fa-truck"></i> For Delivery
                         </button>
                     </li>
                                 @elseif ($item->status == 8)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-indigo waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).toInspection('{{ $item->po_no }}');">
+                                onclick="$(this).showForInspection('{{ route('po-jo-inspection', ['id' => $item->id]) }}',
+                                                                   `{{ strtoupper($item->document_type).' '.$item->po_no }}`);">
                             <i class="fas fa-search"></i> Inspection
                         </button>
                     </li>
@@ -414,7 +420,8 @@
                         @if (empty($item->doc_status->date_issued) && empty($item->doc_status->date_received))
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-warning waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).viewIssue('{{ $item->po_no }}', '{{ $item->document_type }}');">
+                                onclick="$(this).showIssue('{{ route('po-jo-issue', ['id' => $item->id]) }}',
+                                                           `{{ strtoupper($item->document_type).' '.$item->po_no }}`);">
                             <i class="fas fa-paper-plane orange-text"></i> Issue
                         </button>
                     </li>
@@ -422,7 +429,8 @@
                             @if ($item->status != 3)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).receive('{{ $item->po_no }}');">
+                                onclick="$(this).showReceive('{{ route('po-jo-receive', ['id' => $item->id]) }}',
+                                                             `{{ strtoupper($item->document_type).' '.$item->po_no }}`);">
                             <i class="fas fa-lg fa-hand-holding"></i> Receive
                         </button>
                     </li>
@@ -451,7 +459,10 @@
 @include('modals.edit')
 @include('modals.delete-destroy')
 @include('modals.approve')
+@include('modals.create-ors-po')
+@include('modals.cleared')
 @include('modals.cancel')
+@include('modals.uncancel')
 @include('modals.issue')
 @include('modals.receive')
 @include('modals.print')

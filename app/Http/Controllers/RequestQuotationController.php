@@ -88,7 +88,8 @@ class RequestQuotationController extends Controller
                     })->orWhereHas('division', function($query) use ($keyword) {
                         $query->where('division_name', 'like', "%$keyword%");
                     })->orWhereHas('rfq', function($query) use ($keyword) {
-                        $query->where('date_canvass', 'like', "%$keyword%");
+                        $query->where('id', 'like', "%$keyword%")
+                              ->orWhere('date_canvass', 'like', "%$keyword%");
                     });
             });
         }
@@ -196,7 +197,7 @@ class RequestQuotationController extends Controller
             InventoryStock::where('pr_id', $prID)->delete();
             //DB::table('tblinventory_stocks_issue')->where('pr_id', $id)->delete();
 
-            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
+            $instanceDocLog->logDocument($id, NULL, NULL, '-');
 
             $msg = "Request for Quotation '$prNo' successfully updated.";
             Auth::user()->log($request, $msg);
