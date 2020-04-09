@@ -256,4 +256,62 @@ class ObligationRequestStatus extends Model
 
         $user->notify(new Notif($data));
     }
+
+    public function notifyMessage($id, $from, $message) {
+        $orsData = $this::with('po')->find($id);
+        $poNo = $orsData->po_no;
+        $poID = $orsData->po->id;
+        $moduleClass = $orsData->module_class;
+
+        $instanceUser = new User;
+        $users = User::get();
+        $documentType = $orsData->document_type;
+        $documentType = $documentType == 'ors' ? 'Obligation Request & Status' :
+                                         'Budget Utilization Request & Status';
+        $fromName = $instanceUser->getEmployee($from)->name;
+        $fromGroups = $instanceUser->getEmployee($from)->groups;
+        $msgNotif = "$message - $fromName.";
+
+        if ($moduleClass == 3) {
+            $module = 'proc-ors-burs';
+            $_module = 'proc_ors_burs';
+        } else if ($moduleClass == 2) {
+            $module = 'ca-ors-burs';
+            $_module = 'ca_ors_burs';
+        }
+
+        foreach ($users as $user) {
+            $notify = false;
+            $data = (object) [
+                'ors_id' => $id,
+                'po_id' => $poID,
+                'po_no' => $poNo,
+                'module' => $module,
+                'type' =>'message',
+                'msg' => $msgNotif
+            ];
+
+            $groups = $instanceUser->getEmployee($user->id)->groups;
+            $roles = $instanceUser->getEmployee($user->id)->roles;
+
+            foreach ($roles as $role) {
+                $roleData = Role::find($role);
+                $jsonRole = json_decode($roleData->module_access);
+
+                if (isset($jsonRole->{$_module}->receive)) {
+                    if ($jsonRole->{$_module}->receive) {
+                        foreach ($fromGroups as $group) {
+                            if (in_array($group, $groups)) {
+                                $notify = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ($notify) {
+                $user->notify(new Notif($data));
+            }
+        }
+    }
 }

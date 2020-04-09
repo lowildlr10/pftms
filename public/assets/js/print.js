@@ -1,5 +1,4 @@
 $(function() {
-    let isSelectInitiated = false;
     let key, documentType, otherParam;
 
 	$('#paper-size').unbind('change').change(function() {
@@ -24,7 +23,7 @@ $(function() {
               paperSize = $('#paper-size').val(),
               fontSize = $('#font-size').val(),
     	      url = `${baseURL}/print/${key}/?document_type=${documentType}&preview_toggle=preview
-                  &font_scale=${fontSize}&paper_size=${paperSize}&other_param=${otherParam}`,
+                     &font_scale=${fontSize}&paper_size=${paperSize}&other_param=${otherParam}`,
               urlPost = `${baseURL}/print/${key}`;
 
         $('#inp-document-type').val(documentType);
@@ -37,11 +36,6 @@ $(function() {
     });
 
     $.fn.showPrint = function(_key, _documentType, _otherParam = "") {
-        const paperSize = $('#paper-size').val(),
-              fontSize = $('#font-size').val(),
-              url = `${baseURL}/print/${_key}/?document_type=${_documentType}&preview_toggle=preview` +
-                    `&font_scale=${fontSize}&paper_size=${paperSize}&test=true&other_param=${_otherParam}`;
-
         key = _key;
         documentType = _documentType;
         otherParam = _otherParam;
@@ -49,71 +43,96 @@ $(function() {
         switch (documentType) {
             case 'proc_pr':
                 $('#print-title').html('Generate Purchase Request');
+                setPaperSize('A4');
                 break;
             case 'proc_rfq':
                 $('#print-title').html('Generate Request for Quotation');
+                setPaperSize('A4');
                 break;
             case 'proc_abstract':
                 $('#print-title').html('Generate Abstract of Bids and Quotation');
+                setPaperSize('Long');
                 break;
             case 'proc_po':
                 $('#print-title').html('Generate Purchase Order');
+                setPaperSize('A4');
                 break;
             case 'proc_jo':
                 $('#print-title').html('Generate Job Order');
+                setPaperSize('A4');
                 break;
             case 'proc_ors':
                 $('#print-title').html('Generate Obligation Request Status');
+                setPaperSize('A4');
                 break;
             case 'proc_burs':
                 $('#print-title').html('Generate Budget Utilization Request Status');
+                setPaperSize('A4');
                 break;
             case 'ca_ors':
                 $('#print-title').html('Generate Obligation Request Status');
+                setPaperSize('A4');
                 break;
             case 'ca_burs':
                 $('#print-title').html('Generate Budget Utilization Request Status');
+                setPaperSize('A4');
                 break;
             case 'proc_iar':
                 $('#print-title').html('Generate Inspection and Acceptance Report');
+                setPaperSize('A4');
                 break;
             case 'proc_dv':
                 $('#print-title').html('Generate Disbursement Voucher');
+                setPaperSize('A4');
                 break;
             case 'ca_dv':
                 $('#print-title').html('Generate Disbursement Voucher');
+                setPaperSize('A4');
                 break;
             case 'ca_lr':
                 $('#print-title').html('Generate Liquidation Report');
+                setPaperSize('A4');
                 break;
             case 'pay_lddap':
                 $('#print-title').html('Generate List of Due and Demandable Accounts Payable');
+                setPaperSize('A4');
                 break;
             case 'inv_par':
                 $('#print-title').html('Generate Property Acknowledgement Reciept');
+                setPaperSize('A4');
                 break;
             case 'inv_ris':
                 $('#print-title').html('Generate Requisition and Issue Slip');
+                setPaperSize('A4');
                 break;
             case 'inv_ics':
                 $('#print-title').html('Generate Inventory Custodian Slip');
+                setPaperSize('A4');
                 break;
             case 'inv_label':
                 $('#print-title').html('Generate Property Label Tag');
+                setPaperSize('A4');
                 break;
 
             default:
                 break;
         }
 
+        const paperSize = $('#paper-size').val(),
+              fontSize = $('#font-size').val();
+        let url = `${baseURL}/print/${_key}/?document_type=${_documentType}&preview_toggle=preview` +
+                  `&font_scale=${fontSize}&paper_size=${paperSize}&test=true&other_param=${_otherParam}`;
+
     	$.ajax({
 		    url: url,
 		    success: function(data) {
                 $("#print-modal").modal({keyboard: false, backdrop: 'static'})
                                  .on('shown.bs.modal', function() {
-					if (isSelectInitiated == false) {
-						isSelectInitiated = true;
-                    }
+                    const urlPost = `${baseURL}/print/${key}`;
+                    url = `${baseURL}/print/${key}/?document_type=${documentType}&preview_toggle=preview
+                          &font_scale=${fontSize}&paper_size=${paperSize}&other_param=${otherParam}`;
+
+                    printDoc(url, documentType, urlPost);
 
                     $('#other_param').val(otherParam);
 
@@ -158,6 +177,20 @@ $(function() {
         $('#inp-paper-size').val(paperSize);
         $('#inp-other-param').val(otherParam);
         $('#modal-print-content object form').attr('action', url).submit();
+    }
+
+    function setPaperSize(paperType) {
+        paperType = paperType.toLowerCase();
+
+        $("select#paper-size").find('option').each(function() {
+            const text = $(this).text();
+
+            if (text.toLowerCase().indexOf(paperType) >= 0) {
+                const value = $(this).val();
+                $('#paper-size').val(value);
+                return false;
+            }
+        });
     }
 
     function printDoc(url, documentType, urlPost = "") {

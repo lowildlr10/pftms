@@ -51,8 +51,7 @@
                             </div>
                         </a>
                                         @break
-
-                                    @case('proc-abs')
+                                    @case('proc-abstract')
                         <a onclick="$(this).redirectToDoc('{{ route('abstract') }}', '{{ $notification->data['abs_id'] }}');"
                            class="dropdown-item">
                             <div class="notification-content">
@@ -69,11 +68,9 @@
                             </div>
                         </a>
                                         @break
-
                                     @case('proc-po-jo')
 
                                         @break
-
                                     @case('proc-ors-burs')
                         <a onclick="$(this).redirectToDoc('{{ route('proc-ors-burs') }}', '{{ $notification->data['ors_id'] }}');"
                            class="dropdown-item">
@@ -92,7 +89,6 @@
                         </a>
                                         @break
                                     @default
-
                                 @endswitch
                         <div class="dropdown-divider"></div>
                             @endforeach

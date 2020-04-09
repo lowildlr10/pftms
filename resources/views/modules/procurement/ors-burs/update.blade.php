@@ -1,4 +1,4 @@
-<form id="form-update" class="wow animated fadeIn" method="POST"
+<form id="form-update" class="wow animated fadeIn d-flex justify-content-center" method="POST"
       action="{{ route('proc-ors-burs-update', ['id' => $id]) }}">
     @csrf
 
@@ -13,16 +13,20 @@
                                 OBLIGATION/BUDGET UTILIZATION REQUEST AND STATUS
                                 <div class="md-form">
                                     <select id="document-type" name="document_type" searchable="Search here.."
-                                            class="mdb-select md-form my-0 required">
-                                        <option class="red-text" value="" disabled selected
-                                        >* Document Type</option>
-                                        <option value="ORS" {{ $documentType == 'ORS' ? 'selected': '' }}
+                                            class="mdb-select crud-select md-form my-0 required">
+                                        <option class="red-text" value="" disabled selected>
+                                            Choose a document type
+                                        </option>
+                                        <option value="ors" {{ $documentType == 'ors' ? 'selected': '' }}
                                             >OBLIGATION REQUEST AND STATUS (ORS)
                                         </option>
-                                        <option value="BURS" {{ $documentType == 'BURS' ? 'selected': '' }}
+                                        <option value="burs" {{ $documentType == 'burs' ? 'selected': '' }}
                                             >BUDGET UTILIZATION REQUEST AND STATUS (BURS)
                                         </option>
                                     </select>
+                                    <label class="mdb-main-label">
+                                        Document Type <span class="red-text">*</span>
+                                    </label>
                                 </div>
                             </strong>
                         </div>
@@ -30,18 +34,19 @@
                     </div>
                 </div>
                 <div class="col-md-4 border border-left-0 border-bottom-0 border-dark">
-                    <div class="md-form form-sm" value="{{ $serialNo }}">
+                    <div class="md-form form-sm">
                         <input type="text" id="serial-no" name="serial_no"
-                               class="form-control">
+                               class="form-control" value="{{ $serialNo }}"
+                               {{ !$isObligated ? ' readonly' : '' }}>
                         <label for="serial-no" class="{{ !empty($serialNo) ? 'active': '' }}">
                             <strong>Serial Number</strong>
                         </label>
                     </div>
                     <div class="md-form form-sm">
                         <input type="date" id="date-ors-burs" name="date_ors_burs"
-                               class="form-control" value="{{ $dateORS }}">
-                        <label for="date-ors-burs" class="active">
-                            <strong>Date</strong>
+                               class="form-control required" value="{{ $dateORS }}">
+                        <label for="date-ors-burs" class="active mt-3">
+                            <strong>Date <span class="red-text">*</span></strong>
                         </label>
                     </div>
                     <div class="md-form form-sm">
@@ -57,21 +62,19 @@
             <div class="row">
                 <div class="col-md-2 border border-bottom-0 border-dark text-center">
                     <div class="md-form">
-                        <span class="red-text">* </span>
                         Payee
                     </div>
                 </div>
                 <div class="col-md-10 border border-left-0 border-bottom-0 border-dark">
                     <div class="md-form form-sm">
                         <select id="payee" name="payee" searchable="Search here.."
-                                class="mdb-select md-form my-0 required" disabled>
-                            <option class="red-text" value="" disabled selected
-                            >Payee</option>
+                                class="mdb-select crud-select md-form my-0 required" disabled>
+                            <option class="red-text" value="" disabled selected>Payee</option>
 
                             @if (count($payees) > 0)
-                                @foreach ($payees as $payee)
-                            <option value="{{ $payee->id }}" {{ $payee->id == $payee ? 'selected': '' }}
-                                >{{ $payee->company_name }}
+                                @foreach ($payees as $bid)
+                            <option value="{{ $bid->id }}" {{ $bid->id == $payee ? 'selected': '' }}>
+                                {{ $bid->company_name }}
                             </option>
                                 @endforeach
                             @endif
@@ -98,8 +101,7 @@
             <div class="row">
                 <div class="col-md-2 border border-bottom-0 border-dark text-center">
                     <div class="md-form">
-                        <span class="red-text">* </span>
-                        Address
+                        Address <span class="red-text">*</span>
                     </div>
                 </div>
                 <div class="col-md-10 border border-left-0 border-bottom-0 border-dark">
@@ -113,8 +115,7 @@
             <div class="row">
                 <div class="col-md-2 border border-bottom-0 border-dark px-0 text-center">
                     <div class="p-2 border-bottom border-dark">
-                        <span class="red-text">* </span>
-                        <strong>Responsibilty Center</strong>
+                        <strong>Responsibilty Center <span class="red-text">*</span></strong>
                     </div>
                     <div class="md-form px-3">
                         <input type="text" id="responsibility_center" name="responsibility_center"
@@ -124,8 +125,7 @@
                 </div>
                 <div class="col-md-4 border border-left-0 border-bottom-0 border-dark px-0 text-center">
                     <div class="p-2 border-bottom border-dark">
-                        <span class="red-text">* </span>
-                        <strong>PARTICULARS</strong>
+                        <strong>PARTICULARS <span class="red-text">*</span></strong>
                     </div>
                     <div class="form-group p-0 m-0">
                         <textarea class="md-textarea form-control border border-0 rounded-0 required"
@@ -135,8 +135,7 @@
                 </div>
                 <div class="col-md-2 border border-left-0 border-bottom-0 border-dark px-0 text-center">
                     <div class="p-2 border-bottom border-dark">
-                        <span class="red-text">* </span>
-                        <strong>MFO/PAP</strong>
+                        <strong>MFO/PAP <span class="red-text">*</span></strong>
                     </div>
                     <div class="form-group p-0 m-0">
                         <textarea class="md-textarea form-control border border-0 rounded-0 required"
@@ -156,13 +155,11 @@
                 </div>
                 <div class="col-md-2 border border-left-0 border-bottom-0 border-dark px-0 text-center">
                     <div class="p-2 border-bottom border-dark">
-                        <span class="red-text">* </span>
-                        <strong>AMOUNT</strong>
+                        <strong>AMOUNT <span class="red-text">*</span></strong>
                     </div>
                     <div class="md-form px-3">
                         <input type="number" id="amount" name="amount" placeholder="Enter a value..."
-                               class="form-control required" value="{{ $ors->amount }}"
-                               readonly>
+                               class="form-control required" value="{{ $amount }}">
                     </div>
                 </div>
             </div>
@@ -183,71 +180,71 @@
 
             <div class="row">
                 <div class="col-md-6 border border-dark">
+                    <small>
+                        [ A ] Certified: Charges to appropriation/alloment necessary, lawful and under
+                        my direct supervision; and supporting documents valid, proper and legal.
+                    </small>
+
                     <div class="md-form">
-                        <small>
-                            <span class="red-text">* </span>
-                            [ A ] Certified: Charges to appropriation/alloment necessary, lawful and under
-                            my direct supervision; and supporting documents valid, proper and legal.
-                        </small>
                         <select id="sig-certified-1" name="sig_certified_1" searchable="Search here.."
-                                class="mdb-select md-form my-0 required">
-                            <option value="" disabled selected
-                            > Head, Requesting Office/Authorized Representative</option>
+                                class="mdb-select crud-select md-form my-0 required">
+                            <option value="" disabled selected>
+                                Choose a head, requesting office/authorized representative
+                            </option>
 
                             @if (count($signatories) > 0)
-                                @foreach ($signatories as $approval)
-                                    @if ($approval->ors_burs_sign_type == 'approval')
-                            <option value="{{ $approval->id }}" {{ $approval->id == $ors->sig_certified_1 ? 'selected': '' }}
-                                >{{ $approval->name }} [ {{ $approval->position }} ]
+                                @foreach ($signatories as $sig)
+                                    @if ($sig->module->ors->approval)
+                            <option value="{{ $sig->id }}" {{ $sig->id == $sigCertified1 ? 'selected' : '' }}>
+                                {!! $sig->name !!} [{!! $sig->module->ors->designation !!}]
                             </option>
                                     @endif
                                 @endforeach
-                            @else
-                            <option value="" disabled>
-                                No data...
-                            </option>
                             @endif
                         </select>
+                        <label class="mdb-main-label">
+                            Head, Requesting Office/Authorized Representative <span class="red-text">*</span>
+                        </label>
                     </div>
-                    <div class="md-form my-0">
+                    <div class="md-form">
                         <input type="date" id="date-certified-1" name="date_certified_1"
                                class="form-control" value="{{ $dateCertified1 }}">
-                        <label for="date-certified-1" class="active">
+                        <label for="date-certified-1" class="active mt-3">
                             Date:
                         </label>
                     </div>
                 </div>
                 <div class="col-md-6 border border-left-0 border-dark">
+                    <small>
+                        [ B ] Certified: Allotment available and obligated for the purpose/adjustment
+                        necessary as indicated above.
+                    </small>
+
                     <div class="md-form">
-                        <small>
-                            <span class="red-text">* </span>
-                            [ B ] Certified: Allotment available and obligated for the purpose/adjustment
-                            necessary as indicated above.
-                        </small>
                         <select id="sig-certified-2" name="sig_certified_2" searchable="Search here.."
-                                class="mdb-select md-form my-0 required">
-                            <option value="" disabled selected
-                            > Head, Budget Division/Unit/Authorized Representative</option>
+                                class="mdb-select crud-select md-form my-0 required">
+                            <option value="" disabled selected>
+                                Choose a head, budget division/unit/authorized representative
+                            </option>
 
                             @if (count($signatories) > 0)
-                                @foreach ($signatories as $budget)
-                                    @if ($budget->ors_burs_sign_type == 'budget')
-                            <option value="{{ $budget->id }}" {{ $budget->id == $ors->sig_certified_2 ? 'selected': '' }}
-                                >{{ $budget->name }} [ {{ $budget->position }} ]
+                                @foreach ($signatories as $sig)
+                                    @if ($sig->module->ors->funds_available)
+                            <option value="{{ $sig->id }}" {{ $sig->id == $sigCertified2 ? 'selected' : '' }}>
+                                {!! $sig->name !!} [{!! $sig->module->ors->designation !!}]
                             </option>
                                     @endif
                                 @endforeach
-                            @else
-                            <option value="" disabled>
-                                No data...
-                            </option>
                             @endif
                         </select>
+                        <label class="mdb-main-label">
+                            Head, Budget Division/Unit/Authorized Representative <span class="red-text">*</span>
+                        </label>
                     </div>
-                    <div class="md-form my-0">
+                    <div class="md-form">
                         <input type="date" id="date-certified-2" name="date_certified_2"
                                class="form-control" value="{{ $dateCertified2 }}">
-                        <label for="date-certified-2" class="active">
+                        <label for="date-certified-2" class="active mt-3">
                             Date:
                         </label>
                     </div>

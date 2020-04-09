@@ -387,6 +387,7 @@
                 <div id="notif-body">
                     @if (count(Auth::user()->unreadNotifications) > 0)
                         @foreach(Auth::user()->unreadNotifications as $notification)
+                            @if ($notification->data['type'] != 'message')
                     <a class="dropdown-item" href="#">
                         <div class="notification-content">
                             <div class="icon">
@@ -402,6 +403,7 @@
                             </div>
                         </div>
                     </a>
+                            @endif
                         @endforeach
                     @else
                     <a class="dropdown-item" href="#">
@@ -428,7 +430,12 @@
         <div class="dropdown">
             <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-envelope"></i>
-                <!--<span class="badge badge-pill badge-success notification">7</span>-->
+                @if (count(Auth::user()->unreadNotifications) > 0)
+                <span class="badge badge-pill badge-success notification">
+                    {{ count(Auth::user()->unreadNotifications) > 99 ? '99+' :
+                       count(Auth::user()->unreadNotifications) }}
+                </span>
+                @endif
             </a>
             <div class="dropdown-menu messages" aria-labelledby="dropdownMenuMessage">
                 <div class="messages-header">
@@ -436,19 +443,48 @@
                     Messages
                 </div>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#">
-                    <div class="message-content">
-                        <div class="pic">
-                            <img src="#" alt="">
-                        </div>
-                        <div class="content">
-                            <div class="message-title">
-                                <strong> --</strong>
+
+                @if (count(Auth::user()->unreadNotifications) > 0)
+                    @foreach(Auth::user()->unreadNotifications as $notification)
+                        @if ($notification->data['type'] == 'message')
+                    <a class="dropdown-item" href="#">
+                        <div class="message-content">
+                            <!--
+                            <div class="pic">
+                                <img src="#" alt="">
+                            </div> -->
+                            <div class="content">
+                                <div class="message-title">
+                                    <strong>
+                                    @if ($notification->data['module'] == 'proc-ors-burs')
+                                        ORS/BURS <small class="grey-text">{{ $notification->created_at }}</small>
+                                    @endif
+                                    </strong>
+                                </div>
+                                <div class="message-detail">
+                                    {!! $notification->data['msg'] !!}
+                                </div>
                             </div>
-                            <div class="message-detail">No new message.</div>
                         </div>
-                    </div>
-                </a>
+                    </a>
+                        @endif
+                    @endforeach
+                @else
+                    <a class="dropdown-item" href="#">
+                        <div class="message-content">
+                            <div class="pic">
+                                <img src="#" alt="">
+                            </div>
+                            <div class="content">
+                                <div class="message-title">
+                                    <strong> --</strong>
+                                </div>
+                                <div class="message-detail">No new message.</div>
+                            </div>
+                        </div>
+                    </a>
+                @endif
+
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item text-center" href="#">View all messages</a>
             </div>

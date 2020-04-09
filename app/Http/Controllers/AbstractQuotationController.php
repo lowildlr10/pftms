@@ -447,7 +447,8 @@ class AbstractQuotationController extends Controller
 
                 if ($instancePOItem) {
                     if (!empty($awardedTo)) {
-                        if ($awardedTo != $instancePOItem->po->awarded_to) {
+                        if ($awardedTo != $instancePOItem->po->awarded_to ||
+                            $documentType != $instancePOItem->po->document_type) {
                             $this->processPOItemData($prID, $prIDItem, $awardedTo, $poCount, $documentType);
                         }
                     } else {
@@ -481,7 +482,8 @@ class AbstractQuotationController extends Controller
                                                    ->where('po_no', $instancePO->po_no)
                                                    ->first();
 
-            if ($_instancePOItem->pritem->group_no == $instancePRItem->group_no) {
+            if ($_instancePOItem->pritem->group_no == $instancePRItem->group_no &&
+                $instancePO->document_type == $documentType) {
                 $this->addItemPO(
                     $instancePO->po_no,
                     $prID,

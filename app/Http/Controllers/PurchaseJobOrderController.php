@@ -49,7 +49,7 @@ class PurchaseJobOrderController extends Controller
         $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
         $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
         $isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
-        $isAllowedAccountantSigned = Auth::user()->getModuleAccess($module, 'accountant_signed');
+        $isAllowedAccountantSigned = Auth::user()->getModuleAccess($module, 'signed');
         $isAllowedApprove = Auth::user()->getModuleAccess($module, 'approve');
         $isAllowedIssue = Auth::user()->getModuleAccess($module, 'issue');
         $isAllowedReceive = Auth::user()->getModuleAccess($module, 'receive');
@@ -96,6 +96,7 @@ class PurchaseJobOrderController extends Controller
                         $query->where('division_name', 'like', "%$keyword%");
                     })->orWhereHas('po', function($query) use ($keyword) {
                         $query->where('po_no', 'like', "%$keyword%")
+                              ->orWhere('id', 'like', "%$keyword%")
                               ->orWhere('date_po', 'like', "%$keyword%")
                               ->orWhere('date_po_approved', 'like', "%$keyword%")
                               ->orWhere('date_cancelled', 'like', "%$keyword%")
@@ -453,6 +454,193 @@ class PurchaseJobOrderController extends Controller
                 'msg' => $msg,
                 'alert_type' => 'failed'
             ];
+        }
+    }
+
+    public function accountantSigned(Request $request, $id) {
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePO = PurchaseJobOrder::find($id);
+            $poNo = $instancePO->po_no;
+            $documentType = $instancePO->document_type == 'po' ?
+                            'Purchase Order' : 'Job Order';
+
+            $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
+
+            if ($isDocGenerated) {
+                $instancePO->date_accountant_signed = Carbon::now();
+                $instancePO->save();
+
+                $msg = "$documentType '$poNo' is successfully set to
+                       'Cleared/Signed by Accountant'.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('po-jo', ['keyword' => $id])
+                                 ->with('success', $msg);
+            } else {
+                $msg = "Document for $documentType '$poNo' should be generated first.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route($routeName, ['keyword' => $id])
+                                     ->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function approve(Request $request, $id) {
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePO = PurchaseJobOrder::find($id);
+            $poNo = $instancePO->po_no;
+            $documentType = $instancePO->document_type == 'po' ?
+                            'Purchase Order' : 'Job Order';
+
+            $instancePO->date_po_approved = Carbon::now();
+            $instancePO->save();
+
+            $msg = "$documentType '$poNo' is successfully set to
+                   'Approved'.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('po-jo', ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function showIssue($id) {
+        $users = User::orderBy('firstname')->get();
+
+        return view('modules.procurement.po-jo.issue', [
+            'id' => $id,
+            'users' => $users
+        ]);
+    }
+
+    public function issue(Request $request, $id) {
+        $issuedTo = $request->issued_to;
+        $remarks = $request->remarks;
+
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePO = PurchaseJobOrder::find($id);
+            $poNo = $instancePO->po_no;
+            $documentType = $instancePO->document_type == 'po' ?
+                            'Purchase Order' : 'Job Order';
+
+            $instanceDocLog->logDocument($id, Auth::user()->id, $issuedTo, "issued", $remarks);
+            $issuedToName = Auth::user()->getEmployee($issuedTo)->name;
+
+            //$instanceRFQ->notifyIssued($id, $issuedTo, $requestedBy);
+
+            $msg = "$documentType '$poNo' successfully issued to $issuedToName.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('po-jo', ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('rfq', ['keyword' => $id])
+                             ->with('failed', $msg);
+        }
+    }
+
+    public function showReceive($id) {
+        return view('modules.procurement.po-jo.receive', [
+            'id' => $id,
+        ]);
+    }
+
+    public function receive(Request $request, $id) {
+        $remarks = $request->remarks;
+
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePO = PurchaseJobOrder::find($id);
+            $poNo = $instancePO->po_no;
+            $documentType = $instancePO->document_type == 'po' ?
+                            'Purchase Order' : 'Job Order';
+
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received", $remarks);
+
+            //$instanceRFQ->notifyReceived($id, Auth::user()->id, $responsiblePerson, $requestedBy);
+
+            $msg = "$documentType '$poNo' successfully received.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('po-jo', ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('rfq', ['keyword' => $id])
+                             ->with('failed', $msg);
+        }
+    }
+
+    public function delivery(Request $request, $id) {
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePO = PurchaseJobOrder::find($id);
+            $poNo = $instancePO->po_no;
+            $documentType = $instancePO->document_type == 'po' ?
+                            'Purchase Order' : 'Job Order';
+
+            if ($instancePO->status == 7) {
+                $instancePO->status = 8;
+                $instancePO->save();
+
+                $msg = "$documentType '$poNo' is successfully set to
+                       'For Delivery'.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('po-jo', ['keyword' => $id])
+                                 ->with('success', $msg);
+            } else {
+                $msg = "ORS/BURS document for this $documentType '$poNo' should be
+                       obligated first.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('po-jo', ['keyword' => $id])
+                                 ->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function inspection(Request $request, $id) {
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePO = PurchaseJobOrder::with('ors')->find($id);
+            $poNo = $instancePO->po_no;
+            $prID = $instancePO->pr_id;
+            $orsID = $instancePO->ors['id'];
+            $documentType = $instancePO->document_type == 'po' ?
+                            'Purchase Order' : 'Job Order';
+
+            $iarNo = "IAR-" . $poNo;
+            $instanceIAR = new InspectionAcceptanceReport;
+            $instanceIAR->iar_no = $iarNo;
+            $instanceIAR->pr_id = $prID;
+            $instanceIAR->ors_id = $orsID;
+            $instanceIAR->po_id = $id;
+            $instanceIAR->save();
+
+            $instancePO->status = 9;
+            $instancePO->save();
+
+            $msg = "$documentType '$poNo' is now ready for inspection.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('po-jo', ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
         }
     }
 }

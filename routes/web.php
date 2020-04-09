@@ -401,7 +401,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     Route::post('procurement/po-jo/accountant-signed/{id}', [
         'uses' => 'PurchaseJobOrderController@accountantSigned',
         'module' => 'proc_po_jo',
-        'access' => 'accountant_signed'
+        'access' => 'signed'
     ])->name('po-jo-accountant-signed');
     Route::post('procurement/po-jo/approve/{id}', [
         'uses' => 'PurchaseJobOrderController@approve',
@@ -418,6 +418,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'proc_po_jo',
         'access' => 'issue'
     ])->name('po-jo-issue');
+    Route::get('procurement/po-jo/show-receive/{id}', [
+        'uses' => 'PurchaseJobOrderController@showReceive',
+        'module' => 'proc_po_jo',
+        'access' => 'receive'
+    ])->name('po-jo-show-receive');
     Route::post('procurement/po-jo/receive/{id}', [
         'uses' => 'PurchaseJobOrderController@receive',
         'module' => 'proc_po_jo',
@@ -515,6 +520,16 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'proc_ors_burs',
         'access' => 'obligate'
     ])->name('proc-ors-burs-obligate');
+    Route::get('procurement/ors-burs/show-remarks/{id}', [
+        'uses' => 'ObligationRequestStatusController@showLogRemarks',
+        'module' => 'proc_ors_burs',
+        'access' => 'is_allowed'
+    ])->name('proc-ors-burs-show-remarks');
+    Route::post('procurement/ors-burs/create-remarks/{id}', [
+        'uses' => 'ObligationRequestStatusController@logRemarks',
+        'module' => 'proc_ors_burs',
+        'access' => 'is_allowed'
+    ])->name('proc-ors-burs-store-remarks');
 
     // Inpection and Acceptance Report Module
     Route::any('procurement/iar', [

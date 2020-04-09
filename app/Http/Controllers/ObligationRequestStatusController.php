@@ -96,75 +96,6 @@ class ObligationRequestStatusController extends Controller
             'isAllowedReceiveBack'=> $isAllowedReceiveBack,
             'isAllowedPO' => $isAllowedPO,
         ]);
-
-
-        /*
-        $isOrdinaryUser = true;
-        $pageLimit = 50;
-        $search = trim($request['search']);
-        $paperSizes = PaperSize::all();
-        $orsList = DB::table('tblors_burs as ors')
-                     ->select('ors.*', DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'),
-                              'ors.id as ors_id', 'ors.date_ors_burs')
-                     ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'ors.payee')
-                     ->where('ors.module_class_id', 2)
-                     ->whereNull('ors.deleted_at');
-
-        if (!empty($search)) {
-            $orsList = $orsList->where(function ($query)  use ($search) {
-                                   $query->where('ors.payee', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('ors.id', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('ors.date_ors_burs', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('ors.particulars', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.firstname', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.middlename', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.lastname', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('ors.code', 'LIKE', '%' . $search . '%');
-                               });
-        }
-
-        if (Auth::user()->role != 1 && Auth::user()->role != 4) {
-            $orsList = $orsList->where('ors.payee', Auth::user()->emp_id);
-            $isOrdinaryUser = true;
-        } else {
-            $isOrdinaryUser = false;
-        }
-
-        $orsList = $orsList->orderBy('ors.id', 'desc')
-                           ->paginate($pageLimit);
-
-        foreach ($orsList as $list) {
-            $dvCount = DisbursementVoucher::where('ors_id', $list->id)->count();
-            $list->dv_count = $dvCount;
-            $list->document_status = $this->checkDocStatus($list->code);
-
-            if ($dvCount > 0) {
-                $dv = DB::table('tbldv')->where('ors_id', $list->id)->first();
-                $list->dv_id = $dv->id;
-            }
-
-            if (!$isOrdinaryUser) {
-                if (!empty($list->document_status->date_issued) &&
-                    $list->payee != Auth::user()->emp_id) {
-                    $list->display_menu = true;
-                } else {
-                    $list->display_menu = false;
-                }
-
-                if ($list->payee == Auth::user()->emp_id) {
-                    $list->display_menu = true;
-                }
-            } else {
-                $list->display_menu = true;
-            }
-        }
-
-        return view('pages.ors-burs', ['search' => $search,
-                                       'list' => $orsList,
-                                       'pageLimit' => $pageLimit,
-                                       'paperSizes' => $paperSizes,
-                                       'type' => 'cashadvance',
-                                       'colSpan' => 5]);*/
     }
 
     private function getIndexData($request, $type) {
@@ -310,7 +241,49 @@ class ObligationRequestStatusController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showEdit($id) {
-        //
+        $orsData = ObligationRequestStatus::find($id);
+        $isObligated = !empty($orsData->date_obligated) ? 1 : 0;
+        $moduleClass = $orsData->module_class;
+        $documentType = $orsData->document_type;
+        $serialNo = $orsData->serial_no;
+        $dateORS = $orsData->date_ors_burs;
+        $fundCluster = $orsData->fund_cluster;
+        $payee = $orsData->payee;
+        $office = $orsData->office;
+        $address = $orsData->address;
+        $responsibilityCenter = $orsData->responsibility_center;
+        $particulars = $orsData->particulars;
+        $mfoPAP = $orsData->mfo_pap;
+        $uacsObjectCode = $orsData->uacs_object_code;
+        $amount = $orsData->amount;
+        $sigCertified1 = $orsData->sig_certified_1;
+        $sigCertified2 = $orsData->sig_certified_2;
+        $dateCertified1 = $orsData->date_certified_1;
+        $dateCertified2 = $orsData->date_certified_2;
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+
+        if ($moduleClass == 3) {
+            $payees = Supplier::orderBy('company_name')->get();
+        } else if ($moduleClass == 2) {
+
+        }
+
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
+        }
+
+        return view('modules.procurement.ors-burs.update', compact(
+            'id', 'documentType', 'serialNo', 'dateORS',
+            'fundCluster', 'payee', 'office', 'address',
+            'responsibilityCenter', 'particulars', 'mfoPAP',
+            'uacsObjectCode', 'uacsObjectCode', 'amount',
+            'sigCertified1', 'sigCertified2', 'dateCertified1',
+            'dateCertified2', 'signatories', 'payees', 'isObligated'
+        ));
     }
 
     /**
@@ -321,7 +294,64 @@ class ObligationRequestStatusController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id) {
-        //
+        $documentType = $request->document_type;
+        $transactionType = !empty($request->transaction_type) ? $request->transaction_type: 'others';
+        $serialNo = $request->serial_no;
+        $dateORS = !empty($request->date_ors_burs) ? $request->date_ors_burs: NULL;
+        $fundCluster = $request->fund_cluster;
+        $office = $request->office;
+        $address = $request->address;
+        $responsibilityCenter = $request->responsibility_center;
+        $particulars = $request->particulars;
+        $mfoPAP = $request->mfo_pap;
+        $uacsObjectCode = $request->uacs_object_code;
+        $amount = $request->amount;
+        $sigCertified1 = !empty($request->sig_certified_1) ? $request->sig_certified_1: NULL;
+        $sigCertified2 = !empty($request->sig_certified_2) ? $request->sig_certified_2: NULL;
+        $dateCertified1 = !empty($request->date_certified_1) ? $request->date_certified_1: NULL;
+        $dateCertified2 = !empty($request->date_certified_2) ? $request->date_certified_2: NULL;
+
+        try {
+            $instanceORS = ObligationRequestStatus::find($id);
+            $moduleClass = $instanceORS->module_class;
+
+            if ($moduleClass == 3) {
+                $routeName = 'proc-ors-burs';
+            } else if ($moduleClass == 2) {
+                $routeName = 'ca-ors-burs';
+                $instanceORS->transaction_type = $transactionType;
+            }
+
+            $instanceORS->document_type = $documentType;
+            $instanceORS->serial_no = $serialNo;
+            $instanceORS->date_ors_burs = $dateORS;
+            $instanceORS->fund_cluster = $fundCluster;
+            $instanceORS->office = $office;
+            $instanceORS->address = $address;
+            $instanceORS->responsibility_center = $responsibilityCenter;
+            $instanceORS->particulars = $particulars;
+            $instanceORS->mfo_pap = $mfoPAP;
+            $instanceORS->uacs_object_code = $uacsObjectCode;
+            $instanceORS->sig_certified_1 = $sigCertified1;
+            $instanceORS->sig_certified_2 = $sigCertified2;
+            $instanceORS->date_certified_1 = $dateCertified1;
+            $instanceORS->date_certified_2 = $dateCertified2;
+            $instanceORS->amount = $amount;
+            $instanceORS->save();
+
+            $documentType = $documentType == 'ors' ? 'Obligation Request & Status' :
+                            'Budget Utilization Request & Status';
+
+            $msg = "$documentType '$id' successfully updated.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())
+                                 ->with('failed', $msg);
+        }
     }
 
     /**
@@ -423,7 +453,7 @@ class ObligationRequestStatusController extends Controller
 
                     $instanceORS->notifyIssued($id, Auth::user()->id);
 
-                    $msg = "$documentType '$id' successfully issued to accounting unit.";
+                    $msg = "$documentType '$id' successfully issued to budget unit.";
                     Auth::user()->log($request, $msg);
                     return redirect()->route($routeName, ['keyword' => $id])
                                      ->with('success', $msg);
@@ -602,6 +632,29 @@ class ObligationRequestStatusController extends Controller
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function showLogRemarks($id) {
+        $instanceDocLog = DocLog::where('doc_id', $id)
+                                ->whereNotNull('remarks')
+                                ->orderBy('logged_at', 'desc')
+                                ->get();
+        return view('modules.procurement.ors-burs.remarks', [
+            'id' => $id,
+            'docRemarks' => $instanceDocLog
+        ]);
+    }
+
+    public function logRemarks(Request $request, $id) {
+        $message = $request->message;
+
+        if (!empty($message)) {
+            $instanceORS = ObligationRequestStatus::find($id);
+            $instanceDocLog = new DocLog;
+            $instanceORS->notifyMessage($id, Auth::user()->id, $message);
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "message", $message);
+            return 'Sent!';
         }
     }
 }

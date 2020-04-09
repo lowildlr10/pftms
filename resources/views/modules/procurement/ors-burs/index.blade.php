@@ -246,7 +246,8 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $ors->ors['id'] }}', 'proc_ors_burs');">
+                                        onclick="$(this).showPrint('{{ $ors->ors['id'] }}',
+                                                                   'proc_{{ $ors->ors['document_type'] }}');">
                                     <i class="fas fa-print blue-text"></i> Print ORS/BURS
                                 </button>
                                 <button type="button" class="btn btn-outline-mdb-color
@@ -313,6 +314,12 @@
                                 @endif
                             @endif
                         </p>
+                        <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
+                                btn-block waves-effect mb-2"
+                                onclick="$(this).showRemarks('{{ route('proc-ors-burs-show-remarks',
+                                                             ['id' => $ors->ors['id']]) }}');">
+                            <i class="far fa-comment-dots"></i> View Remarks
+                        </button>
                     </div>
                 </div>
                 <hr>
@@ -408,6 +415,7 @@
 @endif
 
 @include('modals.search-post')
+@include('modals.show')
 @include('modals.edit')
 @include('modals.issue')
 @include('modals.receive')

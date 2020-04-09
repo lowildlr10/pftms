@@ -267,7 +267,7 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $item->po_no }}', 'po-jo');">
+                                        onclick="$(this).showPrint('{{ $item->id }}', 'proc_{{ $item->document_type }}');">
                                     <i class="fas fa-print blue-text"></i> Print PO/JO
                                 </button>
                                 <button type="button" class="btn btn-outline-mdb-color
@@ -420,7 +420,7 @@
                         @if (empty($item->doc_status->date_issued) && empty($item->doc_status->date_received))
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-warning waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showIssue('{{ route('po-jo-issue', ['id' => $item->id]) }}',
+                                onclick="$(this).showIssue('{{ route('po-jo-show-issue', ['id' => $item->id]) }}',
                                                            `{{ strtoupper($item->document_type).' '.$item->po_no }}`);">
                             <i class="fas fa-paper-plane orange-text"></i> Issue
                         </button>
@@ -429,7 +429,7 @@
                             @if ($item->status != 3)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showReceive('{{ route('po-jo-receive', ['id' => $item->id]) }}',
+                                onclick="$(this).showReceive('{{ route('po-jo-show-receive', ['id' => $item->id]) }}',
                                                              `{{ strtoupper($item->document_type).' '.$item->po_no }}`);">
                             <i class="fas fa-lg fa-hand-holding"></i> Receive
                         </button>
@@ -465,6 +465,7 @@
 @include('modals.uncancel')
 @include('modals.issue')
 @include('modals.receive')
+@include('modals.delivery')
 @include('modals.print')
 
 @endsection
