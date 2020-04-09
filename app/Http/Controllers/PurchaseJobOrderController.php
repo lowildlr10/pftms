@@ -3,140 +3,146 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\PurchaseRequest;
+use App\Models\PurchaseRequestItem;
+use App\Models\AbstractQuotation;
+use App\Models\AbstractQuotationItem;
+use App\Models\PurchaseJobOrder;
+use App\Models\PurchaseJobOrderItem;
+use App\Models\ObligationRequestStatus;
+use App\Models\InspectionAcceptance;
+use App\Models\DisbursementVoucher;
+use App\Models\InventoryStock;
+
 use App\User;
-use App\PurchaseOrder;
-use App\UnitIssue;
-use App\OrsBurs;
-use App\InspectionAcceptance;
-use App\DisbursementVoucher;
-use App\InventoryStock;
-use App\EmployeeLog;
-use App\DocumentLogHistory;
-use App\PaperSize;
+use App\Models\DocumentLog as DocLog;
+use App\Models\PaperSize;
+use App\Models\Supplier;
+use App\Models\Signatory;
+use App\Models\ItemUnitIssue;
 use Carbon\Carbon;
 use Auth;
 use DB;
 
 class PurchaseJobOrderController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
+    protected $poLetters = [
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+        'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+        'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH', 'AI', 'AJ', 'AK',
+        'AL', 'AM', 'AN', 'AO', 'AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV',
+        'AW', 'AX', 'AY', 'AZ'
+    ];
 
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
-    {
-        $pageLimit = 10;
-        $search = trim($request['search']);
-        $paperSizes = PaperSize::all();
-        $prList = DB::table('tblpr as pr')
-                    ->select('pr.*', 'proj.project',
-                              DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                    ->join('tblpo_jo as po', 'po.pr_id', '=', 'pr.id')
-                    ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'pr.requested_by')
-                    ->join('tblpr_status AS status', 'status.id', '=', 'pr.status')
-                    ->leftJoin('tblprojects AS proj', 'proj.id', '=', 'pr.project_id')
-                    ->whereNull('pr.deleted_at')
-                    ->where('status.id', '>', 5);
+    public function index(Request $request) {
+        $keyword = trim($request->keyword);
+        $instanceDocLog = new DocLog;
 
-        if (!empty($search)) {
-            $prList = $prList->where(function ($query) use ($search) {
-                                   $query->where('pr.pr_no', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('po.po_no', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('pr.date_pr', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('pr.purpose', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.firstname', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.middlename', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.lastname', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('pr.code', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('po.code', 'LIKE', '%' . $search . '%');
-                               });
+        // Get module access
+        $module = 'proc_po_jo';
+        $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
+        $isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
+        $isAllowedAccountantSigned = Auth::user()->getModuleAccess($module, 'signed');
+        $isAllowedApprove = Auth::user()->getModuleAccess($module, 'approve');
+        $isAllowedIssue = Auth::user()->getModuleAccess($module, 'issue');
+        $isAllowedReceive = Auth::user()->getModuleAccess($module, 'receive');
+        $isAllowedCancel = Auth::user()->getModuleAccess($module, 'cancel');
+        $isAllowedUncancel = Auth::user()->getModuleAccess($module, 'uncancel');
+        $isAllowedDelivery = Auth::user()->getModuleAccess($module, 'delivery');
+        $isAllowedInspection = Auth::user()->getModuleAccess($module, 'inspection');
+        $isAllowedORSCreate = Auth::user()->getModuleAccess('proc_ors_burs', 'create');
+        $isAllowedORS = Auth::user()->getModuleAccess('proc_ors_burs', 'is_allowed');
+        $isAllowedIAR = Auth::user()->getModuleAccess('proc_iar', 'is_allowed');
+
+        // User groups
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
+                             [Auth::user()->division];
+
+        // Main data
+        $paperSizes = PaperSize::orderBy('paper_type')->get();
+        $poData = PurchaseRequest::with(['funding', 'requestor'])
+                                 ->whereHas('division', function($query)
+                                            use($empDivisionAccess) {
+            $query->whereIn('id', $empDivisionAccess);
+        })->whereHas('po', function($query) {
+            $query->whereNotNull('id');
+        });
+
+        if (!empty($keyword)) {
+            $poData = $poData->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('pr_no', 'like', "%$keyword%")
+                    ->orWhere('date_pr', 'like', "%$keyword%")
+                    ->orWhere('purpose', 'like', "%$keyword%")
+                    ->orWhereHas('funding', function($query) use ($keyword) {
+                        $query->where('source_name', 'like', "%$keyword%");
+                    })->orWhereHas('stat', function($query) use ($keyword) {
+                        $query->where('status_name', 'like', "%$keyword%");
+                    })->orWhereHas('requestor', function($query) use ($keyword) {
+                        $query->where('firstname', 'like', "%$keyword%")
+                              ->orWhere('middlename', 'like', "%$keyword%")
+                              ->orWhere('lastname', 'like', "%$keyword%");
+                    })->orWhereHas('items', function($query) use ($keyword) {
+                        $query->where('item_description', 'like', "%$keyword%");
+                    })->orWhereHas('division', function($query) use ($keyword) {
+                        $query->where('division_name', 'like', "%$keyword%");
+                    })->orWhereHas('po', function($query) use ($keyword) {
+                        $query->where('po_no', 'like', "%$keyword%")
+                              ->orWhere('id', 'like', "%$keyword%")
+                              ->orWhere('date_po', 'like', "%$keyword%")
+                              ->orWhere('date_po_approved', 'like', "%$keyword%")
+                              ->orWhere('date_cancelled', 'like', "%$keyword%")
+                              ->orWhere('place_delivery', 'like', "%$keyword%")
+                              ->orWhere('date_delivery', 'like', "%$keyword%")
+                              ->orWhere('delivery_term', 'like', "%$keyword%")
+                              ->orWhere('payment_term', 'like', "%$keyword%")
+                              ->orWhere('amount_words', 'like', "%$keyword%")
+                              ->orWhere('grand_total', 'like', "%$keyword%")
+                              ->orWhere('fund_cluster', 'like', "%$keyword%");
+                    });
+            });
         }
 
-        if (Auth::user()->role == 3 || Auth::user()->role == 4 || Auth::user()->role == 6) {
-            $prList = $prList->where('requested_by', Auth::user()->emp_id);
-        }
+        $poData = $poData->sortable(['pr_no' => 'desc'])->paginate(15);
 
-        if (Auth::user()->role == 5) {
-            $prList = $prList->where('emp.division_id', Auth::user()->division_id);
-        }
+        foreach ($poData as $po) {
+            foreach ($po->po as $poDat) {
+                $poDat->doc_status = $instanceDocLog->checkDocStatus($poDat->id);
 
-        $prList = $prList->orderBy('pr.id', 'desc')
-                         ->distinct()
-                         ->paginate($pageLimit, ['pr.id']);
-
-        foreach ($prList as $list) {
-            //$type = "po";
-            $poItem = [];
-            $suppliers = DB::table('tblpo_jo as po')
-                           ->select('po.awarded_to', 'bidder.company_name', 'po.po_no', 'po.for_approval',
-                                    'status.id AS sID', 'po.document_abrv', 'po.date_po_approved',
-                                    'po.date_accountant_signed', 'po.code', 'po.with_ors_burs',
-                                    'po.date_cancelled', 'po.date_po', 'po.created_at')
-                           ->join('tblsuppliers as bidder', 'bidder.id', '=', 'po.awarded_to')
-                           ->join('tblpr_status AS status', 'status.id', '=', 'po.status')
-                           ->where([['po.pr_id', $list->id], ['po.awarded_to', '<>', 0]])
-                           ->whereNotNull('po.awarded_to')
-                           ->whereNull('po.deleted_at')
-                           ->orderBy('po.po_no');
-
-            if (!empty($search)) {
-                $suppliers = $suppliers->where('po.po_no', 'LIKE', '%' . $search . '%')
-                                       ->orWhere('po.code', 'LIKE', '%' . $search . '%');
+                $instanceSupplier = Supplier::find($poDat->awarded_to);
+                $companyName = $instanceSupplier->company_name;
+                $poDat->company_name = $companyName;
             }
-
-            $suppliers = $suppliers->get();
-
-            foreach ($suppliers as $bid) {
-                $ors = OrsBurs::where('po_no', $bid->po_no)->first();
-                $orsDateIssued = "";
-                $prItemCount = DB::table('tblpr_items')
-                                 ->where([['pr_id', $list->id], ['awarded_to', $bid->awarded_to]])
-                                 ->count();
-
-                if (!empty($ors->date_issued)) {
-                    $orsDateIssued = $ors->date_issued;
-                } else {
-                    $orsDateIssued = NULL;
-                }
-
-                $type = strtolower($bid->document_abrv);
-                $logshist = $this->checkDocStatus($bid->code);
-                $poItem[] = (object)['po_no' => $bid->po_no,
-                                     'date_po' => $bid->date_po,
-                                     'date_issued' => $logshist->date_issued,
-                                     'date_received' => $logshist->date_received,
-                                     'awarded_to' => $bid->awarded_to,
-                                     'company_name' => $bid->company_name,
-                                     'type' => $type,
-                                     'status_id' => $bid->sID,
-                                     'ors_date_issue' => $orsDateIssued,
-                                     'for_approval' => $bid->for_approval,
-                                     'with_ors_burs' => $bid->with_ors_burs,
-                                     'date_po_approved' => $bid->date_po_approved,
-                                     'date_accountant_signed' => $bid->date_accountant_signed,
-                                     'item_count' => $prItemCount,
-                                     'date_cancelled' => $bid->date_cancelled,
-                                     'created_at' => $bid->created_at];
-            }
-
-            $list->po_item = $poItem;
         }
 
-        return view('pages.po-jo', ['search' => $search,
-                                    'list' => $prList,
-                                    'pageLimit' => $pageLimit,
-                                    'paperSizes' => $paperSizes]);
+        return view('modules.procurement.po-jo.index', [
+            'list' => $poData,
+            'keyword' => $keyword,
+            'paperSizes' => $paperSizes,
+            'isAllowedCreate' => $isAllowedCreate,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedDelete' => $isAllowedDelete,
+            'isAllowedDestroy' => $isAllowedDestroy,
+            'isAllowedAccountantSigned' => $isAllowedAccountantSigned,
+            'isAllowedApprove' => $isAllowedApprove,
+            'isAllowedIssue' => $isAllowedIssue,
+            'isAllowedReceive' => $isAllowedReceive,
+            'isAllowedCancel' => $isAllowedCancel,
+            'isAllowedUncancel' => $isAllowedUncancel,
+            'isAllowedDelivery' => $isAllowedDelivery,
+            'isAllowedInspection' => $isAllowedInspection,
+            'isAllowedORSCreate' => $isAllowedORSCreate,
+            'isAllowedORS' => $isAllowedORS,
+            'isAllowedIAR' => $isAllowedIAR,
+        ]);
     }
 
     /**
@@ -145,79 +151,128 @@ class PurchaseJobOrderController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, $poNo) {
-        $toggle = $request->toggle;
-        $poList = DB::table('tblpo_jo as po')
-                    ->select('po.*', 'bid.id as sID', 'bid.company_name', 'bid.address', 'bid.vat_no as tin')
-                    ->join('tblsuppliers as bid', 'bid.id', '=', 'po.awarded_to')
-                    ->where('po.po_no', $poNo)
-                    ->first();
-        $poJoNumbers = DB::table('tblpo_jo')->where('pr_id', $poList->pr_id)
-                                    ->select('po_no')
-                                    ->orderByRaw('LENGTH(po_no)')
-                                    ->orderBy('po_no')
-                                    ->get();
-        $signatories = DB::table('tblsignatories AS sig')
-                         ->select('sig.id', 'sig.position', 'sig.po_jo_sign_type', 'sig.active',
-                                   DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                         ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'sig.emp_id')
-                         ->where([['sig.po_jo', 'y'],
-                                  ['sig.active', 'y']])
-                         ->orderBy('emp.firstname')
-                         ->get();
-        $unitIssue = UnitIssue::all();
-        $countItems = DB::table('tblpo_jo_items as po')
-                        ->join('tblunit_issue as unit', 'unit.id', '=', 'po.unit_issue')
-                        ->where('po.po_no', $poNo)
-                        ->count();
+    public function showItems($id) {
+        //
+    }
 
-        if ($countItems > 0) {
-            $poItems = DB::table('tblpo_jo_items as po')
-                         ->join('tblunit_issue as unit', 'unit.id', '=', 'po.unit_issue')
-                         ->where('po.po_no', $poNo)
-                         ->orderByRaw('LENGTH(po.item_id)')
-                         ->orderBy('po.item_id')
-                         ->get();
-        } else {
-            $poItems = [];
-            /*
-            $poItems = DB::table('tblpr_items AS itm')
-                         ->select('itm.*', 'abs.unit_cost', 'abs.total_cost')
-                         ->join('tblabstract_items AS abs', 'abs.pr_item_id', '=', 'itm.item_id')
-                         ->join('tblunit_issue AS unit', 'unit.id', '=', 'itm.unit_issue')
-                         ->where([['itm.pr_id', $poList->pr_id],
-                                  ['itm.awarded_to', $poList->awarded_to],
-                                  ['abs.supplier_id', $poList->awarded_to],
-                                  ['itm.document_type', $toggle]])
-                         ->orderByRaw('LENGTH(itm.item_id)')
-                         ->orderBy('itm.item_id')
-                         ->get();*/
-        }
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function showCreate($prID) {
+        $suppliers = Supplier::select('suppliers.id', 'suppliers.company_name')
+                             ->join('abstract_quotation_items as item', 'item.supplier', '=', 'suppliers.id')
+                             ->where('item.pr_id', $prID)
+                             ->orderBy('suppliers.company_name')
+                             ->distinct()
+                             ->get();
 
-        if ($toggle == 'po') {
-            return view('pages.create-po', ['po' => $poList,
-                                            'poJoNumbers' => $poJoNumbers,
-                                            'signatories' => $signatories,
-                                            'poItems' => $poItems,
-                                            'grandTotal' => 0,
-                                            'unitIssue' => $unitIssue]);
-        } else if ($toggle == 'jo') {
-            return view('pages.create-jo', ['jo' => $poList,
-                                            'poJoNumbers' => $poJoNumbers,
-                                            'signatories' => $signatories,
-                                            'joItems' => $poItems,
-                                            'grandTotal' => 0,
-                                            'unitIssue' => $unitIssue]);
+        return view('modules.procurement.po-jo.create', [
+            'prID' => $prID,
+            'suppliers' => $suppliers
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request, $prID) {
+        $awardedTo = $request->awarded_to;
+        $documentType = $request->document_type;
+
+        try {
+            $instancePR = PurchaseRequest::find($prID);
+            $prNo = $instancePR->pr_no;
+
+            foreach ($this->poLetters as $letter) {
+                $poNo = "$prNo-$letter";
+                $countPO = DB::table('purchase_job_orders')
+                             ->where('po_no', $poNo)
+                             ->count();
+
+                if ($countPO == 0) {
+                    $instancePO = new PurchaseJobOrder;
+                    $instancePO->po_no = $poNo;
+                    $instancePO->pr_id = $prID;
+                    $instancePO->awarded_to = $awardedTo;
+                    $instancePO->document_type = $documentType;
+                    $instancePO->status = 6;
+                    $instancePO->save();
+
+                    $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';
+                    $msg = "$documentType '$poNo' successfully created.";
+                    Auth::user()->log($request, $msg);
+                    return redirect()->route('po-jo', ['keyword' => $poNo])
+                                     ->with('success', $msg);
+                }
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('po-jo', ['keyword' => $prID])
+                             ->with('failed', $msg);
         }
     }
 
-    public function showIssuedTo($poNo) {
-        $issuedTo = User::orderBy('firstname')->get();
-        $po = DB::table('tblpo_jo')->where('po_no', $poNo)->first();
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showEdit(Request $request, $id) {
+        $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
+        $instancePO = PurchaseJobOrder::with(['poitems', 'awardee'])->find($id);
+        $prID = $instancePO->pr_id;
+        $poNo = $instancePO->po_no;
+        $poDate = $instancePO->date_po;
+        $companyName = $instancePO->awardee['company_name'];
+        $companyAddress = $instancePO->awardee['address'];
+        $companyTinNo = $instancePO->awardee['tin_no'];
+        $placeDelivery = $instancePO->place_delivery;
+        $dateDelivery = $instancePO->date_delivery;
+        $deliveryTerm = $instancePO->delivery_term;
+        $paymentTerm = $instancePO->payment_term;
+        $amountWords = $instancePO->amount_words;
+        $grandTotal = $instancePO->grand_total;
+        $fundCluster = $instancePO->fund_cluster;
+        $sigDepartment = $instancePO->sig_department;
+        $sigApproval = $instancePO->sig_approval;
+        $sigFundsAvailable = $instancePO->sig_funds_available;
+        $documentType = $instancePO->document_type;
+        $poItems = $instancePO->poitems;
+        $instanceAbstract = AbstractQuotation::with('modeproc')->where('pr_id', $prID)->first();
+        $modeProcurement = $instanceAbstract->modeproc->mode_name;
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+        $poNumbers = PurchaseJobOrder::select('po_no')->where('pr_id', $prID)->get();
 
-        return view('pages.view-po-jo-issue', ['key' => $poNo,
-                                               'issuedTo' => $issuedTo,
-                                               'type' => $po->document_abrv]);
+        if ($documentType == 'po') {
+            $view = 'modules.procurement.po-jo.po-update';
+        } else {
+            $view = 'modules.procurement.po-jo.jo-update';
+        }
+
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
+        }
+
+        return view($view, compact(
+            'id', 'poNo', 'poDate', 'companyName', 'companyAddress',
+            'companyTinNo', 'placeDelivery', 'dateDelivery',
+            'deliveryTerm', 'amountWords', 'grandTotal', 'paymentTerm',
+            'fundCluster', 'sigDepartment', 'sigApproval',
+            'sigFundsAvailable', 'poItems', 'signatories',
+            'modeProcurement', 'instancePO' , 'poNumbers',
+            'unitIssues'
+        ));
     }
 
     /**
@@ -227,637 +282,365 @@ class PurchaseJobOrderController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $poNo)
-    {
-        $po = PurchaseOrder::where('po_no', $poNo)->first();
-        $ors = OrsBurs::where('po_no', $poNo)->first();
-        $iar = InspectionAcceptance::where('iar_no', 'LIKE', "%$poNo%")->first();
-        $invStocks = InventoryStock::where('po_no', $poNo)
-                                    ->orWhere('inventory_no', 'LIKE', "%$poNo%")
-                                    ->get();
-        $docName = $this->getDocumentName($po->document_abrv);
+    public function update(Request $request, $id) {
+        $poDate = $request->date_po;
+        $placeDelivery = $request->place_delivery;
+        $deliveryTerm = $request->delivery_term;
+        $dateDelivery = $request->date_delivery;
+        $paymentTerm = $request->payment_term;
+        $amountWords = $request->amount_words;
+        $sigFundsAvailable = $request->sig_funds_available;
+        $sigApproval = $request->sig_approval;
+        $sigDepartment = $request->sig_department;
+        $grandTotal = $request->grand_total;
+
+        $itemIDs = $request->item_id;
+        $unitIssues = $request->unit;
+        $itemDescriptions = $request->item_description;
+        $quantities = $request->quantity;
+        $unitCosts = $request->unit_cost;
+        $totalCosts = $request->total_cost;
+        $poNumbers = $request->po_jo_no;
+        $excludes = $request->exclude;
 
         try {
-            $prID = $request->pr_id;
-            $toggle = $request->type;
-            $poNoNew = $request->po_no;
-            $datePO = $request->date_po;
-            $placeDelivery = $request->place_delivery;
-            $deliveryTerm = $request->delivery_term;
-            $dateDelivery = $request->date_delivery;
-            $paymentTerm = $request->payment_term;
-            $amountWords = $request->amount_words;
-            $sigFundsAvailable = $request->sig_funds_available;
-            $sigApproval = $request->sig_approval;
-            $sigDepartment = $request->sig_department;
-            $grandTotal = $request->grand_total;
+            $instancePO = PurchaseJobOrder::find($id);
+            $poNo = $instancePO->po_no;
+            $documentType = $instancePO->document_type;
 
-            $array_ItemID = $request->item_id;
-            $array_UnitIssue = $request->unit;
-            $array_ItemDescription = $request->item_description;
-            $array_Quantity = $request->quantity;
-            $array_UnitCost = $request->unit_cost;
-            $array_TotalCost = $request->total_cost;
-            $array_PO_JO_Number = $request->po_jo_no;
-            $array_Exclude = $request->exclude;
+            $instancePO->date_po = $poDate;
+            $instancePO->place_delivery = $placeDelivery;
+            $instancePO->date_delivery = $dateDelivery;
+            $instancePO->payment_term = $paymentTerm;
+            $instancePO->amount_words = $amountWords;
+            $instancePO->grand_total = $grandTotal;
+            $instancePO->sig_funds_available = $sigFundsAvailable;
+            $instancePO->sig_approval = $sigApproval;
 
-            if ($poNo != $poNoNew) {
-                $poCountValdiation = DB::table('tblpo_jo')
-                                    ->where('po_no', $poNoNew)
-                                    ->count();
-
-                if (is_array($array_PO_JO_Number) && count($array_PO_JO_Number) > 0) {
-                    foreach ($array_PO_JO_Number as $ctrKey => $poNoTempDat) {
-                        if ($poNoTempDat == $poNo) {
-                            $array_PO_JO_Number[$ctrKey] = $poNoNew;
-                        }
-                    }
-                }
-
-                if ($poCountValdiation) {
-                    $msg = "There is an existing $poNoNew in the PO/JO list.";
-                    return redirect(url()->previous())->with('failed', $msg);
-                }
-            }
-
-            $countItems = DB::table('tblpo_jo_items as po')
-                            ->join('tblunit_issue as unit', 'unit.id', '=', 'po.unit_issue')
-                            ->where('po.po_no', $poNo)
-                            ->count();
-
-            $po->po_no = $poNoNew;
-            $po->date_po = $datePO;
-            $po->place_delivery = $placeDelivery;
-            $po->date_delivery = $dateDelivery;
-            $po->payment_term = $paymentTerm;
-            $po->amount_words = $amountWords;
-            $po->grand_total = $grandTotal;
-            $po->sig_funds_available = $sigFundsAvailable;
-            $po->sig_approval = $sigApproval;
-
-            if ($toggle == 'po') {
-                $po->delivery_term = $deliveryTerm;
-                $po->save();
-
-                DB::table('tblpo_jo')
-                  ->where('po_no', $poNo)
-                  ->update(['po_no' => $poNoNew]);
-
-                if (is_array($array_ItemID) && count($array_ItemID) > 0) {
-                    foreach ($array_ItemID as $key => $itemID) {
-                        $inv = InventoryStock::where([['po_no', $poNo],
-                                                    ['po_item_id', $itemID]])->first();
-                        $totalCost = $array_Quantity[$key] * $array_UnitCost[$key];
-
-                        if ($countItems > 0) {
-                            DB::table('tblpo_jo_items')
-                            ->where('item_id', $itemID)
-                            ->where('po_no', $poNo)
-                            ->where('pr_id', $prID)
-                            ->update(['quantity' => $array_Quantity[$key],
-                                        'unit_issue' => $array_UnitIssue[$key],
-                                        'item_description' => $array_ItemDescription[$key],
-                                        'unit_cost' => $array_UnitCost[$key],
-                                        'total_cost' => $totalCost,
-                                        'po_no' => $array_PO_JO_Number[$key],
-                                        'excluded' => $array_Exclude[$key]]);
-                        } else {
-                            $hasItem = DB::table('tblpo_jo_items')
-                                        ->where('item_id', $itemID)
-                                        ->first();
-                            if (!$hasItem) {
-                                DB::table('tblpo_jo_items')->insert([
-                                    ['item_id' => $itemID,
-                                    'po_no' => $poNo,
-                                    'pr_id' => $prID,
-                                    'quantity' => $array_Quantity[$key],
-                                    'unit_issue' => $array_UnitIssue[$key],
-                                    'item_description' => $array_ItemDescription[$key],
-                                    'unit_cost' => $array_UnitCost[$key],
-                                    'total_cost' => $totalCost,
-                                    'po_no' => $array_PO_JO_Number[$key],
-                                    'excluded' => $array_Exclude[$key]]
-                                ]);
-                            }
-                        }
-
-                        if ($inv) {
-                            $oldPO_No = $inv->po_no;
-                            $inventoryNo = str_replace($oldPO_No, $array_PO_JO_Number[$key],
-                                                    $inv->inventory_no);
-                            $inv->po_no = $array_PO_JO_Number[$key];
-                            $inv->inventory_no = $inventoryNo;
-                            $inv->save();
-                        }
-                    }
-                }
-            } else if ($toggle == 'jo') {
-                $po->sig_department = $sigDepartment;
-                $po->save();
-
-                DB::table('tblpo_jo')
-                  ->where('po_no', $poNo)
-                  ->update(['po_no' => $poNoNew]);
-
-                if (is_array($array_ItemID) && count($array_ItemID) > 0) {
-                    foreach ($array_ItemID as $key => $itemID) {
-                        $inv = InventoryStock::where([['po_no', $poNo],
-                                                    ['po_item_id', $itemID]])->first();
-                        $unitCost = $array_TotalCost[$key] / $array_Quantity[$key];
-                        $unitCost = (float)$unitCost;
-
-                        if ($countItems > 0) {
-                            DB::table('tblpo_jo_items')
-                            ->where('item_id', $itemID)
-                            ->where('po_no', $poNo)
-                            ->where('pr_id', $prID)
-                            ->update(['quantity' => $array_Quantity[$key],
-                                        'unit_issue' => $array_UnitIssue[$key],
-                                        'item_description' => $array_ItemDescription[$key],
-                                        'unit_cost' => $unitCost,
-                                        'total_cost' => $array_TotalCost[$key],
-                                        'po_no' => $array_PO_JO_Number[$key],
-                                        'excluded' => $array_Exclude[$key]]);
-                        } else {
-                            $hasItem = DB::table('tblpo_jo_items')
-                                        ->where('item_id', $itemID)
-                                        ->first();
-                            if (!$hasItem) {
-                                DB::table('tblpo_jo_items')->insert([
-                                    ['item_id' => $itemID,
-                                    'po_no' => $poNo,
-                                    'pr_id' => $prID,
-                                    'quantity' => $array_Quantity[$key],
-                                    'unit_issue' => $array_UnitIssue[$key],
-                                    'item_description' => $array_ItemDescription[$key],
-                                    'unit_cost' => $unitCost,
-                                    'total_cost' => $array_TotalCost[$key],
-                                    'po_no' => $array_PO_JO_Number[$key],
-                                    'excluded' => $array_Exclude[$key]]
-                                ]);
-                            }
-                        }
-
-                        if ($inv) {
-                            $oldPO_No = $inv->po_no;
-                            $inventoryNo = str_replace($oldPO_No, $array_PO_JO_Number[$key],
-                                                    $inv->inventory_no);
-                            $inv->po_no = $array_PO_JO_Number[$key];
-                            $inv->inventory_no = $inventoryNo;
-                            $inv->save();
-                        }
-                    }
-                }
-            }
-
-            if ($poNo != $poNoNew) {
-                if ($ors) {
-                    $ors->po_no = $poNoNew;
-                }
-
-                if ($iar) {
-                    DB::table('tbliar')
-                      ->where('iar_no', 'LIKE', "%$poNo%")
-                      ->update(['iar_no' => "IAR-$poNoNew"]);
-                }
-
-                if (count($invStocks) > 0) {
-                    foreach ($invStocks as $_stock) {
-                        $inventoryNoNew = str_replace($poNo, $poNoNew, $_stock->inventory_no);
-
-                        DB::table('tblinventory_stocks')
-                          ->where('po_no', $poNo)
-                          ->orWhere('inventory_no', 'LIKE', "%$poNo%")
-                          ->update([
-                              'po_no' => $poNoNew,
-                              'inventory_no' => $inventoryNoNew
-                            ]);
-                    }
-                }
-            }
-
-            if ($ors) {
-                $ors->amount = $grandTotal;
-                $ors->save();
-            }
-
-            $logEmpMessage = "updated the " . strtolower($docName) . " $poNo.";
-            $this->logEmployeeHistory($logEmpMessage);
-
-            $msg = "$docName $poNo successfully updated.";
-            return redirect(url('procurement/po-jo?search=' . $poNoNew))->with('success', $msg);
-        } catch (Exception $e) {
-            $msg = "There is an error encountered updating the $docName $poNo.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
-    }
-
-    public function createORS_BURS($poNo) {
-        $po = PurchaseOrder::where('po_no', $poNo)->first();
-        $countORS = DB::table('tblors_burs')->where('po_no', $poNo)->count();
-
-        try {
-            if ($countORS == 0) {
-                if ($po->grand_total > 0) {
-                    $ors = new OrsBurs;
-                    $ors->pr_id = $po->pr_id;
-                    $ors->po_no = $poNo;
-                    $ors->responsibility_center = "19 001 03000 14";
-                    $ors->particulars = "To obligate...";
-                    $ors->mfo_pap = "3-Regional Office\nA.III.c.1\nA.III.b.1\nA.III.c.2";
-                    $ors->payee = $po->awarded_to;
-                    $ors->amount = $po->grand_total;
-                    $ors->module_class_id = 3;
-                    $ors->code = $this->generateTrackerCode('ORS', $poNo, 3);
-                    $ors->save();
-
-                    $po->for_approval = 'y';
-                    $po->with_ors_burs = 'y';
-                    $po->save();
-
-                    $logEmpMessage = "created the obligation report status for $poNo.";
-                    $this->logEmployeeHistory($logEmpMessage);
-
-                    $msg = "Successfully created the Obligation Report Status document for $poNo.";
-                    return redirect(url('procurement/ors-burs?search='.$poNo))->with('success', $msg);
-                } else {
-                    $msg = "Please edit first the Purchase/Job Order for $poNo.";
-                    return redirect(url('procurement/po-jo?search=' . $poNo))->with('warning', $msg);
-                }
+            if ($documentType == 'po') {
+                $instancePO->delivery_term = $deliveryTerm;
             } else {
-                $ors = DB::table('tblors_burs')
-                         ->where('po_no', $poNo)
-                         ->first();
+                $instancePO->sig_department = $sigDepartment;
+            }
 
-                if (!empty($ors->deleted_at)) {
-                    /*
-                    $ors->payee = $po->awarded_to;
-                    $ors->amount = $po->grand_total;
-                    $ors->save();*/
+            $instancePO->save();
 
-                    DB::table('tblors_burs')
-                      ->where('po_no', $poNo)
-                      ->update([
-                          'payee' => $po->awarded_to,
-                          'amount' => $po->grand_total,
-                          'updated_at' => Carbon::now()
-                      ]);
-                    OrsBurs::where('po_no', $poNo)->restore();
-
-                    $po->for_approval = 'y';
-                    $po->with_ors_burs = 'y';
-                    $po->save();
-
-                    $msg = "Successfully created the Obligation Report Status document for $poNo.";
-                    return redirect(url('procurement/ors-burs?search='.$poNo))->with('success', $msg);
-                } else {
-                    $msg = "The Obligation/Budget Utilization Report Status for $poNo is already created.";
-                    return redirect(url('procurement/po-jo?search=' . $poNo))->with('warning', $msg);
+            if (is_array($itemIDs) && count($itemIDs)) {
+                foreach ($itemIDs as $itemCtr => $itemID) {
+                    $instancePOItem = PurchaseJobOrderItem::find($itemID);
+                    $instancePOItem->unit_issue = $unitIssues[$itemCtr];
+                    $instancePOItem->item_description = $itemDescriptions[$itemCtr];
+                    $instancePOItem->quantity = $quantities[$itemCtr];
+                    $instancePOItem->unit_cost = $unitCosts[$itemCtr];
+                    $instancePOItem->total_cost = $totalCosts[$itemCtr];
+                    $instancePOItem->po_no = $poNumbers[$itemCtr];
+                    $instancePOItem->excluded = $excludes[$itemCtr];
+                    $instancePOItem->save();
                 }
             }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered creating the Obligation Report Status for $poNo.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
-    }
 
-    public function accountantSigned($poNo) {
-        $po = PurchaseOrder::where('po_no', $poNo)->first();
-        $isDocGenerated = $this->checkDocGenerated($po->code);
-        $docName = $this->getDocumentName($po->document_abrv);
+            $instanceORS = ObligationRequestStatus::where('po_no', $poNo)->first();
 
-        try {
-            if ($isDocGenerated) {
-                $po->date_accountant_signed = date('Y-m-d H:i:s');
-                $po->save();
-
-                $logEmpMessage = "set the " . strtolower($docName) . " $poNo to cleared/signed by accountant.";
-                $this->logEmployeeHistory($logEmpMessage);
-
-                $msg = "$docName $poNo is now set to to cleared/signed by accountant.";
-                return redirect(url('procurement/po-jo?search=' . $poNo))->with('success', $msg);
-            } else {
-                $msg = "Generate first the " . strtolower($docName) . " $poNo document.";
-                return redirect(url('procurement/po-jo?search=' . $poNo))->with('warning', $msg);
+            if ($instanceORS) {
+                $instanceORS->amount = $grandTotal;
+                $instanceORS->save();
             }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered approving the $docName $poNo.";
-            return redirect(url()->previous())->with('failed', $msg);
+
+            $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';
+            $msg = "$documentType '$poNo' successfully updated.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('po-jo', ['keyword' => $poNo])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('po-jo')
+                             ->with('failed', $msg);
         }
     }
 
-    public function approve($poNo) {
-        $po = PurchaseOrder::where('po_no', $poNo)->first();
-        $isDocGenerated = $this->checkDocGenerated($po->code);
-        $docName = $this->getDocumentName($po->document_abrv);
+    /**
+     * Soft deletes the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function delete(Request $request, $id) {
+        $isDestroy = $request->destroy;
 
-        try {
-            if ($isDocGenerated) {
-                $po->date_po_approved = date('Y-m-d H:i:s');
-                $po->save();
+        if ($isDestroy) {
+            $response = $this->destroy($request, $id);
 
-                $logEmpMessage = "set the " . strtolower($docName) . " $poNo to approved.";
-                $this->logEmployeeHistory($logEmpMessage);
-
-                $msg = "$docName $poNo is now set to approved.";
-                return redirect(url('procurement/po-jo?search=' . $poNo))->with('success', $msg);
+            if ($response->alert_type == 'success') {
+                return redirect()->route('po-jo', ['keyword' => $response->pr_id])
+                                 ->with($response->alert_type, $response->msg);
             } else {
-                $msg = "Generate first the " . strtolower($docName) . " $poNo document.";
-                return redirect(url('procurement/po-jo?search=' . $poNo))->with('warning', $msg);
+                return redirect()->route('po-jo')
+                                 ->with($response->alert_type, $response->msg);
             }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered approving the $docName $poNo.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
-    }
-
-    public function issue(Request $request, $poNo) {
-        $po = PurchaseOrder::where('po_no', $poNo)->first();
-        $remarks = $request['remarks'];
-        $issuedTo = $request['issued_to'];
-        $docName = $this->getDocumentName($po->document_abrv);
-
-        try {
-            $code = $po->code;
-            $isDocGenerated = $this->checkDocGenerated($code);
-            $docStatus = $this->checkDocStatus($code);
-
-            if (empty($docStatus->date_issued)) {
-                if ($isDocGenerated) {
-                    $this->logTrackerHistory($code, Auth::user()->emp_id, $issuedTo, "issued", $remarks);
-
-                    $logEmpMessage = "issued the " . strtolower($docName) . " $poNo.";
-                    $this->logEmployeeHistory($logEmpMessage);
-
-                    $msg = "$docName $poNo is now set to issued.";
-                    return redirect(url('procurement/po-jo?search=' . $poNo))->with('success', $msg);
-                } else {
-                    $msg = "Generate first the " . strtolower($docName) . " $poNo document.";
-                    return redirect(url('procurement/po-jo?search=' . $poNo))->with('warning', $msg);
-                }
-            } else {
-                $msg = "$docName $poNo already issued.";
-                return redirect(url('procurement/po-jo?search=' . $poNo))->with('warning', $msg);
-            }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered issuing the $docName $poNo.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
-    }
-
-    public function receive($poNo) {
-        $po = DB::table('tblpo_jo')->where('po_no', $poNo)->first();
-        $code = $po->code;
-        $docStatus = $this->checkDocStatus($code);
-        $docName = $this->getDocumentName($po->document_abrv);
-
-        try {
-            if (!empty($docStatus->date_issued)) {
-                if (empty($docStatus->date_received)) {
-                    $this->logTrackerHistory($code, Auth::user()->emp_id, 0, "received");
-
-                    $logEmpMessage = "received the " . strtolower($docName) . " $poNo.";
-                    $this->logEmployeeHistory($logEmpMessage);
-
-                    $msg = "$docName $poNo is now set to received.";
-                    return redirect(url('procurement/po-jo?search=' . $poNo))->with('success', $msg);
-                } else {
-                    $msg = "$docName $poNo is already received.";
-                    return redirect(url('procurement/po-jo?search=' . $poNo))->with('warning', $msg);
-                }
-            } else {
-                $msg = "You should issue the " . strtolower($docName) . " $poNo first.";
-                return redirect(url('procurement/po-jo?search=' . $poNo))->with('warning', $msg);
-            }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered issuing the $docName $poNo.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
-    }
-
-    public function cancel($poNo) {
-        $po = PurchaseOrder::where('po_no', $poNo)->first();
-        $docName = $this->getDocumentName($po->document_abrv);
-
-        try {
-            if ($po) {
-                $po->date_cancelled = date('Y-m-d H:i:s');
-                $po->status = 3;
-                $po->save();
-
-                $logEmpMessage = "cancelled the " . strtolower($docName) . " $poNo.";
-                $this->logEmployeeHistory($logEmpMessage);
-
-                $msg = "$docName $poNo is now set to cancelled.";
-                return redirect(url('procurement/po-jo?search=' . $poNo))->with('success', $msg);
-            } else {
-                $msg = "There is an error cancelling $docName $poNo.";
-                return redirect(url()->previous())->with('failed', $msg);
-            }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered cancelling the $docName $poNo.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
-    }
-
-    public function unCancel($poNo) {
-        $po = PurchaseOrder::where('po_no', $poNo)->first();
-        $ors = OrsBurs::where('po_no', $poNo)->first();
-        $iar = InspectionAcceptance::where('iar_no', 'LIKE', '%'.$poNo.'%')
-                                   ->first();
-        $dv = DisbursementVoucher::where('ors_id', $ors)->first();
-        $docName = $this->getDocumentName($po->document_abrv);
-
-        try {
-            if ($po) {
-                $po->date_cancelled = NULL;
-                $po->status = 6;
-
-                if ($ors) {
-                    if (!empty($ors->date_obligated)) {
-                        $po->status = 7;
-                    }
-                }
-
-                if ($iar) {
-                    $po->status = 9;
-                }
-
-                if ($dv) {
-                    $po->status = 10;
-                }
-
-                $po->save();
-
-                $logEmpMessage = "uncancelled the " . strtolower($docName) . " $poNo.";
-                $this->logEmployeeHistory($logEmpMessage);
-
-                $msg = "$docName $poNo is now uncancelled.";
-                return redirect(url('procurement/po-jo?search=' . $poNo))->with('success', $msg);
-            } else {
-                $msg = "There is an error uncancelling $docName $poNo.";
-                return redirect(url()->previous())->with('failed', $msg);
-            }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered uncancelling the $docName $poNo.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
-    }
-
-    public function delivery(Request $request, $poNo) {
-        $po = PurchaseOrder::where('po_no', $poNo)->first();
-        $docName = $this->getDocumentName($po->document_abrv);
-
-        try {
-            if ($po->status == 7) {
-                $po->status = 8;
-                $po->save();
-
-                $logEmpMessage = "set the " . strtolower($docName) . " $poNo to for delivery.";
-                $this->logEmployeeHistory($logEmpMessage);
-
-                $msg = "$docName $poNo is ready for delivery.";
-                return redirect(url('procurement/po-jo?search=' . $poNo))->with('success', $msg);
-            } else {
-                $msg = "You must obligate the Obligation/Budget Utilization Report Status of $poNo first.";
-                return redirect(url('procurement/po-jo?search=' . $poNo))->with('warning', $msg);
-            }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered setting the $docName $poNo to 'For Delivery'.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
-    }
-
-    public function inspection(Request $request, $poNo) {
-        $po = PurchaseOrder::where('po_no', $poNo)->first();
-        $ors = OrsBurs::where('po_no', $poNo)->first();
-        $docName = $this->getDocumentName($po->document_abrv);
-
-        try {
-            if ($po->status == 8) {
-                $newIAR_No = "IAR-" . $poNo;
-                $iar = new InspectionAcceptance;
-                $iar->iar_no = $newIAR_No;
-                $iar->pr_id = $ors->pr_id;
-                $iar->ors_id = $ors->id;
-                $iar->code = $this->generateTrackerCode('IAR', $poNo, 3);
-                $iar->save();
-
-                $po->status = 9;
-                $po->save();
-
-                $logEmpMessage = "set the " . strtolower($docName) . " $poNo to for inspection.";
-                $this->logEmployeeHistory($logEmpMessage);
-
-                $msg = "$docName $poNo is ready for inspection.";
-                return redirect(url('procurement/po-jo?search=' . $poNo))->with('success', $msg);
-            } else {
-                $msg = "You must obligate the Obligation/Budget Utilization Report Status of $poNo first.";
-                return redirect(url('procurement/po-jo?search=' . $poNo))->with('warning', $msg);
-            }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered receiving the $docName $poNo.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
-    }
-
-    private function getDocumentName($docName) {
-        if ($docName == 'PO') {
-            $documentName = "Purchase Order";
-        } else if ($docName == 'JO') {
-            $documentName = "Job Order";
         } else {
-            $documentName = "Purchase/Job Order";
-        }
+            try {
+                $instancePO = PurchaseJobOrder::find($id);
+                $documentType = $instancePO->document_type;
+                $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';
+                $poNo = $instancePO->po_no;
+                $prID = $instancePO->pr_id;
+                $countPOItem = PurchaseJobOrderItem::where('po_no', $poNo)->count();
 
-        return $documentName;
-    }
+                if ($countPOItem > 0) {
+                    $msg = "Transfer first the item/s of $documentType '$poNo' to other document.";
+                    Auth::user()->log($request, $msg);
 
-    private function checkDocGenerated($code) {
-        $logs = DB::table('tbldocument_logs_history')
-                  ->where([
-                        ['code', $code],
-                        ['action', 'document_generated']
-                    ])
-                  ->orderBy('logshist.created_at', 'desc')
-                  ->count();
-
-        return $logs;
-    }
-
-    private function checkDocStatus($code) {
-        $logs = DB::table('tbldocument_logs_history')
-                  ->where('code', $code)
-                  ->orderBy('created_at', 'desc')
-                  ->get();
-        $currentStatus = (object) ["issued_by" => NULL,
-                                   "date_issued" => NULL,
-                                   "received_by" => NULL,
-                                   "date_received" => NULL,
-                                   "issued_back_by" => NULL,
-                                   "date_issued_back" => NULL,
-                                   "received_back_by" => NULL,
-                                   "date_received_back" => NULL];
-
-        if (count($logs) > 0) {
-            foreach ($logs as $log) {
-                if ($log->action != "-") {
-                    switch ($log->action) {
-                        case 'issued':
-                            $currentStatus->issued_by = $log->action;
-                            $currentStatus->date_issued = $log->date;
-                            break;
-
-                        case 'received':
-                            $currentStatus->received_by = $log->action;
-                            $currentStatus->date_received = $log->date;
-                            break;
-
-                        case 'issued_back':
-                            $currentStatus->issued_back_by = $log->action;
-                            $currentStatus->date_issued_back = $log->date;
-                            break;
-
-                        case 'received_back':
-                            $currentStatus->received_back_by = $log->action;
-                            $currentStatus->date_received_back = $log->date;
-                            break;
-
-                        default:
-                            # code...
-                            break;
-                    }
-                } else {
-                    break;
+                    return redirect()->route('po-jo', ['keyword' => $prID])
+                                     ->with('warning', $msg);
                 }
+
+                $instancePO->delete();
+
+                $msg = "$documentType '$poNo' successfully deleted.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('po-jo', ['keyword' => $prID])
+                                 ->with('success', $msg);
+            } catch (\Throwable $th) {
+                $msg = "Unknown error has occured. Please try again.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('po-jo')
+                                 ->with('failed', $msg);
             }
         }
-
-        return $currentStatus;
     }
 
-    private function generateTrackerCode($modAbbr, $pKey, $modClass) {
-        $modAbbr = strtoupper($modAbbr);
-        $pKey = strtoupper($pKey);
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($request, $id) {
+        try {
+            $instancePO = PurchaseJobOrder::find($id);
+            $documentType = $instancePO->document_type;
+            $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';
+            $prID = $instancePO->pr_id;
+            $poNo = $instancePO->po_no;
+            $countPOItem = PurchaseJobOrderItem::where('po_no', $poNo)->count();
 
-        return $modAbbr . "-" . $pKey . "-" . $modClass . "-" . date('mdY');
+            if ($countPOItem > 0) {
+                $msg = "Transfer first the item/s of $documentType '$poNo' to other document.";
+                Auth::user()->log($request, $msg);
+
+                return (object) [
+                    'msg' => $msg,
+                    'alert_type' => 'warning',
+                    'pr_id' => $prID
+                ];
+            }
+
+            $instancePO->forceDelete();
+
+            $msg = "$documentType '$poNo' permanently deleted.";
+            Auth::user()->log($request, $msg);
+
+            return (object) [
+                'msg' => $msg,
+                'alert_type' => 'success',
+                'pr_id' => $prID
+            ];
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+
+            return (object) [
+                'msg' => $msg,
+                'alert_type' => 'failed'
+            ];
+        }
     }
 
-    private function logEmployeeHistory($msg, $emp = "") {
-        $empLog = new EmployeeLog;
-        $empLog->emp_id = empty($emp) ? Auth::user()->emp_id: $emp;
-        $empLog->message = $msg;
-        $empLog->save();
+    public function accountantSigned(Request $request, $id) {
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePO = PurchaseJobOrder::find($id);
+            $poNo = $instancePO->po_no;
+            $documentType = $instancePO->document_type == 'po' ?
+                            'Purchase Order' : 'Job Order';
+
+            $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
+
+            if ($isDocGenerated) {
+                $instancePO->date_accountant_signed = Carbon::now();
+                $instancePO->save();
+
+                $msg = "$documentType '$poNo' is successfully set to
+                       'Cleared/Signed by Accountant'.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('po-jo', ['keyword' => $id])
+                                 ->with('success', $msg);
+            } else {
+                $msg = "Document for $documentType '$poNo' should be generated first.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route($routeName, ['keyword' => $id])
+                                     ->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
-    private function logTrackerHistory($code, $empFrom, $empTo, $action, $remarks = "") {
-        $docHistory = new DocumentLogHistory;
-        $docHistory->code = $code;
-        $docHistory->date = Carbon::now();
-        $docHistory->emp_from = $empFrom;
-        $docHistory->emp_to = $empTo;
-        $docHistory->action = $action;
-        $docHistory->remarks = $remarks;
-        $docHistory->save();
+    public function approve(Request $request, $id) {
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePO = PurchaseJobOrder::find($id);
+            $poNo = $instancePO->po_no;
+            $documentType = $instancePO->document_type == 'po' ?
+                            'Purchase Order' : 'Job Order';
+
+            $instancePO->date_po_approved = Carbon::now();
+            $instancePO->save();
+
+            $msg = "$documentType '$poNo' is successfully set to
+                   'Approved'.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('po-jo', ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function showIssue($id) {
+        $users = User::orderBy('firstname')->get();
+
+        return view('modules.procurement.po-jo.issue', [
+            'id' => $id,
+            'users' => $users
+        ]);
+    }
+
+    public function issue(Request $request, $id) {
+        $issuedTo = $request->issued_to;
+        $remarks = $request->remarks;
+
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePO = PurchaseJobOrder::find($id);
+            $poNo = $instancePO->po_no;
+            $documentType = $instancePO->document_type == 'po' ?
+                            'Purchase Order' : 'Job Order';
+
+            $instanceDocLog->logDocument($id, Auth::user()->id, $issuedTo, "issued", $remarks);
+            $issuedToName = Auth::user()->getEmployee($issuedTo)->name;
+
+            //$instanceRFQ->notifyIssued($id, $issuedTo, $requestedBy);
+
+            $msg = "$documentType '$poNo' successfully issued to $issuedToName.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('po-jo', ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('rfq', ['keyword' => $id])
+                             ->with('failed', $msg);
+        }
+    }
+
+    public function showReceive($id) {
+        return view('modules.procurement.po-jo.receive', [
+            'id' => $id,
+        ]);
+    }
+
+    public function receive(Request $request, $id) {
+        $remarks = $request->remarks;
+
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePO = PurchaseJobOrder::find($id);
+            $poNo = $instancePO->po_no;
+            $documentType = $instancePO->document_type == 'po' ?
+                            'Purchase Order' : 'Job Order';
+
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received", $remarks);
+
+            //$instanceRFQ->notifyReceived($id, Auth::user()->id, $responsiblePerson, $requestedBy);
+
+            $msg = "$documentType '$poNo' successfully received.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('po-jo', ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('rfq', ['keyword' => $id])
+                             ->with('failed', $msg);
+        }
+    }
+
+    public function delivery(Request $request, $id) {
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePO = PurchaseJobOrder::find($id);
+            $poNo = $instancePO->po_no;
+            $documentType = $instancePO->document_type == 'po' ?
+                            'Purchase Order' : 'Job Order';
+
+            if ($instancePO->status == 7) {
+                $instancePO->status = 8;
+                $instancePO->save();
+
+                $msg = "$documentType '$poNo' is successfully set to
+                       'For Delivery'.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('po-jo', ['keyword' => $id])
+                                 ->with('success', $msg);
+            } else {
+                $msg = "ORS/BURS document for this $documentType '$poNo' should be
+                       obligated first.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('po-jo', ['keyword' => $id])
+                                 ->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function inspection(Request $request, $id) {
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePO = PurchaseJobOrder::with('ors')->find($id);
+            $poNo = $instancePO->po_no;
+            $prID = $instancePO->pr_id;
+            $orsID = $instancePO->ors['id'];
+            $documentType = $instancePO->document_type == 'po' ?
+                            'Purchase Order' : 'Job Order';
+
+            $iarNo = "IAR-" . $poNo;
+            $instanceIAR = new InspectionAcceptanceReport;
+            $instanceIAR->iar_no = $iarNo;
+            $instanceIAR->pr_id = $prID;
+            $instanceIAR->ors_id = $orsID;
+            $instanceIAR->po_id = $id;
+            $instanceIAR->save();
+
+            $instancePO->status = 9;
+            $instancePO->save();
+
+            $msg = "$documentType '$poNo' is now ready for inspection.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('po-jo', ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 }

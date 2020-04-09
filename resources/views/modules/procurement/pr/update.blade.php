@@ -91,7 +91,7 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="md-form ">
+                                    <div class="md-form">
                                         <input type="number" id="unit_cost{{ $itemCtr }}"
                                                name="unit_cost[]" class="form-control required"
                                                onkeyup="$(this).computeCost('{{ $itemCtr }}', 'unit_cost{{ $itemCtr }}')"

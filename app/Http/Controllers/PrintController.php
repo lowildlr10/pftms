@@ -34,6 +34,9 @@ use App\ListDueDemandAccPay;
 use App\Plugins\PDFGenerator\DocPurchaseRequest;
 use App\Plugins\PDFGenerator\DocRequestQuotation;
 use App\Plugins\PDFGenerator\DocAbstractQuotation;
+use App\Plugins\PDFGenerator\DocPurchaseOrder;
+use App\Plugins\PDFGenerator\DocJobOrder;
+use App\Plugins\PDFGenerator\DocObligationRequestStatus;
 
 class PrintController extends Controller
 {
@@ -108,7 +111,7 @@ class PrintController extends Controller
                 if ($test == 'true') {
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                     $prNo =  $data->abstract->pr_no;
-                    $msg = "Generated the abstract of quotation $prNo.";
+                    $msg = "Generated the Abstract of Quotation '$prNo' document.";
                     Auth::user()->log($request, $msg);
                 } else {
                     $this->generateAbstract(
@@ -121,52 +124,86 @@ class PrintController extends Controller
                     );
                 }
                 break;
-            case 'proc_po_jo':
-                $data = $this->getDataPO_JO($key);
+            case 'proc_po':
+                $data = $this->getDataPOJO($key);
                 $data->doc_type = $documentType;
 
-                if ($data->toggle == 'po') {
-                    if ($test == 'true') {
-                        $code = $this->getDocCode($key, 'po');
-                        $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                        $poNo =  $data->po->po_no;
-                        $msg = "generated the purchase order $poNo.";
-                        Auth::user()->log($request, $msg);
-                    } else {
-                        $this->generatePO(
-                            $data,
-                            $documentType,
-                            $fontScale,
-                            $pageHeight,
-                            $pageWidth,
-                            $pageUnit,
-                            $previewToggle
-                        );
-                    }
-                } else if ($data->toggle == 'jo') {
-                    if ($test == 'true') {
-                        $code = $this->getDocCode($key, 'po');
-                        $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                        $joNo =  $data->jo->po_no;
-                        $msg = "generated the job order $joNo.";
-                        Auth::user()->log($request, $msg);
-                    } else {
-                        $this->generateJO(
-                            $data,
-                            $documentType,
-                            $fontScale,
-                            $pageHeight,
-                            $pageWidth,
-                            $pageUnit,
-                            $previewToggle
-                        );
-                    }
+                if ($test == 'true') {
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
+                    $poNo =  $data->po->po_no;
+                    $msg = "generated the Purchase Order '$poNo' document.";
+                    Auth::user()->log($request, $msg);
+                } else {
+                    $this->generatePO(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
-
                 break;
+            case 'proc_jo':
+                $data = $this->getDataPOJO($key);
+                $data->doc_type = $documentType;
 
-            case 'proc_ors_burs':
-                $data = $this->getDataORS_BURS($key, 'procurement');
+                if ($test == 'true') {
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
+                    $joNo =  $data->jo->po_no;
+                    $msg = "Generated the Job Order '$joNo' document.";
+                    Auth::user()->log($request, $msg);
+                } else {
+                    $this->generateJO(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
+                }
+                break;
+            case 'proc_ors':
+                $data = $this->getDataORSBURS($key, 'procurement');
+                $data->doc_type = $documentType;
+
+                if ($test == 'true') {
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
+                    $msg = "Generated the Obligation Request and Status '$key' document.";
+                    Auth::user()->log($request, $msg);
+                } else {
+                    $this->generateORS(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
+                }
+                break;
+            case 'proc_burs':
+                $data = $this->getDataORSBURS($key, 'procurement');
+                $data->doc_type = $documentType;
+
+                if ($test == 'true') {
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
+                    $msg = "Generated the Budget Utilization Request and Status '$key' document.";
+                    Auth::user()->log($request, $msg);
+                } else {
+                    $this->generateBURS(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
+                }
+                break;
+            case 'ca_ors':
+                $data = $this->getDataORSBURS($key, 'cashadvance');
                 $data->doc_type = $documentType;
 
                 if ($test == 'true') {
@@ -178,37 +215,12 @@ class PrintController extends Controller
                     $msg = "generated the $docType $orsID.";
                     Auth::user()->log($request, $msg);
                 } else {
-                    if (strtolower($data->ors->document_type) == 'ors') {
-                        $this->generateORS(
-                            $data,
-                            $data->ors->document_type,
-                            $fontScale,
-                            $pageHeight,
-                            $pageWidth,
-                            $pageUnit,
-                            $previewToggle
-                        );
-                        $this->generateORS($data, $data->ors->document_type, $fontScale,
-                                           $pageHeight, $pageWidth, $previewToggle);
-                    } else if (strtolower($data->ors->document_type) == 'burs') {
-                        $this->generateJO(
-                            $data,
-                            $documentType,
-                            $fontScale,
-                            $pageHeight,
-                            $pageWidth,
-                            $pageUnit,
-                            $previewToggle
-                        );
-                        $this->generateBURS($data, $data->ors->document_type, $fontScale,
-                                            $pageHeight, $pageWidth, $previewToggle);
-                    }
+                    $this->generateORS($data, $data->ors->document_type, $fontScale,
+                                       $pageHeight, $pageWidth, $previewToggle);
                 }
-
                 break;
-
-            case 'ca_ors_burs':
-                $data = $this->getDataORS_BURS($key, 'cashadvance');
+            case 'ca_burs':
+                $data = $this->getDataORSBURS($key, 'cashadvance');
                 $data->doc_type = $documentType;
 
                 if ($test == 'true') {
@@ -220,17 +232,10 @@ class PrintController extends Controller
                     $msg = "generated the $docType $orsID.";
                     Auth::user()->log($request, $msg);
                 } else {
-                    if (strtolower($data->ors->document_type) == 'ors') {
-                        $this->generateORS($data, $data->ors->document_type, $fontScale,
-                                           $pageHeight, $pageWidth, $previewToggle);
-                    } else if (strtolower($data->ors->document_type) == 'burs') {
-                        $this->generateBURS($data, $data->ors->document_type, $fontScale,
-                                            $pageHeight, $pageWidth, $previewToggle);
-                    }
+                    $this->generateBURS($data, $data->ors->document_type, $fontScale,
+                                        $pageHeight, $pageWidth, $previewToggle);
                 }
-
                 break;
-
             case 'proc_iar':
                 $data = $this->getDataIAR($key);
                 $data->doc_type = $documentType;
@@ -497,9 +502,9 @@ class PrintController extends Controller
     }
 
     private function getDataPropertyLabel($inventoryID, $empID) {
-        $dataLabel = DB::table('tblinventory_stocks_issue as issued')
-                  ->join('tblinventory_stocks as stock', 'stock.id', '=', 'issued.inventory_id')
-                  ->join('tblpo_jo_items as po', 'po.item_id', '=', 'stock.po_item_id')
+        $dataLabel = DB::table('inventory_stock_issues as issued')
+                  ->join('inventory_stocks as stock', 'stock.id', '=', 'issued.inventory_id')
+                  ->join('purchase_job_order_items as po', 'po.item_id', '=', 'stock.po_item_id')
                   ->where('issued.received_by', $empID)
                   //->where('issued.inventory_id', $inventoryID)
                   ->where('stock.inventory_no', $inventoryID)
@@ -595,22 +600,22 @@ class PrintController extends Controller
 
     private function getDataICS($inventoryNo, $empID) {
         $tableData = [];
-        $stockIssue = DB::table('tblinventory_stocks_issue as stocks')
+        $stockIssue = DB::table('inventory_stock_issues as stocks')
                         ->select('stocks.quantity', 'unit.unit', 'po.unit_cost','po.total_cost',
                                 'po.item_description', 'stocks.date_issued', 'inv.property_no',
                                 'inv.est_useful_life', 'stocks.issued_by', 'inv.id as inv_id')
-                        ->join('tblinventory_stocks as inv', 'inv.id', '=', 'stocks.inventory_id')
-                        ->join('tblpo_jo_items as po', 'po.item_id', '=', 'inv.po_item_id')
-                        ->join('tblunit_issue as unit', 'unit.id', '=', 'po.unit_issue')
+                        ->join('inventory_stocks as inv', 'inv.id', '=', 'stocks.inventory_id')
+                        ->join('purchase_job_order_items as po', 'po.item_id', '=', 'inv.po_item_id')
+                        ->join('item_unit_issues as unit', 'unit.id', '=', 'po.unit_issue')
                         ->where('inv.inventory_no', $inventoryNo)
                         ->where('stocks.received_by', $empID)
                         ->orderBy('inv.id')
                         ->distinct()
                         ->get();
-        $po = DB::table('tblpo_jo as po')
+        $po = DB::table('purchase_job_orders as po')
                 ->select('po.po_no', 'po.date_po', 'bid.company_name')
-                ->join('tblinventory_stocks as inv', 'inv.po_no', '=', 'po.po_no')
-                ->join('tblsuppliers as bid', 'bid.id', '=', 'po.awarded_to')
+                ->join('inventory_stocks as inv', 'inv.po_no', '=', 'po.po_no')
+                ->join('suppliers as bid', 'bid.id', '=', 'po.awarded_to')
                 ->where('inv.inventory_no', $inventoryNo)
                 ->first();
 
@@ -627,7 +632,7 @@ class PrintController extends Controller
 
             $issuedBy = $item->issued_by;
             $tableData[] = [$item->quantity,
-                            $item->unit,
+                            $item->unit_name,
                             number_format($item->unit_cost, 2),
                             number_format($item->total_cost, 2),
                             $item->item_description,
@@ -688,23 +693,23 @@ class PrintController extends Controller
 
     private function getDataRIS($inventoryNo, $empID) {
         $tableData = [];
-        $stockIssue = DB::table('tblinventory_stocks_issue as stocks')
+        $stockIssue = DB::table('inventory_stock_issues as stocks')
                         ->select('po.stock_no', 'unit.unit', 'po.item_description', 'po.quantity as po_qnty',
                                  'inv.stock_available', 'stocks.quantity', 'stocks.issued_remarks',
                                  'stocks.issued_by', 'stocks.approved_by', 'inv.id as inv_id')
-                        ->join('tblinventory_stocks as inv', 'inv.id', '=', 'stocks.inventory_id')
-                        ->join('tblpo_jo_items as po', 'po.item_id', '=', 'inv.po_item_id')
-                        ->join('tblunit_issue as unit', 'unit.id', '=', 'po.unit_issue')
+                        ->join('inventory_stocks as inv', 'inv.id', '=', 'stocks.inventory_id')
+                        ->join('purchase_job_order_items as po', 'po.item_id', '=', 'inv.po_item_id')
+                        ->join('item_unit_issues as unit', 'unit.id', '=', 'po.unit_issue')
                         ->where('inv.inventory_no', $inventoryNo)
                         ->where('stocks.received_by', $empID)
                         ->orderBy('inv.id')
                         ->distinct()
                         ->get();
-        $po = DB::table('tblpo_jo as po')
+        $po = DB::table('purchase_job_orders as po')
                 ->select('div.division', 'inv.office', 'inv.requested_by', 'inv.purpose')
-                ->join('tblinventory_stocks as inv', 'inv.po_no', '=', 'po.po_no')
-                ->join('tblsuppliers as bid', 'bid.id', '=', 'po.awarded_to')
-                ->join('tbldivision as div', 'div.id', '=', 'inv.division_id')
+                ->join('inventory_stocks as inv', 'inv.po_no', '=', 'po.po_no')
+                ->join('suppliers as bid', 'bid.id', '=', 'po.awarded_to')
+                ->join('emp_divisions as div', 'div.id', '=', 'inv.division_id')
                 ->where('inv.inventory_no', $inventoryNo)
                 ->first();
 
@@ -731,7 +736,7 @@ class PrintController extends Controller
             $approvedBy = $item->approved_by;
             $issuedBy = $item->issued_by;
             $tableData[] = [$item->stock_no,
-                            $item->unit,
+                            $item->unit_name,
                             $item->item_description,
                             $item->po_qnty,
                             $yes,
@@ -805,22 +810,22 @@ class PrintController extends Controller
 
     private function getDataPAR($inventoryNo, $empID) {
         $tableData = [];
-        $stockIssue = DB::table('tblinventory_stocks_issue as stocks')
+        $stockIssue = DB::table('inventory_stock_issues as stocks')
                         ->select('stocks.quantity', 'unit.unit', 'po.item_description',
                                  'stocks.date_issued', 'po.total_cost', 'inv.property_no',
                                  'stocks.issued_by', 'inv.id as inv_id')
-                        ->join('tblinventory_stocks as inv', 'inv.id', '=', 'stocks.inventory_id')
-                        ->join('tblpo_jo_items as po', 'po.item_id', '=', 'inv.po_item_id')
-                        ->join('tblunit_issue as unit', 'unit.id', '=', 'po.unit_issue')
+                        ->join('inventory_stocks as inv', 'inv.id', '=', 'stocks.inventory_id')
+                        ->join('purchase_job_order_items as po', 'po.item_id', '=', 'inv.po_item_id')
+                        ->join('item_unit_issues as unit', 'unit.id', '=', 'po.unit_issue')
                         ->where('inv.inventory_no', $inventoryNo)
                         ->where('stocks.received_by', $empID)
                         ->orderBy('inv.id')
                         ->distinct()
                         ->get();
-        $po = DB::table('tblpo_jo as po')
+        $po = DB::table('purchase_job_orders as po')
                 ->select('po.po_no', 'po.date_po', 'bid.company_name')
-                ->join('tblinventory_stocks as inv', 'inv.po_no', '=', 'po.po_no')
-                ->join('tblsuppliers as bid', 'bid.id', '=', 'po.awarded_to')
+                ->join('inventory_stocks as inv', 'inv.po_no', '=', 'po.po_no')
+                ->join('suppliers as bid', 'bid.id', '=', 'po.awarded_to')
                 ->where('inv.inventory_no', $inventoryNo)
                 ->first();
 
@@ -837,7 +842,7 @@ class PrintController extends Controller
 
             $issuedBy = $item->issued_by;
             $tableData[] = [$item->quantity,
-                            $item->unit,
+                            $item->unit_name,
                             $item->item_description,
                             $item->property_no,
                             $item->date_issued,
@@ -879,10 +884,10 @@ class PrintController extends Controller
     }
 
     private function getDataLDDAP($id) {
-        $lddap = DB::table('tbllddap')
+        $lddap = DB::table('list_demand_payables')
                    ->where('lddap_id', $id)
                    ->first();
-        $lddapItems = DB::table('tbllddap_items')
+        $lddapItems = DB::table('list_demand_payables_items')
                         ->where('lddap_id', $id)
                         ->get();
 
@@ -1074,9 +1079,9 @@ class PrintController extends Controller
     }
 
     private function getDataLiquidation($id) {
-        $liq = DB::table('tblliquidation as liq')
+        $liq = DB::table('liquidation_reports as liq')
                  ->select('liq.*', 'emp.firstname', 'emp.middlename', 'emp.lastname')
-                 ->join('tblemp_accounts as emp', 'emp.emp_id', '=', 'liq.sig_claimant')
+                 ->join('emp_accounts as emp', 'emp.emp_id', '=', 'liq.sig_claimant')
                  ->where('liq.id', $id)
                  ->first();
         $liq->dv_no = !empty($liq->dv_no) ? $liq->dv_no: '_______';
@@ -1128,21 +1133,21 @@ class PrintController extends Controller
 
     private function getDataDV($id, $type) {
         if ($type == 'procurement') {
-            $dv = DB::table('tbldv as dv')
+            $dv = DB::table('disbursement_vouchers as dv')
                     ->select('dv.id as dv_id', 'dv.*', 'ors.payee', 'ors.address', 'ors.amount',
                              'ors.sig_certified_1', 'ors.po_no', 'ors.sig_certified_2', 'bid.company_name',
                              'bid.vat_no as tin', 'ors.responsibility_center', 'ors.mfo_pap')
-                    ->join('tblors_burs as ors', 'ors.id', '=', 'dv.ors_id')
-                    ->join('tblsuppliers as bid', 'bid.id', '=', 'ors.payee')
+                    ->join('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
+                    ->join('suppliers as bid', 'bid.id', '=', 'ors.payee')
                     ->where('dv.id', $id)
                     ->first();
         } else if ($type == 'cashadvance') {
-            $dv = DB::table('tbldv as dv')
+            $dv = DB::table('disbursement_vouchers as dv')
                     ->select('dv.id as dv_id', 'dv.*', 'ors.payee', 'ors.address', 'ors.amount',
                              'ors.sig_certified_1', 'ors.po_no', 'ors.sig_certified_2',
                              'ors.responsibility_center', 'ors.mfo_pap')
-                    ->join('tblors_burs as ors', 'ors.id', '=', 'dv.ors_id')
-                    ->join('tblemp_accounts as emp', 'emp.emp_id', '=', 'ors.payee')
+                    ->join('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
+                    ->join('emp_accounts as emp', 'emp.emp_id', '=', 'ors.payee')
                     ->where('dv.id', $id)
                     ->first();
         }
@@ -1239,19 +1244,19 @@ class PrintController extends Controller
 
     private function getDataIAR($iarNo) {
         $tableData = [];
-        $iar = DB::table('tbliar as iar')
+        $iar = DB::table('inspection_acceptance_reports as iar')
                  ->select('ors.*', 'iar.*', 'div.division', 'bid.company_name', 'po.date_po')
-                 ->join('tblors_burs as ors', 'ors.id', '=', 'iar.ors_id')
-                 ->join('tblpo_jo as po', 'po.po_no', '=', 'ors.po_no')
-                 ->join('tblpr as pr', 'pr.id', '=', 'iar.pr_id')
-                 ->join('tbldivision as div', 'div.id', '=', 'pr.pr_division_id')
-                 ->join('tblsuppliers as bid', 'bid.id', '=', 'ors.payee')
+                 ->join('obligation_request_status as ors', 'ors.id', '=', 'iar.ors_id')
+                 ->join('purchase_job_orders as po', 'po.po_no', '=', 'ors.po_no')
+                 ->join('purchase_requests as pr', 'pr.id', '=', 'iar.pr_id')
+                 ->join('emp_divisions as div', 'div.id', '=', 'pr.pr_division_id')
+                 ->join('suppliers as bid', 'bid.id', '=', 'ors.payee')
                  ->where('iar_no', $iarNo)
                  ->first();
-        $iarItems = DB::table('tblpo_jo_items as item')
-                     ->join('tblunit_issue as unit', 'unit.id', '=', 'item.unit_issue')
-                     ->join('tblors_burs as ors', 'ors.po_no', '=', 'item.po_no')
-                     ->join('tbliar as iar', 'iar.ors_id', '=', 'ors.id')
+        $iarItems = DB::table('purchase_job_order_items as item')
+                     ->join('item_unit_issues as unit', 'unit.id', '=', 'item.unit_issue')
+                     ->join('obligation_request_status as ors', 'ors.po_no', '=', 'item.po_no')
+                     ->join('inspection_acceptance_reports as iar', 'iar.ors_id', '=', 'ors.id')
                      ->where('iar.iar_no', $iarNo)
                      ->where('item.excluded', 'n')
                      ->get();
@@ -1264,7 +1269,7 @@ class PrintController extends Controller
 
             $tableData[] = [$item->stock_no,
                             $item->item_description,
-                            $item->unit, $item->quantity];
+                            $item->unit_name, $item->quantity];
         }
 
         $data = [
@@ -1303,23 +1308,22 @@ class PrintController extends Controller
                         'footer_data' => $dataFooter];
     }
 
-    private function getDataORS_BURS($id, $type) {
+    private function getDataORSBURS($id, $type) {
         if ($type == 'procurement') {
-            $ors = DB::table('tblors_burs as ors')
+            $ors = DB::table('obligation_request_status as ors')
                      ->select('ors.*', 'bid.company_name', 'ors.id as ors_id')
-                     ->join('tblsuppliers as bid', 'bid.id', '=', 'ors.payee')
-                     ->where('ors.id', $id)
-                     ->where('ors.module_class_id', 3)
+                     ->join('suppliers as bid', 'bid.id', '=', 'ors.payee')
+                     ->where([['ors.id', $id], ['ors.module_class', 3]])
                      ->first();
             $payee = $ors->company_name;
         } else if ($type == 'cashadvance'){
-            $ors = DB::table('tblors_burs as ors')
-                             ->select('ors.*', 'emp.firstname', 'emp.middlename', 'emp.lastname')
-                             ->join('tblemp_accounts as emp', 'emp.emp_id', '=', 'ors.payee')
-                             ->where('ors.id', $id)
-                             ->where('ors.module_class_id', 2)
-                             ->first();
-                    $payee = "";
+            $ors = DB::table('obligation_request_status as ors')
+                     ->select('ors.*', 'emp.firstname', 'emp.middlename', 'emp.lastname')
+                     ->join('emp_accounts as emp', 'emp.emp_id', '=', 'ors.payee')
+                     ->where([['ors.id', $id], ['ors.module_class', 2]])
+                     ->first();
+            $payee = "";
+
             if (!empty($ors->middlename)) {
                 $payee = $ors->firstname . " " . $ors->middlename[0] . ". " . $ors->lastname;
             } else {
@@ -1327,14 +1331,15 @@ class PrintController extends Controller
             }
         }
 
-        $sign1 = $this->getSignatory($ors->sig_certified_1)->name;
-        $sign2 = $this->getSignatory($ors->sig_certified_2)->name;
-        $position1 = $this->getSignatory($ors->sig_certified_1)->position;
-        $position2 = $this->getSignatory($ors->sig_certified_2)->position;
+        $instanceSignatory = new Signatory;
+        $sign1 = $instanceSignatory->getSignatory($ors->sig_certified_1)->name;
+        $sign2 = $instanceSignatory->getSignatory($ors->sig_certified_2)->name;
+        $position1 = $instanceSignatory->getSignatory($ors->sig_certified_1)->ors_designation;
+        $position2 = $instanceSignatory->getSignatory($ors->sig_certified_2)->ors_designation;
         $sDate1 = $ors->date_certified_1;
         $sDate2 = $ors->date_certified_2;
 
-        if (strtolower($ors->document_type) == 'ors') {
+        if ($ors->document_type == 'ors') {
             $statusOf[] = ['C.', 'STATUS OF OBLIGATION', '', '', '', '', '', ''];
             $tableHeaderOnFooter[] = ["Date", "Particulars", "ORS/JEV/Check/ADA/TRA No.",
                                       "Obligation <br><br>(a)", "Payable <br><br>(b)",
@@ -1468,45 +1473,40 @@ class PrintController extends Controller
             ]
         ];
 
-        return (object)['ors' => $ors,
-                        'header_data' => $dataHeader,
-                        'table_data' => $data,
-                        'footer_data' => $dataFooter,
-                        'sign1' => $sign1,
-                        'sign2' => $sign2,
-                        'position1' => $position1,
-                        'position2' => $position2,
-                        'sDate1' => $sDate1,
-                        'sDate2' => $sDate2];
+        return (object)[
+            'ors' => $ors,
+            'header_data' => $dataHeader,
+            'table_data' => $data,
+            'footer_data' => $dataFooter,
+            'sign1' => $sign1,
+            'sign2' => $sign2,
+            'position1' => $position1,
+            'position2' => $position2,
+            'sDate1' => $sDate1,
+            'sDate2' => $sDate2
+        ];
     }
 
-    private function getDataPO_JO($poNo) {
-        $toggle = "po";
+    private function getDataPOJO($id) {
         $tableData = [];
         $grandTotal = 0;
-        $po = DB::table('tblpo_jo as po')
-                ->select('po.*', 'bid.company_name', 'bid.address', 'mode.mode')
-                ->join('tblsuppliers as bid', 'bid.id', '=', 'po.awarded_to')
-                ->join('tblabstract as abs', 'abs.pr_id', '=', 'po.pr_id')
-                ->join('tblmode_procurement as mode', 'mode.id', '=', 'abs.mode_procurement_id')
-                ->where('po.po_no', $poNo)
+        $po = DB::table('purchase_job_orders as po')
+                ->select('po.*', 'bid.company_name', 'bid.address', 'mode.mode_name')
+                ->join('suppliers as bid', 'bid.id', '=', 'po.awarded_to')
+                ->join('abstract_quotations as abs', 'abs.pr_id', '=', 'po.pr_id')
+                ->join('procurement_modes as mode', 'mode.id', '=', 'abs.mode_procurement')
+                ->where('po.id', $id)
                 ->first();
-        $jo = DB::table('tblpo_jo as po')
-                ->select('po.*', 'bid.company_name', 'bid.address')
-                ->join('tblsuppliers as bid', 'bid.id', '=', 'po.awarded_to')
-                ->where('po.po_no', $poNo)
-                ->first();
-
-        $toggle = strtolower($po->document_abrv);
-        $items = DB::table('tblpo_jo_items as item')
-                     ->join('tblunit_issue as unit', 'unit.id', '=', 'item.unit_issue')
+        $documentType = $po->document_type;
+        $poNo = $po->po_no;
+        $items = DB::table('purchase_job_order_items as item')
+                     ->join('item_unit_issues as unit', 'unit.id', '=', 'item.unit_issue')
                      ->where([['item.po_no', $poNo]])
                      ->where('item.excluded', 'n')
-                     ->orderByRaw('LENGTH(item.item_id)')
-                     ->orderBy('item.item_id')
+                     ->orderBy('item.item_no')
                      ->get();
 
-        if ($toggle == 'po') {
+        if ($documentType == 'po') {
             foreach ($items as $key => $item) {
                 if (strpos($item->item_description, "\n") !== FALSE) {
                     $searchStr = ["\r\n", "\n", "\r"];
@@ -1514,7 +1514,7 @@ class PrintController extends Controller
                 }
 
                 $tableData[] = [$key + 1,
-                                $item->unit,
+                                $item->unit_name,
                                 $item->item_description,
                                 $item->quantity,
                                 number_format($item->unit_cost, 2),
@@ -1577,6 +1577,11 @@ class PrintController extends Controller
             $po->table_header = $tableHeader;
             $po->table_data = $data;
             $po->grand_total = $grandTotal;
+
+            return (object)[
+                'po' => $po,
+                'toggle' => $documentType
+            ];
         } else {
             foreach ($items as $key => $item) {
                 if (strpos($item->item_description, "\n") !== FALSE) {
@@ -1584,7 +1589,7 @@ class PrintController extends Controller
                     $item->item_description = str_replace($searchStr, '<br>', $item->item_description);
                 }
 
-                $joUnit = $item->quantity . " " . $item->unit;
+                $joUnit = $item->quantity . " " . $item->unit_name;
                 $tableData[] = [$joUnit,
                                 $item->item_description,
                                 number_format($item->total_cost, 2)];
@@ -1623,13 +1628,14 @@ class PrintController extends Controller
                 ]
             ];
 
-            $jo->table_data = $data;
-            $jo->grand_total = $grandTotal;
-        }
+            $po->table_data = $data;
+            $po->grand_total = $grandTotal;
 
-        return (object)['po' => $po,
-                        'jo' => $jo,
-                        'toggle' => $toggle];
+            return (object)[
+                'jo' => $po,
+                'toggle' => $documentType
+            ];
+        }
     }
 
     private function getDataAbstract($id, $pageHeight) {
@@ -1809,10 +1815,10 @@ class PrintController extends Controller
         foreach ($groupNumbers as $groupNo) {
             $tableData = [];
             $prItems = DB::table('purchase_request_items as item')
-                     ->join('item_unit_issues as unit', 'unit.id', '=', 'item.unit_issue')
-                     ->where('item.pr_id', $prID)
-                     ->orderBy('item.item_no')
-                     ->get();
+                         ->join('item_unit_issues as unit', 'unit.id', '=', 'item.unit_issue')
+                         ->where([['item.pr_id', $prID], ['item.group_no', $groupNo->group_no]])
+                         ->orderBy('item.item_no')
+                         ->get();
 
             foreach ($prItems as $key => $item) {
                 if (strpos($item->item_description, "\n") !== FALSE) {
@@ -2025,6 +2031,8 @@ class PrintController extends Controller
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new DocAbstractQuotation('L', $pageUnit, $pageSize);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "FM-FAS-PUR F07";
         $docRev = "Revision 2";
         $docRevDate = "11-16-18";
@@ -2050,10 +2058,12 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generatePO($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
+    private function generatePO($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new PDF('P', 'mm', $pageSize);
+        $pdf = new DocPurchaseOrder('P', $pageUnit, $pageSize);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "FM-FAS-PUR F08";
         $docRev = "Revision 1";
         $docRevDate = "02-28-18";
@@ -2062,14 +2072,14 @@ class PrintController extends Controller
         $docAuthor = "DOST-CAR";
         $docSubject = "Purchase Order";
         $docKeywords = "PO, po, purchase, order, purchase order";
-        $appName = $this->getSignatory($data->po->sig_approval)->name;
-        $deptName = $this->getSignatory($data->po->sig_funds_available)->name;
 
-        $poDate = "";
+        $instanceSignatory = new Signatory;
+        $data->po->sig_approval = $instanceSignatory->getSignatory($data->po->sig_approval)->name;
+        $data->po->sig_funds_available = $instanceSignatory->getSignatory($data->po->sig_funds_available)->name;
 
         if (!empty($data->po->date_po)) {
-            $poDate = new DateTime($data->po->date_po);
-            $poDate = $poDate->format('F j, Y');
+            $data->po->date_po = new DateTime($data->po->date_po);
+            $data->po->date_po = $data->po->date_po->format('F j, Y');
         }
 
         //Set document information
@@ -2077,16 +2087,18 @@ class PrintController extends Controller
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        include app_path() . "/Classes/DocumentPDF/Documents/doc_purchase_order.php";
+        $pdf->printPurchaseOrder($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateJO($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateJO($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new PDF('P', 'mm', $pageSize);
+        $pdf = new DocJobOrder('P', $pageUnit, $pageSize);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "FM-FAS-PUR F15";
         $docRev = "Revision 1";
         $docRevDate = "02-28-18";
@@ -2096,16 +2108,14 @@ class PrintController extends Controller
         $docSubject = "Job Order";
         $docKeywords = "JO, jo, job, order, job order";
 
-        $contentWidth = $pageWidth  - 20;
-        $deptName = $this->getSignatory($data->jo->sig_department)->name;
-        $appName = $this->getSignatory($data->jo->sig_approval)->name;
-        $fundsName = $this->getSignatory($data->jo->sig_funds_available)->name;
-
-        $joDate = "";
+        $instanceSignatory = new Signatory;
+        $data->jo->sig_department = $instanceSignatory->getSignatory($data->jo->sig_department)->name;
+        $data->jo->sig_approval = $instanceSignatory->getSignatory($data->jo->sig_approval)->name;
+        $data->jo->sig_funds_available = $instanceSignatory->getSignatory($data->jo->sig_funds_available)->name;
 
         if (!empty($data->jo->date_po)) {
-            $joDate = new DateTime($data->jo->date_po);
-            $joDate = $joDate->format('F j, Y');
+            $data->jo->date_po = new DateTime($data->jo->date_po);
+            $data->jo->date_po = $data->jo->date_po->format('F j, Y');
         }
 
         //Set document information
@@ -2113,17 +2123,19 @@ class PrintController extends Controller
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        include app_path() . "/Classes/DocumentPDF/Documents/doc_job_order.php";
+        $pdf->printJobOrder($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateORS($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateORS($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new PDF('P', 'mm', $pageSize);
+        $pdf = new DocObligationRequestStatus('P', $pageUnit, $pageSize);
         $pdf->setHeaderLR(false, true);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "FM-FAS-BUD F04";
         $docRev = "Revision 1";
         $docRevDate = "02-28-18";
@@ -2133,23 +2145,19 @@ class PrintController extends Controller
         $docSubject = "Obligation Request and Status";
         $docKeywords = "ORS, ors, obligated, request, status, obligation request and status";
 
-        $orsDate = "";
-        $sDate1 = "";
-        $sDate2 = "";
-
         if (!empty($data->ors->date_ors_burs)) {
-            $orsDate = new DateTime($data->ors->date_ors_burs);
-            $orsDate = $orsDate->format('F j, Y');
+            $data->ors->date_ors_burs = new DateTime($data->ors->date_ors_burs);
+            $data->ors->date_ors_burs = $data->ors->date_ors_burs->format('F j, Y');
         }
 
         if (!empty($data->sDate1)) {
-            $sDate1 = new DateTime($data->sDate1);
-            $sDate1 = $sDate1->format('F j, Y');
+            $data->sDate1 = new DateTime($data->sDate1);
+            $data->sDate1 = $data->sDate1->format('F j, Y');
         }
 
         if (!empty($data->sDate2)) {
-            $sDate2 = new DateTime($data->sDate2);
-            $sDate2 = $sDate2->format('F j, Y');
+            $data->sDate2 = new DateTime($data->sDate2);
+            $data->sDate2 = $data->sDate2->format('F j, Y');
         }
 
         //Set document information
@@ -2157,17 +2165,19 @@ class PrintController extends Controller
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        include app_path() . "/Classes/DocumentPDF/Documents/doc_ors_burs.php";
+        $pdf->printORSBURS($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateBURS($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateBURS($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new PDF('P', 'mm', $pageSize);
+        $pdf = new DocObligationRequestStatus('P', 'mm', $pageSize);
         $pdf->setHeaderLR(false, true);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "FM-FAS-BUD F06";
         $docRev = "Revision 1";
         $docRevDate = "02-28-18";
@@ -2177,23 +2187,19 @@ class PrintController extends Controller
         $docSubject = "Budget Utilization Request and Status";
         $docKeywords = "BURS, burs, budget, utilization, request, status, budget utilization request status";
 
-        $orsDate = "";
-        $sDate1 = "";
-        $sDate2 = "";
-
         if (!empty($data->ors->date_ors_burs)) {
-            $orsDate = new DateTime($data->ors->date_ors_burs);
-            $orsDate = $orsDate->format('F j, Y');
+            $data->ors->date_ors_burs = new DateTime($data->ors->date_ors_burs);
+            $data->ors->date_ors_burs = $data->ors->date_ors_burs->format('F j, Y');
         }
 
         if (!empty($data->sDate1)) {
-            $sDate1 = new DateTime($data->sDate1);
-            $sDate1 = $sDate1->format('F j, Y');
+            $data->sDate1 = new DateTime($data->sDate1);
+            $data->sDate1 = $data->sDate1->format('F j, Y');
         }
 
         if (!empty($data->sDate2)) {
-            $sDate2 = new DateTime($data->sDate2);
-            $sDate2 = $sDate2->format('F j, Y');
+            $data->sDate2 = new DateTime($data->sDate2);
+            $data->sDate2 = $data->sDate2->format('F j, Y');
         }
 
         //Set document information
@@ -2201,7 +2207,7 @@ class PrintController extends Controller
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        include app_path() . "/Classes/DocumentPDF/Documents/doc_ors_burs.php";
+        $pdf->printORSBURS($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);

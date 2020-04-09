@@ -179,17 +179,36 @@ class User extends Authenticatable
             $fullname = $firstname.$middleInitial.$lastname;
             $position = $userData->position;
             $signature = $userData->signature;
+
+            $groups = !empty($userData->groups) ?
+                      unserialize($userData->groups) :
+                      [];
+            $roles = !empty($userData->roles) ?
+                     unserialize($userData->roles) :
+                     [];
         } else {
-            $fullname = '';
-            $position = '';
-            $signature = '';
+            $fullname = NULL;
+            $position = NULL;
+            $signature = NULL;
+            $groups = [];
+            $roles = [];
         }
 
         return (object) [
             'name' => $fullname,
             'position' => $position,
-            'signature' => $signature
+            'signature' => $signature,
+            'groups' => $groups,
+            'roles' => $roles,
         ];
+    }
+
+    public function getGroups($id) {
+        $userData = $this::find($id);
+        $groups = !empty($userData->groups) ? unserialize($userData->groups) :
+                  NULL;
+
+        return $groups;
     }
 
     public function log($request, $msg) {

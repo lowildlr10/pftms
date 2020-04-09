@@ -73,7 +73,31 @@ class DocumentLog extends Model
                      ->orderBy('logged_at', 'desc')
                      ->get();
         $user = new User;
-        $currentStatus = (object) [];
+        $currentStatus = (object) [
+            'issued_by' => NULL,
+            'issued_to' => NULL,
+            'issued_by_id' => NULL,
+            'issued_to_id' => NULL,
+            'date_issued' => NULL,
+            'issued_remarks' => NULL,
+
+            'received_by' => NULL,
+            'received_by_id' => NULL,
+            'date_received' => NULL,
+            'received_remarks' => NULL,
+
+            'issued_back_by' => NULL,
+            'issued_back_to' => NULL,
+            'issued_back_by_id' => NULL,
+            'issued_back_to_id' => NULL,
+            'date_issued_back' => NULL,
+            'issued_back_remarks' => NULL,
+
+            'received_back_by' => NULL,
+            'received_back_by_id' => NULL,
+            'date_received_back' => NULL,
+            'received_back_remarks' => NULL,
+        ];
 
         if (count($logs) > 0) {
             foreach ($logs as $log) {

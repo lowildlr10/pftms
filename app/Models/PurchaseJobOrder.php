@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
+use App\Notifications\PurchaseRequest as Notif;
+use Kyslik\ColumnSortable\Sortable;
 
 class PurchaseJobOrder extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Sortable;
 
     /**
      * The table associated with the model.
@@ -71,4 +73,32 @@ class PurchaseJobOrder extends Model
     public function pr() {
         return $this->belongsTo('App\Models\PurchaseRequest', 'pr_id', 'id');
     }
+
+    public function stat() {
+        return $this->hasOne('App\Models\ProcurementStatus', 'id', 'status');
+    }
+
+    public function poitems() {
+        return $this->hasMany('App\Models\PurchaseJobOrderItem', 'po_no', 'po_no')->orderBy('item_no');
+    }
+
+    public function emppayee() {
+        return $this->hasOne('App\User', 'id', 'awarded_to');
+    }
+
+    public function bidpayee() {
+        return $this->hasOne('App\Models\Supplier', 'id', 'awarded_to');
+    }
+
+    public function awardee() {
+        return $this->hasOne('App\Models\Supplier', 'id', 'awarded_to');
+    }
+
+    public function ors() {
+        return $this->hasOne('App\Models\ObligationRequestStatus', 'po_no', 'po_no');
+    }
+
+    public $sortable = [
+        'po_no',
+    ];
 }

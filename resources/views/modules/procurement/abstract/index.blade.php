@@ -1,15 +1,5 @@
 @extends('layouts.app')
 
-@section('custom-css')
-
-<!-- DataTables CSS -->
-<link rel="stylesheet" type="text/css" href="{{ asset('plugins/mdb/css/addons/datatables.min.css') }}" rel="stylesheet">
-
-<!-- DataTables Select CSS -->
-<link rel="stylesheet" type="text/css" href="{{ asset('plugins/mdb/css/addons/datatables-select.min.css') }}" rel="stylesheet">
-
-@endsection
-
 @section('main-content')
 
 <div class="row wow animated fadeIn">
@@ -67,7 +57,6 @@
                             <a href="{{ route('abstract') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
                             </a>
-
                         </div>
                     </div>
                     <!--/Card image-->
