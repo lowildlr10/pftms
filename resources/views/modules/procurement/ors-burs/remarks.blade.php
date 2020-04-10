@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-12">
-        <button class="btn btn-sm btn-block btn-link"
+        <button class="btn btn-sm btn-block btn-link blue-text"
                 onclick="$(this).refreshRemarks('{{ route('proc-ors-burs-show-remarks', ['id' => $id]) }}');">
                 <i class="fas fa-sync"></i> Refresh
         </button>
@@ -15,7 +15,7 @@
         <tr>
             <td>
                 <p class="p-0">
-                    From : {{ Auth::user()->getEmployee($item->emp_from)->name }}<br>
+                    <strong class="font-weight-bold">From : {{ Auth::user()->getEmployee($item->emp_from)->name }}</strong><br>
                     <small class="grey-text">
                         <i class="far fa-calendar-alt"></i> {{ $item->logged_at }}
                     </small><br><br>
