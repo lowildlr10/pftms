@@ -40,6 +40,7 @@ class DatabaseMigrateSeeder extends Seeder
             RFQsMigrateSeeder::class,
             AbstractsMigrateSeeder::class,
             POJOsMigrateSeeder::class,
+            ORSBURSsMigrateSeeder::class,
         ]);
     }
 }
