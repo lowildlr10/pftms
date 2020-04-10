@@ -28,7 +28,7 @@ class UsersTableSeeder extends Seeder
         $user->division = $empDivision->id;
         $user->province = $province->id;
         $user->region = $region->id;
-        $user->role = $empRole->id;
+        $user->roles = serialize([$empRole->id]);
         $user->firstname = 'Lennel Threian';
         $user->middlename = 'Lapitan';
         $user->lastname = 'Estabaya';
