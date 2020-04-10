@@ -29,13 +29,17 @@ class RFQsMigrateSeeder extends Seeder
                         ->first();
             $prNo = $prData->pr_no;
             $instancePR = DB::table('purchase_requests')->where('pr_no', $prNo)->first();
-            $_sigRFQData = DB::connection('mysql-old-pftms')
-                                    ->table('tblsignatories')
-                                    ->where('id', $rfq->sig_rfq)
-                                    ->first();
+
+            $__sigRFQData = DB::connection('mysql-old-pftms')
+                                      ->table('tblsignatories')
+                                      ->where('id', $rfq->sig_rfq)
+                                      ->first();
+            $_sigRFQData = $__sigRFQData ?
+                                   User::where('emp_id', $__sigRFQData->emp_id)->first() :
+                                   NULL;
             $sigRFQData = $_sigRFQData ?
-                          Signatory::where('emp_id', $_sigRFQData->emp_id)->first() :
-                          NULL;
+                                  Signatory::where('emp_id', $_sigRFQData->id)->first() :
+                                  NULL;
 
             $instanceRFQ = new RequestQuotation;
             $instanceRFQ->pr_id = $instancePR->id;
