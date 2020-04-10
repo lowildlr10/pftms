@@ -170,6 +170,29 @@ class AbstractsMigrateSeeder extends Seeder
                     $instanceAbsItem->save();
                 }
             }
+
+            $docLogData = DB::connection('mysql-old-pftms')
+                            ->table('tbldocument_logs_history')
+                            ->where('code', $code)
+                            ->get();
+
+            foreach ($docLogData as $log) {
+                $empFromData = User::where('emp_id', $log->emp_from)->first();
+                $empToData = User::where('emp_id', $log->emp_to)->first();
+
+                $instanceDocLog = new DocLog;
+                $instanceDocLog->doc_id = $abstractID;
+                $instanceDocLog->logged_at = $log->date;
+                $instanceDocLog->emp_from = $empFromData ? $empFromData->id :
+                                            NULL;
+                $instanceDocLog->emp_to = $empToData ? $empToData->id :
+                                          NULL;
+                $instanceDocLog->action = $log->action;
+                $instanceDocLog->remarks = $log->remarks;
+                $instanceDocLog->created_at = $log->created_at;
+                $instanceDocLog->updated_at = $log->updated_at;
+                $instanceDocLog->save();
+            }
         }
     }
 }
