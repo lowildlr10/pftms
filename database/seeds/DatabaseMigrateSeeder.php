@@ -38,6 +38,8 @@ class DatabaseMigrateSeeder extends Seeder
             /** Purchase Request */
             PRsMigrateSeeder::class,
             RFQsMigrateSeeder::class,
+            AbstractsMigrateSeeder::class,
+            POJOsMigrateSeeder::class,
         ]);
     }
 }
