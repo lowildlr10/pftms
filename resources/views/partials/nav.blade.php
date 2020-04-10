@@ -447,22 +447,25 @@
                 @if (count(Auth::user()->unreadNotifications) > 0)
                     @foreach(Auth::user()->unreadNotifications as $notification)
                         @if ($notification->data['type'] == 'message')
-                    <a class="dropdown-item" href="#">
+                    <a class="dropdown-item"
+                       @if ($notification->data['module'] == 'proc-ors-burs')
+                       onclick="$(this).redirectToDoc('{{ route('proc-ors-burs') }}', '{{ $notification->data['ors_id'] }}');"
+                       @endif
+                    >
                         <div class="message-content">
                             <!--
                             <div class="pic">
                                 <img src="#" alt="">
-                            </div> -->
-                            <div class="content">
+                            </div>-->
+                            <div class="content w-100">
                                 <div class="message-title">
-                                    <strong>
                                     @if ($notification->data['module'] == 'proc-ors-burs')
-                                        ORS/BURS <small class="grey-text">{{ $notification->created_at }}</small>
+                                        <small>Obligation/Budget Utilization</small><br>
                                     @endif
-                                    </strong>
                                 </div>
                                 <div class="message-detail">
-                                    {!! $notification->data['msg'] !!}
+                                    {!! $notification->data['msg'] !!}<br>
+                                    <small class="grey-text">{{ $notification->created_at }}</small>
                                 </div>
                             </div>
                         </div>
