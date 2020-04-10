@@ -27,7 +27,7 @@ class CreateObligationRequestStatusTable extends Migration
             $table->string('serial_no')->nullable();
             $table->date('date_ors_burs')->nullable();
             $table->dateTime('date_obligated')->nullable();
-            $table->string('payee', 255);
+            $table->uuid('payee');
             $table->string('office')->nullable();
             $table->text('address')->nullable();
             $table->string('responsibility_center')->nullable();
