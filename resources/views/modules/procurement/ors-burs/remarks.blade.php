@@ -8,19 +8,23 @@
 </div>
 
 <div class="table-responsive border m-0 p-0" style="height: 350px;">
-    <table class="table table-sm table-bordered m-0 p-0">
+    <table class="table table-sm m-0 p-0">
         @if (count($docRemarks) > 0)
             @foreach ($docRemarks as $itemCtr => $item)
                 @if (!empty($item->remarks))
         <tr>
             <td>
-                <p class="p-0">
-                    <strong class="font-weight-bold">From : {{ Auth::user()->getEmployee($item->emp_from)->name }}</strong><br>
+                <div class="border rounded p-3 z-depth-1 {{ $item->emp_from == Auth::user()->id ?
+                     'ml-5 grey lighten-5' : 'mr-5 rgba-blue-slight' }}">
+                    <small class="font-weight-bold">
+                        {{ $item->emp_from == Auth::user()->id ? 'You' :
+                        Auth::user()->getEmployee($item->emp_from)->name }}
+                    </small><br>
+                    {{ $item->remarks }}<br><br>
                     <small class="grey-text">
                         <i class="far fa-calendar-alt"></i> {{ $item->logged_at }}
-                    </small><br><br>
-                    <i class="far fa-comment-dots"></i> {{ $item->remarks }}<br>
-                </p>
+                    </small>
+                </div>
             </td>
         </tr>
                 @endif
