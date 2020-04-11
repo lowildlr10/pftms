@@ -466,6 +466,7 @@
 @include('modals.issue')
 @include('modals.receive')
 @include('modals.delivery')
+@include('modals.inspection')
 @include('modals.print')
 
 @endsection
