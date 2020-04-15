@@ -52,7 +52,6 @@ class CreateDisbursementVouchersTable extends Migration
             $table->unsignedBigInteger('module_class');
             $table->foreign('module_class')->references('id')->on('module_classifications');
             $table->enum('for_payment', ['y', 'n'])->default('n');
-            $table->string('document_abrv', 5)->default('DV');
             $table->uuid('disbursed_by')->nullable();
             $table->foreign('disbursed_by')->references('id')->on('emp_accounts');
             $table->softDeletes();
