@@ -96,8 +96,16 @@ class PurchaseRequest extends Model
         return $this->hasOne('App\Models\EmpDivision', 'id', 'division');
     }
 
+    public function div() {
+        return $this->hasOne('App\Models\EmpDivision', 'id', 'division');
+    }
+
     public function po() {
         return $this->hasMany('App\Models\PurchaseJobOrder', 'pr_id', 'id')->orderBy('po_no');
+    }
+
+    public function iar() {
+        return $this->hasMany('App\Models\InspectionAcceptance', 'pr_id', 'id')->orderBy('iar_no');
     }
 
     public $sortable = [

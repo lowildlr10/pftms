@@ -18,13 +18,6 @@ class InspectionAcceptance extends Model
     protected $table = 'inspection_acceptance_reports';
 
     /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'iar_no';
-
-     /**
      * The attributes that are mass assignable.
      *
      * @var array
@@ -63,5 +56,12 @@ class InspectionAcceptance extends Model
 
     public static function generateUuid() {
          return Uuid::generate();
+    }
+
+    /**
+     * Get the phone record associated with the purchase request
+     */
+    public function po() {
+        return $this->belongsTo('App\Models\PurchaseJobOrder', 'po_id', 'id');
     }
 }

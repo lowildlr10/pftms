@@ -73,4 +73,8 @@ class PurchaseJobOrderItem extends Model
     public function po() {
         return $this->belongsTo('App\Models\PurchaseJobOrder', 'po_no', 'po_no');
     }
+
+    public function unitissue() {
+        return $this->hasOne('App\Models\ItemUnitIssue', 'id', 'unit_issue');
+    }
 }

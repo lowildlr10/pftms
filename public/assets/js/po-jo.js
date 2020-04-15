@@ -261,7 +261,7 @@ $(function() {
 
     $.fn.showForInspection = function(url, name) {
         $('#modal-body-inspection').html(`Are you sure you want to set this ${name} `+
-                                      `document to 'For Inspection'?`);
+                                         `document to 'For Inspection'?`);
         $("#modal-inspection").modal({keyboard: false, backdrop: 'static'})
 						  .on('shown.bs.modal', function() {
             $('#inspection-title').html('PO/JO For Inspection');

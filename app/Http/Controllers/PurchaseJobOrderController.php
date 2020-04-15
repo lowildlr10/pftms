@@ -623,7 +623,7 @@ class PurchaseJobOrderController extends Controller
                             'Purchase Order' : 'Job Order';
 
             $iarNo = "IAR-" . $poNo;
-            $instanceIAR = new InspectionAcceptanceReport;
+            $instanceIAR = new InspectionAcceptance;
             $instanceIAR->iar_no = $iarNo;
             $instanceIAR->pr_id = $prID;
             $instanceIAR->ors_id = $orsID;
