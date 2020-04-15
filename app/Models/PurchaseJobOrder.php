@@ -98,6 +98,10 @@ class PurchaseJobOrder extends Model
         return $this->hasOne('App\Models\ObligationRequestStatus', 'po_no', 'po_no');
     }
 
+    public function iar() {
+        return $this->hasOne('App\Models\InspectionAcceptance', 'id', 'po_id');
+    }
+
     public $sortable = [
         'po_no',
     ];

@@ -3,126 +3,173 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\InspectionAcceptance;
-use App\PurchaseOrder;
-use App\Supplier;
-use App\DisbursementVoucher;
-use App\EmployeeLog;
-use App\DocumentLogHistory;
-use App\PaperSize;
-use App\InventoryStock;
+use App\Models\PurchaseRequest;
+use App\Models\PurchaseRequestItem;
+use App\Models\AbstractQuotation;
+use App\Models\AbstractQuotationItem;
+use App\Models\PurchaseJobOrder;
+use App\Models\PurchaseJobOrderItem;
+use App\Models\ObligationRequestStatus;
+use App\Models\InspectionAcceptance;
+use App\Models\DisbursementVoucher;
+use App\Models\InventoryStock;
+
+use App\User;
+use App\Models\DocumentLog as DocLog;
+use App\Models\PaperSize;
+use App\Models\Supplier;
+use App\Models\Signatory;
+use App\Models\ItemUnitIssue;
 use Carbon\Carbon;
-use DB;
 use Auth;
+use DB;
 
 class InspectionAcceptanceController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
-    {
-        $pageLimit = 10;
-        $search = trim($request['search']);
-        $paperSizes = PaperSize::all();
-        $prList = DB::table('tblpr as pr')
-                    ->select('pr.*', 'proj.project',
-                              DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                    ->join('tblpo_jo as po', 'po.pr_id', '=', 'pr.id')
-                    ->join('tbliar as iar as iar', 'iar.iar_no', 'LIKE',
-                            DB::RAW('CONCAT("%", po.po_no, "%")'))
-                    ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'pr.requested_by')
-                    ->join('tblpr_status AS status', 'status.id', '=', 'pr.status')
-                    ->leftJoin('tblprojects AS proj', 'proj.id', '=', 'pr.project_id')
-                    ->whereNull('pr.deleted_at')
-                    ->where('status.id', 6);
+    public function index(Request $request) {
+        $keyword = trim($request->keyword);
+        $instanceDocLog = new DocLog;
 
-        if (!empty($search)) {
-            $prList = $prList->where(function ($query) use ($search) {
-                                   $query->where('pr.pr_no', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('po.po_no', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('iar.iar_no', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('pr.date_pr', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('pr.purpose', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.firstname', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.middlename', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.lastname', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('iar.code', 'LIKE', '%' . $search . '%');
-                               });
+        // Get module access
+        $module = 'proc_iar';
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedIssue = Auth::user()->getModuleAccess($module, 'issue');
+        $isAllowedInspect = Auth::user()->getModuleAccess($module, 'inspect');
+
+        $isAllowedPO = Auth::user()->getModuleAccess('proc_po_jo', 'is_allowed');
+        $isAllowedDV = Auth::user()->getModuleAccess('proc_dv', 'is_allowed');
+
+        // User groups
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
+                             [Auth::user()->division];
+
+        // Main data
+        $paperSizes = PaperSize::orderBy('paper_type')->get();
+        $iarData = PurchaseRequest::with(['funding', 'requestor'])
+                                 ->whereHas('division', function($query)
+                                            use($empDivisionAccess) {
+            $query->whereIn('id', $empDivisionAccess);
+        })->whereHas('iar', function($query) {
+            $query->whereNotNull('id');
+        });
+
+        if (!empty($keyword)) {
+            $iarData = $iarData->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('pr_no', 'like', "%$keyword%")
+                    ->orWhere('date_pr', 'like', "%$keyword%")
+                    ->orWhere('purpose', 'like', "%$keyword%")
+                    ->orWhereHas('funding', function($query) use ($keyword) {
+                        $query->where('source_name', 'like', "%$keyword%");
+                    })->orWhereHas('stat', function($query) use ($keyword) {
+                        $query->where('status_name', 'like', "%$keyword%");
+                    })->orWhereHas('requestor', function($query) use ($keyword) {
+                        $query->where('firstname', 'like', "%$keyword%")
+                              ->orWhere('middlename', 'like', "%$keyword%")
+                              ->orWhere('lastname', 'like', "%$keyword%");
+                    })->orWhereHas('items', function($query) use ($keyword) {
+                        $query->where('item_description', 'like', "%$keyword%");
+                    })->orWhereHas('division', function($query) use ($keyword) {
+                        $query->where('division_name', 'like', "%$keyword%");
+                    })->orWhereHas('po', function($query) use ($keyword) {
+                        $query->where('po_no', 'like', "%$keyword%")
+                              ->orWhere('id', 'like', "%$keyword%")
+                              ->orWhere('date_po', 'like', "%$keyword%")
+                              ->orWhere('date_po_approved', 'like', "%$keyword%")
+                              ->orWhere('date_cancelled', 'like', "%$keyword%")
+                              ->orWhere('place_delivery', 'like', "%$keyword%")
+                              ->orWhere('date_delivery', 'like', "%$keyword%")
+                              ->orWhere('delivery_term', 'like', "%$keyword%")
+                              ->orWhere('payment_term', 'like', "%$keyword%")
+                              ->orWhere('amount_words', 'like', "%$keyword%")
+                              ->orWhere('grand_total', 'like', "%$keyword%")
+                              ->orWhere('fund_cluster', 'like', "%$keyword%");
+                    })->orWhereHas('iar', function($query) use ($keyword) {
+                        $query->where('id', 'like', "%$keyword%")
+                              ->orWhere('po_id', 'like', "%$keyword%")
+                              ->orWhere('iar_no', 'like', "%$keyword%")
+                              ->orWhere('date_iar', 'like', "%$keyword%")
+                              ->orWhere('invoice_no', 'like', "%$keyword%")
+                              ->orWhere('date_invoice', 'like', "%$keyword%");
+                    });
+            });
         }
 
-        if (Auth::user()->role == 3 || Auth::user()->role == 4 || Auth::user()->role == 6) {
-            $prList = $prList->where('requested_by', Auth::user()->emp_id);
-        }
+        $iarData = $iarData->sortable(['pr_no' => 'desc'])->paginate(15);
 
-        if (Auth::user()->role == 5) {
-            $prList = $prList->where('emp.division_id', Auth::user()->division_id);
-        }
+        foreach ($iarData as $iar) {
+            foreach ($iar->iar as $ctrIAR => $iarDat) {
+                $iarDat->doc_status = $instanceDocLog->checkDocStatus($iarDat->id);
+                $inventoryCount = InventoryStock::where('po_no', $iar->po[$ctrIAR]->po_no)
+                                                ->count();
 
-        $prList = $prList->orderBy('pr.id', 'desc')
-                         ->distinct()
-                         ->paginate($pageLimit, ['pr.id']);
-
-        foreach ($prList as $list) {
-            $countIAR = 0;
-            $iarItem = array();
-            $suppliers = DB::table('tblpo_jo as po')
-                           ->select('po.awarded_to', 'bidder.company_name', 'po.po_no', 'iar.iar_no',
-                                    'status.id AS sID', 'iar.date_iar', 'iar.code')
-                           ->join('tbliar as iar as iar', 'iar.iar_no', 'LIKE',
-                                  DB::RAW('CONCAT("%", po.po_no, "%")'))
-                           ->join('tblsuppliers as bidder', 'bidder.id', '=', 'po.awarded_to')
-                           ->join('tblpr_status AS status', 'status.id', '=', 'po.status')
-                           ->where([['iar.pr_id', $list->id],
-                                    ['po.awarded_to', '<>', 0],
-                                    ['po.status', '>', 8]])
-                           ->whereNotNull('po.awarded_to')
-                           ->whereNull('iar.deleted_at')
-                           ->orderBy('po.po_no');
-
-            if (!empty($search)) {
-                $suppliers = $suppliers->where('iar.iar_no', 'LIKE', '%' . $search . '%');
+                $instanceSupplier = Supplier::find($iar->po[$ctrIAR]->awarded_to);
+                $companyName = $instanceSupplier->company_name;
+                $iarDat->company_name = $companyName;
+                $iarDat->inventory_count = $inventoryCount;
             }
-
-            $suppliers = $suppliers->get();
-
-            $countIAR = count($suppliers);
-
-            foreach ($suppliers as $bid) {
-                $inventoryCount = InventoryStock::where('po_no', $bid->po_no)->count();
-                $logshist = $this->checkDocStatus($bid->code);
-                $iarItem[] = (object)['pr_no' => $list->pr_no,
-                                      'po_no' => $bid->po_no,
-                                      'iar_no' => $bid->iar_no,
-                                      'date_iar' => $bid->date_iar,
-                                      'date_issued' => $logshist->date_issued,
-                                      'date_recieved' => $logshist->date_received,
-                                      'awarded_to' => $bid->awarded_to,
-                                      'company_name' => $bid->company_name,
-                                      'status_id' => $bid->sID,
-                                      'inventory_count' => $inventoryCount];
-            }
-
-            $list->iar_item = $iarItem;
-            $list->iar_count = $countIAR;
         }
 
-        return view('pages.iar', ['search' => $search,
-                                  'list' => $prList,
-                                  'pageLimit' => $pageLimit,
-                                  'paperSizes' => $paperSizes]);
+        return view('modules.procurement.iar.index', [
+            'list' => $iarData,
+            'keyword' => $keyword,
+            'paperSizes' => $paperSizes,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedIssue' => $isAllowedIssue,
+            'isAllowedInspect' => $isAllowedInspect,
+            'isAllowedPO' => $isAllowedPO,
+            'isAllowedDV' => $isAllowedDV,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showEdit(Request $request, $id) {
+        $instanceIAR = InspectionAcceptance::with('po')->find($id);
+        $prID = $instanceIAR->pr_id;
+        $poID = $instanceIAR->po_id;
+        $instancePO = PurchaseJobOrder::with('awardee')->find($poID);
+        $instancePR = PurchaseRequest::with('div')->find($prID);
+        $poDate = $instanceIAR->po->date_po;
+        $division = $instancePR->div['division_name'];
+        $poNo = $instanceIAR->po->po_no;
+        $awardee = $instancePO->awardee['company_name'];
+        $poItem = PurchaseJobOrderItem::with('unitissue')->where('po_no', $poNo)->get();
+        $iarNo = $instanceIAR->iar_no;
+        $iarDate = $instanceIAR->date_iar;
+        $invoiceNo = $instanceIAR->invoice_no;
+        $invoiceDate = $instanceIAR->date_invoice;
+        $sigInspection = $instanceIAR->sig_inspection;
+        $sigSupply = $instanceIAR->sig_supply;
+        $inspectionRemarks = $instanceIAR->inspection_remarks;
+        $receivedDate = $instanceIAR->date_received;
+        $acceptanceRemarks = $instanceIAR->acceptance_remarks;
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
+        }
+
+        return view('modules.procurement.iar.update', compact(
+            'poDate', 'division', 'poNo', 'poItem', 'iarNo',
+            'iarDate', 'invoiceNo', 'invoiceDate', 'sigInspection',
+            'sigSupply', 'inspectionRemarks', 'receivedDate',
+            'acceptanceRemarks', 'signatories', 'id', 'awardee'
+        ));
     }
 
     /**
@@ -131,36 +178,136 @@ class InspectionAcceptanceController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $iarNo)
-    {
+
+    public function update(Request $request, $id) {
+        $iarDate = $request->date_iar ? $request->date_iar : NULL;
+        $invoiceNo = $request->invoice_no;
+        $dateInvoice = $request->date_invoice ? $request->date_invoice : NULL;
+        $sigInspection = $request->sig_inspection;
+        $sigSupply = $request->sig_prop_supply;
+
         try {
-            $dateIAR = $request['date_iar'];
-            $invoiceNo = $request['invoice_no'];
-            $dateInvoice = $request['date_invoice'];
-            $sigInspection = $request['sig_inspection'];
-            $sigSupply = $request['sig_supply'];
-            $iar = InspectionAcceptance::where('iar_no', $iarNo)->first();
+            $instanceIAR = InspectionAcceptance::find($id);
+            $iarNo = $instanceIAR->iar_no;
 
-            if (empty($dateInvoice)) {
-                $dateInvoice = NULL;
-            }
+            $instanceIAR->date_iar = $iarDate;
+            $instanceIAR->invoice_no = $invoiceNo;
+            $instanceIAR->date_invoice = $dateInvoice;
+            $instanceIAR->sig_inspection = $sigInspection;
+            $instanceIAR->sig_supply = $sigSupply;
+            $instanceIAR->save();
 
-            $iar->date_iar = $dateIAR;
-            $iar->invoice_no = $invoiceNo;
-            $iar->date_invoice = $dateInvoice;
-            $iar->sig_inspection = $sigInspection;
-            $iar->sig_supply = $sigSupply;
-            $iar->save();
-
-            $msg = "Inspection and Acceptance Report $iarNo successfully updated.";
-            return redirect(url('procurement/iar?search=' . $iarNo))->with('success', $msg);
+            $msg = "Inspection and Acceptance Report '$iarNo' successfully updated.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('iar', ['keyword' => $iarNo])
+                             ->with('success', $msg);
         } catch (Exception $e) {
-            $msg = "There is an error encountered updating the Inspection and
-                    Acceptance Report $iarNo.";
-            return redirect(url()->previous())->with('failed', $msg);
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('iar')
+                             ->with('failed', $msg);
         }
-
     }
+
+    public function showIssue($id) {
+        $users = User::orderBy('firstname')->get();
+
+        return view('modules.procurement.iar.issue', [
+            'id' => $id,
+            'users' => $users
+        ]);
+    }
+
+    public function issue(Request $request, $id) {
+        $issuedTo = $request->issued_to;
+        $remarks = $request->remarks;
+
+        try {
+            $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
+
+            if ($isDocGenerated) {
+                $instanceDocLog = new DocLog;
+                $instanceIAR = InspectionAcceptance::find($id);
+                $iarNo = $instanceIAR->iar_no;
+
+                $instanceDocLog->logDocument($id, Auth::user()->id, $issuedTo, "issued", $remarks);
+                $issuedToName = Auth::user()->getEmployee($issuedTo)->name;
+
+                //$instanceRFQ->notifyIssued($id, $issuedTo, $requestedBy);
+
+                $msg = "Inspection and Acceptance Report '$iarNo' successfully issued to $issuedToName.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('iar', ['keyword' => $id])
+                                ->with('success', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('iar', ['keyword' => $id])
+                             ->with('failed', $msg);
+        }
+    }
+
+    public function showInspect($id) {
+        return view('modules.procurement.iar.inspect', [
+            'id' => $id
+        ]);
+    }
+
+    public function inspect(Request $request, $id) {
+        $remarks = $request->remarks;
+
+        try {
+            $instanceDocLog = new DocLog;
+            $instanceIAR = InspectionAcceptance::with('po')->find($id);
+            $poID = $instanceIAR->po_id;
+            $iarNo = $instanceIAR->iar_no;
+            $inspectedBy = $instanceIAR->sig_inspection;
+
+            $instanceDV = new DisbursementVoucher;
+            $instanceDV->pr_id = $instanceIAR->pr_id;
+            $instanceDV->ors_id = $instanceIAR->ors_id;
+            $instanceDV->particulars = "To payment of...";
+            $instanceDV->sig_accounting = $instanceIAR->po['sig_funds_available'];
+            $instanceDV->sig_agency_head = $instanceIAR->po['sig_approval'];
+            $instanceDV->module_class = 3;
+            $instanceDV->save();
+
+            $instancePO = PurchaseJobOrder::find($poID);
+            $instancePO->status = 10;
+            $instancePO->save();
+
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received", $remarks);
+
+            $msg = "Inspection and Acceptance Report '$iarNo' is successfully set to
+                   'Inspected' and ready for Disbursement Voucher.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('iar', ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('iar', ['keyword' => $id])
+                             ->with('failed', $msg);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Display the specified resource.
@@ -168,6 +315,7 @@ class InspectionAcceptanceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    /*
     public function show($poNo)
     {
         $iar = DB::table('tbliar as iar')
@@ -288,93 +436,5 @@ class InspectionAcceptanceController extends Controller
                     Inspection and Acceptance Report $iarN.";
             return redirect(url()->previous())->with('failed', $msg);
         }
-    }
-
-    private function checkDocGenerated($code) {
-        $logs = DB::table('tbldocument_logs_history')
-                  ->where([
-                        ['code', $code],
-                        ['action', 'document_generated']
-                    ])
-                  ->orderBy('logshist.created_at', 'desc')
-                  ->count();
-
-        return $logs;
-    }
-
-    private function checkDocStatus($code) {
-        $logs = DB::table('tbldocument_logs_history')
-                  ->where('code', $code)
-                  ->orderBy('created_at', 'desc')
-                  ->get();
-        $currentStatus = (object) ["issued_by" => NULL,
-                                   "date_issued" => NULL,
-                                   "received_by" => NULL,
-                                   "date_received" => NULL,
-                                   "issued_back_by" => NULL,
-                                   "date_issued_back" => NULL,
-                                   "received_back_by" => NULL,
-                                   "date_received_back" => NULL];
-
-        if (count($logs) > 0) {
-            foreach ($logs as $log) {
-                if ($log->action != "-") {
-                    switch ($log->action) {
-                        case 'issued':
-                            $currentStatus->issued_by = $log->action;
-                            $currentStatus->date_issued = $log->date;
-                            break;
-
-                        case 'received':
-                            $currentStatus->received_by = $log->action;
-                            $currentStatus->date_received = $log->date;
-                            break;
-
-                        case 'issued_back':
-                            $currentStatus->issued_back_by = $log->action;
-                            $currentStatus->date_issued_back = $log->date;
-                            break;
-
-                        case 'received_back':
-                            $currentStatus->received_back_by = $log->action;
-                            $currentStatus->date_received_back = $log->date;
-                            break;
-
-                        default:
-                            # code...
-                            break;
-                    }
-                } else {
-                    break;
-                }
-            }
-        }
-
-        return $currentStatus;
-    }
-
-    private function generateTrackerCode($modAbbr, $pKey, $modClass) {
-        $modAbbr = strtoupper($modAbbr);
-        $pKey = strtoupper($pKey);
-
-        return $modAbbr . "-" . $pKey . "-" . $modClass . "-" . date('mdY');
-    }
-
-    private function logEmployeeHistory($msg, $emp = "") {
-        $empLog = new EmployeeLog;
-        $empLog->emp_id = empty($emp) ? Auth::user()->emp_id: $emp;
-        $empLog->message = $msg;
-        $empLog->save();
-    }
-
-    private function logTrackerHistory($code, $empFrom, $empTo, $action, $remarks = "") {
-        $docHistory = new DocumentLogHistory;
-        $docHistory->code = $code;
-        $docHistory->date = Carbon::now();
-        $docHistory->emp_from = $empFrom;
-        $docHistory->emp_to = $empTo;
-        $docHistory->action = $action;
-        $docHistory->remarks = $remarks;
-        $docHistory->save();
-    }
+    }*/
 }

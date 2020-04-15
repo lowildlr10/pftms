@@ -537,27 +537,32 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'proc_iar',
         'access' => 'is_allowed'
     ])->name('iar');
-    Route::get('procurement/iar/show-edit/{poNo}', [
+    Route::get('procurement/iar/show-edit/{id}', [
         'uses' => 'InspectionAcceptanceController@showEdit',
         'module' => 'proc_iar',
         'access' => 'update'
     ])->name('iar-show-edit');
-    Route::post('procurement/iar/update/{iarNo}', [
+    Route::post('procurement/iar/update/{id}', [
         'uses' => 'InspectionAcceptanceController@update',
         'module' => 'proc_iar',
         'access' => 'update'
     ])->name('iar-update');
-    Route::get('procurement/iar/show-issue/{iarNo}', [
+    Route::get('procurement/iar/show-issue/{id}', [
         'uses' => 'InspectionAcceptanceController@showIssue',
         'module' => 'proc_iar',
         'access' => 'issue'
     ])->name('iar-show-issue');
-    Route::post('procurement/iar/issue/{iarNo}', [
+    Route::post('procurement/iar/issue/{id}', [
         'uses' => 'InspectionAcceptanceController@issue',
         'module' => 'proc_iar',
         'access' => 'issue'
     ])->name('iar-issue');
-    Route::post('procurement/iar/inspect/{iarNo}', [
+    Route::get('procurement/iar/show-inspect/{id}', [
+        'uses' => 'InspectionAcceptanceController@showInspect',
+        'module' => 'proc_iar',
+        'access' => 'inspect'
+    ])->name('iar-show-inspect');
+    Route::post('procurement/iar/inspect/{id}', [
         'uses' => 'InspectionAcceptanceController@inspect',
         'module' => 'proc_iar',
         'access' => 'inspect'
