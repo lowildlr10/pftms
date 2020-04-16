@@ -37,6 +37,7 @@ use App\Plugins\PDFGenerator\DocAbstractQuotation;
 use App\Plugins\PDFGenerator\DocPurchaseOrder;
 use App\Plugins\PDFGenerator\DocJobOrder;
 use App\Plugins\PDFGenerator\DocObligationRequestStatus;
+use App\Plugins\PDFGenerator\DocInspectionAcceptanceReport;
 
 class PrintController extends Controller
 {
@@ -212,7 +213,7 @@ class PrintController extends Controller
                     $docType = ($data->ors->document_type == 'ors') ?
                                'obligation and request status': 'budget utilization and request status';
                     $orsID =  $data->ors->id;
-                    $msg = "generated the $docType $orsID.";
+                    $msg = "Generated the $docType $orsID.";
                     Auth::user()->log($request, $msg);
                 } else {
                     $this->generateORS($data, $data->ors->document_type, $fontScale,
@@ -229,7 +230,7 @@ class PrintController extends Controller
                     $docType = ($data->ors->document_type == 'ors') ?
                                'obligation and request status': 'budget utilization and request status';
                     $orsID =  $data->ors->id;
-                    $msg = "generated the $docType $orsID.";
+                    $msg = "Ggenerated the $docType $orsID.";
                     Auth::user()->log($request, $msg);
                 } else {
                     $this->generateBURS($data, $data->ors->document_type, $fontScale,
@@ -242,16 +243,19 @@ class PrintController extends Controller
 
                 if ($test == 'true') {
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                    $iarNo =  $data->iar->iar_no;
-                    $msg = "generated the inspection and acceptance report $iarNo.";
+                    $msg = "Generated the Obligation Request and Status '$key' document.";
                     Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateIAR($data, $documentType, $fontScale,
-                                       $pageHeight, $pageWidth, $previewToggle);
+                    $this->generateIAR(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
-
                 break;
-
             case 'proc_dv':
                 $data = $this->getDataDV($key, 'procurement');
                 $data->doc_type = $documentType;
@@ -1242,24 +1246,24 @@ class PrintController extends Controller
                         'footer_data' => $dataFooter];
     }
 
-    private function getDataIAR($iarNo) {
+    private function getDataIAR($id) {
         $tableData = [];
         $iar = DB::table('inspection_acceptance_reports as iar')
-                 ->select('ors.*', 'iar.*', 'div.division', 'bid.company_name', 'po.date_po')
+                 ->select('ors.*', 'iar.*', 'div.division_name', 'bid.company_name', 'po.date_po')
                  ->join('obligation_request_status as ors', 'ors.id', '=', 'iar.ors_id')
                  ->join('purchase_job_orders as po', 'po.po_no', '=', 'ors.po_no')
                  ->join('purchase_requests as pr', 'pr.id', '=', 'iar.pr_id')
-                 ->join('emp_divisions as div', 'div.id', '=', 'pr.pr_division_id')
+                 ->join('emp_divisions as div', 'div.id', '=', 'pr.division')
                  ->join('suppliers as bid', 'bid.id', '=', 'ors.payee')
-                 ->where('iar_no', $iarNo)
+                 ->where('iar.id', $id)
                  ->first();
         $iarItems = DB::table('purchase_job_order_items as item')
-                     ->join('item_unit_issues as unit', 'unit.id', '=', 'item.unit_issue')
-                     ->join('obligation_request_status as ors', 'ors.po_no', '=', 'item.po_no')
-                     ->join('inspection_acceptance_reports as iar', 'iar.ors_id', '=', 'ors.id')
-                     ->where('iar.iar_no', $iarNo)
-                     ->where('item.excluded', 'n')
-                     ->get();
+                      ->join('item_unit_issues as unit', 'unit.id', '=', 'item.unit_issue')
+                      ->join('obligation_request_status as ors', 'ors.po_no', '=', 'item.po_no')
+                      ->join('inspection_acceptance_reports as iar', 'iar.ors_id', '=', 'ors.id')
+                      ->where('iar.iar_no', $iar->iar_no)
+                      ->where('item.excluded', 'n')
+                      ->get();
 
         foreach ($iarItems as $key => $item) {
             if (strpos($item->item_description, "\n") !== FALSE) {
@@ -1302,6 +1306,10 @@ class PrintController extends Controller
                 'data' => [["INSPECTION", "ACCEPTANCE"]]
             ]
         ];
+
+        $instanceSignatory = new Signatory;
+        $iar->sig_inspection = $instanceSignatory->getSignatory($iar->sig_inspection)->name;
+        $iar->sig_supply = $instanceSignatory->getSignatory($iar->sig_supply)->name;
 
         return (object)['iar' => $iar,
                         'table_data' => $data,
@@ -2174,7 +2182,7 @@ class PrintController extends Controller
     private function generateBURS($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new DocObligationRequestStatus('P', 'mm', $pageSize);
+        $pdf = new DocObligationRequestStatus('P', $pageUnit, $pageSize);
         $pdf->setHeaderLR(false, true);
         $pdf->setFontScale($fontScale);
 
@@ -2213,10 +2221,12 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateIAR($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateIAR($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new PDF('P', 'mm', $pageSize);
+        $pdf = new DocInspectionAcceptanceReport('P', $pageUnit, $pageSize);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "FM-FAS-PUR F09";
         $docRev = "Revision 1";
         $docRevDate = "02-28-18";
@@ -2226,27 +2236,19 @@ class PrintController extends Controller
         $docSubject = "Inspection and Acceptance Report";
         $docKeywords = "IAR, iar, inspection, acceptance, report, inspection and acceptance report";
 
-        $contentWidth = $pageWidth  - 20;
-        $sign1 = $this->getSignatory($data->iar->sig_inspection)->name;
-        $sign2 = $this->getSignatory($data->iar->sig_supply)->name;
-
-        $poDate = "";
-        $iarDate = "";
-        $invoiceDate = "";
-
         if (!empty($data->iar->date_po)) {
-            $poDate = new DateTime($data->iar->date_po);
-            $poDate = $poDate->format('F j, Y');
+            $data->iar->date_po = new DateTime($data->iar->date_po);
+            $data->iar->date_po = $data->iar->date_po->format('F j, Y');
         }
 
         if (!empty($data->iar->date_iar)) {
-            $iarDate = new DateTime($data->iar->date_iar);
-            $iarDate = $iarDate->format('F j, Y');
+            $data->iar->date_iar = new DateTime($data->iar->date_iar);
+            $data->iar->date_iar = $data->iar->date_iar->format('F j, Y');
         }
 
         if (!empty($data->iar->date_invoice)) {
-            $invoiceDate = new DateTime($data->iar->date_invoice);
-            $invoiceDate = $invoiceDate->format('F j, Y');
+            $data->iar->date_invoice = new DateTime($data->iar->date_invoice);
+            $data->iar->date_invoice = $data->iar->date_invoice->format('F j, Y');
         }
 
         //Set document information
@@ -2254,7 +2256,7 @@ class PrintController extends Controller
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        include app_path() . "/Classes/DocumentPDF/Documents/doc_inspection_acceptance.php";
+        $pdf->printIAR($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);

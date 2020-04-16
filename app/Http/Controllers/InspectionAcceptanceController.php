@@ -144,7 +144,10 @@ class InspectionAcceptanceController extends Controller
         $division = $instancePR->div['division_name'];
         $poNo = $instanceIAR->po->po_no;
         $awardee = $instancePO->awardee['company_name'];
-        $poItem = PurchaseJobOrderItem::with('unitissue')->where('po_no', $poNo)->get();
+        $poItem = PurchaseJobOrderItem::with('unitissue')
+                                      ->where([
+            ['po_no', $poNo], ['excluded', 'n']
+        ])->get();
         $iarNo = $instanceIAR->iar_no;
         $iarDate = $instanceIAR->date_iar;
         $invoiceNo = $instanceIAR->invoice_no;
