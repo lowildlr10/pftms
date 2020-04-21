@@ -74,4 +74,15 @@ class DisbursementVoucher extends Model
     public static function generateUuid() {
          return Uuid::generate();
     }
+
+    /**
+     * Get the phone record associated with the purchase request
+     */
+    public function pr() {
+        return $this->belongsTo('App\Models\PurchaseRequest', 'pr_id', 'id');
+    }
+
+    public function procors() {
+        return $this->belongsTo('App\Models\ObligationRequestStatus', 'ors_id', 'id');
+    }
 }
