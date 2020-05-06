@@ -27,6 +27,7 @@ class DisbursementVoucher extends Model
         'pr_id',
         'ors_id',
         'dv_no',
+        'payee',
         'date_dv',
         'date_disbursed',
         'fund_cluster',
@@ -53,7 +54,6 @@ class DisbursementVoucher extends Model
         'other_documents',
         'module_class',
         'for_payment',
-        'document_abrv',
         'disbursed_by'
     ];
 
@@ -74,4 +74,24 @@ class DisbursementVoucher extends Model
     public static function generateUuid() {
          return Uuid::generate();
     }
+
+    /**
+     * Get the phone record associated with the purchase request
+     */
+    public function procors() {
+        return $this->belongsTo('App\Models\ObligationRequestStatus', 'ors_id', 'id');
+    }
+
+    public function emppayee() {
+        return $this->hasOne('App\User', 'id', 'awarded_to');
+    }
+
+    public function bidpayee() {
+        return $this->hasOne('App\Models\Supplier', 'id', 'awarded_to');
+    }
+
+    public $sortable = [
+        'dv_no',
+        'particulars',
+    ];
 }
