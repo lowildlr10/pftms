@@ -19,15 +19,15 @@
                 <div class="col-md-3 border border-left-0 border-bottom-0 border-dark">
                     <div class="md-form form-sm">
                         <input type="text" id="fund-cluster" name="fund_cluster"
-                               class="form-control" value="{{ $fundCluster }}">
-                        <label for="fund-cluster" class="{{ !empty($fundCluster) ? 'active': '' }}">
+                               class="form-control" value="{{ !empty($fundCluster) ? $fundCluster: '01' }}">
+                        <label for="fund-cluster" class="active">
                             <strong>Fund Cluster</strong>
                         </label>
                     </div>
                     <div class="md-form form-sm">
                         <input type="date" id="date-dv" name="date_dv"
                                class="form-control" value="{{ $dvDate }}">
-                        <label for="date-dv" class="active">
+                        <label for="date-dv" class="py-3 active">
                             <strong>Date</strong>
                         </label>
                     </div>
@@ -52,28 +52,28 @@
                     <div class="md-form form-sm my-3">
                         <div class="form-check form-check-inline">
                             <input type="checkbox" class="form-check-input" id="mds-check"
-                                   name="mds_check" {{ $paymentMode1 == 1 ? 'checked': '' }}>
+                                   name="mode_payment[]" {{ $paymentMode1 == 1 ? 'checked': '' }}>
                             <label class="form-check-label" for="mds-check">
                                 <strong>MDS Check</strong>
                             </label>
                         </div>
                         <div class="form-check form-check-inline">
                             <input type="checkbox" class="form-check-input" id="commercial-check"
-                                   name="commercial_check" {{ $paymentMode2 == 1 ? 'checked': '' }}>
+                                   name="mode_payment[]" {{ $paymentMode2 == 1 ? 'checked': '' }}>
                             <label class="form-check-label" for="commercial-check">
                                 <strong>Commercial Check</strong>
                             </label>
                         </div>
                         <div class="form-check form-check-inline">
                             <input type="checkbox" class="form-check-input" id="ada"
-                                   name="ada" {{ $paymentMode3 == 1 ? 'checked': '' }}>
+                                   name="mode_payment[]" {{ $paymentMode3 == 1 ? 'checked': '' }}>
                             <label class="form-check-label" for="ada">
                                 <strong>ADA</strong>
                             </label>
                         </div>
                         <div class="form-check form-check-inline">
                             <input type="checkbox" class="form-check-input" id="others-check"
-                                   name="others_check" {{ $paymentMode4 == 1 ? 'checked': '' }}>
+                                   name="mode_payment[]" {{ $paymentMode4 == 1 ? 'checked': '' }}>
                             <label class="form-check-label" for="others-check">
                                 <strong>Others (Please specify)</strong>
                             </label>
@@ -165,9 +165,11 @@
                     <div class="p-2 border-bottom border-dark">
                         <strong>Responsibilty Center</strong>
                     </div>
-                    <div class="md-form px-3">
-                        <input type="text" class="form-control" value="{{ $responsibilityCenter }}"
-                               readonly>
+                    <div class="form-group p-0 m-0">
+                        <textarea class="md-textarea form-control border border-0 rounded-0"
+                                  rows="8" placeholder="Write Responsibilty Center here..."
+                                  name="responsibility_center"
+                        >{{ $responsibilityCenter }}</textarea>
                     </div>
                 </div>
                 <div class="col-md-3 border border-left-0 border-bottom-0 border-dark px-0 text-center">
@@ -176,7 +178,7 @@
                     </div>
                     <div class="form-group p-0 m-0">
                         <textarea class="md-textarea form-control border border-0 rounded-0"
-                                  rows="8" placeholder="Write MFO/PAP here..." readonly
+                                  rows="8" placeholder="Write MFO/PAP here..." name="mfo_pap"
                         >{{ $mfoPAP }}</textarea>
                     </div>
                 </div>
@@ -185,7 +187,8 @@
                         <strong>AMOUNT</strong>
                     </div>
                     <div class="md-form px-3">
-                        <input type="number" class="form-control" value="{{ $amount }}" readonly>
+                        <input type="number" id="amount" name="amount" class="form-control"
+                               value="{{ $amount }}">
                     </div>
                 </div>
             </div>
@@ -198,7 +201,7 @@
                 </div>
                 <div class="col-md-3 border border-left-0 border-bottom-0 border-dark px-0 text-center">
                     <div class="md-form px-3">
-                        <input type="number" value="{{ $amount }}"
+                        <input type="number" id="total-amount" value="{{ $amount }}"
                                class="form-control" readonly>
                     </div>
                 </div>

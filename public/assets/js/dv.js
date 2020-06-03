@@ -70,9 +70,12 @@ $(function() {
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
 
-            $('#amount').change(function() {
+            $('#amount').keyup(function() {
                 const amount = $(this).val();
-                $('#total').val(amount);
+                $('#total-amount').val(amount);
+            }).change(function() {
+                const amount = $(this).val();
+                $('#total-amount').val(amount);
             });
         });
         $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
@@ -98,9 +101,12 @@ $(function() {
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
 
-            $('#amount').change(function() {
+            $('#amount').keyup(function() {
                 const amount = $(this).val();
-                $('#total').val(amount);
+                $('#total-amount').val(amount);
+            }).change(function() {
+                const amount = $(this).val();
+                $('#total-amount').val(amount);
             });
         });
         $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})

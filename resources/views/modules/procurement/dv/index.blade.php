@@ -234,7 +234,7 @@
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showEdit('{{ route('proc-dv-show-edit',
                                                  ['id' => $dv->procdv['id']]) }}');">
-                                    <i class="fas fa-trash-alt orange-text"></i> Edit
+                                    <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
                             </div>
                         </div>

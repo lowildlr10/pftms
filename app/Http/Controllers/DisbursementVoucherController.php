@@ -199,6 +199,7 @@ class DisbursementVoucherController extends Controller
 
         if ($moduleClass == 3) {
             $payees = Supplier::orderBy('company_name')->get();
+            $payee = $dvData->bidpayee['id'];
         } else if ($moduleClass == 2) {
 
         }
@@ -229,6 +230,7 @@ class DisbursementVoucherController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id) {
+        /*
         $moduleType = $request->module_type;
         $getLastID = DisbursementVoucher::orderBy('id', 'desc')->first();
         $pKey = $getLastID->id + 1;
@@ -312,7 +314,7 @@ class DisbursementVoucherController extends Controller
             $msg = "There is an error encountered updating the
                     Disbursement Voucher $pKey.";
             return redirect(url()->previous())->with('failed', $msg);
-        }
+        }*/
     }
 
     public function showIssuedTo(Request $request, $id) {
@@ -569,6 +571,29 @@ class DisbursementVoucherController extends Controller
         } catch (Exception $e) {
             $msg = "There is an error encountered disbursing the $docType $pKey.";
             return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function showLogRemarks($id) {
+        $instanceDocLog = DocLog::where('doc_id', $id)
+                                ->whereNotNull('remarks')
+                                ->orderBy('logged_at', 'desc')
+                                ->get();
+        return view('modules.procurement.ors-burs.remarks', [
+            'id' => $id,
+            'docRemarks' => $instanceDocLog
+        ]);
+    }
+
+    public function logRemarks(Request $request, $id) {
+        $message = $request->message;
+
+        if (!empty($message)) {
+            $instanceORS = ObligationRequestStatus::find($id);
+            $instanceDocLog = new DocLog;
+            $instanceORS->notifyMessage($id, Auth::user()->id, $message);
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "message", $message);
+            return 'Sent!';
         }
     }
 }
