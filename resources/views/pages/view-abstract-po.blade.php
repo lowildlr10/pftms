@@ -59,7 +59,7 @@
             [PR No: {{ $log->pr_no }}]
         </td>
         <td class="table-border-left" align="center">
-            {{ $log->date_abstract_approve }}
+            {{ $log->date_abstract_approved }}
         </td>
 
         <!-- PO/JO Division -->

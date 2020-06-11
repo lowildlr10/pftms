@@ -63,7 +63,7 @@
         <!-- PO/JO Division -->
         <td class="table-border-left table-divider">
             <strong>{{ $log->po_code }}</strong><br>
-            [{{ $log->document_abrv }} No: {{ $log->po_no }}]
+            [{{ $log->document_type }} No: {{ $log->po_no }}]
         </td>
         <td class="table-border-left" align="center">{{ $log->po_created_at }}</td>
         <td class="table-border-left" align="center">{{ strtoupper($log->po_document_status->issued_by) }}</td>

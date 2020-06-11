@@ -63,7 +63,7 @@
         <td class="table-border-left table-divider">
             <strong>{{ $log->abstract_code }}</strong>
         </td>
-        <td class="table-border-left" align="center">{{ $log->date_abstract_approve }}</td>
+        <td class="table-border-left" align="center">{{ $log->date_abstract_approved }}</td>
 
         <!-- Count Division -->
         <td class="table-divider" align="center" data-toggle="tooltip"
