@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\User;
 use Webpatser\Uuid\Uuid;
 use Carbon\Carbon;
+use DB;
 
 class DocumentLog extends Model
 {
@@ -146,5 +147,51 @@ class DocumentLog extends Model
         }
 
         return $currentStatus;
+    }
+
+    public function checkDocHistory($code) {
+        $logs = DB::table('document_logs')
+                  ->where('doc_id', $code)
+                  ->orderBy('created_at', 'desc')
+                  ->get();
+        $history = "";
+
+        if (count($logs) > 0) {
+            foreach ($logs as $log) {
+                switch ($log->action) {
+                    case 'issued':
+                        if (empty($log->remarks)) {
+                            $history .= "<strong class='orange-text'>*</strong>$log->created_at : Document submitted.<br>";
+                        } else {
+                            $history .= "<strong class='orange-text'>*</strong>$log->created_at : Document submitted ($log->remarks).<br>";
+                        }
+
+                        break;
+
+                    case 'received':
+                        $history .= "<strong class='green-text'>*</strong>$log->created_at : Document received.<br>";
+                        break;
+
+                    case 'issued_back':
+                        if (empty($log->remarks)) {
+                            $history .= "<strong class='orange-text'>*</strong>$log->created_at : Document issued back.<br>";
+                        } else {
+                            $history .= "<strong class='orange-text'>*</strong>$log->created_at : Document issued back ($log->remarks).<br>";
+                        }
+                        break;
+
+                    case 'received_back':
+                        $history .= "<strong class='green-text'>*</strong>$log->created_at : Document received back.<br>";
+                        break;
+
+                    default:
+                        # code...
+                        break;
+                }
+
+            }
+        }
+
+        return $history;
     }
 }

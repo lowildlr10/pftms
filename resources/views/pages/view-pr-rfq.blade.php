@@ -62,7 +62,7 @@
         <td class="table-border-left">{{ strtoupper($log->pr_document_status->issued_by) }}</td>
         <td class="table-border-left" align="center">{{ $log->pr_document_status->date_issued }}</td>
         <td class="table-border-left">{{ strtoupper($log->pr_document_status->received_by) }}</td>
-        <td class="table-border-left" align="center">{{ $log->date_pr_approve }}</td>
+        <td class="table-border-left" align="center">{{ $log->date_pr_approved }}</td>
 
         <!-- RFQ Division -->
         <td class="table-divider">
