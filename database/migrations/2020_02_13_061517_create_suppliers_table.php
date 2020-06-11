@@ -31,6 +31,7 @@ class CreateSuppliersTable extends Migration
             $table->string('fax_no', 191)->nullable();
             $table->string('mobile_no', 191)->nullable();
             $table->date('date_established')->nullable();
+            $table->string('tin_no', 200)->nullable();
             $table->string('vat_no', 200)->nullable();
             $table->string('contact_person', 150)->nullable();
             $table->enum('nature_business', ['', 'manufacturer', 'trading_firms',
