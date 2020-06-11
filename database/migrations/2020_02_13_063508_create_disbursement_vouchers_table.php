@@ -19,9 +19,12 @@ class CreateDisbursementVouchersTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('pr_id')->nullable();
             $table->foreign('pr_id')->references('id')->on('purchase_requests');
-            $table->uuid('ors_id');
+            $table->uuid('ors_id')->nullable();
             $table->foreign('ors_id')->references('id')->on('obligation_request_status');
             $table->string('dv_no')->nullable();
+            $table->enum('transaction_type', ['cash_advance', 'reimbursement', 'others'])->default('others');
+            $table->uuid('payee');
+            $table->text('address')->nullable();
             $table->date('date_dv')->nullable();
             $table->dateTime('date_disbursed')->nullable();
             $table->string('fund_cluster', 50)->nullable();

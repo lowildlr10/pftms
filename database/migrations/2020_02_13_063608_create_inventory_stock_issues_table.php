@@ -30,6 +30,7 @@ class CreateInventoryStockIssuesTable extends Migration
             $table->text('issued_remarks')->nullable();
             $table->uuid('approved_by')->nullable();
             $table->foreign('approved_by')->references('id')->on('signatories');
+            $table->enum('excluded', ['y', 'n'])->default('n');
             $table->timestamps();
         });
     }

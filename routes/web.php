@@ -570,7 +570,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
 
     // Disbursement Voucher Module
     Route::any('procurement/dv', [
-        'uses' => 'DisbursementVoucherController@index',
+        'uses' => 'DisbursementVoucherController@indexProc',
         'module' => 'proc_dv',
         'access' => 'is_allowed'
     ])->name('proc-dv');
@@ -594,16 +594,56 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'proc_dv',
         'access' => 'issue'
     ])->name('proc-dv-issue');
+    Route::get('procurement/dv/show-receive/{id}', [
+        'uses' => 'DisbursementVoucherController@showReceive',
+        'module' => 'proc_dv',
+        'access' => 'receive'
+    ])->name('proc-dv-show-receive');
     Route::post('procurement/dv/receive/{id}', [
         'uses' => 'DisbursementVoucherController@receive',
         'module' => 'proc_dv',
         'access' => 'receive'
     ])->name('proc-dv-receive');
+    Route::get('procurement/dv/show-issue-back/{id}', [
+        'uses' => 'DisbursementVoucherController@showIssueback',
+        'module' => 'proc_dv',
+        'access' => 'issue_back'
+    ])->name('proc-dv-show-issue-back');
+    Route::post('procurement/dv/issue-back/{id}', [
+        'uses' => 'DisbursementVoucherController@issueBack',
+        'module' => 'proc_dv',
+        'access' => 'issue_back'
+    ])->name('proc-dv-issue-back');
+    Route::get('procurement/dv/show-receive-back/{id}', [
+        'uses' => 'DisbursementVoucherController@showReceiveBack',
+        'module' => 'proc_dv',
+        'access' => 'receive_back'
+    ])->name('proc-dv-show-receive-back');
+    Route::post('procurement/dv/receive-back/{id}', [
+        'uses' => 'DisbursementVoucherController@receiveBack',
+        'module' => 'proc_dv',
+        'access' => 'receive_back'
+    ])->name('proc-dv-receive-back');
+    Route::get('procurement/dv/show-payment/{id}', [
+        'uses' => 'DisbursementVoucherController@showPayment',
+        'module' => 'proc_dv',
+        'access' => 'payment'
+    ])->name('proc-dv-show-payment');
     Route::post('procurement/dv/payment/{id}', [
         'uses' => 'DisbursementVoucherController@payment',
         'module' => 'proc_dv',
-        'access' => 'disburse'
+        'access' => 'payment'
     ])->name('proc-dv-payment');
+    Route::get('procurement/dv/show-remarks/{id}', [
+        'uses' => 'DisbursementVoucherController@showLogRemarks',
+        'module' => 'proc_dv',
+        'access' => 'is_allowed'
+    ])->name('proc-dv-show-remarks');
+    Route::post('procurement/dv/create-remarks/{id}', [
+        'uses' => 'DisbursementVoucherController@logRemarks',
+        'module' => 'proc_dv',
+        'access' => 'is_allowed'
+    ])->name('proc-dv-store-remarks');
 
     /*===================== PAYMENT ROUTES =====================*/
 
