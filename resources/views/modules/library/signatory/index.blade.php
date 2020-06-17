@@ -69,8 +69,11 @@
                                 <thead class="mdb-color darken-3 white-text">
                                     <tr>
                                         <th class="th-md" width="3%"></th>
-                                        <th class="th-md" width="91%">
+                                        <th class="th-md" width="81%">
                                             <strong>Signatory Name</strong>
+                                        </th>
+                                        <th class="th-md" width="10%">
+                                            <strong>Active?</strong>
                                         </th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
@@ -85,6 +88,7 @@
                                     <tr>
                                         <td></td>
                                         <td>{{ $sig->name }}</td>
+                                        <td class="text-bold">{{ strtoupper($sig->is_active) }}</td>
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-orange p-2 waves-effect material-tooltip-main mr-0"
                                                onclick="$(this).showEdit('{{ route('signatory-show-edit',

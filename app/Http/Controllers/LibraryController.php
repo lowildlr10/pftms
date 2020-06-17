@@ -410,6 +410,7 @@ class LibraryController extends Controller
 
     public function updateSignatory(Request $request, $id) {
         $empID = $request->emp_id;
+        $isActive = $request->is_active;
         $module = $request->module;
         $module = str_replace("\n", '', $module);
         $module = trim($module);
@@ -421,6 +422,7 @@ class LibraryController extends Controller
         try {
             $instanceSignatory = Signatory::find($id);
             $instanceSignatory->emp_id = $empID;
+            $instanceSignatory->is_active = $isActive;
             $instanceSignatory->module = $module;
             $instanceSignatory->save();
 
