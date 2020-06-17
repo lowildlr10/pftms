@@ -228,7 +228,7 @@
 
                     @if (count($users) > 0)
                         @foreach ($users as $emp)
-                    <option value="{{ $emp->id }}">
+                    <option value="{{ $emp->id }}" {{ $emp->id == Auth::user()->id ? 'selected' : '' }}>
                         {!! $emp->firstname !!} {!! $emp->lastname !!} [{!! $emp->position !!}]
                     </option>
                         @endforeach
