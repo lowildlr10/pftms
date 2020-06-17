@@ -624,23 +624,23 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'proc_dv',
         'access' => 'receive_back'
     ])->name('proc-dv-receive-back');
-    Route::get('procurement/dv/show-payment/{id}', [
-        'uses' => 'DisbursementVoucherController@showPayment',
+    Route::get('procurement/dv/show-disburse/{id}', [
+        'uses' => 'DisbursementVoucherController@showDisburse',
         'module' => 'proc_dv',
-        'access' => 'payment'
-    ])->name('proc-dv-show-payment');
-    Route::post('procurement/dv/payment/{id}', [
-        'uses' => 'DisbursementVoucherController@payment',
+        'access' => 'disburse'
+    ])->name('proc-dv-show-disburse');
+    Route::post('procurement/dv/disburse/{id}', [
+        'uses' => 'DisbursementVoucherController@disburse',
         'module' => 'proc_dv',
-        'access' => 'payment'
-    ])->name('proc-dv-payment');
+        'access' => 'disburse'
+    ])->name('proc-dv-disburse');
     Route::get('procurement/dv/show-remarks/{id}', [
-        'uses' => 'DisbursementVoucherController@showLogRemarks',
+        'uses' => 'ObligationRequestStatusController@showLogRemarks',
         'module' => 'proc_dv',
         'access' => 'is_allowed'
     ])->name('proc-dv-show-remarks');
     Route::post('procurement/dv/create-remarks/{id}', [
-        'uses' => 'DisbursementVoucherController@logRemarks',
+        'uses' => 'ObligationRequestStatusController@logRemarks',
         'module' => 'proc_dv',
         'access' => 'is_allowed'
     ])->name('proc-dv-store-remarks');
