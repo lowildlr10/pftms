@@ -74,6 +74,8 @@ class PurchaseRequestController extends Controller
 
         if ($roleHasOrdinary) {
             $prData = $prData->where('requested_by', Auth::user()->id);
+        } else {
+            $prData = $prData->orWhere('requested_by', Auth::user()->id);
         }
 
         if (!empty($keyword)) {
