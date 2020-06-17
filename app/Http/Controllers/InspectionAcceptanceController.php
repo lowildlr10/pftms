@@ -224,12 +224,13 @@ class InspectionAcceptanceController extends Controller
     public function issue(Request $request, $id) {
         $issuedTo = $request->issued_to;
         $remarks = $request->remarks;
+        $instanceDocLog = new DocLog;
 
         try {
             $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
 
             if ($isDocGenerated) {
-                $instanceDocLog = new DocLog;
+
                 $instanceIAR = InspectionAcceptance::find($id);
                 $iarNo = $instanceIAR->iar_no;
 
@@ -243,6 +244,7 @@ class InspectionAcceptanceController extends Controller
                 return redirect()->route('iar', ['keyword' => $id])
                                 ->with('success', $msg);
             }
+
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
@@ -259,9 +261,9 @@ class InspectionAcceptanceController extends Controller
 
     public function inspect(Request $request, $id) {
         $remarks = $request->remarks;
+        $instanceDocLog = new DocLog;
 
         try {
-            $instanceDocLog = new DocLog;
             $instanceIAR = InspectionAcceptance::with('po')->find($id);
             $poID = $instanceIAR->po_id;
             $iarNo = $instanceIAR->iar_no;
@@ -271,6 +273,7 @@ class InspectionAcceptanceController extends Controller
             $instanceDV->pr_id = $instanceIAR->pr_id;
             $instanceDV->ors_id = $instanceIAR->ors_id;
             $instanceDV->particulars = "To payment of...";
+            $instanceDV->payee = $instanceIAR->po->awarded_to;
             $instanceDV->sig_accounting = $instanceIAR->po['sig_funds_available'];
             $instanceDV->sig_agency_head = $instanceIAR->po['sig_approval'];
             $instanceDV->module_class = 3;
