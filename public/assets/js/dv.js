@@ -1,127 +1,242 @@
 $(function() {
-    $.fn.showCreate = function(type) {
-        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+    const template = '<div class="tooltip md-tooltip">' +
+                     '<div class="tooltip-arrow md-arrow"></div>' +
+                     '<div class="tooltip-inner md-inner stylish-color"></div></div>';
 
-        if (type == 'cashadvance') {
-            var createURL = baseURL + '/cadv-reim-liquidation/ors-burs/' +
-                            'create?module_type=' + type;
-        } else {
-            var createURL = baseURL + '/procurement/ors-burs/' +
-                            'create?module_type=' + type;
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
+    });
 
-        $('#modal-body-create').load(createURL, function() {
+    $.fn.showRemarks = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-show').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
-            $('.mdb-select').materialSelect();
+            $(this).slideToggle(500);
         });
-		$("#central-create-modal").modal().on('shown.bs.modal', function() {
-
+        $("#modal-show").modal({keyboard: false, backdrop: 'static'})
+						.on('shown.bs.modal', function() {
+            $('#show-title').html('View Remarks');
 		}).on('hidden.bs.modal', function() {
-			$('#modal-body-create').html(modalLoadingContent);
+		    $('#modal-body-show').html('').css('display', 'none');
 		});
     }
 
-    $.fn.showEdit = function(key, type) {
+    function sendRemarks(url, refreshURL, formData) {
+        $.ajax({
+		    url: url,
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            data: formData,
+		    success: function(response) {
+                $('#modal-body-show').load(refreshURL, function() {
+                    $('#mdb-preloader').fadeOut(300);
+                });
+            },
+            fail: function(xhr, textStatus, errorThrown) {
+                sendRemarks(url, refreshURL, formData);
+		    },
+		    error: function(data) {
+                sendRemarks(url, refreshURL, formData);
+		    }
+        });
+    }
+
+    $.fn.refreshRemarks = function(refreshURL) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
-
-        if (type == 'cashadvance') {
-            var editURL = baseURL + '/cadv-reim-liquidation/dv/' +
-                          'edit/' + key + '/?module_type=' + type;
-        } else {
-            var editURL = baseURL + '/procurement/dv/' +
-                          'edit/' + key + '/?module_type=' + type;
-        }
-
-        $('#modal-body-edit').load(editURL, function() {
+        $('#modal-body-show').load(refreshURL, function() {
             $('#mdb-preloader').fadeOut(300);
-            $('.mdb-select').materialSelect();
+        });
+    }
 
-            $('#others-check').unbind('change').change(function() {
-                if (this.checked) {
-                    $('#other-payment').fadeIn()
-                                       .addClass('required');
-                } else {
-                    $('#other-payment').fadeOut()
-                                       .removeClass('required')
-                                       .val('');
-                }
+    $.fn.storeRemarks = function(url, refreshURL) {
+        let formData = new FormData();
+        const message = $('#message').val(),
+              withError = inputValidation(false);
+
+		if (!withError) {
+            $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+            formData.append('message', message);
+			sendRemarks(url, refreshURL, formData);
+        }
+    }
+
+    $.fn.showCreate = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-create').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $(this).slideToggle(500);
+
+            $('#amount').keyup(function() {
+                const amount = $(this).val();
+                $('#total-amount').val(amount);
+            }).change(function() {
+                const amount = $(this).val();
+                $('#total-amount').val(amount);
             });
         });
-		$("#central-edit-modal").modal().on('shown.bs.modal', function() {
-
+        $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
+						     .on('shown.bs.modal', function() {
+            $('#create-title').html('Create Dibursement Voucher');
 		}).on('hidden.bs.modal', function() {
-		    $('#modal-body-edit').html(modalLoadingContent);
+		    $('#modal-body-create').html('').css('display', 'none');
 		});
     }
 
-    $.fn.createUpdateDoc = function() {
-		var withError = inputValidation(false);
+    $.fn.store = function() {
+        const withError = inputValidation(false);
+
+		if (!withError) {
+			$('#form-store').submit();
+        }
+    }
+
+    $.fn.showEdit = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-edit').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $(this).slideToggle(500);
+
+            $('#amount').keyup(function() {
+                const amount = $(this).val();
+                $('#total-amount').val(amount);
+            }).change(function() {
+                const amount = $(this).val();
+                $('#total-amount').val(amount);
+            });
+        });
+        $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
+						   .on('shown.bs.modal', function() {
+            $('#edit-title').html('Update Dibursement Voucher');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-edit').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.update = function() {
+        const withError = inputValidation(false);
 
 		if (!withError) {
 			$('#form-update').submit();
 		}
-	}
-
-	$.fn.viewIssue = function(id) {
-		$('#modal-body-sm').load('dv/show-issue/' + id + '?back=0');
-		$("#smcard-central-modal").modal()
-						.on('shown.bs.modal', function() {
-
-				   		}).on('hidden.bs.modal', function() {
-					        $('#modal-body-sm').html(modalLoadingContent);
-					    });
-	}
-
-	$.fn.viewIssueBack = function(id) {
-		$('#modal-body-sm').load('dv/show-issue/' + id + '?back=1');
-		$("#smcard-central-modal").modal()
-						.on('shown.bs.modal', function() {
-
-				   		}).on('hidden.bs.modal', function() {
-					        $('#modal-body-sm').html(modalLoadingContent);
-					    });
-	}
-
-	$.fn.issue = function(id) {
-		var withError = inputValidation(false);
-
-		if (!withError) {
-			$('#form-dv-issue').attr('action', 'dv/issue/' + id + '?back=0')
-							   .submit();
-		}
-	}
-
-	$.fn.issueBack = function(id) {
-		var withError = inputValidation(false);
-
-		if (!withError) {
-			$('#form-dv-issue').attr('action', 'dv/issue/' + id + '?back=1')
-							   .submit();
-		}
-	}
-
-	$.fn.receive = function(id) {
-		if (confirm("Receive this document?")) {
-			$('#form-validation').attr('action', 'dv/receive/' + id + '?back=0').submit();
-		}
-	}
-
-	$.fn.receiveBack = function(id) {
-		if (confirm('Receive back this ORS/BURS document?')) {
-			$('#form-validation').attr('action', 'dv/receive/' + id + '?back=1').submit();
-		}
     }
 
-    $.fn.createLiquidation = function(id) {
-		if (confirm('Create the Liquidation Report?')) {
-            var url = baseURL + '/cadv-reim-liquidation/ors-burs/create-liquidation/' + id;
-			$('#form-validation').attr('action', url).submit();
-		}
-	}
-
-	$.fn.payment = function(id) {
-		if (confirm("Disburse this voucher document?")) {
-			$('#form-validation').attr('action', 'dv/payment/' + id).submit();
-		}
+    $.fn.showDelete = function(url, name) {
+		$('#modal-body-delete').html(`Are you sure you want to delete this ${name} `+
+                                     `document?`);
+        $("#modal-delete").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#delete-title').html('Delete Dibursement Voucher');
+            $('#form-delete').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-delete-body').html('');
+             $('#form-delete').attr('action', '#');
+		});
     }
+
+    $.fn.delete = function() {
+        $('#form-delete').submit();
+    }
+
+	$.fn.showIssue = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-issue').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $(this).slideToggle(500);
+        });
+        $("#modal-issue").modal({keyboard: false, backdrop: 'static'})
+						 .on('shown.bs.modal', function() {
+            $('#issue-title').html('Issue Dibursement Voucher');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-issue').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.issue = function() {
+        $('#form-issue').submit();
+    }
+
+    $.fn.showReceive = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-receive').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $(this).slideToggle(500);
+        });
+        $("#modal-receive").modal({keyboard: false, backdrop: 'static'})
+						   .on('shown.bs.modal', function() {
+            $('#receive-title').html('Receive Dibursement Voucher');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-receive').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.receive = function() {
+        $('#form-receive').submit();
+    }
+
+    $.fn.showIssueBack = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-issue-back').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $(this).slideToggle(500);
+        });
+        $("#modal-issue-back").modal({keyboard: false, backdrop: 'static'})
+						      .on('shown.bs.modal', function() {
+            $('#issue-back-title').html('Issue Back Dibursement Voucher');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-issue-back').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.issueBack = function() {
+        $('#form-issue-back').submit();
+    }
+
+    $.fn.showReceiveBack = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-receive-back').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $(this).slideToggle(500);
+        });
+        $("#modal-receive-back").modal({keyboard: false, backdrop: 'static'})
+						        .on('shown.bs.modal', function() {
+            $('#receive-back-title').html('Receive Back Dibursement Voucher');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-receive-back').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.receiveBack = function() {
+        $('#form-receive-back').submit();
+    }
+
+    $.fn.showDisburse = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-obligate').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $(this).slideToggle(500);
+        });
+        $("#modal-obligate").modal({keyboard: false, backdrop: 'static'})
+						        .on('shown.bs.modal', function() {
+            $('#obligate-title').html('Obligate Dibursement Voucher');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-obligate').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.disburse = function() {
+        const withError = inputValidation(false);
+
+        if (!withError) {
+            $('#form-obligate').submit();
+        }
+    }
+
+    $('.material-tooltip-main').tooltip({
+        template: template
+    });
 });

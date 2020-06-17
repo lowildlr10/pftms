@@ -3,19 +3,26 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\PurchaseRequest;
+use App\Models\PurchaseRequestItem;
+use App\Models\AbstractQuotation;
+use App\Models\AbstractQuotationItem;
+use App\Models\PurchaseJobOrder;
+use App\Models\PurchaseJobOrderItem;
+use App\Models\ObligationRequestStatus;
+use App\Models\InspectionAcceptance;
+use App\Models\DisbursementVoucher;
+use App\Models\InventoryStock;
+
 use App\User;
-use App\DisbursementVoucher;
-use App\PurchaseRequest;
-use App\Supplier;
-use App\EmployeeLog;
-use App\DocumentLogHistory;
-use App\PaperSize;
+use App\Models\DocumentLog as DocLog;
+use App\Models\PaperSize;
+use App\Models\Supplier;
+use App\Models\Signatory;
+use App\Models\ItemUnitIssue;
 use Carbon\Carbon;
-use DB;
 use Auth;
-use App\PurchaseOrder;
-use App\LiquidationReport;
-use App\OrsBurs;
+use DB;
 
 class DisbursementVoucherController extends Controller
 {
@@ -34,131 +41,114 @@ class DisbursementVoucherController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
-    {
-        $pageLimit = 25;
-        $search = trim($request['search']);
-        $paperSizes = PaperSize::all();
-        $dvList = DB::table('tbldv as dv')
-                    ->select('dv.*', 'proj.project', 'status.id AS sID', 'ors.po_no', 'pr.pr_no',
-                             DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'),
-                             'po.status as status_id', 'ors.id as ors_id', 'bid.company_name')
-                    ->join('tblors_burs as ors', 'ors.id', '=', 'dv.ors_id')
-                    ->join('tblpo_jo as po', 'po.po_no', '=', 'ors.po_no')
-                    ->join('tblpr as pr', 'pr.id', '=', 'dv.pr_id')
-                    ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'pr.requested_by')
-                    ->join('tblsuppliers as bid', 'bid.id', '=', 'ors.payee')
-                    ->leftJoin('tblprojects AS proj', 'proj.id', '=', 'pr.project_id')
-                    ->join('tblpr_status AS status', 'status.id', '=', 'po.status')
-                    ->where('dv.module_class_id', 3)
-                    ->where('po.status', '<>', 3)
-                    ->whereNull('dv.deleted_at');
+    public function indexProc(Request $request) {
+        $data = $this->getIndexData($request, 'procurement');
 
-        if (!empty($search)) {
-            $dvList = $dvList->where(function ($query) use ($search) {
-                                   $query->where('pr.pr_no', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('pr.date_pr', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('pr.purpose', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.firstname', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.middlename', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.lastname', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('ors.po_no', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('dv.code', 'LIKE', '%' . $search . '%');
-                               });
-        }
+        // Get module access
+        $module = 'proc_dv';
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedIssue = Auth::user()->getModuleAccess($module, 'issue');
+        $isAllowedIssueBack = Auth::user()->getModuleAccess($module, 'issue_back');
+        $isAllowedReceive = Auth::user()->getModuleAccess($module, 'receive');
+        $isAllowedReceiveBack = Auth::user()->getModuleAccess($module, 'receive_back');
+        $isAllowedDisburse = Auth::user()->getModuleAccess($module, 'disburse');
+        $isAllowedIAR = Auth::user()->getModuleAccess('proc_iar', 'is_allowed');
 
-        if (Auth::user()->role == 4 || Auth::user()->role == 6) {
-            $dvList = $dvList->where('requested_by', Auth::user()->emp_id);
-        }
-
-        if (Auth::user()->role == 5) {
-            $dvList = $dvList->where('emp.division_id', Auth::user()->division_id);
-        }
-
-        $dvList = $dvList->orderBy('pr.id', 'desc')
-                         ->paginate($pageLimit);
-
-        foreach ($dvList as $list) {
-            $list->document_status = $this->checkDocStatus($list->code);
-            $list->display_menu = true;
-        }
-
-        return view('pages.dv', ['search' => $search,
-                                 'list' => $dvList,
-                                 'pageLimit' => $pageLimit,
-                                 'paperSizes' => $paperSizes,
-                                 'type' => 'procurement']);
+        return view('modules.procurement.dv.index', [
+            'list' => $data->dv_data,
+            'keyword' => $data->keyword,
+            'paperSizes' => $data->paper_sizes,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedDisburse' => $isAllowedDisburse,
+            'isAllowedIssue' => $isAllowedIssue,
+            'isAllowedIssueBack'=> $isAllowedIssueBack,
+            'isAllowedReceive' => $isAllowedReceive,
+            'isAllowedReceiveBack'=> $isAllowedReceiveBack,
+            'isAllowedIAR' => $isAllowedIAR,
+        ]);
     }
 
-    public function indexCashAdvLiquidation(Request $request)
-    {
-        $isOrdinaryUser = true;
-        $pageLimit = 50;
-        $search = trim($request['search']);
-        $paperSizes = PaperSize::all();
-        $dvList = DB::table('tbldv as dv')
-                    ->select('dv.*', DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'),
-                             'ors.id as ors_id', 'ors.payee', 'ors.transaction_type')
-                    ->join('tblors_burs as ors', 'ors.id', '=', 'dv.ors_id')
-                    ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'ors.payee')
-                    ->where('dv.module_class_id', 2)
-                    ->whereNull('dv.deleted_at');
+    public function indexCA(Request $request) {
+        $data = $this->getIndexData($request, 'procurement');
 
-        if (!empty($search)) {
-            if ($request->isMethod('post')) {
-                $dvList = $dvList->where(function ($query)  use ($search) {
-                                       $query->where('dv.date_dv', 'LIKE', '%' . $search . '%')
-                                             ->orWhere('dv.particulars', 'LIKE', '%' . $search . '%')
-                                             ->orWhere('emp.firstname', 'LIKE', '%' . $search . '%')
-                                             ->orWhere('emp.middlename', 'LIKE', '%' . $search . '%')
-                                             ->orWhere('emp.lastname', 'LIKE', '%' . $search . '%')
-                                             ->orWhere('dv.dv_no', 'LIKE', '%' . $search . '%')
-                                             ->orWhere('dv.id', 'LIKE', '%' . $search . '%')
-                                             ->orWhere('dv.ors_id', 'LIKE', '%' . $search . '%');
-                                   });
-            } else {
-                $dvList = $dvList->where(function ($query)  use ($search) {
-                                       $query->where('dv.id', 'LIKE', '%' . $search . '%');
-                                   });
-            }
+        // Get module access
+        $module = 'proc_dv';
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedIssue = Auth::user()->getModuleAccess($module, 'issue');
+        $isAllowedIssueBack = Auth::user()->getModuleAccess($module, 'issue_back');
+        $isAllowedReceive = Auth::user()->getModuleAccess($module, 'receive');
+        $isAllowedReceiveBack = Auth::user()->getModuleAccess($module, 'receive_back');
+        $isAllowedDisburse = Auth::user()->getModuleAccess($module, 'disburse');
+        $isAllowedIAR = Auth::user()->getModuleAccess('proc_iar', 'is_allowed');
+
+        return view('modules.procurement.dv.index', [
+            'list' => $data->dv_data,
+            'keyword' => $data->keyword,
+            'paperSizes' => $data->paper_sizes,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedDisburse' => $isAllowedDisburse,
+            'isAllowedIssue' => $isAllowedIssue,
+            'isAllowedIssueBack'=> $isAllowedIssueBack,
+            'isAllowedReceive' => $isAllowedReceive,
+            'isAllowedReceiveBack'=> $isAllowedReceiveBack,
+            'isAllowedIAR' => $isAllowedIAR,
+        ]);
+    }
+
+    private function getIndexData($request, $type) {
+        $keyword = trim($request->keyword);
+        $instanceDocLog = new DocLog;
+
+        // User groups
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
+                             [Auth::user()->division];
+
+        // Main data
+        $paperSizes = PaperSize::orderBy('paper_type')->get();
+        $dvData = ObligationRequestStatus::with(['bidpayee', 'procdv'])->whereHas('pr', function($query)
+                                             use($empDivisionAccess) {
+            $query->whereIn('division', $empDivisionAccess);
+        })->whereHas('procdv', function($query) {
+            $query->whereNull('deleted_at');
+        });
+
+        if (!empty($keyword)) {
+            $dvData = $dvData->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('po_no', 'like', "%$keyword%")
+                    ->orWhere('amount', 'like', "%$keyword%")
+                    ->orWhere('document_type', 'like', "%$keyword%")
+                    ->orWhereHas('bidpayee', function($query) use ($keyword) {
+                        $query->where('company_name', 'like', "%$keyword%")
+                              ->orWhere('address', 'like', "%$keyword%");
+                    })->orWhereHas('procdv', function($query) use ($keyword) {
+                        $query->where('id', 'like', "%$keyword%")
+                              ->orWhere('particulars', 'like', "%$keyword%")
+                              //->orWhere('transaction_type', 'like', "%$keyword%")
+                              ->orWhere('dv_no', 'like', "%$keyword%")
+                              ->orWhere('date_dv', 'like', "%$keyword%")
+                              ->orWhere('date_disbursed', 'like', "%$keyword%")
+                              ->orWhere('responsibility_center', 'like', "%$keyword%")
+                              ->orWhere('mfo_pap', 'like', "%$keyword%")
+                              ->orWhere('amount', 'like', "%$keyword%")
+                              ->orWhere('address', 'like', "%$keyword%")
+                              ->orWhere('fund_cluster', 'like', "%$keyword%");
+                    });
+            });
         }
 
-        if (Auth::user()->role != 1 && Auth::user()->role != 3) {
-            $dvList = $dvList->where('ors.payee', Auth::user()->emp_id);
-            $isOrdinaryUser = true;
-        } else {
-            $isOrdinaryUser = false;
+        $dvData = $dvData->sortable(['po_no' => 'desc'])->paginate(15);
+
+        foreach ($dvData as $dvDat) {
+            $dvDat->doc_status = $instanceDocLog->checkDocStatus($dvDat->dv['id']);
         }
 
-        $dvList = $dvList->orderBy('dv.id', 'desc')
-                         ->paginate($pageLimit);
-
-        foreach ($dvList as $list) {
-            $list->document_status = $this->checkDocStatus($list->code);
-            $list->liquidation_count = LiquidationReport::where('dv_id', $list->id)
-                                                        ->count();
-
-            if (!$isOrdinaryUser) {
-                if (!empty($list->document_status->date_issued) &&
-                    $list->payee != Auth::user()->emp_id) {
-                    $list->display_menu = true;
-                } else {
-                    $list->display_menu = false;
-                }
-
-                if ($list->payee == Auth::user()->emp_id) {
-                    $list->display_menu = true;
-                }
-            } else {
-                $list->display_menu = true;
-            }
-        }
-
-        return view('pages.dv', ['search' => $search,
-                                 'list' => $dvList,
-                                 'pageLimit' => $pageLimit,
-                                 'paperSizes' => $paperSizes,
-                                 'type' => 'cashadvance']);
+        return (object) [
+            'keyword' => $keyword,
+            'dv_data' => $dvData,
+            'paper_sizes' => $paperSizes
+        ];
     }
 
     /**
@@ -167,74 +157,69 @@ class DisbursementVoucherController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function showEdit(Request $request, $key) {
-        $moduleType = $request->module_type;
+    public function showEdit($id) {
+        $dvData = DisbursementVoucher::with(['bidpayee', 'procors'])->find($id);
+        $moduleClass = $dvData->module_class;
+        $dvDate = $dvData->date_dv;
+        $dvNo = $dvData->dv_no;
+        $fundCluster = $dvData->fund_cluster;
+        $paymentModes = explode('-', $dvData->payment_mode);
+        $paymentMode1 = $paymentModes[0];
+        $paymentMode2 = $paymentModes[1];
+        $paymentMode3 = $paymentModes[2];
+        $paymentMode4 = $paymentModes[3];
+        $otherPayment = $dvData->other_payment;
+        $responsibilityCenter = $dvData->responsibility_center;
+        $particulars = $dvData->particulars;
+        $mfoPAP = $dvData->mfo_pap;
+        $amount = $dvData->amount;
+        $sigCertified = $dvData->sig_certified;
+        $sigAccounting = $dvData->sig_accounting;
+        $sigAgencyHead = $dvData->sig_agency_head;
+        $dateAccounting = $dvData->date_accounting;
+        $dateAgencyHead = $dvData->date_agency_head;
+        $checkAdaNo = $dvData->check_ada_no;
+        $dateCheckAda = $dvData->date_check_ada;
+        $bankName = $dvData->bank_name;
+        $bankAccountNo = $dvData->bank_account_no;
+        $jevNo = $dvData->jev_no;
+        $receiptPrintedName = $dvData->receipt_printed_name;
+        $dateJev = $dvData->date_jev;
+        $signature = $dvData->signature;
+        $orNo = $dvData->or_no;
+        $otherDocuments = $dvData->other_documents;
+        $tinNo = $dvData->bidpayee['tin_no'];
+        $serialNo = $dvData->procors['serial_no'];
+        $address = !empty($dvData->address) ? $dvData->address : $dvData->procors['address'];
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
 
-        $signatories = DB::table('tblsignatories AS sig')
-                         ->select('sig.id', 'sig.position', 'sig.dv_sign_type', 'sig.active',
-                                   DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                         ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'sig.emp_id')
-                         ->where([['sig.dv', 'y'],
-                                  ['sig.active', 'y']])
-                         ->orderBy('emp.firstname')
-                         ->get();
+        if ($moduleClass == 3) {
+            $payees = Supplier::orderBy('company_name')->get();
+            $payee = $dvData->bidpayee['id'];
+        } else if ($moduleClass == 2) {
 
-        switch ($moduleType) {
-            case 'cashadvance':
-                $dv = DB::table('tbldv as dv')
-                        ->select('dv.id as dv_id', 'dv.*', 'ors.payee', 'ors.address', 'ors.serial_no',
-                                 'ors.amount', 'ors.sig_certified_1', 'ors.responsibility_center',
-                                 'ors.mfo_pap')
-                        ->join('tblors_burs as ors', 'ors.id', '=', 'dv.ors_id')
-                        ->where([['dv.id', $key],
-                                 ['dv.module_class_id', 2]])
-                        ->first();
-
-                if (Auth::user()->role == 1 || Auth::user()->role == 3 || Auth::user()->role == 4) {
-                    $payees = DB::table('tblemp_accounts')
-                                ->select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
-                                        'position', 'emp_id')
-                                ->where('active', 'y')
-                                ->orderBy('firstname')
-                                ->get();
-                } else {
-                    $payees = DB::table('tblemp_accounts')
-                                ->select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
-                                         'position', 'emp_id')
-                                ->where('emp_id', Auth::user()->emp_id)
-                                ->orderBy('firstname')
-                                ->get();
-                }
-
-                $actionURL = url('cadv-reim-liquidation/dv/update/' . $key);
-                break;
-            case 'procurement':
-                $payees = Supplier::all();
-                $dv = DB::table('tbldv as dv')
-                        ->select('dv.id as dv_id', 'dv.*', 'ors.payee', 'ors.address', 'ors.serial_no',
-                                 'ors.amount', 'ors.sig_certified_1', 'ors.responsibility_center',
-                                 'ors.mfo_pap')
-                        ->join('tblors_burs as ors', 'ors.id', '=', 'dv.ors_id')
-                        ->where([['dv.id', $key],
-                                 ['dv.module_class_id', 3]])
-                        ->first();
-                $actionURL = url('procurement/dv/update/' . $key);
-                break;
-
-            default:
-                # code...
-                break;
         }
 
-        $arrayPaymentMode = explode('-', $dv->payment_mode);
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
+        }
 
-        return view('pages.edit-dv', ['dv' => $dv,
-                                      'actionURL' => $actionURL,
-                                      'moduleType' => $moduleType,
-                                      'payees' => $payees,
-                                      'signatories' => $signatories,
-                                      'paymentMode' => $arrayPaymentMode,
-                                      'tinEmpNo' => '']);
+        return view('modules.procurement.dv.update', compact(
+            'id', 'dvData', 'dvNo', 'fundCluster', 'tinNo',
+            'paymentMode1', 'paymentMode2', 'paymentMode3',
+            'paymentMode4', 'otherPayment', 'responsibilityCenter',
+            'mfoPAP', 'amount', 'sigCertified', 'sigAccounting',
+            'sigAgencyHead', 'dateAccounting', 'dateAgencyHead',
+            'checkAdaNo', 'dateCheckAda', 'bankName', 'bankAccountNo',
+            'jevNo', 'receiptPrintedName', 'dateJev', 'signature',
+            'orNo', 'otherDocuments', 'signatories', 'signatories',
+            'serialNo', 'address', 'dvDate', 'payees', 'particulars',
+            'payee'
+        ));
     }
 
     /**
@@ -245,6 +230,7 @@ class DisbursementVoucherController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id) {
+        /*
         $moduleType = $request->module_type;
         $getLastID = DisbursementVoucher::orderBy('id', 'desc')->first();
         $pKey = $getLastID->id + 1;
@@ -328,7 +314,7 @@ class DisbursementVoucherController extends Controller
             $msg = "There is an error encountered updating the
                     Disbursement Voucher $pKey.";
             return redirect(url()->previous())->with('failed', $msg);
-        }
+        }*/
     }
 
     public function showIssuedTo(Request $request, $id) {
@@ -588,95 +574,26 @@ class DisbursementVoucherController extends Controller
         }
     }
 
-    private function checkDocGenerated($code) {
-        $logs = DB::table('tbldocument_logs_history')
-                  ->where([
-                        ['code', $code],
-                        ['action', 'document_generated']
-                    ])
-                  ->orderBy('logshist.created_at', 'desc')
-                  ->count();
-
-        return $logs;
+    public function showLogRemarks($id) {
+        $instanceDocLog = DocLog::where('doc_id', $id)
+                                ->whereNotNull('remarks')
+                                ->orderBy('logged_at', 'desc')
+                                ->get();
+        return view('modules.procurement.ors-burs.remarks', [
+            'id' => $id,
+            'docRemarks' => $instanceDocLog
+        ]);
     }
 
-    private function checkDocStatus($code) {
-        $logs = DB::table('tbldocument_logs_history')
-                  ->where('code', $code)
-                  ->orderBy('created_at', 'desc')
-                  ->get();
-        $currentStatus = (object) ["issued_by" => NULL,
-                                   "date_issued" => NULL,
-                                   "received_by" => NULL,
-                                   "date_received" => NULL,
-                                   "issued_back_by" => NULL,
-                                   "date_issued_back" => NULL,
-                                   "received_back_by" => NULL,
-                                   "date_received_back" => NULL,
-                                   "issued_remarks" => NULL,
-                                   "issued_back_remarks" => NULL];
+    public function logRemarks(Request $request, $id) {
+        $message = $request->message;
 
-        if (count($logs) > 0) {
-            foreach ($logs as $log) {
-                if ($log->action != "-") {
-                    switch ($log->action) {
-                        case 'issued':
-                            $currentStatus->issued_remarks = $log->remarks;
-                            $currentStatus->issued_by = $log->action;
-                            $currentStatus->date_issued = $log->created_at;
-                            break;
-
-                        case 'received':
-                            $currentStatus->received_by = $log->action;
-                            $currentStatus->date_received = $log->created_at;
-                            break;
-
-                        case 'issued_back':
-                            $currentStatus->issued_back_remarks = $log->remarks;
-                            $currentStatus->issued_back_by = $log->action;
-                            $currentStatus->date_issued_back = $log->created_at;
-                            break;
-
-                        case 'received_back':
-                            $currentStatus->received_back_by = $log->action;
-                            $currentStatus->date_received_back = $log->created_at;
-                            break;
-
-                        default:
-                            # code...
-                            break;
-                    }
-                } else {
-                    break;
-                }
-            }
+        if (!empty($message)) {
+            $instanceORS = ObligationRequestStatus::find($id);
+            $instanceDocLog = new DocLog;
+            $instanceORS->notifyMessage($id, Auth::user()->id, $message);
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "message", $message);
+            return 'Sent!';
         }
-
-        return $currentStatus;
-    }
-
-    private function generateTrackerCode($modAbbr, $pKey, $modClass) {
-        $modAbbr = strtoupper($modAbbr);
-        $pKey = strtoupper($pKey);
-
-        return $modAbbr . "-" . $pKey . "-" . $modClass . "-" . date('mdY');
-    }
-
-    private function logEmployeeHistory($msg, $emp = "") {
-        $empLog = new EmployeeLog;
-        $empLog->emp_id = empty($emp) ? Auth::user()->emp_id: $emp;
-        $empLog->message = $msg;
-        $empLog->save();
-    }
-
-    private function logTrackerHistory($code, $empFrom, $empTo, $action, $remarks = "") {
-        $docHistory = new DocumentLogHistory;
-        $docHistory->code = $code;
-        $docHistory->date = Carbon::now();
-        $docHistory->emp_from = $empFrom;
-        $docHistory->emp_to = $empTo;
-        $docHistory->action = $action;
-        $docHistory->remarks = $remarks;
-        $docHistory->save();
     }
 }

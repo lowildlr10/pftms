@@ -79,11 +79,28 @@ class ObligationRequestStatus extends Model
     /**
      * Get the phone record associated with the purchase request
      */
+    public function pr() {
+        return $this->belongsTo('App\Models\PurchaseRequest', 'pr_id', 'id');
+    }
+
     public function po() {
         return $this->belongsTo('App\Models\PurchaseJobOrder', 'po_no', 'po_no');
     }
 
+    public function procdv() {
+        return $this->hasOne('App\Models\DisbursementVoucher', 'ors_id', 'id');
+    }
+
+    public function emppayee() {
+        return $this->hasOne('App\User', 'id', 'payee');
+    }
+
+    public function bidpayee() {
+        return $this->hasOne('App\Models\Supplier', 'id', 'payee');
+    }
+
     public $sortable = [
+        'po_no',
         'serial_no',
         'particulars',
     ];
