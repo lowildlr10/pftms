@@ -200,7 +200,7 @@ class AbstractQuotationController extends Controller
         $sigThirdMember = !empty($sigThirdMember) ? $sigThirdMember : NULL;
 
         try {
-            $instanceAbstract = AbstractQuotation::with('pr')->find($id)->first();
+            $instanceAbstract = AbstractQuotation::with('pr')->find($id);
             $prNo = $instanceAbstract->pr->pr_no;
             $instanceAbstract->sig_chairperson = $sigChairperson;
             $instanceAbstract->sig_vice_chairperson = $sigViceChairperson;
@@ -270,8 +270,7 @@ class AbstractQuotationController extends Controller
             $awardedTo = $json->awarded_to;
             $documentType = $json->document_type;
             $awardedRemark = $json->awarded_remark;
-
-            $instanceAbstract = AbstractQuotation::with('pr')->find($id)->first();
+            $instanceAbstract = AbstractQuotation::with('pr')->find($id);
             $prID = $instanceAbstract->pr->id;
 
             foreach ($selectedSuppliers as $selectedCtr => $selectedsuplier) {
@@ -396,7 +395,7 @@ class AbstractQuotationController extends Controller
             $documentType = $json->document_type;
             $awardedRemark = $json->awarded_remark;
 
-            $instanceAbstract = AbstractQuotation::with('pr')->find($id)->first();
+            $instanceAbstract = AbstractQuotation::with('pr')->find($id);
             $prID = $instanceAbstract->pr->id;
             $prNo = $instanceAbstract->pr->pr_no;
 
