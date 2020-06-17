@@ -27,7 +27,7 @@
             <option value="n">No</option>
         </select>
         <label class="mdb-main-label">
-            Active Status <span class="red-text">*</span>
+            Is Active? <span class="red-text">*</span>
         </label>
     </div>
 
@@ -131,6 +131,13 @@
                 </label>
             </div>
             <div class="md-form">
+                <input type="text" id="tin-no" class="form-control"
+                       name="tin_no">
+                <label for="tin-no">
+                    TIN Number
+                </label>
+            </div>
+            <div class="md-form">
                 <input type="text" id="vat-no" class="form-control"
                        name="vat_no">
                 <label for="vat-no">
@@ -165,10 +172,10 @@
                 </label>
             </div>
             <div class="md-form">
-                <input type="number" id="delivery-vehicle-no" class="form-control"
-                       name="delivery_vehicle_no">
-                <label for="delivery-vehicle-no">
-                    No. of Delivery Vehicles
+                <input type="number" id="delivery-vehicle-no" class="form-control required"
+                       name="delivery_vehicle_no" value="0">
+                <label for="delivery-vehicle-no" class="active">
+                    No. of Delivery Vehicles <span class="red-text">*</span>
                 </label>
             </div>
             <div class="md-form">

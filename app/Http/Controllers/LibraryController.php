@@ -599,6 +599,7 @@ class LibraryController extends Controller
         $telephoneNo = $supplierData->telephone_no;
         $mobileNo = $supplierData->mobile_no;
         $dateEstablished = $supplierData->date_established;
+        $tinNo = $supplierData->tin_no;
         $vatNo = $supplierData->vat_no;
         $contactPerson = $supplierData->contact_person;
         $natureBusiness = $supplierData->nature_business;
@@ -664,6 +665,7 @@ class LibraryController extends Controller
             'telephoneNo' => $telephoneNo,
             'mobileNo' => $mobileNo,
             'dateEstablished' => $dateEstablished,
+            'tinNo' => $tinNo,
             'vatNo' => $vatNo,
             'contactPerson' => $contactPerson,
             'natureBusiness' => $natureBusiness,
@@ -698,6 +700,7 @@ class LibraryController extends Controller
         $telephoneNo = $request->telephone_no;
         $mobileNo = $request->mobile_no;
         $dateEstablished = $request->date_established;
+        $tinNo = $request->tin_no;
         $vatNo = $request->vat_no;
         $contactPerson = $request->contact_person;
         $natureBusiness = $request->nature_business;
@@ -725,6 +728,7 @@ class LibraryController extends Controller
                 $instanceSuplier->telephone_no = $telephoneNo;
                 $instanceSuplier->mobile_no = $mobileNo;
                 $instanceSuplier->date_established = $dateEstablished;
+                $instanceSuplier->tin_no = $tinNo;
                 $instanceSuplier->vat_no = $vatNo;
                 $instanceSuplier->contact_person = $contactPerson;
                 $instanceSuplier->nature_business = $natureBusiness;
@@ -763,6 +767,7 @@ class LibraryController extends Controller
         $telephoneNo = $request->telephone_no;
         $mobileNo = $request->mobile_no;
         $dateEstablished = $request->date_established;
+        $tinNo = $request->tin_no;
         $vatNo = $request->vat_no;
         $contactPerson = $request->contact_person;
         $natureBusiness = $request->nature_business;
@@ -789,6 +794,7 @@ class LibraryController extends Controller
             $instanceSuplier->telephone_no = $telephoneNo;
             $instanceSuplier->mobile_no = $mobileNo;
             $instanceSuplier->date_established = $dateEstablished;
+            $instanceSuplier->tin_no = $tinNo;
             $instanceSuplier->vat_no = $vatNo;
             $instanceSuplier->contact_person = $contactPerson;
             $instanceSuplier->nature_business = $natureBusiness;

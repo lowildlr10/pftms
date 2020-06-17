@@ -24,7 +24,7 @@
             <option value="n" {{ ($isActive == 'n') ? 'selected' : '' }}>No</option>
         </select>
         <label class="mdb-main-label">
-            Active Status <span class="red-text">*</span>
+            Is Active? <span class="red-text">*</span>
         </label>
     </div>
 
@@ -130,6 +130,13 @@
                 </label>
             </div>
             <div class="md-form">
+                <input type="text" id="tin-no" class="form-control"
+                       name="tin_no" value="{{ $tinNo }}">
+                <label for="tin-no" class="{{ !empty($tinNo) ? 'active' : '' }}">
+                    TIN Number
+                </label>
+            </div>
+            <div class="md-form">
                 <input type="text" id="vat-no" class="form-control"
                        name="vat_no" value="{{ $vatNo }}">
                 <label for="vat-no" class="{{ !empty($vatNo) ? 'active' : '' }}">
@@ -175,8 +182,8 @@
             <div class="md-form">
                 <input type="number" id="delivery-vehicle-no" class="form-control"
                        name="delivery_vehicle_no" value="{{ $deliveryVehicleNo }}">
-                <label for="delivery-vehicle-no" class="{{ !empty($deliveryVehicleNo) ? 'active' : '' }}">
-                    No. of Delivery Vehicles
+                <label for="delivery-vehicle-no" class="{{ !empty($deliveryVehicleNo) || $deliveryVehicleNo == 0 ? 'active' : '' }}">
+                    No. of Delivery Vehicles <span class="red-text">*</span>
                 </label>
             </div>
             <div class="md-form">
