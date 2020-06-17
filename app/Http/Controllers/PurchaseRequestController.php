@@ -664,8 +664,8 @@ class PurchaseRequestController extends Controller
                     $instancePRItem->save();
                 }
 
-                //$instancePR->notifyForApproval($prNo, $requestedBy);
-                //$instanceDocLog->logDocument($prID, Auth::user()->id, NULL, 'issued');
+                $instancePR->notifyForApproval($prNo, $requestedBy);
+                $instanceDocLog->logDocument($prID, Auth::user()->id, NULL, 'issued');
 
                 $msg = "Purchase Request '$prNo' successfully created.";
                 //Auth::user()->log($request, $msg);
