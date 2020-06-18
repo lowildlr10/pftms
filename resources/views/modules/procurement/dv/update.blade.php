@@ -26,9 +26,9 @@
                     </div>
                     <div class="md-form form-sm">
                         <input type="date" id="date-dv" name="date_dv"
-                               class="form-control" value="{{ $dvDate }}">
+                               class="form-control required" value="{{ $dvDate }}">
                         <label for="date-dv" class="py-3 active">
-                            <strong>Date</strong>
+                            <strong>Date <span class="red-text">*</span></strong>
                         </label>
                     </div>
                     <div class="md-form form-sm">
@@ -52,28 +52,32 @@
                     <div class="md-form form-sm my-3">
                         <div class="form-check form-check-inline">
                             <input type="checkbox" class="form-check-input" id="mds-check"
-                                   name="mode_payment[]" {{ $paymentMode1 == 1 ? 'checked': '' }}>
+                                   name="mode_payment[]" {{ $paymentMode1 == 1 ? 'checked': '' }}
+                                   value="mds">
                             <label class="form-check-label" for="mds-check">
                                 <strong>MDS Check</strong>
                             </label>
                         </div>
                         <div class="form-check form-check-inline">
                             <input type="checkbox" class="form-check-input" id="commercial-check"
-                                   name="mode_payment[]" {{ $paymentMode2 == 1 ? 'checked': '' }}>
+                                   name="mode_payment[]" {{ $paymentMode2 == 1 ? 'checked': '' }}
+                                   value="commercial">
                             <label class="form-check-label" for="commercial-check">
                                 <strong>Commercial Check</strong>
                             </label>
                         </div>
                         <div class="form-check form-check-inline">
                             <input type="checkbox" class="form-check-input" id="ada"
-                                   name="mode_payment[]" {{ $paymentMode3 == 1 ? 'checked': '' }}>
+                                   name="mode_payment[]" {{ $paymentMode3 == 1 ? 'checked': '' }}
+                                   value="ada">
                             <label class="form-check-label" for="ada">
                                 <strong>ADA</strong>
                             </label>
                         </div>
                         <div class="form-check form-check-inline">
                             <input type="checkbox" class="form-check-input" id="others-check"
-                                   name="mode_payment[]" {{ $paymentMode4 == 1 ? 'checked': '' }}>
+                                   name="mode_payment[]" {{ $paymentMode4 == 1 ? 'checked': '' }}
+                                   value="others">
                             <label class="form-check-label" for="others-check">
                                 <strong>Others (Please specify)</strong>
                             </label>
@@ -152,8 +156,7 @@
             <div class="row">
                 <div class="col-md-4 border border-bottom-0 border-dark px-0 text-center">
                     <div class="p-2 border-bottom border-dark">
-                        <span class="red-text">* </span>
-                        <strong>Particulars</strong>
+                        <strong>Particulars <span class="red-text">*</span></strong>
                     </div>
                     <div class="form-group p-0 m-0">
                         <textarea class="md-textarea form-control border border-0 rounded-0 required"
@@ -184,10 +187,10 @@
                 </div>
                 <div class="col-md-3 border border-left-0 border-bottom-0 border-dark px-0 text-center">
                     <div class="p-2 border-bottom border-dark">
-                        <strong>AMOUNT</strong>
+                        <strong>AMOUNT <span class="red-text">*</span></strong>
                     </div>
                     <div class="md-form px-3">
-                        <input type="number" id="amount" name="amount" class="form-control"
+                        <input type="number" id="amount" name="amount" class="form-control required"
                                value="{{ $amount }}">
                     </div>
                 </div>
@@ -281,7 +284,7 @@
                     <div class="md-form my-0">
                         <input type="date" id="date-accounting" name="date_accounting"
                                class="form-control" value="{{ $dateAccounting }}">
-                        <label for="date-accounting mt-3" class="active">
+                        <label for="date-accounting mt-3" class="active mt-3">
                             Date:
                         </label>
                     </div>
@@ -307,7 +310,7 @@
                     <div class="md-form my-0">
                         <input type="date" id="date-agency-head" name="date_agency_head"
                                class="form-control" value="{{ $dateAgencyHead }}">
-                        <label for="date-agency-head" class="active">
+                        <label for="date-agency-head" class="active mt-3">
                             Date:
                         </label>
                     </div>
