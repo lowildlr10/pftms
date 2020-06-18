@@ -43,93 +43,6 @@ class DisbursementVoucherController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function indexProc(Request $request) {
-<<<<<<< HEAD
-        $pageLimit = 25;
-        $search = trim($request['search']);
-        $paperSizes = PaperSize::all();
-        $dvList = DB::table('tbldv as dv')
-                    ->select('dv.*', 'proj.project', 'status.id AS sID', 'ors.po_no', 'pr.pr_no',
-                             DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'),
-                             'po.status as status_id', 'ors.id as ors_id', 'bid.company_name')
-                    ->join('tblors_burs as ors', 'ors.id', '=', 'dv.ors_id')
-                    ->join('tblpo_jo as po', 'po.po_no', '=', 'ors.po_no')
-                    ->join('tblpr as pr', 'pr.id', '=', 'dv.pr_id')
-                    ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'pr.requested_by')
-                    ->join('tblsuppliers as bid', 'bid.id', '=', 'ors.payee')
-                    ->leftJoin('tblprojects AS proj', 'proj.id', '=', 'pr.project_id')
-                    ->join('tblpr_status AS status', 'status.id', '=', 'po.status')
-                    ->where('dv.module_class_id', 3)
-                    ->where('po.status', '<>', 3)
-                    ->whereNull('dv.deleted_at');
-
-        if (!empty($search)) {
-            $dvList = $dvList->where(function ($query) use ($search) {
-                                   $query->where('pr.pr_no', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('pr.date_pr', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('pr.purpose', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.firstname', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.middlename', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('emp.lastname', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('ors.po_no', 'LIKE', '%' . $search . '%')
-                                         ->orWhere('dv.code', 'LIKE', '%' . $search . '%');
-                               });
-        }
-
-        if (Auth::user()->role == 4 || Auth::user()->role == 6) {
-            $dvList = $dvList->where('requested_by', Auth::user()->emp_id);
-        }
-
-        if (Auth::user()->role == 5) {
-            $dvList = $dvList->where('emp.division_id', Auth::user()->division_id);
-        }
-
-        $dvList = $dvList->orderBy('pr.id', 'desc')
-                         ->paginate($pageLimit);
-
-        foreach ($dvList as $list) {
-            $list->document_status = $this->checkDocStatus($list->code);
-            $list->display_menu = true;
-        }
-
-        return view('pages.dv', ['search' => $search,
-                                 'list' => $dvList,
-                                 'pageLimit' => $pageLimit,
-                                 'paperSizes' => $paperSizes,
-                                 'type' => 'procurement']);
-    }
-
-    public function indexCA(Request $request) {
-        $isOrdinaryUser = true;
-        $pageLimit = 50;
-        $search = trim($request['search']);
-        $paperSizes = PaperSize::all();
-        $dvList = DB::table('tbldv as dv')
-                    ->select('dv.*', DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'),
-                             'ors.id as ors_id', 'ors.payee', 'ors.transaction_type')
-                    ->join('tblors_burs as ors', 'ors.id', '=', 'dv.ors_id')
-                    ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'ors.payee')
-                    ->where('dv.module_class_id', 2)
-                    ->whereNull('dv.deleted_at');
-
-        if (!empty($search)) {
-            if ($request->isMethod('post')) {
-                $dvList = $dvList->where(function ($query)  use ($search) {
-                                       $query->where('dv.date_dv', 'LIKE', '%' . $search . '%')
-                                             ->orWhere('dv.particulars', 'LIKE', '%' . $search . '%')
-                                             ->orWhere('emp.firstname', 'LIKE', '%' . $search . '%')
-                                             ->orWhere('emp.middlename', 'LIKE', '%' . $search . '%')
-                                             ->orWhere('emp.lastname', 'LIKE', '%' . $search . '%')
-                                             ->orWhere('dv.dv_no', 'LIKE', '%' . $search . '%')
-                                             ->orWhere('dv.id', 'LIKE', '%' . $search . '%')
-                                             ->orWhere('dv.ors_id', 'LIKE', '%' . $search . '%');
-                                   });
-            } else {
-                $dvList = $dvList->where(function ($query)  use ($search) {
-                                       $query->where('dv.id', 'LIKE', '%' . $search . '%');
-                                   });
-            }
-        }
-=======
         $data = $this->getIndexData($request, 'procurement');
 
         // Get module access
@@ -182,7 +95,6 @@ class DisbursementVoucherController extends Controller
             'isAllowedIAR' => $isAllowedIAR,
         ]);
     }
->>>>>>> procurement
 
     private function getIndexData($request, $type) {
         $keyword = trim($request->keyword);
