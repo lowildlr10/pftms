@@ -37,6 +37,7 @@ use App\Plugins\PDFGenerator\DocAbstractQuotation;
 use App\Plugins\PDFGenerator\DocPurchaseOrder;
 use App\Plugins\PDFGenerator\DocJobOrder;
 use App\Plugins\PDFGenerator\DocObligationRequestStatus;
+use App\Plugins\PDFGenerator\DocDisbursementVoucher;
 
 class PrintController extends Controller
 {
@@ -258,16 +259,19 @@ class PrintController extends Controller
 
                 if ($test == 'true') {
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                    $dvID =  $data->dv->id;
-                    $msg = "generated the disbursement voucher $dvID.";
+                    $msg = "Generated the Disbursement Voucher '$key' document.";
                     Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateDV($data, $documentType, $fontScale,
-                                  $pageHeight, $pageWidth, $previewToggle);
+                    $this->generateDV(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
-
                 break;
-
             case 'ca_dv':
                 $data = $this->getDataDV($key, 'cashadvance');
                 $data->doc_type = $documentType;
@@ -1170,14 +1174,22 @@ class PrintController extends Controller
             $dv->mfo_pap = str_replace($searchStr, '<br>', $dv->mfo_pap);
         }
 
+        $instanceSignatory = new Signatory;
+        $sign1 = $instanceSignatory->getSignatory($dv->sig_certified)->name;
+        $sign2 = $instanceSignatory->getSignatory($dv->sig_accounting)->name;
+        $sign3 = $instanceSignatory->getSignatory($dv->sig_agency_head)->name;
+        $position1 = $instanceSignatory->getSignatory($dv->sig_certified)->dv_designation;
+        $position2 = $instanceSignatory->getSignatory($dv->sig_accounting)->dv_designation;
+        $position3 = $instanceSignatory->getSignatory($dv->sig_agency_head)->dv_designation;
+
         $tableData[] = [$dv->particulars,
                         $dv->responsibility_center,
                         $dv->mfo_pap, ""];
         $amount = number_format($dv->amount, 2);
 
-        if ($dv->module_class_id == 3) {
+        if ($dv->module_class == 3) {
             $payee = $dv->company_name;
-        } else if ($dv->module_class_id == 2) {
+        } else if ($dv->module_class == 2) {
             $payee = $this->getEmployee($dv->payee)->name;
         }
 
@@ -1239,7 +1251,13 @@ class PrintController extends Controller
         return (object)['dv' => $dv,
                         'header_data' => $dataHeader,
                         'table_data' => $data,
-                        'footer_data' => $dataFooter];
+                        'footer_data' => $dataFooter,
+                        'sign1' => $sign1,
+                        'sign2' => $sign2,
+                        'sign3' => $sign3,
+                        'position1' => $position1,
+                        'position2' => $position2,
+                        'position3' => $position3];
     }
 
     private function getDataIAR($iarNo) {
@@ -2260,31 +2278,23 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateDV($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateDV($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new PDF('P', 'mm', $pageSize);
+        $pdf = new DocDisbursementVoucher('P', 'mm', $pageSize);
         $pdf->setHeaderLR(false, true);
-        $docCode = ($documentType == 'dv') ? 'FM-FAS-BUD F12': 'FM-FAS-ACCTG F01';
-        $docRev = ($documentType == 'dv') ? 'Revision 1': 'Revision 0';
-        $docRevDate = ($documentType == 'dv') ? '02-28-18': '08-31-17';
+        $docCode = ($data->dv->module_class == 3) ? 'FM-FAS-BUD F12': 'FM-FAS-ACCTG F01';
+        $docRev = ($data->dv->module_class == 3) ? 'Revision 1': 'Revision 0';
+        $docRevDate = ($data->dv->module_class == 3) ? '02-28-18': '08-31-17';
         $docTitle = "dv_" . $data->dv->id;
         $docCreator = "DOST-CAR";
         $docAuthor = "DOST-CAR";
         $docSubject = "Disbursement Voucher";
         $docKeywords = "DV, dv, disbursement, voucher, disbursement voucher";
 
-        $payee = "";
-        $signatory = $this->getSignatory($data->dv->sig_certified_1)->name;
-        $sign1 = $this->getSignatory($data->dv->sig_accounting)->name;
-        $sign2 = $this->getSignatory($data->dv->sig_agency_head)->name;
-        $paymentMode = explode("-", $data->dv->payment_mode);
-
-        $dvDate = "";
-
         if (!empty($data->dv->date_dv)) {
-            $dvDate = new DateTime($data->dv->date_dv);
-            $dvDate = $dvDate->format('F j, Y');
+            $data->dv->date_dv = new DateTime($data->dv->date_dv);
+            $data->dv->date_dv = $data->dv->date_dv->format('F j, Y');
         }
 
         //Set document information
@@ -2292,7 +2302,7 @@ class PrintController extends Controller
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        include app_path() . "/Classes/DocumentPDF/Documents/doc_disbursement_voucher.php";
+        $pdf->printDV($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);

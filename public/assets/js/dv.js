@@ -214,25 +214,25 @@ $(function() {
         $('#form-receive-back').submit();
     }
 
-    $.fn.showDisburse = function(url) {
+    $.fn.showPayment = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
-        $('#modal-body-obligate').load(url, function() {
+        $('#modal-body-payment').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $(this).slideToggle(500);
         });
-        $("#modal-obligate").modal({keyboard: false, backdrop: 'static'})
+        $("#modal-payment").modal({keyboard: false, backdrop: 'static'})
 						        .on('shown.bs.modal', function() {
-            $('#obligate-title').html('Obligate Dibursement Voucher');
+            $('#payment-title').html('To Payment');
 		}).on('hidden.bs.modal', function() {
-            $('#modal-body-obligate').html('').css('display', 'none');
+            $('#modal-body-payment').html('').css('display', 'none');
 		});
     }
 
-    $.fn.disburse = function() {
+    $.fn.payment = function() {
         const withError = inputValidation(false);
 
         if (!withError) {
-            $('#form-obligate').submit();
+            $('#form-payment').submit();
         }
     }
 
