@@ -13,6 +13,7 @@ use App\Models\ObligationRequestStatus;
 use App\Models\InspectionAcceptance;
 use App\Models\DisbursementVoucher;
 use App\Models\InventoryStock;
+use App\Models\ListDemandPayable;
 
 use App\User;
 use App\Models\DocumentLog as DocLog;
@@ -138,7 +139,7 @@ class DisbursementVoucherController extends Controller
         $isAllowedIssueBack = Auth::user()->getModuleAccess($module, 'issue_back');
         $isAllowedReceive = Auth::user()->getModuleAccess($module, 'receive');
         $isAllowedReceiveBack = Auth::user()->getModuleAccess($module, 'receive_back');
-        $isAllowedDisburse = Auth::user()->getModuleAccess($module, 'disburse');
+        $isAllowedPayment = Auth::user()->getModuleAccess($module, 'payment');
         $isAllowedIAR = Auth::user()->getModuleAccess('proc_iar', 'is_allowed');
 
         return view('modules.procurement.dv.index', [
@@ -146,7 +147,7 @@ class DisbursementVoucherController extends Controller
             'keyword' => $data->keyword,
             'paperSizes' => $data->paper_sizes,
             'isAllowedUpdate' => $isAllowedUpdate,
-            'isAllowedDisburse' => $isAllowedDisburse,
+            'isAllowedPayment' => $isAllowedPayment,
             'isAllowedIssue' => $isAllowedIssue,
             'isAllowedIssueBack'=> $isAllowedIssueBack,
             'isAllowedReceive' => $isAllowedReceive,
@@ -204,6 +205,7 @@ class DisbursementVoucherController extends Controller
         if (!empty($keyword)) {
             $dvData = $dvData->where(function($qry) use ($keyword) {
                 $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('pr_id', 'like', "%$keyword%")
                     ->orWhere('po_no', 'like', "%$keyword%")
                     ->orWhere('amount', 'like', "%$keyword%")
                     ->orWhere('document_type', 'like', "%$keyword%")
@@ -229,7 +231,7 @@ class DisbursementVoucherController extends Controller
         $dvData = $dvData->sortable(['po_no' => 'desc'])->paginate(15);
 
         foreach ($dvData as $dvDat) {
-            $dvDat->doc_status = $instanceDocLog->checkDocStatus($dvDat->dv['id']);
+            $dvDat->doc_status = $instanceDocLog->checkDocStatus($dvDat->procdv['id']);
         }
 
         return (object) [
@@ -381,245 +383,313 @@ class DisbursementVoucherController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id) {
-        /*
-        $moduleType = $request->module_type;
-        $getLastID = DisbursementVoucher::orderBy('id', 'desc')->first();
-        $pKey = $getLastID->id + 1;
-        $dv = DisbursementVoucher::where('id', $id)->first();
+        $fundCluster = $request->fund_cluster;
+        $dateDV = !empty($request->date_dv) ? $request->date_dv : NULL;
+        $dvNo = $request->dv_no;
+        $modePayments = !empty($request->mode_payment) ? $request->mode_payment : [];
+        $otherPayment = !empty($request->other_payment) ? $request->other_payment : NULL;
+        $particulars = $request->particulars;
+        $responsibilityCenter = $request->responsibility_center;
+        $mfoPAP = $request->mfo_pap;
+        $amount = $request->amount;
+        $sigAccounting = $request->sig_accounting;
+        $dateAccounting = !empty($request->date_accounting) ? $request->date_accounting : NULL;
+        $sigAgencyHead = $request->sig_agency_head;
+        $dateAgencyHead = !empty($request->date_agency_head) ? $request->date_agency_head : NULL;
 
-        if ($moduleType == 'cashadvance') {
-            $pKey = $id;
-            $redirectURL = "cadv-reim-liquidation/dv?search=" . $pKey;
-        } else if ($moduleType == 'procurement') {
-            $pr = PurchaseRequest::where('id', $dv->pr_id)->first();
-            $pKey = $pr->pr_no;
-            $redirectURL = "procurement/dv?search=" . $pKey;
+        if (in_array('mds', $modePayments)) {
+            $modePayment = '1';
+        } else {
+            $modePayment = '0';
+        }
+
+        if (in_array('commercial', $modePayments)) {
+            $modePayment .= '-1';
+        } else {
+            $modePayment .= '-0';
+        }
+
+        if (in_array('ada', $modePayments)) {
+            $modePayment .= '-1';
+        } else {
+            $modePayment .= '-0';
+        }
+
+        if (in_array('others', $modePayments)) {
+            $modePayment .= '-1';
+        } else {
+            $modePayment .= '-0';
         }
 
         try {
-            $fundCluster = $request->fund_cluster;
-            $dvNo = $request->dv_no;
-            $dateDV = $request->date_dv;
-            $paymentMode1 = $request->mds_check;
-            $paymentMode2 = $request->commercial_check;
-            $paymentMode3 = $request->ada;
-            $paymentMode4 = $request->others_check;
-            $otherPayment = $request->other_payment;
-            $particulars = $request->particulars;
-            $sigAccounting = $request->sig_accounting;
-            $sigAgencyHead = $request->sig_agency_head;
-            $dateAccounting = $request->date_accounting;
-            $dateAgencyHead = $request->date_agency_head;
-            $paymentMode = "";
+            $instanceDV = DisbursementVoucher::find($id);
+            $moduleClass = $instanceDV->module_class;
 
-            if (empty($dateDV)) {
-                $dateDV = NULL;
+            if ($moduleClass == 3) {
+                $routeName = 'proc-dv';
+            } else if ($moduleClass == 2) {
+                $routeName = 'ca-dv';
             }
 
-            if (empty($otherPayment)) {
-                $otherPayment = NULL;
-            }
+            $instanceDV->fund_cluster = $fundCluster;
+            $instanceDV->date_dv = $dateDV;
+            $instanceDV->dv_no = $dvNo;
+            $instanceDV->payment_mode = $modePayment;
+            $instanceDV->other_payment = $otherPayment;
+            $instanceDV->particulars = $particulars;
+            $instanceDV->responsibility_center = $responsibilityCenter;
+            $instanceDV->mfo_pap = $mfoPAP;
+            $instanceDV->amount = $amount;
+            $instanceDV->sig_accounting = $sigAccounting;
+            $instanceDV->date_accounting = $dateAccounting;
+            $instanceDV->sig_agency_head = $sigAgencyHead;
+            $instanceDV->date_agency_head = $dateAgencyHead;
+            $instanceDV->save();
 
-            if (empty($paymentMode1)) {
-                $paymentMode .= "0";
-            } else {
-                $paymentMode .= "1";
-            }
+            $documentType = 'Disbursement Voucher';
 
-            if (empty($paymentMode2)) {
-                $paymentMode .= "-0";
-            } else {
-                $paymentMode .= "-1";
-            }
-
-            if (empty($paymentMode3)) {
-                $paymentMode .= "-0";
-            } else {
-                $paymentMode .= "-1";
-            }
-
-            if (empty($paymentMode4)) {
-                $paymentMode .= "-0";
-            } else {
-                $paymentMode .= "-1";
-            }
-
-            $dv->fund_cluster = $fundCluster;
-            $dv->dv_no = $dvNo;
-            $dv->date_dv = $dateDV;
-            $dv->payment_mode = $paymentMode;
-            $dv->other_payment = $otherPayment;
-            $dv->particulars = $particulars;
-            $dv->sig_accounting = $sigAccounting;
-            $dv->sig_agency_head = $sigAgencyHead;
-            $dv->date_accounting = $dateAccounting;
-            $dv->date_agency_head = $dateAgencyHead;
-            $dv->save();
-
-            $logEmpMessage = "updated the disbursement voucher $id.";
-            $this->logEmployeeHistory($logEmpMessage);
-
-            $msg = "Disbursement Voucher $pKey successfully updated.";
-            return redirect(url($redirectURL))->with('success', $msg);
-        } catch (Exception $e) {
-            $msg = "There is an error encountered updating the
-                    Disbursement Voucher $pKey.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }*/
+            $msg = "$documentType '$id' successfully updated.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())
+                                 ->with('failed', $msg);
+        }
     }
 
-    public function showIssuedTo(Request $request, $id) {
-        $issuedTo = User::orderBy('firstname')->get();
-        $issueBack = (int)$request['back'];
-
-        return view('pages.view-dv-issue', ['key' => $id,
-                                            'issuedTo' => $issuedTo,
-                                            'issueBack' => $issueBack]);
+    public function showIssue($id) {
+        return view('modules.procurement.dv.issue', [
+            'id' => $id
+        ]);
     }
 
     public function issue(Request $request, $id) {
-        $dv = DisbursementVoucher::where('id', $id)->first();
-
-        if ($dv->module_class_id == 3) {
-            $pr = PurchaseRequest::where('id', $dv->pr_id)->first();
-            $pKey = $pr->pr_no;
-            $redirectURL = "procurement/dv?search=" . $pKey;
-        } else if ($dv->module_class_id == 2) {
-            $pKey = $id;
-            $redirectURL = "cadv-reim-liquidation/dv?search=" . $pKey;
-        }
+        $remarks = $request->remarks;
 
         try {
-            $issueBack = $request['back'];
-            $remarks = $request['remarks'];
-            $issuedTo = $request['issued_to'];
-            $code = $dv->code;
-            $isDocGenerated = $this->checkDocGenerated($code);
-            $docStatus = $this->checkDocStatus($code);
+            $instanceDocLog = new DocLog;
+            $instanceDV = DisbursementVoucher::find($id);
+            $moduleClass = $instanceDV->module_class;
+            $documentType = 'Disbursement Voucher';
 
-            if (!$issueBack) {
-                if (empty($docStatus->date_issued)) {
-                    if ($isDocGenerated) {
-                        $this->logTrackerHistory($code, Auth::user()->emp_id, $issuedTo, "issued", $remarks);
+            $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
+            $docStatus = $instanceDocLog->checkDocStatus($id);
 
-                        $logEmpMessage = "issued the disbursement voucher $pKey.";
-                        $this->logEmployeeHistory($logEmpMessage);
+            if ($moduleClass == 3) {
+                $routeName = 'proc-dv';
+            } else if ($moduleClass == 2) {
+                $routeName = 'ca-dv';
+            }
 
-                        $msg = "Disbursement Voucher $pKey is now set to issued.";
-                        return redirect(url($redirectURL))->with('success', $msg);
-                    } else {
-                        $msg = "Generate first the Disbursement Voucher $pKey document.";
-                        return redirect(url($redirectURL))->with('warning', $msg);
-                    }
+            if (empty($docStatus->date_issued)) {
+                if ($isDocGenerated) {
+                    $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "issued", $remarks);
+
+                    //$instanceDV->notifyIssued($id, Auth::user()->id);
+
+                    $msg = "$documentType '$id' successfully issued to accounting unit.";
+                    Auth::user()->log($request, $msg);
+                    return redirect()->route($routeName, ['keyword' => $id])
+                                     ->with('success', $msg);
                 } else {
-                    $msg = "Disbursement Voucher $pKey is already issued.";
-                    return redirect(url($redirectURL))->with('warning', $msg);
+                    $msg = "Document for $documentType '$id' should be generated first.";
+                    Auth::user()->log($request, $msg);
+                    return redirect()->route($routeName, ['keyword' => $id])
+                                     ->with('warning', $msg);
                 }
             } else {
-                $issueBackResponse = $this->issueBack($pKey, $code, "Disbursement Voucher", $docStatus,
-                                                      $issuedTo, $remarks);
-
-                if ($issueBackResponse->status == 'success') {
-                    return redirect(url($redirectURL))->with('success', $issueBackResponse->msg);
-                } else {
-                    return redirect(url()->previous())->with('failed', $issueBackResponse->msg);
-                }
+                $msg = "$documentType '$id' already issued.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route($routeName, ['keyword' => $id])
+                                 ->with('warning', $msg);
             }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered issuing the Disbursement Voucher $pKey.";
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
     }
 
-    private function issueBack($pKey, $code, $docType, $docStatus, $issuedTo, $remarks) {
-        if (empty($docStatus->date_issued_back)) {
-            $this->logTrackerHistory($code, Auth::user()->emp_id, $issuedTo, "issued_back", $remarks);
-
-            $logEmpMessage = "issued back the " . strtolower($docType) . " $pKey.";
-            $this->logEmployeeHistory($logEmpMessage);
-
-            $msg = "Issued back the $docType $pKey document.";
-            $status = "success";
-        } else {
-            $msg = "There is an error encountered issuing back the $docType $pKey.";
-            $status = "failed";
-        }
-
-        return (object) ['msg' => $msg,
-                         'status' => $status];
+    public function showReceive($id) {
+        return view('modules.procurement.dv.receive', [
+            'id' => $id
+        ]);
     }
 
     public function receive(Request $request, $id) {
-        $dv = DisbursementVoucher::where('id', $id)->first();
-
-        if ($dv->module_class_id == 3) {
-            $pr = PurchaseRequest::where('id', $dv->pr_id)->first();
-            $pKey = $pr->pr_no;
-            $redirectURL = "procurement/dv?search=" . $pKey;
-        } else if ($dv->module_class_id == 2) {
-            $pKey = $id;
-            $redirectURL = "cadv-reim-liquidation/dv?search=" . $pKey;
-        }
+        $remarks = $request->remarks;
 
         try {
-            $receiveBack = $request['back'];
-            $code = $dv->code;
-            $isDocGenerated = $this->checkDocGenerated($code);
-            $docStatus = $this->checkDocStatus($code);
+            $instanceDocLog = new DocLog;
+            $instanceDV = DisbursementVoucher::find($id);
+            $moduleClass = $instanceDV->module_class;
+            $documentType = 'Disbursement Voucher';
 
-            if (!$receiveBack) {
-                if (!empty($docStatus->date_issued) && empty($docStatus->date_received)) {
-                    if ($isDocGenerated) {
-                        $this->logTrackerHistory($code, Auth::user()->emp_id, 0, "received");
-
-                        $logEmpMessage = "received the disbursement voucher $pKey.";
-                        $this->logEmployeeHistory($logEmpMessage);
-
-                        $msg = "Disbursement Voucher $pKey is now set to received.";
-                        return redirect(url($redirectURL))->with('success', $msg);
-                    } else {
-                        $msg = "Generate first the Disbursement Voucher $pKey document.";
-                        return redirect(url($redirectURL))->with('warning', $msg);
-                    }
-                } else {
-                    $msg = "Disbursement Voucher $pKey is already received.";
-                    return redirect(url($redirectURL))->with('warning', $msg);
-                }
-            } else {
-                $receiveBackResponse = $this->receiveBack($pKey, $code, "Disbursement Voucher",
-                                                          $docStatus);
-
-                if ($receiveBackResponse->status == 'success') {
-                    return redirect(url($redirectURL))->with('success', $receiveBackResponse->msg);
-                } else {
-                    return redirect(url()->previous())->with('failed', $receiveBackResponse->msg);
-                }
+            if ($moduleClass == 3) {
+                $routeName = 'proc-dv';
+            } else if ($moduleClass == 2) {
+                $routeName = 'ca-dv';
             }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered receiving the Disbursement Voucher $pKey.";
+
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received", $remarks);
+            //$instanceDV->notifyReceived($id, Auth::user()->id);
+
+            $msg = "$documentType '$id' successfully received.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
     }
 
-    public function receiveBack($pKey, $code, $docType, $docStatus) {
-        if (!empty($docStatus->date_issued_back) && empty($docStatus->date_received_back)) {
-            $this->logTrackerHistory($code, Auth::user()->emp_id, 0, "-");
-            $this->logTrackerHistory($code, Auth::user()->emp_id, 0, "received_back");
-
-            $logEmpMessage = "received back the $docType $pKey.";
-            $this->logEmployeeHistory($logEmpMessage);
-
-            $msg = "Received back the $docType $pKey document.";
-            $status = "success";
-        } else {
-            $msg = "There is an error encountered issuing back the $docType $pKey.";
-            $status = "failed";
-        }
-
-        return (object) ['msg' => $msg,
-                         'status' => $status];
+    public function showIssueBack($id) {
+        return view('modules.procurement.dv.issue-back', [
+            'id' => $id
+        ]);
     }
 
+    public function issueBack(Request $request, $id) {
+        $remarks = $request->remarks;
+
+        try {
+            $instanceDocLog = new DocLog;
+            $instanceDV = DisbursementVoucher::find($id);
+            $moduleClass = $instanceDV->module_class;
+            $documentType = 'Disbursement Voucher';
+
+            if ($moduleClass == 3) {
+                $routeName = 'proc-dv';
+            } else if ($moduleClass == 2) {
+                $routeName = 'ca-dv';
+            }
+
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "issued_back", $remarks);
+            //$instanceDV->notifyIssuedBack($id, Auth::user()->id);
+
+            $msg = "$documentType '$id' successfully issued back.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function showReceiveBack($id) {
+        return view('modules.procurement.dv.receive-back', [
+            'id' => $id
+        ]);
+    }
+
+    public function receiveBack(Request $request, $id) {
+        $remarks = $request->remarks;
+
+        try {
+            $instanceDocLog = new DocLog;
+            $instanceDV = DisbursementVoucher::find($id);
+            $moduleClass = $instanceDV->module_class;
+            $documentType = 'Disbursement Voucher';
+
+            if ($moduleClass == 3) {
+                $routeName = 'proc-dv';
+            } else if ($moduleClass == 2) {
+                $routeName = 'ca-dv';
+            }
+
+            $instanceDocLog->logDocument($id, NULL, NULL, "-", NULL);
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received_back", $remarks);
+
+            $msg = "$documentType '$id' successfully received back.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function showPayment($id) {
+        $instanceDV = DisbursementVoucher::find($id);
+        $dvNo = $instanceDV->dv_no;
+        return view('modules.procurement.dv.payment', [
+            'id' => $id,
+            'dvNo' => $dvNo
+        ]);
+    }
+
+    public function payment(Request $request, $id) {
+        $dvNo = $request->dv_no;
+
+        try {
+            $instanceDocLog = new DocLog;
+            $instanceDV = DisbursementVoucher::with('procors')->find($id);
+            $moduleClass = $instanceDV->module_class;
+            $documentType = 'Disbursement Voucher';
+
+            if ($moduleClass == 3) {
+                $routeName = 'proc-dv';
+                $instancePO = PurchaseJobOrder::where('po_no', $instanceDV->procors->po_no)
+                                              ->first();
+                $instancePO->status = 10;
+                $instancePO->save();
+            } else if ($moduleClass == 2) {
+                $routeName = 'ca-dv';
+            }
+
+            $instanceDV->date_disbursed = Carbon::now();
+            $instanceDV->disbursed_by = Auth::user()->id;
+            $instanceDV->for_payment = 'y';
+            $instanceDV->dv_no = $dvNo;
+            $instanceDV->save();
+
+            //$instanceDV->notifyPayment($id, Auth::user()->id);
+
+            $msg = "$documentType with a DV number of '$dvNo'
+                    is successfully set to 'For Payment'.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function showLogRemarks($id) {
+        $instanceDocLog = DocLog::where('doc_id', $id)
+                                ->whereNotNull('remarks')
+                                ->orderBy('logged_at', 'desc')
+                                ->get();
+        return view('modules.procurement.dv.remarks', [
+            'id' => $id,
+            'docRemarks' => $instanceDocLog
+        ]);
+    }
+
+    public function logRemarks(Request $request, $id) {
+        $message = $request->message;
+
+        if (!empty($message)) {
+            $instanceDV = DisbursementVoucher::find($id);
+            $instanceDocLog = new DocLog;
+            //$instanceDV->notifyMessage($id, Auth::user()->id, $message);
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "message", $message);
+            return 'Sent!';
+        }
+    }
+
+    /*
     public function createLiquidation($id) {
         $dv = DisbursementVoucher::where('id', $id)->first();
         $ors = OrsBurs::where('id', $dv->ors_id)->first();
@@ -669,82 +739,5 @@ class DisbursementVoucherController extends Controller
         }
     }
 
-    public function payment($id)
-    {
-        $dv = DisbursementVoucher::find($id);
-        $ors = DB::table('tblors_burs as ors')
-                 ->join('tbldv as dv', 'dv.ors_id', '=', 'ors.id')
-                 ->first();
-        $docType = "Disbursement Voucher";
-
-        if ($dv->module_class_id == 3) {
-            $pKey = $ors->po_no;
-            $redirectURL = "procurement/dv?search=" . $pKey;
-        } else if ($dv->module_class_id == 2) {
-            $pKey = $dv->id;
-            $redirectURL = "cadv-reim-liquidation/dv?search=" . $pKey;
-        }
-
-        try {
-            $code = $dv->code;
-            $isDocGenerated = $this->checkDocGenerated($code);
-            $po = PurchaseOrder::where('po_no', $ors->po_no)->first();
-
-            if ($isDocGenerated) {
-                if (empty($dv->date_disbursed)) {
-                    if ($dv->module_class_id == 2) {
-
-                    } else {
-                        if (isset($po)) {
-                            $po->status = 11;
-                            $po->save();
-                        }
-                    }
-
-                    $dv->disbursed_by = Auth::user()->emp_id;
-                    $dv->date_disbursed = date('Y-m-d H:i:s');
-                    $dv->for_payment = 'y';
-                    $dv->save();
-
-                    $logEmpMessage = "disbursed the " . strtolower($docType) . " $pKey.";
-                    $this->logEmployeeHistory($logEmpMessage);
-
-                    $msg = "$docType $pKey is now set to payment.";
-                    return redirect(url($redirectURL))->with('success', $msg);
-                } else {
-                    $msg = "$docType $pKey is already disbursed.";
-                    return redirect(url($redirectURL))->with('warning', $msg);
-                }
-            } else {
-                $msg = "Generate first the $docType $pKey document.";
-                return redirect(url($redirectURL))->with('warning', $msg);
-            }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered disbursing the $docType $pKey.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
-    }
-
-    public function showLogRemarks($id) {
-        $instanceDocLog = DocLog::where('doc_id', $id)
-                                ->whereNotNull('remarks')
-                                ->orderBy('logged_at', 'desc')
-                                ->get();
-        return view('modules.procurement.ors-burs.remarks', [
-            'id' => $id,
-            'docRemarks' => $instanceDocLog
-        ]);
-    }
-
-    public function logRemarks(Request $request, $id) {
-        $message = $request->message;
-
-        if (!empty($message)) {
-            $instanceORS = ObligationRequestStatus::find($id);
-            $instanceDocLog = new DocLog;
-            $instanceORS->notifyMessage($id, Auth::user()->id, $message);
-            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "message", $message);
-            return 'Sent!';
-        }
-    }
+    */
 }

@@ -1,5 +1,5 @@
 <form id="form-issue" class="wow animated fadeIn" method="POST"
-      action="{{ route('proc-ors-burs-issue', ['id' => $id]) }}">
+      action="{{ route('proc-dv-issue', ['id' => $id]) }}">
     @csrf
     <div class="row">
         <div class="col-md-12">

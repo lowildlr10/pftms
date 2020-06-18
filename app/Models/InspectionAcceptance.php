@@ -64,4 +64,7 @@ class InspectionAcceptance extends Model
     public function po() {
         return $this->belongsTo('App\Models\PurchaseJobOrder', 'po_id', 'id');
     }
+    public function ors() {
+        return $this->hasOne('App\Models\ObligationRequestStatus', 'id', 'ors_id');
+    }
 }

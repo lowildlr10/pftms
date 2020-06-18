@@ -224,12 +224,13 @@ class InspectionAcceptanceController extends Controller
     public function issue(Request $request, $id) {
         $issuedTo = $request->issued_to;
         $remarks = $request->remarks;
+        $instanceDocLog = new DocLog;
 
         try {
             $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
 
             if ($isDocGenerated) {
-                $instanceDocLog = new DocLog;
+
                 $instanceIAR = InspectionAcceptance::find($id);
                 $iarNo = $instanceIAR->iar_no;
 
@@ -243,6 +244,7 @@ class InspectionAcceptanceController extends Controller
                 return redirect()->route('iar', ['keyword' => $id])
                                 ->with('success', $msg);
             }
+
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
@@ -259,10 +261,10 @@ class InspectionAcceptanceController extends Controller
 
     public function inspect(Request $request, $id) {
         $remarks = $request->remarks;
+        $instanceDocLog = new DocLog;
 
         try {
-            $instanceDocLog = new DocLog;
-            $instanceIAR = InspectionAcceptance::with('po')->find($id);
+            $instanceIAR = InspectionAcceptance::with(['po', 'ors'])->find($id);
             $poID = $instanceIAR->po_id;
             $iarNo = $instanceIAR->iar_no;
             $inspectedBy = $instanceIAR->sig_inspection;
@@ -271,8 +273,11 @@ class InspectionAcceptanceController extends Controller
             $instanceDV->pr_id = $instanceIAR->pr_id;
             $instanceDV->ors_id = $instanceIAR->ors_id;
             $instanceDV->particulars = "To payment of...";
+            $instanceDV->payee = $instanceIAR->po->awarded_to;
+            $instanceDV->sig_certified = $instanceIAR->ors->sig_certified_1;
             $instanceDV->sig_accounting = $instanceIAR->po['sig_funds_available'];
             $instanceDV->sig_agency_head = $instanceIAR->po['sig_approval'];
+            $instanceDV->amount = $instanceIAR->ors->amount;
             $instanceDV->module_class = 3;
             $instanceDV->save();
 
@@ -294,150 +299,4 @@ class InspectionAcceptanceController extends Controller
                              ->with('failed', $msg);
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    /*
-    public function show($poNo)
-    {
-        $iar = DB::table('tbliar as iar')
-                 ->join('tblpo_jo as po', 'po.pr_id', '=', 'iar.pr_id')
-                 ->join('tblpr as pr', 'pr.id', '=', 'iar.pr_id')
-                 ->join('tbldivision as div', 'div.id', '=', 'pr.pr_division_id')
-                 ->where('po.po_no', $poNo)
-                 ->where('iar_no', 'LIKE', '%' . $poNo . '%')
-                 ->first();
-        $poItems = DB::table('tblpo_jo_items as po')
-                             ->join('tblunit_issue as unit', 'unit.id', '=', 'po.unit_issue')
-                             ->where('po.po_no', $poNo)
-                             ->where('po.excluded', 'n')
-                             ->get();
-        $signatories = DB::table('tblsignatories AS sig')
-                         ->select('sig.id', 'sig.position', 'sig.iar_sign_type', 'sig.active',
-                                   DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                         ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'sig.emp_id')
-                         ->orderBy('emp.firstname')
-                         ->where([['sig.iar', 'y'],
-                                  ['sig.active', 'y']])
-                         ->get();
-        $suppliers = Supplier::all();
-
-        return view('pages.create-iar', ['iar' => $iar,
-                                         'poItems' => $poItems,
-                                         'signatories' => $signatories,
-                                         'suppliers' => $suppliers]);
-    }
-
-    public function showIssuedTo($iarNo) {
-        $issuedTo = DB::table('tblemp_accounts as emp')
-                      ->join('tblsignatories as sig', 'sig.emp_id', '=', 'emp.emp_id')
-                      ->where([['iar', 'y'], ['iar_sign_type', 'inspector']])
-                      ->get();
-
-        return view('pages.view-iar-issue', ['key' => $iarNo,
-                                             'issuedTo' => $issuedTo]);
-    }
-
-    public function issue(Request $request, $iarNo) {
-        $iar = InspectionAcceptance::where('iar_no', $iarNo)->first();
-
-        try {
-            $remarks = $request['remarks'];
-            $issuedTo = $request['issued_to'];
-            $code = $iar->code;
-            $isDocGenerated = $this->checkDocGenerated($code);
-            $docStatus = $this->checkDocStatus($code);
-
-            if (empty($docStatus->date_issued)) {
-                if ($isDocGenerated) {
-                    $this->logTrackerHistory($code, Auth::user()->emp_id, $issuedTo, "issued", $remarks);
-
-                    $logEmpMessage = "issued the inspection and acceptance report $iarNo.";
-                    $this->logEmployeeHistory($logEmpMessage);
-
-                    $msg = "Inspection and Acceptance $iarNo is now set to issued.";
-                    return redirect(url('procurement/iar?search=' . $iarNo))
-                                   ->with('success', $msg);
-                } else {
-                    $msg = "Generated first the Inspection and Acceptance $iarNo document.";
-                    return redirect(url('procurement/iar?search=' . $iarNo))
-                                   ->with('warning', $msg);
-                }
-            } else {
-                $msg = "Inspection and Acceptance $iarNo is already issued.";
-                return redirect(url('procurement/iar?search=' . $iarNo))->with('warning', $msg);
-            }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered issuing the Inspection and
-                    Acceptance Report $iarNo.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
-    }
-
-    public function inspect($iarNo) {
-        $iar = InspectionAcceptance::where('iar_no', $iarNo)->first();
-
-        try {
-            $poNo = substr($iarNo, 4);
-            $po = PurchaseOrder::where('po_no', $poNo)->first();
-            $code = $iar->code;
-            $isDocGenerated = $this->checkDocGenerated($code);
-
-            if ($isDocGenerated) {
-                $dv = new DisbursementVoucher;
-                $dv->pr_id = $iar->pr_id;
-                $dv->ors_id = $iar->ors_id;
-                $dv->particulars = "To payment of...";
-                $dv->sig_accounting = $po->sig_funds_available;
-                $dv->sig_agency_head = $po->sig_approval;
-                $dv->module_class_id = 3;
-                $dv->code = $this->generateTrackerCode('DV', $poNo, 3);
-                $dv->save();
-
-                $po->status = 10;
-                $po->save();
-
-                $this->logTrackerHistory($code, Auth::user()->emp_id, 0, "received");
-
-                $logEmpMessage = "received and set to inspected the inspection and
-                                  acceptance report $iarNo.";
-                $this->logEmployeeHistory($logEmpMessage);
-
-                $msg = "Inspection and Acceptance Report $iarNo is now set to recieved
-                        & inspected and ready for Disbursement Voucher.";
-                return redirect(url('procurement/iar?search=' . $iarNo))
-                               ->with('success', $msg);
-            } else {
-                $msg = "Generate first the Inspection and Acceptance
-                        Report $iarNo document first.";
-                return redirect(url('procurement/iar?search=' . $iarNo))
-                               ->with('warning', $msg);
-            }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered receiving and set to inspected the
-                    Inspection and Acceptance Report $iarN.";
-            return redirect(url()->previous())->with('failed', $msg);
-        }
-    }*/
 }

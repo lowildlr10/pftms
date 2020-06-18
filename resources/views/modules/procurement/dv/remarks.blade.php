@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-md-12">
         <button class="btn btn-sm btn-block btn-link blue-text"
-                onclick="$(this).refreshRemarks('{{ route('proc-ors-burs-show-remarks', ['id' => $id]) }}');">
+                onclick="$(this).refreshRemarks('{{ route('proc-dv-show-remarks', ['id' => $id]) }}');">
                 <i class="fas fa-sync"></i> Refresh
         </button>
     </div>
@@ -43,8 +43,8 @@
             </label>
         </div>
         <button class="btn btn-sm btn-block btn-outline-mdb-color"
-                onclick="$(this).storeRemarks('{{ route('proc-ors-burs-store-remarks', ['id' => $id]) }}',
-                                              '{{ route('proc-ors-burs-show-remarks', ['id' => $id]) }}');">
+                onclick="$(this).storeRemarks('{{ route('proc-dv-store-remarks', ['id' => $id]) }}',
+                                              '{{ route('proc-dv-show-remarks', ['id' => $id]) }}');">
             <i class="fas fa-location-arrow"></i> Send
         </button>
     </div>

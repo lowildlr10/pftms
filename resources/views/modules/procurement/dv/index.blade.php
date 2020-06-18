@@ -316,7 +316,7 @@
                     </li>
                     @endif
 
-                    @if (empty($dv->procdv['date_dibursed']))
+                    @if (empty($dv->procdv['date_disbursed']))
                         @if (empty($dv->doc_status->date_issued) &&
                              empty($dv->doc_status->date_received) &&
                              empty($dv->doc_status->date_issued_back) &&
@@ -345,12 +345,12 @@
                                  !empty($dv->doc_status->date_received) &&
                                  empty($dv->doc_status->date_issued_back) &&
                                  empty($dv->doc_status->date_received_back))
-                            @if ($isAllowedDisburse)
+                            @if ($isAllowedPayment)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showDisburse('{{ route('proc-dv-show-obligate', ['id' => $dv->procdv['id']]) }}',
+                                onclick="$(this).showPayment('{{ route('proc-dv-show-payment', ['id' => $dv->procdv['id']]) }}',
                                                               `{{ 'Disbursement Voucher '.$dv->procdv['id'] }}`);">
-                            <i class="fas fa-angle-double-right"></i> Payement
+                            <i class="fas fa-angle-double-right"></i> Payment/LDDAP
                         </button>
                     </li>
                             @endif
@@ -377,6 +377,15 @@
                         </button>
                     </li>
                         @endif
+                    @else
+                        @if ($isAllowedPayment)
+                    <li class="list-group-item justify-content-between">
+                        <a onclick="$(this).redirectToDoc('{{ route('lddap') }}', '{{ $dv->procdv['id'] }}');"
+                          class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
+                            <i class="fas fa-angle-double-right"></i> Generate Payment/LDDAP
+                        </a>
+                    </li>
+                        @endif
                     @endif
                 </ul>
             </div>
@@ -400,6 +409,7 @@
 @include('modals.receive')
 @include('modals.issue-back')
 @include('modals.receive-back')
+@include('modals.payment')
 
 @include('modals.print')
 
