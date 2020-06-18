@@ -153,69 +153,6 @@ class DisbursementVoucherController extends Controller
         ];
     }
 
-    private function getIndexData($request, $type) {
-        $keyword = trim($request->keyword);
-        $instanceDocLog = new DocLog;
-
-        // User groups
-        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
-                             [Auth::user()->division];
-
-        // Main data
-        $paperSizes = PaperSize::orderBy('paper_type')->get();
-        $orsData = DisbursementVoucher::with('bidpayee')->whereHas('pr', function($query)
-                   use($empDivisionAccess) {
-            $query->whereIn('division', $empDivisionAccess);
-        })->whereHas('procdv', function($query) {
-            $query->whereNull('deleted_at');
-        });
-
-        if (!empty($keyword)) {
-            $orsData = $orsData->where(function($qry) use ($keyword) {
-                $qry->where('id', 'like', "%$keyword%")
-                    ->orWhere('po_no', 'like', "%$keyword%")
-                    ->orWhere('date_po', 'like', "%$keyword%")
-                    ->orWhere('grand_total', 'like', "%$keyword%")
-                    ->orWhere('document_type', 'like', "%$keyword%")
-                    ->orWhereHas('stat', function($query) use ($keyword) {
-                        $query->where('status_name', 'like', "%$keyword%");
-                    })->orWhereHas('bidpayee', function($query) use ($keyword) {
-                        $query->where('company_name', 'like', "%$keyword%")
-                              ->orWhere('address', 'like', "%$keyword%");
-                    })->orWhereHas('poitems', function($query) use ($keyword) {
-                        $query->where('item_description', 'like', "%$keyword%");
-                    })->orWhereHas('ors', function($query) use ($keyword) {
-                        $query->where('id', 'like', "%$keyword%")
-                              ->orWhere('particulars', 'like', "%$keyword%")
-                              ->orWhere('document_type', 'like', "%$keyword%")
-                              ->orWhere('transaction_type', 'like', "%$keyword%")
-                              ->orWhere('serial_no', 'like', "%$keyword%")
-                              ->orWhere('date_ors_burs', 'like', "%$keyword%")
-                              ->orWhere('date_obligated', 'like', "%$keyword%")
-                              ->orWhere('responsibility_center', 'like', "%$keyword%")
-                              ->orWhere('uacs_object_code', 'like', "%$keyword%")
-                              ->orWhere('amount', 'like', "%$keyword%")
-                              ->orWhere('office', 'like', "%$keyword%")
-                              ->orWhere('address', 'like', "%$keyword%")
-                              ->orWhere('fund_cluster', 'like', "%$keyword%");
-                    });
-            });
-        }
-
-        $orsData = $orsData->sortable(['po_no' => 'desc'])->paginate(15);
-
-        foreach ($orsData as $orsDat) {
-            $orsDat->doc_status = $instanceDocLog->checkDocStatus($orsDat->ors['id']);
-        }
-
-        return (object) [
-            'keyword' => $keyword,
-            'ors_data' => $orsData,
-            'paper_sizes' => $paperSizes
-        ];
-    }
-
     /**
      * Display the specified resource.
      *
