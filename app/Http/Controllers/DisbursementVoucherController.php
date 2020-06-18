@@ -116,6 +116,7 @@ class DisbursementVoucherController extends Controller
         if (!empty($keyword)) {
             $dvData = $dvData->where(function($qry) use ($keyword) {
                 $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('pr_id', 'like', "%$keyword%")
                     ->orWhere('po_no', 'like', "%$keyword%")
                     ->orWhere('amount', 'like', "%$keyword%")
                     ->orWhere('document_type', 'like', "%$keyword%")
