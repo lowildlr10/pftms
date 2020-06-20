@@ -144,7 +144,7 @@ $(function() {
         });
         $("#modal-issue").modal({keyboard: false, backdrop: 'static'})
 						 .on('shown.bs.modal', function() {
-            $('#issue-title').html('Issue ORS/BURS');
+            $('#issue-title').html('Submit ORS/BURS');
 		}).on('hidden.bs.modal', function() {
             $('#modal-body-issue').html('').css('display', 'none');
 		});
@@ -180,7 +180,7 @@ $(function() {
         });
         $("#modal-issue-back").modal({keyboard: false, backdrop: 'static'})
 						      .on('shown.bs.modal', function() {
-            $('#issue-back-title').html('Issue Back ORS/BURS');
+            $('#issue-back-title').html('Submit Back ORS/BURS');
 		}).on('hidden.bs.modal', function() {
             $('#modal-body-issue-back').html('').css('display', 'none');
 		});

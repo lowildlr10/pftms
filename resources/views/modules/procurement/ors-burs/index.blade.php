@@ -124,7 +124,7 @@
                                                          empty($ors->doc_status->date_issued_back) &&
                                                          empty($ors->doc_status->date_received_back))
                                                 <i class="fas fa-paper-plane fa-lg orange-text material-tooltip-main"
-                                                   data-toggle="tooltip" data-placement="right" title="Issued"></i>
+                                                   data-toggle="tooltip" data-placement="right" title="Submitted"></i>
                                                 @elseif (!empty($ors->doc_status->date_issued) &&
                                                          !empty($ors->doc_status->date_received) &&
                                                          empty($ors->doc_status->date_issued_back) &&
@@ -136,7 +136,7 @@
                                                          !empty($ors->doc_status->date_issued_back) &&
                                                          empty($ors->doc_status->date_received_back))
                                                 <i class="fas fa-undo-alt fa-lg orange-text material-tooltip-main"
-                                                   data-toggle="tooltip" data-placement="right" title="Issued Back"></i>
+                                                   data-toggle="tooltip" data-placement="right" title="Sumbitted Back"></i>
                                                 @elseif (!empty($ors->doc_status->date_issued) &&
                                                          !empty($ors->doc_status->date_received) &&
                                                          !empty($ors->doc_status->date_issued_back) &&
@@ -347,7 +347,7 @@
                         <button type="button" class="btn btn-outline-orange waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showIssue('{{ route('proc-ors-burs-show-issue', ['id' => $ors->ors['id']]) }}',
                                                            `{{ strtoupper($ors->ors['document_type']).' '.$ors->po_no }}`);">
-                            <i class="fas fa-paper-plane"></i> Issue
+                            <i class="fas fa-paper-plane"></i> Submit
                         </button>
                     </li>
                         @elseif (!empty($ors->doc_status->date_issued) &&
@@ -381,7 +381,7 @@
                         <button type="button" class="btn btn-outline-orange waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showIssueBack('{{ route('proc-ors-burs-show-issue-back', ['id' => $ors->ors['id']]) }}',
                                                                `{{ strtoupper($ors->ors['document_type']).' '.$ors->po_no }}`);">
-                            <i class="fas fa-undo-alt"></i> Issue Back
+                            <i class="fas fa-undo-alt"></i> Submit Back
                         </button>
                     </li>
                             @endif
