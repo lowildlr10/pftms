@@ -643,7 +643,7 @@ class AbstractQuotationController extends Controller
         $unitCost = $instanceAbsItem->unit_cost;
         $totalCost = $instanceAbsItem->total_cost;
         $specification = $instanceAbsItem->specification;
-        $specification = !empty($specification) ? "($specification)" : '=';
+        $specification = !empty($specification) ? "($specification)" : '';
 
         $poItemCount = PurchaseJobOrderItem::where('pr_item_id', $prItemID)
                                            ->count();
