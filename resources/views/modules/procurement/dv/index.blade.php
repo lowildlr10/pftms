@@ -129,7 +129,7 @@
                                                      empty($dv->doc_status->date_issued_back) &&
                                                      empty($dv->doc_status->date_received_back))
                                         <i class="fas fa-paper-plane fa-lg orange-text material-tooltip-main"
-                                           data-toggle="tooltip" data-placement="right" title="Issued"></i>
+                                           data-toggle="tooltip" data-placement="right" title="Submitted"></i>
                                                 @elseif (!empty($dv->doc_status->date_issued) &&
                                                          !empty($dv->doc_status->date_received) &&
                                                          empty($dv->doc_status->date_issued_back) &&
@@ -141,7 +141,7 @@
                                                          !empty($dv->doc_status->date_issued_back) &&
                                                          empty($dv->doc_status->date_received_back))
                                         <i class="fas fa-undo-alt fa-lg orange-text material-tooltip-main"
-                                           data-toggle="tooltip" data-placement="right" title="Issued Back"></i>
+                                           data-toggle="tooltip" data-placement="right" title="Submitted Back"></i>
                                                 @elseif (!empty($dv->doc_status->date_issued) &&
                                                          !empty($dv->doc_status->date_received) &&
                                                          !empty($dv->doc_status->date_issued_back) &&
@@ -326,7 +326,7 @@
                         <button type="button" class="btn btn-outline-orange waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showIssue('{{ route('proc-dv-show-issue', ['id' => $dv->procdv['id']]) }}',
                                                            `{{ 'Disbursement Voucher '.$dv->procdv['id'] }}`);">
-                            <i class="fas fa-paper-plane"></i> Issue
+                            <i class="fas fa-paper-plane"></i> Submit
                         </button>
                     </li>
                         @elseif (!empty($dv->doc_status->date_issued) &&
@@ -360,7 +360,7 @@
                         <button type="button" class="btn btn-outline-orange waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showIssueBack('{{ route('proc-dv-show-issue-back', ['id' => $dv->procdv['id']]) }}',
                                                                `{{ 'Disbursement Voucher '.$dv->procdv['id'] }}`);">
-                            <i class="fas fa-undo-alt"></i> Issue Back
+                            <i class="fas fa-undo-alt"></i> Submit Back
                         </button>
                     </li>
                             @endif
