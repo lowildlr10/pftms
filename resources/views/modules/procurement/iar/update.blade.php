@@ -55,10 +55,10 @@
         </div>
         <div class="col-md-6">
             <div class="md-form">
-                <input type="text" id="invoice-no" class="form-control form-sm required"
+                <input type="text" id="invoice-no" class="form-control form-sm"
                        value="{{ $invoiceNo }}" name="invoice_no">
                 <label for="invoice-no" class="{{ !empty($invoiceNo) ? 'active' : '' }}">
-                    Invoice No <span class="red-text">*</span>
+                    Invoice No
                 </label>
             </div>
         </div>
@@ -76,10 +76,10 @@
         </div>
         <div class="col-md-6">
             <div class="md-form">
-                <input type="date" id="date-invoice" class="form-control form-sm required"
+                <input type="date" id="date-invoice" class="form-control form-sm"
                        value="{{ $invoiceDate }}" name="date_invoice">
                 <label for="date-invoice" class="{{ !empty($invoiceDate) ? 'active' : '' }} mt-3">
-                    Date <span class="red-text">*</span>
+                    Date
                 </label>
             </div>
         </div>
@@ -121,26 +121,14 @@
                         {{ $item->quantity }}
                     </td>
                 </tr>
-
-                @for ($i = 0; $i < 2; $i++)
-                <tr>
-                    <td colspan="4"></td>
-                </tr>
-                @endfor
-
-                <tr>
-                    <td class="text-center" colspan="4">
-                        *** Nothing Follows ***
-                    </td>
-                </tr>
                     @endforeach
-                @else
+                @endif
+
                 <tr>
                     <td class="text-center" colspan="4">
                         *** Nothing Follows ***
                     </td>
                 </tr>
-                @endif
             </tbody>
         </table>
     </div>
