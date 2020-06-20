@@ -230,7 +230,6 @@ class InspectionAcceptanceController extends Controller
             $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
 
             if ($isDocGenerated) {
-
                 $instanceIAR = InspectionAcceptance::find($id);
                 $iarNo = $instanceIAR->iar_no;
 
@@ -242,9 +241,13 @@ class InspectionAcceptanceController extends Controller
                 $msg = "Inspection and Acceptance Report '$iarNo' successfully issued to $issuedToName.";
                 Auth::user()->log($request, $msg);
                 return redirect()->route('iar', ['keyword' => $id])
-                                ->with('success', $msg);
+                                 ->with('success', $msg);
+            } else {
+                $msg = "Document for Inspection and Acceptance Report '$id' should be generated first.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('iar', ['keyword' => $id])
+                                 ->with('warning', $msg);
             }
-
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
