@@ -150,7 +150,7 @@ $(function() {
         });
         $("#modal-issue").modal({keyboard: false, backdrop: 'static'})
 						 .on('shown.bs.modal', function() {
-            $('#issue-title').html('Issue Dibursement Voucher');
+            $('#issue-title').html('Submit Dibursement Voucher');
 		}).on('hidden.bs.modal', function() {
             $('#modal-body-issue').html('').css('display', 'none');
 		});
@@ -186,7 +186,7 @@ $(function() {
         });
         $("#modal-issue-back").modal({keyboard: false, backdrop: 'static'})
 						      .on('shown.bs.modal', function() {
-            $('#issue-back-title').html('Issue Back Dibursement Voucher');
+            $('#issue-back-title').html('Submit Back Dibursement Voucher');
 		}).on('hidden.bs.modal', function() {
             $('#modal-body-issue-back').html('').css('display', 'none');
 		});
