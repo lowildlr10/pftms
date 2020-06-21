@@ -137,6 +137,7 @@ class PurchaseRequestController extends Controller
     }
 
     public function showTrackPR($prNo) {
+        $instanceDocLog = new DocLog;
         $mainStatusColor = "";
         $mainStatusSymbol = "-";
 
@@ -147,7 +148,7 @@ class PurchaseRequestController extends Controller
             $prApprovedStatusColor = "";
             $prApprovedStatusSymbol = "";
 
-            if (!empty($pr->date_pr_approve)) {
+            if (!empty($pr->date_pr_approved)) {
                 $mainStatusColor = "green";
                 $mainStatusSymbol = '<i class="fas fa-check"></i>';
                 $prApprovedStatusColor =  $mainStatusColor;
@@ -168,9 +169,9 @@ class PurchaseRequestController extends Controller
             $mainStatusSymbol = "-";
 
             // Request for Quotation
-            $rfq = Canvass::where('pr_id', $pr->id)->first();
-            $rfqCode = isset($rfq->code) ? $rfq->code: '';
-            $rfqDocStatus = $this->checkDocStatus($rfqCode);
+            $rfq = RequestQuotation::where('pr_id', $pr->id)->first();
+            $rfqCode = $rfq->id;
+            $rfqDocStatus = $instanceDocLog->checkDocStatus($rfqCode);
 
             $rfqIssuedStatusColor = "";
             $rfqIssuedStatusSymbol = "-";
@@ -197,54 +198,59 @@ class PurchaseRequestController extends Controller
                 $rfqReceivedStatusSymbol = '<i class="fas fa-check"></i>';
             }
 
-            $rfqTrackData = (object) ['main_status_color' => $mainStatusColor,
-                                    'main_status_symbol' => $mainStatusSymbol,
-                                    '_issued_status_color' => $rfqIssuedStatusColor,
-                                    '_issued_status_symbol' => $rfqIssuedStatusSymbol,
-                                    '_received_status_color' => $rfqReceivedStatusColor,
-                                    '_received_status_symbol' => $rfqReceivedStatusSymbol];
+            $rfqTrackData = (object) [
+                'main_status_color' => $mainStatusColor,
+                'main_status_symbol' => $mainStatusSymbol,
+                '_issued_status_color' => $rfqIssuedStatusColor,
+                '_issued_status_symbol' => $rfqIssuedStatusSymbol,
+                '_received_status_color' => $rfqReceivedStatusColor,
+                '_received_status_symbol' => $rfqReceivedStatusSymbol
+            ];
 
             // -- Reset Variable
             $mainStatusColor = "";
             $mainStatusSymbol = "-";
 
             // Abstract of Bids and Quotation
-            $abstract = Abstracts::where('pr_id', $pr->id)->first();
+            $abstract = AbstractQuotation::where('pr_id', $pr->id)->first();
 
             $abstractApprovedStatusColor = "";
             $abstractApprovedStatusSymbol = "-";
 
-            if (!empty($abstract) > 0 && !empty($abstract->date_abstract_approve)) {
+            if (!empty($abstract) > 0 && !empty($abstract->date_abstract_approved)) {
                 $mainStatusColor = "green";
                 $mainStatusSymbol = '<i class="fas fa-check"></i>';
                 $abstractApprovedStatusColor = "green";
                 $abstractApprovedStatusSymbol = '<i class="fas fa-check"></i>';
-            } else if (!empty($abstract) > 0 && empty($abstract->date_abstract_approve)) {
+            } else if (!empty($abstract) > 0 && empty($abstract->date_abstract_approved)) {
                 $mainStatusColor = "blue";
                 $mainStatusSymbol = '<i class="fas fa-chevron-right"></i>';
                 $abstractApprovedStatusColor = "";
                 $abstractApprovedStatusSymbol = '-';
             }
 
-            $abstractTrackData = (object) ['main_status_color' => $mainStatusColor,
-                                        'main_status_symbol' => $mainStatusSymbol,
-                                        '_approved_status_color' => $abstractApprovedStatusColor,
-                                        '_approved_status_symbol' => $abstractApprovedStatusSymbol];
+            $abstractTrackData = (object) [
+                'main_status_color' => $mainStatusColor,
+                'main_status_symbol' => $mainStatusSymbol,
+                '_approved_status_color' => $abstractApprovedStatusColor,
+                '_approved_status_symbol' => $abstractApprovedStatusSymbol
+            ];
 
             // -- Reset Variable
             $mainStatusColor = "";
             $mainStatusSymbol = "-";
 
             // Purchase/Job Order
-            $po = DB::table('tblpo_jo')->where('pr_id', $pr->id)
-                                       ->get();
+            $po = PurchaseJobOrder::where('pr_id', $pr->id)
+                                  ->orderBy('po_no')
+                                  ->get();
             $poCount = $po->count();
             $poCountComplete = 0;
 
             foreach ($po as $dat) {
                 // Individual Purchase/Job Order
-                $poCode = isset($dat->code) ? $dat->code: '';
-                $poDocStatus = $this->checkDocStatus($poCode);
+                $poCode = $dat->id;
+                $poDocStatus = $instanceDocLog->checkDocStatus($poCode);
 
                 $poStatusColor = "blue";
                 $poStatusSymbol = '<i class="fas fa-chevron-right"></i>';
@@ -278,10 +284,10 @@ class PurchaseRequestController extends Controller
                 }
 
                 // Obligation / Budget Utilization and Request Status
-                $ors = OrsBurs::where('po_no', $dat->po_no)->first();
+                $ors = ObligationRequestStatus::where('po_no', $dat->po_no)->first();
                 $orsID = isset($ors->id) ? $ors->id: '';
-                $orsCode = isset($ors->code) ? $ors->code: '';
-                $orsDocStatus = $this->checkDocStatus($orsCode);
+                $orsCode = $orsID;
+                $orsDocStatus = $instanceDocLog->checkDocStatus($orsCode);
 
                 $orsStatusColor = "";
                 $orsStatusSymbol = "-";
@@ -319,10 +325,10 @@ class PurchaseRequestController extends Controller
                 }
 
                 // Inspection and Acceptance Report
-                $iar = InspectionAcceptance::where('ors_id', $orsID)->first();
+                $iar = InspectionAcceptance::where('po_id', $poCode)->first();
                 $inventoryCount = InventoryStock::where('po_no', $dat->po_no)->count();
-                $iarCode = isset($iar->code) ? $iar->code: '';
-                $iarDocStatus = $this->checkDocStatus($iarCode);
+                $iarCode = isset($iar->id) ? $iar->id : NULL;
+                $iarDocStatus = $instanceDocLog->checkDocStatus($iarCode);
 
                 $iarStatusColor = "";
                 $iarStatusSymbol = "-";
@@ -361,8 +367,8 @@ class PurchaseRequestController extends Controller
 
                 // Disbursement Voucher
                 $dv = DisbursementVoucher::where('ors_id', $orsID)->first();
-                $dvCode = isset($dv->code) ? $dv->code: '';
-                $dvDocStatus = $this->checkDocStatus($dvCode);
+                $dvCode = isset($dv->id) ? $dv->id: NULL;
+                $dvDocStatus = $instanceDocLog->checkDocStatus($dvCode);
 
                 $dvStatusColor = "";
                 $dvStatusSymbol = "-";
@@ -455,14 +461,16 @@ class PurchaseRequestController extends Controller
             $mainPOTrackData = (object) ['main_status_color' => $mainStatusColor,
                                         'main_status_symbol' => $mainStatusSymbol];
 
-            return view('pages.pr-tracker', ['prNo' => $prNo,
-                                            'isPrDisapproved' => !empty($pr->date_pr_disapprove) ? true: false,
-                                            'isPrCancelled' => !empty($pr->date_pr_cancel) ? true: false,
-                                            'prTrackData' => $prTrackData,
-                                            'rfqTrackData' => $rfqTrackData,
-                                            'abstractTrackData' => $abstractTrackData,
-                                            'mainPOTrackData' => $mainPOTrackData,
-                                            'po' => $po]);
+            return view('modules.procurement.pr.tracker', [
+                'prNo' => $prNo,
+                'isPrDisapproved' => !empty($pr->date_pr_disapprove) ? true: false,
+                'isPrCancelled' => !empty($pr->date_pr_cancel) ? true: false,
+                'prTrackData' => $prTrackData,
+                'rfqTrackData' => $rfqTrackData,
+                'abstractTrackData' => $abstractTrackData,
+                'mainPOTrackData' => $mainPOTrackData,
+                'po' => $po
+            ]);
         } else {
             return "No data found.";
         }
