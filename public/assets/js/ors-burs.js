@@ -75,9 +75,29 @@ $(function() {
                 $('#total').val(amount);
             });
         });
-        $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
+        $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
             $('#create-title').html('Create ORS/BURS');
+		}).on('hidden.bs.modal', function() {
+		    $('#modal-body-create').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.showCreateDV = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-create').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $(this).slideToggle(500);
+
+            $('#amount').change(function() {
+                const amount = $(this).val();
+                $('#total').val(amount);
+            });
+        });
+        $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
+						     .on('shown.bs.modal', function() {
+            $('#create-title').html('Create DV from ORS/BURS');
 		}).on('hidden.bs.modal', function() {
 		    $('#modal-body-create').html('').css('display', 'none');
 		});

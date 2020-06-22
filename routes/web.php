@@ -28,57 +28,6 @@ Route::post('register', 'AccountController@storeProfile');
 
 Route::middleware(['web', 'auth'])->group(function () {
 
-    /*===================== CASH ADVANCE, REIMBURSEMENT, & LIQUIDATION ROUTES =====================*/
-
-    // Obligation and Request Status/BURS
-    Route::any('cadv-reim-liquidation/ors-burs', 'ObligationRequestStatusController@indexCashAdvLiquidation');
-    Route::get('cadv-reim-liquidation/ors-burs/create', 'ObligationRequestStatusController@showCreate');
-    Route::post('cadv-reim-liquidation/ors-burs/store', 'ObligationRequestStatusController@store');
-    Route::get('cadv-reim-liquidation/ors-burs/edit/{key}', 'ObligationRequestStatusController@showEdit');
-    Route::post('cadv-reim-liquidation/ors-burs/update/{key}', 'ObligationRequestStatusController@update');
-    Route::get('cadv-reim-liquidation/ors-burs/show-issue/{key}', 'ObligationRequestStatusController@showIssuedTo');
-    Route::post('cadv-reim-liquidation/ors-burs/create-dv/{id}', 'ObligationRequestStatusController@createDV');
-    Route::post('cadv-reim-liquidation/ors-burs/delete/{id}', 'ObligationRequestStatusController@delete');
-    Route::post('cadv-reim-liquidation/ors-burs/issue/{id}', 'ObligationRequestStatusController@issue');
-    Route::post('cadv-reim-liquidation/ors-burs/receive/{id}', 'ObligationRequestStatusController@receive');
-    Route::post('cadv-reim-liquidation/ors-burs/obligate/{id}', [
-        'uses' => 'ObligationRequestStatusController@obligate',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Budget Officer']
-    ]);
-
-    // Disbursement Voucher
-    Route::any('cadv-reim-liquidation/dv', 'DisbursementVoucherController@indexCashAdvLiquidation');
-    Route::get('cadv-reim-liquidation/dv/create', 'DisbursementVoucherController@showCreate');
-    Route::post('cadv-reim-liquidation/dv/store', 'DisbursementVoucherController@store');
-    Route::get('cadv-reim-liquidation/dv/edit/{key}', 'DisbursementVoucherController@showEdit');
-    Route::post('cadv-reim-liquidation/dv/update/{key}', 'DisbursementVoucherController@update');
-    Route::get('cadv-reim-liquidation/dv/show/{poNo}', 'DisbursementVoucherController@show');
-    Route::get('cadv-reim-liquidation/dv/show-issue/{id}', 'DisbursementVoucherController@showIssuedTo');
-    Route::post('cadv-reim-liquidation/dv/update/{poNo}', 'DisbursementVoucherController@update');
-    Route::post('cadv-reim-liquidation/dv/issue/{id}', 'DisbursementVoucherController@issue');
-    Route::post('cadv-reim-liquidation/dv/receive/{id}', 'DisbursementVoucherController@receive');
-    Route::post('cadv-reim-liquidation/ors-burs/create-liquidation/{id}',
-                'DisbursementVoucherController@createLiquidation');
-    Route::post('cadv-reim-liquidation/dv/payment/{id}', [
-        'uses' => 'DisbursementVoucherController@payment',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Accountant']
-    ]);
-
-    // Liquidation Report
-    Route::any('cadv-reim-liquidation/liquidation', 'LiquidationController@indexCashAdvLiquidation');
-    Route::any('cadv-reim-liquidation/liquidation/edit/{id}', 'LiquidationController@showEdit');
-    Route::post('cadv-reim-liquidation/liquidation/update/{id}', 'LiquidationController@update');
-    Route::get('cadv-reim-liquidation/liquidation/show-issue/{id}', 'LiquidationController@showIssuedTo');
-    Route::post('cadv-reim-liquidation/liquidation/issue/{id}', 'LiquidationController@issue');
-    Route::post('cadv-reim-liquidation/liquidation/receive/{id}', 'LiquidationController@receive');
-    Route::post('cadv-reim-liquidation/liquidation/liquidate/{id}', [
-        'uses' => 'LiquidationController@liquidate',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Accountant']
-    ]);
-
     /*===================== INVENTORY ROUTES =====================*/
 
     // Stocks
@@ -208,6 +157,219 @@ Route::middleware(['web', 'auth'])->group(function () {
 });
 
 Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
+
+    /*===================== CASH ADVANCE, REIMBURSEMENT, & LIQUIDATION ROUTES =====================*/
+
+    Route::any('cadv-reim-liquidation/ors-burs', [
+        'uses' => 'ObligationRequestStatusController@indexCA',
+        'module' => 'ca_ors_burs',
+        'access' => 'is_allowed'
+    ])->name('ca-ors-burs');
+    Route::get('cadv-reim-liquidation/ors-burs/show-create', [
+        'uses' => 'ObligationRequestStatusController@showCreate',
+        'module' => 'ca_ors_burs',
+        'access' => 'create'
+    ])->name('ca-ors-burs-show-create');
+    Route::post('cadv-reim-liquidation/ors-burs/store', [
+        'uses' => 'ObligationRequestStatusController@store',
+        'module' => 'ca_ors_burs',
+        'access' => 'create'
+    ])->name('ca-ors-burs-store');
+    Route::get('cadv-reim-liquidation/ors-burs/show-edit/{id}', [
+        'uses' => 'ObligationRequestStatusController@showEdit',
+        'module' => 'ca_ors_burs',
+        'access' => 'update'
+    ])->name('ca-ors-burs-show-edit');
+    Route::post('cadv-reim-liquidation/ors-burs/update/{id}', [
+        'uses' => 'ObligationRequestStatusController@update',
+        'module' => 'ca_ors_burs',
+        'access' => 'update'
+    ])->name('ca-ors-burs-update');
+    Route::post('cadv-reim-liquidation/ors-burs/delete/{id}', [
+        'uses' => 'ObligationRequestStatusController@delete',
+        'module' => 'ca_ors_burs',
+        'access' => 'delete'
+    ])->name('ca-ors-burs-delete');
+    Route::post('cadv-reim-liquidation/ors-burs/destroy/{id}', [
+        'uses' => 'ObligationRequestStatusController@destroy',
+        'module' => 'ca_ors_burs',
+        'access' => 'destroy'
+    ])->name('ca-ors-burs-destroy');
+    Route::get('cadv-reim-liquidation/ors-burs/show-issue/{id}', [
+        'uses' => 'ObligationRequestStatusController@showIssue',
+        'module' => 'ca_ors_burs',
+        'access' => 'issue'
+    ])->name('ca-ors-burs-show-issue');
+    Route::post('cadv-reim-liquidation/ors-burs/issue/{id}', [
+        'uses' => 'ObligationRequestStatusController@issue',
+        'module' => 'ca_ors_burs',
+        'access' => 'issue'
+    ])->name('ca-ors-burs-issue');
+    Route::get('cadv-reim-liquidation/ors-burs/show-receive/{id}', [
+        'uses' => 'ObligationRequestStatusController@showReceive',
+        'module' => 'ca_ors_burs',
+        'access' => 'receive'
+    ])->name('ca-ors-burs-show-receive');
+    Route::post('cadv-reim-liquidation/ors-burs/receive/{id}', [
+        'uses' => 'ObligationRequestStatusController@receive',
+        'module' => 'ca_ors_burs',
+        'access' => 'receive'
+    ])->name('ca-ors-burs-receive');
+    Route::get('cadv-reim-liquidation/ors-burs/show-issue-back/{id}', [
+        'uses' => 'ObligationRequestStatusController@showIssueback',
+        'module' => 'ca_ors_burs',
+        'access' => 'issue_back'
+    ])->name('ca-ors-burs-show-issue-back');
+    Route::post('cadv-reim-liquidation/ors-burs/issue-back/{id}', [
+        'uses' => 'ObligationRequestStatusController@issueBack',
+        'module' => 'ca_ors_burs',
+        'access' => 'issue_back'
+    ])->name('ca-ors-burs-issue-back');
+    Route::get('cadv-reim-liquidation/ors-burs/show-receive-back/{id}', [
+        'uses' => 'ObligationRequestStatusController@showReceiveBack',
+        'module' => 'ca_ors_burs',
+        'access' => 'receive_back'
+    ])->name('ca-ors-burs-show-receive-back');
+    Route::post('cadv-reim-liquidation/ors-burs/receive-back/{id}', [
+        'uses' => 'ObligationRequestStatusController@receiveBack',
+        'module' => 'ca_ors_burs',
+        'access' => 'receive_back'
+    ])->name('ca-ors-burs-receive-back');
+    Route::get('cadv-reim-liquidation/ors-burs/show-obligate/{id}', [
+        'uses' => 'ObligationRequestStatusController@showObligate',
+        'module' => 'ca_ors_burs',
+        'access' => 'obligate'
+    ])->name('ca-ors-burs-show-obligate');
+    Route::post('cadv-reim-liquidation/ors-burs/obligate/{id}', [
+        'uses' => 'ObligationRequestStatusController@obligate',
+        'module' => 'ca_ors_burs',
+        'access' => 'obligate'
+    ])->name('ca-ors-burs-obligate');
+    Route::get('cadv-reim-liquidation/ors-burs/show-remarks/{id}', [
+        'uses' => 'ObligationRequestStatusController@showLogRemarks',
+        'module' => 'ca_ors_burs',
+        'access' => 'is_allowed'
+    ])->name('ca-ors-burs-show-remarks');
+    Route::post('cadv-reim-liquidation/ors-burs/create-remarks/{id}', [
+        'uses' => 'ObligationRequestStatusController@logRemarks',
+        'module' => 'ca_ors_burs',
+        'access' => 'is_allowed'
+    ])->name('ca-ors-burs-store-remarks');
+
+    // Disbursement Voucher
+    Route::any('cadv-reim-liquidation/dv', [
+        'uses' => 'DisbursementVoucherController@indexCA',
+        'module' => 'ca_dv',
+        'access' => 'is_allowed'
+    ])->name('ca-dv');
+    Route::get('cadv-reim-liquidation/dv/show-create', [
+        'uses' => 'DisbursementVoucherController@showCreate',
+        'module' => 'ca_dv',
+        'access' => 'create'
+    ])->name('ca-dv-show-create');
+    Route::get('cadv-reim-liquidation/dv/show-create-from-ors/{orsID}', [
+        'uses' => 'DisbursementVoucherController@showCreateFromORS',
+        'module' => 'ca_dv',
+        'access' => 'create'
+    ])->name('ca-dv-show-create-ors');
+    Route::post('cadv-reim-liquidation/dv/store', [
+        'uses' => 'DisbursementVoucherController@store',
+        'module' => 'ca_dv',
+        'access' => 'create'
+    ])->name('ca-dv-store');
+    Route::get('cadv-reim-liquidation/dv/show-edit/{id}', [
+        'uses' => 'DisbursementVoucherController@showEdit',
+        'module' => 'ca_dv',
+        'access' => 'update'
+    ])->name('ca-dv-show-edit');
+    Route::post('cadv-reim-liquidation/dv/update/{id}', [
+        'uses' => 'DisbursementVoucherController@update',
+        'module' => 'ca_dv',
+        'access' => 'update'
+    ])->name('ca-dv-update');
+    Route::post('cadv-reim-liquidation/dv/delete/{id}', [
+        'uses' => 'DisbursementVoucherController@delete',
+        'module' => 'ca_dv',
+        'access' => 'delete'
+    ])->name('ca-dv-delete');
+    Route::post('cadv-reim-liquidation/dv/destroy/{id}', [
+        'uses' => 'DisbursementVoucherController@destroy',
+        'module' => 'ca_dv',
+        'access' => 'destroy'
+    ])->name('ca-dv-destroy');
+    Route::get('cadv-reim-liquidation/dv/show-issue/{id}', [
+        'uses' => 'DisbursementVoucherController@showIssue',
+        'module' => 'ca_dv',
+        'access' => 'issue'
+    ])->name('ca-dv-show-issue');
+    Route::post('cadv-reim-liquidation/dv/issue/{id}', [
+        'uses' => 'DisbursementVoucherController@issue',
+        'module' => 'ca_dv',
+        'access' => 'issue'
+    ])->name('ca-dv-issue');
+    Route::get('cadv-reim-liquidation/dv/show-receive/{id}', [
+        'uses' => 'DisbursementVoucherController@showReceive',
+        'module' => 'ca_dv',
+        'access' => 'receive'
+    ])->name('ca-dv-show-receive');
+    Route::post('cadv-reim-liquidation/dv/receive/{id}', [
+        'uses' => 'DisbursementVoucherController@receive',
+        'module' => 'ca_dv',
+        'access' => 'receive'
+    ])->name('ca-dv-receive');
+    Route::get('cadv-reim-liquidation/dv/show-issue-back/{id}', [
+        'uses' => 'DisbursementVoucherController@showIssueback',
+        'module' => 'ca_dv',
+        'access' => 'issue_back'
+    ])->name('ca-dv-show-issue-back');
+    Route::post('cadv-reim-liquidation/dv/issue-back/{id}', [
+        'uses' => 'DisbursementVoucherController@issueBack',
+        'module' => 'ca_dv',
+        'access' => 'issue_back'
+    ])->name('ca-dv-issue-back');
+    Route::get('cadv-reim-liquidation/dv/show-receive-back/{id}', [
+        'uses' => 'DisbursementVoucherController@showReceiveBack',
+        'module' => 'ca_dv',
+        'access' => 'receive_back'
+    ])->name('ca-dv-show-receive-back');
+    Route::post('cadv-reim-liquidation/dv/receive-back/{id}', [
+        'uses' => 'DisbursementVoucherController@receiveBack',
+        'module' => 'ca_dv',
+        'access' => 'receive_back'
+    ])->name('ca-dv-receive-back');
+    Route::get('cadv-reim-liquidation/dv/show-payment/{id}', [
+        'uses' => 'DisbursementVoucherController@showPayment',
+        'module' => 'ca_dv',
+        'access' => 'payment'
+    ])->name('ca-dv-show-payment');
+    Route::post('cadv-reim-liquidation/dv/payment/{id}', [
+        'uses' => 'DisbursementVoucherController@payment',
+        'module' => 'ca_dv',
+        'access' => 'payment'
+    ])->name('ca-dv-payment');
+    Route::get('cadv-reim-liquidation/dv/show-remarks/{id}', [
+        'uses' => 'DisbursementVoucherController@showLogRemarks',
+        'module' => 'ca_dv',
+        'access' => 'is_allowed'
+    ])->name('ca-dv-show-remarks');
+    Route::post('cadv-reim-liquidation/dv/create-remarks/{id}', [
+        'uses' => 'DisbursementVoucherController@logRemarks',
+        'module' => 'ca_dv',
+        'access' => 'is_allowed'
+    ])->name('ca-dv-store-remarks');
+
+    // Liquidation Report
+    Route::any('cadv-reim-liquidation/liquidation', 'LiquidationController@indexCashAdvLiquidation');
+    Route::any('cadv-reim-liquidation/liquidation/edit/{id}', 'LiquidationController@showEdit');
+    Route::post('cadv-reim-liquidation/liquidation/update/{id}', 'LiquidationController@update');
+    Route::get('cadv-reim-liquidation/liquidation/show-issue/{id}', 'LiquidationController@showIssuedTo');
+    Route::post('cadv-reim-liquidation/liquidation/issue/{id}', 'LiquidationController@issue');
+    Route::post('cadv-reim-liquidation/liquidation/receive/{id}', 'LiquidationController@receive');
+    Route::post('cadv-reim-liquidation/liquidation/liquidate/{id}', [
+        'uses' => 'LiquidationController@liquidate',
+        'middleware' => 'roles',
+        'roles' => ['Developer', 'Accountant']
+    ]);
 
     /*===================== PROCUREMENT ROUTES =====================*/
 

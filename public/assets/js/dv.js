@@ -130,7 +130,7 @@ $(function() {
                                      `document?`);
         $("#modal-delete").modal({keyboard: false, backdrop: 'static'})
 						  .on('shown.bs.modal', function() {
-            $('#delete-title').html('Delete Dibursement Voucher');
+            $('#delete-title').html('Delete DV');
             $('#form-delete').attr('action', url);
 		}).on('hidden.bs.modal', function() {
              $('#modal-delete-body').html('');

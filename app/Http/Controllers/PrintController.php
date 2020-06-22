@@ -209,16 +209,18 @@ class PrintController extends Controller
                 $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-                    $code = $this->getDocCode($key, 'ors');
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                    $docType = ($data->ors->document_type == 'ors') ?
-                               'obligation and request status': 'budget utilization and request status';
-                    $orsID =  $data->ors->id;
-                    $msg = "Generated the $docType $orsID.";
+                    $msg = "Generated the Obligation Request and Status '$key' document.";
                     Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateORS($data, $data->ors->document_type, $fontScale,
-                                       $pageHeight, $pageWidth, $previewToggle);
+                    $this->generateORS(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
                 break;
             case 'ca_burs':
@@ -1345,7 +1347,7 @@ class PrintController extends Controller
         } else if ($type == 'cashadvance'){
             $ors = DB::table('obligation_request_status as ors')
                      ->select('ors.*', 'emp.firstname', 'emp.middlename', 'emp.lastname')
-                     ->join('emp_accounts as emp', 'emp.emp_id', '=', 'ors.payee')
+                     ->join('emp_accounts as emp', 'emp.id', '=', 'ors.payee')
                      ->where([['ors.id', $id], ['ors.module_class', 2]])
                      ->first();
             $payee = "";

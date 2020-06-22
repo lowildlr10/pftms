@@ -12,6 +12,7 @@ use App\Models\PurchaseJobOrderItem;
 use App\Models\ObligationRequestStatus;
 use App\Models\InspectionAcceptance;
 use App\Models\DisbursementVoucher;
+use App\Models\LiquidationReport;
 use App\Models\InventoryStock;
 use App\Models\ListDemandPayable;
 
@@ -54,6 +55,7 @@ class DisbursementVoucherController extends Controller
         $isAllowedReceiveBack = Auth::user()->getModuleAccess($module, 'receive_back');
         $isAllowedPayment = Auth::user()->getModuleAccess($module, 'payment');
         $isAllowedIAR = Auth::user()->getModuleAccess('proc_iar', 'is_allowed');
+        $isAllowedLDDAP = Auth::user()->getModuleAccess('pay_lddap', 'is_allowed');
 
         return view('modules.procurement.dv.index', [
             'list' => $data->dv_data,
@@ -66,33 +68,45 @@ class DisbursementVoucherController extends Controller
             'isAllowedReceive' => $isAllowedReceive,
             'isAllowedReceiveBack'=> $isAllowedReceiveBack,
             'isAllowedIAR' => $isAllowedIAR,
+            'isAllowedLDDAP' => $isAllowedLDDAP
         ]);
     }
 
     public function indexCA(Request $request) {
-        $data = $this->getIndexData($request, 'procurement');
+        $data = $this->getIndexData($request, 'cashadvance');
 
         // Get module access
-        $module = 'proc_dv';
+        $module = 'ca_dv';
+        $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
         $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
+        $isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
         $isAllowedIssue = Auth::user()->getModuleAccess($module, 'issue');
         $isAllowedIssueBack = Auth::user()->getModuleAccess($module, 'issue_back');
         $isAllowedReceive = Auth::user()->getModuleAccess($module, 'receive');
         $isAllowedReceiveBack = Auth::user()->getModuleAccess($module, 'receive_back');
         $isAllowedDisburse = Auth::user()->getModuleAccess($module, 'disburse');
-        $isAllowedIAR = Auth::user()->getModuleAccess('proc_iar', 'is_allowed');
+        $isAllowedPayment = Auth::user()->getModuleAccess($module, 'payment');
+        $isAllowedORS = Auth::user()->getModuleAccess('ca_ors', 'is_allowed');
+        $isAllowedLR = Auth::user()->getModuleAccess('ca_lr', 'is_allowed');
+        $isAllowedLDDAP = Auth::user()->getModuleAccess('pay_lddap', 'is_allowed');
 
-        return view('modules.procurement.dv.index', [
+        return view('modules.voucher.dv.index', [
             'list' => $data->dv_data,
             'keyword' => $data->keyword,
             'paperSizes' => $data->paper_sizes,
+            'isAllowedCreate' => $isAllowedCreate,
             'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedDelete' => $isAllowedDelete,
+            'isAllowedDestroy' => $isAllowedDestroy,
             'isAllowedDisburse' => $isAllowedDisburse,
             'isAllowedIssue' => $isAllowedIssue,
             'isAllowedIssueBack'=> $isAllowedIssueBack,
             'isAllowedReceive' => $isAllowedReceive,
             'isAllowedReceiveBack'=> $isAllowedReceiveBack,
-            'isAllowedIAR' => $isAllowedIAR,
+            'isAllowedPayment' => $isAllowedPayment,
+            'isAllowedLDDAP' => $isAllowedLDDAP,
+            'isAllowedORS' => $isAllowedORS
         ]);
     }
 
@@ -107,43 +121,82 @@ class DisbursementVoucherController extends Controller
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
-        $dvData = ObligationRequestStatus::with(['bidpayee', 'procdv'])->whereHas('pr', function($query)
-                                             use($empDivisionAccess) {
-            $query->whereIn('division', $empDivisionAccess);
-        })->whereHas('procdv', function($query) {
-            $query->whereNull('deleted_at');
-        });
 
-        if (!empty($keyword)) {
-            $dvData = $dvData->where(function($qry) use ($keyword) {
-                $qry->where('id', 'like', "%$keyword%")
-                    ->orWhere('pr_id', 'like', "%$keyword%")
-                    ->orWhere('po_no', 'like', "%$keyword%")
-                    ->orWhere('amount', 'like', "%$keyword%")
-                    ->orWhere('document_type', 'like', "%$keyword%")
-                    ->orWhereHas('bidpayee', function($query) use ($keyword) {
-                        $query->where('company_name', 'like', "%$keyword%")
-                              ->orWhere('address', 'like', "%$keyword%");
-                    })->orWhereHas('procdv', function($query) use ($keyword) {
-                        $query->where('id', 'like', "%$keyword%")
-                              ->orWhere('particulars', 'like', "%$keyword%")
-                              //->orWhere('transaction_type', 'like', "%$keyword%")
-                              ->orWhere('dv_no', 'like', "%$keyword%")
-                              ->orWhere('date_dv', 'like', "%$keyword%")
-                              ->orWhere('date_disbursed', 'like', "%$keyword%")
-                              ->orWhere('responsibility_center', 'like', "%$keyword%")
-                              ->orWhere('mfo_pap', 'like', "%$keyword%")
-                              ->orWhere('amount', 'like', "%$keyword%")
-                              ->orWhere('address', 'like', "%$keyword%")
-                              ->orWhere('fund_cluster', 'like', "%$keyword%");
-                    });
+        if ($type == 'procurement') {
+            $dvData = ObligationRequestStatus::with(['bidpayee', 'procdv'])->whereHas('pr', function($query)
+                                                use($empDivisionAccess) {
+                $query->whereIn('division', $empDivisionAccess);
+            })->whereHas('procdv', function($query) {
+                $query->whereNull('deleted_at');
             });
-        }
 
-        $dvData = $dvData->sortable(['po_no' => 'desc'])->paginate(15);
+            if (!empty($keyword)) {
+                $dvData = $dvData->where(function($qry) use ($keyword) {
+                    $qry->where('id', 'like', "%$keyword%")
+                        ->orWhere('pr_id', 'like', "%$keyword%")
+                        ->orWhere('po_no', 'like', "%$keyword%")
+                        ->orWhere('amount', 'like', "%$keyword%")
+                        ->orWhere('document_type', 'like', "%$keyword%")
+                        ->orWhereHas('bidpayee', function($query) use ($keyword) {
+                            $query->where('company_name', 'like', "%$keyword%")
+                                ->orWhere('address', 'like', "%$keyword%");
+                        })->orWhereHas('procdv', function($query) use ($keyword) {
+                            $query->where('id', 'like', "%$keyword%")
+                                ->orWhere('particulars', 'like', "%$keyword%")
+                                //->orWhere('transaction_type', 'like', "%$keyword%")
+                                ->orWhere('dv_no', 'like', "%$keyword%")
+                                ->orWhere('date_dv', 'like', "%$keyword%")
+                                ->orWhere('date_disbursed', 'like', "%$keyword%")
+                                ->orWhere('responsibility_center', 'like', "%$keyword%")
+                                ->orWhere('mfo_pap', 'like', "%$keyword%")
+                                ->orWhere('amount', 'like', "%$keyword%")
+                                ->orWhere('address', 'like', "%$keyword%")
+                                ->orWhere('fund_cluster', 'like', "%$keyword%");
+                        });
+                });
+            }
 
-        foreach ($dvData as $dvDat) {
-            $dvDat->doc_status = $instanceDocLog->checkDocStatus($dvDat->procdv['id']);
+            $dvData = $dvData->sortable(['po_no' => 'desc'])->paginate(15);
+
+            foreach ($dvData as $dvDat) {
+                $dvDat->doc_status = $instanceDocLog->checkDocStatus($dvDat->procdv['id']);
+            }
+        } else {
+            $dvData = DisbursementVoucher::whereHas('emppayee', function($query)
+                                           use($empDivisionAccess) {
+                $query->whereIn('division', $empDivisionAccess);
+            })->whereNull('deleted_at')->where('module_class', 2);
+
+            if (!empty($keyword)) {
+                $dvData = $dvData->where(function($qry) use ($keyword) {
+                    $qry->where('id', 'like', "%$keyword%")
+                        ->orWhere('ors_id', 'like', "%$keyword%")
+                        ->orWhere('particulars', 'like', "%$keyword%")
+                        ->orWhere('transaction_type', 'like', "%$keyword%")
+                        ->orWhere('dv_no', 'like', "%$keyword%")
+                        ->orWhere('date_dv', 'like', "%$keyword%")
+                        ->orWhere('date_disbursed', 'like', "%$keyword%")
+                        ->orWhere('responsibility_center', 'like', "%$keyword%")
+                        ->orWhere('mfo_pap', 'like', "%$keyword%")
+                        ->orWhere('amount', 'like', "%$keyword%")
+                        ->orWhere('address', 'like', "%$keyword%")
+                        ->orWhere('fund_cluster', 'like', "%$keyword%")
+                        ->orWhereHas('emppayee', function($query) use ($keyword) {
+                            $query->where('firstname', 'like', "%$keyword%")
+                                  ->orWhere('middlename', 'like', "%$keyword%")
+                                  ->orWhere('lastname', 'like', "%$keyword%")
+                                  ->orWhere('position', 'like', "%$keyword%");
+                        });
+                });
+            }
+
+            $dvData = $dvData->sortable(['created_at' => 'desc'])->paginate(15);
+
+            foreach ($dvData as $dvDat) {
+                $dvDat->doc_status = $instanceDocLog->checkDocStatus($dvDat->id);
+                $dvDat->has_ors = ObligationRequestStatus::where('id', $dvDat->ors_id)->count();
+                $dvDat->has_lr = LiquidationReport::where('dv_id', $dvDat->id)->count();
+            }
         }
 
         return (object) [
@@ -154,17 +207,176 @@ class DisbursementVoucherController extends Controller
     }
 
     /**
+     * Show the form for creatingr the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showCreateFromORS($orsID) {
+        $orsList = ObligationRequestStatus::all();
+        $orsData = ObligationRequestStatus::with('emppayee')->find($orsID);
+        $empID = $orsData->emppayee['emp_id'];
+        $payee = $orsData->payee;
+        $serialNo = $orsData->serial_no;
+        $address = $orsData->address;
+        $sigCert1 = $orsData->sig_certified_1;
+        $transactionType = $orsData->transaction_type;
+        $amount = $orsData->amount;
+
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+        $payees = User::orderBy('firstname')->get();
+
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
+        }
+
+        return view('modules.voucher.dv.create', compact(
+            'signatories', 'payees', 'payee', 'empID',
+            'serialNo', 'address', 'amount', 'orsList',
+            'orsID', 'transactionType', 'sigCert1'
+        ));
+    }
+
+    /**
+     * Show the form for creatingr the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showCreate() {
+        $orsList = ObligationRequestStatus::all();
+        $empID = '';
+        $payee = '';
+        $serialNo = '';
+        $address = '';
+        $sigCert1 = '';
+        $transactionType = '';
+        $amount = 0.00;
+
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+        $payees = User::orderBy('firstname')->get();
+
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
+        }
+
+        return view('modules.voucher.dv.create', compact(
+            'signatories', 'payees', 'payee', 'empID',
+            'serialNo', 'address', 'amount', 'orsList',
+            'orsID', 'transactionType', 'sigCert1'
+        ));
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request) {
+        $orsID = !empty($request->ors_id) ? $request->ors_id : NULL;
+        $transactionType = $request->transaction_type;
+        $fundCluster = $request->fund_cluster;
+        $dateDV = !empty($request->date_dv) ? $request->date_dv : NULL;
+        $dvNo = $request->dv_no;
+        $payee = $request->payee;
+        $address = $request->address;
+        $modePayments = !empty($request->mode_payment) ? $request->mode_payment : [];
+        $otherPayment = !empty($request->other_payment) ? $request->other_payment : NULL;
+        $particulars = $request->particulars;
+        $responsibilityCenter = $request->responsibility_center;
+        $mfoPAP = $request->mfo_pap;
+        $amount = $request->amount;
+        $sigAccounting = $request->sig_accounting;
+        $dateAccounting = !empty($request->date_accounting) ? $request->date_accounting : NULL;
+        $sigAgencyHead = $request->sig_agency_head;
+        $dateAgencyHead = !empty($request->date_agency_head) ? $request->date_agency_head : NULL;
+
+        if (in_array('mds', $modePayments)) {
+            $modePayment = '1';
+        } else {
+            $modePayment = '0';
+        }
+
+        if (in_array('commercial', $modePayments)) {
+            $modePayment .= '-1';
+        } else {
+            $modePayment .= '-0';
+        }
+
+        if (in_array('ada', $modePayments)) {
+            $modePayment .= '-1';
+        } else {
+            $modePayment .= '-0';
+        }
+
+        if (in_array('others', $modePayments)) {
+            $modePayment .= '-1';
+        } else {
+            $modePayment .= '-0';
+        }
+
+        $routeName = 'ca-dv';
+
+        try {
+            $instanceDV = new DisbursementVoucher;
+            $instanceDV->ors_id = $orsID;
+            $instanceDV->transaction_type = $transactionType;
+            $instanceDV->fund_cluster = $fundCluster;
+            $instanceDV->date_dv = $dateDV;
+            $instanceDV->dv_no = $dvNo;
+            $instanceDV->payment_mode = $modePayment;
+            $instanceDV->other_payment = $otherPayment;
+            $instanceDV->payee = $payee;
+            $instanceDV->address = $address;
+            $instanceDV->particulars = $particulars;
+            $instanceDV->responsibility_center = $responsibilityCenter;
+            $instanceDV->mfo_pap = $mfoPAP;
+            $instanceDV->amount = $amount;
+            $instanceDV->sig_accounting = $sigAccounting;
+            $instanceDV->date_accounting = $dateAccounting;
+            $instanceDV->sig_agency_head = $sigAgencyHead;
+            $instanceDV->date_agency_head = $dateAgencyHead;
+            $instanceDV->module_class = 2;
+            $instanceDV->save();
+
+            $documentType = 'Disbursement Voucher';
+
+            $msg = "$documentType '$orsID' successfully updated.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $orsID])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())
+                                 ->with('failed', $msg);
+        }
+    }
+
+    /**
      * Display the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function showEdit($id) {
-        $dvData = DisbursementVoucher::with(['bidpayee', 'procors'])->find($id);
+        $orsList = ObligationRequestStatus::all();
+        $dvData = DisbursementVoucher::with(['bidpayee', 'procors', 'emppayee'])->find($id);
         $moduleClass = $dvData->module_class;
+        $orsID = $dvData->ors_id;
         $dvDate = $dvData->date_dv;
         $dvNo = $dvData->dv_no;
         $fundCluster = $dvData->fund_cluster;
+        $transactionType = $dvData->transaction_type;
         $paymentModes = explode('-', $dvData->payment_mode);
         $paymentMode1 = $paymentModes[0];
         $paymentMode2 = $paymentModes[1];
@@ -190,8 +402,8 @@ class DisbursementVoucherController extends Controller
         $signature = $dvData->signature;
         $orNo = $dvData->or_no;
         $otherDocuments = $dvData->other_documents;
-        $tinNo = $dvData->bidpayee['tin_no'];
         $serialNo = $dvData->procors['serial_no'];
+        $payee = $dvData->payee;
         $address = !empty($dvData->address) ? $dvData->address : $dvData->procors['address'];
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
@@ -201,16 +413,19 @@ class DisbursementVoucherController extends Controller
 
         if ($moduleClass == 3) {
             $payees = Supplier::orderBy('company_name')->get();
-            $payee = $dvData->bidpayee['id'];
+            $tinNo = $dvData->bidpayee['tin_no'];
+            $viewFile = 'modules.procurement.dv.update';
         } else if ($moduleClass == 2) {
-
+            $payees = User::orderBy('firstname')->get();
+            $tinNo = $dvData->emppayee['emp_id'];
+            $viewFile = 'modules.voucher.dv.update';
         }
 
         foreach ($signatories as $sig) {
             $sig->module = json_decode($sig->module);
         }
 
-        return view('modules.procurement.dv.update', compact(
+        return view($viewFile, compact(
             'id', 'dvData', 'dvNo', 'fundCluster', 'tinNo',
             'paymentMode1', 'paymentMode2', 'paymentMode3',
             'paymentMode4', 'otherPayment', 'responsibilityCenter',
@@ -220,7 +435,7 @@ class DisbursementVoucherController extends Controller
             'jevNo', 'receiptPrintedName', 'dateJev', 'signature',
             'orNo', 'otherDocuments', 'signatories', 'signatories',
             'serialNo', 'address', 'dvDate', 'payees', 'particulars',
-            'payee'
+            'payee', 'transactionType', 'orsList', 'orsID'
         ));
     }
 
@@ -233,6 +448,8 @@ class DisbursementVoucherController extends Controller
      */
     public function update(Request $request, $id) {
         $fundCluster = $request->fund_cluster;
+        $orsID = !empty($request->ors_id) ? $request->ors_id : NULL;
+        $transactionType = $request->transaction_type;
         $dateDV = !empty($request->date_dv) ? $request->date_dv : NULL;
         $dvNo = $request->dv_no;
         $modePayments = !empty($request->mode_payment) ? $request->mode_payment : [];
@@ -278,6 +495,8 @@ class DisbursementVoucherController extends Controller
                 $routeName = 'proc-dv';
             } else if ($moduleClass == 2) {
                 $routeName = 'ca-dv';
+                $instanceDV->ors_id = $orsID;
+                $instanceDV->transaction_type = $transactionType;
             }
 
             $instanceDV->fund_cluster = $fundCluster;
