@@ -26,13 +26,13 @@ class CreateLiquidationReportsTable extends Migration
             $table->text('particulars')->nullable();
             $table->double('amount', 50, 2)->default(0.00);
             $table->double('total_amount', 50, 2)->default(0.00);
-            $table->double('amount_cash_dv', 50, 2)->default(0.00);
+            $table->double('amount_cash_adv', 50, 2)->default(0.00);
             $table->string('or_no')->nullable();
             $table->date('or_dtd')->nullable();
             $table->double('amount_refunded', 50, 2)->default(0.00);
             $table->double('amount_reimbursed', 50, 2)->default(0.00);
             $table->uuid('sig_claimant')->nullable();
-            $table->foreign('sig_claimant')->references('id')->on('signatories');
+            $table->foreign('sig_claimant')->references('id')->on('emp_accounts');
             $table->uuid('sig_supervisor')->nullable();
             $table->foreign('sig_supervisor')->references('id')->on('signatories');
             $table->uuid('sig_accounting')->nullable();
