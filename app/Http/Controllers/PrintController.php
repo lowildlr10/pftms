@@ -283,16 +283,19 @@ class PrintController extends Controller
                 $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-                    $code = $this->getDocCode($key, 'dv');
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                    $dvID =  $data->dv->id;
-                    $msg = "generated the disbursement voucher $dvID.";
+                    $msg = "Generated the Disbursement Voucher '$key' document.";
                     Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateDV($data, $documentType, $fontScale,
-                                      $pageHeight, $pageWidth, $previewToggle);
+                    $this->generateDV(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
-
                 break;
 
             case 'ca_lr':
@@ -1143,6 +1146,7 @@ class PrintController extends Controller
 
     private function getDataDV($id, $type) {
         if ($type == 'procurement') {
+
             $dv = DB::table('disbursement_vouchers as dv')
                     ->select('dv.id as dv_id', 'dv.*', 'ors.payee', 'ors.address', 'ors.amount',
                              'ors.sig_certified_1', 'ors.po_no', 'ors.sig_certified_2', 'bid.company_name',
@@ -1153,11 +1157,8 @@ class PrintController extends Controller
                     ->first();
         } else if ($type == 'cashadvance') {
             $dv = DB::table('disbursement_vouchers as dv')
-                    ->select('dv.id as dv_id', 'dv.*', 'ors.payee', 'ors.address', 'ors.amount',
-                             'ors.sig_certified_1', 'ors.po_no', 'ors.sig_certified_2',
-                             'ors.responsibility_center', 'ors.mfo_pap')
-                    ->join('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
-                    ->join('emp_accounts as emp', 'emp.emp_id', '=', 'ors.payee')
+                    ->select('dv.id as dv_id', 'dv.*', 'emp.emp_id')
+                    ->join('emp_accounts as emp', 'emp.id', '=', 'dv.payee')
                     ->where('dv.id', $id)
                     ->first();
         }
@@ -1196,7 +1197,7 @@ class PrintController extends Controller
         if ($dv->module_class == 3) {
             $payee = $dv->company_name;
         } else if ($dv->module_class == 2) {
-            $payee = $this->getEmployee($dv->payee)->name;
+            $payee = Auth::user()->getEmployee($dv->payee)->name;
         }
 
         $dataHeader = [

@@ -62,10 +62,10 @@
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="13%">
-                                            @sortablelink('dv.dv_no', 'DV No.', [], ['class' => 'white-text'])
+                                            @sortablelink('dv_no', 'DV No.', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="58%">
-                                            @sortablelink('dv.particulars', 'Particulars', [], ['class' => 'white-text'])
+                                            @sortablelink('particulars', 'Particulars', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="20%">
                                             @sortablelink('emppayee.firstname', 'Payee', [], ['class' => 'white-text'])
@@ -83,39 +83,38 @@
                                     <tr class="hidden-xs">
                                         <td align="center">
                                             @if (!empty($dv->date_disbursed))
-                                        <i class="far fa-money-bill-alt fa-lg text-success material-tooltip-main"
+                                            <i class="far fa-money-bill-alt fa-lg text-success material-tooltip-main"
                                            data-toggle="tooltip" data-placement="right" title="Disbursed"></i>
                                             @else
                                                 @if (!empty($dv->doc_status->date_issued) &&
                                                      empty($dv->doc_status->date_received) &&
                                                      empty($dv->doc_status->date_issued_back) &&
                                                      empty($dv->doc_status->date_received_back))
-                                        <i class="fas fa-paper-plane fa-lg orange-text material-tooltip-main"
-                                           data-toggle="tooltip" data-placement="right" title="Submitted"></i>
-                                                @elseif (!empty($dv->doc_status->date_issued) &&
-                                                         !empty($dv->doc_status->date_received) &&
-                                                         empty($dv->doc_status->date_issued_back) &&
-                                                         empty($dv->doc_status->date_received_back))
-                                        <i classs fa-hand-holding fa-lg text-success material-tooltip-main"
-                                           data-toggle="tooltip" data-placement="right" title="Received"></i>
-                                                @elseif (!empty($dv->doc_status->date_issued) &&
-                                                         !empty($dv->doc_status->date_received) &&
-                                                         !empty($dv->doc_status->date_issued_back) &&
-                                                         empty($dv->doc_status->date_received_back))
-                                        <i class="fas fa-undo-alt fa-lg orange-text material-tooltip-main"
-                                           data-toggle="tooltip" data-placement="right" title="Submitted Back"></i>
-                                                @elseif (!empty($dv->doc_status->date_issued) &&
-                                                         !empty($dv->doc_status->date_received) &&
-                                                         !empty($dv->doc_status->date_issued_back) &&
-                                                         !empty($dv->doc_status->date_received_back))
-                                        <i class="fas fa-hand-holding fa-lg text-success material-tooltip-main"
-                                           data-toggle="tooltip" data-placement="right" title="Received"></i>
+                                            <i class="fas fa-paper-plane fa-lg orange-text material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Submitted"></i>
+                                            @elseif (!empty($dv->doc_status->date_issued) &&
+                                                     !empty($dv->doc_status->date_received) &&
+                                                     empty($dv->doc_status->date_issued_back) &&
+                                                     empty($dv->doc_status->date_received_back))
+                                            <i class="fas fa-hand-holding fa-lg text-success material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Received"></i>
+                                            @elseif (!empty($dv->doc_status->date_issued) &&
+                                                     !empty($dv->doc_status->date_received) &&
+                                                     !empty($dv->doc_status->date_issued_back) &&
+                                                     empty($dv->doc_status->date_received_back))
+                                            <i class="fas fa-undo-alt fa-lg orange-text material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Sumbitted Back"></i>
+                                            @elseif (!empty($dv->doc_status->date_issued) &&
+                                                     !empty($dv->doc_status->date_received) &&
+                                                     !empty($dv->doc_status->date_issued_back) &&
+                                                     !empty($dv->doc_status->date_received_back))
+                                            <i class="fas fa-hand-holding fa-lg text-success material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Received"></i>
                                                 @else
-                                        <i class="far fa-lg fa-file material-tooltip-main"
-                                           data-toggle="tooltip" data-placement="right" title="Pending"></i>
+                                            <i class="far fa-lg fa-file material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Pending"></i>
                                                 @endif
                                             @endif
-
                                         </td>
                                         <td></td>
                                         <td>{{ !empty($dv->dv_no) ? $dv->dv_no : 'NA' }}</td>
@@ -208,12 +207,13 @@
                     </div>
                     <div class="card-body">
                         <p>
-                            <strong>ORS/BURS Date: </strong> {{ $dv->date_ors_burs }}<br>
+                            <strong>DV Date: </strong> {{ $dv->date_dv }}<br>
+                            <strong>ORS/BURS Date: </strong> {{ $dv->procors['date_ors_burs'] }}<br>
                             <strong>Particulars: </strong> {{
                                 (strlen($dv->particulars) > 150) ?
                                 substr($dv->particulars, 0, 150).'...' : $dv->particulars
                             }}<br>
-                            <strong>Payee: </strong> {{ $dv->bidpayee['company_name'] }}<br>
+                            <strong>Payee: </strong> {{ $dv->emppayee['firstname'] }} {{ $dv->emppayee['lastname'] }}<br>
 
                             @if (!empty($dv->dv['date_disbursed']))
                                 @if (!empty($dv->doc_status->issued_remarks) &&
@@ -274,12 +274,30 @@
                     </li>
 
                     @if ($isAllowedORS)
-                        @if ($ors->has_ors)
+                        @if ($dv->has_ors)
                     <li class="list-group-item justify-content-between">
                         <a type="button" class="btn btn-outline-warning waves-effect btn-block btn-md btn-rounded"
-                           onclick="$(this).redirectToDoc('{{ route('ca-dv') }}', '{{ $ors->id }}');">
-                            <i class="fas fa-file-signature orange-text"></i> Edit DV
+                           onclick="$(this).redirectToDoc('{{ route('ca-ors-burs') }}', '{{ $dv->ors_id }}');">
+                            <i class="fas fa-file-signature orange-text"></i> Edit ORS/BURS
                         </a>
+                    </li>
+                        @endif
+                    @endif
+
+                    @if ($dv->transaction_type == 'cash_advance' && $isAllowedLR)
+                        @if ($dv->has_lr)
+                    <li class="list-group-item justify-content-between">
+                        <a type="button" class="btn btn-outline-warning waves-effect btn-block btn-md btn-rounded"
+                           onclick="$(this).redirectToDoc('{{ route('ca-lr') }}', '{{ $dv->id }}');">
+                            <i class="fas fa-file-signature orange-text"></i> Edit Liquidation Report
+                        </a>
+                    </li>
+                        @else
+                    <li class="list-group-item justify-content-between">
+                        <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
+                                onclick="$(this).showCreateLR('{{ route('ca-dv-show-create-lr', ['dvID' => $dv->id]) }}');">
+                            <i class="fas fa-pencil-alt green-text"></i> Create Liquidation Report
+                        </button>
                     </li>
                         @endif
                     @endif

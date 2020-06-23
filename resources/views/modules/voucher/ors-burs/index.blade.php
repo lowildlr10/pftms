@@ -62,10 +62,10 @@
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="13%">
-                                            @sortablelink('ors.serial_no', 'Serial No.', [], ['class' => 'white-text'])
+                                            @sortablelink('serial_no', 'Serial No.', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="58%">
-                                            @sortablelink('ors.particulars', 'Particulars', [], ['class' => 'white-text'])
+                                            @sortablelink('particulars', 'Particulars', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="20%">
                                             @sortablelink('emppayee.firstname', 'Payee', [], ['class' => 'white-text'])
@@ -190,7 +190,7 @@
 <!-- Modals -->
 
 @if (count($list) > 0)
-    @foreach ($list as $listCtr => $pr)
+    @foreach ($list as $listCtr => $ors)
 <div class="modal custom-rightmenu-modal fade right" id="right-modal-{{ $listCtr + 1 }}" tabindex="-1"
      role="dialog">
     <div class="modal-dialog modal-full-height modal-righty" role="document">

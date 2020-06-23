@@ -134,10 +134,10 @@
             <div class="row">
                 <div class="col-md-2 border border-bottom-0 border-dark px-0 text-center">
                     <div class="p-2 border-bottom border-dark">
-                        <strong>Responsibilty Center <span class="red-text">*</span></strong>
+                        <strong>Responsibilty Center</strong>
                     </div>
                     <div class="form-group p-0 m-0">
-                        <textarea class="md-textarea form-control border border-0 rounded-0 required"
+                        <textarea class="md-textarea form-control border border-0 rounded-0"
                                   id="responsibility_center" name="responsibility_center" rows="8"
                                   placeholder="Write responsibility center here...">{{ $responsibilityCenter }}</textarea>
                     </div>
@@ -154,10 +154,10 @@
                 </div>
                 <div class="col-md-2 border border-left-0 border-bottom-0 border-dark px-0 text-center">
                     <div class="p-2 border-bottom border-dark">
-                        <strong>MFO/PAP <span class="red-text">*</span></strong>
+                        <strong>MFO/PAP</strong>
                     </div>
                     <div class="form-group p-0 m-0">
-                        <textarea class="md-textarea form-control border border-0 rounded-0 required"
+                        <textarea class="md-textarea form-control border border-0 rounded-0"
                                   id="mfo-pap" name="mfo_pap" rows="8" placeholder="Write MFO/PAP here..."
                         >{{ $mfoPAP }}</textarea>
                     </div>

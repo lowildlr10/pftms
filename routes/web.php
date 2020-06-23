@@ -359,17 +359,106 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     ])->name('ca-dv-store-remarks');
 
     // Liquidation Report
-    Route::any('cadv-reim-liquidation/liquidation', 'LiquidationController@indexCashAdvLiquidation');
-    Route::any('cadv-reim-liquidation/liquidation/edit/{id}', 'LiquidationController@showEdit');
-    Route::post('cadv-reim-liquidation/liquidation/update/{id}', 'LiquidationController@update');
-    Route::get('cadv-reim-liquidation/liquidation/show-issue/{id}', 'LiquidationController@showIssuedTo');
-    Route::post('cadv-reim-liquidation/liquidation/issue/{id}', 'LiquidationController@issue');
-    Route::post('cadv-reim-liquidation/liquidation/receive/{id}', 'LiquidationController@receive');
+    Route::any('cadv-reim-liquidation/liquidation', [
+        'uses' => 'LiquidationController@indexCA',
+        'module' => 'ca_lr',
+        'access' => 'is_allowed'
+    ])->name('ca-lr');
+    Route::get('cadv-reim-liquidation/liquidation/show-create', [
+        'uses' => 'LiquidationController@showCreate',
+        'module' => 'ca_lr',
+        'access' => 'create'
+    ])->name('ca-lr-show-create');
+    Route::get('cadv-reim-liquidation/liquidation/show-create-from-dv/{dvID}', [
+        'uses' => 'LiquidationController@showCreateFromDV',
+        'module' => 'ca_lr',
+        'access' => 'create'
+    ])->name('ca-dv-show-create-lr');
+    Route::post('cadv-reim-liquidation/liquidation/store', [
+        'uses' => 'LiquidationController@store',
+        'module' => 'ca_lr',
+        'access' => 'create'
+    ])->name('ca-lr-store');
+    Route::get('cadv-reim-liquidation/liquidation/show-edit/{id}', [
+        'uses' => 'LiquidationController@showEdit',
+        'module' => 'ca_lr',
+        'access' => 'update'
+    ])->name('ca-lr-show-edit');
+    Route::post('cadv-reim-liquidation/liquidation/update/{id}', [
+        'uses' => 'LiquidationController@update',
+        'module' => 'ca_lr',
+        'access' => 'update'
+    ])->name('ca-lr-update');
+    Route::post('cadv-reim-liquidation/liquidation/delete/{id}', [
+        'uses' => 'LiquidationController@delete',
+        'module' => 'ca_lr',
+        'access' => 'delete'
+    ])->name('ca-lr-delete');
+    Route::post('cadv-reim-liquidation/liquidation/destroy/{id}', [
+        'uses' => 'LiquidationController@destroy',
+        'module' => 'ca_lr',
+        'access' => 'destroy'
+    ])->name('ca-lr-destroy');
+    Route::get('cadv-reim-liquidation/liquidation/show-issue/{id}', [
+        'uses' => 'LiquidationController@showIssue',
+        'module' => 'ca_lr',
+        'access' => 'issue'
+    ])->name('ca-lr-show-issue');
+    Route::post('cadv-reim-liquidation/liquidation/issue/{id}', [
+        'uses' => 'LiquidationController@issue',
+        'module' => 'ca_lr',
+        'access' => 'issue'
+    ])->name('ca-lr-issue');
+    Route::get('cadv-reim-liquidation/liquidation/show-receive/{id}', [
+        'uses' => 'LiquidationController@showReceive',
+        'module' => 'ca_lr',
+        'access' => 'receive'
+    ])->name('ca-lr-show-receive');
+    Route::post('cadv-reim-liquidation/liquidation/receive/{id}', [
+        'uses' => 'LiquidationController@receive',
+        'module' => 'ca_lr',
+        'access' => 'receive'
+    ])->name('ca-lr-receive');
+    Route::get('cadv-reim-liquidation/liquidation/show-issue-back/{id}', [
+        'uses' => 'LiquidationController@showIssueback',
+        'module' => 'ca_lr',
+        'access' => 'issue_back'
+    ])->name('ca-lr-show-issue-back');
+    Route::post('cadv-reim-liquidation/liquidation/issue-back/{id}', [
+        'uses' => 'LiquidationController@issueBack',
+        'module' => 'ca_lr',
+        'access' => 'issue_back'
+    ])->name('ca-lr-issue-back');
+    Route::get('cadv-reim-liquidation/liquidation/show-receive-back/{id}', [
+        'uses' => 'LiquidationController@showReceiveBack',
+        'module' => 'ca_lr',
+        'access' => 'receive_back'
+    ])->name('ca-lr-show-receive-back');
+    Route::post('cadv-reim-liquidation/liquidation/receive-back/{id}', [
+        'uses' => 'LiquidationController@receiveBack',
+        'module' => 'ca_lr',
+        'access' => 'receive_back'
+    ])->name('ca-lr-receive-back');
+    Route::get('cadv-reim-liquidation/liquidation/show-liquidate/{id}', [
+        'uses' => 'LiquidationController@showLiquidate',
+        'module' => 'ca_lr',
+        'access' => 'liquidate'
+    ])->name('ca-lr-show-liquidate');
     Route::post('cadv-reim-liquidation/liquidation/liquidate/{id}', [
         'uses' => 'LiquidationController@liquidate',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Accountant']
-    ]);
+        'module' => 'ca_lr',
+        'access' => 'liquidate'
+    ])->name('ca-lr-payment');
+    Route::get('cadv-reim-liquidation/liquidation/show-remarks/{id}', [
+        'uses' => 'LiquidationController@showLogRemarks',
+        'module' => 'ca_lr',
+        'access' => 'is_allowed'
+    ])->name('ca-lr-show-remarks');
+    Route::post('cadv-reim-liquidation/liquidation/create-remarks/{id}', [
+        'uses' => 'LiquidationController@logRemarks',
+        'module' => 'ca_lr',
+        'access' => 'is_allowed'
+    ])->name('ca-lr-store-remarks');
 
     /*===================== PROCUREMENT ROUTES =====================*/
 

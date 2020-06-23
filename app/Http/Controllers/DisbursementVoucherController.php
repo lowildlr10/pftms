@@ -87,7 +87,7 @@ class DisbursementVoucherController extends Controller
         $isAllowedReceiveBack = Auth::user()->getModuleAccess($module, 'receive_back');
         $isAllowedDisburse = Auth::user()->getModuleAccess($module, 'disburse');
         $isAllowedPayment = Auth::user()->getModuleAccess($module, 'payment');
-        $isAllowedORS = Auth::user()->getModuleAccess('ca_ors', 'is_allowed');
+        $isAllowedORS = Auth::user()->getModuleAccess('ca_ors_burs', 'is_allowed');
         $isAllowedLR = Auth::user()->getModuleAccess('ca_lr', 'is_allowed');
         $isAllowedLDDAP = Auth::user()->getModuleAccess('pay_lddap', 'is_allowed');
 
@@ -106,7 +106,8 @@ class DisbursementVoucherController extends Controller
             'isAllowedReceiveBack'=> $isAllowedReceiveBack,
             'isAllowedPayment' => $isAllowedPayment,
             'isAllowedLDDAP' => $isAllowedLDDAP,
-            'isAllowedORS' => $isAllowedORS
+            'isAllowedORS' => $isAllowedORS,
+            'isAllowedLR' => $isAllowedLR
         ]);
     }
 
@@ -162,7 +163,7 @@ class DisbursementVoucherController extends Controller
                 $dvDat->doc_status = $instanceDocLog->checkDocStatus($dvDat->procdv['id']);
             }
         } else {
-            $dvData = DisbursementVoucher::whereHas('emppayee', function($query)
+            $dvData = DisbursementVoucher::with('procors')->whereHas('emppayee', function($query)
                                            use($empDivisionAccess) {
                 $query->whereIn('division', $empDivisionAccess);
             })->whereNull('deleted_at')->where('module_class', 2);
@@ -255,6 +256,7 @@ class DisbursementVoucherController extends Controller
         $address = '';
         $sigCert1 = '';
         $transactionType = '';
+        $orsID = NULL;
         $amount = 0.00;
 
         $signatories = Signatory::addSelect([
@@ -295,6 +297,7 @@ class DisbursementVoucherController extends Controller
         $responsibilityCenter = $request->responsibility_center;
         $mfoPAP = $request->mfo_pap;
         $amount = $request->amount;
+        $sigCertified = $request->sig_certified;
         $sigAccounting = $request->sig_accounting;
         $dateAccounting = !empty($request->date_accounting) ? $request->date_accounting : NULL;
         $sigAgencyHead = $request->sig_agency_head;
@@ -341,6 +344,7 @@ class DisbursementVoucherController extends Controller
             $instanceDV->responsibility_center = $responsibilityCenter;
             $instanceDV->mfo_pap = $mfoPAP;
             $instanceDV->amount = $amount;
+            $instanceDV->sig_certified = $sigCertified;
             $instanceDV->sig_accounting = $sigAccounting;
             $instanceDV->date_accounting = $dateAccounting;
             $instanceDV->sig_agency_head = $sigAgencyHead;
@@ -458,6 +462,7 @@ class DisbursementVoucherController extends Controller
         $responsibilityCenter = $request->responsibility_center;
         $mfoPAP = $request->mfo_pap;
         $amount = $request->amount;
+        $sigCertified = $request->sig_certified;
         $sigAccounting = $request->sig_accounting;
         $dateAccounting = !empty($request->date_accounting) ? $request->date_accounting : NULL;
         $sigAgencyHead = $request->sig_agency_head;
@@ -497,6 +502,7 @@ class DisbursementVoucherController extends Controller
                 $routeName = 'ca-dv';
                 $instanceDV->ors_id = $orsID;
                 $instanceDV->transaction_type = $transactionType;
+                $instanceDV->sig_certified = $sigCertified;
             }
 
             $instanceDV->fund_cluster = $fundCluster;
@@ -525,6 +531,89 @@ class DisbursementVoucherController extends Controller
             Auth::user()->log($request, $msg);
             return redirect(url()->previous())
                                  ->with('failed', $msg);
+        }
+    }
+
+    /**
+     * Soft deletes the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function delete(Request $request, $id) {
+        $isDestroy = $request->destroy;
+
+        if ($isDestroy) {
+            $response = $this->destroy($request, $id);
+
+            if ($response->alert_type == 'success') {
+                return redirect()->route('ca-dv', ['keyword' => $response->id])
+                                 ->with($response->alert_type, $response->msg);
+            } else {
+                return redirect()->route('ca-dv')
+                                 ->with($response->alert_type, $response->msg);
+            }
+        } else {
+            try {
+                $instanceDV = DisbursementVoucher::find($id);
+                //$instanceORS = ObligationRequestStatus::where('id', $instanceDV->ors_id)->first();
+                $documentType = 'Disbursement Voucher';
+                $dvID = $instanceDV->id;
+                $instanceDV->delete();
+
+                /*
+                if ($instanceORS) {
+                    $instanceORS->delete();
+                }*/
+
+                $msg = "$documentType '$dvID' successfully deleted.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('ca-dv', ['keyword' => $id])
+                                 ->with('success', $msg);
+            } catch (\Throwable $th) {
+                $msg = "Unknown error has occured. Please try again.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('ca-dv')
+                                 ->with('failed', $msg);
+            }
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($request, $id) {
+        try {
+            $instanceDV = DisbursementVoucher::find($id);
+            //$instanceORS = ObligationRequestStatus::where('id', $instanceDV->ors_id)->first();
+            $documentType = 'Disbursement Voucher';
+            $dvID = $instanceDV->id;
+            $instanceDV->forceDelete();
+
+            /*
+            if ($instanceORS) {
+                $instanceORS->forceDelete();
+            }*/
+
+            $msg = "$documentType '$dvID' permanently deleted.";
+            Auth::user()->log($request, $msg);
+
+            return (object) [
+                'msg' => $msg,
+                'alert_type' => 'success',
+                'id' => $id
+            ];
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+
+            return (object) [
+                'msg' => $msg,
+                'alert_type' => 'failed'
+            ];
         }
     }
 

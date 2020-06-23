@@ -502,15 +502,21 @@ class ObligationRequestStatusController extends Controller
         } else {
             try {
                 $instanceORS = ObligationRequestStatus::find($id);
+                //$instanceDV = DisbursementVoucher::where('ors_id', $id)->first();
                 $documentType = $instanceORS->document_type;
                 $documentType = $documentType == 'ors' ? 'Obligation Request and Status' :
                                                  'Budget Utilization and Request Status';
                 $orsID = $instanceORS->id;
                 $instanceORS->delete();
 
+                /*
+                if ($instanceDV) {
+                    $instanceDV->delete();
+                }*/
+
                 $msg = "$documentType '$orsID' successfully deleted.";
                 Auth::user()->log($request, $msg);
-                return redirect()->route('ca-ors-burs', ['keyword' => $prID])
+                return redirect()->route('ca-ors-burs', ['keyword' => $id])
                                  ->with('success', $msg);
             } catch (\Throwable $th) {
                 $msg = "Unknown error has occured. Please try again.";
@@ -530,11 +536,17 @@ class ObligationRequestStatusController extends Controller
     public function destroy($request, $id) {
         try {
             $instanceORS = ObligationRequestStatus::find($id);
+            //$instanceDV = DisbursementVoucher::where('ors_id', $id)->first();
             $documentType = $instanceORS->document_type;
             $documentType = $documentType == 'ors' ? 'Obligation Request and Status' :
                                              'Budget Utilization and Request Status';
             $orsID = $instanceORS->id;
-            $instancePO->forceDelete();
+            $instanceORS->forceDelete();
+
+            /*
+            if ($instanceDV) {
+                $instanceDV->forceDelete();
+            }*/
 
             $msg = "$documentType '$orsID' permanently deleted.";
             Auth::user()->log($request, $msg);
@@ -542,7 +554,7 @@ class ObligationRequestStatusController extends Controller
             return (object) [
                 'msg' => $msg,
                 'alert_type' => 'success',
-                'pr_id' => $prID
+                'id' => $id
             ];
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";

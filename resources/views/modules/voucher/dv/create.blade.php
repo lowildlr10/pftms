@@ -253,9 +253,10 @@
                             [ A ] Certified: Expenses/Cash Advance necessary, lawful and
                             incurred under my direct supervision.
                         </small>
-                        <select searchable="Search here.." class="mdb-select md-form my-0 crud-select" disabled>
+                        <select searchable="Search here.." class="mdb-select md-form my-0 crud-select required"
+                                id="sig-certified" name="sig_certified">
                             <option class="red-text" value="" disabled selected
-                            >Printed Name, Designation and Signature of Supervisor</option>
+                            >* Printed Name, Designation and Signature of Supervisor</option>
 
                             @if (count($signatories) > 0)
                                 @foreach ($signatories as $sig)

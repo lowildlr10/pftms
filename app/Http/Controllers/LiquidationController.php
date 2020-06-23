@@ -3,14 +3,28 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\PurchaseRequest;
+use App\Models\PurchaseRequestItem;
+use App\Models\AbstractQuotation;
+use App\Models\AbstractQuotationItem;
+use App\Models\PurchaseJobOrder;
+use App\Models\PurchaseJobOrderItem;
+use App\Models\ObligationRequestStatus;
+use App\Models\InspectionAcceptance;
+use App\Models\DisbursementVoucher;
+use App\Models\LiquidationReport;
+use App\Models\InventoryStock;
+use App\Models\ListDemandPayable;
+
 use App\User;
-use App\EmployeeLog;
-use App\DocumentLogHistory;
-use App\PaperSize;
+use App\Models\DocumentLog as DocLog;
+use App\Models\PaperSize;
+use App\Models\Supplier;
+use App\Models\Signatory;
+use App\Models\ItemUnitIssue;
 use Carbon\Carbon;
-use DB;
 use Auth;
-use App\LiquidationReport;
+use DB;
 
 
 class LiquidationController extends Controller
@@ -30,8 +44,8 @@ class LiquidationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function indexCashAdvLiquidation(Request $request)
-    {
+    public function indexCA(Request $request) {
+        /*
         $pageLimit = 25;
         $search = trim($request['search']);
         $paperSizes = PaperSize::all();
@@ -85,7 +99,64 @@ class LiquidationController extends Controller
         return view('pages.liquidation', ['search' => $search,
                                           'list' => $liqList,
                                           'pageLimit' => $pageLimit,
-                                          'paperSizes' => $paperSizes]);
+                                          'paperSizes' => $paperSizes]);*/
+    }
+
+    private function getIndexData($request, $type) {
+        $keyword = trim($request->keyword);
+        $instanceDocLog = new DocLog;
+
+        // User groups
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
+                             [Auth::user()->division];
+
+        // Main data
+        $paperSizes = PaperSize::orderBy('paper_type')->get();
+
+        if ($type == 'cashadvance') {
+            $dvData = DisbursementVoucher::with('procors')->whereHas('emppayee', function($query)
+                                           use($empDivisionAccess) {
+                $query->whereIn('division', $empDivisionAccess);
+            })->whereNull('deleted_at')->where('module_class', 2);
+
+            if (!empty($keyword)) {
+                $dvData = $dvData->where(function($qry) use ($keyword) {
+                    $qry->where('id', 'like', "%$keyword%")
+                        ->orWhere('ors_id', 'like', "%$keyword%")
+                        ->orWhere('particulars', 'like', "%$keyword%")
+                        ->orWhere('transaction_type', 'like', "%$keyword%")
+                        ->orWhere('dv_no', 'like', "%$keyword%")
+                        ->orWhere('date_dv', 'like', "%$keyword%")
+                        ->orWhere('date_disbursed', 'like', "%$keyword%")
+                        ->orWhere('responsibility_center', 'like', "%$keyword%")
+                        ->orWhere('mfo_pap', 'like', "%$keyword%")
+                        ->orWhere('amount', 'like', "%$keyword%")
+                        ->orWhere('address', 'like', "%$keyword%")
+                        ->orWhere('fund_cluster', 'like', "%$keyword%")
+                        ->orWhereHas('emppayee', function($query) use ($keyword) {
+                            $query->where('firstname', 'like', "%$keyword%")
+                                  ->orWhere('middlename', 'like', "%$keyword%")
+                                  ->orWhere('lastname', 'like', "%$keyword%")
+                                  ->orWhere('position', 'like', "%$keyword%");
+                        });
+                });
+            }
+
+            $dvData = $dvData->sortable(['created_at' => 'desc'])->paginate(15);
+
+            foreach ($dvData as $dvDat) {
+                $dvDat->doc_status = $instanceDocLog->checkDocStatus($dvDat->id);
+                $dvDat->has_ors = ObligationRequestStatus::where('id', $dvDat->ors_id)->count();
+                $dvDat->has_lr = LiquidationReport::where('dv_id', $dvDat->id)->count();
+            }
+        }
+
+        return (object) [
+            'keyword' => $keyword,
+            'lr_data' => $lrData,
+            'paper_sizes' => $paperSizes
+        ];
     }
 
     /**
@@ -93,36 +164,127 @@ class LiquidationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function showCreate()
-    {
-        $signatories = DB::table('tblsignatories AS sig')
-                         ->select('sig.id', 'sig.position', 'sig.liquidation_sign_type', 'sig.active',
-                                   DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                         ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'sig.emp_id')
-                         ->where([['sig.liquidation', 'y'],
-                                  ['sig.active', 'y']])
-                         ->orderBy('emp.firstname')
-                         ->get();
-        $actionURL = url('cadv-reim-liquidation/ors-burs/store');
+    public function showCreateFromDV($dvID) {
+        $dvList = DisbursementVoucher::all();
+        $dvData = DisbursementVoucher::find($dvID);
+        $amount = $dvData->amount;
+        $dvNo = $dvData->dv_no;
+        $dvDate = $dvData->dv_date ? $dvData->dv_date : NULL;
+        $claimant = $dvData->payee;
 
-        if (Auth::user()->role != 1 && Auth::user()->role != 3) {
-            $claimants = DB::table('tblemp_accounts')
-                           ->select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
-                                   'position', 'emp_id')
-                           ->where('emp_id', Auth::user()->emp_id)
-                           ->orderBy('firstname')
-                           ->get();
-        } else {
-            $claimants = DB::table('tblemp_accounts')
-                           ->select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
-                                   'position', 'emp_id')
-                           ->where('active', 'y')
-                           ->orderBy('firstname')
-                           ->get();
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+        $claimants = User::orderBy('firstname')->get();
+
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
         }
-        return view('pages.create-liquidation', ['actionURL' => $actionURL,
-                                                 'claimants' => $claimants,
-                                                 'signatories' => $signatories]);
+
+        return view('modules.voucher.liquidation.create', compact(
+            'signatories', 'claimants', 'claimant',
+            'dvNo', 'amount', 'dvList', 'dvID', 'dvDate'
+        ));
+    }
+
+    public function showCreate() {
+        $dvList = DisbursementVoucher::all();
+        $amount = 0.00;
+        $dvNo = NULL;
+        $dvDate = NULL;
+        $claimant = NULL;
+
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+        $claimants = User::orderBy('firstname')->get();
+
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
+        }
+
+        return view('modules.voucher.liquidation.create', compact(
+            'signatories', 'claimants', 'claimant',
+            'dvNo', 'amount', 'dvList', 'dvID', 'dvDate'
+        ));
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request) {
+        $periodCover = $request->period_cover;
+        $serialNo = $request->serial_no;
+        $dateLiquidation = !empty($request->date_liquidation) ? $request->date_liquidation : NULL;
+        $entityName = $request->entity_name;
+        $fundCluster = $request->fund_cluster;
+        $responsibilityCenter = $request->responsibility_center;
+        $particulars = $request->particulars;
+        $amount = $request->amount;
+        $totalAmount = $request->total_amount;
+        $dvID = $request->dv_id;
+        $dvDTD = !empty($request->dv_dtd) ? $request->dv_dtd : NULL;
+        $amountCashAdv = $request->amount_cash_adv;
+        $orNO = $request->or_no;
+        $orDTD = !empty($request->or_dtd) ? $request->or_dtd : NULL;
+        $amountRefunded = $request->amount_refunded;
+        $amountReimbursed = $request->amount_reimbursed;
+        $sigClaimant = $request->sig_claimant;
+        $dateClaimant = !empty($request->date_claimant) ? $request->date_claimant : NULL;
+        $sigSupervisor = $request->sig_supervisor;
+        $dateSupervisor = !empty($request->date_supervisor) ? $request->date_supervisor : NULL;
+        $sigAccounting = $request->sig_accounting;
+        $jevNo = $request->jev_no;
+        $dateAccounting = !empty($request->date_accounting) ? $request->date_accounting : NULL;
+
+        $routeName = 'ca-lr';
+
+        try {
+            $instanceLR = new LiquidationReport;
+            $instanceLR->period_covered = $periodCover;
+            $instanceLR->serial_no = $serialNo;
+            $instanceLR->date_liquidation = $dateLiquidation;
+            $instanceLR->entity_name = $entityName;
+            $instanceLR->fund_cluster = $fundCluster;
+            $instanceLR->responsibility_center = $responsibilityCenter;
+            $instanceLR->particulars = $particulars;
+            $instanceLR->amount = $amount;
+            $instanceLR->total_amount = $totalAmount;
+            $instanceLR->dv_id = $dvID;
+            $instanceLR->dv_dtd = $dvDTD;
+            $instanceLR->amount_cash_adv = $amountCashAdv;
+            $instanceLR->or_no = $orNO;
+            $instanceLR->or_dtd = $orDTD;
+            $instanceLR->amount_refunded = $amountRefunded;
+            $instanceLR->amount_reimbursed = $amountReimbursed;
+            $instanceLR->sig_claimant = $sigClaimant;
+            $instanceLR->date_claimant = $dateClaimant;
+            $instanceLR->sig_supervisor = $sigSupervisor;
+            $instanceLR->date_supervisor = $dateSupervisor;
+            $instanceLR->sig_accounting = $sigAccounting;
+            $instanceLR->jev_no = $jevNo;
+            $instanceLR->date_accounting = $dateAccounting;
+            $instanceLR->save();
+
+            $documentType = 'Liquidation Report';
+
+            $msg = "$documentType successfully created.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $dvID])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())
+                                 ->with('failed', $msg);
+        }
     }
 
     /**
@@ -163,17 +325,6 @@ class LiquidationController extends Controller
                                                'actionURL' => $actionURL,
                                                'claimants' => $claimants,
                                                'signatories' => $signatories]);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
     }
 
     /**
