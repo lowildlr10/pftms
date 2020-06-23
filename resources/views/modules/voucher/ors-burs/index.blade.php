@@ -225,12 +225,20 @@
                                                                   ['id' => $ors->id]) }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
+
+                                @if (!$ors->date_obligated)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showDelete('{{ route('ca-ors-burs-delete', ['id' => $ors->id]) }}',
                                                                               '{{ $ors->id }}');">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
+                                @else
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light" disabled>
+                                    <i class="fas fa-trash-alt red-text"></i> Delete
+                                </button>
+                                @endif
                             </div>
                         </div>
                     </div>

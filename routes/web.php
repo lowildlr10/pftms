@@ -448,7 +448,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'uses' => 'LiquidationController@liquidate',
         'module' => 'ca_lr',
         'access' => 'liquidate'
-    ])->name('ca-lr-payment');
+    ])->name('ca-lr-liquidate');
     Route::get('cadv-reim-liquidation/liquidation/show-remarks/{id}', [
         'uses' => 'LiquidationController@showLogRemarks',
         'module' => 'ca_lr',

@@ -73,6 +73,9 @@ class LiquidationReport extends Model
     /**
      * Get the phone record associated with the...
      */
+    public function dv() {
+        return $this->hasOne('App\Models\DisbursementVoucher', 'id', 'dv_id');
+    }
     public function empclaimant() {
         return $this->hasOne('App\User', 'id', 'sig_claimant');
     }

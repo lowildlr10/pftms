@@ -97,7 +97,7 @@
                                 <a href="{{ route('ca-dv') }}" class="waves-effect">Disbursement Voucher</a>
                             </li>
                             <li>
-                                <a href="{{ url('voucher-liquidation') }}" class="waves-effect">Liquidation Report</a>
+                                <a href="{{ route('ca-lr') }}" class="waves-effect">Liquidation Report</a>
                             </li>
                         </ul>
                     </div>

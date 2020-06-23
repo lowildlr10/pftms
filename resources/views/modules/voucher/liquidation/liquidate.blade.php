@@ -1,5 +1,5 @@
-<form id="form-obligate" class="wow animated fadeIn" method="POST"
-      action="{{ route('proc-ors-burs-obligate', ['id' => $id]) }}">
+<form id="form-liquidate" class="wow animated fadeIn" method="POST"
+      action="{{ route('ca-lr-liquidate', ['id' => $id]) }}">
     @csrf
 
     <div class="row">

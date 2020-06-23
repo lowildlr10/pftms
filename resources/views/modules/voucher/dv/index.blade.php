@@ -196,12 +196,20 @@
                                                  ['id' => $dv->id]) }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
+
+                                @if (!$dv->date_disbursed)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showDelete('{{ route('ca-dv-delete', ['id' => $dv->id]) }}',
                                                                               '{{ $dv->id }}');">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
+                                @else
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light" disabled>
+                                    <i class="fas fa-trash-alt red-text"></i> Delete
+                                </button>
+                                @endif
                             </div>
                         </div>
                     </div>
