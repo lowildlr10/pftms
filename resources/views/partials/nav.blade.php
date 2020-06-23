@@ -91,13 +91,13 @@
                     <div class="sidebar-submenu">
                         <ul>
                             <li>
-                                <a href="{{ url('voucher-ors-burs') }}" class="waves-effect">ORS & BURS</a>
+                                <a href="{{ route('ca-ors-burs') }}" class="waves-effect">ORS & BURS</a>
                             </li>
                             <li>
-                                <a href="{{ url('voucher-dv') }}" class="waves-effect">Disbursement Voucher</a>
+                                <a href="{{ route('ca-dv') }}" class="waves-effect">Disbursement Voucher</a>
                             </li>
                             <li>
-                                <a href="{{ url('voucher-liquidation') }}" class="waves-effect">Liquidation Report</a>
+                                <a href="{{ route('ca-lr') }}" class="waves-effect">Liquidation Report</a>
                             </li>
                         </ul>
                     </div>

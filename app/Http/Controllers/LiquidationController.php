@@ -3,14 +3,28 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\PurchaseRequest;
+use App\Models\PurchaseRequestItem;
+use App\Models\AbstractQuotation;
+use App\Models\AbstractQuotationItem;
+use App\Models\PurchaseJobOrder;
+use App\Models\PurchaseJobOrderItem;
+use App\Models\ObligationRequestStatus;
+use App\Models\InspectionAcceptance;
+use App\Models\DisbursementVoucher;
+use App\Models\LiquidationReport;
+use App\Models\InventoryStock;
+use App\Models\ListDemandPayable;
+
 use App\User;
-use App\EmployeeLog;
-use App\DocumentLogHistory;
-use App\PaperSize;
+use App\Models\DocumentLog as DocLog;
+use App\Models\PaperSize;
+use App\Models\Supplier;
+use App\Models\Signatory;
+use App\Models\ItemUnitIssue;
 use Carbon\Carbon;
-use DB;
 use Auth;
-use App\LiquidationReport;
+use DB;
 
 
 class LiquidationController extends Controller
@@ -30,62 +44,112 @@ class LiquidationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function indexCashAdvLiquidation(Request $request)
-    {
-        $pageLimit = 25;
-        $search = trim($request['search']);
-        $paperSizes = PaperSize::all();
-        $liqList = DB::table('tblliquidation as liq')
-                     ->select('liq.*', DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                     ->join('tblemp_accounts as emp', 'emp.emp_id', '=', 'liq.sig_claimant')
-                     ->whereNull('liq.deleted_at');
+    public function indexCA(Request $request) {
+        $data = $this->getIndexData($request, 'cashadvance');
 
-        if (!empty($search)) {
-            $liqList = $liqList->where(function ($query)  use ($search) {
-                                    $query->where('liq.period_covered', 'LIKE', '%' . $search . '%')
-                                          ->orWhere('liq.particulars', 'LIKE', '%' . $search . '%')
-                                          ->orWhere('emp.firstname', 'LIKE', '%' . $search . '%')
-                                          ->orWhere('emp.middlename', 'LIKE', '%' . $search . '%')
-                                          ->orWhere('emp.lastname', 'LIKE', '%' . $search . '%')
-                                          ->orWhere('liq.serial_no', 'LIKE', '%' . $search . '%')
-                                          ->orWhere('liq.dv_no', 'LIKE', '%' . $search . '%')
-                                          ->orWhere('liq.id', 'LIKE', '%' . $search . '%');
-                                });
-        }
+        // Get module access
+        $module = 'ca_lr';
+        $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
+        $isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
+        $isAllowedIssue = Auth::user()->getModuleAccess($module, 'issue');
+        $isAllowedIssueBack = Auth::user()->getModuleAccess($module, 'issue_back');
+        $isAllowedReceive = Auth::user()->getModuleAccess($module, 'receive');
+        $isAllowedReceiveBack = Auth::user()->getModuleAccess($module, 'receive_back');
+        $isAllowedLiquidate = Auth::user()->getModuleAccess($module, 'liquidate');
+        $isAllowedDV = Auth::user()->getModuleAccess('ca_dv', 'is_allowed');
+        $isAllowedORS = Auth::user()->getModuleAccess('ca_ors_burs', 'is_allowed');
 
-        if (Auth::user()->role != 1 && Auth::user()->role != 3) {
-            $liqList = $liqList->where('liq.sig_claimant', Auth::user()->emp_id);
-            $isOrdinaryUser = true;
-        } else {
-            $isOrdinaryUser = false;
-        }
+        return view('modules.voucher.liquidation.index', [
+            'list' => $data->lr_data,
+            'keyword' => $data->keyword,
+            'paperSizes' => $data->paper_sizes,
+            'isAllowedCreate' => $isAllowedCreate,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedDelete' => $isAllowedDelete,
+            'isAllowedDestroy' => $isAllowedDestroy,
+            'isAllowedLiquidate' => $isAllowedLiquidate,
+            'isAllowedIssue' => $isAllowedIssue,
+            'isAllowedIssueBack'=> $isAllowedIssueBack,
+            'isAllowedReceive' => $isAllowedReceive,
+            'isAllowedReceiveBack'=> $isAllowedReceiveBack,
+            'isAllowedORS' => $isAllowedORS,
+            'isAllowedDV' => $isAllowedDV
+        ]);
+    }
 
-        $liqList = $liqList->orderBy('liq.id', 'desc')
-                           ->paginate($pageLimit);
+    private function getIndexData($request, $type) {
+        $keyword = trim($request->keyword);
+        $instanceDocLog = new DocLog;
 
-        foreach ($liqList as $list) {
-            $list->document_status = $this->checkDocStatus($list->code);
+        // User groups
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
+                             [Auth::user()->division];
 
-            if (!$isOrdinaryUser) {
-                if (!empty($list->document_status->date_issued) &&
-                    $list->sig_claimant != Auth::user()->emp_id) {
-                    $list->display_menu = true;
-                } else {
-                    $list->display_menu = false;
-                }
+        // Main data
+        $paperSizes = PaperSize::orderBy('paper_type')->get();
 
-                if ($list->sig_claimant == Auth::user()->emp_id) {
-                    $list->display_menu = true;
-                }
-            } else {
-                $list->display_menu = true;
+        if ($type == 'cashadvance') {
+            $lrData = LiquidationReport::with('dv')->whereHas('empclaimant', function($query)
+                                           use($empDivisionAccess) {
+                $query->whereIn('division', $empDivisionAccess);
+            })->whereNull('deleted_at');
+
+            if (!empty($keyword)) {
+                $lrData = $lrData->where(function($qry) use ($keyword) {
+                    $qry->where('id', 'like', "%$keyword%")
+                        ->orWhere('period_covered', 'like', "%$keyword%")
+                        ->orWhere('entity_name', 'like', "%$keyword%")
+                        ->orWhere('serial_no', 'like', "%$keyword%")
+                        ->orWhere('fund_cluster', 'like', "%$keyword%")
+                        ->orWhere('date_liquidation', 'like', "%$keyword%")
+                        ->orWhere('responsibility_center', 'like', "%$keyword%")
+                        ->orWhere('particulars', 'like', "%$keyword%")
+                        ->orWhere('amount', 'like', "%$keyword%")
+                        ->orWhere('date_liquidated', 'like', "%$keyword%")
+                        ->orWhere('jev_no', 'like', "%$keyword%")
+                        ->orWhere('dv_dtd', 'like', "%$keyword%")
+                        ->orWhere('or_no', 'like', "%$keyword%")
+                        ->orWhere('or_dtd', 'like', "%$keyword%")
+                        ->orWhereHas('empclaimant', function($query) use ($keyword) {
+                            $query->where('firstname', 'like', "%$keyword%")
+                                  ->orWhere('middlename', 'like', "%$keyword%")
+                                  ->orWhere('lastname', 'like', "%$keyword%")
+                                  ->orWhere('position', 'like', "%$keyword%");
+                        })->orWhereHas('dv', function($query) use ($keyword) {
+                            $query->where('id', 'like', "%$keyword%")
+                                  ->orWhere('ors_id', 'like', "%$keyword%")
+                                  ->orWhere('particulars', 'like', "%$keyword%")
+                                  ->orWhere('transaction_type', 'like', "%$keyword%")
+                                  ->orWhere('dv_no', 'like', "%$keyword%")
+                                  ->orWhere('date_dv', 'like', "%$keyword%")
+                                  ->orWhere('date_disbursed', 'like', "%$keyword%")
+                                  ->orWhere('responsibility_center', 'like', "%$keyword%")
+                                  ->orWhere('mfo_pap', 'like', "%$keyword%")
+                                  ->orWhere('amount', 'like', "%$keyword%")
+                                  ->orWhere('address', 'like', "%$keyword%")
+                                  ->orWhere('fund_cluster', 'like', "%$keyword%");
+                        });
+                });
+            }
+
+            $lrData = $lrData->sortable(['created_at' => 'desc'])->paginate(15);
+
+            foreach ($lrData as $lrDat) {
+                $instanceDV = DisbursementVoucher::find($lrDat->dv_id);
+                $lrDat->doc_status = $instanceDocLog->checkDocStatus($lrDat->id);
+                $lrDat->has_dv = DisbursementVoucher::where('id', $lrDat->dv_id)->count();
+                $lrDat->has_ors = ObligationRequestStatus::where('id', $instanceDV->ors_id)->count();
             }
         }
 
-        return view('pages.liquidation', ['search' => $search,
-                                          'list' => $liqList,
-                                          'pageLimit' => $pageLimit,
-                                          'paperSizes' => $paperSizes]);
+        return (object) [
+            'keyword' => $keyword,
+            'lr_data' => $lrData,
+            'paper_sizes' => $paperSizes
+        ];
     }
 
     /**
@@ -93,36 +157,136 @@ class LiquidationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function showCreate()
-    {
-        $signatories = DB::table('tblsignatories AS sig')
-                         ->select('sig.id', 'sig.position', 'sig.liquidation_sign_type', 'sig.active',
-                                   DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                         ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'sig.emp_id')
-                         ->where([['sig.liquidation', 'y'],
-                                  ['sig.active', 'y']])
-                         ->orderBy('emp.firstname')
-                         ->get();
-        $actionURL = url('cadv-reim-liquidation/ors-burs/store');
+    public function showCreateFromDV($dvID) {
+        $dvList = DisbursementVoucher::all();
+        $dvData = DisbursementVoucher::find($dvID);
+        $amount = $dvData->amount;
+        $dvNo = $dvData->dv_no;
+        $dvDate = $dvData->date_dv;
+        $claimant = $dvData->payee;
 
-        if (Auth::user()->role != 1 && Auth::user()->role != 3) {
-            $claimants = DB::table('tblemp_accounts')
-                           ->select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
-                                   'position', 'emp_id')
-                           ->where('emp_id', Auth::user()->emp_id)
-                           ->orderBy('firstname')
-                           ->get();
-        } else {
-            $claimants = DB::table('tblemp_accounts')
-                           ->select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
-                                   'position', 'emp_id')
-                           ->where('active', 'y')
-                           ->orderBy('firstname')
-                           ->get();
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+        $claimants = User::orderBy('firstname')->get();
+
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
         }
-        return view('pages.create-liquidation', ['actionURL' => $actionURL,
-                                                 'claimants' => $claimants,
-                                                 'signatories' => $signatories]);
+
+        return view('modules.voucher.liquidation.create', compact(
+            'signatories', 'claimants', 'claimant',
+            'dvNo', 'amount', 'dvList', 'dvID', 'dvDate'
+        ));
+    }
+
+    public function showCreate() {
+        $dvList = DisbursementVoucher::all();
+        $amount = 0.00;
+        $dvID = NULL;
+        $dvNo = NULL;
+        $dvDate = NULL;
+        $claimant = NULL;
+
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+        $claimants = User::orderBy('firstname')->get();
+
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
+        }
+
+        return view('modules.voucher.liquidation.create', compact(
+            'signatories', 'claimants', 'claimant',
+            'dvNo', 'amount', 'dvList', 'dvID', 'dvDate'
+        ));
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request) {
+        $periodCover = $request->period_cover;
+        $serialNo = $request->serial_no;
+        $dateLiquidation = !empty($request->date_liquidation) ? $request->date_liquidation : NULL;
+        $entityName = $request->entity_name;
+        $fundCluster = $request->fund_cluster;
+        $responsibilityCenter = $request->responsibility_center;
+        $particulars = $request->particulars;
+        $amount = $request->amount;
+        $totalAmount = $request->total_amount;
+        $dvID = $request->dv_id;
+        $dvDTD = !empty($request->dv_dtd) ? $request->dv_dtd : NULL;
+        $amountCashAdv = $request->amount_cash_adv;
+        $orNO = $request->or_no;
+        $orDTD = !empty($request->or_dtd) ? $request->or_dtd : NULL;
+        $amountRefunded = $request->amount_refunded;
+        $amountReimbursed = $request->amount_reimbursed;
+        $sigClaimant = $request->sig_claimant;
+        $dateClaimant = !empty($request->date_claimant) ? $request->date_claimant : NULL;
+        $sigSupervisor = $request->sig_supervisor;
+        $dateSupervisor = !empty($request->date_supervisor) ? $request->date_supervisor : NULL;
+        $sigAccounting = $request->sig_accounting;
+        $jevNo = $request->jev_no;
+        $dateAccounting = !empty($request->date_accounting) ? $request->date_accounting : NULL;
+
+        $routeName = 'ca-lr';
+        $documentType = 'Liquidation Report';
+
+        try {
+            $instanceDV = DisbursementVoucher::find($dvID);
+
+            if ($instanceDV && !empty($instanceDV->dv_no)) {
+                $instanceLR = new LiquidationReport;
+                $instanceLR->period_covered = $periodCover;
+                $instanceLR->serial_no = $serialNo;
+                $instanceLR->date_liquidation = $dateLiquidation;
+                $instanceLR->entity_name = $entityName;
+                $instanceLR->fund_cluster = $fundCluster;
+                $instanceLR->responsibility_center = $responsibilityCenter;
+                $instanceLR->particulars = $particulars;
+                $instanceLR->amount = $amount;
+                $instanceLR->total_amount = $totalAmount;
+                $instanceLR->dv_id = $dvID;
+                $instanceLR->dv_dtd = $dvDTD;
+                $instanceLR->amount_cash_adv = $amountCashAdv;
+                $instanceLR->or_no = $orNO;
+                $instanceLR->or_dtd = $orDTD;
+                $instanceLR->amount_refunded = $amountRefunded;
+                $instanceLR->amount_reimbursed = $amountReimbursed;
+                $instanceLR->sig_claimant = $sigClaimant;
+                $instanceLR->date_claimant = $dateClaimant;
+                $instanceLR->sig_supervisor = $sigSupervisor;
+                $instanceLR->date_supervisor = $dateSupervisor;
+                $instanceLR->sig_accounting = $sigAccounting;
+                $instanceLR->jev_no = $jevNo;
+                $instanceLR->date_accounting = $dateAccounting;
+                $instanceLR->save();
+
+                $msg = "$documentType successfully created.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route($routeName, ['keyword' => $dvID])
+                                 ->with('success', $msg);
+            } else {
+                $msg = "DV number must not be empty.";
+                Auth::user()->log($request, $msg);
+                return redirect(url()->previous())
+                                     ->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())
+                                 ->with('failed', $msg);
+        }
     }
 
     /**
@@ -132,48 +296,53 @@ class LiquidationController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showEdit($id) {
-        $liquidationData = LiquidationReport::find($id);
-        $signatories = DB::table('tblsignatories AS sig')
-                         ->select('sig.id', 'sig.position', 'sig.liquidation_sign_type', 'sig.active',
-                                   DB::raw('CONCAT(emp.firstname, " ", emp.lastname) AS name'))
-                         ->join('tblemp_accounts AS emp', 'emp.emp_id', '=', 'sig.emp_id')
-                         ->where([['sig.liquidation', 'y'],
-                                  ['sig.active', 'y']])
-                         ->orderBy('emp.firstname')
-                         ->get();
-        $actionURL = url('cadv-reim-liquidation/liquidation/update/' . $id);
+        $dvList = DisbursementVoucher::all();
+        $liquidationData = LiquidationReport::with('dv')->find($id);
+        $dateDV = $liquidationData->dv['date_dv'];
+        $periodCover = $liquidationData->period_covered;
+        $serialNo = $liquidationData->serial_no;
+        $dateLiquidation = $liquidationData->date_liquidation;
+        $entityName = $liquidationData->entity_name;
+        $fundCluster = $liquidationData->fund_cluster;
+        $responsibilityCenter = $liquidationData->responsibility_center;
+        $particulars = $liquidationData->particulars;
+        $amount = $liquidationData->amount;
+        $totalAmount = $liquidationData->total_amount;
+        $dvID = $liquidationData->dv_id;
+        $dvDTD = $liquidationData->dv_dtd ? $liquidationData->dv_dtd : $dateDV;
+        $amountCashAdv = $liquidationData->amount_cash_adv;
+        $orNo = $liquidationData->or_no;
+        $orDTD = $liquidationData->or_dtd;
+        $amountRefunded = $liquidationData->amount_refunded;
+        $amountReimbursed = $liquidationData->amount_reimbursed;
+        $sigClaimant = $liquidationData->sig_claimant;
+        $dateClaimant = $liquidationData->date_claimant;
+        $sigSupervisor = $liquidationData->sig_supervisor;
+        $dateSupervisor = $liquidationData->date_supervisor;
+        $sigAccounting = $liquidationData->sig_accounting;
+        $jevNo = $liquidationData->jev_no;
+        $dateAccounting = $liquidationData->date_accounting;
 
-        if (Auth::user()->role != 1 && Auth::user()->role != 3) {
-            $claimants = DB::table('tblemp_accounts')
-                           ->select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
-                                   'position', 'emp_id')
-                           ->where('emp_id', Auth::user()->emp_id)
-                           ->orderBy('firstname')
-                           ->get();
-        } else {
-            $claimants = DB::table('tblemp_accounts')
-                           ->select(DB::raw('CONCAT(firstname, " ", lastname) AS name'),
-                                   'position', 'emp_id')
-                           ->where('active', 'y')
-                           ->orderBy('firstname')
-                           ->get();
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+        $claimants = User::orderBy('firstname')->get();
+
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
         }
 
-        return view('pages.edit-liquidation', ['dat' => $liquidationData,
-                                               'actionURL' => $actionURL,
-                                               'claimants' => $claimants,
-                                               'signatories' => $signatories]);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
+        return view('modules.voucher.liquidation.update', compact(
+            'signatories', 'claimants', 'amount', 'dvList',
+            'periodCover', 'serialNo', 'dateLiquidation', 'entityName',
+            'fundCluster', 'responsibilityCenter', 'particulars', 'amount',
+            'totalAmount', 'dvID', 'dvDTD', 'amountCashAdv',
+            'orNo', 'orDTD', 'amountRefunded', 'amountReimbursed',
+            'dateClaimant', 'dateClaimant', 'sigSupervisor', 'dateSupervisor',
+            'sigAccounting', 'jevNo', 'dateAccounting', 'id', 'sigClaimant'
+        ));
     }
 
     /**
@@ -183,71 +352,114 @@ class LiquidationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
-        $liq = LiquidationReport::find($id);
+    public function update(Request $request, $id) {
         $periodCover = $request->period_covered;
         $serialNo = $request->serial_no;
-        $dateLiquidation = !empty($request->date_liquidation) ? $request->date_liquidation: NULL;
+        $dateLiquidation = !empty($request->date_liquidation) ? $request->date_liquidation : NULL;
+        $entityName = $request->entity_name;
+        $fundCluster = $request->fund_cluster;
         $responsibilityCenter = $request->responsibility_center;
         $particulars = $request->particulars;
         $amount = $request->amount;
         $totalAmount = $request->total_amount;
-        $AmountCashAdvance = $request->amount_cash_adv;
-        $orNo = $request->or_no;
-        $orDTD = !empty($request->or_dtd) ? $request->or_dtd: NULL;
+        $dvID = $request->dv_id;
+        $dvDTD = !empty($request->dv_dtd) ? $request->dv_dtd : NULL;
+        $amountCashAdv = $request->amount_cash_adv;
+        $orNO = $request->or_no;
+        $orDTD = !empty($request->or_dtd) ? $request->or_dtd : NULL;
         $amountRefunded = $request->amount_refunded;
         $amountReimbursed = $request->amount_reimbursed;
         $sigClaimant = $request->sig_claimant;
+        $dateClaimant = !empty($request->date_claimant) ? $request->date_claimant : NULL;
         $sigSupervisor = $request->sig_supervisor;
+        $dateSupervisor = !empty($request->date_supervisor) ? $request->date_supervisor : NULL;
         $sigAccounting = $request->sig_accounting;
-        $dateClaimant = !empty($request->date_claimant) ? $request->date_claimant: NULL;
-        $dateSupervisor = !empty($request->date_supervisor) ? $request->date_supervisor: NULL;
-        $dateAccounting = !empty($request->date_accounting) ? $request->date_accounting: NULL;
-        $entityNamwe = $request->entity_name;
-        $fundCluster = $request->fund_cluster;
         $jevNo = $request->jev_no;
-        $redirectURL = "cadv-reim-liquidation/liquidation?search=" . $id;
+        $dateAccounting = !empty($request->date_accounting) ? $request->date_accounting : NULL;
 
-        if ($liq) {
-            $liq->period_covered = $periodCover;
-            $liq->serial_no = $serialNo;
-            $liq->date_liquidation = $dateLiquidation;
-            $liq->responsibility_center = $responsibilityCenter;
-            $liq->particulars = $particulars;
-            $liq->amount = $amount;
-            $liq->total_amount = $totalAmount;
-            $liq->amount_cash_adv = $AmountCashAdvance;
-            $liq->or_no = $orNo;
-            $liq->or_dtd = $orDTD;
-            $liq->amount_refunded = $amountRefunded;
-            $liq->amount_reimbursed = $amountReimbursed;
-            $liq->sig_claimant = $sigClaimant;
-            $liq->sig_supervisor = $sigSupervisor;
-            $liq->sig_accounting = $sigAccounting;
-            $liq->date_claimant = $dateClaimant;
-            $liq->date_supervisor = $dateSupervisor;
-            $liq->date_accounting = $dateAccounting;
-            $liq->entity_name = $entityNamwe;
-            $liq->fund_cluster = $fundCluster;
-            $liq->jev_no = $jevNo;
+        $routeName = 'ca-lr';
+        $documentType = 'Liquidation Report';
 
-            try {
-                $liq->save();
+        try {
+            $instanceLR = LiquidationReport::find($id);
+            $instanceLR->period_covered = $periodCover;
+            $instanceLR->serial_no = $serialNo;
+            $instanceLR->date_liquidation = $dateLiquidation;
+            $instanceLR->entity_name = $entityName;
+            $instanceLR->fund_cluster = $fundCluster;
+            $instanceLR->responsibility_center = $responsibilityCenter;
+            $instanceLR->particulars = $particulars;
+            $instanceLR->amount = $amount;
+            $instanceLR->total_amount = $totalAmount;
+            $instanceLR->dv_id = $dvID;
+            $instanceLR->dv_dtd = $dvDTD;
+            $instanceLR->amount_cash_adv = $amountCashAdv;
+            $instanceLR->or_no = $orNO;
+            $instanceLR->or_dtd = $orDTD;
+            $instanceLR->amount_refunded = $amountRefunded;
+            $instanceLR->amount_reimbursed = $amountReimbursed;
+            $instanceLR->sig_claimant = $sigClaimant;
+            $instanceLR->date_claimant = $dateClaimant;
+            $instanceLR->sig_supervisor = $sigSupervisor;
+            $instanceLR->date_supervisor = $dateSupervisor;
+            $instanceLR->sig_accounting = $sigAccounting;
+            $instanceLR->jev_no = $jevNo;
+            $instanceLR->date_accounting = $dateAccounting;
+            $instanceLR->save();
 
-                $logEmpMessage = "updated the liquidation report $id.";
-                $this->logEmployeeHistory($logEmpMessage);
+            $msg = "$documentType '$id' successfully updated.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $dvID])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())
+                                 ->with('failed', $msg);
+        }
+    }
 
-                $msg = "Liquidation Report $id successfully updated.";
-                return redirect(url($redirectURL))->with('success', $msg);
-            } catch (\Throwable $th) {
-                $msg = "There is an error encountered updating the
-                        Liquidation Report $id.";
-                return redirect(url()->previous())->with('failed', $msg);
+    /**
+     * Soft deletes the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function delete(Request $request, $id) {
+        $isDestroy = $request->destroy;
+
+        if ($isDestroy) {
+            $response = $this->destroy($request, $id);
+
+            if ($response->alert_type == 'success') {
+                return redirect()->route('ca-dv', ['keyword' => $response->id])
+                                 ->with($response->alert_type, $response->msg);
+            } else {
+                return redirect()->route('ca-dv')
+                                 ->with($response->alert_type, $response->msg);
             }
         } else {
-            $msg = "Liquidation Report $id not found. Try again later.";
-            return redirect(url()->previous())->with('warning', $msg);
+            try {
+                $instanceLR = LiquidationReport::find($id);
+                //$instanceORS = ObligationRequestStatus::where('id', $instanceLR->ors_id)->first();
+                $documentType = 'Liquidation Report';
+                $instanceLR->delete();
+
+                /*
+                if ($instanceORS) {
+                    $instanceORS->delete();
+                }*/
+
+                $msg = "$documentType '$id' successfully deleted.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('ca-dv', ['keyword' => $id])
+                                 ->with('success', $msg);
+            } catch (\Throwable $th) {
+                $msg = "Unknown error has occured. Please try again.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('ca-dv')
+                                 ->with('failed', $msg);
+            }
         }
     }
 
@@ -257,272 +469,233 @@ class LiquidationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
-        //
+    public function destroy($request, $id) {
+        try {
+            $instanceLR = LiquidationReport::find($id);
+            //$instanceORS = ObligationRequestStatus::where('id', $instanceLR->ors_id)->first();
+            $documentType = 'Liquidation Report';
+            $instanceLR->forceDelete();
+
+            /*
+            if ($instanceORS) {
+                $instanceORS->forceDelete();
+            }*/
+
+            $msg = "$documentType '$id' permanently deleted.";
+            Auth::user()->log($request, $msg);
+
+            return (object) [
+                'msg' => $msg,
+                'alert_type' => 'success',
+                'id' => $id
+            ];
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+
+            return (object) [
+                'msg' => $msg,
+                'alert_type' => 'failed'
+            ];
+        }
     }
 
-    public function showIssuedTo(Request $request, $id) {
-        $issuedTo = User::orderBy('firstname')->get();
-        $issueBack = (int)$request->back;
-
-        return view('pages.view-liquidation-issue', ['key' => $id,
-                                                     'issuedTo' => $issuedTo,
-                                                     'issueBack' => $issueBack]);
+    public function showIssue($id) {
+        return view('modules.voucher.liquidation.issue', [
+            'id' => $id
+        ]);
     }
 
     public function issue(Request $request, $id) {
-        $liq = LiquidationReport::find($id);
-        $docType = "Liquidation Report";
-        $pKey = $id;
-        $redirectURL = "cadv-reim-liquidation/liquidation?search=" . $pKey;
-        $issueBack = $request->back;
         $remarks = $request->remarks;
-        $issuedTo = $request->issued_to;
-        $code = $liq->code;
-        $isDocGenerated = $this->checkDocGenerated($code);
-        $docStatus = $this->checkDocStatus($code);
 
         try {
-            if (!$issueBack) {
-                if (empty($docStatus->date_issued)) {
-                    if ($isDocGenerated) {
-                        $this->logTrackerHistory($code, Auth::user()->emp_id, $issuedTo, "issued", $remarks);
+            $instanceDocLog = new DocLog;
+            $instanceLR = LiquidationReport::find($id);
+            $documentType = 'Liquidation Report';
 
-                        $logEmpMessage = "issued the " . strtolower($docType) . " $pKey.";
-                        $this->logEmployeeHistory($logEmpMessage);
+            $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
+            $docStatus = $instanceDocLog->checkDocStatus($id);
 
-                        $msg = "$docType $pKey is now set to issued.";
-                        return redirect(url($redirectURL))->with('success', $msg);
-                    } else {
-                        $msg = "Generate first the $docType $pKey document.";
-                        return redirect(url($redirectURL))->with('warning', $msg);
-                    }
+            $routeName = 'ca-lr';
+
+            if (empty($docStatus->date_issued)) {
+                if ($isDocGenerated) {
+                    $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "issued", $remarks);
+
+                    //$instanceDV->notifyIssued($id, Auth::user()->id);
+
+                    $msg = "$documentType '$id' successfully issued to accounting unit.";
+                    Auth::user()->log($request, $msg);
+                    return redirect()->route($routeName, ['keyword' => $id])
+                                     ->with('success', $msg);
                 } else {
-                    $msg = "$docType $pKey is already issued.";
-                    return redirect(url($redirectURL))->with('warning', $msg);
+                    $msg = "Document for $documentType '$id' should be generated first.";
+                    Auth::user()->log($request, $msg);
+                    return redirect()->route($routeName, ['keyword' => $id])
+                                     ->with('warning', $msg);
                 }
             } else {
-                $issueBackResponse = $this->issueBack($pKey, $code, $docType, $docStatus,
-                                                      $issuedTo, $remarks);
-
-                if ($issueBackResponse->status == 'success') {
-                    return redirect(url($redirectURL))->with('success', $issueBackResponse->msg);
-                } else {
-                    return redirect(url()->previous())->with('failed', $issueBackResponse->msg);
-                }
+                $msg = "$documentType '$id' already issued.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route($routeName, ['keyword' => $id])
+                                 ->with('warning', $msg);
             }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered issuing the $docType $pKey.";
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
     }
 
-    private function issueBack($pKey, $code, $docType, $docStatus, $issuedTo, $remarks) {
-        if (empty($docStatus->date_issued_back)) {
-            $this->logTrackerHistory($code, Auth::user()->emp_id, $issuedTo, "issued_back", $remarks);
-
-            $logEmpMessage = "issued back the " . strtolower($docType) . " $pKey.";
-            $this->logEmployeeHistory($logEmpMessage);
-
-            $msg = "Issued back the $docType $pKey document.";
-            $status = "success";
-        } else {
-            $msg = "There is an error encountered issuing back the $docType $pKey.";
-            $status = "failed";
-        }
-
-        return (object) ['msg' => $msg,
-                         'status' => $status];
+    public function showReceive($id) {
+        return view('modules.voucher.liquidation.receive', [
+            'id' => $id
+        ]);
     }
 
     public function receive(Request $request, $id) {
-        $liq = LiquidationReport::find($id);
-        $docType = "Liquidation Report";
-        $pKey = $id;
-        $redirectURL = "cadv-reim-liquidation/liquidation?search=" . $pKey;
-        $receiveBack = $request->back;
-        $code = $liq->code;
-        $isDocGenerated = $this->checkDocGenerated($code);
-        $docStatus = $this->checkDocStatus($code);
+        $remarks = $request->remarks;
 
         try {
-            if (!$receiveBack) {
-                if (!empty($docStatus->date_issued) && empty($docStatus->date_received)) {
-                    if ($isDocGenerated) {
-                        $this->logTrackerHistory($code, Auth::user()->emp_id, 0, "received");
+            $instanceDocLog = new DocLog;
+            $instanceLR = LiquidationReport::find($id);
+            $documentType = 'Liquidation Report';
 
-                        $logEmpMessage = "received the " . strtolower($docType) . " $pKey.";
-                        $this->logEmployeeHistory($logEmpMessage);
+            $routeName = 'ca-lr';
 
-                        $msg = "$docType $pKey is now set to received.";
-                        return redirect(url($redirectURL))->with('success', $msg);
-                    } else {
-                        $msg = "Generate first the $docType $pKey document.";
-                        return redirect(url($redirectURL))->with('warning', $msg);
-                    }
-                } else {
-                    $msg = "$docType $pKey is already received.";
-                    return redirect(url($redirectURL))->with('warning', $msg);
-                }
-            } else {
-                $receiveBackResponse = $this->receiveBack($pKey, $code, $docType,
-                                                          $docStatus);
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received", $remarks);
+            //$instanceLR->notifyReceived($id, Auth::user()->id);
 
-                if ($receiveBackResponse->status == 'success') {
-                    return redirect(url($redirectURL))->with('success', $receiveBackResponse->msg);
-                } else {
-                    return redirect(url()->previous())->with('failed', $receiveBackResponse->msg);
-                }
-            }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered receiving the $docType $pKey.";
+            $msg = "$documentType '$id' successfully received.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
     }
 
-    public function receiveBack($pKey, $code, $docType, $docStatus) {
-        if (!empty($docStatus->date_issued_back) && empty($docStatus->date_received_back)) {
-            $this->logTrackerHistory($code, Auth::user()->emp_id, 0, "-");
-            $this->logTrackerHistory($code, Auth::user()->emp_id, 0, "received_back");
-
-            $logEmpMessage = "received back the $docType $pKey.";
-            $this->logEmployeeHistory($logEmpMessage);
-
-            $msg = "Received back the $docType $pKey document.";
-            $status = "success";
-        } else {
-            $msg = "There is an error encountered issuing back the $docType $pKey.";
-            $status = "failed";
-        }
-
-        return (object) ['msg' => $msg,
-                         'status' => $status];
+    public function showIssueBack($id) {
+        return view('modules.voucher.liquidation.issue-back', [
+            'id' => $id
+        ]);
     }
 
-    public function liquidate($id) {
-        $liq = LiquidationReport::find($id);
-        $docType = "Liquidation Report";
-        $pKey = $id;
-        $redirectURL = "cadv-reim-liquidation/liquidation?search=" . $pKey;
-        $code = $liq->code;
-        $isDocGenerated = $this->checkDocGenerated($code);
+    public function issueBack(Request $request, $id) {
+        $remarks = $request->remarks;
 
         try {
-            if ($isDocGenerated) {
-                if (empty($liq->date_liquidated)) {
-                    $liq->liquidated_by = Auth::user()->emp_id;
-                    $liq->date_liquidated = date('Y-m-d H:i:s');
-                    $liq->save();
+            $instanceDocLog = new DocLog;
+            $instanceLR = LiquidationReport::find($id);
+            $documentType = 'Liquidation Report';
 
-                    $logEmpMessage = "liquidated the " . strtolower($docType) . " $pKey.";
-                    $this->logEmployeeHistory($logEmpMessage);
+            $routeName = 'ca-lr';
 
-                    $msg = "$docType $pKey is now set to liquidated.";
-                    return redirect(url($redirectURL))->with('success', $msg);
-                } else {
-                    $msg = "$docType $pKey is already liquidated.";
-                    return redirect(url($redirectURL))->with('warning', $msg);
-                }
-            } else {
-                $msg = "Generate first the $docType $pKey document.";
-                return redirect(url($redirectURL))->with('warning', $msg);
-            }
-        } catch (Exception $e) {
-            $msg = "There is an error encountered liquidating the $docType $pKey.";
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "issued_back", $remarks);
+            //$instanceLR->notifyIssuedBack($id, Auth::user()->id);
+
+            $msg = "$documentType '$id' successfully issued back.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
     }
 
-    private function checkDocGenerated($code) {
-        $logs = DB::table('tbldocument_logs_history')
-                  ->where([
-                        ['code', $code],
-                        ['action', 'document_generated']
-                    ])
-                  ->orderBy('logshist.created_at', 'desc')
-                  ->count();
-
-        return $logs;
+    public function showReceiveBack($id) {
+        return view('modules.voucher.liquidation.receive-back', [
+            'id' => $id
+        ]);
     }
 
-    private function checkDocStatus($code) {
-        $logs = DB::table('tbldocument_logs_history')
-                  ->where('code', $code)
-                  ->orderBy('created_at', 'desc')
-                  ->get();
-        $currentStatus = (object) ["issued_by" => NULL,
-                                   "date_issued" => NULL,
-                                   "received_by" => NULL,
-                                   "date_received" => NULL,
-                                   "issued_back_by" => NULL,
-                                   "date_issued_back" => NULL,
-                                   "received_back_by" => NULL,
-                                   "date_received_back" => NULL,
-                                   "issued_remarks" => NULL,
-                                   "issued_back_remarks" => NULL];
+    public function receiveBack(Request $request, $id) {
+        $remarks = $request->remarks;
 
-        if (count($logs) > 0) {
-            foreach ($logs as $log) {
-                if ($log->action != "-") {
-                    switch ($log->action) {
-                        case 'issued':
-                            $currentStatus->issued_remarks = $log->remarks;
-                            $currentStatus->issued_by = $log->action;
-                            $currentStatus->date_issued = $log->created_at;
-                            break;
+        try {
+            $instanceDocLog = new DocLog;
+            $instanceLR = LiquidationReport::find($id);
+            $documentType = 'Liquidation Report';
 
-                        case 'received':
-                            $currentStatus->received_by = $log->action;
-                            $currentStatus->date_received = $log->created_at;
-                            break;
+            $routeName = 'ca-lr';
 
-                        case 'issued_back':
-                            $currentStatus->issued_back_remarks = $log->remarks;
-                            $currentStatus->issued_back_by = $log->action;
-                            $currentStatus->date_issued_back = $log->created_at;
-                            break;
+            $instanceDocLog->logDocument($id, NULL, NULL, "-", NULL);
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received_back", $remarks);
 
-                        case 'received_back':
-                            $currentStatus->received_back_by = $log->action;
-                            $currentStatus->date_received_back = $log->created_at;
-                            break;
-
-                        default:
-                            # code...
-                            break;
-                    }
-                } else {
-                    break;
-                }
-            }
+            $msg = "$documentType '$id' successfully received back.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
         }
-
-        return $currentStatus;
     }
 
-    private function generateTrackerCode($modAbbr, $pKey, $modClass) {
-        $modAbbr = strtoupper($modAbbr);
-        $pKey = strtoupper($pKey);
-
-        return $modAbbr . "-" . $pKey . "-" . $modClass . "-" . date('mdY');
+    public function showLiquidate($id) {
+        $instanceDV = LiquidationReport::find($id);
+        $serialNo = $instanceDV->serial_no;
+        return view('modules.voucher.liquidation.liquidate', [
+            'id' => $id,
+            'serialNo' => $serialNo
+        ]);
     }
 
-    private function logEmployeeHistory($msg, $emp = "") {
-        $empLog = new EmployeeLog;
-        $empLog->emp_id = empty($emp) ? Auth::user()->emp_id: $emp;
-        $empLog->message = $msg;
-        $empLog->save();
+    public function liquidate(Request $request, $id) {
+        $serialNo = $request->serial_no;
+
+        try {
+            $instanceDocLog = new DocLog;
+            $instanceLR = LiquidationReport::find($id);
+            $documentType = 'Liquidation Report';
+
+            $routeName = 'ca-lr';
+
+            $instanceLR->date_liquidated = Carbon::now();
+            $instanceLR->liquidated_by = Auth::user()->id;
+            $instanceLR->serial_no = $serialNo;
+            $instanceLR->save();
+
+            //$instanceLR->notifyPayment($id, Auth::user()->id);
+
+            $msg = "$documentType with a serial number of '$serialNo'
+                    is successfully set to 'Liquidated'.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 
-    private function logTrackerHistory($code, $empFrom, $empTo, $action, $remarks = "") {
-        $docHistory = new DocumentLogHistory;
-        $docHistory->code = $code;
-        $docHistory->date = Carbon::now();
-        $docHistory->emp_from = $empFrom;
-        $docHistory->emp_to = $empTo;
-        $docHistory->action = $action;
-        $docHistory->remarks = $remarks;
-        $docHistory->save();
+    public function showLogRemarks($id) {
+        $instanceDocLog = DocLog::where('doc_id', $id)
+                                ->whereNotNull('remarks')
+                                ->orderBy('logged_at', 'desc')
+                                ->get();
+        return view('modules.procurement.dv.remarks', [
+            'id' => $id,
+            'docRemarks' => $instanceDocLog
+        ]);
+    }
+
+    public function logRemarks(Request $request, $id) {
+        $message = $request->message;
+
+        if (!empty($message)) {
+            $instanceLR = LiquidationReport::find($id);
+            $instanceDocLog = new DocLog;
+            //$instanceLR->notifyMessage($id, Auth::user()->id, $message);
+            $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "message", $message);
+            return 'Sent!';
+        }
     }
 }

@@ -39,6 +39,7 @@ use App\Plugins\PDFGenerator\DocJobOrder;
 use App\Plugins\PDFGenerator\DocObligationRequestStatus;
 use App\Plugins\PDFGenerator\DocInspectionAcceptanceReport;
 use App\Plugins\PDFGenerator\DocDisbursementVoucher;
+use App\Plugins\PDFGenerator\DocLiquidationReport;
 
 class PrintController extends Controller
 {
@@ -209,16 +210,18 @@ class PrintController extends Controller
                 $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-                    $code = $this->getDocCode($key, 'ors');
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                    $docType = ($data->ors->document_type == 'ors') ?
-                               'obligation and request status': 'budget utilization and request status';
-                    $orsID =  $data->ors->id;
-                    $msg = "Generated the $docType $orsID.";
+                    $msg = "Generated the Obligation Request and Status '$key' document.";
                     Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateORS($data, $data->ors->document_type, $fontScale,
-                                       $pageHeight, $pageWidth, $previewToggle);
+                    $this->generateORS(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
                 break;
             case 'ca_burs':
@@ -281,16 +284,19 @@ class PrintController extends Controller
                 $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-                    $code = $this->getDocCode($key, 'dv');
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                    $dvID =  $data->dv->id;
-                    $msg = "generated the disbursement voucher $dvID.";
+                    $msg = "Generated the Disbursement Voucher '$key' document.";
                     Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateDV($data, $documentType, $fontScale,
-                                      $pageHeight, $pageWidth, $previewToggle);
+                    $this->generateDV(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
-
                 break;
 
             case 'ca_lr':
@@ -298,16 +304,19 @@ class PrintController extends Controller
                 $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-                    $code = $this->getDocCode($key, 'liquidation');
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                    $liqID =  $data->liq->id;
-                    $msg = "generated the disbursement voucher $liqID.";
+                    $msg = "Generated the Liquidation Report '$key' document.";
                     Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateLiquidation($data, $documentType, $fontScale,
-                                               $pageHeight, $pageWidth, $previewToggle);
+                    $this->generateLR(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
-
                 break;
 
                 case 'pay_lddap':
@@ -1088,8 +1097,10 @@ class PrintController extends Controller
 
     private function getDataLiquidation($id) {
         $liq = DB::table('liquidation_reports as liq')
-                 ->select('liq.*', 'emp.firstname', 'emp.middlename', 'emp.lastname')
-                 ->join('emp_accounts as emp', 'emp.emp_id', '=', 'liq.sig_claimant')
+                 ->select('liq.*', 'emp.firstname', 'emp.middlename', 'emp.lastname',
+                          'dv.dv_no')
+                 ->join('emp_accounts as emp', 'emp.id', '=', 'liq.sig_claimant')
+                 ->join('disbursement_vouchers as dv', 'dv.id', '=', 'liq.dv_id')
                  ->where('liq.id', $id)
                  ->first();
         $liq->dv_no = !empty($liq->dv_no) ? $liq->dv_no: '_______';
@@ -1097,6 +1108,11 @@ class PrintController extends Controller
         $liq->or_no = !empty($liq->or_no) ? $liq->or_no: '_______';
         $liq->or_dtd = !empty($liq->or_dtd) ? $liq->or_dtd: '_______';
         $multiplier = 100 / 90;
+
+        $instanceSignatory = new Signatory;
+        $claimant = Auth::user()->getEmployee($liq->sig_claimant)->name;
+        $supervisor = $instanceSignatory->getSignatory($liq->sig_supervisor)->name;
+        $accounting = $instanceSignatory->getSignatory($liq->sig_accounting)->name;
 
         if (strlen($liq->particulars) <= 73) {
             $liq->particulars = $liq->particulars . '<br><br>';
@@ -1134,13 +1150,18 @@ class PrintController extends Controller
             ]
         ];
 
-        return (object)['liq' => $liq,
-                        'table_data' => $data
-                    ];
+        return (object)[
+            'liq' => $liq,
+            'table_data' => $data,
+            'claimant' => $claimant,
+            'supervisor' => $supervisor,
+            'accounting' => $accounting
+        ];
     }
 
     private function getDataDV($id, $type) {
         if ($type == 'procurement') {
+
             $dv = DB::table('disbursement_vouchers as dv')
                     ->select('dv.id as dv_id', 'dv.*', 'ors.payee', 'ors.address', 'ors.amount',
                              'ors.sig_certified_1', 'ors.po_no', 'ors.sig_certified_2', 'bid.company_name',
@@ -1151,11 +1172,8 @@ class PrintController extends Controller
                     ->first();
         } else if ($type == 'cashadvance') {
             $dv = DB::table('disbursement_vouchers as dv')
-                    ->select('dv.id as dv_id', 'dv.*', 'ors.payee', 'ors.address', 'ors.amount',
-                             'ors.sig_certified_1', 'ors.po_no', 'ors.sig_certified_2',
-                             'ors.responsibility_center', 'ors.mfo_pap')
-                    ->join('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
-                    ->join('emp_accounts as emp', 'emp.emp_id', '=', 'ors.payee')
+                    ->select('dv.id as dv_id', 'dv.*', 'emp.emp_id')
+                    ->join('emp_accounts as emp', 'emp.id', '=', 'dv.payee')
                     ->where('dv.id', $id)
                     ->first();
         }
@@ -1194,7 +1212,7 @@ class PrintController extends Controller
         if ($dv->module_class == 3) {
             $payee = $dv->company_name;
         } else if ($dv->module_class == 2) {
-            $payee = $this->getEmployee($dv->payee)->name;
+            $payee = Auth::user()->getEmployee($dv->payee)->name;
         }
 
         $dataHeader = [
@@ -1345,7 +1363,7 @@ class PrintController extends Controller
         } else if ($type == 'cashadvance'){
             $ors = DB::table('obligation_request_status as ors')
                      ->select('ors.*', 'emp.firstname', 'emp.middlename', 'emp.lastname')
-                     ->join('emp_accounts as emp', 'emp.emp_id', '=', 'ors.payee')
+                     ->join('emp_accounts as emp', 'emp.id', '=', 'ors.payee')
                      ->where([['ors.id', $id], ['ors.module_class', 2]])
                      ->first();
             $payee = "";
@@ -2310,10 +2328,10 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateLiquidation($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateLR($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new PDF('P', 'mm', $pageSize);
+        $pdf = new DocLiquidationReport('P', 'mm', $pageSize);
         $docCode = "";
         $docRev = "";
         $docRevDate = "";
@@ -2323,43 +2341,34 @@ class PrintController extends Controller
         $docSubject = "Liquidation Report";
         $docKeywords = "LR, lr, liquidation, report, liquidation report";
 
-        $serialNo = $data->liq->serial_no;
-        $dateLiquidation = $data->liq->date_liquidation;
-        $claimant = $this->getEmployee($data->liq->sig_claimant)->name;
-        $supervisor = $this->getSignatory($data->liq->sig_supervisor)->name;
-        $accounting = $this->getSignatory($data->liq->sig_accounting)->name;
-        $dateClaimant = $data->liq->date_claimant;
-        $dateSupervisor = $data->liq->date_supervisor;
-        $dateAccountant = $data->liq->date_accounting;
-
-        if (empty($serialNo)) {
-            $serialNo = '______________';
+        if (empty($data->liq->serial_no)) {
+            $data->liq->serial_no = '______________';
         }
 
-        if (!empty($dateLiquidation)) {
-            $dateLiquidation = new DateTime($dateLiquidation);
-            $dateLiquidation = $dateLiquidation->format('F j, Y');
+        if (!empty($data->liq->date_liquidation)) {
+            $data->liq->date_liquidation = new DateTime($data->liq->date_liquidation);
+            $data->liq->date_liquidation = $data->liq->date_liquidation->format('F j, Y');
         }
 
-        if (!empty($dateClaimant)) {
-            $dateClaimant = new DateTime($dateClaimant);
-            $dateClaimant = $dateClaimant->format('F j, Y');
+        if (!empty($data->liq->date_claimant)) {
+            $data->liq->date_claimant = new DateTime($data->liq->date_claimant);
+            $data->liq->date_claimant = $data->liq->date_claimant->format('F j, Y');
         } else {
-            $dateClaimant = ' ______________________';
+            $data->liq->date_claimant = ' ______________________';
         }
 
-        if (!empty($dateSupervisor)) {
-            $dateSupervisor = new DateTime($dateSupervisor);
-            $dateSupervisor = $dateSupervisor->format('F j, Y');
+        if (!empty($data->liq->date_supervisor)) {
+            $data->liq->date_supervisor = new DateTime($data->liq->date_supervisor);
+            $data->liq->date_supervisor = $data->liq->date_supervisor->format('F j, Y');
         } else {
-            $dateSupervisor = ' ______________________';
+            $data->liq->date_supervisor = ' ______________________';
         }
 
-        if (!empty($dateAccountant)) {
-            $dateAccountant = new DateTime($dateAccountant);
-            $dateAccountant = $dateAccountant->format('F j, Y');
+        if (!empty($data->liq->date_accounting)) {
+            $data->liq->date_accounting = new DateTime($data->liq->date_accounting);
+            $data->liq->date_accounting = $data->liq->date_accounting->format('F j, Y');
         } else {
-            $dateAccountant = ' ______________________';
+            $data->liq->date_accounting = ' ______________________';
         }
 
         if (empty($data->liq->jev_no)) {
@@ -2371,7 +2380,7 @@ class PrintController extends Controller
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        include app_path() . "/Classes/DocumentPDF/Documents/doc_liquidation_report.php";
+        $pdf->printLR($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);

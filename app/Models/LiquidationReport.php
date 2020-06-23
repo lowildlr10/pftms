@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
+use Kyslik\ColumnSortable\Sortable;
 
 class LiquidationReport extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Sortable;
 
     /**
      * The table associated with the model.
@@ -33,7 +34,7 @@ class LiquidationReport extends Model
         'particulars',
         'amount',
         'total_amount',
-        'amount_cash_dv'.
+        'amount_cash_dv',
         'or_no',
         'or_dtd',
         'amount_refunded',
@@ -68,4 +69,19 @@ class LiquidationReport extends Model
     public static function generateUuid() {
          return Uuid::generate();
     }
+
+    /**
+     * Get the phone record associated with the...
+     */
+    public function dv() {
+        return $this->hasOne('App\Models\DisbursementVoucher', 'id', 'dv_id');
+    }
+    public function empclaimant() {
+        return $this->hasOne('App\User', 'id', 'sig_claimant');
+    }
+
+    public $sortable = [
+        'serial_no',
+        'particulars',
+    ];
 }

@@ -107,8 +107,8 @@ class ObligationRequestStatus extends Model
 
     public function notifyIssued($id, $issuedBy) {
         $orsData = $this::with('po')->find($id);
-        $poNo = $orsData->po_no;
-        $poID = $orsData->po->id;
+        $poNo = isset($orsData->po_no) ? $orsData->po_no : NULL;
+        $poID = isset($orsData->po->id) ? $orsData->id : NULL;
         $moduleClass = $orsData->module_class;
 
         $instanceUser = new User;
@@ -166,8 +166,8 @@ class ObligationRequestStatus extends Model
     public function notifyIssuedBack($id, $issuedBackBy) {
         $instanceDocLog = new DocLog;
         $orsData = $this::with('po')->find($id);
-        $poNo = $orsData->po_no;
-        $poID = $orsData->po->id;
+        $poNo = isset($orsData->po_no) ? $orsData->po_no : NULL;
+        $poID = isset($orsData->po->id) ? $orsData->id : NULL;
         $moduleClass = $orsData->module_class;
 
         $instanceUser = new User;
@@ -202,8 +202,8 @@ class ObligationRequestStatus extends Model
     public function notifyReceived($id, $receivedBy) {
         $instanceDocLog = new DocLog;
         $orsData = $this::with('po')->find($id);
-        $poNo = $orsData->po_no;
-        $poID = $orsData->po->id;
+        $poNo = isset($orsData->po_no) ? $orsData->po_no : NULL;
+        $poID = isset($orsData->po->id) ? $orsData->id : NULL;
         $moduleClass = $orsData->module_class;
 
         $instanceUser = new User;
@@ -238,8 +238,8 @@ class ObligationRequestStatus extends Model
     public function notifyObligated($id, $obligatedBy) {
         $instanceDocLog = new DocLog;
         $orsData = $this::with('po')->find($id);
-        $poNo = $orsData->po_no;
-        $poID = $orsData->po->id;
+        $poNo = isset($orsData->po_no) ? $orsData->po_no : NULL;
+        $poID = isset($orsData->po->id) ? $orsData->id : NULL;
         $serialNo = $orsData->serial_no;
         $moduleClass = $orsData->module_class;
 
@@ -275,8 +275,8 @@ class ObligationRequestStatus extends Model
 
     public function notifyMessage($id, $from, $message) {
         $orsData = $this::with('po')->find($id);
-        $poNo = $orsData->po_no;
-        $poID = $orsData->po->id;
+        $poNo = isset($orsData->po_no) ? $orsData->po_no : NULL;
+        $poID = isset($orsData->po->id) ? $orsData->id : NULL;
         $moduleClass = $orsData->module_class;
 
         $instanceUser = new User;
