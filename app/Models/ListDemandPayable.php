@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
+use Kyslik\ColumnSortable\Sortable;
 
 class ListDemandPayable extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Sortable;
 
     /**
      * The table associated with the model.
@@ -33,7 +34,7 @@ class ListDemandPayable extends Model
         'nca_no',
         'lddap_ada_no',
         'date_lddap',
-        'fund_cluster'.
+        'fund_cluster',
         'mds_gsb_accnt_no',
         'sig_cert_correct',
         'sig_approval_1',
@@ -65,4 +66,19 @@ class ListDemandPayable extends Model
     public static function generateUuid() {
          return Uuid::generate();
     }
+
+    /**
+     * Get the phone record associated with the purchase request
+     */
+    public function dv() {
+        return $this->hasOne('App\Models\DisbursementVoucher', 'id', 'dv_id');
+    }
+
+    public $sortable = [
+        'date_lddap',
+        'lddap_ada_no',
+        'nca_no',
+        'status',
+        'total_amount'
+    ];
 }

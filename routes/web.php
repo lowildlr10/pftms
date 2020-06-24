@@ -106,19 +106,6 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('voucher-tracking/{toggle}', 'VoucherLogController@index');
     Route::get('voucher-tracking/generate-table/{toggle}', 'VoucherLogController@show');
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     /*===================== ACCOUNT MANAGEMENT ROUTES =====================*/
 
     // Profile Module
@@ -900,42 +887,42 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
 
     // List of Due and Demandable Accounts Payable Module
     Route::any('payment/lddap', [
-        'uses' => 'PaymentController@indexLDDAP',
+        'uses' => 'LDDAPController@index',
         'module' => 'pay_lddap',
         'access' => 'is_allowed'
     ])->name('lddap');
     Route::get('payment/lddap/show-create', [
-        'uses' => 'PaymentController@showCreate',
+        'uses' => 'LDDAPController@showCreate',
         'module' => 'pay_lddap',
         'access' => 'create'
     ])->name('lddap-show-create');
     Route::get('payment/lddap/show-edit/{id}', [
-        'uses' => 'PaymentController@showEdit',
+        'uses' => 'LDDAPController@showEdit',
         'module' => 'pay_lddap',
         'access' => 'update'
     ])->name('lddap-show-edit');
     Route::post('payment/lddap/store', [
-        'uses' => 'PaymentController@store',
+        'uses' => 'LDDAPController@store',
         'module' => 'pay_lddap',
         'access' => 'create'
     ])->name('lddap-store');
     Route::post('payment/lddap/update/{id}', [
-        'uses' => 'PaymentController@update',
+        'uses' => 'LDDAPController@update',
         'module' => 'pay_lddap',
         'access' => 'update'
     ])->name('lddap-update');
     Route::post('payment/lddap/delete/{id}', [
-        'uses' => 'PaymentController@delete',
+        'uses' => 'LDDAPController@delete',
         'module' => 'pay_lddap',
         'access' => 'delete'
     ])->name('lddap-delete');
     Route::post('payment/lddap/for-approval/{id}', [
-        'uses' => 'PaymentController@forApproval',
+        'uses' => 'LDDAPController@forApproval',
         'module' => 'pay_lddap',
         'access' => 'approval'
     ])->name('lddap-for-approval');
     Route::post('payment/lddap/approve/{id}', [
-        'uses' => 'PaymentController@approve',
+        'uses' => 'LDDAPController@approve',
         'module' => 'pay_lddap',
         'access' => 'approve'
     ])->name('lddap-approve');

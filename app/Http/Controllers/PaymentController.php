@@ -150,19 +150,6 @@ class PaymentController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request) {
-        $lddap = new ListDueDemandAccPay;
-        $getLastID = ListDueDemandAccPay::orderBy('lddap_id', 'desc')->first();
-
-        if ($getLastID) {
-            $pKey = $getLastID->lddap_id + 1;
-        } else {
-            $pKey = 1;
-        }
-
-        $redirectURL = 'payment/lddap';
-        $documentType = 'LDDAP';
-        $moduleClassID = 4;
-
         $dvID = $request->dv_id;
         $sigCertCorrect = $request->sig_cert_correct;
         $sigApproval1 = $request->sig_approval_1;
@@ -199,29 +186,28 @@ class PaymentController extends Controller
         $listPriorNetAmount = $request->prior_net_amount;
         $listPriorRemarks = $request->prior_remarks;
 
-        $lddap->dv_id = $dvID;
-        $lddap->code = $this->generateTrackerCode($documentType, $pKey, $moduleClassID);
-        $lddap->sig_cert_correct = $sigCertCorrect;
-        $lddap->sig_approval_1 = $sigApproval1;
-        $lddap->sig_approval_2 = $sigApproval2;
-        $lddap->sig_approval_3 = $sigApproval3;
-        $lddap->total_amount_words = $totalAmountWords;
-        $lddap->total_amount = $totalAmount;
-        $lddap->sig_agency_auth_1 = $sigAgencyAuth1;
-        $lddap->sig_agency_auth_2 = $sigAgencyAuth2;
-        $lddap->sig_agency_auth_3 = $sigAgencyAuth3;
-        $lddap->sig_agency_auth_4 = $sigAgencyAuth4;
-        $lddap->department = $department;
-        $lddap->entity_name = $entityName;
-        $lddap->operating_unit = $operatingUnit;
-        $lddap->nca_no = $ncaNo;
-        $lddap->lddap_ada_no = $lddapAdaNo;
-        $lddap->lddap_date = $lddapDate;
-        $lddap->fund_cluster = $fundCluster;
-        $lddap->mds_gsb_accnt_no = $mdsGsbAccntNo;
-
         try {
-            $lddap->save();
+            $instanceLDDAP = new ListDueDemandAccPay;
+            $instanceLDDAP->dv_id = $dvID;
+            $instanceLDDAP->sig_cert_correct = $sigCertCorrect;
+            $instanceLDDAP->sig_approval_1 = $sigApproval1;
+            $instanceLDDAP->sig_approval_2 = $sigApproval2;
+            $instanceLDDAP->sig_approval_3 = $sigApproval3;
+            $instanceLDDAP->total_amount_words = $totalAmountWords;
+            $instanceLDDAP->total_amount = $totalAmount;
+            $instanceLDDAP->sig_agency_auth_1 = $sigAgencyAuth1;
+            $instanceLDDAP->sig_agency_auth_2 = $sigAgencyAuth2;
+            $instanceLDDAP->sig_agency_auth_3 = $sigAgencyAuth3;
+            $instanceLDDAP->sig_agency_auth_4 = $sigAgencyAuth4;
+            $instanceLDDAP->department = $department;
+            $instanceLDDAP->entity_name = $entityName;
+            $instanceLDDAP->operating_unit = $operatingUnit;
+            $instanceLDDAP->nca_no = $ncaNo;
+            $instanceLDDAP->lddap_ada_no = $lddapAdaNo;
+            $instanceLDDAP->lddap_date = $lddapDate;
+            $instanceLDDAP->fund_cluster = $fundCluster;
+            $instanceLDDAP->mds_gsb_accnt_no = $mdsGsbAccntNo;
+            $instanceLDDAP->save();
 
             if (is_array($listCurrentCreditorName)) {
                 if (count($listCurrentCreditorName) > 0) {
@@ -229,6 +215,7 @@ class PaymentController extends Controller
 
                     foreach ($listCurrentCreditorName as $ctr => $creditorName) {
                         $itemID = "cy-$pKey-" . ($ctr + 1);
+                        $instanceLDDAPItem = 
 
                         DB::table('tbllddap_items')->insert([
                             'lddap_item_id' => $itemID,
@@ -275,14 +262,18 @@ class PaymentController extends Controller
                 }
             }
 
-            $logEmpMessage = "saved the list of due and demandable accounts payable $pKey.";
-            $this->logEmployeeHistory($logEmpMessage);
+            $documentType = 'LDDAP';
+            $routeName = 'lddap';
 
-            $msg = "List Of Due And Demandable Accounts Payable $pKey successfully saved.";
-            return redirect(url($redirectURL))->with('success', $msg);
-        } catch (Exception $e) {
-            $msg = "There is an error encountered storing the List Of Due And Demandable Accounts Payable $pKey.";
-            return redirect(url()->previous())->with('failed', $msg);
+            $msg = "$documentType successfully created.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName)
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())
+                                 ->with('failed', $msg);
         }
     }
 

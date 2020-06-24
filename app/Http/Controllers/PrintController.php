@@ -40,6 +40,7 @@ use App\Plugins\PDFGenerator\DocObligationRequestStatus;
 use App\Plugins\PDFGenerator\DocInspectionAcceptanceReport;
 use App\Plugins\PDFGenerator\DocDisbursementVoucher;
 use App\Plugins\PDFGenerator\DocLiquidationReport;
+use App\Plugins\PDFGenerator\DocListDueDemandable;
 
 class PrintController extends Controller
 {
@@ -324,16 +325,19 @@ class PrintController extends Controller
                     $data->doc_type = $documentType;
 
                     if ($test == 'true') {
-                        //$code = $this->getDocCode($key, 'lddap');
-                        //$instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                        //$lddapID =  $data->lddap->id;
-                        //$msg = "generated the disbursement voucher $lddapID.";
-                        //Auth::user()->log($request, $msg);
+                        $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
+                        $msg = "Generated the List of Due and Demandable Accounts Payable '$key' document.";
+                        Auth::user()->log($request, $msg);
                     } else {
-                        $this->generateLDDAP($data, $documentType, $fontScale,
-                                             $pageHeight, $pageWidth, $previewToggle);
+                        $this->generateLDDAP(
+                            $data,
+                            $fontScale,
+                            $pageHeight,
+                            $pageWidth,
+                            $pageUnit,
+                            $previewToggle
+                        );
                     }
-
                     break;
 
             case 'inv_par':
@@ -902,9 +906,9 @@ class PrintController extends Controller
 
     private function getDataLDDAP($id) {
         $lddap = DB::table('list_demand_payables')
-                   ->where('lddap_id', $id)
+                   ->where('id', $id)
                    ->first();
-        $lddapItems = DB::table('list_demand_payables_items')
+        $lddapItems = DB::table('list_demand_payable_items')
                         ->where('lddap_id', $id)
                         ->get();
 
@@ -1008,6 +1012,20 @@ class PrintController extends Controller
         $withholding = number_format($withholding, 2);
         $netAmount = number_format($netAmount, 2);
 
+        $instanceSignatory = new Signatory;
+        $certCorrect = $instanceSignatory->getSignatory($lddap->sig_cert_correct)->name;
+        $certCorrectPosition = $instanceSignatory->getSignatory($lddap->sig_cert_correct)->lddap_designation;
+        $approval1 = $instanceSignatory->getSignatory($lddap->sig_approval_1)->name;
+        $approval2 = $instanceSignatory->getSignatory($lddap->sig_approval_2)->name;
+        $approval3 = $instanceSignatory->getSignatory($lddap->sig_approval_3)->name;
+        $approvalPosition1 = $instanceSignatory->getSignatory($lddap->sig_approval_1)->lddap_designation;
+        $approvalPosition2 = $instanceSignatory->getSignatory($lddap->sig_approval_2)->lddap_designation;
+        $approvalPosition3 = $instanceSignatory->getSignatory($lddap->sig_approval_3)->lddap_designation;
+        $agencyAuth1 = $instanceSignatory->getSignatory($lddap->sig_agency_auth_1)->name;
+        $agencyAuth2 = $instanceSignatory->getSignatory($lddap->sig_agency_auth_2)->name;
+        $agencyAuth3 = $instanceSignatory->getSignatory($lddap->sig_agency_auth_3)->name;
+        $agencyAuth4 = $instanceSignatory->getSignatory($lddap->sig_agency_auth_4)->name;
+
         $data = [
             [
                 'col-span' => true,
@@ -1090,9 +1108,22 @@ class PrintController extends Controller
             ]
         ];
 
-        return (object)['lddap' => $lddap,
-                        'table_data' => $data,
-                       ];
+        return (object)[
+            'lddap' => $lddap,
+            'table_data' => $data,
+            'sig_cert_correct' => $certCorrect,
+            'sig_cert_correct_position' => $certCorrectPosition,
+            'sig_approval_1' => $approval1,
+            'sig_approval_2' => $approval2,
+            'sig_approval_3' => $approval3,
+            'sig_approval_1_position' => $approvalPosition1,
+            'sig_approval_2_position' => $approvalPosition2,
+            'sig_approval_3_position' => $approvalPosition3,
+            'sig_agency_auth_1' => $agencyAuth1,
+            'sig_agency_auth_2' => $agencyAuth2,
+            'sig_agency_auth_3' => $agencyAuth3,
+            'sig_agency_auth_4' => $agencyAuth4,
+        ];
     }
 
     private function getDataLiquidation($id) {
@@ -2386,10 +2417,10 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateLDDAP($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateLDDAP($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new PDF('P', 'mm', $pageSize);
+        $pdf = new DocListDueDemandable('P', 'mm', $pageSize);
         $docCode = "";
         $docRev = "";
         $docRevDate = "";
@@ -2400,33 +2431,9 @@ class PrintController extends Controller
         $docKeywords = "LDDAP, lddap, List, Due, Demandable, Accounts, Payable,
                         Advice, Debit, Accounts";
 
-        $department = $data->lddap->department;
-        $entityName = $data->lddap->entity_name;
-        $operatingUnit = $data->lddap->operating_unit;
-        $ncaNo = $data->lddap->nca_no;
-        $lddapNo = $data->lddap->lddap_ada_no;
-        $fundCluster = $data->lddap->fund_cluster;
-        $mdsgsbBranch = $data->lddap->mds_gsb_accnt_no;
-        $certCorrect = $this->getSignatory($data->lddap->sig_cert_correct)->name;
-        $certCorrectPosition = $this->getSignatory($data->lddap->sig_cert_correct)->position;
-        $approval1 = $this->getSignatory($data->lddap->sig_approval_1)->name;
-        $approval2 = $this->getSignatory($data->lddap->sig_approval_2)->name;
-        $approval3 = $this->getSignatory($data->lddap->sig_approval_3)->name;
-        $approvalPosition1 = $this->getSignatory($data->lddap->sig_approval_1)->position;
-        $approvalPosition2 = $this->getSignatory($data->lddap->sig_approval_2)->position;
-        $approvalPosition3 = $this->getSignatory($data->lddap->sig_approval_3)->position;
-        $agencyAuth1 = $this->getSignatory($data->lddap->sig_agency_auth_1)->name;
-        $agencyAuth2 = $this->getSignatory($data->lddap->sig_agency_auth_2)->name;
-        $agencyAuth3 = $this->getSignatory($data->lddap->sig_agency_auth_3)->name;
-        $agencyAuth4 = $this->getSignatory($data->lddap->sig_agency_auth_4)->name;
-        $totalAmountWords = $data->lddap->total_amount_words;
-        $totalAmount = number_format($data->lddap->total_amount, 2);
-
-        $lddapDate = "";
-
         if (!empty($data->lddap->lddap_date)) {
-            $lddapDate = new DateTime($data->lddap->lddap_date);
-            $lddapDate = $lddapDate->format('j F Y');
+            $data->lddap->lddap_date = new DateTime($data->lddap->lddap_date);
+            $data->lddap->lddap_date = $data->lddap->lddap_date->format('j F Y');
         }
 
         /*
@@ -2478,7 +2485,7 @@ class PrintController extends Controller
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        include app_path() . "/Classes/DocumentPDF/Documents/doc_list_due_demandable.php";
+        $pdf->printLDDAP($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);
