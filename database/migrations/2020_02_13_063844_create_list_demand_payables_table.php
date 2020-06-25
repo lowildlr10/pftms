@@ -21,6 +21,7 @@ class CreateListDemandPayablesTable extends Migration
             $table->foreign('dv_id')->references('id')->on('disbursement_vouchers');
             $table->dateTime('date_for_approval')->nullable();
             $table->dateTime('date_approved')->nullable();
+            $table->dateTime('date_for_summary')->nullable();
             $table->string('department');
             $table->string('entity_name');
             $table->string('operating_unit');
@@ -47,7 +48,7 @@ class CreateListDemandPayablesTable extends Migration
             $table->foreign('sig_agency_auth_4')->references('id')->on('signatories');
             $table->text('total_amount_words');
             $table->double('total_amount', 50, 2)->default('0.00');
-            $table->enum('status', ['pending', 'for_approval', 'approved', 'for_payment'])->default('pending');
+            $table->enum('status', ['pending', 'for_approval', 'approved', 'for_summary'])->default('pending');
             $table->softDeletes();
             $table->timestamps();
         });
