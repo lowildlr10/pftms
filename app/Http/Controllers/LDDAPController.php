@@ -55,7 +55,11 @@ class LDDAPController extends Controller
                     ->orWhere('date_lddap', 'like', "%$keyword%")
                     ->orWhere('total_amount_words', 'like', "%$keyword%")
                     ->orWhere('total_amount', 'like', "%$keyword%")
-                    ->orWhere('status', 'like', "%$keyword%");
+                    ->orWhere('status', 'like', "%$keyword%")
+                    ->orWhereHas('dv', function($query) use ($keyword) {
+                        $query->where('id', 'like', "%$keyword%")
+                              ->orWhere('dv_no', 'like', "%$keyword%");
+                    });
             });
         }
 
@@ -88,7 +92,9 @@ class LDDAPController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showCreate() {
-        $dvList = DisbursementVoucher::whereNotNull('dv_no')->get();
+        $dvList = DisbursementVoucher::whereNotNull('dv_no')
+                                     ->orderBy('dv_no')
+                                     ->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -266,7 +272,9 @@ class LDDAPController extends Controller
         $priorItems = ListDemandPayableItem::where([
             ['lddap_id', $id], ['category', 'prior_year']
         ])->orderBy('item_no')->get();
-        $dvList = DisbursementVoucher::whereNotNull('dv_no')->get();
+        $dvList = DisbursementVoucher::whereNotNull('dv_no')
+                                     ->orderBy('dv_no')
+                                     ->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
