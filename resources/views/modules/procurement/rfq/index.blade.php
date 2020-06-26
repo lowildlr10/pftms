@@ -181,7 +181,7 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $rfq->rfq->id }}', 'proc_rfq');">
+                                        onclick="$(this).showPrint('{{ $rfq->rfq['id'] }}', 'proc_rfq');">
                                     <i class="fas fa-print blue-text"></i> Print RFQ
                                 </button>
 
