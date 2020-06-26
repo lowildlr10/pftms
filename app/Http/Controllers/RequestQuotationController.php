@@ -68,7 +68,10 @@ class RequestQuotationController extends Controller
         if ($roleHasOrdinary) {
             $rfqData = $rfqData->where('requested_by', Auth::user()->id);
         } else {
-            $rfqData = $rfqData->orWhere('requested_by', Auth::user()->id);
+            $rfqData = $rfqData->orWhere('requested_by', Auth::user()->id)
+                               ->whereHas('rfq', function($query) {
+                $query->whereNotNull('id');
+            });
         }
 
         if (!empty($keyword)) {
