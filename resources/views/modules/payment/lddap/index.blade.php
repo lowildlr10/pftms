@@ -99,19 +99,19 @@
                                             @elseif ($lddap->status == 'approved')
                                             <i class="fas fa-check fa-lg text-success material-tooltip-main"
                                                data-toggle="tooltip" data-placement="right" title="Approved"></i>
-                                            @elseif ($lddap->status == 'for_payment')
-                                            <i class="fas fa-check fa-lg text-success material-tooltip-main"
+                                            @elseif ($lddap->status == 'for_summary')
+                                            <i class="fas fa-list-alt fa-lg text-success material-tooltip-main"
                                                data-toggle="tooltip" data-placement="right" title="For Summary"></i>
                                             @endif
                                         </td>
                                         <td></td>
                                         <td>{{ $lddap->date_lddap }}</td>
-                                        <td>{{ $lddap->dv_no ? $lddap->dv_no : 'NA' }}</td>
+                                        <td>{{ $lddap->dv['dv_no'] ? $lddap->dv['dv_no'] : 'NA' }}</td>
                                         <td>{{ $lddap->lddap_ada_no }}</td>
                                         <td>{{ $lddap->nca_no }}</td>
                                         <td>P{{ number_format($lddap->total_amount, 2) }}</td>
                                         <td>
-                                            <strong>{{ strtoupper($lddap->status) }}</strong>
+                                            <strong>{{ strtoupper(str_replace('_', ' ', $lddap->status)) }}</strong>
                                         </td>
 
                                         <td align="center">
@@ -224,22 +224,25 @@
                     @if ($lddap->status == 'pending')
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-black waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).forApproval('{{ $lddap->lddap_id }}');">
+                                onclick="$(this).showApproval('{{ route('lddap-for-approval',
+                                                              ['id' => $lddap->id]) }}');">
                             <i class="fas fa-flag"></i> For Approval
                         </button>
                     </li>
                     @elseif ($lddap->status == 'for_approval')
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).approve('{{ $lddap->lddap_id }}');">
+                                onclick="$(this).showApprove('{{ route('lddap-approve',
+                                                          ['id' => $lddap->id]) }}');">
                             <i class="fas fa-check"></i> Approve
                         </button>
                     </li>
-                    @elseif ($lddap->status == 'for_payment')
+                    @elseif ($lddap->status == 'approved')
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).summary('{{ $lddap->lddap_id }}');">
-                            <i class="fas fa-check"></i> For Summary
+                                onclick="$(this).showSummary('{{ route('lddap-summary',
+                                                          ['id' => $lddap->id]) }}');">
+                            <i class="fas fa-list-alt"></i> For Summary
                         </button>
                     </li>
                     @else
@@ -268,9 +271,8 @@
 @include('modals.edit')
 @include('modals.delete-destroy')
 @include('modals.approve')
-
-@include('modals.disapprove')
-@include('modals.cancel')
+@include('modals.approval')
+@include('modals.summary')
 @include('modals.print')
 
 @endsection

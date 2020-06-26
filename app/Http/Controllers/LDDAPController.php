@@ -498,4 +498,77 @@ class LDDAPController extends Controller
             ];
         }
     }
+
+    public function forApproval(Request $request, $id) {
+        $documentType = 'List of Due and Demandable Accounts Payable';
+        $routeName = 'lddap';
+
+        try {
+            $instanceDocLog = new DocLog;
+            $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
+
+            if ($isDocGenerated) {
+                $instanceLDDAP = ListDemandPayable::find($id);
+                $instanceLDDAP->status = 'for_approval';
+                $instanceLDDAP->date_for_approval = Carbon::now();
+                $instanceLDDAP->save();
+
+                $msg = "$documentType '$id' successfully set to 'For Approval'.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route($routeName, ['keyword' => $id])
+                                ->with('success', $msg);
+            } else {
+                $msg = "Document for $documentType '$id' should be generated first.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route($routeName, ['keyword' => $id])
+                                 ->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function approve(Request $request, $id) {
+        $documentType = 'List of Due and Demandable Accounts Payable';
+        $routeName = 'lddap';
+
+        try {
+            $instanceLDDAP = ListDemandPayable::find($id);
+            $instanceLDDAP->status = 'approved';
+            $instanceLDDAP->date_approved = Carbon::now();
+            $instanceLDDAP->save();
+
+            $msg = "$documentType '$id' successfully set to 'Approved'.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function summary(Request $request, $id) {
+        $documentType = 'List of Due and Demandable Accounts Payable';
+        $routeName = 'lddap';
+
+        try {
+            $instanceLDDAP = ListDemandPayable::find($id);
+            $instanceLDDAP->status = 'for_summary';
+            $instanceLDDAP->date_for_summary = Carbon::now();
+            $instanceLDDAP->save();
+
+            $msg = "$documentType '$id' successfully set to 'For Summary'.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
 }

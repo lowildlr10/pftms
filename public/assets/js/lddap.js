@@ -1,4 +1,8 @@
 $(function() {
+    const template = '<div class="tooltip md-tooltip">' +
+                     '<div class="tooltip-arrow md-arrow"></div>' +
+                     '<div class="tooltip-inner md-inner stylish-color"></div></div>';
+
     function filterNaN(inputVal) {
         let outputVal = isNaN(inputVal) ? 0 : inputVal;
 
@@ -328,15 +332,58 @@ $(function() {
         $('#form-delete').submit();
     }
 
-    $.fn.forApproval = function(id) {
-		if (confirm('Set to "For Approval" this document?')) {
-			$('#form-validation').attr('action', 'lddap/for-approval/' + id).submit();
-		}
-	}
-
-	$.fn.approve = function(id) {
-		if (confirm('Set to "Approved" this LDDAP document?')) {
-			$('#form-validation').attr('action', 'lddap/approve/' + id).submit();
-		}
+    $.fn.showApproval = function(url, name) {
+        $('#modal-body-approval').html(`Are you sure you want to set this
+                                       document to 'For Approval'?`);
+        $("#modal-approval").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#approval-title').html('Approval LDDAP');
+            $('#form-approval').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-approval-body').html('');
+             $('#form-approval').attr('action', '#');
+		});
     }
+
+    $.fn.approval = function() {
+        $('#form-approval').submit();
+    }
+
+    $.fn.showApprove = function(url, name) {
+        $('#modal-body-approve').html(`Are you sure you want to set this
+                                       document to 'Approved'?`);
+        $("#modal-approve").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#approve-title').html('Approve LDDAP');
+            $('#form-approve').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-approve-body').html('');
+             $('#form-approve').attr('action', '#');
+		});
+    }
+
+    $.fn.approve = function() {
+        $('#form-approve').submit();
+    }
+
+    $.fn.showSummary = function(url, name) {
+        $('#modal-body-summary').html(`Are you sure you want to set this
+                                       document to 'For Summary'?`);
+        $("#modal-summary").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#summary-title').html('Summary LDDAP');
+            $('#form-summary').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-summary-body').html('');
+             $('#form-summary').attr('action', '#');
+		});
+    }
+
+    $.fn.summary = function() {
+        $('#form-summary').submit();
+    }
+
+    $('.material-tooltip-main').tooltip({
+        template: template
+    });
 });
