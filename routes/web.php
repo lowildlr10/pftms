@@ -46,6 +46,18 @@ Route::middleware(['web', 'auth'])->group(function () {
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
     ])->name('stocks-store-iar');
+    Route::get('inventory/stocks/show-edit-from-iar/{poID}', [
+        'uses' => 'InventoryController@showEditFromIAR',
+        'middleware' => 'roles',
+        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    ])->name('stocks-show-edit-iar');
+    Route::get('inventory/stocks/update-iar', [
+        'uses' => 'InventoryController@updateFromIAR',
+        'middleware' => 'roles',
+        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    ])->name('stocks-update-iar');
+
+
 
 
 

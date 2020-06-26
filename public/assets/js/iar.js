@@ -10,11 +10,11 @@ $(function() {
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
         });
-        $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
-						     .on('shown.bs.modal', function() {
-            $('#create-title').html('Create Inventory Stock');
+        $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
+						   .on('shown.bs.modal', function() {
+            $('#create-title').html('Create Inventory Stocks');
 		}).on('hidden.bs.modal', function() {
-		    $('#modal-body-create').html('').css('display', 'none');
+            $('#modal-body-create').html('').css('display', 'none');
 		});
     }
 
@@ -26,18 +26,18 @@ $(function() {
         }
     }
 
-    $.fn.showUpdateStocks = function(url) {
+    $.fn.showEditStocks = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
-        $('#modal-body-update').load(url, function() {
+        $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
         });
-        $("#modal-sm-update").modal({keyboard: false, backdrop: 'static'})
-						     .on('shown.bs.modal', function() {
-            $('#update-title').html('Update Inventory Stock');
+        $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
+						   .on('shown.bs.modal', function() {
+            $('#edit-title').html('Update Inventory Stocks');
 		}).on('hidden.bs.modal', function() {
-		    $('#modal-body-update').html('').css('display', 'none');
+            $('#modal-body-edit').html('').css('display', 'none');
 		});
     }
 

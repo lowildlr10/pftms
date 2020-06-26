@@ -305,14 +305,16 @@
                             @if ($item->inventory_count == 0)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showCreateStocks();">
+                                onclick="$(this).showCreateStocks(`{{ route('stocks-show-create-iar',
+                                                                  ['poID' => $item->po_id]) }}`);">
                             <i class="fas fa-box green-text"></i> Issue/Inventory
                         </button>
                     </li>
                             @else
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-warning waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showUpdateStocks();">
+                                onclick="$(this).showUpdateStocks(`{{ route('stocks-show-edit-iar',
+                                                                  ['poID' => $item->po_id]) }}`);">
                             <i class="fas fa-box"></i> Update Inventory
                         </button>
                     </li>
@@ -359,6 +361,7 @@
 @endif
 
 @include('modals.search-post')
+@include('modals.create')
 @include('modals.edit')
 @include('modals.issue')
 @include('modals.inspect')

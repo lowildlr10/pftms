@@ -106,7 +106,7 @@ class InspectionAcceptanceController extends Controller
         foreach ($iarData as $iar) {
             foreach ($iar->iar as $ctrIAR => $iarDat) {
                 $iarDat->doc_status = $instanceDocLog->checkDocStatus($iarDat->id);
-                $inventoryCount = InventoryStock::where('po_no', $iar->po[$ctrIAR]->po_no)
+                $inventoryCount = InventoryStock::where('po_id', $iar->po[$ctrIAR]->id)
                                                 ->count();
 
                 $instanceSupplier = Supplier::find($iar->po[$ctrIAR]->awarded_to);
