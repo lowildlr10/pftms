@@ -26,7 +26,7 @@ class CreateInventoryStockItemsTable extends Migration
             $table->uuid('po_item_id');
             $table->foreign('po_item_id')->references('id')->on('purchase_job_order_items');
             $table->uuid('unit_issue');
-            $table->foreign('unit_issue')->references('id')->on('item_unit_issue');
+            $table->foreign('unit_issue')->references('id')->on('item_unit_issues');
             $table->text('description');
             $table->unsignedInteger('quantity')->default(0);
             $table->enum('stock_available', ['y', 'n'])->default('y');
