@@ -170,8 +170,8 @@ class PurchaseRequestController extends Controller
 
             // Request for Quotation
             $rfq = RequestQuotation::where('pr_id', $pr->id)->first();
-            $rfqCode = $rfq->id;
-            $rfqDocStatus = $instanceDocLog->checkDocStatus($rfqCode);
+            $rfqCode = $rfq ? $rfq->id : NULL;
+            $rfqDocStatus = $rfq ?  $instanceDocLog->checkDocStatus($rfqCode) : NULL;
 
             $rfqIssuedStatusColor = "";
             $rfqIssuedStatusSymbol = "-";
