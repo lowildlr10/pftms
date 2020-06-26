@@ -35,67 +35,76 @@ Route::middleware(['web', 'auth'])->group(function () {
         'uses' => 'InventoryController@index',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('inventory');
-    Route::get('inventory/stocks/create/{poNo}', [
-        'uses' => 'InventoryController@create',
+    ])->name('stocks');
+    Route::get('inventory/stocks/show-create-from-iar/{poID}', [
+        'uses' => 'InventoryController@showCreateFromIAR',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('inventory-create');
+    ])->name('stocks-show-create-iar');
+    Route::get('inventory/stocks/store-iar', [
+        'uses' => 'InventoryController@storeFromIAR',
+        'middleware' => 'roles',
+        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    ])->name('stocks-store-iar');
+
+
+
+
     Route::get('inventory/stocks/show/{key}', [
         'uses' => 'InventoryController@show',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('inventory-show');
+    ])->name('stocks-show');
     Route::get('inventory/stocks/show-create/{classification}', [
         'uses' => 'InventoryController@showCreate',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('inventory-show-create');
+    ])->name('stocks-show-create');
     Route::get('inventory/stocks/edit/{inventoryNo}', [
         'uses' => 'InventoryController@edit',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('inventory-edit');
+    ])->name('stocks-edit');
     Route::get('inventory/stocks/issued/{inventoryNo}', [
         'uses' => 'InventoryController@showIssuedTo',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('inventory-issued');
+    ])->name('stocks-issued');
     Route::post('inventory/stocks/store/{inventoryNo}', [
         'uses' => 'InventoryController@store',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('inventory-store');
+    ])->name('stocks-store');
     Route::post('inventory/stocks/issue-stocks/{key}', [
         'uses' => 'InventoryController@issueStocks',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('inventory-issue-stocks');
+    ])->name('stocks-issue-stocks');
     Route::post('inventory/stocks/update/{inventoryNo}', [
         'uses' => 'InventoryController@update',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('inventory-update');
+    ])->name('stocks-update');
     Route::post('inventory/stocks/update-stocks/{inventoryNo}', [
         'uses' => 'InventoryController@updateStocks',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('inventory-update-stocks');
+    ])->name('stocks-update-stocks');
     Route::post('inventory/stocks/update-serial-no/{inventoryNo}', [
         'uses' => 'InventoryController@updateSerialNo',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('inventory-update-serial-no');
+    ])->name('stocks-update-serial-no');
     Route::post('inventory/stocks/delete/{inventoryNo}', [
         'uses' => 'InventoryController@delete',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('inventory-delete');
+    ])->name('stocks-delete');
     Route::post('inventory/stocks/set-issued/{inventoryNo}', [
-        'uses' => 'InventoryController@setIssued',
+        'uses' => 'InventoryStocksController@setIssued',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('inventory-set-issued');
+    ])->name('stocks-set-issued');
 
     /*===================== REPORT ROUTES =====================*/
 
