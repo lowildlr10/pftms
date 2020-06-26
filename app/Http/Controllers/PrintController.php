@@ -2424,7 +2424,7 @@ class PrintController extends Controller
         $docCode = "";
         $docRev = "";
         $docRevDate = "";
-        $docTitle = "lddap_" /*$data->ddap->lddap_id*/;
+        $docTitle = "lddap_".$data->lddap->id /*$data->ddap->lddap_id*/;
         $docCreator = "DOST-CAR";
         $docAuthor = "DOST-CAR";
         $docSubject = "List of Due And Demandable Accounts Payable - Advice to Debit Accounts";

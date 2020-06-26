@@ -55,7 +55,11 @@ class LDDAPController extends Controller
                     ->orWhere('date_lddap', 'like', "%$keyword%")
                     ->orWhere('total_amount_words', 'like', "%$keyword%")
                     ->orWhere('total_amount', 'like', "%$keyword%")
-                    ->orWhere('status', 'like', "%$keyword%");
+                    ->orWhere('status', 'like', "%$keyword%")
+                    ->orWhereHas('dv', function($query) use ($keyword) {
+                        $query->where('id', 'like', "%$keyword%")
+                              ->orWhere('dv_no', 'like', "%$keyword%");
+                    });
             });
         }
 
@@ -88,7 +92,9 @@ class LDDAPController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showCreate() {
-        $dvList = DisbursementVoucher::whereNotNull('dv_no')->get();
+        $dvList = DisbursementVoucher::whereNotNull('dv_no')
+                                     ->orderBy('dv_no')
+                                     ->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -266,7 +272,9 @@ class LDDAPController extends Controller
         $priorItems = ListDemandPayableItem::where([
             ['lddap_id', $id], ['category', 'prior_year']
         ])->orderBy('item_no')->get();
-        $dvList = DisbursementVoucher::whereNotNull('dv_no')->get();
+        $dvList = DisbursementVoucher::whereNotNull('dv_no')
+                                     ->orderBy('dv_no')
+                                     ->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -488,6 +496,79 @@ class LDDAPController extends Controller
                 'msg' => $msg,
                 'alert_type' => 'failed'
             ];
+        }
+    }
+
+    public function forApproval(Request $request, $id) {
+        $documentType = 'List of Due and Demandable Accounts Payable';
+        $routeName = 'lddap';
+
+        try {
+            $instanceDocLog = new DocLog;
+            $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
+
+            if ($isDocGenerated) {
+                $instanceLDDAP = ListDemandPayable::find($id);
+                $instanceLDDAP->status = 'for_approval';
+                $instanceLDDAP->date_for_approval = Carbon::now();
+                $instanceLDDAP->save();
+
+                $msg = "$documentType '$id' successfully set to 'For Approval'.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route($routeName, ['keyword' => $id])
+                                ->with('success', $msg);
+            } else {
+                $msg = "Document for $documentType '$id' should be generated first.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route($routeName, ['keyword' => $id])
+                                 ->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function approve(Request $request, $id) {
+        $documentType = 'List of Due and Demandable Accounts Payable';
+        $routeName = 'lddap';
+
+        try {
+            $instanceLDDAP = ListDemandPayable::find($id);
+            $instanceLDDAP->status = 'approved';
+            $instanceLDDAP->date_approved = Carbon::now();
+            $instanceLDDAP->save();
+
+            $msg = "$documentType '$id' successfully set to 'Approved'.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function summary(Request $request, $id) {
+        $documentType = 'List of Due and Demandable Accounts Payable';
+        $routeName = 'lddap';
+
+        try {
+            $instanceLDDAP = ListDemandPayable::find($id);
+            $instanceLDDAP->status = 'for_summary';
+            $instanceLDDAP->date_for_summary = Carbon::now();
+            $instanceLDDAP->save();
+
+            $msg = "$documentType '$id' successfully set to 'For Summary'.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
         }
     }
 }

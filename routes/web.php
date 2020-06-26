@@ -926,6 +926,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'pay_lddap',
         'access' => 'approve'
     ])->name('lddap-approve');
+    Route::post('payment/lddap/summary/{id}', [
+        'uses' => 'LDDAPController@summary',
+        'module' => 'pay_lddap',
+        'access' => 'summary'
+    ])->name('lddap-summary');
 
     /*===================== SYSTEM LIBRARIES ROUTES =====================*/
 
