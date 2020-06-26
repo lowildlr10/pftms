@@ -17,20 +17,23 @@ class CreateInventoryStockIssuesTable extends Migration
             $table->engine = 'InnoDB';
 
             $table->uuid('id')->primary();
+            $table->uuid('inv_stock_id')->nullable();
+            $table->foreign('inv_stock_id')->references('id')->on('inventory_stocks');
             $table->uuid('pr_id')->nullable();
             $table->foreign('pr_id')->references('id')->on('purchase_requests');
-            $table->uuid('inventory_id')->nullable();
-            $table->foreign('inventory_id')->references('id')->on('inventory_stocks');
-            $table->string('serial_no')->nullable();
-            $table->unsignedInteger('quantity')->default(0);
-            $table->uuid('requested_by');
-            $table->foreign('requested_by')->references('id')->on('emp_accounts');
-            $table->uuid('issued_by')->nullable();
-            $table->foreign('issued_by')->references('id')->on('signatories');
-            $table->text('issued_remarks')->nullable();
-            $table->uuid('approved_by')->nullable();
-            $table->foreign('approved_by')->references('id')->on('signatories');
-            $table->enum('excluded', ['y', 'n'])->default('n');
+            $table->uuid('po_id')->nullable();
+            $table->foreign('po_id')->references('id')->on('purchase_job_orders');
+            $table->uuid('sig_requested_by')->nullable();
+            $table->foreign('sig_requested_by')->references('id')->on('signatories');
+            $table->uuid('sig_approved_by')->nullable();
+            $table->foreign('sig_approved_by')->references('id')->on('signatories');
+            $table->uuid('sig_issued_by')->nullable();
+            $table->foreign('sig_issued_by')->references('id')->on('signatories');
+            $table->uuid('sig_received_from')->nullable();
+            $table->foreign('sig_received_from')->references('id')->on('signatories');
+            $table->uuid('sig_received_by')->nullable();
+            $table->foreign('sig_received_by')->references('id')->on('signatories');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
