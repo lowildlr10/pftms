@@ -32,29 +32,29 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     // Stocks
     Route::any('inventory/stocks', [
-        'uses' => 'InventoryController@index',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'uses' => 'InventoryStockController@index',
+        //'middleware' => 'roles',
+        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
     ])->name('stocks');
     Route::get('inventory/stocks/show-create-from-iar/{poID}', [
-        'uses' => 'InventoryController@showCreateFromIAR',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'uses' => 'InventoryStockController@showCreateFromIAR',
+        //'middleware' => 'roles',
+        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
     ])->name('stocks-show-create-iar');
-    Route::get('inventory/stocks/store-iar', [
-        'uses' => 'InventoryController@storeFromIAR',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    Route::post('inventory/stocks/store-iar/{poID}', [
+        'uses' => 'InventoryStockController@storeFromIAR',
+        //'middleware' => 'roles',
+        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
     ])->name('stocks-store-iar');
     Route::get('inventory/stocks/show-edit-from-iar/{poID}', [
-        'uses' => 'InventoryController@showEditFromIAR',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+        'uses' => 'InventoryStockController@showEditFromIAR',
+        //'middleware' => 'roles',
+        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
     ])->name('stocks-show-edit-iar');
-    Route::get('inventory/stocks/update-iar', [
-        'uses' => 'InventoryController@updateFromIAR',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    Route::post('inventory/stocks/update-iar/{poID}', [
+        'uses' => 'InventoryStockController@updateFromIAR',
+        //'middleware' => 'roles',
+        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
     ])->name('stocks-update-iar');
 
 

@@ -3,19 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 
-class InventoryClassification extends Model
+class InventoryStockItem extends Model
 {
-    use SoftDeletes;
 
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'inventory_stock_classifications';
+    protected $table = 'inventory_stock_items';
 
      /**
      * The attributes that are mass assignable.
@@ -24,9 +22,25 @@ class InventoryClassification extends Model
      */
     protected $fillable = [
         'id',
-        'classification_name',
-        'abbrv'
+        'inv_stock_id',
+        'pr_id',
+        'po_id',
+        'po_item_id',
+        'item_classification',
+        'unit_issue',
+        'description',
+        'quantity',
+        'stock_available',
+        'amount',
+        'est_useful_life',
     ];
+
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
 
     /**
      * Indicates if the IDs are auto-incrementing.

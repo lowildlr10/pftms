@@ -25,19 +25,18 @@ class InventoryStock extends Model
     protected $fillable = [
         'id',
         'pr_id',
-        'po_item_id',
-        'po_no',
+        'po_id',
+        'entity_name',
+        'fund_cluster',
         'inventory_no',
-        'property_no',
-        'inventory_classification',
-        'item_classification',
-        'requested_by',
-        'office',
         'division',
+        'office',
+        'responsibility_center',
+        'po_no',
+        'date_po',
+        'supplier',
         'purpose',
-        'stock_available',
-        'est_useful_life',
-        'group_no',
+        'inventory_classification',
         'status',
     ];
 
@@ -57,5 +56,9 @@ class InventoryStock extends Model
 
     public static function generateUuid() {
          return Uuid::generate();
+    }
+
+    public function stockitems() {
+        return $this->hasMany('App\Models\InventoryStockItem', 'inv_stock_id', 'id')->orderBy('item_no');
     }
 }
