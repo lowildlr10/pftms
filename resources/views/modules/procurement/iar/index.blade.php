@@ -313,8 +313,8 @@
                             @else
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-warning waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showUpdateStocks(`{{ route('stocks-show-edit-iar',
-                                                                  ['poID' => $item->po_id]) }}`);">
+                                onclick="$(this).showEditStocks(`{{ route('stocks-show-edit-iar',
+                                                                ['poID' => $item->po_id]) }}`);">
                             <i class="fas fa-box"></i> Update Inventory
                         </button>
                     </li>
