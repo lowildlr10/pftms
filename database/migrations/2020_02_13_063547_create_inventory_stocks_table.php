@@ -21,8 +21,8 @@ class CreateInventoryStocksTable extends Migration
             $table->foreign('pr_id')->references('id')->on('purchase_requests');
             $table->uuid('po_id')->nullable();
             $table->foreign('po_id')->references('id')->on('purchase_job_orders');
-            $table->string('entity_name')->nullalbe();
-            $table->string('fund_cluster', 50)->nullalbe();
+            $table->string('entity_name')->nullable();
+            $table->string('fund_cluster', 50)->nullable();
             $table->string('inventory_no');
             $table->uuid('division')->nullable();
             $table->foreign('division')->references('id')->on('emp_divisions');
