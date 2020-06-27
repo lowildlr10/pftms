@@ -34,8 +34,79 @@ class InventoryStockController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() {
-        //
+    public function index(Request $request) {
+        $keyword = trim($request->keyword);
+        $instanceDocLog = new DocLog;
+
+        // Get module access
+        $isAllowedDestroy = 1;
+        /*
+        $module = 'inv_stocks';
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedIssue = Auth::user()->getModuleAccess($module, 'issue');
+        $isAllowedIssueBack = Auth::user()->getModuleAccess($module, 'issue_back');
+        $isAllowedReceive = Auth::user()->getModuleAccess($module, 'receive');
+        $isAllowedReceiveBack = Auth::user()->getModuleAccess($module, 'receive_back');
+        $isAllowedObligate = Auth::user()->getModuleAccess($module, 'obligate');
+        $isAllowedPO = Auth::user()->getModuleAccess('proc_po_jo', 'is_allowed');*/
+
+        // Main data
+        $paperSizes = PaperSize::orderBy('paper_type')->get();
+        $invStocksData = InventoryStock::with(['stockitems', 'procstatus', 'inventoryclass'])
+                                       ->has('stockitems', '>', 0);
+
+        if (!empty($keyword)) {
+            $invStocksData = $invStocksData->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('pr_id', 'like', "%$keyword%")
+                    ->orWhere('po_id', 'like', "%$keyword%")
+                    ->orWhere('entity_name', 'like', "%$keyword%")
+                    ->orWhere('fund_cluster', 'like', "%$keyword%")
+                    ->orWhere('inventory_no', 'like', "%$keyword%")
+                    ->orWhere('division', 'like', "%$keyword%")
+                    ->orWhere('office', 'like', "%$keyword%")
+                    ->orWhere('responsibility_center', 'like', "%$keyword%")
+                    ->orWhere('po_no', 'like', "%$keyword%")
+                    ->orWhere('date_po', 'like', "%$keyword%")
+                    ->orWhere('purpose', 'like', "%$keyword%")
+                    ->orWhereHas('supplier', function($query) use ($keyword) {
+                        $query->where('company_name', 'like', "%$keyword%");
+                    })->orWhereHas('inventoryclass', function($query) use ($keyword) {
+                        $query->where('classification_name', 'like', "%$keyword%")
+                              ->orWhere('abbrv', 'like', "%$keyword%");
+                    })->orWhereHas('procstatus', function($query) use ($keyword) {
+                        $query->where('status_name', 'like', "%$keyword%");
+                    })->orWhereHas('stockitems', function($query) use ($keyword) {
+                        $query->where('po_item_id', 'like', "%$keyword%")
+                              ->orWhere('description', 'like', "%$keyword%")
+                              ->orWhere('quantity', 'like', "%$keyword%")
+                              ->orWhere('stock_available', 'like', "%$keyword%")
+                              ->orWhere('amount', 'like', "%$keyword%")
+                              ->orWhere('est_useful_life', 'like', "%$keyword%");
+                    });
+            });
+        }
+
+        $invStocksData = $invStocksData->sortable(['inventory_no' => 'desc'])->paginate(15);
+
+        foreach ($invStocksData as $invStock) {
+            foreach ($invStock->stockitems as $item) {
+                $stockItem = InventoryStockItem::with('stockissueditems')
+                                              ->find($item->id);
+                $item->available_quantity = $stockItem->quantity;
+
+                foreach ($stockItem->stockissueditems as $issuedItem) {
+                    $item->available_quantity -= $issuedItem->quantity;
+                }
+            }
+        }
+
+        return view('modules.inventory.stock.index', [
+            'keyword' => $keyword,
+            'list' => $invStocksData,
+            'paper_sizes' => $paperSizes,
+            'isAllowedDestroy' => $isAllowedDestroy
+        ]);
     }
 
     /**
@@ -302,5 +373,71 @@ class InventoryStockController extends Controller
      */
     public function destroy($id) {
         //
+    }
+
+    public function showIssueItem($invStockID, $invStockItemID, $classification, $type) {
+        if ($type == 'multiple') {
+            $invStockData = InventoryStock::with('stockitems')->find($invStockID);
+        } else {
+            $invStockData = InventoryStock::with(['stockitems' => function($query) use ($invStockItemID) {
+                $query->where('id', $invStockItemID);
+            }])->find($invStockID);
+        }
+
+        $supplierData = Supplier::find($invStockData->supplier);
+
+        foreach ($invStockData->stockitems as $item) {
+            $stockItem = InventoryStockItem::with('stockissueditems')
+                                           ->find($item->id);
+            $item->available_quantity = $stockItem->quantity;
+            $unitIssueData = ItemUnitIssue::find($item->unit_issue);
+            $item->unit = $unitIssueData->unit_name;
+
+            foreach ($stockItem->stockissueditems as $issuedItem) {
+                $item->available_quantity -= $issuedItem->quantity;
+            }
+        }
+
+        $stocks = $invStockData->stockitems;
+        $inventoryNo = $invStockData->inventory_no;
+        $poNo = $invStockData->po_no;
+        $poDate = $invStockData->date_po;
+        $supplier = $supplierData->company_name;
+        $unitIssue = $unitIssueData->unit_name;
+
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
+        }
+        $employees = User::orderBy('firstname')->get();
+
+        if ($classification == 'ris') {
+            return view('modules.inventory.stock.ris-issue', compact(
+                'invStockID', 'invStockItemID', 'classification', 'type',
+                'stocks', 'inventoryNo', 'poNo', 'poDate', 'supplier',
+                'unitIssue', 'signatories', 'employees'
+            ));
+        } else if ($classification == 'par') {
+            return view('modules.inventory.stock.par-issue', compact(
+                'invStockID', 'invStockItemID', 'classification', 'type',
+                'invStockID', 'invStockItemID', 'classification', 'type',
+                'stocks', 'inventoryNo', 'poNo', 'poDate', 'supplier',
+                'unitIssue', 'signatories', 'employees'
+            ));
+        } else {
+            return view('modules.inventory.stock.ics-issue', compact(
+                'invStockID', 'invStockItemID', 'classification', 'type',
+                'stocks', 'inventoryNo', 'poNo', 'poDate', 'supplier',
+                'unitIssue', 'signatories', 'employees'
+            ));
+        }
+    }
+
+    public function storeIssueItem($invStockID, $invStockItemID, $classification, $type) {
+
     }
 }

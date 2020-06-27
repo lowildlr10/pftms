@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
+use Kyslik\ColumnSortable\Sortable;
 
 class ItemClassification extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Sortable;
 
     /**
      * The table associated with the model.
@@ -44,4 +45,8 @@ class ItemClassification extends Model
     public static function generateUuid() {
          return Uuid::generate();
     }
+
+    public $sortable = [
+        'classification_name',
+    ];
 }

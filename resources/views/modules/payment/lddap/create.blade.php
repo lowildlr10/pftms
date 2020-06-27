@@ -374,8 +374,8 @@
             </div>
 
             <div class="row">
-                <div class="col-md-6 border border-dark">
-                    <div class="md-form">
+                <div class="col-md-6 formborder border-dark">
+                    <div class="md-">
                         <small>
                             <span class="red-text">* </span>
                             I hereby warant that the above List of Due and Demmandable A/Ps

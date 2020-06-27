@@ -56,12 +56,20 @@ Route::middleware(['web', 'auth'])->group(function () {
         //'middleware' => 'roles',
         //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
     ])->name('stocks-update-iar');
+    Route::get('inventory/stocks/show-issue-item/{invStockID}/{invStockItemID}/{classification}/{type}', [
+        'uses' => 'InventoryStockController@showIssueItem',
+        //'middleware' => 'roles',
+        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    ])->name('stocks-show-issue-item');
+    Route::post('inventory/stocks/store-issue-item/{invStockID}/{invStockItemID}/{classification}/{type}', [
+        'uses' => 'InventoryStockController@storeIssueItem',
+        //'middleware' => 'roles',
+        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    ])->name('stocks-store-issue-item');
 
 
 
-
-
-
+        /*
     Route::get('inventory/stocks/show/{key}', [
         'uses' => 'InventoryController@show',
         'middleware' => 'roles',
@@ -116,7 +124,7 @@ Route::middleware(['web', 'auth'])->group(function () {
         'uses' => 'InventoryStocksController@setIssued',
         'middleware' => 'roles',
         'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-set-issued');
+    ])->name('stocks-set-issued');*/
 
     /*===================== REPORT ROUTES =====================*/
 

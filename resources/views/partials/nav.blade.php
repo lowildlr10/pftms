@@ -167,7 +167,7 @@
                     <div class="sidebar-submenu">
                         <ul>
                             <li>
-                                <a href="{{ url('inventory/stocks') }}" class="waves-effect">Stocks</a>
+                                <a href="{{ route('stocks') }}" class="waves-effect">Stocks</a>
                             </li>
                         </ul>
                     </div>

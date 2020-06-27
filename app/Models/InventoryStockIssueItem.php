@@ -3,17 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Webpatser\Uuid\Uuid;
 
-class InventoryStockItem extends Model
+class InventoryStockIssueItem extends Model
 {
-
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'inventory_stock_items';
+    protected $table = 'inventory_stock_issue_items';
 
      /**
      * The attributes that are mass assignable.
@@ -23,16 +21,12 @@ class InventoryStockItem extends Model
     protected $fillable = [
         'id',
         'inv_stock_id',
-        'pr_id',
-        'po_id',
-        'po_item_id',
-        'item_classification',
-        'unit_issue',
-        'description',
+        'inv_stock_item_id',
+        'inv_stock_issue_id',
+        'prop_stock_no',
         'quantity',
-        'stock_available',
-        'amount',
-        'est_useful_life',
+        'remarks',
+        'excluded',
     ];
 
     /**
@@ -58,9 +52,5 @@ class InventoryStockItem extends Model
 
     public static function generateUuid() {
          return Uuid::generate();
-    }
-
-    public function stockissueditems() {
-        return $this->hasMany('App\Models\InventoryStockIssueItem', 'id', 'inv_stock_id');
     }
 }
