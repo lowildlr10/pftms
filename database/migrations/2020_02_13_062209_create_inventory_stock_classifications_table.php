@@ -18,6 +18,7 @@ class CreateInventoryStockClassificationsTable extends Migration
 
             $table->uuid('id')->primary();
             $table->string('classification_name', 200);
+            $table->string('abbrv', 50)->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
