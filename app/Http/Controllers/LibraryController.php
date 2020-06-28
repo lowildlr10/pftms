@@ -1045,20 +1045,24 @@ class LibraryController extends Controller
     public function showEditInventoryClassification($id) {
         $inventoryData = InventoryClassification::find($id);
         $className = $inventoryData->classification_name;
+        $abbrv = $inventoryData->abbrv;
 
         return view('modules.library.inventory-classification.update', [
             'id' => $id,
-            'classification' => $className
+            'classification' => $className,
+            'abbrv' => $abbrv
         ]);
     }
 
     public function storeInventoryClassification(Request $request) {
         $className = $request->classification_name;
+        $abbrv = $request->abbrv;
 
         try {
             if (!$this->checkDuplication('InventoryClassification', $className)) {
                 $instanceInvClass = new InventoryClassification;
                 $instanceInvClass->classification_name = $className;
+                $instanceInvClass->abbrv = $abbrv;
                 $instanceInvClass->save();
 
                 $msg = "Inventory classification '$className' successfully created.";
@@ -1075,10 +1079,12 @@ class LibraryController extends Controller
 
     public function updateInventoryClassification(Request $request, $id) {
         $className = $request->classification_name;
+        $abbrv = $request->abbrv;
 
         try {
             $instanceInvClass = InventoryClassification::find($id);
             $instanceInvClass->classification_name = $className;
+            $instanceInvClass->abbrv = $abbrv;
             $instanceInvClass->save();
 
             $msg = "Inventory classification '$className' successfully updated.";

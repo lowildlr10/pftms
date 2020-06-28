@@ -14,7 +14,7 @@ $(function() {
         '#proc_iar',
         '#proc_dv',
         '#pay_lddap',
-        '#inv_stock',
+        '#inv_stocks',
         '#track_pr_rfq',
         '#track_rfq_abs',
         '#track_abs_po',
