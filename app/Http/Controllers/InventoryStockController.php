@@ -758,6 +758,10 @@ class InventoryStockController extends Controller
         $invStockIssues = InventoryStockIssue::with(['invstocks', 'recipient'])
                                              ->where('inv_stock_id', $id)
                                              ->get();
+        $module = 'inv_stocks';
+        $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
+        $isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
 
         foreach ($invStockIssues as $invStockIssue) {
             $invClassData = InventoryClassification::find(
@@ -768,7 +772,8 @@ class InventoryStockController extends Controller
         }
 
         return view('modules.inventory.stock.recipient', compact(
-            'id', 'invStockIssues'
+            'id', 'invStockIssues', 'isAllowedDelete', 'isAllowedDestroy',
+            'isAllowedUpdate'
         ));
     }
 
