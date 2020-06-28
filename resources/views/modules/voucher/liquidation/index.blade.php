@@ -295,6 +295,11 @@
                                 @endif
                             @endif
                         </p>
+                        <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
+                                btn-block waves-effect mb-2"
+                                onclick="$(this).showAttachment('{{ $lr->id }}', 'proc-rfq');">
+                            <i class="fas fa-paperclip fa-lg"></i> View Attachment
+                        </button>
                         <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showRemarks('{{ route('ca-lr-show-remarks',
@@ -401,6 +406,7 @@
 @include('modals.receive-back')
 @include('modals.liquidate')
 @include('modals.print')
+@include('modals.attachment')
 
 @endsection
 
@@ -409,6 +415,7 @@
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/liquidation.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/attachment.js') }}"></script>
 
 @if (!empty(session("success")))
     @include('modals.alert')
