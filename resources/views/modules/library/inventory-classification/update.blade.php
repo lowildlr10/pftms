@@ -8,4 +8,12 @@
             inventory Classification Name <span class="red-text">*</span>
         </label>
     </div>
+
+    <div class="md-form">
+        <input type="text" id="abbrv" class="form-control required"
+               name="abbrv" value="{{ $abbrv }}">
+        <label for="abbrv" class="{{ !empty($abbrv) ? 'active' : '' }}">
+            Abbreviation <span class="red-text">*</span>
+        </label>
+    </div>
 </form>

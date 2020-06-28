@@ -8,4 +8,12 @@
             Inventory Classification Name <span class="red-text">*</span>
         </label>
     </div>
+
+    <div class="md-form">
+        <input type="text" id="abbrv" class="form-control required"
+               name="abbrv">
+        <label for="abbrv">
+            Abbreviation <span class="red-text">*</span>
+        </label>
+    </div>
 </form>
