@@ -237,6 +237,11 @@
                                 onclick="$(this).showItem('{{ route('pr-show-items', ['id' => $pr->id]) }}');">
                             <i class="far fa-list-alt fa-lg"></i> View Items
                         </button>
+                        <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
+                                btn-block waves-effect mb-2"
+                                onclick="$(this).showAttachment('{{ $pr->id }}', 'proc-rfq');">
+                            <i class="fas fa-paperclip fa-lg"></i> View Attachment
+                        </button>
                         <a class="btn btn-sm btn-outline-mdb-color btn-rounded
                                   btn-block waves-effect"
                            href="{{ route('pr-tracker', ['prNo' => $pr->pr_no] ) }}">
@@ -324,6 +329,7 @@
 @include('modals.disapprove')
 @include('modals.cancel')
 @include('modals.print')
+@include('modals.attachment')
 
 @endsection
 
@@ -332,6 +338,7 @@
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/pr.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/attachment.js') }}"></script>
 
 @if (!empty(session("success")))
     @include('modals.alert')

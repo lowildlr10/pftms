@@ -300,6 +300,11 @@
                             <strong>Awarded To: </strong> {{ $item->company_name }}<br>
                             <strong>Requested By: </strong> {{ Auth::user()->getEmployee($pr->requestor['id'])->name }}<br>
                         </p>
+                        <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
+                                btn-block waves-effect mb-2"
+                                onclick="$(this).showAttachment('{{ $pr->id }}', 'proc-rfq');">
+                            <i class="fas fa-paperclip fa-lg"></i> View Attachment
+                        </button>
                         <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showPrint('{{ $pr->id }}', 'proc-po-jo');">
@@ -468,6 +473,7 @@
 @include('modals.delivery')
 @include('modals.inspection')
 @include('modals.print')
+@include('modals.attachment')
 
 @endsection
 
@@ -476,6 +482,7 @@
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script src="{{ asset('assets/js/po-jo.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/attachment.js') }}"></script>
 
 @if (!empty(session("success")))
     @include('modals.alert')
