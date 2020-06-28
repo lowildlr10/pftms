@@ -25,6 +25,7 @@ class CreateInventoryStockIssueItemsTable extends Migration
             $table->binary('prop_stock_no')->nullable();
             $table->unsignedInteger('quantity')->default(0);
             $table->string('est_useful_life')->nullable();
+            $table->enum('stock_available', ['y', 'n'])->default('y');
             $table->text('remarks')->nullable();
             $table->enum('excluded', ['y', 'n'])->default('n');
         });

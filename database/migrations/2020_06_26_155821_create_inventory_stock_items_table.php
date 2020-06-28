@@ -32,7 +32,6 @@ class CreateInventoryStockItemsTable extends Migration
             $table->foreign('unit_issue')->references('id')->on('item_unit_issues');
             $table->text('description');
             $table->unsignedInteger('quantity')->default(0);
-            $table->enum('stock_available', ['y', 'n'])->default('y');
             $table->double('amount', 50, 2)->default(0.00);
         });
     }
