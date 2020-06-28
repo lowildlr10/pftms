@@ -24,7 +24,7 @@ class CreateInventoryStockIssuesTable extends Migration
             $table->uuid('po_id')->nullable();
             $table->foreign('po_id')->references('id')->on('purchase_job_orders');
             $table->uuid('sig_requested_by')->nullable();
-            $table->foreign('sig_requested_by')->references('id')->on('signatories');
+            $table->foreign('sig_requested_by')->references('id')->on('emp_accounts');
             $table->uuid('sig_approved_by')->nullable();
             $table->foreign('sig_approved_by')->references('id')->on('signatories');
             $table->uuid('sig_issued_by')->nullable();
@@ -32,7 +32,7 @@ class CreateInventoryStockIssuesTable extends Migration
             $table->uuid('sig_received_from')->nullable();
             $table->foreign('sig_received_from')->references('id')->on('signatories');
             $table->uuid('sig_received_by')->nullable();
-            $table->foreign('sig_received_by')->references('id')->on('signatories');
+            $table->foreign('sig_received_by')->references('id')->on('emp_accounts');
             $table->softDeletes();
             $table->timestamps();
         });
