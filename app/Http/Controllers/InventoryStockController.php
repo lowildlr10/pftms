@@ -14,6 +14,8 @@ use App\Models\InspectionAcceptance;
 use App\Models\DisbursementVoucher;
 use App\Models\InventoryStock;
 use App\Models\InventoryStockItem;
+use App\Models\InventoryStockIssue;
+use App\Models\InventoryStockIssueItem;
 
 use App\User;
 use App\Models\DocumentLog as DocLog;
@@ -437,7 +439,85 @@ class InventoryStockController extends Controller
         }
     }
 
-    public function storeIssueItem($invStockID, $invStockItemID, $classification, $type) {
+    public function storeIssueItem(Request $request, $invStockID, $invStockItemID, $classification, $type) {
+        $invStockItemIDs = $request->inv_stock_item_id;
+        $quantities = $request->quantity;
+        $datesIssued = $request->date_issued;
+        $propStockNos = $request->prop_stock_no;
+        $sigReceivedBy = $request->sig_received_by;
 
+        if ($classification == 'ris') {
+
+        } else if ($classification == 'par') {
+
+        } else {
+            $estUsefulLifes = $request->est_useful_life;
+            $sigReceivedFrom = $request->sig_received_from;
+        }
+
+
+            $instanceInvStocks = InventoryStock::find($invStockID);
+
+            if ($classification == 'ris') {
+
+            } else if ($classification == 'par') {
+                # code...
+            } else {
+                $instanceInvStockIssue = InventoryStockIssue::where([
+                    ['inv_stock_id', $invStockID], ['sig_received_by', $sigReceivedBy]
+                ])->first();
+
+                if (!$instanceInvStockIssue) {
+                    $instanceInvStockIssue = new InventoryStockIssue;
+                    $instanceInvStockIssue->inv_stock_id = $invStockID;
+                    $instanceInvStockIssue->pr_id = $instanceInvStocks->pr_id;
+                    $instanceInvStockIssue->po_id = $instanceInvStocks->po_id;
+                }
+
+                $instanceInvStockIssue->sig_received_from = $sigReceivedFrom;
+                //$instanceInvStockIssue->sig_received_by = $sigReceivedBy;
+                $instanceInvStockIssue->save();
+
+                if (!$instanceInvStockIssue) {
+                    $invStockIssue = DB::table('inventory_stock_issues')
+                                       ->where([
+                        ['inv_stock_id', $invStockID], ['sig_received_by', $sigReceivedBy]
+                    ])->first();
+                    $invStockIssueID = $invStockIssue->id;
+                } else {
+                    $invStockIssueID = $instanceInvStockIssue->id;
+                }
+
+                foreach ($invStockItemIDs as $ctr => $invStockItemID) {
+                    $propStockNo = $propStockNos[$ctr];
+                    $quantity = $quantities[$ctr];
+                    $dateIssued = $datesIssued[$ctr];
+                    $propStockNo = $propStockNos[$ctr];
+                    $estUsefulLife = $estUsefulLifes[$ctr];
+
+                    if (!$instanceInvStockIssue) {
+                        $instanceInvStockIssueItem = new InventoryStockIssueItem;
+                        $instanceInvStockIssueItem->inv_stock_id = $invStockID;
+                        $instanceInvStockIssueItem->inv_stock_item_id = $invStockItemID;
+                        $instanceInvStockIssueItem->inv_stock_issue_id = $invStockIssueID;
+                    } else {
+                        $instanceInvStockIssueItem = InventoryStockIssueItem::where([
+                            ['inv_stock_issue_id', $invStockIssueID],
+                            ['inv_stock_item_id', $invStockItemID]
+                        ])->first();
+                    }
+
+                    $instanceInvStockIssueItem->prop_stock_no = $propStockNo;
+                    $instanceInvStockIssueItem->date_issued = $dateIssued;
+                    $instanceInvStockIssueItem->quantity = $quantity;
+                    $instanceInvStockIssueItem->est_useful_life = $estUsefulLife;
+                    $instanceInvStockIssueItem->save();
+                }
+            }
+
+        try {
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
     }
 }

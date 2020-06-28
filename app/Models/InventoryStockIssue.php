@@ -21,14 +21,14 @@ class InventoryStockIssue extends Model
      */
     protected $fillable = [
         'id',
+        'inv_stock_id',
         'pr_id',
-        'inventory_id',
-        'serial_no',
-        'quantity',
-        'requested_by',
-        'issued_by',
-        'issued_remarks',
-        'approved_by'
+        'po_id',
+        'sig_requested_by',
+        'sig_approved_by',
+        'sig_issued_by',
+        'sig_received_from',
+        'sig_received_by'
     ];
 
     /**
@@ -47,5 +47,9 @@ class InventoryStockIssue extends Model
 
     public static function generateUuid() {
          return Uuid::generate();
+    }
+
+    public function invstocks() {
+        return $this->belongsTo('App\Models\InventoryStock', 'inv_stock_id', 'id');
     }
 }

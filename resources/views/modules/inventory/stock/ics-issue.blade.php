@@ -24,7 +24,7 @@
 
             <tr>
                 <td colspan="2">
-                    <div class="col-md-12 px-0 table-responsive">
+                    <div class="col-md-12 px-0 table-responsive border">
                         <table class="table table-hover">
                             <tr>
                                 <th class="text-center" width="6%">
@@ -101,14 +101,14 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input class="form-control form-control-sm" type="text"
-                                               name="prop_stock_no[]">
+                                        <textarea class="md-textarea form-control" name="prop_stock_no"
+                                                  placeholder="Value..." rows="1"></textarea>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
                                         <input class="form-control form-control-sm" type="text"
-                                               name="est_useful_life[]">
+                                               name="est_useful_life[]" placeholder="Value...">
                                     </div>
                                 </td>
                                 <td>
