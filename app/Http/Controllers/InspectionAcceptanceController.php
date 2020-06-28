@@ -44,6 +44,9 @@ class InspectionAcceptanceController extends Controller
         $isAllowedPO = Auth::user()->getModuleAccess('proc_po_jo', 'is_allowed');
         $isAllowedDV = Auth::user()->getModuleAccess('proc_dv', 'is_allowed');
 
+        $isAllowedCreateStocks = Auth::user()->getModuleAccess('inv_stocks', 'create');
+        $isAllowedUpdateStocks = Auth::user()->getModuleAccess('inv_stocks', 'update');
+
         // User groups
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
@@ -125,6 +128,8 @@ class InspectionAcceptanceController extends Controller
             'isAllowedInspect' => $isAllowedInspect,
             'isAllowedPO' => $isAllowedPO,
             'isAllowedDV' => $isAllowedDV,
+            'isAllowedCreateStocks' => $isAllowedCreateStocks,
+            'isAllowedUpdateStocks' => $isAllowedUpdateStocks
         ]);
     }
 

@@ -23,6 +23,7 @@
         </h5>
         <hr>
         <div class="btn-group btn-menu-1">
+            @if ($isAllowedUpdate)
             <button onclick="$(this).showUpdateIssueItem(`{{ route('stocks-show-update-issue-item', [
                         'invStockIssueID' => $inv->id,
                         'classification' => $inv->classification
@@ -30,16 +31,21 @@
                class="btn btn-outline-mdb-color btn-rounded btn-sm px-2 waves-effect">
                <i class="fas fa-edit orange-text"></i> Edit
             </button>
+            @endif
+
             <button onclick="$(this).showPrint('{{ $inv->id }}', 'inv_{{ $inv->classification }}');"
                class="btn btn-outline-mdb-color btn-rounded btn-sm px-2 waves-effect">
                <i class="fas fa-print text-info"></i> Print
             </button>
+
+            @if ($isAllowedDelete || $isAllowedDestroy)
             <button onclick="$(this).showDeleteIssue('{{ route('stocks-delete-issue', [
                         'invStockIssueID' => $inv->id
                     ]) }}', '{{ $inv->recipient['firstname'] }}');"
                class="btn btn-outline-mdb-color btn-rounded btn-sm px-2 waves-effect">
                <i class="fas fa-trash red-text"></i> Delete
             </button>
+            @endif
         </div>
     </li>
 		@endforeach

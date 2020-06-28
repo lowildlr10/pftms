@@ -303,6 +303,7 @@
                     @if (!empty($item->doc_status->date_issued))
                         @if ($pr->po[$listCtr1]->status > 9)
                             @if ($item->inventory_count == 0)
+                                @if ($isAllowedCreateStocks)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showCreateStocks(`{{ route('stocks-show-create-iar',
@@ -310,7 +311,9 @@
                             <i class="fas fa-box green-text"></i> Issue/Inventory
                         </button>
                     </li>
+                                @endif
                             @else
+                                @if ($isAllowedUpdateStocks)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-warning waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showUpdateStocks(`{{ route('stocks-show-edit-iar',
@@ -318,6 +321,7 @@
                             <i class="fas fa-box"></i> Update Inventory
                         </button>
                     </li>
+                                @endif
                             @endif
                     <li class="list-group-item justify-content-between">
                         <a onclick="$(this).redirectToDoc('{{ route('proc-dv') }}', '{{ $pr->id }}');"

@@ -47,10 +47,13 @@
                                     <a class="dropdown-item" onclick="$(this).showCreate('ics');">
                                         Inventory Custodian Slip (ICS)
                                     </a>
+
+                                    @if ($isAllowedIAR)
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{{ route('iar') }}" target="_blank">
                                         <i class="fas fa-angle-double-left"></i> Go Back to Inspection & Acceptance Report
                                     </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -132,6 +135,8 @@
                                                     <strong class="green-text">
                                                         [{{ $item->available_quantity }}/{{ $item->quantity }}]
                                                     </strong>
+
+                                                                @if ($isAllowedIssue)
                                                     <button type="button" class="btn btn-outline-orange btn-sm py-0 px-1 my-0 ml-1 mb-2 z-depth-0
                                                                                  waves-effect waves-light"
                                                             onclick="$(this).showCreateIssueItem(`{{ route('stocks-show-create-issue-item', [
@@ -142,6 +147,7 @@
                                                             ]) }}`);">
                                                         <i class="fas fa-paper-plane"></i> Issue
                                                     </button>
+                                                                @endif
                                                             @else
                                                     <strong class="red-text">
                                                         [{{ $item->available_quantity }}/{{ $item->quantity }}] - <i class="fas fa-ban"></i> Out of Stock
@@ -218,6 +224,7 @@
                     <div class="gradient-card-header rgba-white-light p-0">
                         <div class="p-0">
                             <div class="btn-group btn-menu-1 p-0">
+                                @if ($isAllowedIssue)
                                 <button type="button" class="btn btn-outline-green
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showCreateIssueItem(`{{ route('stocks-show-create-issue-item', [
@@ -228,6 +235,7 @@
                                         ]) }}`);">
                                     <i class="fas fa-paper-plane green-text"></i> Issue Item / Property
                                 </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -278,6 +286,7 @@
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
 
+                    @if ($isAllowedIssue)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showIssue('{{ route('stocks-issue', ['id' => $inv->id]) }}',
@@ -285,6 +294,7 @@
                             <i class="fas fa-check"></i> Set to Issued
                         </button>
                     </li>
+                    @endif
                 </ul>
             </div>
             <!--Footer-->

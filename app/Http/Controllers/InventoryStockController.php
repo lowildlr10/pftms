@@ -41,16 +41,13 @@ class InventoryStockController extends Controller
         $instanceDocLog = new DocLog;
 
         // Get module access
-        $isAllowedDestroy = 1;
-        /*
         $module = 'inv_stocks';
+        $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
         $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
+        $isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
         $isAllowedIssue = Auth::user()->getModuleAccess($module, 'issue');
-        $isAllowedIssueBack = Auth::user()->getModuleAccess($module, 'issue_back');
-        $isAllowedReceive = Auth::user()->getModuleAccess($module, 'receive');
-        $isAllowedReceiveBack = Auth::user()->getModuleAccess($module, 'receive_back');
-        $isAllowedObligate = Auth::user()->getModuleAccess($module, 'obligate');
-        $isAllowedPO = Auth::user()->getModuleAccess('proc_po_jo', 'is_allowed');*/
+        $isAllowedIAR = Auth::user()->getModuleAccess('proc_iar', 'is_allowed');
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
@@ -105,6 +102,12 @@ class InventoryStockController extends Controller
             'keyword' => $keyword,
             'list' => $invStocksData,
             'paperSizes' => $paperSizes,
+            'isAllowedCreate' => $isAllowedCreate,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedDelete' => $isAllowedDelete,
+            'isAllowedDestroy' => $isAllowedDestroy,
+            'isAllowedIssue' => $isAllowedIssue,
+            'isAllowedIAR' => $isAllowedIAR,
             'isAllowedDestroy' => $isAllowedDestroy
         ]);
     }
