@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Webpatser\Uuid\Uuid;
 
 class InventoryStockIssueItem extends Model
 {
@@ -52,5 +53,9 @@ class InventoryStockIssueItem extends Model
 
     public static function generateUuid() {
          return Uuid::generate();
+    }
+
+    public function invstockitems() {
+        return $this->belongsTo('App\Models\InventoryStockItem', 'inv_stock_item_id', 'id');
     }
 }

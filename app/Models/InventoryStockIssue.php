@@ -52,4 +52,8 @@ class InventoryStockIssue extends Model
     public function invstocks() {
         return $this->belongsTo('App\Models\InventoryStock', 'inv_stock_id', 'id');
     }
+
+    public function recipient() {
+        return $this->hasOne('App\User', 'id', 'sig_received_by');
+    }
 }

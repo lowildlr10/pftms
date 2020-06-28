@@ -61,6 +61,6 @@ class InventoryStockItem extends Model
     }
 
     public function stockissueditems() {
-        return $this->hasMany('App\Models\InventoryStockIssueItem', 'id', 'inv_stock_id');
+        return $this->hasMany('App\Models\InventoryStockIssueItem', 'inv_stock_item_id', 'id');
     }
 }

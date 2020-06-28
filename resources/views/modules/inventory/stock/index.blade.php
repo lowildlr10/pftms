@@ -110,7 +110,7 @@
                                                 <i class="fas fa-file-signature fa-lg orange-text material-tooltip-main"
                                                    data-toggle="tooltip" data-placement="right" title="Recorded"></i>
                                                 @else
-                                                <i class="fas fa-paper-plane fa-lg green-text material-tooltip-main"
+                                                <i class="fas fa-check fa-lg green-text material-tooltip-main"
                                                    data-toggle="tooltip" data-placement="right" title="Issued"></i>
                                                 @endif
                                             </td>
@@ -134,7 +134,7 @@
                                                     </strong>
                                                     <button type="button" class="btn btn-outline-orange btn-sm py-0 px-1 my-0 ml-1 mb-2 z-depth-0
                                                                                  waves-effect waves-light"
-                                                            onclick="$(this).showIssueItem(`{{ route('stocks-show-issue-item', [
+                                                            onclick="$(this).showCreateIssueItem(`{{ route('stocks-show-create-issue-item', [
                                                                 'invStockID' => $inv->id,
                                                                 'invStockItemID' => $item->id,
                                                                 'classification' => strtolower($inv->inventoryclass['abbrv']),
@@ -220,13 +220,13 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-green
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showIssueItem(`{{ route('stocks-show-issue-item', [
+                                        onclick="$(this).showCreateIssueItem(`{{ route('stocks-show-create-issue-item', [
                                             'invStockID' => $inv->id,
                                             'invStockItemID' => 0,
                                             'classification' => strtolower($inv->inventoryclass['abbrv']),
                                             'type' => 'multiple'
                                         ]) }}`);">
-                                    <i class="fas fa-paper-plane green-text"></i> Issue an Item / Property
+                                    <i class="fas fa-paper-plane green-text"></i> Issue Item / Property
                                 </button>
                             </div>
                         </div>
@@ -239,9 +239,10 @@
                         </p>
                         <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
                                 btn-block waves-effect mb-2"
-                                onclick="$(this).showIssued('{{ $inv->inventory_no }}',
-                                                            '{{ $inv->classification_abrv }}');">
-                            <i class="fas fa-users fa-lg"></i> Show Issuee
+                                onclick="$(this).showRecipients(`{{ route('stocks-show-recipients', [
+                                    'id' => $inv->id
+                                ]) }}`);">
+                            <i class="fas fa-users fa-lg"></i> Show Recipients
                         </button>
                     </div>
                 </div>
@@ -279,7 +280,8 @@
 
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).issue('{{ $inv->inventory_no }}');">
+                                onclick="$(this).showIssue('{{ route('stocks-issue', ['id' => $inv->id]) }}',
+                                                           `{{ $inv->inventoryclass['classification_name'] }}`);">
                             <i class="fas fa-check"></i> Set to Issued
                         </button>
                     </li>
@@ -302,6 +304,7 @@
 @include('modals.show')
 @include('modals.create')
 @include('modals.edit')
+@include('modals.issue-no-remarks')
 @include('modals.delete-destroy')
 @include('modals.print')
 

@@ -345,15 +345,19 @@ class PrintController extends Controller
                 $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-                    $code = $this->getDocCode($key, 'stock');
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                    $msg = "generated the property acknowledgement report $key.";
+                    $msg = "Generated the Property Acknowledgement Report '$key' document.";
                     Auth::user()->log($request, $msg);
                 } else {
-                    $this->generatePAR($data, $documentType, $fontScale,
-                                       $pageHeight, $pageWidth, $previewToggle);
+                    $this->generatePAR(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
-
                 break;
 
             case 'inv_ris':
@@ -361,15 +365,19 @@ class PrintController extends Controller
                 $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-                    $code = $this->getDocCode($key, 'stock');
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                    $msg = "generated the requisition and issue slip $key.";
+                    $msg = "Generated the Requisition and Issue Slip '$key' document.";
                     Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateRIS($data, $documentType, $fontScale,
-                                       $pageHeight, $pageWidth, $previewToggle);
+                    $this->generateRIS(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
-
                 break;
 
             case 'inv_ics':
@@ -377,15 +385,19 @@ class PrintController extends Controller
                 $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-                    $code = $this->getDocCode($key, 'stock');
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                    $msg = "generated the inventory custodian slip $key.";
+                    $msg = "Generated the Inventory Custodian Slip '$key' document.";
                     Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateICS($data, $documentType, $fontScale,
-                                       $pageHeight, $pageWidth, $previewToggle);
+                    $this->generateICS(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
-
                 break;
 
             case 'inv_label':
@@ -393,14 +405,21 @@ class PrintController extends Controller
                 $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
+                    $msg = "Generated the Property Label '$key' tag.";
+                    Auth::user()->log($request, $msg);
                 } else {
                     $pageHeight = 53.27;
                     $pageWidth = 103.76125;
-                    $this->generatePropertyLabel($data, $documentType, $fontScale,
-                                                 $pageHeight, $pageWidth, $previewToggle);
+                    $this->generatePropertyLabel(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
-
                 break;
 
             default:

@@ -56,75 +56,46 @@ Route::middleware(['web', 'auth'])->group(function () {
         //'middleware' => 'roles',
         //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
     ])->name('stocks-update-iar');
-    Route::get('inventory/stocks/show-issue-item/{invStockID}/{invStockItemID}/{classification}/{type}', [
-        'uses' => 'InventoryStockController@showIssueItem',
+    Route::get('inventory/stocks/show-create-issue-item/{invStockID}/{invStockItemID}/{classification}/{type}', [
+        'uses' => 'InventoryStockController@showCreateIssueItem',
         //'middleware' => 'roles',
         //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-show-issue-item');
-    Route::post('inventory/stocks/store-issue-item/{invStockID}/{invStockItemID}/{classification}/{type}', [
+    ])->name('stocks-show-create-issue-item');
+    Route::post('inventory/stocks/store-issue-item/{invStockID}/{classification}', [
         'uses' => 'InventoryStockController@storeIssueItem',
         //'middleware' => 'roles',
         //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
     ])->name('stocks-store-issue-item');
-
-
-
-        /*
-    Route::get('inventory/stocks/show/{key}', [
-        'uses' => 'InventoryController@show',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-show');
-    Route::get('inventory/stocks/show-create/{classification}', [
-        'uses' => 'InventoryController@showCreate',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-show-create');
-    Route::get('inventory/stocks/edit/{inventoryNo}', [
-        'uses' => 'InventoryController@edit',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-edit');
-    Route::get('inventory/stocks/issued/{inventoryNo}', [
-        'uses' => 'InventoryController@showIssuedTo',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-issued');
-    Route::post('inventory/stocks/store/{inventoryNo}', [
-        'uses' => 'InventoryController@store',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-store');
-    Route::post('inventory/stocks/issue-stocks/{key}', [
-        'uses' => 'InventoryController@issueStocks',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-issue-stocks');
-    Route::post('inventory/stocks/update/{inventoryNo}', [
-        'uses' => 'InventoryController@update',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-update');
-    Route::post('inventory/stocks/update-stocks/{inventoryNo}', [
-        'uses' => 'InventoryController@updateStocks',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-update-stocks');
-    Route::post('inventory/stocks/update-serial-no/{inventoryNo}', [
-        'uses' => 'InventoryController@updateSerialNo',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-update-serial-no');
-    Route::post('inventory/stocks/delete/{inventoryNo}', [
-        'uses' => 'InventoryController@delete',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-delete');
-    Route::post('inventory/stocks/set-issued/{inventoryNo}', [
-        'uses' => 'InventoryStocksController@setIssued',
-        'middleware' => 'roles',
-        'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-set-issued');*/
+    Route::get('inventory/stocks/show-update-issue-item/{invStockIssueID}/{classification}', [
+        'uses' => 'InventoryStockController@showUpdateIssueItem',
+        //'middleware' => 'roles',
+        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    ])->name('stocks-show-update-issue-item');
+    Route::post('inventory/stocks/update-issue-item/{invStockID}/{classification}', [
+        'uses' => 'InventoryStockController@updateIssueItem',
+        //'middleware' => 'roles',
+        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    ])->name('stocks-update-issue-item');
+    Route::get('inventory/stocks/show-recipients/{id}', [
+        'uses' => 'InventoryStockController@showRecipients',
+        //'middleware' => 'roles',
+        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    ])->name('stocks-show-recipients');
+    Route::post('inventory/stocks/delete-issue/{invStockIssueID}', [
+        'uses' => 'InventoryStockController@deleteIssue',
+        //'middleware' => 'roles',
+        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    ])->name('stocks-delete-issue');
+    Route::post('inventory/stocks/destroy-issue/{invStockIssueID}', [
+        'uses' => 'InventoryStockController@destroyIssue',
+        //'middleware' => 'roles',
+        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    ])->name('stocks-destroy-issue');
+    Route::post('inventory/stocks/issue/{id}', [
+        'uses' => 'InventoryStockController@issue',
+        //'middleware' => 'roles',
+        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
+    ])->name('stocks-issue');
 
     /*===================== REPORT ROUTES =====================*/
 

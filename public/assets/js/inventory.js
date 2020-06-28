@@ -30,18 +30,17 @@ $(function() {
 		});
     }
 
-    $.fn.showIssueItem = function(url) {
+    $.fn.showCreateIssueItem = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-create').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
-
-
+            initializeQtyInput();
         });
         $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
-            $('#create-title').html('Issue Item / Property');
+            $('#create-title').html('Create Issue Item / Property');
 		}).on('hidden.bs.modal', function() {
 		    $('#modal-body-create').html('').css('display', 'none');
 		});
@@ -61,14 +60,28 @@ $(function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
-
-
         });
-        $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
+        $("#modal-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {
             $('#edit-title').html('Update Issued Items');
 		}).on('hidden.bs.modal', function() {
             $('#modal-body-edit').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.showUpdateIssueItem = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-edit').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $(this).slideToggle(500);
+            initializeQtyInput();
+        });
+        $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
+						     .on('shown.bs.modal', function() {
+            $('#edit-title').html('Update Issue Item / Property');
+		}).on('hidden.bs.modal', function() {
+		    $('#modal-body-edit').html('').css('display', 'none');
 		});
     }
 
@@ -86,6 +99,54 @@ $(function() {
                 $(this).remove();
             });
 		}
+    }
+
+    $.fn.showRecipients = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-show').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $(this).slideToggle(500);
+        });
+        $("#modal-show").modal({keyboard: false, backdrop: 'static'})
+						   .on('shown.bs.modal', function() {
+            $('#show-title').html('Recipients');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-show').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.showDeleteIssue = function(url, name) {
+		$('#modal-body-delete').html(`Are you sure you want to delete ${name}'s `+
+                                     `issued items?`);
+        $("#modal-delete").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#delete-title').html('Delete Recipient');
+            $('#form-delete').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-delete-body').html('');
+             $('#form-delete').attr('action', '#');
+		});
+    }
+
+    $.fn.delete = function() {
+        $('#form-delete').submit();
+    }
+
+    $.fn.showIssue = function(url, name) {
+        $('#modal-body-issue').html(`Are you sure you want to set this '${name}'
+                                      to 'Issued'?`);
+        $("#modal-issue").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#issue-title').html('Set to Issued');
+            $('#form-issue').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-issue-body').html('');
+             $('#form-issue').attr('action', '#');
+		});
+    }
+
+    $.fn.issue = function() {
+        $('#form-issue').submit();
     }
 
 

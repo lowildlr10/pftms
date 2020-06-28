@@ -1,5 +1,5 @@
-<form id="form-update" class="wow animated fadeIn d-flex justify-content-center" method="POST"
-      action="{{ route('stocks-update-issue-item', [
+<form id="form-store" class="wow animated fadeIn d-flex justify-content-center" method="POST"
+      action="{{ route('stocks-store-issue-item', [
           'invStockID' => $invStockID,
           'classification' => $classification,
       ]) }}">
@@ -36,33 +36,33 @@
                                 <th class="text-center" width="9%">
                                     Total Cost
                                 </th>
-                                <th class="text-center" width="23%">
+                                <th class="text-center" width="28%">
                                     Description
                                 </th>
                                 <th class="text-center" width="12%">
                                     Date Acquired <span class="red-text">* </span>
                                 </th>
-                                <th class="text-center" width="10%">
+                                <th class="text-center" width="13%">
                                     Inventory Item Number <span class="red-text">* </span>
                                 </th>
-                                <th class="text-center" width="12%">
+                                <th class="text-center" width="14%">
                                     Estimated Useful Life <span class="red-text">* </span>
                                 </th>
-                                <th class="text-center" width="12%">
+                                <th class="text-center" width="2%">
 
                                 </th>
                             </tr>
 
                             @if (count($stocks) > 0)
                                 @foreach ($stocks as $ctr => $stock)
+                                    @if ($stock->available_quantity > 0)
                             <tr id="row-{{ $ctr + 1 }}">
                                 <td>
                                     <div class="md-form form-sm my-0">
                                         <input class="form-control required form-control-sm quantity required" type="number"
                                                name="quantity[]" placeholder="avail: {{ $stock->available_quantity }}"
-                                               min="0" max="{{ $stock->available_quantity }}"
-                                               value="{{ $stock->quantity }}">
-                                        <input type="hidden" name="inv_stock_issue_item_id[]" value="{{ $stock->id }}">
+                                               min="0" max="{{ $stock->available_quantity }}" required="required">
+                                        <input type="hidden" name="inv_stock_item_id[]" value="{{ $stock->id }}">
                                     </div>
                                 </td>
                                 <td align="center">
@@ -74,7 +74,7 @@
                                 <td>
                                     <div class="md-form form-sm my-0">
                                         <input class="form-control form-control-sm" type="number"
-                                               readonly="readonly" value="{{ $stock->invstockitems->amount / $stock->invstockitems->quantity }}">
+                                               readonly="readonly" value="{{ $stock->amount / $stock->quantity }}">
                                     </div>
                                 </td>
                                 <td>
@@ -87,64 +87,43 @@
                                     <div class="md-form form-sm my-0">
                                         <textarea class="md-textarea form-control required"
                                                   placeholder="Item description..."
-                                                  rows="1" readonly>{{ $stock->invstockitems->description }}</textarea>
+                                                  rows="1" readonly>{{ $stock->description }}</textarea>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
                                         <input class="form-control form-control-sm required" type="date"
-                                               name="date_issued[]" value="{{ $stock->date_issued }}">
+                                               name="date_issued[]">
                                     </div>
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
                                         <textarea class="md-textarea form-control required" name="prop_stock_no[]"
-                                                  placeholder="Value..." rows="1">{{ $stock->prop_stock_no }}</textarea>
+                                                  placeholder="Value..." rows="1"></textarea>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
                                         <input class="form-control form-control-sm required" type="text"
-                                               name="est_useful_life[]" placeholder="Value..."
-                                               value="{{ $stock->est_useful_life }}">
+                                               name="est_useful_life[]" placeholder="Value...">
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="md-form">
-                                        <select name="deleted[]" searchable="Search here.."
-                                                class="mdb-select crud-select md-form my-0 required">
-                                            <option value="" disabled selected>
-                                                Choose a delete option
-                                            </option>
-
-                                            <option value="y">Yes</option>
-                                            <option value="n" selected>No</option>
-                                        </select>
-                                        <label class="mdb-main-label">
-                                            Delete? <span class="red-text">*</span>
-                                        </label>
-                                    </div>
-
-                                    <div class="md-form">
-                                        <select name="excluded[]" searchable="Search here.."
-                                                class="mdb-select crud-select md-form my-0 required">
-                                            <option value="" disabled selected>
-                                                Choose an exclude option
-                                            </option>
-
-                                            <option value="y" {{ $stock->excluded == 'y' ? 'selected' : '' }}>
-                                                Yes
-                                            </option>
-                                            <option value="n" {{ $stock->excluded == 'n' ? 'selected' : '' }}>
-                                                No
-                                            </option>
-                                        </select>
-                                        <label class="mdb-main-label">
-                                            Exclude? <span class="red-text">*</span>
-                                        </label>
-                                    </div>
+                                    <a onclick="$(this).deleteRow('#row-{{ $ctr + 1 }}');"
+                                       class="btn btn-outline-red px-1 py-0">
+                                        <i class="fas fa-minus-circle"></i>
+                                    </a>
                                 </td>
                             </tr>
+                                @else
+                            <tr>
+                                <td colspan="9">
+                                    <h6 class="text-center red-text">
+                                        {{ $stock->description }} (Out of Stock)
+                                    </h6>
+                                </td>
+                            </tr>
+                                @endif
                             @endforeach
                         @endif
 
@@ -191,7 +170,7 @@
                             @if (count($signatories) > 0)
                                 @foreach ($signatories as $sig)
                                     @if ($sig->module->ics->received_from)
-                            <option value="{{ $sig->id }}" {{ $sig->id == $sigReceivedFrom ? 'selected' : '' }}>
+                            <option value="{{ $sig->id }}">
                                 {!! $sig->name !!} [{!! $sig->module->ics->designation !!}]
                             </option>
                                     @endif
@@ -213,7 +192,7 @@
 
                             @if (count($employees) > 0)
                                 @foreach ($employees as $emp)
-                            <option value="{{ $emp->id }}" {{ $emp->id == $sigReceivedBy ? 'selected' : '' }}>
+                            <option value="{{ $emp->id }}">
                                 {{ $emp->firstname }} {{ $emp->lastname }}
                             </option>
                                 @endforeach
