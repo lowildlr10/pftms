@@ -28,75 +28,6 @@ Route::post('register', 'AccountController@storeProfile');
 
 Route::middleware(['web', 'auth'])->group(function () {
 
-    /*===================== INVENTORY ROUTES =====================*/
-
-    // Stocks
-    Route::any('inventory/stocks', [
-        'uses' => 'InventoryStockController@index',
-        //'middleware' => 'roles',
-        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks');
-    Route::get('inventory/stocks/show-create-from-iar/{poID}', [
-        'uses' => 'InventoryStockController@showCreateFromIAR',
-        //'middleware' => 'roles',
-        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-show-create-iar');
-    Route::post('inventory/stocks/store-iar/{poID}', [
-        'uses' => 'InventoryStockController@storeFromIAR',
-        //'middleware' => 'roles',
-        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-store-iar');
-    Route::get('inventory/stocks/show-edit-from-iar/{poID}', [
-        'uses' => 'InventoryStockController@showEditFromIAR',
-        //'middleware' => 'roles',
-        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-show-edit-iar');
-    Route::post('inventory/stocks/update-iar/{poID}', [
-        'uses' => 'InventoryStockController@updateFromIAR',
-        //'middleware' => 'roles',
-        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-update-iar');
-    Route::get('inventory/stocks/show-create-issue-item/{invStockID}/{invStockItemID}/{classification}/{type}', [
-        'uses' => 'InventoryStockController@showCreateIssueItem',
-        //'middleware' => 'roles',
-        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-show-create-issue-item');
-    Route::post('inventory/stocks/store-issue-item/{invStockID}/{classification}', [
-        'uses' => 'InventoryStockController@storeIssueItem',
-        //'middleware' => 'roles',
-        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-store-issue-item');
-    Route::get('inventory/stocks/show-update-issue-item/{invStockIssueID}/{classification}', [
-        'uses' => 'InventoryStockController@showUpdateIssueItem',
-        //'middleware' => 'roles',
-        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-show-update-issue-item');
-    Route::post('inventory/stocks/update-issue-item/{invStockID}/{classification}', [
-        'uses' => 'InventoryStockController@updateIssueItem',
-        //'middleware' => 'roles',
-        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-update-issue-item');
-    Route::get('inventory/stocks/show-recipients/{id}', [
-        'uses' => 'InventoryStockController@showRecipients',
-        //'middleware' => 'roles',
-        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-show-recipients');
-    Route::post('inventory/stocks/delete-issue/{invStockIssueID}', [
-        'uses' => 'InventoryStockController@deleteIssue',
-        //'middleware' => 'roles',
-        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-delete-issue');
-    Route::post('inventory/stocks/destroy-issue/{invStockIssueID}', [
-        'uses' => 'InventoryStockController@destroyIssue',
-        //'middleware' => 'roles',
-        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-destroy-issue');
-    Route::post('inventory/stocks/issue/{id}', [
-        'uses' => 'InventoryStockController@issue',
-        //'middleware' => 'roles',
-        //'roles' => ['Developer', 'Supply & Property Officer', 'PSTD']
-    ])->name('stocks-issue');
-
     /*===================== REPORT ROUTES =====================*/
 
     // Under Development
@@ -882,6 +813,75 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'proc_dv',
         'access' => 'is_allowed'
     ])->name('proc-dv-store-remarks');
+
+    /*===================== INVENTORY ROUTES =====================*/
+
+    // Stocks
+    Route::any('inventory/stocks', [
+        'uses' => 'InventoryStockController@index',
+        'module' => 'inv_stocks',
+        'access' => 'is_allowed'
+    ])->name('stocks');
+    Route::get('inventory/stocks/show-create-from-iar/{poID}', [
+        'uses' => 'InventoryStockController@showCreateFromIAR',
+        'module' => 'inv_stocks',
+        'access' => 'create'
+    ])->name('stocks-show-create-iar');
+    Route::post('inventory/stocks/store-iar/{poID}', [
+        'uses' => 'InventoryStockController@storeFromIAR',
+        'module' => 'inv_stocks',
+        'access' => 'create'
+    ])->name('stocks-store-iar');
+    Route::get('inventory/stocks/show-edit-from-iar/{poID}', [
+        'uses' => 'InventoryStockController@showEditFromIAR',
+        'module' => 'inv_stocks',
+        'access' => 'update'
+    ])->name('stocks-show-edit-iar');
+    Route::post('inventory/stocks/update-iar/{poID}', [
+        'uses' => 'InventoryStockController@updateFromIAR',
+        'module' => 'inv_stocks',
+        'access' => 'update'
+    ])->name('stocks-update-iar');
+    Route::get('inventory/stocks/show-create-issue-item/{invStockID}/{invStockItemID}/{classification}/{type}', [
+        'uses' => 'InventoryStockController@showCreateIssueItem',
+        'module' => 'inv_stocks',
+        'access' => 'issue'
+    ])->name('stocks-show-create-issue-item');
+    Route::post('inventory/stocks/store-issue-item/{invStockID}/{classification}', [
+        'uses' => 'InventoryStockController@storeIssueItem',
+        'module' => 'inv_stocks',
+        'access' => 'issue'
+    ])->name('stocks-store-issue-item');
+    Route::get('inventory/stocks/show-update-issue-item/{invStockIssueID}/{classification}', [
+        'uses' => 'InventoryStockController@showUpdateIssueItem',
+        'module' => 'inv_stocks',
+        'access' => 'update'
+    ])->name('stocks-show-update-issue-item');
+    Route::post('inventory/stocks/update-issue-item/{invStockID}/{classification}', [
+        'uses' => 'InventoryStockController@updateIssueItem',
+        'module' => 'inv_stocks',
+        'access' => 'update'
+    ])->name('stocks-update-issue-item');
+    Route::get('inventory/stocks/show-recipients/{id}', [
+        'uses' => 'InventoryStockController@showRecipients',
+        'module' => 'inv_stocks',
+        'access' => 'is_allowed'
+    ])->name('stocks-show-recipients');
+    Route::post('inventory/stocks/delete-issue/{invStockIssueID}', [
+        'uses' => 'InventoryStockController@deleteIssue',
+        'module' => 'inv_stocks',
+        'access' => 'delete'
+    ])->name('stocks-delete-issue');
+    Route::post('inventory/stocks/destroy-issue/{invStockIssueID}', [
+        'uses' => 'InventoryStockController@destroyIssue',
+        'module' => 'inv_stocks',
+        'access' => 'destroy'
+    ])->name('stocks-destroy-issue');
+    Route::post('inventory/stocks/issue/{id}', [
+        'uses' => 'InventoryStockController@issue',
+        'module' => 'inv_stocks',
+        'access' => 'issue'
+    ])->name('stocks-issue');
 
     /*===================== PAYMENT ROUTES =====================*/
 
