@@ -20,6 +20,19 @@ class InventoryClassificationsMigrateSeeder extends Seeder
         foreach ($invClassData as $class) {
             $invClass = new InventoryClassification;
             $invClass->classification_name = $class->classification;
+
+            if (strpos(strtolower($invClass->classification_name), 'ris') !== false) {
+                $invClass->abbrv = 'RIS';
+            }
+
+            if (strpos(strtolower($invClass->classification_name), 'ics') !== false) {
+                $invClass->abbrv = 'ICS';
+            }
+
+            if (strpos(strtolower($invClass->classification_name), 'par') !== false) {
+                $invClass->abbrv = 'PAR';
+            }
+
             $invClass->save();
         }
     }
