@@ -15,12 +15,18 @@ use App\Models\ObligationRequestStatus;
 use App\Models\InspectionAcceptance;
 use App\Models\DisbursementVoucher;
 use App\Models\InventoryStock;
+use App\Models\InventoryStockItem;
+use App\Models\InventoryStockIssue;
+use App\Models\InventoryStockIssueItem;
 
 use App\Models\DocumentLog as DocLog;
 use App\Models\EmpLog;
 use App\Models\Signatory;
 use App\User;
 use App\Models\PaperSize;
+use App\Models\Supplier;
+use App\Models\ItemUnitIssue;
+use App\Models\EmpDivision;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -41,6 +47,10 @@ use App\Plugins\PDFGenerator\DocInspectionAcceptanceReport;
 use App\Plugins\PDFGenerator\DocDisbursementVoucher;
 use App\Plugins\PDFGenerator\DocLiquidationReport;
 use App\Plugins\PDFGenerator\DocListDueDemandable;
+use App\Plugins\PDFGenerator\DocPropertyAcknowledgement;
+use App\Plugins\PDFGenerator\DocInventoryCustodian;
+use App\Plugins\PDFGenerator\DocRequisitionIssueSlip;
+use App\Plugins\PDFGenerator\DocPropertyLabel;
 
 class PrintController extends Controller
 {
@@ -341,66 +351,85 @@ class PrintController extends Controller
                     break;
 
             case 'inv_par':
-                $data = $this->getDataPAR($key, $otherParam);
+                $data = $this->getDataPAR($key);
                 $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-                    $code = $this->getDocCode($key, 'stock');
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                    $msg = "generated the property acknowledgement report $key.";
+                    $msg = "Generated the Property Acknowledgement Report '$key' document.";
                     Auth::user()->log($request, $msg);
                 } else {
-                    $this->generatePAR($data, $documentType, $fontScale,
-                                       $pageHeight, $pageWidth, $previewToggle);
+                    $this->generatePAR(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
-
                 break;
 
             case 'inv_ris':
-                $data = $this->getDataRIS($key, $otherParam);
+                $data = $this->getDataRIS($key);
                 $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-                    $code = $this->getDocCode($key, 'stock');
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                    $msg = "generated the requisition and issue slip $key.";
+                    $msg = "Generated the Requisition and Issue Slip '$key' document.";
                     Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateRIS($data, $documentType, $fontScale,
-                                       $pageHeight, $pageWidth, $previewToggle);
+                    $this->generateRIS(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
-
                 break;
 
             case 'inv_ics':
-                $data = $this->getDataICS($key, $otherParam);
+                $data = $this->getDataICS($key);
                 $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-                    $code = $this->getDocCode($key, 'stock');
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                    $msg = "generated the inventory custodian slip $key.";
+                    $msg = "Generated the Inventory Custodian Slip '$key' document.";
                     Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateICS($data, $documentType, $fontScale,
-                                       $pageHeight, $pageWidth, $previewToggle);
+                    $this->generateICS(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
-
                 break;
 
             case 'inv_label':
-                $data = $this->getDataPropertyLabel($key, $otherParam);
+                $data = $this->getDataPropertyLabel($key);
                 $data->doc_type = $documentType;
 
                 if ($test == 'true') {
-
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
+                    $msg = "Generated the Property Label '$key' tag.";
+                    Auth::user()->log($request, $msg);
                 } else {
                     $pageHeight = 53.27;
                     $pageWidth = 103.76125;
-                    $this->generatePropertyLabel($data, $documentType, $fontScale,
-                                                 $pageHeight, $pageWidth, $previewToggle);
+                    $this->generatePropertyLabel(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
-
                 break;
 
             default:
@@ -522,153 +551,157 @@ class PrintController extends Controller
         return $groupNumbers;
     }
 
-    private function getDataPropertyLabel($inventoryID, $empID) {
-        $dataLabel = DB::table('inventory_stock_issues as issued')
-                  ->join('inventory_stocks as stock', 'stock.id', '=', 'issued.inventory_id')
-                  ->join('purchase_job_order_items as po', 'po.item_id', '=', 'stock.po_item_id')
-                  ->where('issued.received_by', $empID)
-                  //->where('issued.inventory_id', $inventoryID)
-                  ->where('stock.inventory_no', $inventoryID)
-                  ->get();
+    private function getDataPropertyLabel($invStockIssueID) {
+        $invStockIssueData = InventoryStockIssue::find($invStockIssueID);
+        $invStockIssueItemData = InventoryStockIssueItem::with('invstockitems')
+                                                    ->where('inv_stock_issue_id', $invStockIssueID)
+                                                    ->get();
+        $data = (object) [
+            'inv_stock_issue' => $invStockIssueData,
+            'inv_stock_issue_item' => $invStockIssueItemData
+        ];
+
+        $instanceSignatory = new Signatory;
+        $sigIssuedBy = $invStockIssueData->sig_received_from ?
+                       $invStockIssueData->sig_received_from :
+                       $invStockIssueData->sig_issued_by;
+        $sigReceivedBy = $invStockIssueData->sig_received_by;
+        $certifiedBy = $instanceSignatory->getSignatory($sigIssuedBy)->name;
+        $issuedTo = Auth::user()->getEmployee($sigReceivedBy)->name;
         $finalData = [];
+        $multiplier = 1;
 
-        foreach ($dataLabel as $data) {
-            $propertyNo = $data->property_no;
-            $issuedBy = $this->getSignatory($data->issued_by);
-            $receivedBy = $this->getEmployee($empID);
-            $acquiredDate = "";
+        foreach ($invStockIssueItemData as $item) {
+            $propertyNos = unserialize($item->prop_stock_no);
+            $dateAcquired = $item->date_issued;
+            $description = $item->invstockitems->description;
 
-            if (!empty($data->date_issued)) {
-                $acquiredDate = new DateTime($data->date_issued);
-                $acquiredDate = $acquiredDate->format('F j, Y');
+            if (!empty($dateAcquired)) {
+                $dateAcquired = new DateTime($dateAcquired);
+                $dateAcquired = $dateAcquired->format('F j, Y');
             }
 
-            /*
-            if (strpos($data->item_description, "\n") !== FALSE) {
-                $searchStr = ["\r\n", "\n", "\r"];
-                $data->item_description = str_replace($searchStr, '<br>', $data->item_description);
-            }*/
+            foreach ($propertyNos as $propertyNo) {
+                if (empty($propertyNo)) {
+                    $propertyNo = 'N/A';
+                }
 
-            $itemDescription = $data->item_description;
-            $multiplier = 85 / 85;
+                $data1 = [
+                    [
+                        'aligns' => ['L', 'L'],
+                        'widths' => [$multiplier * 18,
+                                    $multiplier * 67],
+                        'font-styles' => ['', ''],
+                        'type' => 'row-data',
+                        'data' => [[' Property No.:', $propertyNo]]
+                    ]
+                ];
+                $data2 = [
+                    [
+                        'aligns' => ['L', 'L'],
+                        'widths' => [$multiplier * 18,
+                                    $multiplier * 67],
+                        'font-styles' => ['', ''],
+                        'type' => 'row-data',
+                        'data' => [[' Description:', $description]]
+                    ]
+                ];
+                $data3 = [
+                    [
+                        'aligns' => ['L', 'L', 'L', 'L'],
+                        'widths' => [$multiplier * 18,
+                                    $multiplier * 21,
+                                    $multiplier * 12,
+                                    $multiplier * 34],
+                        'font-styles' => ['', 'B', '', 'B'],
+                        'type' => 'row-data',
+                        'data' => [[' Date Acquired:', $dateAcquired, 'Issued To:', $issuedTo]]
+                    ]
+                ];
+                $data4 = [
+                    [
+                        'aligns' => ['L', 'L'],
+                        'widths' => [$multiplier * 18,
+                                    $multiplier * 67],
+                        'font-styles' => ['', 'B'],
+                        'type' => 'row-data',
+                        'data' => [[' Certified By:', $certifiedBy],
+                                [' Verified By:', '______________________________________________________']]
+                    ]
+                ];
 
-            if (empty($data->property_no)) {
-                $propertyNo = 'N/A';
+                $finalData[] = (object) [
+                    'data1' => $data1,
+                    'data2' => $data2,
+                    'data3' => $data3,
+                    'data4' => $data4,
+                    'property_no' => $propertyNo,
+                    'stock_id' => $invStockIssueID,
+                    'received_by' => $issuedTo
+                ];
             }
-
-            if (!empty($data->serial_no)) {
-                $itemDescription = substr($data->item_description, 0, 178) . "... \n[S/N: " . $data->serial_no . "]";
-            } else {
-                $itemDescription = substr($data->item_description, 0, 185) . "...";
-            }
-
-            $data1 = [
-                [
-                    'aligns' => ['L', 'L'],
-                    'widths' => [$multiplier * 18,
-                                $multiplier * 67],
-                    'font-styles' => ['', ''],
-                    'type' => 'row-data',
-                    'data' => [[' Property No.:', $propertyNo]]
-                ]
-            ];
-            $data2 = [
-                [
-                    'aligns' => ['L', 'L'],
-                    'widths' => [$multiplier * 18,
-                                $multiplier * 67],
-                    'font-styles' => ['', ''],
-                    'type' => 'row-data',
-                    'data' => [[' Description:', $itemDescription]]
-                ]
-            ];
-            $data3 = [
-                [
-                    'aligns' => ['L', 'L', 'L', 'L'],
-                    'widths' => [$multiplier * 18,
-                                $multiplier * 21,
-                                $multiplier * 12,
-                                $multiplier * 34],
-                    'font-styles' => ['', 'B', '', 'B'],
-                    'type' => 'row-data',
-                    'data' => [[' Date Acquired:', $acquiredDate, 'Issued To:', $receivedBy->name]]
-                ]
-            ];
-            $data4 = [
-                [
-                    'aligns' => ['L', 'L'],
-                    'widths' => [$multiplier * 18,
-                                $multiplier * 67],
-                    'font-styles' => ['', 'B'],
-                    'type' => 'row-data',
-                    'data' => [[' Certified By:', $issuedBy->name],
-                            [' Verified By:', '______________________________________________________']]
-                ]
-            ];
-
-            $finalData[] = (object)['stock' => $data,
-                                    'data1' => $data1,
-                                    'data2' => $data2,
-                                    'data3' => $data3,
-                                    'data4' => $data4,
-                                    'property_no' => $propertyNo,
-                                    'stock_id' => $data->id,
-                                    'received_by' => $receivedBy->name];
         }
 
-        return $finalData;
+        return (object) ['label_data' => $finalData];
     }
 
-    private function getDataICS($inventoryNo, $empID) {
-        $tableData = [];
-        $stockIssue = DB::table('inventory_stock_issues as stocks')
-                        ->select('stocks.quantity', 'unit.unit', 'po.unit_cost','po.total_cost',
-                                'po.item_description', 'stocks.date_issued', 'inv.property_no',
-                                'inv.est_useful_life', 'stocks.issued_by', 'inv.id as inv_id')
-                        ->join('inventory_stocks as inv', 'inv.id', '=', 'stocks.inventory_id')
-                        ->join('purchase_job_order_items as po', 'po.item_id', '=', 'inv.po_item_id')
-                        ->join('item_unit_issues as unit', 'unit.id', '=', 'po.unit_issue')
-                        ->where('inv.inventory_no', $inventoryNo)
-                        ->where('stocks.received_by', $empID)
-                        ->orderBy('inv.id')
-                        ->distinct()
-                        ->get();
-        $po = DB::table('purchase_job_orders as po')
-                ->select('po.po_no', 'po.date_po', 'bid.company_name')
-                ->join('inventory_stocks as inv', 'inv.po_no', '=', 'po.po_no')
-                ->join('suppliers as bid', 'bid.id', '=', 'po.awarded_to')
-                ->where('inv.inventory_no', $inventoryNo)
-                ->first();
+    private function getDataICS($invStockIssueID) {
+        $invStockIssueData = InventoryStockIssue::with('invstocks')
+                                                ->find($invStockIssueID);
+        $invStockIssueItemData = InventoryStockIssueItem::with('invstockitems')
+                                                    ->where('inv_stock_issue_id', $invStockIssueID)
+                                                    ->get();
 
-        foreach ($stockIssue as $item) {
+        $entityName = $invStockIssueData->invstocks->entity_name;
+        $fundCluster = $invStockIssueData->invstocks->fund_cluster;
+        $inventoryNo = $invStockIssueData->invstocks->inventory_no;
+        $poNo = $invStockIssueData->invstocks->po_no;
+        $datePO = $invStockIssueData->invstocks->date_po;
+        $supplierData = Supplier::find($invStockIssueData->invstocks->supplier);
+        $supplier = $supplierData->company_name;
+
+        $instanceSignatory = new Signatory;
+        $sigReceivedFrom = $invStockIssueData->sig_received_from;
+        $sigReceivedBy = $invStockIssueData->sig_received_by;
+        $sigReceivedFromName = $instanceSignatory->getSignatory($sigReceivedFrom)->name;
+        $sigReceivedFromPosition = $instanceSignatory->getSignatory($sigReceivedFrom)->ics_designation;
+        $sigReceivedByName = Auth::user()->getEmployee($sigReceivedBy)->name;
+        $sigReceivedByPosition = Auth::user()->getEmployee($sigReceivedBy)->position;
+
+        $multiplier = 100 / 90;
+        $tableData = [];
+
+        foreach ($invStockIssueItemData as $item) {
+            $unitData = ItemUnitIssue::find($item->invstockitems->unit_issue);
+            $propertyNo = implode(', ', unserialize($item->prop_stock_no));
+            $unitName = $unitData->unit_name;
+
             if (!empty($item->date_issued)) {
                 $item->date_issued = new DateTime($item->date_issued);
                 $item->date_issued = $item->date_issued->format('F j, Y');
             }
 
-            if (strpos($item->item_description, "\n") !== FALSE) {
+            if (strpos($item->invstockitems->description, "\n") !== FALSE) {
                 $searchStr = ["\r\n", "\n", "\r"];
-                $item->item_description = str_replace($searchStr, '<br>', $item->item_description);
+                $item->description = str_replace($searchStr, '<br>', $item->description);
             }
 
-            $issuedBy = $item->issued_by;
-            $tableData[] = [$item->quantity,
-                            $item->unit_name,
-                            number_format($item->unit_cost, 2),
-                            number_format($item->total_cost, 2),
-                            $item->item_description,
-                            $item->date_issued,
-                            $item->property_no,
-                            $item->est_useful_life];
+            $tableData[] = [
+                $item->quantity,
+                $unitName,
+                number_format($item->invstockitems->amount/$item->quantity, 2),
+                number_format($item->invstockitems->amount, 2),
+                $item->invstockitems->description,
+                $item->date_issued,
+                $propertyNo,
+                $item->est_useful_life
+            ];
         }
 
         for ($i = 0; $i <= 3; $i++) {
             $tableData[] = ['', '', '', '', '', '', '', ''];
         }
 
-        $issuedBy = $this->getSignatory($issuedBy);
-        $receivedBy = $this->getEmployee($empID);
-        $multiplier = 100 / 90;
         $data = [
             [
                 'col-span' => true,
@@ -703,40 +736,69 @@ class PrintController extends Controller
             ]
         ];
 
-
-
-        return (object)['inventory_no' => $inventoryNo,
-                        'po' => $po,
-                        'table_data' => $data,
-                        'issued_by' => $issuedBy,
-                        'received_by' => $receivedBy];
+        return (object)[
+            'fund_cluster' => $fundCluster,
+            'entity_name' => $entityName,
+            'inventory_no' => $inventoryNo,
+            'po_no' => $poNo,
+            'date_po' => $datePO,
+            'supplier' => $supplier,
+            'table_data' => $data,
+            'received_from_name' => $sigReceivedFromName,
+            'received_from_position' => $sigReceivedFromPosition,
+            'received_by_name' => $sigReceivedByName,
+            'received_by_position' => $sigReceivedByPosition,
+        ];
     }
 
-    private function getDataRIS($inventoryNo, $empID) {
-        $tableData = [];
-        $stockIssue = DB::table('inventory_stock_issues as stocks')
-                        ->select('po.stock_no', 'unit.unit', 'po.item_description', 'po.quantity as po_qnty',
-                                 'inv.stock_available', 'stocks.quantity', 'stocks.issued_remarks',
-                                 'stocks.issued_by', 'stocks.approved_by', 'inv.id as inv_id')
-                        ->join('inventory_stocks as inv', 'inv.id', '=', 'stocks.inventory_id')
-                        ->join('purchase_job_order_items as po', 'po.item_id', '=', 'inv.po_item_id')
-                        ->join('item_unit_issues as unit', 'unit.id', '=', 'po.unit_issue')
-                        ->where('inv.inventory_no', $inventoryNo)
-                        ->where('stocks.received_by', $empID)
-                        ->orderBy('inv.id')
-                        ->distinct()
-                        ->get();
-        $po = DB::table('purchase_job_orders as po')
-                ->select('div.division', 'inv.office', 'inv.requested_by', 'inv.purpose')
-                ->join('inventory_stocks as inv', 'inv.po_no', '=', 'po.po_no')
-                ->join('suppliers as bid', 'bid.id', '=', 'po.awarded_to')
-                ->join('emp_divisions as div', 'div.id', '=', 'inv.division_id')
-                ->where('inv.inventory_no', $inventoryNo)
-                ->first();
+    private function getDataRIS($invStockIssueID) {
+        $invStockIssueData = InventoryStockIssue::with('invstocks')
+                                                ->find($invStockIssueID);
+        $invStockIssueItemData = InventoryStockIssueItem::with('invstockitems')
+                                                    ->where('inv_stock_issue_id', $invStockIssueID)
+                                                    ->get();
 
-        foreach ($stockIssue as $item) {
+        $fundCluster = $invStockIssueData->invstocks->fund_cluster;
+        $divisionData = EmpDivision::find($invStockIssueData->invstocks->division);
+        $division = $divisionData->division_name;
+        $office = $invStockIssueData->invstocks->office;
+        $purpose = $invStockIssueData->invstocks->purpose;
+        $inventoryNo = $invStockIssueData->invstocks->inventory_no;
+        $responsibilityCenter = $invStockIssueData->invstocks->responsibility_center;
+
+        $instanceSignatory = new Signatory;
+        $sigIssuedBy = $invStockIssueData->sig_issued_by;
+        $sigReceivedBy = $invStockIssueData->sig_received_by;
+        $sigRequestedBy = $invStockIssueData->sig_requested_by;
+        $sigApprovedBy = $invStockIssueData->sig_approved_by;
+        $sigApprovedByName = $instanceSignatory->getSignatory($sigApprovedBy)->name;
+        $sigApprovedByPosition = $instanceSignatory->getSignatory($sigApprovedBy)->ris_designation;
+        $sigIssuedByName = $instanceSignatory->getSignatory($sigIssuedBy)->name;
+        $sigIssuedByPosition = $instanceSignatory->getSignatory($sigIssuedBy)->ris_designation;
+        $sigRequestedByName = Auth::user()->getEmployee($sigRequestedBy)->name;
+        $sigRequestedByPosition = Auth::user()->getEmployee($sigRequestedBy)->position;
+        $sigReceivedByName = Auth::user()->getEmployee($sigReceivedBy)->name;
+        $sigReceivedByPosition = Auth::user()->getEmployee($sigReceivedBy)->position;
+
+        $multiplier = 100 / 90;
+        $tableData = [];
+
+        foreach ($invStockIssueItemData as $item) {
+            $unitData = ItemUnitIssue::find($item->invstockitems->unit_issue);
+            $propertyNo = implode(', ', unserialize($item->prop_stock_no));
+            $unitName = $unitData->unit_name;
             $yes = "";
             $no = "";
+
+            if (strpos($item->invstockitems->description, "\n") !== FALSE) {
+                $searchStr = ["\r\n", "\n", "\r"];
+                $item->description = str_replace($searchStr, '<br>', $item->description);
+            }
+
+            if (strpos($item->remarks, "\n") !== FALSE) {
+                $searchStr = ["\r\n", "\n", "\r"];
+                $item->remarks = str_replace($searchStr, '<br>', $item->remarks);
+            }
 
             if ($item->stock_available == 'y') {
                 $yes = "x";
@@ -744,37 +806,21 @@ class PrintController extends Controller
                 $no = "x";
             }
 
-            if (strpos($item->item_description, "\n") !== FALSE) {
-                $searchStr = ["\r\n", "\n", "\r"];
-                $item->item_description = str_replace($searchStr, '<br>', $item->item_description);
-            }
-
-            if (strpos($item->issued_remarks, "\n") !== FALSE) {
-                $searchStr = ["\r\n", "\n", "\r"];
-                $item->issued_remarks = str_replace($searchStr, '<br>', $item->issued_remarks);
-            }
-
-            $approvedBy = $item->approved_by;
-            $issuedBy = $item->issued_by;
-            $tableData[] = [$item->stock_no,
-                            $item->unit_name,
-                            $item->item_description,
-                            $item->po_qnty,
-                            $yes,
-                            $no,
-                            $item->quantity,
-                            $item->issued_remarks];
+            $tableData[] = [
+                $propertyNo,
+                $unitName,
+                $item->invstockitems->description,
+                $item->invstockitems->quantity,
+                $yes,
+                $no,
+                $item->quantity,
+                $item->remarks
+            ];
         }
 
         for ($i = 0; $i <= 3; $i++) {
             $tableData[] = ['', '', '', '', '', '', '', ''];
         }
-
-        $multiplier = 100 / 90;
-        $requestedBy = $this->getEmployee($po->requested_by);
-        $approvedBy = $this->getSignatory($approvedBy);
-        $issuedBy = $this->getSignatory($issuedBy);
-        $receivedBy = $this->getEmployee($empID);
 
         $data = [
             [
@@ -815,68 +861,80 @@ class PrintController extends Controller
                 'font-styles' => ['', '', '', '', ''],
                 'type' => 'row-data',
                 'data' => [['Signature:<br><br> ', '', '', '', ''],
-                           ['Printed Name:', $requestedBy->name, $approvedBy->name,
-                            $issuedBy->name, $receivedBy->name],
-                           ['Designations:', $requestedBy->position, $approvedBy->position,
-                            $issuedBy->position, $receivedBy->position],
+                           ['Printed Name:', $sigRequestedByName, $sigApprovedByName,
+                            $sigIssuedByName, $sigReceivedByName],
+                           ['Designations:', $sigRequestedByPosition, $sigApprovedByPosition,
+                            $sigIssuedByPosition, $sigReceivedByPosition],
                            ['Date:', '', '', '', '']]
             ]
         ];
 
-        return (object)['inventory_no' => $inventoryNo,
-                        'table_data' => $data,
-                        'footer_data' => $dataFooter,
-                        'po' => $po];
+        return (object)[
+            'fund_cluster' => $fundCluster,
+            'inventory_no' => $inventoryNo,
+            'office' => $office,
+            'purpose' => $purpose,
+            'division' => $division,
+            'responsibility_center' => $responsibilityCenter,
+            'table_data' => $data,
+            'footer_data' => $dataFooter
+        ];
     }
 
-    private function getDataPAR($inventoryNo, $empID) {
-        $tableData = [];
-        $stockIssue = DB::table('inventory_stock_issues as stocks')
-                        ->select('stocks.quantity', 'unit.unit', 'po.item_description',
-                                 'stocks.date_issued', 'po.total_cost', 'inv.property_no',
-                                 'stocks.issued_by', 'inv.id as inv_id')
-                        ->join('inventory_stocks as inv', 'inv.id', '=', 'stocks.inventory_id')
-                        ->join('purchase_job_order_items as po', 'po.item_id', '=', 'inv.po_item_id')
-                        ->join('item_unit_issues as unit', 'unit.id', '=', 'po.unit_issue')
-                        ->where('inv.inventory_no', $inventoryNo)
-                        ->where('stocks.received_by', $empID)
-                        ->orderBy('inv.id')
-                        ->distinct()
-                        ->get();
-        $po = DB::table('purchase_job_orders as po')
-                ->select('po.po_no', 'po.date_po', 'bid.company_name')
-                ->join('inventory_stocks as inv', 'inv.po_no', '=', 'po.po_no')
-                ->join('suppliers as bid', 'bid.id', '=', 'po.awarded_to')
-                ->where('inv.inventory_no', $inventoryNo)
-                ->first();
+    private function getDataPAR($invStockIssueID) {
+        $invStockIssueData = InventoryStockIssue::with('invstocks')
+                                                ->find($invStockIssueID);
+        $invStockIssueItemData = InventoryStockIssueItem::with('invstockitems')
+                                                    ->where('inv_stock_issue_id', $invStockIssueID)
+                                                    ->get();
 
-        foreach ($stockIssue as $item) {
+        $fundCluster = $invStockIssueData->invstocks->fund_cluster;
+        $inventoryNo = $invStockIssueData->invstocks->inventory_no;
+        $poNo = $invStockIssueData->invstocks->po_no;
+        $datePO = $invStockIssueData->invstocks->date_po;
+        $supplierData = Supplier::find($invStockIssueData->invstocks->supplier);
+        $supplier = $supplierData->company_name;
+
+        $instanceSignatory = new Signatory;
+        $sigIssuedBy = $invStockIssueData->sig_issued_by;
+        $sigReceivedBy = $invStockIssueData->sig_received_by;
+        $sigIssuedByName = $instanceSignatory->getSignatory($sigIssuedBy)->name;
+        $sigIssuedByPosition = $instanceSignatory->getSignatory($sigIssuedBy)->par_designation;
+        $sigReceivedByName = Auth::user()->getEmployee($sigReceivedBy)->name;
+        $sigReceivedByPosition = Auth::user()->getEmployee($sigReceivedBy)->position;
+
+        $multiplier = 100 / 90;
+        $tableData = [];
+
+        foreach ($invStockIssueItemData as $item) {
+            $unitData = ItemUnitIssue::find($item->invstockitems->unit_issue);
+            $propertyNo = implode(', ', unserialize($item->prop_stock_no));
+            $unitName = $unitData->unit_name;
+
             if (!empty($item->date_issued)) {
                 $item->date_issued = new DateTime($item->date_issued);
                 $item->date_issued = $item->date_issued->format('F j, Y');
             }
 
-            if (strpos($item->item_description, "\n") !== FALSE) {
+            if (strpos($item->invstockitems->description, "\n") !== FALSE) {
                 $searchStr = ["\r\n", "\n", "\r"];
-                $item->item_description = str_replace($searchStr, '<br>', $item->item_description);
+                $item->description = str_replace($searchStr, '<br>', $item->description);
             }
 
-            $issuedBy = $item->issued_by;
-            $tableData[] = [$item->quantity,
-                            $item->unit_name,
-                            $item->item_description,
-                            $item->property_no,
-                            $item->date_issued,
-                            number_format($item->total_cost, 2)];
+            $tableData[] = [
+                $item->quantity,
+                $unitName,
+                $item->invstockitems->description,
+                $propertyNo,
+                $item->date_issued,
+                number_format($item->invstockitems->amount, 2)
+            ];
         }
 
         for ($i = 0; $i <= 3; $i++) {
             $tableData[] = ['', '', '', '', '', ''];
         }
 
-        $multiplier = 100 / 90;
-        $issuedBy = $this->getSignatory($issuedBy);
-        $receivedBy = $this->getEmployee($empID);
         $data = [
             [
                 'aligns' => ['C', 'C', 'C', 'C', 'C', 'C'],
@@ -897,11 +955,18 @@ class PrintController extends Controller
             ]
         ];
 
-        return (object)['inventory_no' => $inventoryNo,
-                        'po' => $po,
-                        'table_data' => $data,
-                        'issued_by' => $issuedBy,
-                        'received_by' => $receivedBy];
+        return (object)[
+            'fund_cluster' => $fundCluster,
+            'inventory_no' => $inventoryNo,
+            'po_no' => $poNo,
+            'date_po' => $datePO,
+            'supplier' => $supplier,
+            'table_data' => $data,
+            'issued_by_name' => $sigIssuedByName,
+            'issued_by_position' => $sigIssuedByPosition,
+            'received_by_name' => $sigReceivedByName,
+            'received_by_position' => $sigReceivedByPosition,
+        ];
     }
 
     private function getDataLDDAP($id) {
@@ -2332,7 +2397,7 @@ class PrintController extends Controller
     private function generateDV($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new DocDisbursementVoucher('P', 'mm', $pageSize);
+        $pdf = new DocDisbursementVoucher('P', $pageUnit, $pageSize);
         $pdf->setHeaderLR(false, true);
         $docCode = ($data->dv->module_class == 3) ? 'FM-FAS-BUD F12': 'FM-FAS-ACCTG F01';
         $docRev = ($data->dv->module_class == 3) ? 'Revision 1': 'Revision 0';
@@ -2362,7 +2427,7 @@ class PrintController extends Controller
     private function generateLR($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new DocLiquidationReport('P', 'mm', $pageSize);
+        $pdf = new DocLiquidationReport('P', $pageUnit, $pageSize);
         $docCode = "";
         $docRev = "";
         $docRevDate = "";
@@ -2420,7 +2485,7 @@ class PrintController extends Controller
     private function generateLDDAP($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new DocListDueDemandable('P', 'mm', $pageSize);
+        $pdf = new DocListDueDemandable('P', $pageUnit, $pageSize);
         $docCode = "";
         $docRev = "";
         $docRevDate = "";
@@ -2491,10 +2556,10 @@ class PrintController extends Controller
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generatePAR($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
+    private function generatePAR($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new PDF('P', 'mm', $pageSize);
+        $pdf = new DocPropertyAcknowledgement('P', $pageUnit, $pageSize);
         $docCode = "FM-FAS-PUR F10";
         $docRev = "Revision 1";
         $docRevDate = "02-28-18";
@@ -2504,28 +2569,21 @@ class PrintController extends Controller
         $docSubject = "Property Acknowledgement Receipt";
         $docKeywords = "PAR, par, property, acknowledgement, receipt, property acknowledgement receipt";
 
-        $poDate = "";
-
-        if (!empty($data->po->date_po)) {
-            $poDate = new DateTime($data->po->date_po);
-            $poDate = $poDate->format('F j, Y');
-        }
-
         //Set document information
         $this->setDocumentInfo($pdf, $docCode, $docRev, $docRevDate, $docTitle,
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        include app_path() . "/Classes/DocumentPDF/Documents/doc_property_acknowledgement.php";
+        $pdf->printPAR($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateRIS($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateRIS($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new PDF('P', 'mm', $pageSize);
+        $pdf = new DocRequisitionIssueSlip('P', $pageUnit, $pageSize);
         $docCode = "FM-FAS-PUR F11";
         $docRev = "Revision 1";
         $docRevDate = "02-28-18";
@@ -2540,16 +2598,16 @@ class PrintController extends Controller
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        include app_path() . "/Classes/DocumentPDF/Documents/doc_requisition_issue_slip.php";
+        $pdf->printRIS($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generateICS($data, $documentType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
+    private function generateICS($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new PDF('P', 'mm', $pageSize);
+        $pdf = new DocInventoryCustodian('P', $pageUnit, $pageSize);
         $docCode = "FM-FAS-PUR F16";
         $docRev = "Revision 1";
         $docRevDate = "02-28-18";
@@ -2571,15 +2629,15 @@ class PrintController extends Controller
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        include app_path() . "/Classes/DocumentPDF/Documents/doc_inventory_custodian.php";
+        $pdf->printICS($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);
     }
 
-    private function generatePropertyLabel($_data, $docType, $fontScale, $pageHeight, $pageWidth, $previewToggle) {
+    private function generatePropertyLabel($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new PDF('L', 'mm', $pageSize);
+        $pdf = new DocPropertyLabel('L', $pageUnit, $pageSize);
         $pdf->setHeaderLR(false, false);
         $docCode = "";
         $docRev = "";
@@ -2595,7 +2653,7 @@ class PrintController extends Controller
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        include app_path() . "/Classes/DocumentPDF/Documents/doc_property_label.php";
+        $pdf->printPropertyLabel($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);

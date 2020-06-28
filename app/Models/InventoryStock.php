@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
+use Kyslik\ColumnSortable\Sortable;
 
 class InventoryStock extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Sortable;
 
     /**
      * The table associated with the model.
@@ -61,4 +62,20 @@ class InventoryStock extends Model
     public function stockitems() {
         return $this->hasMany('App\Models\InventoryStockItem', 'inv_stock_id', 'id')->orderBy('item_no');
     }
+
+    public function supplier() {
+        return $this->hasOne('App\Models\Supplier', 'id', 'supplier');
+    }
+
+    public function procstatus() {
+        return $this->hasOne('App\Models\ProcurementStatus', 'id', 'status');
+    }
+
+    public function inventoryclass() {
+        return $this->hasOne('App\Models\InventoryClassification', 'id', 'inventory_classification');
+    }
+
+    public $sortable = [
+        'inventory_no',
+    ];
 }

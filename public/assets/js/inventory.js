@@ -1,78 +1,13 @@
 $(function() {
-	function inputValidation(withError) {
-		var errorCount = 0;
+    const template = '<div class="tooltip md-tooltip">' +
+                     '<div class="tooltip-arrow md-arrow"></div>' +
+                     '<div class="tooltip-inner md-inner stylish-color"></div></div>';
 
-        $(".required").each(function() {
-			var inputField = $(this).val().replace(/^\s+|\s+$/g, "").length;
-
-			if (inputField == 0) {
-				$(this).addClass("input-error-highlighter");
-				errorCount++;
-			} else {
-				$("input[name='quantity']").each(function() {
-					if ($(this).val() == "0") {
-			            $(this).addClass("input-error-highlighter");
-			            errorCount++;
-			        }
-				});
-
-				$(this).removeClass("input-error-highlighter");
-			}
-		});
-
-		if (errorCount == 0) {
-			withError = false;
-		} else {
-			withError = true;
-		}
-
-		return withError;
-	}
-
-	function showPrint(_key, _documentType, _otherParam = "") {
-    	var paperSize = "";
-    	var fontSize = 0;
-    	var url = "";
-    	var dateFrom, dateTo;
-    	var otherParam = _otherParam;
-
-     	documentType = _documentType;
-    	key = _key;
-
-		$('#other_param').val(_otherParam);
-
-    	if (_documentType == 'label') {
-    		$('#paper-size').val(2);
-    		$('#print-title').html('Generate Property Label');
-    	}
-
-    	paperSize = $('#paper-size').val();
-
-    	url = '../print/' + key + '?document_type=' + documentType + '&preview_toggle=preview' +
-    		  '&font_scale=' + fontSize + '&paper_size=' + paperSize + '&test=true' + '&other_param=' + otherParam;
-
-    	$.ajax({
-		    url: url,
-		    dataType: 'html',
-		    success: function(data) {
-		    	url = '../print/' + key + '?document_type=' + documentType + '&preview_toggle=preview' +
-    		  		  '&font_scale=' + fontSize + '&paper_size=' + paperSize + '&test=false'  + '&other_param=' + otherParam;
-
-		    	$('#modal-print-content iframe').attr('src', url);
-		    	$("#print-modal").modal({keyboard: false, backdrop: 'static'})
-							.on('shown.bs.modal', function() {
-
-					   		}).on('hidden.bs.modal', function() {
-						        $('#modal-print-content iframe').attr('src', '');
-						    });
-		    },
-		    error: function(xhr, error){
-		        if (documentType == 'label') {
-		        	alert('There is an error encountered on the generation of the Property Label.');
-		        }
-		    }
-		});
-	}
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
 
 	function initializeQtyInput() {
 		$('.quantity').each(function() {
@@ -93,15 +28,136 @@ $(function() {
 			    }
 			});
 		});
-	}
+    }
 
-	$.fn.createUpdateDoc = function() {
-		var withError = inputValidation(false);
+    $.fn.showCreateIssueItem = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-create').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $(this).slideToggle(500);
+            initializeQtyInput();
+        });
+        $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
+						     .on('shown.bs.modal', function() {
+            $('#create-title').html('Create Issue Item / Property');
+		}).on('hidden.bs.modal', function() {
+		    $('#modal-body-create').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.store = function() {
+        const withError = inputValidation(false);
+
+		if (!withError) {
+			$('#form-store').submit();
+        }
+    }
+
+    $.fn.showEdit = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-edit').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $(this).slideToggle(500);
+        });
+        $("#modal-edit").modal({keyboard: false, backdrop: 'static'})
+						   .on('shown.bs.modal', function() {
+            $('#edit-title').html('Update Issued Items');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-edit').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.showUpdateIssueItem = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-edit').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $(this).slideToggle(500);
+            initializeQtyInput();
+        });
+        $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
+						     .on('shown.bs.modal', function() {
+            $('#edit-title').html('Update Issue Item / Property');
+		}).on('hidden.bs.modal', function() {
+		    $('#modal-body-edit').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.update = function() {
+        const withError = inputValidation(false);
 
 		if (!withError) {
 			$('#form-update').submit();
 		}
-	}
+    }
+
+    $.fn.deleteRow = function(row) {
+        if (confirm('Are you sure you want to delete this row?')) {
+            $(row).fadeOut(300, function() {
+                $(this).remove();
+            });
+		}
+    }
+
+    $.fn.showRecipients = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-show').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $(this).slideToggle(500);
+        });
+        $("#modal-show").modal({keyboard: false, backdrop: 'static'})
+						   .on('shown.bs.modal', function() {
+            $('#show-title').html('Recipients');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-show').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.showDeleteIssue = function(url, name) {
+		$('#modal-body-delete').html(`Are you sure you want to delete ${name}'s `+
+                                     `issued items?`);
+        $("#modal-delete").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#delete-title').html('Delete Recipient');
+            $('#form-delete').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-delete-body').html('');
+             $('#form-delete').attr('action', '#');
+		});
+    }
+
+    $.fn.delete = function() {
+        $('#form-delete').submit();
+    }
+
+    $.fn.showIssue = function(url, name) {
+        $('#modal-body-issue').html(`Are you sure you want to set this '${name}'
+                                      to 'Issued'?`);
+        $("#modal-issue").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#issue-title').html('Set to Issued');
+            $('#form-issue').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-issue-body').html('');
+             $('#form-issue').attr('action', '#');
+		});
+    }
+
+    $.fn.issue = function() {
+        $('#form-issue').submit();
+    }
+
+
+
+
+
+
+
+
+
+    /*
 
 	$.fn.showCreate = function(classification) {
 		$('#modal-body-create').load('stocks/show-create/' + classification);
@@ -193,5 +249,9 @@ $(function() {
 		if (confirm("Set this " + invNo + " to 'ISSUED'?")) {
 			$('#form-validation').attr('action', 'stocks/set-issued/' + invNo).submit();
 		}
-	}
+    }*/
+
+    $('.material-tooltip-main').tooltip({
+        template: template
+    });
 });

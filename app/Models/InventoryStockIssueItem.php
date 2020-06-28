@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Webpatser\Uuid\Uuid;
 
-class InventoryStockIssue extends Model
+class InventoryStockIssueItem extends Model
 {
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'inventory_stock_issues';
+    protected $table = 'inventory_stock_issue_items';
 
      /**
      * The attributes that are mass assignable.
@@ -22,14 +22,20 @@ class InventoryStockIssue extends Model
     protected $fillable = [
         'id',
         'inv_stock_id',
-        'pr_id',
-        'po_id',
-        'sig_requested_by',
-        'sig_approved_by',
-        'sig_issued_by',
-        'sig_received_from',
-        'sig_received_by'
+        'inv_stock_item_id',
+        'inv_stock_issue_id',
+        'prop_stock_no',
+        'quantity',
+        'remarks',
+        'excluded',
     ];
+
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
 
     /**
      * Indicates if the IDs are auto-incrementing.
@@ -49,11 +55,7 @@ class InventoryStockIssue extends Model
          return Uuid::generate();
     }
 
-    public function invstocks() {
-        return $this->belongsTo('App\Models\InventoryStock', 'inv_stock_id', 'id');
-    }
-
-    public function recipient() {
-        return $this->hasOne('App\User', 'id', 'sig_received_by');
+    public function invstockitems() {
+        return $this->belongsTo('App\Models\InventoryStockItem', 'inv_stock_item_id', 'id');
     }
 }

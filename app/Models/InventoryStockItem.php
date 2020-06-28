@@ -59,4 +59,8 @@ class InventoryStockItem extends Model
     public static function generateUuid() {
          return Uuid::generate();
     }
+
+    public function stockissueditems() {
+        return $this->hasMany('App\Models\InventoryStockIssueItem', 'inv_stock_item_id', 'id');
+    }
 }
