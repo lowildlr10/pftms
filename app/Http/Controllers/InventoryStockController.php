@@ -104,7 +104,7 @@ class InventoryStockController extends Controller
         return view('modules.inventory.stock.index', [
             'keyword' => $keyword,
             'list' => $invStocksData,
-            'paper_sizes' => $paperSizes,
+            'paperSizes' => $paperSizes,
             'isAllowedDestroy' => $isAllowedDestroy
         ]);
     }
