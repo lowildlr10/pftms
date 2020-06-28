@@ -21,10 +21,13 @@ class CreateInventoryStockIssueItemsTable extends Migration
             $table->foreign('inv_stock_item_id')->references('id')->on('inventory_stock_items');
             $table->uuid('inv_stock_issue_id')->nullable();
             $table->foreign('inv_stock_issue_id')->references('id')->on('inventory_stock_issues');
+            $table->date('date_issued');
             $table->binary('prop_stock_no')->nullable();
             $table->unsignedInteger('quantity')->default(0);
+            $table->string('est_useful_life')->nullable();
+            $table->enum('stock_available', ['y', 'n'])->default('y');
             $table->text('remarks')->nullable();
-            $table->enum('excluded', ['y', 'n'])->default('y');
+            $table->enum('excluded', ['y', 'n'])->default('n');
         });
     }
 
