@@ -9,22 +9,6 @@
         </label>
     </div>
 
-    <div class="md-form">
-        <select class="mdb-select md-form required" searchable="Search here.."
-                name="is_ordinary">
-            <option value="" disabled selected>Choose a value</option>
-            <option value="y" {{ $isOrdinary == 'y' ? 'selected': '' }}>
-                Yes
-            </option>
-            <option value="n" {{ $isOrdinary == 'n' ? 'selected': '' }}>
-                No
-            </option>
-        </select>
-        <label class="mdb-main-label">
-            Is an Ordinary Role? <span class="red-text">*</span>
-        </label>
-    </div>
-
     <span class="d-block text-center">
         <strong class="text-black-50">* MODULE ACCESS *</strong>
         <input type="hidden" name="module_access" id="json-access">
@@ -86,4 +70,99 @@
         @endforeach
     @endif
 
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_developer">
+            <option value="" disabled selected>Choose a value</option>
+            <option value="y" {{ $isDeveloper == 'y' ? 'selected': '' }}>
+                Yes
+            </option>
+            <option value="n" {{ $isDeveloper == 'n' ? 'selected': '' }}>
+                No
+            </option>
+        </select>
+        <label class="mdb-main-label">
+            Is a Developer Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_administrator">
+            <option value="" disabled selected>Choose a value</option>
+            <option value="y" {{ $isAdministrator == 'y' ? 'selected': '' }}>
+                Yes
+            </option>
+            <option value="n" {{ $isAdministrator == 'n' ? 'selected': '' }}>
+                No
+            </option>
+        </select>
+        <label class="mdb-main-label">
+            Is an Administrator Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_accountant">
+            <option value="" disabled selected>Choose a value</option>
+            <option value="y" {{ $isAccountant == 'y' ? 'selected': '' }}>
+                Yes
+            </option>
+            <option value="n" {{ $isAccountant == 'n' ? 'selected': '' }}>
+                No
+            </option>
+        </select>
+        <label class="mdb-main-label">
+            Is an Accountant Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_budget">
+            <option value="" disabled selected>Choose a value</option>
+            <option value="y" {{ $isBudget == 'y' ? 'selected': '' }}>
+                Yes
+            </option>
+            <option value="n" {{ $isBudget == 'n' ? 'selected': '' }}>
+                No
+            </option>
+        </select>
+        <label class="mdb-main-label">
+            Is a Budget Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_property_supply">
+            <option value="" disabled selected>Choose a value</option>
+            <option value="y" {{ $isPropertySupply == 'y' ? 'selected': '' }}>
+                Yes
+            </option>
+            <option value="n" {{ $isPropertySupply == 'n' ? 'selected': '' }}>
+                No
+            </option>
+        </select>
+        <label class="mdb-main-label">
+            Is a Property & Supply Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_ordinary">
+            <option value="" disabled selected>Choose a value</option>
+            <option value="y" {{ $isOrdinary == 'y' ? 'selected': '' }}>
+                Yes
+            </option>
+            <option value="n" {{ $isOrdinary == 'n' ? 'selected': '' }}>
+                No
+            </option>
+        </select>
+        <label class="mdb-main-label">
+            Is an Ordinary Role? <span class="red-text">*</span>
+        </label>
+    </div>
 </form>

@@ -888,6 +888,11 @@ class AccountController extends Controller
         $userRoleData = EmpRole::find($id);
         $role = $userRoleData->role;
         $isOrdinary = $userRoleData->is_ordinary;
+        $isPropertySupply = $userRoleData->is_property_supply;
+        $isBudget = $userRoleData->is_budget;
+        $isAccountant = $userRoleData->is_accountant;
+        $isAdministrator = $userRoleData->is_administrator;
+        $isDeveloper = $userRoleData->is_developer;
         $module = json_decode($userRoleData->module_access);
 
         return view('modules.library.role.update', [
@@ -896,13 +901,23 @@ class AccountController extends Controller
             'moduleAccess' => $module,
             'label' => $this->moduleLabels,
             'modules' => $this->modules,
-            'isOrdinary' => $isOrdinary
+            'isOrdinary' => $isOrdinary,
+            'isPropertySupply' => $isPropertySupply,
+            'isBudget' => $isBudget,
+            'isAccountant' => $isAccountant,
+            'isAdministrator' => $isAdministrator,
+            'isDeveloper' => $isDeveloper,
         ]);
     }
 
     public function storeRole(Request $request) {
         $roleName = $request->role;
         $isOrdinary = $request->is_ordinary;
+        $isPropertySupply = $request->is_property_supply;
+        $isBudget = $request->is_budget;
+        $isAccountant = $request->is_accountant;
+        $isAdministrator = $request->is_administrator;
+        $isDeveloper = $request->is_developer;
         $moduleAccess = $request->module_access;
         $moduleAccess = str_replace("\n", '', $moduleAccess);
         $moduleAccess = trim($moduleAccess);
@@ -913,6 +928,11 @@ class AccountController extends Controller
                 $instanceEmpRole = new EmpRole;
                 $instanceEmpRole->role = $roleName;
                 $instanceEmpRole->is_ordinary = $isOrdinary;
+                $instanceEmpRole->is_property_supply = $isPropertySupply;
+                $instanceEmpRole->is_budget = $isBudget;
+                $instanceEmpRole->is_accountant = $isAccountant;
+                $instanceEmpRole->is_administrator = $isAdministrator;
+                $instanceEmpRole->is_developer = $isDeveloper;
                 $instanceEmpRole->module_access = $moduleAccess;
                 $instanceEmpRole->save();
 
@@ -931,6 +951,11 @@ class AccountController extends Controller
     public function updateRole(Request $request, $id) {
         $roleName = $request->role;
         $isOrdinary = $request->is_ordinary;
+        $isPropertySupply = $request->is_property_supply;
+        $isBudget = $request->is_budget;
+        $isAccountant = $request->is_accountant;
+        $isAdministrator = $request->is_administrator;
+        $isDeveloper = $request->is_developer;
         $moduleAccess = $request->module_access;
         $moduleAccess = str_replace("\n", '', $moduleAccess);
         $moduleAccess = trim($moduleAccess);
@@ -940,6 +965,11 @@ class AccountController extends Controller
             $instanceEmpRole = EmpRole::find($id);
             $instanceEmpRole->role = $roleName;
             $instanceEmpRole->is_ordinary = $isOrdinary;
+            $instanceEmpRole->is_property_supply = $isPropertySupply;
+            $instanceEmpRole->is_budget = $isBudget;
+            $instanceEmpRole->is_accountant = $isAccountant;
+            $instanceEmpRole->is_administrator = $isAdministrator;
+            $instanceEmpRole->is_developer = $isDeveloper;
             $instanceEmpRole->module_access = $moduleAccess;
             $instanceEmpRole->save();
 
