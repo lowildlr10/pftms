@@ -47,6 +47,8 @@ class LiquidationController extends Controller
     public function indexCA(Request $request) {
         $data = $this->getIndexData($request, 'cashadvance');
 
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+
         // Get module access
         $module = 'ca_lr';
         $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
@@ -75,7 +77,8 @@ class LiquidationController extends Controller
             'isAllowedReceive' => $isAllowedReceive,
             'isAllowedReceiveBack'=> $isAllowedReceiveBack,
             'isAllowedORS' => $isAllowedORS,
-            'isAllowedDV' => $isAllowedDV
+            'isAllowedDV' => $isAllowedDV,
+            'roleHasOrdinary' => $roleHasOrdinary
         ]);
     }
 
@@ -96,6 +99,10 @@ class LiquidationController extends Controller
                                            use($empDivisionAccess) {
                 $query->whereIn('division', $empDivisionAccess);
             })->whereNull('deleted_at');
+
+            if ($roleHasOrdinary) {
+                $lrData = $lrData->where('sig_claimant', Auth::user()->id);
+            }
 
             if (!empty($keyword)) {
                 $lrData = $lrData->where(function($qry) use ($keyword) {

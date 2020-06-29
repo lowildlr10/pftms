@@ -118,7 +118,11 @@
                                     @if (count($list) > 0)
                                         @foreach ($list as $listCtr => $dv)
 
+                                            @if (!$roleHasOrdinary && empty($dv->doc_status->date_issued))
+                                    <tr class="hidden-xs d-none">
+                                            @else
                                     <tr class="hidden-xs">
+                                            @endif
                                         <td align="center">
                                             @if (!empty($dv->procdv['date_disbursed']))
                                         <i class="far fa-money-bill-alt fa-lg text-success material-tooltip-main"

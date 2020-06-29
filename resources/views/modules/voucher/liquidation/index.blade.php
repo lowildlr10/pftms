@@ -83,7 +83,11 @@
 
                                         @if (count($list) > 0)
                                             @foreach ($list as $listCtr => $lr)
+                                                @if (!$roleHasOrdinary && empty($lr->doc_status->date_issued))
+                                        <tr class="hidden-xs d-none">
+                                                @else
                                         <tr class="hidden-xs">
+                                                @endif
                                             <td align="center">
                                                 @if (!empty($lr->date_liquidated))
                                                 <i class="fas fa-file-signature fa-lg green-text material-tooltip-main"

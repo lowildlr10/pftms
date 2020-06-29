@@ -46,6 +46,8 @@ class DisbursementVoucherController extends Controller
     public function indexProc(Request $request) {
         $data = $this->getIndexData($request, 'procurement');
 
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+
         // Get module access
         $module = 'proc_dv';
         $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
@@ -68,12 +70,15 @@ class DisbursementVoucherController extends Controller
             'isAllowedReceive' => $isAllowedReceive,
             'isAllowedReceiveBack'=> $isAllowedReceiveBack,
             'isAllowedIAR' => $isAllowedIAR,
-            'isAllowedLDDAP' => $isAllowedLDDAP
+            'isAllowedLDDAP' => $isAllowedLDDAP,
+            'roleHasOrdinary' => $roleHasOrdinary
         ]);
     }
 
     public function indexCA(Request $request) {
         $data = $this->getIndexData($request, 'cashadvance');
+
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
 
         // Get module access
         $module = 'ca_dv';
@@ -107,7 +112,8 @@ class DisbursementVoucherController extends Controller
             'isAllowedPayment' => $isAllowedPayment,
             'isAllowedLDDAP' => $isAllowedLDDAP,
             'isAllowedORS' => $isAllowedORS,
-            'isAllowedLR' => $isAllowedLR
+            'isAllowedLR' => $isAllowedLR,
+            'roleHasOrdinary' => $roleHasOrdinary
         ]);
     }
 
@@ -167,6 +173,10 @@ class DisbursementVoucherController extends Controller
                                            use($empDivisionAccess) {
                 $query->whereIn('division', $empDivisionAccess);
             })->whereNull('deleted_at')->where('module_class', 2);
+
+            if ($roleHasOrdinary) {
+                $dvData = $dvData->where('payee', Auth::user()->id);
+            }
 
             if (!empty($keyword)) {
                 $dvData = $dvData->where(function($qry) use ($keyword) {

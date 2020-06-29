@@ -45,6 +45,8 @@ class ObligationRequestStatusController extends Controller
     public function indexProc(Request $request) {
         $data = $this->getIndexData($request, 'procurement');
 
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+
         // Get module access
         $module = 'proc_ors_burs';
         $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
@@ -66,11 +68,14 @@ class ObligationRequestStatusController extends Controller
             'isAllowedReceive' => $isAllowedReceive,
             'isAllowedReceiveBack'=> $isAllowedReceiveBack,
             'isAllowedPO' => $isAllowedPO,
+            'roleHasOrdinary' => $roleHasOrdinary
         ]);
     }
 
     public function indexCA(Request $request) {
         $data = $this->getIndexData($request, 'cashadvance');
+
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
 
         // Get module access
         $module = 'ca_ors_burs';
@@ -100,7 +105,8 @@ class ObligationRequestStatusController extends Controller
             'isAllowedReceive' => $isAllowedReceive,
             'isAllowedReceiveBack'=> $isAllowedReceiveBack,
             'isAllowedDV' => $isAllowedDV,
-            'isAllowedDVCreate' => $isAllowedDVCreate
+            'isAllowedDVCreate' => $isAllowedDVCreate,
+            'roleHasOrdinary' => $roleHasOrdinary
         ]);
     }
 
@@ -166,6 +172,10 @@ class ObligationRequestStatusController extends Controller
                                                 use($empDivisionAccess) {
                 $query->whereIn('division', $empDivisionAccess);
             })->whereNull('deleted_at')->where('module_class', 2);
+
+            if ($roleHasOrdinary) {
+                $orsData = $orsData->where('payee', Auth::user()->id);
+            }
 
             if (!empty($keyword)) {
                 $orsData = $orsData->where(function($qry) use ($keyword) {
