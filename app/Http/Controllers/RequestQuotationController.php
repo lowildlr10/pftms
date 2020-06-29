@@ -57,7 +57,8 @@ class RequestQuotationController extends Controller
         $roleHasAdministrator = Auth::user()->hasOrdinaryRole();
         $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $empDivisionAccess = Auth::user()->getDivisionAccess();
+        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
+                             [Auth::user()->division];
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
@@ -69,8 +70,12 @@ class RequestQuotationController extends Controller
             $query->whereNotNull('id');
         });
 
-        if ($roleHasOrdinary && !$roleHasDeveloper && !$roleHasBudget && !$roleHasPropertySupply ) {
-            $rfqData = $rfqData->where('requested_by', Auth::user()->id);
+        if ($roleHasOrdinary) {
+            if ($roleHasDeveloper || $roleHasAccountant ||
+                $roleHasBudget || $roleHasPropertySupply) {
+            } else {
+                $rfqData = $rfqData->where('requested_by', Auth::user()->id);
+            }
         }
 
         if (!empty($keyword)) {
@@ -129,7 +134,16 @@ class RequestQuotationController extends Controller
         $canvassedBy = $rfqData->canvassed_by;
         $prItemData = PurchaseRequestItem::where('pr_id', $prID)->get();
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
-        $users = User::where('is_active', 'y')
+
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
+                             [Auth::user()->division];
+        $users = $roleHasOrdinary ?
+                User::where('id', Auth::user()->id)
+                    ->orderBy('firstname')
+                    ->get() :
+                User::where('is_active', 'y')
+                    ->whereIn('division', $empDivisionAccess)
                     ->orderBy('firstname')->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))

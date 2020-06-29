@@ -66,7 +66,8 @@ class PurchaseRequestController extends Controller
         $roleHasAdministrator = Auth::user()->hasOrdinaryRole();
         $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $empDivisionAccess = Auth::user()->getDivisionAccess();
+        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
+                             [Auth::user()->division];
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
@@ -76,9 +77,12 @@ class PurchaseRequestController extends Controller
             $query->whereIn('id', $empDivisionAccess);
         });
 
-        if ($roleHasOrdinary && !$roleHasDeveloper && !$roleHasAccountant &&
-            !$roleHasBudget && !$roleHasPropertySupply) {
-            $prData = $prData->where('requested_by', Auth::user()->id);
+        if ($roleHasOrdinary) {
+            if ($roleHasDeveloper || $roleHasAccountant ||
+                $roleHasBudget || $roleHasPropertySupply) {
+            } else {
+                $prData = $prData->where('requested_by', Auth::user()->id);
+            }
         }
 
         if (!empty($keyword)) {
@@ -489,16 +493,21 @@ class PurchaseRequestController extends Controller
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
         $fundingSources = FundingSource::orderBy('source_name')->get();
+        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
+                             [Auth::user()->division];
         $divisions = $roleHasOrdinary ?
                     EmpDivision::where('id', Auth::user()->division)
                                ->orderBy('division_name')
                                ->get() :
-                     EmpDivision::orderBy('division_name')->get();
+                    EmpDivision::whereIn('id', $empDivisionAccess)
+                               ->orderBy('division_name')
+                               ->get();
         $users = $roleHasOrdinary ?
                 User::where('id', Auth::user()->id)
                     ->orderBy('firstname')
                     ->get() :
                 User::where('is_active', 'y')
+                    ->whereIn('division', $empDivisionAccess)
                     ->orderBy('firstname')->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
@@ -545,16 +554,22 @@ class PurchaseRequestController extends Controller
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
         $fundingSources = FundingSource::orderBy('source_name')->get();
+
+        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
+                             [Auth::user()->division];
         $divisions = $roleHasOrdinary ?
                     EmpDivision::where('id', Auth::user()->division)
                                ->orderBy('division_name')
                                ->get() :
-                     EmpDivision::orderBy('division_name')->get();
+                    EmpDivision::whereIn('id', $empDivisionAccess)
+                               ->orderBy('division_name')
+                               ->get();
         $users = $roleHasOrdinary ?
                 User::where('id', Auth::user()->id)
                     ->orderBy('firstname')
                     ->get() :
                 User::where('is_active', 'y')
+                    ->whereIn('division', $empDivisionAccess)
                     ->orderBy('firstname')->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))

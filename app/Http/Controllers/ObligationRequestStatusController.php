@@ -276,12 +276,21 @@ class ObligationRequestStatusController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showCreate() {
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
+                             [Auth::user()->division];
+        $payees = $roleHasOrdinary ?
+                User::where('id', Auth::user()->id)
+                    ->orderBy('firstname')
+                    ->get() :
+                User::where('is_active', 'y')
+                    ->whereIn('division', $empDivisionAccess)
+                    ->orderBy('firstname')->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
                           ->limit(1)
         ])->where('is_active', 'y')->get();
-        $payees = User::orderBy('firstname')->get();
 
         foreach ($signatories as $sig) {
             $sig->module = json_decode($sig->module);
