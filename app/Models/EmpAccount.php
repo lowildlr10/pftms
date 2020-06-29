@@ -145,6 +145,121 @@ class User extends Authenticatable
         return $divisionAccess;
     }
 
+    public function hasDeveloperRole($userID = '') {
+        if (empty($userID)) {
+            $roles = !empty($this->roles) ? unserialize($this->roles) : [];
+        } else {
+            $userData = $this::find($userID);
+            $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
+        }
+
+        if (empty($roles)) {
+            return true;
+        } else {
+            foreach ($roles as $role) {
+                $roleData = Role::find($role);
+
+                if ($roleData->is_developer == 'n') {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public function hasAdministratorRole($userID = '') {
+        if (empty($userID)) {
+            $roles = !empty($this->roles) ? unserialize($this->roles) : [];
+        } else {
+            $userData = $this::find($userID);
+            $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
+        }
+
+        if (empty($roles)) {
+            return true;
+        } else {
+            foreach ($roles as $role) {
+                $roleData = Role::find($role);
+
+                if ($roleData->is_administrator == 'n') {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public function hasAccountantRole($userID = '') {
+        if (empty($userID)) {
+            $roles = !empty($this->roles) ? unserialize($this->roles) : [];
+        } else {
+            $userData = $this::find($userID);
+            $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
+        }
+
+        if (empty($roles)) {
+            return true;
+        } else {
+            foreach ($roles as $role) {
+                $roleData = Role::find($role);
+
+                if ($roleData->is_accountant == 'n') {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public function hasBudgetRole($userID = '') {
+        if (empty($userID)) {
+            $roles = !empty($this->roles) ? unserialize($this->roles) : [];
+        } else {
+            $userData = $this::find($userID);
+            $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
+        }
+
+        if (empty($roles)) {
+            return true;
+        } else {
+            foreach ($roles as $role) {
+                $roleData = Role::find($role);
+
+                if ($roleData->is_budget == 'n') {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public function hasPropertySupplyRole($userID = '') {
+        if (empty($userID)) {
+            $roles = !empty($this->roles) ? unserialize($this->roles) : [];
+        } else {
+            $userData = $this::find($userID);
+            $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
+        }
+
+        if (empty($roles)) {
+            return true;
+        } else {
+            foreach ($roles as $role) {
+                $roleData = Role::find($role);
+
+                if ($roleData->is_property_supply == 'n') {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public function hasOrdinaryRole($userID = '') {
         if (empty($userID)) {
             $roles = !empty($this->roles) ? unserialize($this->roles) : [];
