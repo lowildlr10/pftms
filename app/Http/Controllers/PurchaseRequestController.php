@@ -60,9 +60,13 @@ class PurchaseRequestController extends Controller
         $isAllowedRFQ = Auth::user()->getModuleAccess('proc_rfq', 'is_allowed');
 
         // User groups
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
+        $roleHasAdministrator = Auth::user()->hasOrdinaryRole();
+        $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
-                             [Auth::user()->division];
+        $empDivisionAccess = Auth::user()->getDivisionAccess();
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
@@ -72,10 +76,9 @@ class PurchaseRequestController extends Controller
             $query->whereIn('id', $empDivisionAccess);
         });
 
-        if ($roleHasOrdinary) {
+        if ($roleHasOrdinary && !$roleHasDeveloper && !$roleHasAccountant &&
+            !$roleHasBudget && !$roleHasPropertySupply) {
             $prData = $prData->where('requested_by', Auth::user()->id);
-        } else {
-            $prData = $prData->orWhere('requested_by', Auth::user()->id);
         }
 
         if (!empty($keyword)) {

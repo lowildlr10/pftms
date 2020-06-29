@@ -51,9 +51,13 @@ class RequestQuotationController extends Controller
         $isAllowedAbstract = Auth::user()->getModuleAccess('proc_abstract', 'is_allowed');
 
         // User groups
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
+        $roleHasAdministrator = Auth::user()->hasOrdinaryRole();
+        $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
-                             [Auth::user()->division];
+        $empDivisionAccess = Auth::user()->getDivisionAccess();
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
@@ -65,13 +69,8 @@ class RequestQuotationController extends Controller
             $query->whereNotNull('id');
         });
 
-        if ($roleHasOrdinary) {
+        if ($roleHasOrdinary && !$roleHasDeveloper && !$roleHasBudget && !$roleHasPropertySupply ) {
             $rfqData = $rfqData->where('requested_by', Auth::user()->id);
-        } else {
-            $rfqData = $rfqData->orWhere('requested_by', Auth::user()->id)
-                               ->whereHas('rfq', function($query) {
-                $query->whereNotNull('id');
-            });
         }
 
         if (!empty($keyword)) {
