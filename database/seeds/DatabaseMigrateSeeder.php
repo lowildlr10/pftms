@@ -35,12 +35,14 @@ class DatabaseMigrateSeeder extends Seeder
             SignatoriesMigrateSeeder::class,
             UnitIssuesMigrateSeeder::class,
 
-            /** Purchase Request */
+            /** Procurement */
             PRsMigrateSeeder::class,
             RFQsMigrateSeeder::class,
             AbstractsMigrateSeeder::class,
             POJOsMigrateSeeder::class,
             ORSBURSsMigrateSeeder::class,
+            IARsMigrateSeeder::class,
+            DVsMigrateSeeder::class,
         ]);
     }
 }

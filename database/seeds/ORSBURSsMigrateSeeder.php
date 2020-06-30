@@ -100,17 +100,7 @@ class ORSBURSsMigrateSeeder extends Seeder
             $sigAgencyHeadData = $_sigAgencyHeadData ?
                                  Signatory::where('emp_id', $_sigAgencyHeadData->id)->first() :
                                  NULL;
-
-            $__sigObligatedByData = DB::connection('mysql-old-pftms')
-                                      ->table('tblsignatories')
-                                      ->where('id', $ors->obligated_by)
-                                      ->first();
-            $_sigObligatedByData = $__sigObligatedByData ?
-                                   User::where('emp_id', $__sigObligatedByData->emp_id)->first() :
-                                   NULL;
-            $sigObligatedByData = $_sigObligatedByData ?
-                                  Signatory::where('emp_id', $_sigObligatedByData->id)->first() :
-                                  NULL;
+            $sigObligatedByData = User::where('emp_id', $ors->obligated_by)->first();
 
             $instanceORS = new ObligationRequestStatus;
 
