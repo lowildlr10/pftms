@@ -1,5 +1,5 @@
 <form id="form-receive-back" class="wow animated fadeIn" method="POST"
-      action="{{ route('proc-dv-receive-back', ['id' => $id]) }}">
+      action="{{ route('ca-dv-receive-back', ['id' => $id]) }}">
     @csrf
 
     <div class="row">

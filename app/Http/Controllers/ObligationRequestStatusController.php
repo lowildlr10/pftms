@@ -587,7 +587,16 @@ class ObligationRequestStatusController extends Controller
     }
 
     public function showIssue($id) {
-        return view('modules.procurement.ors-burs.issue', [
+        $instanceORS = ObligationRequestStatus::find($id);
+        $moduleClass = $instanceORS->module_class;
+
+        if ($moduleClass == 3) {
+            $viewFile = 'modules.procurement.ors-burs.issue';
+        } else if ($moduleClass == 2) {
+            $viewFile = 'modules.voucher.ors-burs.issue';
+        }
+
+        return view($viewFile, [
             'id' => $id
         ]);
     }
@@ -618,7 +627,7 @@ class ObligationRequestStatusController extends Controller
 
                     $instanceORS->notifyIssued($id, Auth::user()->id);
 
-                    $msg = "$documentType '$id' successfully issued to budget unit.";
+                    $msg = "$documentType '$id' successfully submitted to budget unit.";
                     Auth::user()->log($request, $msg);
                     return redirect()->route($routeName, ['keyword' => $id])
                                      ->with('success', $msg);
@@ -629,7 +638,7 @@ class ObligationRequestStatusController extends Controller
                                      ->with('warning', $msg);
                 }
             } else {
-                $msg = "$documentType '$id' already issued.";
+                $msg = "$documentType '$id' already submitted.";
                 Auth::user()->log($request, $msg);
                 return redirect()->route($routeName, ['keyword' => $id])
                                  ->with('warning', $msg);
@@ -642,7 +651,16 @@ class ObligationRequestStatusController extends Controller
     }
 
     public function showReceive($id) {
-        return view('modules.procurement.ors-burs.receive', [
+        $instanceORS = ObligationRequestStatus::find($id);
+        $moduleClass = $instanceORS->module_class;
+
+        if ($moduleClass == 3) {
+            $viewFile = 'modules.procurement.ors-burs.receive';
+        } else if ($moduleClass == 2) {
+            $viewFile = 'modules.voucher.ors-burs.receive';
+        }
+
+        return view($viewFile, [
             'id' => $id
         ]);
     }
@@ -679,7 +697,16 @@ class ObligationRequestStatusController extends Controller
     }
 
     public function showIssueBack($id) {
-        return view('modules.procurement.ors-burs.issue-back', [
+        $instanceORS = ObligationRequestStatus::find($id);
+        $moduleClass = $instanceORS->module_class;
+
+        if ($moduleClass == 3) {
+            $viewFile = 'modules.procurement.ors-burs.issue-back';
+        } else if ($moduleClass == 2) {
+            $viewFile = 'modules.voucher.ors-burs.issue-back';
+        }
+
+        return view($viewFile, [
             'id' => $id
         ]);
     }
@@ -704,7 +731,7 @@ class ObligationRequestStatusController extends Controller
             $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "issued_back", $remarks);
             $instanceORS->notifyIssuedBack($id, Auth::user()->id);
 
-            $msg = "$documentType '$id' successfully issued back.";
+            $msg = "$documentType '$id' successfully submitted back.";
             Auth::user()->log($request, $msg);
             return redirect()->route($routeName, ['keyword' => $id])
                              ->with('success', $msg);
@@ -716,7 +743,16 @@ class ObligationRequestStatusController extends Controller
     }
 
     public function showReceiveBack($id) {
-        return view('modules.procurement.ors-burs.receive-back', [
+        $instanceORS = ObligationRequestStatus::find($id);
+        $moduleClass = $instanceORS->module_class;
+
+        if ($moduleClass == 3) {
+            $viewFile = 'modules.procurement.ors-burs.receive-back';
+        } else if ($moduleClass == 2) {
+            $viewFile = 'modules.voucher.ors-burs.receive-back';
+        }
+
+        return view($viewFile, [
             'id' => $id
         ]);
     }
@@ -754,8 +790,16 @@ class ObligationRequestStatusController extends Controller
 
     public function showObligate($id) {
         $instanceORS = ObligationRequestStatus::find($id);
+        $moduleClass = $instanceORS->module_class;
         $serialNo = $instanceORS->serial_no;
-        return view('modules.procurement.ors-burs.obligate', [
+
+        if ($moduleClass == 3) {
+            $viewFile = 'modules.procurement.ors-burs.obligate';
+        } else if ($moduleClass == 2) {
+            $viewFile = 'modules.voucher.ors-burs.obligate';
+        }
+
+        return view($viewFile, [
             'id' => $id,
             'serialNo' => $serialNo
         ]);

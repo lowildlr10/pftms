@@ -648,7 +648,16 @@ class DisbursementVoucherController extends Controller
     }
 
     public function showIssue($id) {
-        return view('modules.procurement.dv.issue', [
+        $instanceDV = DisbursementVoucher::find($id);
+        $moduleClass = $instanceDV->module_class;
+
+        if ($moduleClass == 3) {
+            $viewFile = 'modules.procurement.dv.issue';
+        } else if ($moduleClass == 2) {
+            $viewFile = 'modules.voucher.dv.issue';
+        }
+
+        return view($viewFile, [
             'id' => $id
         ]);
     }
@@ -677,7 +686,7 @@ class DisbursementVoucherController extends Controller
 
                     //$instanceDV->notifyIssued($id, Auth::user()->id);
 
-                    $msg = "$documentType '$id' successfully issued to accounting unit.";
+                    $msg = "$documentType '$id' successfully submitted to accounting unit.";
                     Auth::user()->log($request, $msg);
                     return redirect()->route($routeName, ['keyword' => $id])
                                      ->with('success', $msg);
@@ -688,7 +697,7 @@ class DisbursementVoucherController extends Controller
                                      ->with('warning', $msg);
                 }
             } else {
-                $msg = "$documentType '$id' already issued.";
+                $msg = "$documentType '$id' already submitted.";
                 Auth::user()->log($request, $msg);
                 return redirect()->route($routeName, ['keyword' => $id])
                                  ->with('warning', $msg);
@@ -701,7 +710,16 @@ class DisbursementVoucherController extends Controller
     }
 
     public function showReceive($id) {
-        return view('modules.procurement.dv.receive', [
+        $instanceDV = DisbursementVoucher::find($id);
+        $moduleClass = $instanceDV->module_class;
+
+        if ($moduleClass == 3) {
+            $viewFile = 'modules.procurement.dv.receive';
+        } else if ($moduleClass == 2) {
+            $viewFile = 'modules.voucher.dv.receive';
+        }
+
+        return view($viewFile, [
             'id' => $id
         ]);
     }
@@ -771,7 +789,16 @@ class DisbursementVoucherController extends Controller
     }
 
     public function showReceiveBack($id) {
-        return view('modules.procurement.dv.receive-back', [
+        $instanceDV = DisbursementVoucher::find($id);
+        $moduleClass = $instanceDV->module_class;
+
+        if ($moduleClass == 3) {
+            $viewFile = 'modules.procurement.dv.receive-back';
+        } else if ($moduleClass == 2) {
+            $viewFile = 'modules.voucher.dv.receive-back';
+        }
+
+        return view($viewFile, [
             'id' => $id
         ]);
     }
@@ -807,8 +834,16 @@ class DisbursementVoucherController extends Controller
 
     public function showPayment($id) {
         $instanceDV = DisbursementVoucher::find($id);
+        $moduleClass = $instanceDV->module_class;
         $dvNo = $instanceDV->dv_no;
-        return view('modules.procurement.dv.payment', [
+
+        if ($moduleClass == 3) {
+            $viewFile = 'modules.procurement.dv.payment';
+        } else if ($moduleClass == 2) {
+            $viewFile = 'modules.voucher.dv.payment';
+        }
+
+        return view($viewFile, [
             'id' => $id,
             'dvNo' => $dvNo
         ]);

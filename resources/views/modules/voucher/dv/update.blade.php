@@ -1,5 +1,5 @@
 <form id="form-update" class="wow animated fadeIn d-flex justify-content-center" method="POST"
-      action="{{ route('proc-dv-update', ['id' => $id]) }}">
+      action="{{ route('ca-dv-update', ['id' => $id]) }}">
     @csrf
 
     <div class="card w-responsive">
