@@ -113,26 +113,25 @@ class InventoryStocksMigrateSeeder extends Seeder
 
                 if (!$instanceInvStock) {
                     $instanceInvStock = new InventoryStock;
+                    $instanceInvStock->pr_id = $prID;
+                    $instanceInvStock->po_id = $poID;
+                    $instanceInvStock->inventory_no = $inventoryNo;
+                    $instanceInvStock->entity_name = $entityName;
+                    $instanceInvStock->fund_cluster = $fundCluster;
+                    $instanceInvStock->division = $division;
+                    $instanceInvStock->office = $office;
+                    $instanceInvStock->responsibility_center = $responsibilityCenter;
+                    $instanceInvStock->po_no = $poNo;
+                    $instanceInvStock->date_po = $datePO;
+                    $instanceInvStock->supplier = $supplier;
+                    $instanceInvStock->purpose = $purpose;
+                    $instanceInvStock->inventory_classification = $inventoryClassification;
+                    $instanceInvStock->status = $status;
+                    $instanceInvStock->deleted_at = $deletedAt;
+                    $instanceInvStock->created_at = $createdAt;
+                    $instanceInvStock->updated_at = $updatedAt;
+                    $instanceInvStock->save();
                 }
-
-                $instanceInvStock->pr_id = $prID;
-                $instanceInvStock->po_id = $poID;
-                $instanceInvStock->entity_name = $entityName;
-                $instanceInvStock->fund_cluster = $fundCluster;
-                $instanceInvStock->inventory_no = $inventoryNo;
-                $instanceInvStock->division = $division;
-                $instanceInvStock->office = $office;
-                $instanceInvStock->responsibility_center = $responsibilityCenter;
-                $instanceInvStock->po_no = $poNo;
-                $instanceInvStock->date_po = $datePO;
-                $instanceInvStock->supplier = $supplier;
-                $instanceInvStock->purpose = $purpose;
-                $instanceInvStock->inventory_classification = $inventoryClassification;
-                $instanceInvStock->status = $status;
-                $instanceInvStock->deleted_at = $deletedAt;
-                $instanceInvStock->created_at = $createdAt;
-                $instanceInvStock->updated_at = $updatedAt;
-                $instanceInvStock->save();
 
                 if (!$instanceInvStock) {
                     $invStockData = DB::table('inventory_stocks')

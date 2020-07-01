@@ -24,7 +24,7 @@ class IARsMigrateSeeder extends Seeder
 
         foreach ($iarsData as $ctr => $iar) {
             $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
-            echo "Inventory Stocks: [ $percentage% ] migrated.\n";
+            echo "Inspection and Acceptance Reports: [ $percentage% ] migrated.\n";
 
             $iarNo = $iar->iar_no;
             $poNo = trim(str_replace('IAR-', '', $iarNo));

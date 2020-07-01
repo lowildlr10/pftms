@@ -25,7 +25,7 @@ class DVsMigrateSeeder extends Seeder
 
         foreach ($dvsData as $ctr => $dv) {
             $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
-            echo "Inventory Stocks: [ $percentage% ] migrated.\n";
+            echo "Disbursement Vouchers: [ $percentage% ] migrated.\n";
 
             $code = $dv->code;
             $dvNo = $dv->dv_no;
