@@ -109,7 +109,8 @@ class InventoryStocksMigrateSeeder extends Seeder
                 $sigRequestedByData = DB::table('emp_accounts')->where('emp_id', $_sigRequestedBy)->first();
                 $sigRequestedBy = isset($sigRequestedByData->id) && $sigRequestedByData->id ? $sigRequestedByData->id : NULL;
 
-                $instanceInvStock = InventoryStock::where('inventory_no', $inventoryNo)->first();
+                //$instanceInvStock = InventoryStock::where('inventory_no', $inventoryNo)->first();
+                $instanceInvStock = DB::table('inventory_stocks')->where('inventory_no', $inventoryNo)->first();
 
                 if (!$instanceInvStock) {
                     $instanceInvStock = new InventoryStock;
