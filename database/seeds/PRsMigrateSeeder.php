@@ -22,9 +22,10 @@ class PRsMigrateSeeder extends Seeder
         $prsData = DB::connection('mysql-old-pftms')
                      ->table('tblpr')
                      ->get();
+        $dataCount = $prsData->count();
 
         foreach ($prsData as $ctr => $pr) {
-            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
             echo "Purchase Requests: [ $percentage% ] migrated.\n";
 
             $code = $pr->code;

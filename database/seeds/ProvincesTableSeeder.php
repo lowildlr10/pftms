@@ -25,8 +25,10 @@ class ProvincesTableSeeder extends Seeder
             'Mountain Province'
         ];
 
+        $dataCount = count($provinces);
+
         foreach ($provinces as $ctr => $prov) {
-            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
             echo "Provinces: [ $percentage% ] migrated.\n";
 
             $province = new Province;

@@ -22,9 +22,10 @@ class POJOsMigrateSeeder extends Seeder
         $posData = DB::connection('mysql-old-pftms')
                      ->table('tblpo_jo')
                      ->get();
+        $dataCount = $posData->count();
 
         foreach ($posData as $ctr => $po) {
-            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
             echo "Purchase and Job Orders: [ $percentage% ] migrated.\n";
 
             $code = $po->code;

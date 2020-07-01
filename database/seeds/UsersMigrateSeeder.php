@@ -20,9 +20,10 @@ class UsersMigrateSeeder extends Seeder
         $usersData = DB::connection('mysql-old-pftms')
                        ->table('tblemp_accounts')
                        ->get();
+        $dataCount = $usersData->count();
 
         foreach ($usersData as $ctr => $usr) {
-            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
             echo "Emp Accounts: [ $percentage% ] migrated.\n";
 
             $user = new User;

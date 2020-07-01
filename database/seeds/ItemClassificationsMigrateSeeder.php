@@ -16,9 +16,10 @@ class ItemClassificationsMigrateSeeder extends Seeder
         $itmClassData = DB::connection('mysql-old-pftms')
                           ->table('tblitem_classifications')
                           ->get();
+        $dataCount = $itmClassData->count();
 
         foreach ($itmClassData as $ctr => $class) {
-            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
             echo "Item Classifications: [ $percentage% ] migrated.\n";
 
             $itemClass = new ItemClassification;

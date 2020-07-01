@@ -17,9 +17,10 @@ class SuppliersMigrateSeeder extends Seeder
         $supplierData = DB::connection('mysql-old-pftms')
                           ->table('tblsuppliers')
                           ->get();
+        $dataCount = $supplierData->count();
 
         foreach ($supplierData as $ctr => $sup) {
-            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
             echo "Suppliers: [ $percentage% ] migrated.\n";
 
             $supplier = new Supplier;

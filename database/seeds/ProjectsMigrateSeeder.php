@@ -16,9 +16,10 @@ class ProjectsMigrateSeeder extends Seeder
         $fundingSrcData = DB::connection('mysql-old-pftms')
                             ->table('tblprojects')
                             ->get();
+        $dataCount = $fundingSrcData->count();
 
         foreach ($fundingSrcData as $ctr => $fund) {
-            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
             echo "Source of Funds: [ $percentage% ] migrated.\n";
 
             $funding = new FundingSource;

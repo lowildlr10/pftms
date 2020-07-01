@@ -16,9 +16,10 @@ class SupplierClassificationsMigrateSeeder extends Seeder
         $supClassData = DB::connection('mysql-old-pftms')
                           ->table('tblsupplier_classifications')
                           ->get();
+        $dataCount = $supClassData->count();
 
         foreach ($supClassData as $ctr => $class) {
-            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
             echo "Supplier Classifications: [ $percentage% ] migrated.\n";
 
             $supClass = new SupplierClassification;

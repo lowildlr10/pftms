@@ -23,9 +23,10 @@ class ORSBURSsMigrateSeeder extends Seeder
         $orsData = DB::connection('mysql-old-pftms')
                      ->table('tblors_burs')
                      ->get();
+        $dataCount = $orsData->count();
 
         foreach ($orsData as $ctr => $ors) {
-            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
             echo "Inventory Stocks: [ $percentage% ] migrated.\n";
 
             $code = $ors->code;

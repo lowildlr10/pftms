@@ -31,9 +31,10 @@ class RegionsTableSeeder extends Seeder
             'Caraga Administrative Region',
             'Autonomous Region in Muslim Mindanao'
         ];
+        $dataCount = count($regions);
 
         foreach ($regions as $ctr => $reg) {
-            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
             echo "Regions: [ $percentage% ] migrated.\n";
 
             $region = new Region;

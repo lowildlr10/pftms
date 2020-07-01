@@ -25,8 +25,10 @@ class DivisionsTableSeeder extends Seeder
             'PSTC - Kalinga'
         ];
 
+        $dataCount = count($divisions);
+
         foreach ($divisions as $ctr => $div) {
-            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
             echo "Inventory Stocks: [ $percentage% ] migrated.\n";
 
             $division = new EmpDivision;

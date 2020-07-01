@@ -20,10 +20,10 @@ class InventoryStocksMigrateSeeder extends Seeder
         $invsData = DB::connection('mysql-old-pftms')
                      ->table('tblinventory_stocks')
                      ->get();
-        $invsDataCount = $invsData->count();
+        $dataCount = $invsData->count();
 
         foreach ($invsData as $ctr => $inv) {
-            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
             echo "Inventory Stocks: [ $percentage% ] migrated.\n";
 
             $entityName = 'Department of Science and Technology - CAR';

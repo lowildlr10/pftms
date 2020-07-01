@@ -20,9 +20,10 @@ class IARsMigrateSeeder extends Seeder
         $iarsData = DB::connection('mysql-old-pftms')
                      ->table('tbliar')
                      ->get();
+        $dataCount = $iarsData->count();
 
         foreach ($iarsData as $ctr => $iar) {
-            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
             echo "Inventory Stocks: [ $percentage% ] migrated.\n";
 
             $iarNo = $iar->iar_no;

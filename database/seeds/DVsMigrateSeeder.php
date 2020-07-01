@@ -21,9 +21,10 @@ class DVsMigrateSeeder extends Seeder
         $dvsData = DB::connection('mysql-old-pftms')
                      ->table('tbldv')
                      ->get();
+        $dataCount = $dvsData->count();
 
         foreach ($dvsData as $ctr => $dv) {
-            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
             echo "Inventory Stocks: [ $percentage% ] migrated.\n";
 
             $code = $dv->code;

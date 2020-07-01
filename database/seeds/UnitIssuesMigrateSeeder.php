@@ -16,9 +16,10 @@ class UnitIssuesMigrateSeeder extends Seeder
         $unitIssueData = DB::connection('mysql-old-pftms')
                            ->table('tblunit_issue')
                            ->get();
+        $dataCount = $unitIssueData->count();
 
         foreach ($unitIssueData as $ctr => $unit) {
-            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
             echo "Unit of Issues: [ $percentage% ] migrated.\n";
 
             $unitIssue = new ItemUnitIssue;

@@ -16,9 +16,10 @@ class PaperSizesMigrateSeeder extends Seeder
         $paperSizeData = DB::connection('mysql-old-pftms')
                            ->table('tblpaper_size')
                            ->get();
+        $dataCount = $paperSizeData->count();
 
         foreach ($paperSizeData as $ctr => $p) {
-            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
             echo "Paper Sizes: [ $percentage% ] migrated.\n";
 
             $paper = new PaperSize;
