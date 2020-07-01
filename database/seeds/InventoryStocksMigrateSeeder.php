@@ -143,8 +143,13 @@ class InventoryStocksMigrateSeeder extends Seeder
                     $invStockID = $instanceInvStock->id;
                 }
 
+
+                $_poItemData = DB::connection('mysql-old-pftms')
+                                 ->table('tblpo_jo_items')
+                                 ->where('item_id', $_poItemID)
+                                 ->first();
                 $poItemData = DB::table('purchase_job_order_items')
-                                ->where('po_no', $poNo)
+                                ->where([['po_no', $poNo], ['item_description', $_poItemData->item_description]])
                                 ->first();
 
                 if ($poItemData) {
