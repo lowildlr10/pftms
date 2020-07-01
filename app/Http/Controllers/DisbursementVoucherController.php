@@ -46,7 +46,9 @@ class DisbursementVoucherController extends Controller
     public function indexProc(Request $request) {
         $data = $this->getIndexData($request, 'procurement');
 
-        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
 
         // Get module access
         $module = 'proc_dv';
@@ -71,7 +73,9 @@ class DisbursementVoucherController extends Controller
             'isAllowedReceiveBack'=> $isAllowedReceiveBack,
             'isAllowedIAR' => $isAllowedIAR,
             'isAllowedLDDAP' => $isAllowedLDDAP,
-            'roleHasOrdinary' => $roleHasOrdinary
+            'roleHasDeveloper' => $roleHasDeveloper,
+            'roleHasAccountant' => $roleHasAccountant,
+            'roleHasBudget' => $roleHasBudget,
         ]);
     }
 
@@ -130,6 +134,50 @@ class DisbursementVoucherController extends Controller
         $paperSizes = PaperSize::orderBy('paper_type')->get();
 
         if ($type == 'procurement') {
+            $dvData = DisbursementVoucher::select('id', 'pr_id', 'particulars', 'module_class', 'dv_no')
+                                         ->with(['bidpayee' => function($query) {
+                $query->select('company_name', 'address');
+            },
+            'procors' => function($query) {
+                $query->select('id', 'po_no');
+            },
+            'pr' => function($query) use($empDivisionAccess) {
+                $query->whereIn('division', $empDivisionAccess);
+            }])->where('disbursement_vouchers.module_class', 3);
+
+            if (!empty($keyword)) {
+                $dvData = $dvData->where(function($qry) use ($keyword) {
+                    $qry->where('disbursement_vouchers.id', 'like', "%$keyword%")
+                        ->orWhere('disbursement_vouchers.pr_id', 'like', "%$keyword%")
+                        ->orWhere('disbursement_vouchers.particulars', 'like', "%$keyword%")
+                        ->orWhere('disbursement_vouchers.transaction_type', 'like', "%$keyword%")
+                        ->orWhere('disbursement_vouchers.dv_no', 'like', "%$keyword%")
+                        ->orWhere('disbursement_vouchers.date_dv', 'like', "%$keyword%")
+                        ->orWhere('disbursement_vouchers.date_disbursed', 'like', "%$keyword%")
+                        ->orWhere('disbursement_vouchers.responsibility_center', 'like', "%$keyword%")
+                        ->orWhere('disbursement_vouchers.mfo_pap', 'like', "%$keyword%")
+                        ->orWhere('disbursement_vouchers.amount', 'like', "%$keyword%")
+                        ->orWhere('disbursement_vouchers.address', 'like', "%$keyword%")
+                        ->orWhere('disbursement_vouchers.fund_cluster', 'like', "%$keyword%")
+                        ->orWhereHas('procors', function($query) use ($keyword) {
+                            $query->where('id', 'like', "%$keyword%")
+                                  ->orWhere('po_no', 'like', "%$keyword%");
+                        })
+                        ->orWhereHas('bidpayee', function($query) use ($keyword) {
+                            $query->where('company_name', 'like', "%$keyword%")
+                                  ->orWhere('address', 'like', "%$keyword%");
+                        });
+                });
+            }
+
+            $dvData = $dvData->sortable(['procors.po_no' => 'desc'])->paginate(15);
+
+            foreach ($dvData as $dvDat) {
+                $dvDat->doc_status = $instanceDocLog->checkDocStatus($dvDat->id);
+            }
+
+
+            /*
             $dvData = ObligationRequestStatus::with(['bidpayee', 'procdv'])->whereHas('pr', function($query)
                                                 use($empDivisionAccess) {
                 $query->whereIn('division', $empDivisionAccess);
@@ -167,7 +215,7 @@ class DisbursementVoucherController extends Controller
 
             foreach ($dvData as $dvDat) {
                 $dvDat->doc_status = $instanceDocLog->checkDocStatus($dvDat->procdv['id']);
-            }
+            }*/
         } else {
             $dvData = DisbursementVoucher::with('procors')->whereHas('emppayee', function($query)
                                            use($empDivisionAccess) {

@@ -113,7 +113,8 @@
 
                                         @if (count($list) > 0)
                                             @foreach ($list as $listCtr => $ors)
-                                                @if (!$roleHasOrdinary && empty($ors->doc_status->date_issued))
+                                                @if (($roleHasAccountant || $roleHasBudget) &&
+                                                     empty($ors->doc_status->date_issued))
                                         <tr class="hidden-xs d-none">
                                                 @else
                                         <tr class="hidden-xs">

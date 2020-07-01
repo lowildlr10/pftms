@@ -97,7 +97,7 @@
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="8%">
-                                            @sortablelink('po_no', 'PO/JO No.', [], ['class' => 'white-text'])
+                                            @sortablelink('procors.po_no', 'PO/JO No.', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="13%">
                                             @sortablelink('dv.dv_no', 'DV No.', [], ['class' => 'white-text'])
@@ -118,7 +118,8 @@
                                     @if (count($list) > 0)
                                         @foreach ($list as $listCtr => $dv)
 
-                                            @if (!$roleHasOrdinary && empty($dv->doc_status->date_issued))
+                                            @if (($roleHasAccountant || $roleHasBudget) &&
+                                                  empty($dv->doc_status->date_issued))
                                     <tr class="hidden-xs d-none">
                                             @else
                                     <tr class="hidden-xs">
@@ -160,12 +161,12 @@
 
                                         </td>
                                         <td></td>
-                                        <td>{{ $dv->po_no }}</td>
-                                        <td>{{ $dv->procdv['dv_no'] }}</td>
+                                        <td>{{ $dv->procors['po_no'] }}</td>
+                                        <td>{{ $dv->dv_no }}</td>
                                         <td>
                                             <i class="fas fa-caret-right"></i> {{
-                                                (strlen($dv->procdv['particulars']) > 150) ?
-                                                substr($dv->procdv['particulars'], 0, 150).'...' : $dv->procdv['particulars']
+                                                (strlen($dv->particulars) > 150) ?
+                                                substr($dv->particulars, 0, 150).'...' : $dv->particulars
                                             }}
                                         </td>
                                         <td>{{ $dv->bidpayee['company_name'] }}</td>
@@ -216,7 +217,7 @@
             <div class="modal-header stylish-color-dark white-text">
                 <h6>
                     <i class="fas fa-shopping-cart"></i>
-                    <strong>DV NO: {{ $dv->procdv['dv_no'] }}</strong>
+                    <strong>DV NO: {{ $dv->dv_no }}</strong>
                 </h6>
                 <button type="button" class="close white-text" data-dismiss="modal"
                         aria-label="Close">
@@ -231,13 +232,13 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $dv->procdv['id'] }}', 'proc_dv');">
+                                        onclick="$(this).showPrint('{{ $dv->id }}', 'proc_dv');">
                                     <i class="fas fa-print blue-text"></i> Print DV
                                 </button>
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showEdit('{{ route('proc-dv-show-edit',
-                                                 ['id' => $dv->procdv['id']]) }}');">
+                                                 ['id' => $dv->id]) }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
                             </div>
@@ -305,7 +306,7 @@
                         <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showRemarks('{{ route('proc-dv-show-remarks',
-                                                             ['id' => $dv->procdv['id']]) }}');">
+                                                             ['id' => $dv->id]) }}');">
                             <i class="far fa-comment-dots"></i> View Remarks
                         </button>
                     </div>
@@ -333,8 +334,8 @@
                              $isAllowedIssue)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-orange waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showIssue('{{ route('proc-dv-show-issue', ['id' => $dv->procdv['id']]) }}',
-                                                           `{{ 'Disbursement Voucher '.$dv->procdv['id'] }}`);">
+                                onclick="$(this).showIssue('{{ route('proc-dv-show-issue', ['id' => $dv->id]) }}',
+                                                           `{{ 'Disbursement Voucher '.$dv->id }}`);">
                             <i class="fas fa-paper-plane"></i> Submit
                         </button>
                     </li>
@@ -345,8 +346,8 @@
                                  $isAllowedReceive)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showReceive('{{ route('proc-dv-show-receive', ['id' => $dv->procdv['id']]) }}',
-                                                             `{{ 'Disbursement Voucher '.$dv->procdv['id'] }}`);">
+                                onclick="$(this).showReceive('{{ route('proc-dv-show-receive', ['id' => $dv->id]) }}',
+                                                             `{{ 'Disbursement Voucher '.$dv->id }}`);">
                             <i class="fas fa-hand-holding"></i> Receive
                         </button>
                     </li>
@@ -357,8 +358,8 @@
                             @if ($isAllowedPayment)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showPayment('{{ route('proc-dv-show-payment', ['id' => $dv->procdv['id']]) }}',
-                                                              `{{ 'Disbursement Voucher '.$dv->procdv['id'] }}`);">
+                                onclick="$(this).showPayment('{{ route('proc-dv-show-payment', ['id' => $dv->id]) }}',
+                                                              `{{ 'Disbursement Voucher '.$dv->id }}`);">
                             <i class="fas fa-angle-double-right"></i> Payment/LDDAP
                         </button>
                     </li>
@@ -367,8 +368,8 @@
                             @if ($isAllowedIssueBack)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-orange waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showIssueBack('{{ route('proc-dv-show-issue-back', ['id' => $dv->procdv['id']]) }}',
-                                                               `{{ 'Disbursement Voucher '.$dv->procdv['id'] }}`);">
+                                onclick="$(this).showIssueBack('{{ route('proc-dv-show-issue-back', ['id' => $dv->id]) }}',
+                                                               `{{ 'Disbursement Voucher '.$dv->id }}`);">
                             <i class="fas fa-undo-alt"></i> Submit Back
                         </button>
                     </li>
@@ -380,8 +381,8 @@
                                  $isAllowedReceiveBack)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showReceiveBack('{{ route('proc-dv-show-receive-back', ['id' => $dv->procdv['id']]) }}',
-                                                                 `{{ 'Disbursement Voucher '.$dv->procdv['id'] }}`);">
+                                onclick="$(this).showReceiveBack('{{ route('proc-dv-show-receive-back', ['id' => $dv->id]) }}',
+                                                                 `{{ 'Disbursement Voucher '.$dv->id }}`);">
                             <i class="fas fa-hand-holding"></i> Receive Back
                         </button>
                     </li>
@@ -389,7 +390,7 @@
                     @else
                         @if ($isAllowedPayment)
                     <li class="list-group-item justify-content-between">
-                        <a onclick="$(this).redirectToDoc('{{ route('lddap') }}', '{{ $dv->procdv['id'] }}');"
+                        <a onclick="$(this).redirectToDoc('{{ route('lddap') }}', '{{ $dv->id }}');"
                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
                             <i class="fas fa-angle-double-right"></i> Generate Payment/LDDAP
                         </a>
