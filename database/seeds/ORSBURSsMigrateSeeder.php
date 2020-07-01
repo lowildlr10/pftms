@@ -27,7 +27,7 @@ class ORSBURSsMigrateSeeder extends Seeder
 
         foreach ($orsData as $ctr => $ors) {
             $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
-            echo "Inventory Stocks: [ $percentage% ] migrated.\n";
+            echo "Obligation Request Status: [ $percentage% ] migrated.\n";
 
             $code = $ors->code;
             $_orsID = $ors->id;
@@ -152,7 +152,7 @@ class ORSBURSsMigrateSeeder extends Seeder
                     $instanceORS->responsibility_center = $responsibilityCenter;
                     $instanceORS->particulars = $particulars;
                     $instanceORS->mfo_pap = $mfoPAP;
-                    $instanceORS->uacs_object_code = $uacsOobjectCode;
+                    $instanceORS->uacs_object_code = $uacsObjectCode;
                     $instanceORS->amount = $amount;
                     $instanceORS->sig_certified_1 = $sigCertified1;
                     $instanceORS->sig_certified_2 = $sigCertified2;

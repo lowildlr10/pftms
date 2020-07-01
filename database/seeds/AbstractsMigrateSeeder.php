@@ -27,7 +27,7 @@ class AbstractsMigrateSeeder extends Seeder
 
         foreach ($abstractsData as $ctr => $abs) {
             $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
-            echo "Inventory Stocks: [ $percentage% ] migrated.\n";
+            echo "Abstract of Quotation: [ $percentage% ] migrated.\n";
 
             $code = $abs->code;
             $prID = $abs->pr_id;
