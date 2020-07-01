@@ -26,7 +26,7 @@ class CreateInventoryStockItemsTable extends Migration
             $table->uuid('po_item_id')->nullable();
             $table->foreign('po_item_id')->references('id')->on('purchase_job_order_items');
             $table->unsignedInteger('item_no');
-            $table->uuid('item_classification');
+            $table->uuid('item_classification')->nullable();
             $table->foreign('item_classification')->references('id')->on('item_classifications');
             $table->uuid('unit_issue');
             $table->foreign('unit_issue')->references('id')->on('item_unit_issues');

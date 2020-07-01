@@ -25,41 +25,39 @@ class ORSBURSsMigrateSeeder extends Seeder
                      ->get();
 
         foreach ($orsData as $ors) {
-            $prID = NULL;
-            $poNo = NULL;
             $code = $ors->code;
-
-            if ($ors->module_class_id == 3) {
-                $_supplierData = DB::connection('mysql-old-pftms')
-                                   ->table('tblsuppliers')
-                                   ->where('id', $ors->payee)
-                                   ->first();
-                $supplierData = Supplier::where('company_name', $_supplierData->company_name)
-                                        ->first();
-                $payee = $supplierData->id;
-
-                $_prID = $ors->pr_id;
-                $prData = DB::connection('mysql-old-pftms')
-                            ->table('tblpr')
-                            ->where('id', $_prID)
-                            ->first();
-                $prNo = $prData->pr_no;
-                $instancePR = DB::table('purchase_requests')->where('pr_no', $prNo)->first();
-                $prID = $instancePR->id;
-                $poNo = $ors->po_no;
-                $moduleClass = 3;
-
-                $poCount = PurchaseJobOrder::where('po_no', $poNo)->count();
-            } else if ($ors->module_class_id == 2) {
-                $userData = User::where('emp_id', $ors->payee)
-                                ->first();
-                $payee = $userData->id;
-                $moduleClass = 2;
-            }
+            $_orsID = $ors->id;
+            $_prID = $ors->pr_id;
+            $poNo = $ors->po_no;
+            $serialNo = $ors->serial_no;
+            $fundCluster = $ors->fund_cluster;
+            $transactionType = $ors->transaction_type;
+            $dateORS = $ors->date_ors_burs;
+            $dateObligated = $ors->date_obligated;
+            $_payee = $ors->payee;
+            $office = $ors->office;
+            $address = $ors->address;
+            $responsibilityCenter = $ors->responsibility_center;
+            $particulars = $ors->particulars;
+            $mfoPAP = $ors->mfo_pap;
+            $uacsObjectCode = $ors->uacs_object_code;
+            $amount = $ors->amount;
+            $_sigCertified1 = $ors->sig_certified_1;
+            $_sigCertified2 = $ors->sig_certified_2;
+            $_sigAccounting = $ors->sig_accounting;
+            $_sigAgencyHead = $ors->sig_agency_head;
+            $_sigObligatedBy = $ors->obligated_by;
+            $dateCertified1 = $ors->date_certified_1;
+            $dateCertified2 = $ors->date_certified_2;
+            $moduleClassID = $ors->module_class_id;
+            $documentType = strtolower($ors->document_type);
+            $deletedAt = $ors->deleted_at;
+            $createdAt = $ors->created_at;
+            $updatedAt = $ors->updated_at;
 
             $__sigCertified1Data = DB::connection('mysql-old-pftms')
                                      ->table('tblsignatories')
-                                     ->where('id', $ors->sig_certified_1)
+                                     ->where('id', $_sigCertified1)
                                      ->first();
             $_sigCertified1Data = $__sigCertified1Data ?
                                   User::where('emp_id', $__sigCertified1Data->emp_id)->first() :
@@ -70,7 +68,7 @@ class ORSBURSsMigrateSeeder extends Seeder
 
             $__sigCertified2Data = DB::connection('mysql-old-pftms')
                                      ->table('tblsignatories')
-                                     ->where('id', $ors->sig_certified_2)
+                                     ->where('id', $_sigCertified2)
                                      ->first();
             $_sigCertified2Data = $__sigCertified2Data ?
                                   User::where('emp_id', $__sigCertified2Data->emp_id)->first() :
@@ -81,7 +79,7 @@ class ORSBURSsMigrateSeeder extends Seeder
 
             $__sigAccountingData = DB::connection('mysql-old-pftms')
                                      ->table('tblsignatories')
-                                     ->where('id', $ors->sig_accounting)
+                                     ->where('id', $_sigAccounting)
                                      ->first();
             $_sigAccountingData = $__sigAccountingData ?
                                   User::where('emp_id', $__sigAccountingData->emp_id)->first() :
@@ -92,7 +90,7 @@ class ORSBURSsMigrateSeeder extends Seeder
 
             $__sigAgencyHeadData = DB::connection('mysql-old-pftms')
                                      ->table('tblsignatories')
-                                     ->where('id', $ors->sig_agency_head)
+                                     ->where('id', $_sigAgencyHead)
                                      ->first();
             $_sigAgencyHeadData = $__sigAgencyHeadData ?
                                   User::where('emp_id', $__sigAgencyHeadData->emp_id)->first() :
@@ -100,58 +98,75 @@ class ORSBURSsMigrateSeeder extends Seeder
             $sigAgencyHeadData = $_sigAgencyHeadData ?
                                  Signatory::where('emp_id', $_sigAgencyHeadData->id)->first() :
                                  NULL;
-            $sigObligatedByData = User::where('emp_id', $ors->obligated_by)->first();
+            $sigObligatedByData = User::where('emp_id', $_sigObligatedBy)->first();
 
-            $instanceORS = new ObligationRequestStatus;
+            $sigCertified1 = isset($sigCertified1Data->id) && $sigCertified1Data->id ? $sigCertified1Data->id : NULL;
+            $sigCertified2 = isset($sigCertified2Data->id) && $sigCertified2Data->id ? $sigCertified2Data->id : NULL;
+            $sigAccounting = isset($sigAccountingData->id) && $sigAccountingData->id ? $sigAccountingData->id : NULL;
+            $sigAgencyHead = isset($sigAgencyHeadData->id) && $sigAgencyHeadData->id ? $sigAgencyHeadData->id : NULL;
+            $sigObligatedBy = isset($sigObligatedByData->id) && $sigObligatedByData->id ? $sigObligatedByData->id : NULL;
 
-            $instanceORS->pr_id = $prID;
-            $instanceORS->po_no = $ors->po_no;
-            $instanceORS->transaction_type = $ors->transaction_type;
-            $instanceORS->document_type = strtolower($ors->document_type);
-            $instanceORS->fund_cluster = $ors->fund_cluster ? $ors->fund_cluster : NULL;
-            $instanceORS->serial_no = $ors->serial_no ? $ors->serial_no : NULL;
-            $instanceORS->date_ors_burs = $ors->date_ors_burs ? $ors->date_ors_burs : NULL;
-            $instanceORS->date_obligated = $ors->date_obligated ? $ors->date_obligated : NULL;
-            $instanceORS->payee = $payee;
-            $instanceORS->office = $ors->office;
-            $instanceORS->address = $ors->address;
-            $instanceORS->responsibility_center = $ors->responsibility_center;
-            $instanceORS->particulars = $ors->particulars;
-            $instanceORS->mfo_pap = $ors->mfo_pap;
-            $instanceORS->uacs_object_code = $ors->uacs_object_code;
-            $instanceORS->amount = $ors->amount;
-            $instanceORS->sig_certified_1 = $sigCertified1Data ?
-                                            $sigCertified1Data->id :
-                                            NULL;
-            $instanceORS->sig_certified_2 = $sigCertified2Data ?
-                                            $sigCertified2Data->id :
-                                            NULL;
-            $instanceORS->sig_accounting = $sigAccountingData ?
-                                           $sigAccountingData->id :
-                                           NULL;
-            $instanceORS->sig_agency_head = $sigAgencyHeadData ?
-                                            $sigAgencyHeadData->id :
-                                            NULL;
-            $instanceORS->obligated_by = $sigObligatedByData ?
-                                         $sigObligatedByData->id :
-                                         NULL;
-            $instanceORS->date_certified_1 = $ors->date_certified_1 ? $ors->date_certified_1 : NULL;
-            $instanceORS->date_certified_2 = $ors->date_certified_2 ? $ors->date_certified_2 : NULL;
-            $instanceORS->module_class = $moduleClass;
-            $instanceORS->deleted_at = $ors->deleted_at ? $ors->deleted_at : NULL;
-            $instanceORS->created_at = $ors->created_at;
-            $instanceORS->updated_at = Carbon::now();
 
-            if (isset($poCount) && $poCount > 0 && $moduleClass == 3) {
-                $instanceORS->save();
+            if ($moduleClassID == 3) {
+                $_supplierData = DB::connection('mysql-old-pftms')
+                                   ->table('tblsuppliers')
+                                   ->where('id', $_payee)
+                                   ->first();
+                $supplierData = Supplier::where('company_name', 'like', '%'.$_supplierData->company_name.'%')
+                                        ->first();
+                $payee = isset($supplierData->id) && $supplierData->id ? $supplierData->id : NULL;
+
+                $prOldData = DB::connection('mysql-old-pftms')
+                               ->table('tblpr')
+                               ->where('id', $_prID)
+                               ->first();
+                $prNo = $prOldData->pr_no;
+                $prData = DB::table('purchase_requests')->where('pr_no', $prNo)->first();
+                $prID = $prData->id;
+
+                $poCount = DB::table('purchase_job_orders')->where('po_no', $poNo)->count();
+            } else if ($moduleClassID == 2) {
+                $userData = User::where('emp_id', $_payee)
+                                ->first();
+                $payee = isset($userData->id) && $userData->id ? $userData->id : NULL;
             }
 
-            if ($moduleClass == 2) {
-                $instanceORS->save();
+            if ($moduleClassID == 3) {
+                if ($poCount > 0 && !empty($poNo)) {
+                    $instanceORS = new ObligationRequestStatus;
+                    $instanceORS->pr_id = $prID;
+                    $instanceORS->po_no = $poNo;
+                    $instanceORS->transaction_type = $transactionType;
+                    $instanceORS->document_type = $documentType;
+                    $instanceORS->fund_cluster = $fundCluster;
+                    $instanceORS->serial_no = $serialNo;
+                    $instanceORS->date_ors_burs = $dateORS;
+                    $instanceORS->date_obligated = $dateObligated;
+                    $instanceORS->payee = $payee;
+                    $instanceORS->office = $office;
+                    $instanceORS->address = $address;
+                    $instanceORS->responsibility_center = $responsibilityCenter;
+                    $instanceORS->particulars = $particulars;
+                    $instanceORS->mfo_pap = $mfoPAP;
+                    $instanceORS->uacs_object_code = $uacsOobjectCode;
+                    $instanceORS->amount = $amount;
+                    $instanceORS->sig_certified_1 = $sigCertified1;
+                    $instanceORS->sig_certified_2 = $sigCertified2;
+                    $instanceORS->sig_accounting = $sigAccounting;
+                    $instanceORS->sig_agency_head = $sigAgencyHead;
+                    $instanceORS->obligated_by = $sigObligatedBy;
+                    $instanceORS->date_certified_1 = $dateCertified1;
+                    $instanceORS->date_certified_2 = $dateCertified2;
+                    $instanceORS->module_class = $moduleClassID;
+                    $instanceORS->deleted_at = $deletedAt;
+                    $instanceORS->created_at = $createdAt;
+                    $instanceORS->updated_at = $updatedAt;
+                    $instanceORS->save();
+                }
             }
 
             $orsData = DB::table('obligation_request_status')
-                         ->where('po_no', $ors->po_no)
+                         ->where('po_no', $poNo)
                          ->first();
 
             if ($orsData) {
