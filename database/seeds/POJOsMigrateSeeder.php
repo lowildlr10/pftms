@@ -23,7 +23,10 @@ class POJOsMigrateSeeder extends Seeder
                      ->table('tblpo_jo')
                      ->get();
 
-        foreach ($posData as $po) {
+        foreach ($posData as $ctr => $po) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Purchase and Job Orders: [ $percentage% ] migrated.\n";
+
             $code = $po->code;
             $prID = $po->pr_id;
             $poNo = $po->po_no;

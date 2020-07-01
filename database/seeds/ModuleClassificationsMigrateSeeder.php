@@ -16,7 +16,10 @@ class ModuleClassificationsMigrateSeeder extends Seeder
                           ->table('tblmodule_classifications')
                           ->get();
 
-        foreach ($moduleClass as $class) {
+        foreach ($moduleClass as $ctr => $class) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Module Classifications: [ $percentage% ] migrated.\n";
+
             DB::table('module_classifications')
               ->insert([
                     'id' => $class->id,

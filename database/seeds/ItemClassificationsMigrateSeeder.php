@@ -17,7 +17,10 @@ class ItemClassificationsMigrateSeeder extends Seeder
                           ->table('tblitem_classifications')
                           ->get();
 
-        foreach ($itmClassData as $class) {
+        foreach ($itmClassData as $ctr => $class) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Item Classifications: [ $percentage% ] migrated.\n";
+
             $itemClass = new ItemClassification;
             $itemClass->classification_name = $class->classification;
             $itemClass->save();

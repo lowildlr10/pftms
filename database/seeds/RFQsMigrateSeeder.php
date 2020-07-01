@@ -20,7 +20,10 @@ class RFQsMigrateSeeder extends Seeder
                       ->table('tblcanvass')
                       ->get();
 
-        foreach ($rfqsData as $rfq) {
+        foreach ($rfqsData as $ctr => $rfq) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Request for Quotations: [ $percentage% ] migrated.\n";
+
             $code = $rfq->code;
             $prID = $rfq->pr_id;
             $prData = DB::connection('mysql-old-pftms')

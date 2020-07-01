@@ -21,7 +21,10 @@ class UsersMigrateSeeder extends Seeder
                        ->table('tblemp_accounts')
                        ->get();
 
-        foreach ($usersData as $usr) {
+        foreach ($usersData as $ctr => $usr) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Emp Accounts: [ $percentage% ] migrated.\n";
+
             $user = new User;
             $user->emp_id = $usr->emp_id;
             $user->firstname = $usr->firstname;

@@ -24,7 +24,10 @@ class ORSBURSsMigrateSeeder extends Seeder
                      ->table('tblors_burs')
                      ->get();
 
-        foreach ($orsData as $ors) {
+        foreach ($orsData as $ctr => $ors) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Inventory Stocks: [ $percentage% ] migrated.\n";
+
             $code = $ors->code;
             $_orsID = $ors->id;
             $_prID = $ors->pr_id;

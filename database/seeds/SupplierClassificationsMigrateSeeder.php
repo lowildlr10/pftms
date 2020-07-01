@@ -17,7 +17,10 @@ class SupplierClassificationsMigrateSeeder extends Seeder
                           ->table('tblsupplier_classifications')
                           ->get();
 
-        foreach ($supClassData as $class) {
+        foreach ($supClassData as $ctr => $class) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Supplier Classifications: [ $percentage% ] migrated.\n";
+
             $supClass = new SupplierClassification;
             $supClass->classification_name = $class->classification;
             $supClass->save();

@@ -17,7 +17,10 @@ class ProjectsMigrateSeeder extends Seeder
                             ->table('tblprojects')
                             ->get();
 
-        foreach ($fundingSrcData as $fund) {
+        foreach ($fundingSrcData as $ctr => $fund) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Source of Funds: [ $percentage% ] migrated.\n";
+
             $funding = new FundingSource;
             $funding->reference_code = $fund->reference_code;
             $funding->source_name = $fund->project;

@@ -23,7 +23,10 @@ class PRsMigrateSeeder extends Seeder
                      ->table('tblpr')
                      ->get();
 
-        foreach ($prsData as $pr) {
+        foreach ($prsData as $ctr => $pr) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Purchase Requests: [ $percentage% ] migrated.\n";
+
             $code = $pr->code;
             $prID = $pr->id;
             $prNo = trim($pr->pr_no);

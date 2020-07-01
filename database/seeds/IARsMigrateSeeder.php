@@ -21,7 +21,10 @@ class IARsMigrateSeeder extends Seeder
                      ->table('tbliar')
                      ->get();
 
-        foreach ($iarsData as $iar) {
+        foreach ($iarsData as $ctr => $iar) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Inventory Stocks: [ $percentage% ] migrated.\n";
+
             $iarNo = $iar->iar_no;
             $poNo = trim(str_replace('IAR-', '', $iarNo));
             $code = $iar->code;

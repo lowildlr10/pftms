@@ -32,7 +32,10 @@ class RegionsTableSeeder extends Seeder
             'Autonomous Region in Muslim Mindanao'
         ];
 
-        foreach ($regions as $reg) {
+        foreach ($regions as $ctr => $reg) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Regions: [ $percentage% ] migrated.\n";
+
             $region = new Region;
             $region->region_name = $reg;
             $region->save();

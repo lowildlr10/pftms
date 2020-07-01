@@ -22,7 +22,10 @@ class DVsMigrateSeeder extends Seeder
                      ->table('tbldv')
                      ->get();
 
-        foreach ($dvsData as $dv) {
+        foreach ($dvsData as $ctr => $dv) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Inventory Stocks: [ $percentage% ] migrated.\n";
+
             $code = $dv->code;
             $dvNo = $dv->dv_no;
             $dateDV = $dv->date_dv;

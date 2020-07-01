@@ -16,7 +16,10 @@ class ProcurementStatusMigrateSeeder extends Seeder
                             ->table('tblpr_status')
                             ->get();
 
-        foreach ($procStatusData as $stat) {
+        foreach ($procStatusData as $ctr => $stat) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Procurement Status: [ $percentage% ] migrated.\n";
+
             DB::table('procurement_status')
               ->insert([
                     'id' => $stat->id,

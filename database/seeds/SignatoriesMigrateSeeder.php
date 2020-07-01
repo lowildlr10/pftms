@@ -22,7 +22,10 @@ class SignatoriesMigrateSeeder extends Seeder
         $modules = [];
         $actives = [];
 
-        foreach ($signatoryData as $sig) {
+        foreach ($signatoryData as $ctr => $sig) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Signatories: [ $percentage% ] migrated.\n";
+
             $user = User::where('emp_id', $sig->emp_id)
                         ->first();
 

@@ -37,7 +37,10 @@ class RolesTableSeeder extends Seeder
             ]
         ];
 
-        foreach ($roles as $rol) {
+        foreach ($roles as $ctr => $rol) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Emp Roles: [ $percentage% ] migrated.\n";
+
             $rol->modules = str_replace("\n", '', $rol->modules);
             $rol->modules = trim($rol->modules);
             $rol->modules = preg_replace('/\s/', '', $rol->modules );

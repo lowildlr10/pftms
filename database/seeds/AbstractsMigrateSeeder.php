@@ -24,7 +24,10 @@ class AbstractsMigrateSeeder extends Seeder
                            ->table('tblabstract')
                            ->get();
 
-        foreach ($abstractsData as $abs) {
+        foreach ($abstractsData as $ctr => $abs) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Inventory Stocks: [ $percentage% ] migrated.\n";
+
             $code = $abs->code;
             $prID = $abs->pr_id;
             $prData = DB::connection('mysql-old-pftms')

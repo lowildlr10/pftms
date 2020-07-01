@@ -17,7 +17,10 @@ class ProcurementModesMigrateSeeder extends Seeder
                           ->table('tblmode_procurement')
                           ->get();
 
-        foreach ($procModeData as $mode) {
+        foreach ($procModeData as $ctr => $mode) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Procurement Modes: [ $percentage% ] migrated.\n";
+
             $procMode = new ProcurementMode;
             $procMode->mode_name = $mode->mode;
             $procMode->save();

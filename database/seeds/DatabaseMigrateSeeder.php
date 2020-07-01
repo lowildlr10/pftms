@@ -43,6 +43,7 @@ class DatabaseMigrateSeeder extends Seeder
             ORSBURSsMigrateSeeder::class,
             IARsMigrateSeeder::class,
             DVsMigrateSeeder::class,
+            InventoryStocksMigrateSeeder::class,
         ]);
     }
 }

@@ -17,7 +17,10 @@ class UnitIssuesMigrateSeeder extends Seeder
                            ->table('tblunit_issue')
                            ->get();
 
-        foreach ($unitIssueData as $unit) {
+        foreach ($unitIssueData as $ctr => $unit) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Unit of Issues: [ $percentage% ] migrated.\n";
+
             $unitIssue = new ItemUnitIssue;
             $unitIssue->unit_name = $unit->unit;
             $unitIssue->save();

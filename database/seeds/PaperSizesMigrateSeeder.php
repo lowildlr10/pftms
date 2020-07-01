@@ -17,7 +17,10 @@ class PaperSizesMigrateSeeder extends Seeder
                            ->table('tblpaper_size')
                            ->get();
 
-        foreach ($paperSizeData as $p) {
+        foreach ($paperSizeData as $ctr => $p) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Paper Sizes: [ $percentage% ] migrated.\n";
+
             $paper = new PaperSize;
             $paper->paper_type = $p->paper_size;
             $paper->unit = 'mm';

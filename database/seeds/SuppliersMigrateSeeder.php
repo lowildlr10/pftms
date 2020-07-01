@@ -18,7 +18,10 @@ class SuppliersMigrateSeeder extends Seeder
                           ->table('tblsuppliers')
                           ->get();
 
-        foreach ($supplierData as $sup) {
+        foreach ($supplierData as $ctr => $sup) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Suppliers: [ $percentage% ] migrated.\n";
+
             $supplier = new Supplier;
             $supplier->company_name = $sup->company_name;
             $supplier->date_filed = $sup->date_file;

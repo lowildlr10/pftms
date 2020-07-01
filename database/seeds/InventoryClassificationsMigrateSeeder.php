@@ -17,7 +17,10 @@ class InventoryClassificationsMigrateSeeder extends Seeder
                           ->table('tblinventory_classification')
                           ->get();
 
-        foreach ($invClassData as $class) {
+        foreach ($invClassData as $ctr => $class) {
+            $percentage = number_format((($ctr + 1) / $invsDataCount) * 100, 2);
+            echo "Inventory Classifications: [ $percentage% ] migrated.\n";
+
             $invClass = new InventoryClassification;
             $invClass->classification_name = $class->classification;
 
