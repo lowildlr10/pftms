@@ -929,4 +929,28 @@ class PurchaseRequestController extends Controller
             return redirect(url()->previous())->with('failed', $msg);
         }
     }
+
+    public function uncancel(Request $request, $id) {
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePR = PurchaseRequest::find($id);
+            $prNo = $instancePR->pr_no;
+            $requestedBy = $instancePR->requested_by;
+            $instancePR->date_pr_cancelled = NULL;
+            $instancePR->status = 1;
+            $instancePR->save();
+
+            //$instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
+            //$instancePR->notifyCancelled($prNo, $requestedBy);
+
+            $msg = "Purchase request '$prNo' successfully un-cancelled.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('pr', ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
 }

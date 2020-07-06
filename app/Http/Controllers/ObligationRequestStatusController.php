@@ -129,10 +129,11 @@ class ObligationRequestStatusController extends Controller
         if ($type == 'procurement') {
             $orsData = PurchaseJobOrder::with('bidpayee')->whereHas('pr', function($query)
                                                 use($empDivisionAccess) {
-                $query->whereIn('division', $empDivisionAccess);
+                $query->whereIn('division', $empDivisionAccess)
+                      ->whereNull('date_pr_cancelled');
             })->whereHas('ors', function($query) {
                 $query->whereNull('deleted_at');
-            });
+            })->whereNull('date_cancelled');
 
             if (!empty($keyword)) {
                 $orsData = $orsData->where(function($qry) use ($keyword) {

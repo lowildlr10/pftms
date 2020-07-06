@@ -436,6 +436,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'proc_pr',
         'access' => 'cancel'
     ])->name('pr-cancel');
+    Route::post('procurement/pr/uncancel/{id}', [
+        'uses' => 'PurchaseRequestController@uncancel',
+        'module' => 'proc_pr',
+        'access' => 'cancel'
+    ])->name('pr-uncancel');
     Route::get('procurement/pr/tracker/{prNo}', [
         'uses' => 'PurchaseRequestController@showTrackPR',
         'module' => 'proc_pr',
@@ -603,7 +608,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'cancel'
     ])->name('po-jo-cancel');
     Route::post('procurement/po-jo/uncancel/{id}', [
-        'uses' => 'PurchaseJobOrderController@unCancel',
+        'uses' => 'PurchaseJobOrderController@uncancel',
         'module' => 'proc_po_jo',
         'access' => 'uncancel'
     ])->name('po-jo-uncancel');

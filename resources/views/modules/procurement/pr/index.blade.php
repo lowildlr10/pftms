@@ -299,11 +299,21 @@
                     @endif
 
                     @if ($pr->status > 1 && $pr->status < 5)
+                        @if (!empty($pr->date_pr_cancelled))
+                    <li class="list-group-item justify-content-between">
+                        <button type="button" class="btn btn-outline-blue-grey waves-effect btn-md btn-block btn-rounded"
+                                onclick="$(this).showUncancel('{{ route('pr-uncancel', ['id' => $pr->id]) }}',
+                                                            '{{ $pr->pr_no }}');">
+                            <i class="fas fa-lock-open"></i> Un-cancel
+                        </button>
+                    </li>
+                        @else
                     <ul class="list-group z-depth-0">
                         <li class="list-group-item justify-content-between text-center">
                             No more available actions.
                         </li>
                     </ul>
+                        @endif
                     @endif
                 </ul>
             </div>

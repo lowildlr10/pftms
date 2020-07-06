@@ -62,7 +62,7 @@ class AbstractQuotationController extends Controller
             $query->whereIn('id', $empDivisionAccess);
         })->whereHas('abstract', function($query) {
             $query->whereNotNull('id');
-        });
+        })->whereNull('date_pr_cancelled');
 
         if (!empty($keyword)) {
             $absData = $absData->where(function($qry) use ($keyword) {
