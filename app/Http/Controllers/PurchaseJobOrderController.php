@@ -74,7 +74,7 @@ class PurchaseJobOrderController extends Controller
             $query->whereIn('id', $empDivisionAccess);
         })->whereHas('po', function($query) {
             $query->whereNotNull('id');
-        });
+        })->whereNull('date_pr_cancelled');
 
         if (!empty($keyword)) {
             $poData = $poData->where(function($qry) use ($keyword) {
@@ -634,6 +634,49 @@ class PurchaseJobOrderController extends Controller
             $instancePO->save();
 
             $msg = "$documentType '$poNo' is now ready for inspection.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('po-jo', ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function cancel(Request $request, $id) {
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePO = PurchaseJobOrder::find($id);
+            $poNo = $instancePO->po_no;
+            $instancePO->date_cancelled = Carbon::now();
+            $instancePO->save();
+
+            //$instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
+            //$instancePR->notifyCancelled($poNo, $requestedBy);
+
+            $msg = "Purchase/Job Order '$poNo' successfully cancelled.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('po-jo', ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function uncancel(Request $request, $id) {
+        try {
+            $instanceDocLog = new DocLog;
+            $instancePO = PurchaseJobOrder::find($id);
+            $poNo = $instancePO->po_no;
+            $instancePO->date_cancelled = NULL;
+            $instancePO->save();
+
+            //$instancePR->notifyCancelled($poNo, $requestedBy);
+
+            $msg = "Purchase/Job Order '$poNo' successfully un-cancelled.";
             Auth::user()->log($request, $msg);
             return redirect()->route('po-jo', ['keyword' => $id])
                              ->with('success', $msg);

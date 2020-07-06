@@ -68,7 +68,7 @@ class RequestQuotationController extends Controller
             $query->whereIn('id', $empDivisionAccess);
         })->whereHas('rfq', function($query) {
             $query->whereNotNull('id');
-        });
+        })->whereNull('date_pr_cancelled');
 
         if ($roleHasOrdinary) {
             if ($roleHasDeveloper || $roleHasAccountant ||

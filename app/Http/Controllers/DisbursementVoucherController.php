@@ -135,14 +135,13 @@ class DisbursementVoucherController extends Controller
 
         if ($type == 'procurement') {
             $dvData = DisbursementVoucher::select('id', 'pr_id', 'particulars', 'module_class', 'dv_no')
-                                         ->with(['bidpayee' => function($query) {
-                $query->select('company_name', 'address');
-            },
+                                         ->with(['bidpayee',
             'procors' => function($query) {
                 $query->select('id', 'po_no');
             },
             'pr' => function($query) use($empDivisionAccess) {
-                $query->whereIn('division', $empDivisionAccess);
+                $query->whereIn('division', $empDivisionAccess)
+                      ->whereNull('date_pr_cancelled');
             }])->where('disbursement_vouchers.module_class', 3);
 
             if (!empty($keyword)) {

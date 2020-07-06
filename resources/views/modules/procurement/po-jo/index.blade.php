@@ -144,26 +144,31 @@
                                                             @foreach ($pr->po as $listCtr1 => $item)
                                                             <tr class="row-item">
                                                                 <td align="center">
-                                                                    @if ($item->status == 3)
+                                                                    @if (empty($item->date_cancelled))
+                                                                        @if ($item->status == 3)
                                                                     <i class="fas fa-ban fa-lg text-danger material-tooltip-main"
                                                                        data-toggle="tooltip" data-placement="right" title="Cancelled"></i>
-                                                                    @elseif ($item->status == 8)
+                                                                        @elseif ($item->status == 8)
                                                                     <i class="fas fa-truck fa-lg black-text material-tooltip-main"
                                                                        data-toggle="tooltip" data-placement="right" title="For Delivery"></i>
-                                                                    @elseif ($item->status >= 9)
+                                                                        @elseif ($item->status >= 9)
                                                                     <i class="fas fa-check fa-lg text-success material-tooltip-main"
                                                                        data-toggle="tooltip" data-placement="right" title="Complete"></i>
                                                                     @else
-                                                                        @if (empty($item->date_accountant_signed) && empty($item->date_po_approved))
+                                                                            @if (empty($item->date_accountant_signed) && empty($item->date_po_approved))
                                                                     <i class="far fa-lg fa-file material-tooltip-main"
                                                                        data-toggle="tooltip" data-placement="right" title="Pending"></i>
-                                                                        @elseif (!empty($item->date_accountant_signed) && empty($item->date_po_approved))
+                                                                            @elseif (!empty($item->date_accountant_signed) && empty($item->date_po_approved))
                                                                     <i class="fas fa-signature fa-lg text-success material-tooltip-main"
                                                                        data-toggle="tooltip" data-placement="right" title="Clear/Signed by Accountant"></i>
-                                                                        @elseif (!empty($item->date_accountant_signed) && !empty($item->date_po_approved))
+                                                                            @elseif (!empty($item->date_accountant_signed) && !empty($item->date_po_approved))
                                                                     <i class="fas fa-thumbs-up fa-lg text-success material-tooltip-main"
                                                                        data-toggle="tooltip" data-placement="right" title="Approved"></i>
+                                                                            @endif
                                                                         @endif
+                                                                    @else
+                                                                    <i class="fa fa-ban fa-lg red-text material-tooltip-main"
+                                                                       data-toggle="tooltip" data-placement="right" title="Cancelled"></i>
                                                                     @endif
                                                                 </td>
                                                                 <td align="center"><strong>{{ $item->po_no }}</strong></td>
@@ -326,23 +331,22 @@
 
                     @if (!empty($item->date_cancelled))
                     <li class="list-group-item justify-content-between">
-                        <button type="button" class="btn btn-outline-black waves-effect btn-block btn-md btn-rounded"
+                        <button type="button" class="btn btn-outline-blue-grey waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showUncancel('{{ route('po-jo-uncancel', ['id' => $item->id]) }}',
                                                               `{{ strtoupper($item->document_type).' '.$item->po_no }}`);">
                             <i class="fas fa-lock-open fa-lg black-text"></i> Uncancel Document
                         </button>
                     </li>
-                    @endif
-
-                    @if ($isAllowedORSCreate)
-                        @if ($item->with_ors_burs == 'y')
+                    @else
+                        @if ($isAllowedORSCreate)
+                            @if ($item->with_ors_burs == 'y')
                     <li class="list-group-item justify-content-between">
                         <a type="button" class="btn btn-outline-warning waves-effect btn-block btn-md btn-rounded"
                            onclick="$(this).redirectToDoc('{{ route('proc-ors-burs') }}', '{{ $item->po_no }}');">
                             <i class="fas fa-file-signature orange-text"></i> Edit ORS/BURS
                         </a>
                     </li>
-                        @else
+                            @else
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showCreateORS('{{ route('po-jo-create-ors-burs', ['poID' => $item->id]) }}',
@@ -350,10 +354,10 @@
                             <i class="fas fa-pencil-alt green-text"></i> Create ORS/BURS
                         </button>
                     </li>
+                            @endif
                         @endif
-                    @endif
 
-                    @if (empty($item->date_accountant_signed) && empty($item->date_po_approved))
+                        @if (empty($item->date_accountant_signed) && empty($item->date_po_approved))
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showAccountantSigned('{{ route('po-jo-accountant-signed', ['id' => $item->id]) }}',
@@ -361,7 +365,7 @@
                             <i class="fas fa-signature green-text"></i> Cleared/Signed by Accountant
                         </button>
                     </li>
-                    @elseif (!empty($item->date_accountant_signed) && empty($item->date_po_approved))
+                        @elseif (!empty($item->date_accountant_signed) && empty($item->date_po_approved))
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showApprove('{{ route('po-jo-approve', ['id' => $item->id]) }}',
@@ -369,8 +373,8 @@
                             <i class="fas fa-thumbs-up green-text"></i> Approve
                         </button>
                     </li>
-                    @elseif (!empty($item->date_accountant_signed) && !empty($item->date_po_approved))
-                        @if (!empty($item->doc_status->date_issued) && $item->status != 3)
+                        @elseif (!empty($item->date_accountant_signed) && !empty($item->date_po_approved))
+                            @if (!empty($item->doc_status->date_issued) && $item->status != 3)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-danger waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showCancel('{{ route('po-jo-cancel', ['id' => $item->id]) }}',
@@ -378,7 +382,7 @@
                             <i class="fas fa-ban fa-lg red-text"></i> Cancel
                         </button>
                     </li>
-                            @if ($item->with_ors_burs == 'y')
+                                @if ($item->with_ors_burs == 'y')
                     <!--
                     <li class="list-group-item justify-content-between">
                         <a type="button" class="btn btn-outline-warning waves-effect btn-block btn-rounded"
@@ -387,7 +391,7 @@
                         </a>
                     </li>
                     -->
-                                @if ($item->status == 7)
+                                    @if ($item->status == 7)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-black waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showForDelivery('{{ route('po-jo-delivery', ['id' => $item->id]) }}',
@@ -395,7 +399,7 @@
                             <i class="fas fa-truck"></i> For Delivery
                         </button>
                     </li>
-                                @elseif ($item->status == 8)
+                                    @elseif ($item->status == 8)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-indigo waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showForInspection('{{ route('po-jo-inspection', ['id' => $item->id]) }}',
@@ -403,15 +407,15 @@
                             <i class="fas fa-search"></i> Inspection
                         </button>
                     </li>
-                                @elseif ($item->status >= 9)
+                                    @elseif ($item->status >= 9)
                     <li class="list-group-item justify-content-between">
                         <a type="button" class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded"
                            onclick="$(this).redirectToDoc('{{ route('iar') }}', '{{ $item->pr_id }}');">
                             Generate IAR <i class="fas fa-angle-double-right"></i>
                         </a>
                     </li>
-                                @endif
-                            @else
+                                    @endif
+                                @else
                     <!--
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block"
@@ -420,9 +424,9 @@
                         </button>
                     </li>
                     -->
+                                @endif
                             @endif
-                        @endif
-                        @if (empty($item->doc_status->date_issued) && empty($item->doc_status->date_received))
+                            @if (empty($item->doc_status->date_issued) && empty($item->doc_status->date_received))
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-warning waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showIssue('{{ route('po-jo-show-issue', ['id' => $item->id]) }}',
@@ -430,8 +434,8 @@
                             <i class="fas fa-paper-plane orange-text"></i> Issue
                         </button>
                     </li>
-                        @elseif (!empty($item->doc_status->date_issued) && empty($item->doc_status->date_received))
-                            @if ($item->status != 3)
+                            @elseif (!empty($item->doc_status->date_issued) && empty($item->doc_status->date_received))
+                                @if ($item->status != 3)
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showReceive('{{ route('po-jo-show-receive', ['id' => $item->id]) }}',
@@ -439,6 +443,7 @@
                             <i class="fas fa-lg fa-hand-holding"></i> Receive
                         </button>
                     </li>
+                                @endif
                             @endif
                         @endif
                     @endif

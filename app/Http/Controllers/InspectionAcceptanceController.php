@@ -60,7 +60,9 @@ class InspectionAcceptanceController extends Controller
             $query->whereIn('id', $empDivisionAccess);
         })->whereHas('iar', function($query) {
             $query->whereNotNull('id');
-        });
+        })->whereHas('po', function($query) {
+            $query->whereNull('date_cancelled');
+        })->whereNull('date_pr_cancelled');
 
         if (!empty($keyword)) {
             $iarData = $iarData->where(function($qry) use ($keyword) {
