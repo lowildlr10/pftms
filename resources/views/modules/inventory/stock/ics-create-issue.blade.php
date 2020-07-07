@@ -53,80 +53,81 @@
                                 </th>
                             </tr>
 
+                            <tbody id="row-items">
                             @if (count($stocks) > 0)
                                 @foreach ($stocks as $ctr => $stock)
                                     @if ($stock->available_quantity > 0)
-                            <tr id="row-{{ $ctr + 1 }}">
-                                <td>
-                                    <div class="md-form form-sm my-0">
-                                        <input class="form-control required form-control-sm quantity required" type="number"
-                                               name="quantity[]" placeholder="avail: {{ $stock->available_quantity }}"
-                                               min="0" max="{{ $stock->available_quantity }}" required="required">
-                                        <input type="hidden" name="inv_stock_item_id[]" value="{{ $stock->id }}">
-                                    </div>
-                                </td>
-                                <td align="center">
-                                    <div class="md-form form-sm my-0">
-                                        <input class="form-control form-control-sm" type="text"
-                                               readonly="readonly" value="{{ $stock->unit }}">
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="md-form form-sm my-0">
-                                        <input class="form-control form-control-sm" type="number"
-                                               readonly="readonly" value="{{ $stock->amount / $stock->quantity }}">
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="md-form form-sm my-0">
-                                        <input class="form-control form-control-sm" type="number"
-                                               readonly="readonly" value="{{ $stock->amount }}">
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="md-form form-sm my-0">
-                                        <textarea class="md-textarea form-control required"
-                                                  placeholder="Item description..."
-                                                  rows="1" readonly>{{ $stock->description }}</textarea>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="md-form form-sm my-0">
-                                        <input class="form-control form-control-sm required" type="date"
-                                               name="date_issued[]">
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="md-form form-sm my-0">
-                                        <textarea class="md-textarea form-control required" name="prop_stock_no[]"
-                                                  placeholder="Value..." rows="1"></textarea>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="md-form form-sm my-0">
-                                        <input class="form-control form-control-sm required" type="text"
-                                               name="est_useful_life[]" placeholder="Value...">
-                                    </div>
-                                </td>
-                                <td>
-                                    <a onclick="$(this).deleteRow('#row-{{ $ctr + 1 }}');"
-                                       class="btn btn-outline-red px-1 py-0">
-                                        <i class="fas fa-minus-circle"></i>
-                                    </a>
-                                </td>
-                            </tr>
+                                <tr id="row-{{ $ctr + 1 }}">
+                                    <td>
+                                        <div class="md-form form-sm my-0">
+                                            <input class="form-control required form-control-sm quantity required" type="number"
+                                                name="quantity[]" placeholder="avail: {{ $stock->available_quantity }}"
+                                                min="0" max="{{ $stock->available_quantity }}" required="required">
+                                            <input type="hidden" name="inv_stock_item_id[]" value="{{ $stock->id }}">
+                                        </div>
+                                    </td>
+                                    <td align="center">
+                                        <div class="md-form form-sm my-0">
+                                            <input class="form-control form-control-sm" type="text"
+                                                readonly="readonly" value="{{ $stock->unit }}">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="md-form form-sm my-0">
+                                            <input class="form-control form-control-sm" type="number"
+                                                readonly="readonly" value="{{ $stock->amount / $stock->quantity }}">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="md-form form-sm my-0">
+                                            <input class="form-control form-control-sm" type="number"
+                                                readonly="readonly" value="{{ $stock->amount }}">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="md-form form-sm my-0">
+                                            <textarea class="md-textarea form-control required"
+                                                    placeholder="Item description..."
+                                                    rows="1" readonly>{{ $stock->description }}</textarea>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="md-form form-sm my-0">
+                                            <input class="form-control form-control-sm required" type="date"
+                                                name="date_issued[]">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="md-form form-sm my-0">
+                                            <textarea class="md-textarea form-control required" name="prop_stock_no[]"
+                                                    placeholder="Value..." rows="1"></textarea>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="md-form form-sm my-0">
+                                            <input class="form-control form-control-sm required" type="text"
+                                                name="est_useful_life[]" placeholder="Value...">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a onclick="$(this).deleteRow('#row-{{ $ctr + 1 }}');"
+                                        class="btn btn-outline-red px-1 py-0">
+                                            <i class="fas fa-minus-circle"></i>
+                                        </a>
+                                    </td>
+                                </tr>
                                 @else
-                            <tr>
-                                <td colspan="9">
-                                    <h6 class="text-center red-text">
-                                        {{ $stock->description }} (Out of Stock)
-                                    </h6>
-                                </td>
-                            </tr>
+                                <tr>
+                                    <td colspan="9">
+                                        <h6 class="text-center red-text">
+                                            {{ $stock->description }} (Out of Stock)
+                                        </h6>
+                                    </td>
+                                </tr>
                                 @endif
                             @endforeach
                         @endif
-
+                            </tbody>
                         </table>
                     </div>
                 </td>

@@ -84,7 +84,8 @@ class InventoryStockController extends Controller
             });
         }
 
-        $invStocksData = $invStocksData->sortable(['inventory_no' => 'desc'])->paginate(15);
+        $invStocksData = $invStocksData->sortable(['created_at' => 'desc'])->paginate(15);
+        $instanceInvClass = InventoryClassification::orderBy('classification_name')->get();
 
         foreach ($invStocksData as $invStock) {
             foreach ($invStock->stockitems as $item) {
@@ -102,6 +103,7 @@ class InventoryStockController extends Controller
             'keyword' => $keyword,
             'list' => $invStocksData,
             'paperSizes' => $paperSizes,
+            'instanceInvClass' => $instanceInvClass,
             'isAllowedCreate' => $isAllowedCreate,
             'isAllowedUpdate' => $isAllowedUpdate,
             'isAllowedDelete' => $isAllowedDelete,
@@ -135,8 +137,17 @@ class InventoryStockController extends Controller
         ));
     }
 
-    public function showCreate() {
-        //
+    public function showCreate($classificationID, $classification) {
+        $divisions = EmpDivision::orderBy('division_name')->get();
+        $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
+        $itemClassifications = ItemClassification::orderBy('classification_name')
+                                                 ->get();
+        $suppliers = Supplier::orderBy('company_name')->get();
+
+        return view('modules.inventory.stock.create', compact(
+            'divisions', 'classificationID', 'suppliers',
+            'classification', 'unitIssues', 'itemClassifications'
+        ));
     }
 
     /**
@@ -226,8 +237,70 @@ class InventoryStockController extends Controller
         }
     }
 
-    public function store(Request $request) {
-        //
+    public function store(Request $request, $classificationID, $classification) {
+        $fundCluster = $request->fund_cluster ? $request->fund_cluster : NULL;
+        $inventoryNo = $request->inventory_no;
+        $division = $request->division ? $request->division : NULL;
+        $office = $request->office ? $request->office : NULL;
+        $purpose = $request->purpose ? $request->purpose : '-';
+        $entityName = $request->entity_name ? $request->entity_name : NULL;
+        $poNo = $request->po_no  ? $request->po_no : NULL;
+        $datePO = $request->date_po ? $request->date_po : NULL;
+        $supplier = $request->supplier ? $request->supplier : NULL;
+
+        $units = $request->unit;
+        $descriptions = $request->description;
+        $quantities = $request->quantity;
+        $amounts = $request->amount;
+        $itemClassifications = $request->item_classification;
+
+        try {
+            $instanceInvStocks = new InventoryStock;
+            $instanceInvStocks->fund_cluster = $fundCluster;
+            $instanceInvStocks->inventory_no = $inventoryNo;
+            $instanceInvStocks->division = $division;
+            $instanceInvStocks->entity_name = $entityName;
+            $instanceInvStocks->office = $office;
+            $instanceInvStocks->po_no = $poNo;
+            $instanceInvStocks->date_po = $datePO;
+            $instanceInvStocks->supplier = $supplier;
+            $instanceInvStocks->purpose = $purpose;
+            $instanceInvStocks->inventory_classification = $classificationID;
+            $instanceInvStocks->save();
+
+            $invStock = DB::table('inventory_stocks')
+                        ->where([['inventory_no', $inventoryNo],
+                                ['inventory_classification', $classificationID]])
+                        ->first();
+            $invStockID = $invStock->id;
+
+            foreach ($units as $ctr => $unit) {
+                $itemNo = $ctr + 1;
+
+                $instanceInvStockItem = new InventoryStockItem;
+                $instanceInvStockItem->inv_stock_id = $invStockID;
+                $instanceInvStockItem->item_classification = $itemClassifications[$ctr];
+                $instanceInvStockItem->item_no = $itemNo;
+                $instanceInvStockItem->unit_issue = $unit;
+                $instanceInvStockItem->description = $descriptions[$ctr];
+                $instanceInvStockItem->quantity = $quantities[$ctr];
+                $instanceInvStockItem->amount = $amounts[$ctr];
+                $instanceInvStockItem->save();
+            }
+
+            $documentType = 'Inventory Stocks';
+            $routeName = 'stocks';
+
+            $msg = "$documentType successfully created.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName)
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())
+                                 ->with('failed', $msg);
+        }
     }
 
     /**
@@ -267,7 +340,7 @@ class InventoryStockController extends Controller
         ));
     }
 
-    public function showEdit($id) {
+    public function showEdit($id, $type) {
         //
     }
 

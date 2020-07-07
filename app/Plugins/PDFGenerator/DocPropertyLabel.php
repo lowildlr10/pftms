@@ -32,7 +32,7 @@ class DocPropertyLabel extends PDF {
 
         /* ------------------------------------- End of Config ------------------------------------- */
 
-        foreach ($data->label_data as $dat) {
+        foreach ($data->label_data as $ctr => $dat) {
             //Add a page
             $this->AddPage();
 
@@ -103,7 +103,7 @@ class DocPropertyLabel extends PDF {
             //$type = 'code39';
             $black = '000000'; // color in hexa
 
-            $code = $dat->stock_id . '-' . $dat->received_by; // barcode
+            $code = $dat->stock_id[$ctr]; // barcode
 
             $this->StartTransform();
             $this->Rotate(90);

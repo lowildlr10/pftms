@@ -10,14 +10,14 @@
             <tr>
                 <td>
                     <div class="md-form form-sm">
-                        <input type="text" id="divsion" class="form-control required"
+                        <input type="text" id="divsion" class="form-control"
                                value="{{ $division }}" readonly>
                         <label for="divsion" class="active">
                             <strong>Division</strong>
                         </label>
                     </div>
                     <div class="md-form form-sm">
-                        <input type="text" id="office" class="form-control required"
+                        <input type="text" id="office" class="form-control"
                                value="{{ $office }}" readonly>
                         <label for="office" class="active">
                             <strong>Office</strong>
@@ -26,7 +26,7 @@
                 </td>
                 <td>
                     <div class="md-form form-sm">
-                        <input type="text" id="inventory-no" class="form-control required"
+                        <input type="text" id="inventory-no" class="form-control"
                                name="inventory_no" value="{{ $inventoryNo }}" readonly>
                         <label for="inventory-no" class="active">
                             <strong>RIS No</strong>
@@ -112,7 +112,7 @@
                                     <div class="custom-control custom-radio">
                                         <input type="radio" class="custom-control-input" id="avail-y-{{ $ctr }}"
                                                name="stock_available[{{ $ctr }}]" value="y"
-                                               {{ $stock->invstockitems->stock_available == 'y' ? 'checked' : '' }}>
+                                               {{ $stock->stock_available == 'y' ? 'checked' : '' }}>
                                         <label class="custom-control-label" for="avail-y-{{ $ctr }}"></label>
                                     </div>
                                 </td>
@@ -120,7 +120,7 @@
                                     <div class="custom-control custom-radio">
                                         <input type="radio" class="custom-control-input" id="avail-n-{{ $ctr }}"
                                                name="stock_available[{{ $ctr }}]" value="n"
-                                               {{ $stock->invstockitems->stock_available == 'n' ? 'checked' : '' }}>
+                                               {{ $stock->stock_available == 'n' ? 'checked' : '' }}>
                                         <label class="custom-control-label" for="avail-n-{{ $ctr }}"></label>
                                     </div>
                                 </td>

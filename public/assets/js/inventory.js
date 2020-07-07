@@ -30,6 +30,100 @@ $(function() {
 		});
     }
 
+    $.fn.addRow = function(tableID) {
+		const table = $(tableID).get(0);
+		const rowCount = table.rows.length;
+		let row = table.insertRow(rowCount);
+		const iteration = rowCount;
+		const origCount = $('#item-count').get(0).value;
+		const conCount = eval(origCount) + 1;
+	    const colCount = table.rows[0].cells.length;
+
+		row.id = "row-" + (rowCount - 1);
+
+	    for (let i = 0; i < colCount; i++) {
+	        const newcell = row.insertCell(i);
+			$(newcell).html($(table.rows[1].cells[i]).html());
+
+			switch(i){
+				case 0:
+                    /*
+                    $(newcell).find('div.md-form').first().append($(newcell).find('select'));
+                    $(newcell).find('div.select-wrapper').remove();
+                    $(newcell).find('select').attr('id', 'unit' + conCount).val('').materialSelect();
+
+                    $(newcell).find('input')
+							  .attr('name', 'unit[]')
+                              .val('');*/
+
+                    $(newcell).find('select')
+							  .attr('name', 'unit[]')
+                              .val('');
+				break;
+				case 1:
+                    $(newcell).find('textarea')
+                              .attr('name', 'description[]')
+							  .val('');
+				break;
+				case 2:
+					$(newcell).find('input')
+							  .attr('name', 'quantity[]')
+							  .val('');
+                break;
+                case 3:
+					$(newcell).find('input')
+							  .attr('name', 'amount[]')
+							  .val('');
+                break;
+                case 4:
+                    /*
+                    $(newcell).find('div.md-form').first().append($(newcell).find('select'));
+                    $(newcell).find('div.select-wrapper').remove();
+                    $(newcell).find('select').attr('id', 'item_classification' + conCount).val('').materialSelect();
+
+                    $(newcell).find('input')
+							  .attr('name', 'item_classification[]')
+                              .val('');*/
+                    $(newcell).find('select')
+							  .attr('name', 'item_classification[]')
+                              .val('');
+				break;
+				case 5:
+					$(newcell).find('a')
+							  .attr('onclick', "$(this).deleteRow('#row-" + (rowCount - 1) + "')");
+				break;
+			}
+	    }
+
+	    $("#item-count").val(conCount);
+	}
+
+	$.fn.showCreate = function(url, classification) {
+        let name = '';
+
+		if (classification == 'ris') {
+			name = 'Requisition and Issue Slip';
+		} else if (classification == 'par') {
+			name = 'Property Aknowledgement Receipt';
+		} else {
+			name = 'Inventory Custodian Slip';
+        }
+
+		$('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-create').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $(this).slideToggle(500);
+            initializeQtyInput();
+        });
+        $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
+						     .on('shown.bs.modal', function() {
+            $('#create-title').html(`Create ${name}`);
+		}).on('hidden.bs.modal', function() {
+		    $('#modal-body-create').html('').css('display', 'none');
+		});
+	}
+
     $.fn.showCreateIssueItem = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-create').load(url, function() {
@@ -94,10 +188,16 @@ $(function() {
     }
 
     $.fn.deleteRow = function(row) {
-        if (confirm('Are you sure you want to delete this row?')) {
-            $(row).fadeOut(300, function() {
-                $(this).remove();
-            });
+        if (confirm('Are you sure you want to remove this item?')) {
+			const rowCount = $('#row-items tr').length;
+
+			if (rowCount > 1) {
+                $(row).fadeOut(300, function() {
+                    $(this).remove();
+                });
+			} else {
+				alert('Cannot delete all the rows.');
+			}
 		}
     }
 

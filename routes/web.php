@@ -827,6 +827,16 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'inv_stocks',
         'access' => 'create'
     ])->name('stocks-show-create-iar');
+    Route::get('inventory/stocks/show-create/{classificationID}/{classification}', [
+        'uses' => 'InventoryStockController@showCreate',
+        'module' => 'inv_stocks',
+        'access' => 'create'
+    ])->name('stocks-show-create');
+    Route::post('inventory/stocks/store/{classificationID}/{classification}', [
+        'uses' => 'InventoryStockController@store',
+        'module' => 'inv_stocks',
+        'access' => 'create'
+    ])->name('stocks-store');
     Route::post('inventory/stocks/store-iar/{poID}', [
         'uses' => 'InventoryStockController@storeFromIAR',
         'module' => 'inv_stocks',
@@ -837,6 +847,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'inv_stocks',
         'access' => 'update'
     ])->name('stocks-show-edit-iar');
+    Route::get('inventory/stocks/show-edit/{id}/{classification}', [
+        'uses' => 'InventoryStockController@showEdit',
+        'module' => 'inv_stocks',
+        'access' => 'update'
+    ])->name('stocks-show-edit');
     Route::post('inventory/stocks/update-iar/{poID}', [
         'uses' => 'InventoryStockController@updateFromIAR',
         'module' => 'inv_stocks',
