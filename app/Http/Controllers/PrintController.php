@@ -552,9 +552,11 @@ class PrintController extends Controller
     }
 
     private function getDataPropertyLabel($invStockIssueID) {
+        $stockID = [];
         $invStockIssueData = InventoryStockIssue::find($invStockIssueID);
         $invStockIssueItemData = InventoryStockIssueItem::with('invstockitems')
                                                     ->where('inv_stock_issue_id', $invStockIssueID)
+                                                    ->where('excluded', 'n')
                                                     ->get();
         $data = (object) [
             'inv_stock_issue' => $invStockIssueData,
@@ -574,7 +576,9 @@ class PrintController extends Controller
         foreach ($invStockIssueItemData as $item) {
             $propertyNos = unserialize($item->prop_stock_no);
             $dateAcquired = $item->date_issued;
-            $description = $item->invstockitems->description;
+            $description = (strlen($item->invstockitems->description) > 300) ?
+                            substr($item->invstockitems->description, 0, 300).'...' :
+                            $item->invstockitems->description;
 
             if (!empty($dateAcquired)) {
                 $dateAcquired = new DateTime($dateAcquired);
@@ -582,6 +586,8 @@ class PrintController extends Controller
             }
 
             foreach ($propertyNos as $propertyNo) {
+                $stockID[] = $item->id;
+
                 if (empty($propertyNo)) {
                     $propertyNo = 'N/A';
                 }
@@ -636,7 +642,8 @@ class PrintController extends Controller
                     'data3' => $data3,
                     'data4' => $data4,
                     'property_no' => $propertyNo,
-                    'stock_id' => $invStockIssueID,
+                    'stock_id' => $stockID,
+                    //'stock_id' => $invStockIssueID,
                     'received_by' => $issuedTo
                 ];
             }
@@ -650,6 +657,7 @@ class PrintController extends Controller
                                                 ->find($invStockIssueID);
         $invStockIssueItemData = InventoryStockIssueItem::with('invstockitems')
                                                     ->where('inv_stock_issue_id', $invStockIssueID)
+                                                    ->where('excluded', 'n')
                                                     ->get();
 
         $entityName = $invStockIssueData->invstocks->entity_name;
@@ -756,6 +764,7 @@ class PrintController extends Controller
                                                 ->find($invStockIssueID);
         $invStockIssueItemData = InventoryStockIssueItem::with('invstockitems')
                                                     ->where('inv_stock_issue_id', $invStockIssueID)
+                                                    ->where('excluded', 'n')
                                                     ->get();
 
         $fundCluster = $invStockIssueData->invstocks->fund_cluster;
@@ -886,6 +895,7 @@ class PrintController extends Controller
                                                 ->find($invStockIssueID);
         $invStockIssueItemData = InventoryStockIssueItem::with('invstockitems')
                                                     ->where('inv_stock_issue_id', $invStockIssueID)
+                                                    ->where('excluded', 'n')
                                                     ->get();
 
         $fundCluster = $invStockIssueData->invstocks->fund_cluster;

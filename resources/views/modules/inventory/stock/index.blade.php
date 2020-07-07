@@ -38,15 +38,19 @@
                                     <i class="fas fa-pencil-alt"></i> Create
                                 </button>
                                 <div class="dropdown-menu">
-                                    <a class="dropdown-item" onclick="$(this).showCreate('par');">
-                                        Property Aknowledgement Receipt (PAR)
+                                    @if (count($instanceInvClass) > 0)
+                                        @foreach ($instanceInvClass as $class)
+
+
+                                    <a class="dropdown-item" onclick="$(this).showCreate(`{{ route('stocks-show-create', [
+                                            'classification' => strtolower($class->abbrv),
+                                            'classificationID' => $class->id
+                                        ]) }}`, '{{ strtolower($class->abbrv) }}');">
+                                        {{ $class->classification_name }}
                                     </a>
-                                    <a class="dropdown-item" onclick="$(this).showCreate('ris');">
-                                        Requisition and Issue Slip (RIS)
-                                    </a>
-                                    <a class="dropdown-item" onclick="$(this).showCreate('ics');">
-                                        Inventory Custodian Slip (ICS)
-                                    </a>
+
+                                        @endforeach
+                                    @endif
 
                                     @if ($isAllowedIAR)
                                     <div class="dropdown-divider"></div>
