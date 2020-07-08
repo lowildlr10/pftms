@@ -148,16 +148,26 @@ $(function() {
         }
     }
 
-    $.fn.showEdit = function(url) {
+    $.fn.showEdit = function(url, classification) {
+        let name = '';
+
+		if (classification == 'ris') {
+			name = 'Requisition and Issue Slip';
+		} else if (classification == 'par') {
+			name = 'Property Aknowledgement Receipt';
+		} else {
+			name = 'Inventory Custodian Slip';
+        }
+
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
         });
-        $("#modal-edit").modal({keyboard: false, backdrop: 'static'})
+        $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {
-            $('#edit-title').html('Update Issued Items');
+            $('#edit-title').html(`Update ${name}`);
 		}).on('hidden.bs.modal', function() {
             $('#modal-body-edit').html('').css('display', 'none');
 		});
@@ -228,6 +238,18 @@ $(function() {
 		});
     }
 
+    $.fn.showDelete = function(url, name) {
+		$('#modal-body-delete').html(`Are you sure you want to delete "${name}"?`);
+        $("#modal-delete").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#delete-title').html('Delete Inventory');
+            $('#form-delete').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-delete-body').html('');
+             $('#form-delete').attr('action', '#');
+		});
+    }
+
     $.fn.delete = function() {
         $('#form-delete').submit();
     }
@@ -248,108 +270,6 @@ $(function() {
     $.fn.issue = function() {
         $('#form-issue').submit();
     }
-
-
-
-
-
-
-
-
-
-    /*
-
-	$.fn.showCreate = function(classification) {
-		$('#modal-body-create').load('stocks/show-create/' + classification);
-		$("#central-create-modal").modal({keyboard: false, backdrop: 'static'})
-						.on('shown.bs.modal', function() {
-
-				   		}).on('hidden.bs.modal', function() {
-					        $('#modal-body-create').html(modalLoadingContent);
-					    });
-	}
-
-	$.fn.showEdit = function(key, classification, type) {
-		$('#modal-body-issue').load('stocks/show/' + key +
-									'?classification=' + classification +
-									'&type=' + type);
-		$("#central-issue-modal").modal({keyboard: false, backdrop: 'static'})
-						.on('shown.bs.modal', function() {
-				            initializeQtyInput();
-				   		}).on('hidden.bs.modal', function() {
-					        $('#modal-body-issue').html(modalLoadingContent);
-					    });
-	}
-
-	$.fn.showEditIssue = function(invNo, classification, empID) {
-		$('#modal-body-edit').load('stocks/edit/' + invNo +
-								   '?classification=' + classification +
-								   '&received_by=' + empID);
-		$("#central-edit-modal").modal({keyboard: false, backdrop: 'static'})
-						.on('shown.bs.modal', function() {
-				            initializeQtyInput();
-				   		}).on('hidden.bs.modal', function() {
-					        $('#modal-body-edit').html(modalLoadingContent);
-					    });
-	}
-
-	$.fn.showIssued = function(invNo, classification) {
-		$('#modal-body-sm').load('stocks/issued/' + invNo +
-								 '?classification=' + classification);
-		$("#smcard-central-modal").modal({keyboard: false, backdrop: 'static'})
-						.on('shown.bs.modal', function() {
-
-				   		}).on('hidden.bs.modal', function() {
-					        $('#modal-body-sm').html(modalLoadingContent);
-					    });
-	}
-
-	$.fn.saveLabel = function(invID, empID, element) {
-		var serialNo = element.val();
-
-		$.post('stocks/update-serial-no/' + invID, {
-			_token: $('meta[name=csrf-token]').attr('content'),
-		    received_by: empID,
-		    serial_no: serialNo
-		}).done(function(data) {
-			showPrint(invID, 'label', empID);
-		}).fail(function(xhr, status, error) {
-
-		});
-	}
-
-	$.fn.issueDoc = function() {
-		var withError = inputValidation(false);
-
-		if (!withError) {
-			$('input[name^=quantity]').each(function(index) {
-				var maxValue = parseInt($(this).attr('max'));
-				var currentValue = parseInt($(this).val());
-
-				if ((currentValue > maxValue) && currentValue == 0) {
-					$(this).addClass("input-error-highlighter");
-					withError = true;
-				}
-			});
-		}
-
-		if (!withError) {
-			$('#form-update').submit();
-		}
-	}
-
-	$.fn.delete = function(invNo, classification, empID) {
-		if (confirm("Delete issued item/s for " + empID +
-					" [" + classification + " No: " + invNo + "]?")) {
-			$('#form-validation').attr('action', 'stocks/delete/' + invNo + '?received_by=' + empID).submit();
-		}
-	}
-
-	$.fn.issued = function(invNo) {
-		if (confirm("Set this " + invNo + " to 'ISSUED'?")) {
-			$('#form-validation').attr('action', 'stocks/set-issued/' + invNo).submit();
-		}
-    }*/
 
     $('.material-tooltip-main').tooltip({
         template: template

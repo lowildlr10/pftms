@@ -122,7 +122,11 @@
                                                 @endif
                                             </td>
                                             <td align="center"></td>
-                                            <td>{{ $inv->inventory_no }}</td>
+                                            <td>
+                                                {{ $inv->inventory_no }} {!!
+                                                    !$inv->po_id ? '<br><em><small class="grey-text">(Manually Added)</small></em>' : ''
+                                                !!}
+                                            </td>
                                             <td class="py-2 px-0">
                                                 <div class="mdb-color-text">
                                                     @if (count($inv->stockitems) > 0)
@@ -229,7 +233,7 @@
                         <div class="p-0">
                             <div class="btn-group btn-menu-1 p-0">
                                 @if ($isAllowedIssue)
-                                <button type="button" class="btn btn-outline-green
+                                <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showCreateIssueItem(`{{ route('stocks-show-create-issue-item', [
                                             'invStockID' => $inv->id,
@@ -239,6 +243,29 @@
                                         ]) }}`);">
                                     <i class="fas fa-paper-plane green-text"></i> Issue Item / Property
                                 </button>
+                                @endif
+
+                                @if (empty($inv->po_id))
+                                    @if ($isAllowedUpdate)
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light"
+                                        onclick="$(this).showEdit(`{{ route('stocks-show-edit', [
+                                            'id' => $inv->id,
+                                            'classification' => strtolower($inv->inventoryclass['abbrv']),
+                                        ]) }}`);">
+                                    <i class="fas fa-edit orange-text"></i> Edit
+                                </button>
+                                    @endif
+
+                                    @if ($isAllowedDelete)
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light"
+                                        onclick="$(this).showDelete(`{{ route('stocks-delete', [
+                                            'id' => $inv->id,
+                                        ]) }}`, '{{ $inv->inventory_no }}');">
+                                    <i class="fas fa-trash red-text"></i> Delete
+                                </button>
+                                    @endif
                                 @endif
                             </div>
                         </div>

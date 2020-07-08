@@ -169,6 +169,11 @@
                             <li>
                                 <a href="{{ route('stocks') }}" class="waves-effect">Stocks</a>
                             </li>
+                            <li>
+                                <a href="{{ route('stocks') }}" class="waves-effect">
+                                    <i class="fas fa-qrcode"></i>&nbsp;-&nbsp;Barcode
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </li>

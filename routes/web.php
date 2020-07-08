@@ -857,6 +857,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'inv_stocks',
         'access' => 'update'
     ])->name('stocks-show-edit');
+    Route::post('inventory/stocks/update/{id}', [
+        'uses' => 'InventoryStockController@update',
+        'module' => 'inv_stocks',
+        'access' => 'update'
+    ])->name('stocks-update');
     Route::post('inventory/stocks/update-iar/{poID}', [
         'uses' => 'InventoryStockController@updateFromIAR',
         'module' => 'inv_stocks',
@@ -902,6 +907,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'inv_stocks',
         'access' => 'issue'
     ])->name('stocks-issue');
+    Route::post('inventory/stocks/delete/{id}', [
+        'uses' => 'InventoryStockController@delete',
+        'module' => 'inv_stocks',
+        'access' => 'delete'
+    ])->name('stocks-delete');
 
     /*===================== PAYMENT ROUTES =====================*/
 

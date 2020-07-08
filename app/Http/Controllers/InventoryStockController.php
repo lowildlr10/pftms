@@ -304,16 +304,6 @@ class InventoryStockController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id) {
-        //
-    }
-
-    /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
@@ -340,8 +330,32 @@ class InventoryStockController extends Controller
         ));
     }
 
-    public function showEdit($id, $type) {
-        //
+    public function showEdit($id, $classification) {
+        $invStockData = InventoryStock::with('stockitems')->find($id);
+        $fundCluster = $invStockData->fund_cluster;
+        $inventoryNo = $invStockData->inventory_no;
+        $division = $invStockData->division;
+        $entityName = $invStockData->entity_name;
+        $office = $invStockData->office;
+        $purpose = $invStockData->purpose;
+        $poNo = $invStockData->po_no;
+        $datePO = $invStockData->date_po;
+        $supplier = $invStockData->supplier;
+        $items = $invStockData->stockitems;
+
+        $divisions = EmpDivision::orderBy('division_name')->get();
+        $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
+        $itemClassifications = ItemClassification::orderBy('classification_name')
+                                                 ->get();
+        $suppliers = Supplier::orderBy('company_name')->get();
+
+        return view('modules.inventory.stock.update', compact(
+            'divisions', 'suppliers', 'classification',
+            'unitIssues', 'itemClassifications', 'id',
+            'fundCluster', 'fundCluster', 'division',
+            'entityName', 'office', 'purpose', 'inventoryNo',
+            'poNo', 'datePO', 'supplier', 'items'
+        ));
     }
 
     /**
@@ -438,7 +452,119 @@ class InventoryStockController extends Controller
     }
 
     public function update(Request $request, $id){
-        //
+        $fundCluster = $request->fund_cluster ? $request->fund_cluster : NULL;
+        $inventoryNo = $request->inventory_no;
+        $division = $request->division ? $request->division : NULL;
+        $office = $request->office ? $request->office : NULL;
+        $purpose = $request->purpose ? $request->purpose : '-';
+        $entityName = $request->entity_name ? $request->entity_name : NULL;
+        $poNo = $request->po_no  ? $request->po_no : NULL;
+        $datePO = $request->date_po ? $request->date_po : NULL;
+        $supplier = $request->supplier ? $request->supplier : NULL;
+
+        $units = $request->unit;
+        $descriptions = $request->description;
+        $quantities = $request->quantity;
+        $amounts = $request->amount;
+        $itemClassifications = $request->item_classification;
+        $invStockItemIDs = $request->inv_stock_item_id;
+
+        try {
+            $instanceInvStocks = InventoryStock::find($id);
+            $instanceInvStocks->fund_cluster = $fundCluster;
+            $instanceInvStocks->inventory_no = $inventoryNo;
+            $instanceInvStocks->division = $division;
+            $instanceInvStocks->entity_name = $entityName;
+            $instanceInvStocks->office = $office;
+            $instanceInvStocks->po_no = $poNo;
+            $instanceInvStocks->date_po = $datePO;
+            $instanceInvStocks->supplier = $supplier;
+            $instanceInvStocks->purpose = $purpose;
+            $instanceInvStocks->save();
+
+            foreach ($invStockItemIDs as $ctr => $itemID) {
+                $instanceInvStockItem = InventoryStockItem::find($itemID);
+                $instanceInvStockItem->item_classification = $itemClassifications[$ctr];
+                $instanceInvStockItem->unit_issue = $units[$ctr];
+                $instanceInvStockItem->description = $descriptions[$ctr];
+                $instanceInvStockItem->quantity = $quantities[$ctr];
+                $instanceInvStockItem->amount = $amounts[$ctr];
+                $instanceInvStockItem->save();
+            }
+
+            $documentType = 'Inventory Stocks';
+            $routeName = 'stocks';
+
+            $msg = "$documentType successfully update.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName)
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())
+                                 ->with('failed', $msg);
+        }
+    }
+
+    /**
+     * Soft deletes the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function delete(Request $request, $id) {
+        try {
+            $instanceInvStock = InventoryStock::find($id);
+            $documentType = 'Inventory Stocks';
+            $inventoryNo = $instanceInvStock->id;
+            InventoryStockIssueItem::where('inv_stock_id', $id)->delete();
+            InventoryStockIssue::where('inv_stock_id', $id)->forceDelete();
+            InventoryStockItem::where('inv_stock_id', $id)->delete();
+            $instanceInvStock->forceDelete();
+
+            $msg = "$documentType '$inventoryNo' successfully deleted.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('stocks')
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('stocks')
+                             ->with('failed', $msg);
+        }
+
+        /*
+        $isDestroy = $request->destroy;
+
+        if ($isDestroy) {
+            $response = $this->destroy($request, $id);
+
+            if ($response->alert_type == 'success') {
+                return redirect()->route('stocks', ['keyword' => $response->id])
+                                 ->with($response->alert_type, $response->msg);
+            } else {
+                return redirect()->route('stocks')
+                                 ->with($response->alert_type, $response->msg);
+            }
+        } else {
+            try {
+                $instanceInvStock = InventoryStock::find($id);
+                $documentType = 'Inventory Stocks';
+                $inventoryNo = $instanceInvStock->id;
+                $instanceInvStock->delete();
+
+                $msg = "$documentType '$inventoryNo' successfully deleted.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('stocks', ['keyword' => $id])
+                                 ->with('success', $msg);
+            } catch (\Throwable $th) {
+                $msg = "Unknown error has occured. Please try again.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('stocks')
+                                 ->with('failed', $msg);
+            }
+        }*/
     }
 
     /**
@@ -447,9 +573,35 @@ class InventoryStockController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id) {
-        //
-    }
+    /*
+    public function destroy($request, $id) {
+        try {
+            $instanceInvStock = InventoryStock::find($id);
+            $documentType = 'Inventory Stocks';
+            $inventoryNo = $instanceInvStock->id;
+            InventoryStockIssue::where()->delete();
+            InventoryStockIssueItem::where()->delete();
+            InventoryStockItem::where()->delete();
+            $instanceInvStock->forceDelete();
+
+            $msg = "$documentType '$inventoryNo' permanently deleted.";
+            Auth::user()->log($request, $msg);
+
+            return (object) [
+                'msg' => $msg,
+                'alert_type' => 'success',
+                'id' => $id
+            ];
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+
+            return (object) [
+                'msg' => $msg,
+                'alert_type' => 'failed'
+            ];
+        }
+    }*/
 
     public function showCreateIssueItem($invStockID, $invStockItemID, $classification, $type) {
         if ($type == 'multiple') {
