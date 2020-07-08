@@ -8,7 +8,10 @@ use DB;
 use DateTime;
 use App\Models\ItemUnitIssue;
 use App\Models\Signatory;
+use App\Models\InventoryStockIssue;
+use App\Models\InventoryStockIssueItem;
 use App\Models\DocumentLog as DocLog;
+use Auth;
 
 class VoucherLogController extends Controller
 {
@@ -104,7 +107,7 @@ class VoucherLogController extends Controller
                 $iarTooltip = "Date & time of IAR inspected to date & time of Inventory Stock created.";
                 $stockTooltip = "Date & time of Inventory Stock created to date & time of
                                  Inventory Stock issued.";
-                return view('modules.voucher-tracking.iar-stock.index', ['data' => $data,
+                return view('modules.voucher-tracking.iar-stocks.index', ['data' => $data,
                                                      'search' => $search,
                                                      'iarTooltip' => $iarTooltip,
                                                      'stockTooltip' => $stockTooltip]);
@@ -421,16 +424,16 @@ class VoucherLogController extends Controller
 
     private function generateIAR_STOCK($dateFrom, $dateTo, $search) {
         $instanceDocLog = new DocLog;
+        $signatory = new Signatory;
         $data = DB::table('inspection_acceptance_reports as iar')
                   ->select('iar.id as iar_code', 'inv.id as inv_code',
-                           'inv.created_at as inv_created_at',
+                           'inv.created_at as inv_created_at', 'inv.inventory_no',
                            'inv.id as inv_id', 'inv.po_no',
-                           'invclass.classification as inv_classification')
+                           'invclass.classification_name as inv_classification')
                   ->leftJoin('purchase_requests as pr', 'pr.id', '=', 'iar.pr_id')
-                  ->leftJoin('inventory_stocks as inv',
-                             'iar.iar_no', 'LIKE', DB::Raw("CONCAT('%', inv.po_no, '%')"))
+                  ->leftJoin('inventory_stocks as inv', 'iar.po_id', '=', 'inv.po_id')
                   ->leftJoin('item_classifications as invclass',
-                             'invclass.id', '=', 'inv.inventory_class_id')
+                             'invclass.id', '=', 'inv.inventory_classification')
                   ->whereBetween(DB::raw('DATE(iar.created_at)'), array($dateFrom, $dateTo));
 
         if (!empty($search)) {
@@ -460,13 +463,19 @@ class VoucherLogController extends Controller
                                                             $dat->inv_created_at);
 
             // Inventory Stock
-            $issuedStock = StockIssue::where('inventory_id', $dat->inv_id)->get();
+            $issuedStock = InventoryStockIssueItem::with(['invstockitems', 'invstockissue'])
+                                              ->where('inv_stock_id', $dat->inv_id)->get();
             $invDocStatusList = [];
             $invRangeCountList = [];
 
             foreach ($issuedStock as $stock) {
-                $issuedBy = $this->getSignatoryName($stock->issued_by);
-                $issuedTo = $this->getEmployeeName($stock->received_by);
+                $issuedBy = $signatory->getSignatory($stock->invstockissue->sig_received_from ?
+                            $stock->invstockissue->sig_received_from :
+                            $stock->invstockissue->sig_issued_by)->name;
+                $issuedTo = Auth::user()->getEmployee(
+                                $stock->invstockissue->sig_received_by
+                            )->name;
+                $issuedTo .= '<br><em><small class="grey-text">Item Barcode:<br>'.$stock->id.'</small></em>';
                 $dateIssued = $stock->date_issued;
                 $oldDateInvCreated = strtotime($dat->inv_created_at);
 

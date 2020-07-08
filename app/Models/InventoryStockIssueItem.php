@@ -58,4 +58,8 @@ class InventoryStockIssueItem extends Model
     public function invstockitems() {
         return $this->belongsTo('App\Models\InventoryStockItem', 'inv_stock_item_id', 'id');
     }
+
+    public function invstockissue() {
+        return $this->belongsTo('App\Models\InventoryStockIssue', 'inv_stock_issue_id', 'id');
+    }
 }

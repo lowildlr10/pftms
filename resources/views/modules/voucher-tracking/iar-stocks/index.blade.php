@@ -75,7 +75,7 @@
             {{ isset($log->inv_document_status[0]->issued_by) ?
                strtoupper($log->inv_document_status[0]->issued_by): '' }}
         </td>
-        <td class="table-border-left" ali@extends('layouts.partials.vlogs')
+        <td class="table-border-left">
 
         @section('log-content')
 
@@ -134,18 +134,19 @@
                     {{ ($listCounter + 1) + (($data->currentpage() - 1) * $data->perpage()) }}
                 </td>
 
-                <!-- PO/JO Division -->
+                <!-- IAR Division -->
                 <td class="table-border-left table-divider">
                     <strong>{{ $log->iar_code }}</strong><br>
-                    [{{ $log->inv_classification }} No: {{ $log->po_no }}]
+                    [{{ $log->inv_classification }} PO No: {{ $log->po_no }}]
                 </td>
                 <td class="table-border-left" align="center">{{ strtoupper($log->iar_document_status->received_by) }}</td>
                 <td class="table-border-left" align="center">{{ $log->iar_document_status->date_received }}</td>
 
-                <!-- IAR Division -->
+                <!-- INV Division -->
                 @if (!empty($log->inv_code))
                 <td class="table-divider">
-                    <strong>{{ $log->inv_code }}</strong>
+                    <strong>{{ $log->inv_code }}</strong><br>
+                    [Inventory No: {{ $log->inventory_no }}]
                 </td>
                 <td class="table-border-left" align="center">{{ $log->inv_created_at }}</td>
                 <td class="table-border-left" align="center">
@@ -153,8 +154,8 @@
                        strtoupper($log->inv_document_status[0]->issued_by): '' }}
                 </td>
                 <td class="table-border-left" align="center">
-                    {{ isset($log->inv_document_status[0]->issued_to) ?
-                       strtoupper($log->inv_document_status[0]->issued_to): '' }}</td>
+                    {!! isset($log->inv_document_status[0]->issued_to) ?
+                       strtoupper($log->inv_document_status[0]->issued_to): '' !!}</td>
                 <td class="table-border-left" align="center">
                     {{ isset($log->inv_document_status[0]->quantity) ?
                        $log->inv_document_status[0]->quantity: '' }}
@@ -212,7 +213,7 @@
                 <td class="table-divider"></td>
                 <td class="table-border-left" align="center"></td>
                 <td class="table-border-left" align="center">{{ strtoupper($logStock->issued_by) }}</td>
-                <td class="table-border-left" align="center">{{ strtoupper($logStock->issued_to) }}</td>
+                <td class="table-border-left" align="center">{!! strtoupper($logStock->issued_to) !!}</td>
                 <td class="table-border-left" align="center">{{ $logStock->quantity }}</td>
                 <td class="table-border-left" align="center">{{ $logStock->date_issued }}</td>
 
@@ -249,9 +250,9 @@
         </table>
 
         @endsection
-        gn="center">
-            {{ isset($log->inv_document_status[0]->issued_to) ?
-               strtoupper($log->inv_document_status[0]->issued_to): '' }}</td>
+        <td align="center">
+            {!! isset($log->inv_document_status[0]->issued_to) ?
+               strtoupper($log->inv_document_status[0]->issued_to): '' !!}</td>
         <td class="table-border-left" align="center">
             {{ isset($log->inv_document_status[0]->quantity) ?
                $log->inv_document_status[0]->quantity: '' }}
@@ -309,7 +310,7 @@
         <td class="table-divider"></td>
         <td class="table-border-left" align="center"></td>
         <td class="table-border-left" align="center">{{ strtoupper($logStock->issued_by) }}</td>
-        <td class="table-border-left" align="center">{{ strtoupper($logStock->issued_to) }}</td>
+        <td class="table-border-left" align="center">{!! strtoupper($logStock->issued_to) !!}</td>
         <td class="table-border-left" align="center">{{ $logStock->quantity }}</td>
         <td class="table-border-left" align="center">{{ $logStock->date_issued }}</td>
 
