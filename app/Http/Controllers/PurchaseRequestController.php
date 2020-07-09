@@ -55,6 +55,7 @@ class PurchaseRequestController extends Controller
         $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
         $isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
         $isAllowedCancel = Auth::user()->getModuleAccess($module, 'cancel');
+        $isAllowedUncancel = $isAllowedCancel;
         $isAllowedApprove = Auth::user()->getModuleAccess($module, 'approve');
         $isAllowedDisapprove = Auth::user()->getModuleAccess($module, 'disapprove');
         $isAllowedRFQ = Auth::user()->getModuleAccess('proc_rfq', 'is_allowed');
@@ -118,9 +119,15 @@ class PurchaseRequestController extends Controller
             'isAllowedDelete' => $isAllowedDelete,
             'isAllowedDestroy' => $isAllowedDestroy,
             'isAllowedCancel' => $isAllowedCancel,
+            'isAllowedUncancel' => $isAllowedUncancel,
             'isAllowedApprove' => $isAllowedApprove,
             'isAllowedDisapprove' => $isAllowedDisapprove,
             'isAllowedRFQ' => $isAllowedRFQ,
+            'roleHasDeveloper' => $roleHasDeveloper,
+            'roleHasBudget' => $roleHasBudget,
+            'roleHasAccountant' => $roleHasAccountant,
+            'roleHasPropertySupply' => $roleHasPropertySupply,
+            'roleHasOrdinary' => $roleHasOrdinary,
         ]);
     }
 
@@ -491,24 +498,27 @@ class PurchaseRequestController extends Controller
     public function showCreate() {
         $itemNo = 0;
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
         $fundingSources = FundingSource::orderBy('source_name')->get();
-        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
-                             [Auth::user()->division];
-        $divisions = $roleHasOrdinary ?
+        $empDivisionAccess = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
+                              [Auth::user()->division] :
+                              Auth::user()->getDivisionAccess();
+        $divisions = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
                     EmpDivision::where('id', Auth::user()->division)
                                ->orderBy('division_name')
                                ->get() :
                     EmpDivision::whereIn('id', $empDivisionAccess)
                                ->orderBy('division_name')
                                ->get();
-        $users = $roleHasOrdinary ?
-                User::where('id', Auth::user()->id)
-                    ->orderBy('firstname')
-                    ->get() :
-                User::where('is_active', 'y')
-                    ->whereIn('division', $empDivisionAccess)
-                    ->orderBy('firstname')->get();
+        $users = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
+                 User::where('id', Auth::user()->id)
+                     ->orderBy('firstname')
+                     ->get() :
+                 User::where('is_active', 'y')
+                     ->whereIn('division', $empDivisionAccess)
+                     ->orderBy('firstname')->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -552,25 +562,28 @@ class PurchaseRequestController extends Controller
         $approvedBy = $prData->approved_by;
         $recommendedBy = $prData->recommended_by;
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
         $fundingSources = FundingSource::orderBy('source_name')->get();
 
-        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
-                             [Auth::user()->division];
-        $divisions = $roleHasOrdinary ?
+        $empDivisionAccess = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
+                              [Auth::user()->division] :
+                              Auth::user()->getDivisionAccess();
+        $divisions = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
                     EmpDivision::where('id', Auth::user()->division)
                                ->orderBy('division_name')
                                ->get() :
                     EmpDivision::whereIn('id', $empDivisionAccess)
                                ->orderBy('division_name')
                                ->get();
-        $users = $roleHasOrdinary ?
-                User::where('id', Auth::user()->id)
-                    ->orderBy('firstname')
-                    ->get() :
-                User::where('is_active', 'y')
-                    ->whereIn('division', $empDivisionAccess)
-                    ->orderBy('firstname')->get();
+        $users = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
+                 User::where('id', Auth::user()->id)
+                     ->orderBy('firstname')
+                     ->get() :
+                 User::where('is_active', 'y')
+                     ->whereIn('division', $empDivisionAccess)
+                     ->orderBy('firstname')->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')

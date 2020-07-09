@@ -233,6 +233,27 @@
     @foreach ($list as $listCtr => $pr)
         @if (count($pr->iar) > 0)
             @foreach ($pr->iar as $listCtr1 => $item)
+                @php
+                $countVisible = 0;
+                $isVisiblePrint = true;
+                $isVisibleUpdate = $isAllowedUpdate;
+                $isVisibleViewAttachment = true;
+                $isVisibleIssue = $isAllowedIssue;
+                $isVisibleInspect = $isAllowedInspect;
+                $isVisiblePO = $isAllowedPO;
+                $isVisibleDV = $isAllowedDV;
+                $isVisibleCreateStock = $isAllowedCreateStocks;
+                $isVisibleUpdateStocks = $isAllowedUpdateStocks;
+
+                if ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) {
+                    $isVisibleUpdate = false;
+                    $isVisibleViewAttachment = false;
+                    $isVisibleIssue = false;
+                    $isVisibleInspect = false;
+                    $isVisibleCreateStock = false;
+                    $isVisibleUpdateStocks = false;
+                }
+                @endphp
 <div id="right-modal-{{ ($listCtr + 1) + (($list->currentpage() - 1) * $list->perpage()) }}-{{ $listCtr1 }}"
      tabindex="-1" class="modal custom-rightmenu-modal fade right" role="dialog">
     <div class="modal-dialog modal-full-height modal-right" role="document">
@@ -255,16 +276,27 @@
                     <div class="gradient-card-header rgba-white-light p-0">
                         <div class="p-0">
                             <div class="btn-group btn-menu-1 p-0">
+
+                                <!-- Print Button Section-->
+                                @if ($isVisiblePrint)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showPrint('{{ $item->id }}', 'proc_iar');">
                                     <i class="fas fa-print blue-text"></i> Print IAR
                                 </button>
+                                @endif
+                                <!-- End Print Button Section -->
+
+                                <!-- Edit Button Section-->
+                                @if ($isVisibleUpdate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showEdit('{{ route('iar-show-edit', ['id' => $item->id]) }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
+                                @endif
+                                <!-- End Edit Button Section -->
+
                             </div>
                         </div>
                     </div>
@@ -281,16 +313,25 @@
                             <strong>Awarded To: </strong> {{ $item->company_name }}<br>
                             <strong>Requested By: </strong> {{ Auth::user()->getEmployee($pr->requestor['id'])->name }}<br>
                         </p>
+
+                        <!-- View Attachment Button Section-->
+                        @if ($isVisibleViewAttachment)
                         <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showAttachment('{{ $pr->id }}', 'proc-rfq');">
                             <i class="fas fa-paperclip fa-lg"></i> View Attachment
                         </button>
+                        @endif
+                        <!-- End View Attachment Button Section -->
+
+                        <!-- View Items Button Section-->
                         <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showPrint('{{ $pr->id }}', 'proc-po-jo');">
                             <i class="far fa-list-alt fa-lg"></i> View Items
                         </button>
+                        <!-- End View Items Button Section -->
+
                     </div>
                 </div>
                 <hr>
@@ -298,43 +339,70 @@
                     <li class="list-group-item justify-content-between">
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
+
+                    <!-- Regenerate PO/JO Button Section -->
+                    @if ($isVisiblePO)
+                        @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <a onclick="$(this).redirectToDoc('{{ route('po-jo') }}', '{{ $pr->id }}');"
                            class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
                             <i class="fas fa-angle-double-left"></i> Regenerate PO/JO
                         </a>
                     </li>
+                    @endif
+                    <!-- End Regenerate PO/JO Button Section -->
 
                     @if (!empty($item->doc_status->date_issued))
                         @if ($pr->po[$listCtr1]->status > 9)
                             @if ($item->inventory_count == 0)
-                                @if ($isAllowedCreateStocks)
+
+                    <!-- Create Inventory Stocks Button Section -->
+                                @if ($isVisibleCreateStock)
+                                    @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showCreateStocks(`{{ route('stocks-show-create-iar',
                                                                   ['poID' => $item->po_id]) }}`);">
-                            <i class="fas fa-box green-text"></i> Issue/Inventory
+                            <i class="fas fa-box green-text"></i> Create Inventory Stocks
                         </button>
                     </li>
                                 @endif
+                    <!-- End Create Inventory Stocks Button Section -->
+
                             @else
-                                @if ($isAllowedUpdateStocks)
+
+                    <!-- Update Inventory Stocks Button Section -->
+                                @if ($isVisibleUpdateStocks)
+                                    @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-warning waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showEditStocks(`{{ route('stocks-show-edit-iar',
                                                                 ['poID' => $item->po_id]) }}`);">
-                            <i class="fas fa-box"></i> Update Inventory
+                            <i class="fas fa-box"></i> Update Inventory Stocks
                         </button>
                     </li>
                                 @endif
+                    <!-- End Update Inventory Stocks Button Section -->
+
                             @endif
+
+                    <!-- Generate DV Button Section -->
+                                @if ($isVisibleDV)
+                                    @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <a onclick="$(this).redirectToDoc('{{ route('proc-dv') }}', '{{ $pr->id }}');"
                            class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
                             Generate DV <i class="fas fa-angle-double-right"></i>
                         </a>
                     </li>
+                                @endif
+                    <!-- End Generate DV Button Section -->
+
                         @else
+
+                    <!-- Inspect Button Section -->
+                            @if ($isVisibleInspect)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showInspect('{{ route('iar-show-inspect', ['id' => $item->id]) }}',
@@ -342,14 +410,29 @@
                             <i class="fas fa-search"></i> Inspect
                         </button>
                     </li>
+                            @endif
+                    <!-- End Inspect Button Section -->
+
                         @endif
                     @else
+
+                    <!-- Inspect Button Section -->
+                        @if ($isVisibleIssue)
+                            @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-warning waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showIssue('{{ route('iar-show-issue', ['id' => $item->id]) }}',
                                                            `{{ $item->iar_no }}`);">
                             <i class="fas fa-paper-plane"></i> Issue
                         </button>
+                    </li>
+                        @endif
+
+                    @endif
+
+                    @if (!$countVisible)
+                    <li class="list-group-item justify-content-between text-center">
+                        No more available actions.
                     </li>
                     @endif
                 </ul>

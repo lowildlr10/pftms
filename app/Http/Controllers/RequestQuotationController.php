@@ -48,6 +48,7 @@ class RequestQuotationController extends Controller
         $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
         $isAllowedIssue = Auth::user()->getModuleAccess($module, 'issue');
         $isAllowedReceive = Auth::user()->getModuleAccess($module, 'receive');
+        $isAllowedPR = Auth::user()->getModuleAccess('proc_pr', 'is_allowed');
         $isAllowedAbstract = Auth::user()->getModuleAccess('proc_abstract', 'is_allowed');
 
         // User groups
@@ -116,7 +117,11 @@ class RequestQuotationController extends Controller
             'isAllowedUpdate' => $isAllowedUpdate,
             'isAllowedIssue' => $isAllowedIssue,
             'isAllowedReceive' => $isAllowedReceive,
+            'isAllowedPR' => $isAllowedPR,
             'isAllowedAbstract' => $isAllowedAbstract,
+            'roleHasOrdinary' => $roleHasOrdinary,
+            'roleHasBudget' => $roleHasBudget,
+            'roleHasAccountant' => $roleHasAccountant,
         ]);
     }
 
@@ -136,15 +141,19 @@ class RequestQuotationController extends Controller
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
 
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
-                             [Auth::user()->division];
-        $users = $roleHasOrdinary ?
-                User::where('id', Auth::user()->id)
-                    ->orderBy('firstname')
-                    ->get() :
-                User::where('is_active', 'y')
-                    ->whereIn('division', $empDivisionAccess)
-                    ->orderBy('firstname')->get();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
+
+        $empDivisionAccess = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
+                              [Auth::user()->division] :
+                              Auth::user()->getDivisionAccess();
+        $users = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
+                 User::where('id', Auth::user()->id)
+                     ->orderBy('firstname')
+                     ->get() :
+                 User::where('is_active', 'y')
+                     ->whereIn('division', $empDivisionAccess)
+                     ->orderBy('firstname')->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')

@@ -47,10 +47,13 @@ class AbstractQuotationController extends Controller
         $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
         $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
         $isAllowedApprove = Auth::user()->getModuleAccess($module, 'approve_po_jo');
+        $isAllowedRFQ = Auth::user()->getModuleAccess('proc_rfq', 'is_allowed');
         $isAllowedPO = Auth::user()->getModuleAccess('proc_po_jo', 'is_allowed');
 
         // User groups
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
 
@@ -111,7 +114,11 @@ class AbstractQuotationController extends Controller
             'isAllowedUpdate' => $isAllowedUpdate,
             'isAllowedDelete' => $isAllowedDelete,
             'isAllowedApprove' => $isAllowedApprove,
+            'isAllowedRFQ' => $isAllowedRFQ,
             'isAllowedPO' => $isAllowedPO,
+            'roleHasOrdinary' => $roleHasOrdinary,
+            'roleHasBudget' => $roleHasBudget,
+            'roleHasAccountant' => $roleHasAccountant
         ]);
     }
 

@@ -59,10 +59,13 @@ class PurchaseJobOrderController extends Controller
         $isAllowedInspection = Auth::user()->getModuleAccess($module, 'inspection');
         $isAllowedORSCreate = Auth::user()->getModuleAccess('proc_ors_burs', 'create');
         $isAllowedORS = Auth::user()->getModuleAccess('proc_ors_burs', 'is_allowed');
+        $isAllowedAbstract = Auth::user()->getModuleAccess('proc_abs', 'is_allowed');
         $isAllowedIAR = Auth::user()->getModuleAccess('proc_iar', 'is_allowed');
 
         // User groups
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
 
@@ -141,7 +144,11 @@ class PurchaseJobOrderController extends Controller
             'isAllowedInspection' => $isAllowedInspection,
             'isAllowedORSCreate' => $isAllowedORSCreate,
             'isAllowedORS' => $isAllowedORS,
+            'isAllowedAbstract' => $isAllowedAbstract,
             'isAllowedIAR' => $isAllowedIAR,
+            'roleHasOrdinary' => $roleHasOrdinary,
+            'roleHasBudget' => $roleHasBudget,
+            'roleHasAccountant' => $roleHasAccountant,
         ]);
     }
 

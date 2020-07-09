@@ -160,6 +160,26 @@
 <!-- Modals -->
 @if (count($list) > 0)
     @foreach ($list as $listCtr => $abs)
+        @php
+        $countVisible = 0;
+        $isVisiblePrint = true;
+        $isVisibleCreate = $isAllowedCreate;
+        $isVisibleUpdate = $isAllowedUpdate;
+        $isVisibleDelete = $isAllowedDelete;
+        $isVisibleViewAttachment = true;
+        $isVisibleApprove = $isAllowedApprove;
+        $isVisibleRFQ = $isAllowedRFQ;
+        $isVisiblePO = $isAllowedPO;
+
+        //Cancel and Un-cancel
+        if ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) {
+            $isVisibleCreate = false;
+            $isVisibleUpdate = false;
+            $isVisibleDelete = false;
+            $isVisibleViewAttachment = false;
+            $isVisibleApprove = false;
+        }
+        @endphp
 <div class="modal custom-rightmenu-modal fade right" id="right-modal-{{ $listCtr + 1 }}" tabindex="-1"
      role="dialog">
     <div class="modal-dialog modal-full-height modal-right" role="document">
@@ -182,20 +202,30 @@
                     <div class="gradient-card-header rgba-white-light p-0">
                         <div class="p-0">
                             <div class="btn-group btn-menu-1 p-0">
-                                <button type="button" class="btn btn-outline-mdb-color
-                                        btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $abs->abstract['id'] }}', 'proc_abstract');">
-                                    <i class="fas fa-print blue-text"></i> Print Abstract
-                                </button>
 
-                                @if ($abs->toggle == 'store' && $isAllowedCreate)
+                                 <!-- Print Button Section -->
+                                 @if ($isVisiblePrint)
+                                 <button type="button" class="btn btn-outline-mdb-color
+                                         btn-sm px-2 waves-effect waves-light"
+                                         onclick="$(this).showPrint('{{ $abs->abstract['id'] }}', 'proc_abstract');">
+                                     <i class="fas fa-print blue-text"></i> Print Abstract
+                                 </button>
+                                 @endif
+                                 <!-- End Print Button Section -->
+
+                                <!-- Edit Button Section-->
+                                @if ($abs->toggle == 'store' && $isVisibleCreate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showCreate('{{ route('abstract-show-create', ['id' => $abs->abstract['id']]) }}',
                                                                     '{{ $abs->abstract['id'] }}');">
                                     <i class="fas fa-pencil-alt green-text"></i> Create
                                 </button>
-                                @elseif ($abs->toggle == 'update' && $isAllowedUpdate)
+                                @endif
+                                <!-- End Edit Button Section -->
+
+                                <!-- Edit Button Section-->
+                                @if ($abs->toggle == 'update' && $isVisibleUpdate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showEdit('{{ route('abstract-show-edit', ['id' => $abs->abstract['id']]) }}',
@@ -203,13 +233,16 @@
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
                                 @endif
-                                @if ($abs->toggle == 'store' && $isAllowedDelete)
+                                <!-- End Edit Button Section -->
+
+                                <!-- Edit Button Section-->
+                                @if ($abs->toggle == 'store' && $isVisibleDelete)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         disabled="disabled">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
-                                @elseif ($abs->toggle == 'update' && $isAllowedDelete)
+                                @elseif ($abs->toggle == 'update' && $isVisibleDelete)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showDelete('{{ route('abstract-delete-items',
@@ -218,6 +251,8 @@
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
                                 @endif
+                                <!-- End Edit Button Section -->
+
                             </div>
                         </div>
                     </div>
@@ -233,11 +268,17 @@
                             }}<br>
                             <strong>Requested By: </strong> {{ Auth::user()->getEmployee($abs->requestor['id'])->name }}<br>
                         </p>
+
+                        <!-- View Attachment Button Section -->
+                            @if ($isVisibleViewAttachment)
                         <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showAttachment('{{ $abs->id }}', 'proc-rfq');">
                             <i class="fas fa-paperclip fa-lg"></i> View Attachment
                         </button>
+                            @endif
+                        <!-- End View Attachment Button Section -->
+
                         <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showItem('{{ route('pr-show-items', ['id' => $abs->id]) }}');">
@@ -250,28 +291,38 @@
                     <li class="list-group-item justify-content-between">
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
+
+                    <!-- Regenerate RFQ Button Section -->
+                        @if ($isVisibleRFQ)
+                            @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <a onclick="$(this).redirectToDoc('{{ route('rfq') }}', '{{ $abs->id }}');"
                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
                             <i class="fas fa-angle-double-left"></i> Regenerate RFQ
                         </a>
                     </li>
+                        @endif
+                    <!-- End Regenerate RFQ Button Section -->
 
                     @if ($abs->status >= 6)
-                        @if ($isAllowedPO)
+
+                    <!-- Generate PO/JO Button Section -->
+                        @if ($isVisiblePO)
+                            @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <a onclick="$(this).redirectToDoc('{{ route('po-jo') }}', '{{ $abs->id }}');"
                            class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
                             Generate PO/JO <i class="fas fa-angle-double-right"></i>
                         </a>
                     </li>
-                        @else
-                    <li class="list-group-item justify-content-between text-center">
-                        No more available actions.
-                    </li>
                         @endif
+                    <!-- End Generate PO/JO Button Section -->
+
                     @else
-                        @if ($isAllowedApprove)
+
+                    <!-- To PO/JO Button Section -->
+                        @if ($isVisibleApprove)
+                            @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-md btn-block btn-rounded"
                                 onclick="$(this).showApprove('{{ route('abstract-approve', ['id' => $abs->abstract['id']]) }}',
@@ -280,6 +331,14 @@
                         </button>
                     </li>
                         @endif
+                    <!-- End To PO/JO Button Section -->
+
+                    @endif
+
+                    @if (!$countVisible)
+                    <li class="list-group-item justify-content-between text-center">
+                        No more available actions.
+                    </li>
                     @endif
                 </ul>
             </div>

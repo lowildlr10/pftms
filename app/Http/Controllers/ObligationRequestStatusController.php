@@ -45,9 +45,9 @@ class ObligationRequestStatusController extends Controller
     public function indexProc(Request $request) {
         $data = $this->getIndexData($request, 'procurement');
 
-        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
-        $roleHasAccountant = Auth::user()->hasAccountantRole();
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
 
         // Get module access
         $module = 'proc_ors_burs';
@@ -70,9 +70,9 @@ class ObligationRequestStatusController extends Controller
             'isAllowedReceive' => $isAllowedReceive,
             'isAllowedReceiveBack'=> $isAllowedReceiveBack,
             'isAllowedPO' => $isAllowedPO,
-            'roleHasDeveloper' => $roleHasDeveloper,
-            'roleHasAccountant' => $roleHasAccountant,
+            'roleHasOrdinary' => $roleHasOrdinary,
             'roleHasBudget' => $roleHasBudget,
+            'roleHasAccountant' => $roleHasAccountant,
         ]);
     }
 

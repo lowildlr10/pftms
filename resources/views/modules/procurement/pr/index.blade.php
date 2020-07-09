@@ -167,6 +167,39 @@
 <!-- Modals -->
 @if (count($list) > 0)
     @foreach ($list as $listCtr => $pr)
+        @php
+        $countVisible = 0;
+        $isVisiblePrint = true;
+        $isVisibleUpdate = $isAllowedUpdate;
+        $isVisibleDelete = $isAllowedDelete;
+        $isVisibleViewAttachment = true;
+        $isVisibleTrackPR = true;
+        $isVisibleApprove = $isAllowedApprove;
+        $isVisibleDisapprove = $isAllowedDisapprove;
+        $isVisibleCancel = $isAllowedCancel;
+        $isVisibleUncancel = $isAllowedUncancel;
+        $isVisibleRFQ = $isAllowedRFQ;
+
+        //Cancel and Un-cancel
+        if ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) {
+            if (Auth::user()->id == $pr->requestor['id']) {
+                $isVisibleUpdate = $isAllowedUpdate ? $isAllowedUpdate : false;
+                $isVisibleDelete = $isAllowedDelete ? $isAllowedDelete : false;
+                $isVisibleViewAttachment = true;
+                $isVisibleTrackPR = true;
+                $isVisibleCancel = $isAllowedCancel ? $isAllowedCancel : false;
+                $isVisibleUncancel = $isAllowedUncancel ? $isAllowedUncancel : false;
+            } else {
+                $isVisibleUpdate = false;
+                $isVisibleDelete = false;
+                $isVisibleViewAttachment = false;
+                $isVisibleTrackPR = false;
+                $isVisibleCancel = false;
+                $isVisibleUncancel = false;
+            }
+        }
+        @endphp
+
 <div class="modal custom-rightmenu-modal fade right" id="right-modal-{{ $listCtr + 1 }}" tabindex="-1"
      role="dialog">
     <div class="modal-dialog modal-full-height modal-right" role="document">
@@ -189,21 +222,29 @@
                     <div class="gradient-card-header rgba-white-light p-0">
                         <div class="p-0">
                             <div class="btn-group btn-menu-1 p-0">
+
+                                <!-- Print Button Section -->
+                                @if ($isVisiblePrint)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showPrint('{{ $pr->id }}', 'proc_pr');">
                                     <i class="fas fa-print blue-text"></i> Print PR
                                 </button>
+                                @endif
+                                <!-- End Print Button Section -->
 
-                                @if ($isAllowedUpdate)
+                                <!-- Edit Button Section-->
+                                @if ($isVisibleUpdate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showEdit('{{ route('pr-show-edit', ['id' => $pr->id]) }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
                                 @endif
+                                <!-- End Edit Button Section -->
 
-                                @if ($isAllowedDelete)
+                                <!-- Delete Button Section -->
+                                @if ($isVisibleDelete)
                                     @if ($pr->status == 1)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
@@ -219,6 +260,8 @@
                                 </button>
                                     @endif
                                 @endif
+                                <!-- End Delete Button Section -->
+
                             </div>
                         </div>
                     </div>
@@ -232,21 +275,35 @@
                             }}<br>
                             <strong>Requested By: </strong> {{ Auth::user()->getEmployee($pr->requestor['id'])->name }}<br>
                         </p>
+
+                        <!-- View Items Button Section -->
                         <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showItem('{{ route('pr-show-items', ['id' => $pr->id]) }}');">
                             <i class="far fa-list-alt fa-lg"></i> View Items
                         </button>
+                        <!-- End View Items Button Section -->
+
+                        <!-- View Attachment Button Section -->
+                        @if ($isVisibleViewAttachment)
                         <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showAttachment('{{ $pr->id }}', 'proc-rfq');">
                             <i class="fas fa-paperclip fa-lg"></i> View Attachment
                         </button>
+                        @endif
+                        <!-- End View Attachment Button Section -->
+
+                        <!-- Track PR Status Button Section -->
+                        @if ($isVisibleTrackPR)
                         <a class="btn btn-sm btn-outline-mdb-color btn-rounded
                                   btn-block waves-effect"
                            href="{{ route('pr-tracker', ['prNo' => $pr->pr_no] ) }}">
                             <i class="far fa-eye"></i> Track PR Status
                         </a>
+                        @endif
+                        <!-- End Track PR Status Button Section -->
+
                     </div>
                 </div>
                 <hr>
@@ -256,7 +313,10 @@
                     </li>
 
                     @if ($pr->status == 1)
-                        @if ($isAllowedApprove)
+
+                    <!-- Approve Button Section -->
+                        @if ($isVisibleApprove)
+                            @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-md btn-block btn-rounded"
                                 onclick="$(this).showApprove('{{ route('pr-approve', ['id' => $pr->id]) }}',
@@ -265,8 +325,11 @@
                         </button>
                     </li>
                         @endif
+                    <!-- End Approve Button Section -->
 
-                        @if ($isAllowedApprove)
+                    <!-- Disapprove Button Section -->
+                        @if ($isVisibleDisapprove)
+                            @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-black waves-effect btn-md btn-block btn-rounded"
                                 onclick="$(this).showDisapprove('{{ route('pr-disapprove', ['id' => $pr->id]) }}',
@@ -275,8 +338,13 @@
                         </button>
                     </li>
                         @endif
+                    <!-- End Disapprove Button Section -->
 
-                        @if ($isAllowedCancel)
+                        @if (empty($pr->date_pr_cancelled))
+
+                    <!-- Cancel Button Section -->
+                            @if ($isVisibleCancel)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-red waves-effect btn-md btn-block btn-rounded"
                                 onclick="$(this).showCancel('{{ route('pr-cancel', ['id' => $pr->id]) }}',
@@ -284,22 +352,14 @@
                             <i class="fas fa-ban"></i> Cancel
                         </button>
                     </li>
-                        @endif
-                    @endif
+                            @endif
+                    <!-- End Cancel Button Section -->
 
-                    @if ($pr->status >= 5)
-                        @if ($isAllowedRFQ)
-                    <li class="list-group-item justify-content-between">
-                        <a onclick="$(this).redirectToDoc('{{ route('rfq') }}', '{{ $pr->id }}');"
-                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
-                            Generate RFQ <i class="fas fa-angle-double-right"></i>
-                        </a>
-                    </li>
-                        @endif
-                    @endif
+                        @else
 
-                    @if ($pr->status > 1 && $pr->status < 5)
-                        @if (!empty($pr->date_pr_cancelled))
+                    <!-- Un-cancel Button Section -->
+                            @if ($isVisibleUncancel)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-blue-grey waves-effect btn-md btn-block btn-rounded"
                                 onclick="$(this).showUncancel('{{ route('pr-uncancel', ['id' => $pr->id]) }}',
@@ -307,13 +367,32 @@
                             <i class="fas fa-lock-open"></i> Un-cancel
                         </button>
                     </li>
-                        @else
-                    <ul class="list-group z-depth-0">
-                        <li class="list-group-item justify-content-between text-center">
-                            No more available actions.
-                        </li>
-                    </ul>
+                            @endif
+                    <!-- End Un-cancel Button Section -->
+
                         @endif
+                    @endif
+
+                    @if ($pr->status >= 5)
+
+                    <!-- Generate RFQ Button Section -->
+                        @if ($isVisibleRFQ)
+                            @php $countVisible++ @endphp
+                    <li class="list-group-item justify-content-between">
+                        <a onclick="$(this).redirectToDoc('{{ route('rfq') }}', '{{ $pr->id }}');"
+                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
+                            Generate RFQ <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                        @endif
+                    <!-- End Generate RFQ Button Section -->
+
+                    @endif
+
+                    @if (!$countVisible)
+                    <li class="list-group-item justify-content-between text-center">
+                        No more available actions.
+                    </li>
                     @endif
                 </ul>
             </div>

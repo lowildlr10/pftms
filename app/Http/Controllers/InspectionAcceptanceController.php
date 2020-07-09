@@ -49,6 +49,8 @@ class InspectionAcceptanceController extends Controller
 
         // User groups
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
 
@@ -131,7 +133,10 @@ class InspectionAcceptanceController extends Controller
             'isAllowedPO' => $isAllowedPO,
             'isAllowedDV' => $isAllowedDV,
             'isAllowedCreateStocks' => $isAllowedCreateStocks,
-            'isAllowedUpdateStocks' => $isAllowedUpdateStocks
+            'isAllowedUpdateStocks' => $isAllowedUpdateStocks,
+            'roleHasOrdinary' => $roleHasOrdinary,
+            'roleHasBudget' => $roleHasBudget,
+            'roleHasAccountant' => $roleHasAccountant,
         ]);
     }
 

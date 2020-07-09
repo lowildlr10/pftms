@@ -208,6 +208,29 @@
 <!-- Modals -->
 @if (count($list) > 0)
     @foreach ($list as $listCtr => $dv)
+        @php
+        $countVisible = 0;
+        $isVisiblePrint = true;
+        $isVisibleUpdate = $isAllowedUpdate;
+        $isVisibleViewAttachment = true;
+        $isVisibleIssue = $isAllowedIssue;
+        $isVisibledIssueBack = $isAllowedIssueBack;
+        $isVisibleReceive = $isAllowedReceive;
+        $isVisibleReceiveBack = $isAllowedReceiveBack;
+        $isVisiblePayment = $isAllowedPayment;
+        $isVisibleIAR = $isAllowedIAR;
+        $isVisibleLDDAP = $isAllowedLDDAP;
+
+        if ($roleHasOrdinary || $roleHasBudget) {
+            $isVisibleUpdate = false;
+            $isVisibleViewAttachment = false;
+            $isVisibleIssue = false;
+            $isVisibledIssueBack = false;
+            $isVisibleReceive = false;
+            $isVisibleReceiveBack = false;
+            $isVisiblePayment = false;
+        }
+        @endphp
 <div class="modal custom-rightmenu-modal fade right" id="right-modal-{{ $listCtr + 1 }}" tabindex="-1"
      role="dialog">
     <div class="modal-dialog modal-full-height modal-right" role="document">
@@ -230,17 +253,28 @@
                     <div class="gradient-card-header rgba-white-light p-0">
                         <div class="p-0">
                             <div class="btn-group btn-menu-1 p-0">
+
+                                <!-- Print Button Section -->
+                                @if ($isVisiblePrint)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showPrint('{{ $dv->id }}', 'proc_dv');">
                                     <i class="fas fa-print blue-text"></i> Print DV
                                 </button>
+                                @endif
+                                <!-- End Print Button Section -->
+
+                                <!-- Edit Button Section-->
+                                @if ($isVisibleUpdate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showEdit('{{ route('proc-dv-show-edit',
                                                  ['id' => $dv->id]) }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
+                                @endif
+                                <!-- End Edit Button Section -->
+
                             </div>
                         </div>
                     </div>
@@ -298,17 +332,26 @@
                                 @endif
                             @endif
                         </p>
+
+                        <!-- View Attachment Button Section -->
+                        @if ($isVisibleViewAttachment)
                         <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showAttachment('{{ $dv->pr['id'] }}', 'proc-rfq');">
                             <i class="fas fa-paperclip fa-lg"></i> View Attachment
                         </button>
+                        @endif
+                        <!-- End View Attachment Button Section -->
+
+                        <!-- View Remarks Button Section -->
                         <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showRemarks('{{ route('proc-dv-show-remarks',
                                                              ['id' => $dv->id]) }}');">
                             <i class="far fa-comment-dots"></i> View Remarks
                         </button>
+                        <!-- End View Remarks Button Section -->
+
                     </div>
                 </div>
                 <hr>
@@ -317,7 +360,9 @@
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
 
-                    @if ($isAllowedIAR)
+                    <!-- Regenerate IAR Button Section -->
+                    @if ($isVisibleIAR)
+                        @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <a onclick="$(this).redirectToDoc('{{ route('iar') }}', '{{ $dv->pr_id }}');"
                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
@@ -325,13 +370,17 @@
                         </a>
                     </li>
                     @endif
+                     <!-- End Regenerate IAR Button Section -->
 
                     @if (empty($dv->procdv['date_disbursed']))
                         @if (empty($dv->doc_status->date_issued) &&
                              empty($dv->doc_status->date_received) &&
                              empty($dv->doc_status->date_issued_back) &&
-                             empty($dv->doc_status->date_received_back) &&
-                             $isAllowedIssue)
+                             empty($dv->doc_status->date_received_back))
+
+                    <!-- Submit Button Section -->
+                            @if ($isVisibleIssue)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-orange waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showIssue('{{ route('proc-dv-show-issue', ['id' => $dv->id]) }}',
@@ -339,11 +388,17 @@
                             <i class="fas fa-paper-plane"></i> Submit
                         </button>
                     </li>
+                            @endif
+                    <!-- End Submit Button Section -->
+
                         @elseif (!empty($dv->doc_status->date_issued) &&
                                  empty($dv->doc_status->date_received) &&
                                  empty($dv->doc_status->date_issued_back) &&
-                                 empty($dv->doc_status->date_received_back) &&
-                                 $isAllowedReceive)
+                                 empty($dv->doc_status->date_received_back))
+
+                    <!-- Receive Button Section -->
+                            @if ($isVisibleReceive)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showReceive('{{ route('proc-dv-show-receive', ['id' => $dv->id]) }}',
@@ -351,11 +406,17 @@
                             <i class="fas fa-hand-holding"></i> Receive
                         </button>
                     </li>
+                            @endif
+                    <!-- End Receive Button Section -->
+
                         @elseif (!empty($dv->doc_status->date_issued) &&
                                  !empty($dv->doc_status->date_received) &&
                                  empty($dv->doc_status->date_issued_back) &&
                                  empty($dv->doc_status->date_received_back))
-                            @if ($isAllowedPayment)
+
+                    <!-- Payment Button Section -->
+                            @if ($isVisiblePayment)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showPayment('{{ route('proc-dv-show-payment', ['id' => $dv->id]) }}',
@@ -364,8 +425,11 @@
                         </button>
                     </li>
                             @endif
+                    <!-- End Payment Button Section -->
 
-                            @if ($isAllowedIssueBack)
+                    <!-- Submit Back Button Section -->
+                            @if ($isVisibledIssueBack)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-orange waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showIssueBack('{{ route('proc-dv-show-issue-back', ['id' => $dv->id]) }}',
@@ -374,11 +438,16 @@
                         </button>
                     </li>
                             @endif
+                    <!-- End Submit Back Button Section -->
+
                         @elseif (!empty($dv->doc_status->date_issued) &&
                                  !empty($dv->doc_status->date_received) &&
                                  !empty($dv->doc_status->date_issued_back) &&
-                                 empty($dv->doc_status->date_received_back) &&
-                                 $isAllowedReceiveBack)
+                                 empty($dv->doc_status->date_received_back))
+
+                    <!-- Receive Back Button Section -->
+                            @if ($isVisibleReceiveBack)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showReceiveBack('{{ route('proc-dv-show-receive-back', ['id' => $dv->id]) }}',
@@ -386,9 +455,15 @@
                             <i class="fas fa-hand-holding"></i> Receive Back
                         </button>
                     </li>
+                            @endif
+                    <!-- End Receive Back Button Section -->
+
                         @endif
                     @else
-                        @if ($isAllowedPayment)
+
+                    <!-- Generate Payment/LDDAP Button Section -->
+                        @if ($isVisiblePayment)
+                            @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <a onclick="$(this).redirectToDoc('{{ route('lddap') }}', '{{ $dv->id }}');"
                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
@@ -396,6 +471,14 @@
                         </a>
                     </li>
                         @endif
+                    <!-- End Generate Payment/LDDAP Button Section -->
+
+                    @endif
+
+                    @if (!$countVisible)
+                    <li class="list-group-item justify-content-between text-center">
+                        No more available actions.
+                    </li>
                     @endif
                 </ul>
             </div>
