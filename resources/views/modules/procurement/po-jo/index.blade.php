@@ -171,7 +171,15 @@
                                                                        data-toggle="tooltip" data-placement="right" title="Cancelled"></i>
                                                                     @endif
                                                                 </td>
-                                                                <td align="center"><strong>{{ $item->po_no }}</strong></td>
+                                                                <td align="center">
+                                                                    <strong>{{ $item->po_no }}</strong>
+
+                                                                    @if ($item->with_ors_burs == 'y')
+                                                                    <br><em>
+                                                                        <small class="grey-text">(ORS/BURS Created)</small>
+                                                                    </em>
+                                                                    @endif
+                                                                </td>
                                                                 <td align="center">
                                                                     <strong>
                                                                         <h6 class="mb-0">
@@ -248,6 +256,40 @@
     @foreach ($list as $listCtr => $pr)
         @if (count($pr->po) > 0)
             @foreach ($pr->po as $listCtr1 => $item)
+                @php
+                $countVisible = 0;
+                $isVisiblePrint = true;
+                $isVisibleCreate = $isAllowedCreate;
+                $isVisibleUpdate = $isAllowedUpdate;
+                $isVisibleDelete = $isAllowedDelete;
+                $isVisibleViewAttachment = true;
+                $isVisibleAccountantSigned = $isAllowedAccountantSigned;
+                $isVisibleApprove = $isAllowedApprove;
+                $isVisibleIssue = $isAllowedIssue;
+                $isVisibleReceive = $isAllowedReceive;
+                $isVisibleCancel = $isAllowedCancel;
+                $isVisibleUncancel = $isAllowedUncancel;
+                $isVisibleDelivery = $isAllowedDelivery;
+                $isVisibleInspection = $isAllowedInspection;
+                $isVisibleORS = $isAllowedORS;
+                $isVisibleORSCreate = $isAllowedORSCreate;
+                $isVisibleAbstract = $isAllowedAbstract;
+                $isVisibleIAR = $isAllowedIAR;
+
+                if ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) {
+                    $isVisibleCreate = false;
+                    $isVisibleUpdate = false;
+                    $isVisibleDelete = false;
+                    $isVisibleViewAttachment = false;
+                    $isVisibleApprove = false;
+                    $isVisibleIssue = false;
+                    $isVisibleReceive = false;
+                    $isVisibleCancel = false;
+                    $isVisibleUncancel = false;
+                    $isVisibleDelivery = false;
+                    $isVisibleInspection = false;
+                }
+                @endphp
 <div id="right-modal-{{ ($listCtr + 1) + (($list->currentpage() - 1) * $list->perpage()) }}-{{ $listCtr1 }}"
      tabindex="-1" class="modal custom-rightmenu-modal fade right" role="dialog">
     <div class="modal-dialog modal-full-height modal-right" role="document">
@@ -270,18 +312,29 @@
                     <div class="gradient-card-header rgba-white-light p-0">
                         <div class="p-0">
                             <div class="btn-group btn-menu-1 p-0">
+
+                                <!-- Print Button Section-->
+                                @if ($isVisiblePrint)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showPrint('{{ $item->id }}', 'proc_{{ $item->document_type }}');">
                                     <i class="fas fa-print blue-text"></i> Print PO/JO
                                 </button>
+                                @endif
+                                <!-- End Print Button Section -->
+
+                                <!-- Edit Button Section-->
+                                @if ($isVisibleUpdate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showEdit('{{ route('po-jo-show-edit', ['id' => $item->id]) }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
+                                @endif
+                                <!-- End Edit Button Section -->
 
-                                @if ($isAllowedDelete)
+                                <!-- Delete Button Section-->
+                                @if ($isVisibleDelete)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showDelete('{{ route('po-jo-delete',
@@ -290,6 +343,8 @@
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
                                 @endif
+                                <!-- End Delete Button Section -->
+
                             </div>
                         </div>
                     </div>
@@ -305,16 +360,25 @@
                             <strong>Awarded To: </strong> {{ $item->company_name }}<br>
                             <strong>Requested By: </strong> {{ Auth::user()->getEmployee($pr->requestor['id'])->name }}<br>
                         </p>
+
+                        <!-- View Attachment Button Section-->
+                        @if ($isVisibleViewAttachment)
                         <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showAttachment('{{ $pr->id }}', 'proc-rfq');">
                             <i class="fas fa-paperclip fa-lg"></i> View Attachment
                         </button>
+                        @endif
+                        <!-- End View Attachment Button Section -->
+
+                        <!-- View Items Button Section-->
                         <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showPrint('{{ $pr->id }}', 'proc-po-jo');">
                             <i class="far fa-list-alt fa-lg"></i> View Items
                         </button>
+                        <!-- End View Items Button Section -->
+
                     </div>
                 </div>
                 <hr>
@@ -322,14 +386,24 @@
                     <li class="list-group-item justify-content-between">
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
+
+                    <!-- Regenerate Abstract Button Section -->
+                    @if ($isVisibleAbstract)
+                        @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <a onclick="$(this).redirectToDoc('{{ route('abstract') }}', '{{ $pr->id }}');"
                            class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
                             <i class="fas fa-angle-double-left"></i> Regenerate Abstract
                         </a>
                     </li>
+                    @endif
+                    <!-- End Regenerate Abstract Button Section -->
 
                     @if (!empty($item->date_cancelled))
+
+                    <!-- Uncancel Button Section -->
+                        @if ($isVisibleUncancel)
+                            @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-blue-grey waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showUncancel('{{ route('po-jo-uncancel', ['id' => $item->id]) }}',
@@ -337,16 +411,29 @@
                             <i class="fas fa-lock-open fa-lg black-text"></i> Uncancel Document
                         </button>
                     </li>
+                        @endif
+                    <!-- End Uncancel Button Section -->
+
                     @else
-                        @if ($isAllowedORSCreate)
-                            @if ($item->with_ors_burs == 'y')
+                        @if ($item->with_ors_burs == 'y')
+
+                    <!-- Edit ORS/BURS Button Section -->
+                            @if ($isVisibleORS)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <a type="button" class="btn btn-outline-warning waves-effect btn-block btn-md btn-rounded"
                            onclick="$(this).redirectToDoc('{{ route('proc-ors-burs') }}', '{{ $item->po_no }}');">
                             <i class="fas fa-file-signature orange-text"></i> Edit ORS/BURS
                         </a>
                     </li>
-                            @else
+                            @endif
+                    <!-- End Edit ORS/BURS Button Section -->
+
+                        @else
+
+                    <!-- Create ORS/BURS Button Section -->
+                            @if ($isVisibleORSCreate)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showCreateORS('{{ route('po-jo-create-ors-burs', ['poID' => $item->id]) }}',
@@ -355,9 +442,15 @@
                         </button>
                     </li>
                             @endif
+                    <!-- End Create ORS/BURS Button Section -->
+
                         @endif
 
                         @if (empty($item->date_accountant_signed) && empty($item->date_po_approved))
+
+                    <!-- Cleared/Signed by Accountant Button Section -->
+                            @if ($isVisibleAccountantSigned)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showAccountantSigned('{{ route('po-jo-accountant-signed', ['id' => $item->id]) }}',
@@ -365,7 +458,14 @@
                             <i class="fas fa-signature green-text"></i> Cleared/Signed by Accountant
                         </button>
                     </li>
+                            @endif
+                    <!-- End Cleared/Signed by Accountant Button Section -->
+
                         @elseif (!empty($item->date_accountant_signed) && empty($item->date_po_approved))
+
+                    <!-- Approve Button Section -->
+                            @if ($isVisibleApprove)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showApprove('{{ route('po-jo-approve', ['id' => $item->id]) }}',
@@ -373,8 +473,15 @@
                             <i class="fas fa-thumbs-up green-text"></i> Approve
                         </button>
                     </li>
+                            @endif
+                    <!-- End Approve Button Section -->
+
                         @elseif (!empty($item->date_accountant_signed) && !empty($item->date_po_approved))
                             @if (!empty($item->doc_status->date_issued) && $item->status != 3)
+
+                    <!-- Cancel Button Section -->
+                                @if ($isVisibleCancel)
+                                    @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-danger waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showCancel('{{ route('po-jo-cancel', ['id' => $item->id]) }}',
@@ -382,16 +489,15 @@
                             <i class="fas fa-ban fa-lg red-text"></i> Cancel
                         </button>
                     </li>
+                                @endif
+                    <!-- End Cancel Button Section -->
+
                                 @if ($item->with_ors_burs == 'y')
-                    <!--
-                    <li class="list-group-item justify-content-between">
-                        <a type="button" class="btn btn-outline-warning waves-effect btn-block btn-rounded"
-                           href="{{ url('procurement/ors-burs?search='.$item->po_no) }}">
-                            <i class="fas fa-file-signature orange-text"></i> Edit ORS/BURS
-                        </a>
-                    </li>
-                    -->
                                     @if ($item->status == 7)
+
+                    <!-- For Delivery Button Section -->
+                                        @if ($isVisibleDelivery)
+                                            @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-black waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showForDelivery('{{ route('po-jo-delivery', ['id' => $item->id]) }}',
@@ -399,7 +505,14 @@
                             <i class="fas fa-truck"></i> For Delivery
                         </button>
                     </li>
+                                        @endif
+                    <!-- End For Delivery Button Section -->
+
                                     @elseif ($item->status == 8)
+
+                    <!-- Inspection Button Section -->
+                                        @if ($isVisibleInspection)
+                                            @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-indigo waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showForInspection('{{ route('po-jo-inspection', ['id' => $item->id]) }}',
@@ -407,26 +520,32 @@
                             <i class="fas fa-search"></i> Inspection
                         </button>
                     </li>
+                                        @endif
+                    <!-- End Inspection Button Section -->
+
                                     @elseif ($item->status >= 9)
+
+                    <!-- Generate IAR Button Section -->
+                                        @if ($isVisibleIAR)
+                                            @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <a type="button" class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded"
                            onclick="$(this).redirectToDoc('{{ route('iar') }}', '{{ $item->pr_id }}');">
                             Generate IAR <i class="fas fa-angle-double-right"></i>
                         </a>
                     </li>
+                                        @endif
+                    <!-- End Generate IAR Button Section -->
+
                                     @endif
-                                @else
-                    <!--
-                    <li class="list-group-item justify-content-between">
-                        <button type="button" class="btn btn-outline-green waves-effect btn-block"
-                                onclick="$(this).createORS_BURS('{{ $item->po_no }}');">
-                            <i class="fas fa-pencil-alt green-text"></i> Create ORS/BURS
-                        </button>
-                    </li>
-                    -->
                                 @endif
                             @endif
+
                             @if (empty($item->doc_status->date_issued) && empty($item->doc_status->date_received))
+
+                    <!-- Issue Button Section -->
+                                @if ($isVisibleIssue)
+                                    @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-warning waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showIssue('{{ route('po-jo-show-issue', ['id' => $item->id]) }}',
@@ -434,8 +553,15 @@
                             <i class="fas fa-paper-plane orange-text"></i> Issue
                         </button>
                     </li>
+                                @endif
+                    <!-- End Issue Button Section -->
+
                             @elseif (!empty($item->doc_status->date_issued) && empty($item->doc_status->date_received))
                                 @if ($item->status != 3)
+
+                    <!-- Receive Button Section -->
+                                    @if ($isVisibleReceive)
+                                        @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showReceive('{{ route('po-jo-show-receive', ['id' => $item->id]) }}',
@@ -443,9 +569,18 @@
                             <i class="fas fa-lg fa-hand-holding"></i> Receive
                         </button>
                     </li>
+                                    @endif
+                    <!-- End Receive Button Section -->
+
                                 @endif
                             @endif
                         @endif
+                    @endif
+
+                    @if (!$countVisible)
+                    <li class="list-group-item justify-content-between text-center">
+                        No more available actions.
+                    </li>
                     @endif
                 </ul>
             </div>

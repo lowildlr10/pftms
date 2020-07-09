@@ -157,6 +157,24 @@
 <!-- Modals -->
 @if (count($list) > 0)
     @foreach ($list as $listCtr => $rfq)
+        @php
+        $countVisible = 0;
+        $isVisiblePrint = true;
+        $isVisibleUpdate = $isAllowedUpdate;
+        $isVisibleViewAttachment = true;
+        $isVisibleIssue = $isAllowedIssue;
+        $isVisibleReceive = $isAllowedReceive;
+        $isVisiblePR = $isAllowedPR;
+        $isVisibleAbstract = $isAllowedAbstract;
+
+        if ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) {
+            $isVisibleUpdate = false;
+            $isVisibleViewAttachment = false;
+            $isVisibleIssue = false;
+            $isVisibleReceive = false;
+        }
+        @endphp
+
 <div class="modal custom-rightmenu-modal fade right" id="right-modal-{{ $listCtr + 1 }}" tabindex="-1"
      role="dialog">
     <div class="modal-dialog modal-full-height modal-right" role="document">
@@ -179,19 +197,27 @@
                     <div class="gradient-card-header rgba-white-light p-0">
                         <div class="p-0">
                             <div class="btn-group btn-menu-1 p-0">
+
+                                <!-- Print Button Section -->
+                                @if ($isVisiblePrint)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showPrint('{{ $rfq->rfq['id'] }}', 'proc_rfq');">
                                     <i class="fas fa-print blue-text"></i> Print RFQ
                                 </button>
+                                @endif
+                                <!-- End Print Button Section -->
 
-                                @if ($isAllowedUpdate)
+                                <!-- Edit Button Section-->
+                                @if ($isVisibleUpdate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showEdit('{{ route('rfq-show-edit', ['id' => $rfq->rfq['id']]) }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
                                 @endif
+                                <!-- End Edit Button Section -->
+
                             </div>
                         </div>
                     </div>
@@ -206,16 +232,25 @@
                             }}<br>
                             <strong>Requested By: </strong> {{ Auth::user()->getEmployee($rfq->requestor['id'])->name }}<br>
                         </p>
+
+                        <!-- View Items Button Section -->
                         <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showItem('{{ route('pr-show-items', ['id' => $rfq->id]) }}');">
                             <i class="far fa-list-alt fa-lg"></i> View Items
                         </button>
+                        <!-- End View Items Button Section -->
+
+                        <!-- View Attachment Button Section -->
+                        @if ($isVisibleViewAttachment)
                         <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showAttachment('{{ $rfq->id }}', 'proc-rfq');">
                             <i class="fas fa-paperclip fa-lg"></i> View Attachment
                         </button>
+                        @endif
+                        <!-- End View Attachment Button Section -->
+
                     </div>
                 </div>
                 <hr>
@@ -223,16 +258,25 @@
                     <li class="list-group-item justify-content-between">
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
+
+                    <!-- Regenerate PR Button Section -->
+                    @if ($isVisiblePR)
+                        @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <a onclick="$(this).redirectToDoc('{{ route('pr') }}', '{{ $rfq->id }}');"
                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
                             <i class="fas fa-angle-double-left"></i> Regenerate PR
                         </a>
                     </li>
+                    @endif
+                    <!-- End Regenerate PR Button Section -->
 
                     @if (empty($rfq->doc_status->date_issued) &&
                          empty($rfq->doc_status->date_received))
+
+                    <!-- Issue Button Section -->
                         @if ($isAllowedIssue)
+                            @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-orange waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showIssue('{{ route('rfq-show-issue', ['id' => $rfq->rfq['id']]) }}');">
@@ -240,9 +284,14 @@
                         </button>
                     </li>
                         @endif
+                    <!-- End Issue Button Section -->
+
                     @elseif (!empty($rfq->doc_status->date_issued) &&
                               empty($rfq->doc_status->date_received))
+
+                    <!-- Receive Button Section -->
                         @if ($isAllowedReceive)
+                            @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-success waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showReceive('{{ route('rfq-show-receive', ['id' => $rfq->rfq['id']]) }}');">
@@ -250,21 +299,28 @@
                         </button>
                     </li>
                         @endif
+                    <!-- End Receive Button Section -->
+
                     @else
-                        @if ($isAllowedAbstract)
+
+                    <!-- Generate Abstract Button Section -->
+                        @if ($isVisibleAbstract)
+                            @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <a onclick="$(this).redirectToDoc('{{ route('abstract') }}', '{{ $rfq->id }}');"
                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
                             Generate Abstract <i class="fas fa-angle-double-right"></i>
                         </a>
                     </li>
-                        @else
-                    <ul class="list-group z-depth-0">
-                        <li class="list-group-item justify-content-between text-center">
-                            No more available actions.
-                        </li>
-                    </ul>
                         @endif
+                    <!-- End Generate Abstract Button Section -->
+
+                    @endif
+
+                    @if (!$countVisible)
+                    <li class="list-group-item justify-content-between text-center">
+                        No more available actions.
+                    </li>
                     @endif
                 </ul>
             </div>

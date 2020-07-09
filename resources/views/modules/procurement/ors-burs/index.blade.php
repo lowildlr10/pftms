@@ -226,7 +226,29 @@
 <!-- Modals -->
 
 @if (count($list) > 0)
-    @foreach ($list as $listCtr => $pr)
+    @foreach ($list as $listCtr => $ors)
+        @php
+        $countVisible = 0;
+        $isVisiblePrint = true;
+        $isVisibleUpdate = $isAllowedUpdate;
+        $isVisibleViewAttachment = true;
+        $isVisibleIssue = $isAllowedIssue;
+        $isVisibledIssueBack = $isAllowedIssueBack;
+        $isVisibleReceive = $isAllowedReceive;
+        $isVisibleReceiveBack = $isAllowedReceiveBack;
+        $isVisibleObligate = $isAllowedObligate;
+        $isVisiblePO = $isAllowedPO;
+
+        if ($roleHasOrdinary || $roleHasAccountant) {
+            $isVisibleUpdate = false;
+            $isVisibleViewAttachment = false;
+            $isVisibleIssue = false;
+            $isVisibledIssueBack = false;
+            $isVisibleReceive = false;
+            $isVisibleReceiveBack = false;
+            $isVisibleObligate = false;
+        }
+        @endphp
 <div class="modal custom-rightmenu-modal fade right" id="right-modal-{{ $listCtr + 1 }}" tabindex="-1"
      role="dialog">
     <div class="modal-dialog modal-full-height modal-righty" role="document">
@@ -249,18 +271,29 @@
                     <div class="gradient-card-header rgba-white-light p-0">
                         <div class="p-0">
                             <div class="btn-group btn-menu-1 p-0">
+
+                                <!-- Print Button Section -->
+                                @if ($isVisiblePrint)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showPrint('{{ $ors->ors['id'] }}',
                                                                    'proc_{{ $ors->ors['document_type'] }}');">
                                     <i class="fas fa-print blue-text"></i> Print ORS/BURS
                                 </button>
+                                @endif
+                                <!-- End Print Button Section -->
+
+                                <!-- Edit Button Section-->
+                                @if ($isVisibleUpdate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showEdit('{{ route('proc-ors-burs-show-edit',
                                                                   ['id' => $ors->ors['id']]) }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
+                                @endif
+                                <!-- End Edit Button Section -->
+
                             </div>
                         </div>
                     </div>
@@ -319,17 +352,26 @@
                                 @endif
                             @endif
                         </p>
+
+                        <!-- View Attachment Button Section -->
+                        @if ($isVisibleViewAttachment)
                         <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showAttachment('{{ $ors->pr->id }}', 'proc-rfq');">
                             <i class="fas fa-paperclip fa-lg"></i> View Attachment
                         </button>
+                        @endif
+                        <!-- End View Attachment Button Section -->
+
+                        <!-- View Remarks Button Section -->
                         <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showRemarks('{{ route('proc-ors-burs-show-remarks',
                                                              ['id' => $ors->ors['id']]) }}');">
                             <i class="far fa-comment-dots"></i> View Remarks
                         </button>
+                        <!-- End View Remarks Button Section -->
+
                     </div>
                 </div>
                 <hr>
@@ -338,7 +380,9 @@
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
 
-                    @if ($isAllowedPO)
+                    <!-- Regenerate PO/JO Button Section -->
+                    @if ($isVisiblePO)
+                        @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <a onclick="$(this).redirectToDoc('{{ route('po-jo') }}', '{{ $ors->po_no }}');"
                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
@@ -346,13 +390,17 @@
                         </a>
                     </li>
                     @endif
+                    <!-- End Regenerate PO/JO Button Section -->
 
                     @if (empty($ors->ors['date_obligated']))
                         @if (empty($ors->doc_status->date_issued) &&
                              empty($ors->doc_status->date_received) &&
                              empty($ors->doc_status->date_issued_back) &&
-                             empty($ors->doc_status->date_received_back) &&
-                             $isAllowedIssue)
+                             empty($ors->doc_status->date_received_back))
+
+                    <!-- Submit Button Section -->
+                            @if ($isVisibleIssue)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-orange waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showIssue('{{ route('proc-ors-burs-show-issue', ['id' => $ors->ors['id']]) }}',
@@ -360,11 +408,17 @@
                             <i class="fas fa-paper-plane"></i> Submit
                         </button>
                     </li>
+                            @endif
+                    <!-- End Submit Button Section -->
+
                         @elseif (!empty($ors->doc_status->date_issued) &&
                                  empty($ors->doc_status->date_received) &&
                                  empty($ors->doc_status->date_issued_back) &&
-                                 empty($ors->doc_status->date_received_back) &&
-                                 $isAllowedReceive)
+                                 empty($ors->doc_status->date_received_back))
+
+                    <!-- Receive Button Section -->
+                            @if ($isVisibleReceive)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showReceive('{{ route('proc-ors-burs-show-receive', ['id' => $ors->ors['id']]) }}',
@@ -372,11 +426,17 @@
                             <i class="fas fa-hand-holding"></i> Receive
                         </button>
                     </li>
+                            @endif
+                    <!-- End Receive Button Section -->
+
                         @elseif (!empty($ors->doc_status->date_issued) &&
                                  !empty($ors->doc_status->date_received) &&
                                  empty($ors->doc_status->date_issued_back) &&
                                  empty($ors->doc_status->date_received_back))
-                            @if ($isAllowedObligate)
+
+                    <!-- Obligate Button Section -->
+                            @if ($isVisibleObligate)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showObligate('{{ route('proc-ors-burs-show-obligate', ['id' => $ors->ors['id']]) }}',
@@ -385,8 +445,11 @@
                         </button>
                     </li>
                             @endif
+                    <!-- End Obligate Button Section -->
 
-                            @if ($isAllowedIssueBack)
+                    <!-- Submit Back Button Section -->
+                            @if ($isVisibledIssueBack)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-orange waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showIssueBack('{{ route('proc-ors-burs-show-issue-back', ['id' => $ors->ors['id']]) }}',
@@ -395,11 +458,16 @@
                         </button>
                     </li>
                             @endif
+                    <!-- End Submit Back Button Section -->
+
                         @elseif (!empty($ors->doc_status->date_issued) &&
                                  !empty($ors->doc_status->date_received) &&
                                  !empty($ors->doc_status->date_issued_back) &&
-                                 empty($ors->doc_status->date_received_back) &&
-                                 $isAllowedReceiveBack)
+                                 empty($ors->doc_status->date_received_back))
+
+                    <!-- Receive Back Button Section -->
+                            @if ($isVisibleReceiveBack)
+                                @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showReceiveBack('{{ route('proc-ors-burs-show-receive-back', ['id' => $ors->ors['id']]) }}',
@@ -407,7 +475,16 @@
                             <i class="fas fa-hand-holding"></i> Receive Back
                         </button>
                     </li>
+                            @endif
+                    <!-- End Receive Back Button Section -->
+
                         @endif
+                    @endif
+
+                    @if (!$countVisible)
+                    <li class="list-group-item justify-content-between text-center">
+                        No more available actions.
+                    </li>
                     @endif
                 </ul>
             </div>

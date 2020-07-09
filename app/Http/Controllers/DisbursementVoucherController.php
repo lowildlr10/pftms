@@ -46,7 +46,7 @@ class DisbursementVoucherController extends Controller
     public function indexProc(Request $request) {
         $data = $this->getIndexData($request, 'procurement');
 
-        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $roleHasAccountant = Auth::user()->hasAccountantRole();
         $roleHasBudget = Auth::user()->hasBudgetRole();
 
@@ -73,7 +73,7 @@ class DisbursementVoucherController extends Controller
             'isAllowedReceiveBack'=> $isAllowedReceiveBack,
             'isAllowedIAR' => $isAllowedIAR,
             'isAllowedLDDAP' => $isAllowedLDDAP,
-            'roleHasDeveloper' => $roleHasDeveloper,
+            'roleHasOrdinary' => $roleHasOrdinary,
             'roleHasAccountant' => $roleHasAccountant,
             'roleHasBudget' => $roleHasBudget,
         ]);
