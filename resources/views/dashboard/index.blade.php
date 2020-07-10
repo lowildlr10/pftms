@@ -151,14 +151,15 @@
 
                 <div class="card">
                     <div class="row">
-                        <div class="col-xl-5 col-md-12 mr-0">
+                        <div class="col-md-12 mr-0">
                             <div class="card-body card-body-cascade pb-0">
-                                <div class="row card-body pt-3">
+                                <div class="row card-body pt-3 pb-5">
                                     <div class="col-md-12">
-                                        <p>
-                                            Hello <strong>{{ Auth::user()->firstname }}</strong>,<br>
-                                            Dashboard is currently under construction...
-                                        </p>
+                                        <h6>
+                                            Welcome back <strong class="font-weight-bolder">
+                                                {{ strtoupper(Auth::user()->firstname . ' ' . Auth::user()->lastname) }}
+                                            </strong>
+                                        </h6><br>
 
                                         <!-- Search form -->
                                         <form id="form-track" class="form-inline md-form form-sm mt-0" method="GET"
@@ -168,6 +169,11 @@
                                                    type="text" placeholder="Enter your PR number to track."
                                                    aria-label="Search">
                                         </form>
+
+                                        <a class="btn btn-dark btn-rounded btn-block" target="_blank"
+                                           href="https://drive.google.com/file/d/1BWrfhqUy93qpT4KgvGWvN3zqQ7jBrwLa/view?usp=sharing">
+                                            <h6><i class="fa fa-file-pdf"></i> Download User's Manual</h6>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
