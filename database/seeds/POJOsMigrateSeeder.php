@@ -114,6 +114,11 @@ class POJOsMigrateSeeder extends Seeder
             $instancePO->updated_at = $po->updated_at;
             $instancePO->save();
 
+            $poData = DB::table('purchase_job_orders')
+                        ->where('po_no', $poNo)
+                        ->first();
+            $poID = $poData->id;
+
             $poItemData = DB::connection('mysql-old-pftms')
                             ->table('tblpo_jo_items')
                             ->where('po_no', $poNo)
@@ -162,10 +167,6 @@ class POJOsMigrateSeeder extends Seeder
             }
 
             /*
-            $poData = DB::table('purchase_job_orders')
-                        ->where('po_no', $poNo)
-                        ->first();
-            $poID = $poData->id;
 
             $prItemsData = DB::connection('mysql-old-pftms')
                              ->table('tblpr_items')
