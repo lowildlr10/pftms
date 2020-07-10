@@ -43,11 +43,12 @@ $(function() {
 				case 0:
                     $(newcell).find('div.md-form').first().append($(newcell).find('select'));
                     $(newcell).find('div.select-wrapper').remove();
-                    $(newcell).find('select').attr('id', 'unit' + conCount).val('').materialSelect();
+                    $(newcell).find('select').attr('id', 'unit' + conCount).prop('selectedIndex', 0).materialSelect();
 
                     $(newcell).find('input')
+                              .first()
 							  .attr('name', 'item_id[]')
-                              .val('');
+                              .val('0');
 				break;
 				case 1:
 					$(newcell).find('textarea')

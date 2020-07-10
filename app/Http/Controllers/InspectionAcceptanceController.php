@@ -284,17 +284,21 @@ class InspectionAcceptanceController extends Controller
             $iarNo = $instanceIAR->iar_no;
             $inspectedBy = $instanceIAR->sig_inspection;
 
-            $instanceDV = new DisbursementVoucher;
-            $instanceDV->pr_id = $instanceIAR->pr_id;
-            $instanceDV->ors_id = $instanceIAR->ors_id;
-            $instanceDV->particulars = "To payment of...";
-            $instanceDV->payee = $instanceIAR->po->awarded_to;
-            $instanceDV->sig_certified = $instanceIAR->ors->sig_certified_1;
-            $instanceDV->sig_accounting = $instanceIAR->po['sig_funds_available'];
-            $instanceDV->sig_agency_head = $instanceIAR->po['sig_approval'];
-            $instanceDV->amount = $instanceIAR->ors->amount;
-            $instanceDV->module_class = 3;
-            $instanceDV->save();
+            $instanceDV = DisbursementVoucher::where('ors_id', $instanceIAR->ors_id)->first();
+
+            if (!$instanceDV) {
+                $instanceDV = new DisbursementVoucher;
+                $instanceDV->pr_id = $instanceIAR->pr_id;
+                $instanceDV->ors_id = $instanceIAR->ors_id;
+                $instanceDV->particulars = "To payment of...";
+                $instanceDV->payee = $instanceIAR->po->awarded_to;
+                $instanceDV->sig_certified = $instanceIAR->ors->sig_certified_1;
+                $instanceDV->sig_accounting = $instanceIAR->po['sig_funds_available'];
+                $instanceDV->sig_agency_head = $instanceIAR->po['sig_approval'];
+                $instanceDV->amount = $instanceIAR->ors->amount;
+                $instanceDV->module_class = 3;
+                $instanceDV->save();
+            }
 
             $instancePO = PurchaseJobOrder::find($poID);
             $instancePO->status = 10;

@@ -238,22 +238,30 @@ class ObligationRequestStatusController extends Controller
             $documentType = $instancePO->document_type;
             $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';
             $grandTotal = $instancePO->grand_total;
-            $countORS = ObligationRequestStatus::where('po_no', $poNo)->count();
 
-            if ($countORS == 0 && $grandTotal > 0) {
-                $instanceORS = new ObligationRequestStatus;
-                $instanceORS->pr_id = $prID;
-                $instanceORS->po_no = $poNo;
-                $instanceORS->responsibility_center = "19 001 03000 14";
-                $instanceORS->particulars = "To obligate...";
-                $instanceORS->mfo_pap = "3-Regional Office\nA.III.c.1\nA.III.b.1\nA.III.c.2";
-                $instanceORS->payee = $instancePO->awarded_to;
-                $instanceORS->amount = $instancePO->grand_total;
-                $instanceORS->module_class = 3;
-                $instanceORS->save();
+            if ($grandTotal > 0) {
+                $instanceORS = ObligationRequestStatus::where('po_no', $poNo)->first();
+
+                if (!$instanceORS) {
+                    $instanceORS = new ObligationRequestStatus;
+                    $instanceORS->pr_id = $prID;
+                    $instanceORS->po_no = $poNo;
+                    $instanceORS->responsibility_center = "19 001 03000 14";
+                    $instanceORS->particulars = "To obligate...";
+                    $instanceORS->mfo_pap = "3-Regional Office\nA.III.c.1\nA.III.b.1\nA.III.c.2";
+                    $instanceORS->payee = $instancePO->awarded_to;
+                    $instanceORS->amount = $instancePO->grand_total;
+                    $instanceORS->module_class = 3;
+                    $instanceORS->save();
+                }
 
                 $instancePO->for_approval = 'y';
                 $instancePO->with_ors_burs = 'y';
+
+                if ($instanceORS->date_obligated) {
+                    $instancePO->status = 7;
+                }
+
                 $instancePO->save();
 
                 $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';

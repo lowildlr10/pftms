@@ -14,6 +14,7 @@ use App\Models\ObligationRequestStatus;
 use App\Models\InspectionAcceptance;
 use App\Models\DisbursementVoucher;
 use App\Models\InventoryStock;
+use App\Models\InventoryStockItem;
 use App\Models\InventoryStockIssue;
 
 use App\User;
@@ -751,6 +752,8 @@ class PurchaseRequestController extends Controller
         $unitCosts = $request->unit_cost;
         $totalCosts = $request->total_cost;
 
+        $groupNos = [];
+
         try {
             $instancePR = PurchaseRequest::find($id);
             $instancePR->date_pr = $prDate;
@@ -767,6 +770,7 @@ class PurchaseRequestController extends Controller
 
             // Delete other dependent documents
             if ($instancePR->status >= 5) {
+                /*
                 RequestQuotation::where('pr_id', $id)->forceDelete();
                 AbstractQuotation::where('pr_id', $id)->forceDelete();
                 AbstractQuotationItem::where('pr_id', $id)->delete();
@@ -776,7 +780,7 @@ class PurchaseRequestController extends Controller
                 InspectionAcceptance::where('pr_id', $id)->forceDelete();
                 DisbursementVoucher::where('pr_id', $id)->forceDelete();
                 InventoryStock::where('pr_id', $id)->forceDelete();
-                InventoryStockIssue::where('pr_id', $id)->delete();
+                InventoryStockIssue::where('pr_id', $id)->delete();*/
             }
 
             // Update pr items
@@ -808,10 +812,51 @@ class PurchaseRequestController extends Controller
                         $instancePR->notifyForApproval($prNo, $requestedBy);
                         $instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
                         $instanceDocLog->logDocument($id, Auth::user()->id, NULL, 'issued');
+
+                        $instancePRItem = PurchaseRequestItem::where('pr_id', $id)->get();
+
+                        foreach ($instancePRItem as $item) {
+                            $groupNos[] = $item->group_no;
+                        }
+
+                        $groupNos = array_unique($groupNos);
                     }
 
                     $instancePRItem = PurchaseRequestItem::find($itemID);
-                    $instancePRItem = $instancePRItem ? $instancePRItem : new PurchaseRequestItem;
+
+                    if (!$instancePRItem) {
+                        $instancePRItem = new PurchaseRequestItem;
+
+                        for ($groupNo = 0; $groupNo  <= 20; $groupNo++) {
+                            if (!in_array($groupNo, $groupNos)) {
+                                $instancePRItem->group_no = $groupNo;
+                                break;
+                            }
+                        }
+                    } else {
+                        $instancePOItem = PurchaseJobOrderItem::where('pr_item_id', $itemID)->first();
+
+                        if ($instancePOItem) {
+                            $poItemID = $instancePOItem->id;
+                            $amount = $instancePOItem->total_cost;
+                            $instancePOItem->item_no = $arrayKey + 1;
+                            $instancePOItem->quantity = $quantity;
+                            $instancePOItem->unit_issue = $unit;
+                            $instancePOItem->item_description = $description;
+                            $instancePOItem->save();
+
+                            $instanceInvStockItem = InventoryStockItem::where('po_item_id', $poItemID)->first();
+
+                            if ($instanceInvStockItem) {
+                                $instanceInvStockItem->quantity = $quantity;
+                                $instanceInvStockItem->unit_issue = $unit;
+                                $instanceInvStockItem->description = $description;
+                                $instanceInvStockItem->amount = $amount;
+                                $instanceInvStockItem->save();
+                            }
+                        }
+                    }
+
                     $instancePRItem->pr_id = $id;
                     $instancePRItem->item_no = $arrayKey + 1;
                     $instancePRItem->quantity = $quantity;

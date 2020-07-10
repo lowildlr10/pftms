@@ -13,6 +13,7 @@ use App\Models\ObligationRequestStatus;
 use App\Models\InspectionAcceptance;
 use App\Models\DisbursementVoucher;
 use App\Models\InventoryStock;
+use App\Models\InventoryStockItem;
 
 use App\User;
 use App\Models\DocumentLog as DocLog;
@@ -343,6 +344,16 @@ class PurchaseJobOrderController extends Controller
                     $instancePOItem->po_no = $poNumbers[$itemCtr];
                     $instancePOItem->excluded = $excludes[$itemCtr];
                     $instancePOItem->save();
+
+                    $instanceInvStockItem = InventoryStockItem::where('po_item_id', $itemID)->first();
+
+                    if ($instanceInvStockItem) {
+                        $instanceInvStockItem->quantity = $quantities[$itemCtr];
+                        $instanceInvStockItem->unit_issue = $unitIssues[$itemCtr];
+                        $instanceInvStockItem->description = $itemDescriptions[$itemCtr];
+                        $instanceInvStockItem->amount = $totalCosts[$itemCtr];
+                        $instanceInvStockItem->save();
+                    }
                 }
             }
 
@@ -630,12 +641,16 @@ class PurchaseJobOrderController extends Controller
                             'Purchase Order' : 'Job Order';
 
             $iarNo = "IAR-" . $poNo;
-            $instanceIAR = new InspectionAcceptance;
-            $instanceIAR->iar_no = $iarNo;
-            $instanceIAR->pr_id = $prID;
-            $instanceIAR->ors_id = $orsID;
-            $instanceIAR->po_id = $id;
-            $instanceIAR->save();
+            $instanceIAR = InspectionAcceptance::where('iar_no', $iarNo)->first();
+
+            if (!$instanceIAR) {
+                $instanceIAR = new InspectionAcceptance;
+                $instanceIAR->iar_no = $iarNo;
+                $instanceIAR->pr_id = $prID;
+                $instanceIAR->ors_id = $orsID;
+                $instanceIAR->po_id = $id;
+                $instanceIAR->save();
+            }
 
             $instancePO->status = 9;
             $instancePO->save();
