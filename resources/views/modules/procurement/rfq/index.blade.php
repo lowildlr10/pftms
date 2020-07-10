@@ -168,10 +168,15 @@
         $isVisibleAbstract = $isAllowedAbstract;
 
         if ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) {
-            $isVisibleUpdate = false;
-            $isVisibleViewAttachment = false;
-            $isVisibleIssue = false;
-            $isVisibleReceive = false;
+            if (Auth::user()->id == $pr->requestor['id']) {
+                $isVisibleUpdate = $isAllowedUpdate ? $isAllowedUpdate : false;
+                $isVisibleViewAttachment = true;
+            } else {
+                $isVisibleUpdate = false;
+                $isVisibleViewAttachment = false;
+            }
+
+
         }
         @endphp
 
