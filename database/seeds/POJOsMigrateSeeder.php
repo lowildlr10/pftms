@@ -114,6 +114,51 @@ class POJOsMigrateSeeder extends Seeder
             $instancePO->updated_at = $po->updated_at;
             $instancePO->save();
 
+            $poItemData = DB::connection('mysql-old-pftms')
+                            ->table('tblpo_jo_items')
+                            ->where('po_no', $poNo)
+                            ->orderByRaw('LENGTH(item_id)')
+                            ->orderBy('item_id')
+                            ->get();
+
+            if (count($poItemData) > 0) {
+                foreach ($poItemData as $ctr => $item) {
+                    $prItemOld = DB::connection('mysql-old-pftms')
+                                   ->table('tblpr_items')
+                                   ->where('item_id', $item->item_id)
+                                   ->first();
+                    $instancePRItem = DB::table('purchase_request_items')
+                                        ->where('item_description', $prItemOld->item_description)
+                                        ->first();
+                    $prItemID = $instancePRItem->id;
+                    $itemNo = $instancePRItem->item_no;
+
+                    $unitData = DB::connection('mysql-old-pftms')
+                                  ->table('tblunit_issue')
+                                  ->where('id', $item->unit_issue)
+                                  ->first();
+                    $unitName = $unitData ? $unitData->unit : NULL;
+                    $instanceUnit = !empty($unitName) ?
+                                    Unit::where('unit_name', $unitName)->first() :
+                                    NULL;
+
+                    $instancePOItem = new PurchaseJobOrderItem;
+                    $instancePOItem->po_no = $poNo;
+                    $instancePOItem->pr_id = $instancePR->id;
+                    $instancePOItem->pr_item_id = $prItemID;
+                    $instancePOItem->item_no = $itemNo;
+                    $instancePOItem->stock_no = $item->stock_no;
+                    $instancePOItem->quantity = $item->quantity;
+                    $instancePOItem->unit_issue = $instanceUnit ? $instanceUnit->id : NULL;
+                    $instancePOItem->item_description = $item->item_description;
+                    $instancePOItem->unit_cost = $item->unit_cost;
+                    $instancePOItem->total_cost = $item->total_cost;
+                    $instancePOItem->excluded = $item->excluded;
+                    $instancePOItem->save();
+                }
+            }
+
+            /*
             $poData = DB::table('purchase_job_orders')
                         ->where('po_no', $poNo)
                         ->first();
@@ -162,7 +207,7 @@ class POJOsMigrateSeeder extends Seeder
                     $instancePOItem->excluded = $poItemData->excluded;
                     $instancePOItem->save();
                 }
-            }
+            }*/
 
             $docLogData = DB::connection('mysql-old-pftms')
                             ->table('tbldocument_logs_history')
