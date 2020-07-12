@@ -71,7 +71,7 @@ class DocAbstractQuotation extends PDF {
 
                 // TABLE TITLE
                 $this->SetFont('helvetica', 'B', 10 + ($fontScale * 10));
-                $this->Cell($pageHeight * 0.948, 5, 'ABSTRACT OF QUOTATION', "", "",'C');
+                $this->Cell($pageWidth * 0.948, 5, 'ABSTRACT OF QUOTATION', "", "",'C');
                 $this->Ln(10);
 
                 $x = $this->GetX();
