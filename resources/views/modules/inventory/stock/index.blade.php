@@ -105,90 +105,85 @@
 
                                 <!--Table body-->
                                 <tbody>
-                                    <form id="form-validation" method="POST" action="#">
-                                        @csrf
-                                        <input type="hidden" name="type" id="type">
+                                    @if (count($list) > 0)
+                                        @foreach ($list as $listCtr => $inv)
+                                    <tr>
+                                        <td align="center">
+                                            @if ($inv->procstatus['id'] == 12)
+                                            <i class="fas fa-file-signature fa-lg orange-text material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Recorded"></i>
+                                            @else
+                                            <i class="fas fa-check fa-lg green-text material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Issued"></i>
+                                            @endif
+                                        </td>
+                                        <td align="center"></td>
+                                        <td>
+                                            {{ $inv->inventory_no }} {!!
+                                                !$inv->po_id ? '<br><em><small class="grey-text">(Manually Added)</small></em>' : ''
+                                            !!}
+                                        </td>
+                                        <td class="py-2 px-0">
+                                            <div class="mdb-color-text">
+                                                @if (count($inv->stockitems) > 0)
+                                                    @foreach ($inv->stockitems as $cntr => $item)
+                                                <i class="fas fa-caret-right"></i>
 
-                                        @if (count($list) > 0)
-                                            @foreach ($list as $listCtr => $inv)
-                                        <tr class="hidden-xs">
-                                            <td align="center">
-                                                @if ($inv->procstatus['id'] == 12)
-                                                <i class="fas fa-file-signature fa-lg orange-text material-tooltip-main"
-                                                   data-toggle="tooltip" data-placement="right" title="Recorded"></i>
-                                                @else
-                                                <i class="fas fa-check fa-lg green-text material-tooltip-main"
-                                                   data-toggle="tooltip" data-placement="right" title="Issued"></i>
+                                                        @if (strlen($item->item_description) > 60)
+                                                <strong>{{ $cntr + 1 }}.|</strong> {{ substr($item->description, 0, 60) }}...
+                                                        @else
+                                                <strong>{{ $cntr + 1 }}.|</strong> {{ $item->description }}.
+                                                        @endif
+
+                                                        @if ($item->available_quantity > 0)
+                                                <strong class="green-text">
+                                                    [{{ $item->available_quantity }}/{{ $item->quantity }}]
+                                                </strong>
+
+                                                            @if ($isAllowedIssue)
+                                                <button type="button" class="btn btn-outline-orange btn-sm py-0 px-1 my-0 ml-1 mb-2 z-depth-0
+                                                                             waves-effect waves-light"
+                                                        onclick="$(this).showCreateIssueItem(`{{ route('stocks-show-create-issue-item', [
+                                                            'invStockID' => $inv->id,
+                                                            'invStockItemID' => $item->id,
+                                                            'classification' => strtolower($inv->inventoryclass['abbrv']),
+                                                            'type' => 'single'
+                                                        ]) }}`);">
+                                                    <i class="fas fa-paper-plane"></i> Issue
+                                                </button>
+                                                            @endif
+                                                        @else
+                                                <strong class="red-text">
+                                                    [{{ $item->available_quantity }}/{{ $item->quantity }}] - <i class="fas fa-ban"></i> Out of Stock
+                                                </strong>
+                                                        @endif
+
+                                                <br>
+
+                                                    @endforeach
                                                 @endif
-                                            </td>
-                                            <td align="center"></td>
-                                            <td>
-                                                {{ $inv->inventory_no }} {!!
-                                                    !$inv->po_id ? '<br><em><small class="grey-text">(Manually Added)</small></em>' : ''
-                                                !!}
-                                            </td>
-                                            <td class="py-2 px-0">
-                                                <div class="mdb-color-text">
-                                                    @if (count($inv->stockitems) > 0)
-                                                        @foreach ($inv->stockitems as $cntr => $item)
-                                                    <i class="fas fa-caret-right"></i>
-
-                                                            @if (strlen($item->item_description) > 60)
-                                                    <strong>{{ $cntr + 1 }}.|</strong> {{ substr($item->description, 0, 60) }}...
-                                                            @else
-                                                    <strong>{{ $cntr + 1 }}.|</strong> {{ $item->description }}.
-                                                            @endif
-
-                                                            @if ($item->available_quantity > 0)
-                                                    <strong class="green-text">
-                                                        [{{ $item->available_quantity }}/{{ $item->quantity }}]
-                                                    </strong>
-
-                                                                @if ($isAllowedIssue)
-                                                    <button type="button" class="btn btn-outline-orange btn-sm py-0 px-1 my-0 ml-1 mb-2 z-depth-0
-                                                                                 waves-effect waves-light"
-                                                            onclick="$(this).showCreateIssueItem(`{{ route('stocks-show-create-issue-item', [
-                                                                'invStockID' => $inv->id,
-                                                                'invStockItemID' => $item->id,
-                                                                'classification' => strtolower($inv->inventoryclass['abbrv']),
-                                                                'type' => 'single'
-                                                            ]) }}`);">
-                                                        <i class="fas fa-paper-plane"></i> Issue
-                                                    </button>
-                                                                @endif
-                                                            @else
-                                                    <strong class="red-text">
-                                                        [{{ $item->available_quantity }}/{{ $item->quantity }}] - <i class="fas fa-ban"></i> Out of Stock
-                                                    </strong>
-                                                            @endif
-
-                                                    <br>
-
-                                                        @endforeach
-                                                    @endif
-                                                </div>
-                                            </td>
-                                            <td>{{ $inv->inventoryclass['classification_name'] }}</td>
-                                            <td>{{ $inv->procstatus['status_name'] }}</td>
-                                            <td align="center">
-                                                <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
-                                                   data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal"
-                                                   data-toggle="tooltip" data-placement="left" title="Open">
-                                                    <i class="fas fa-folder-open"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                            @endforeach
-                                        @else
-                                        <tr>
-                                            <td colspan="6" class="text-center py-5">
-                                                <h6 class="red-text">
-                                                    No available data.
-                                                </h6>
-                                            </td>
-                                        </tr>
-                                        @endif
-                                    </form>
+                                            </div>
+                                        </td>
+                                        <td>{{ $inv->inventoryclass['classification_name'] }}</td>
+                                        <td>{{ $inv->procstatus['status_name'] }}</td>
+                                        <td align="center">
+                                            <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
+                                               data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal"
+                                               data-toggle="tooltip" data-placement="left" title="Open">
+                                                <i class="fas fa-folder-open"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                        @endforeach
+                                    @else
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <h6 class="red-text">
+                                                No available data.
+                                            </h6>
+                                        </td>
+                                    </tr>
+                                    @endif
                                 </tbody>
                                 <!--Table body-->
                             </table>
