@@ -58,7 +58,7 @@
 
                                 <!--Table head-->
                                 <thead class="mdb-color darken-3 white-text">
-                                    <tr class="hidden-xs">
+                                    <tr>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="13%">
@@ -77,103 +77,98 @@
 
                                 <!--Table body-->
                                 <tbody>
-                                    <form id="form-validation" method="POST" action="#">
-                                        @csrf
-                                        <input type="hidden" name="type" id="type">
-
-                                        @if (count($list) > 0)
-                                            @foreach ($list as $listCtr => $lr)
-                                                @if (!$roleHasOrdinary && empty($lr->doc_status->date_issued))
-                                        <tr class="hidden-xs d-none">
+                                    @if (count($list) > 0)
+                                        @foreach ($list as $listCtr => $lr)
+                                            @if (!$roleHasOrdinary && empty($lr->doc_status->date_issued))
+                                    <tr class="d-none">
+                                            @else
+                                    <tr>
+                                            @endif
+                                        <td align="center">
+                                            @if (!empty($lr->date_liquidated))
+                                            <i class="fas fa-file-signature fa-lg green-text material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Liquidated"></i>
+                                            @else
+                                                @if (!empty($lr->doc_status->date_issued) &&
+                                                     empty($lr->doc_status->date_received) &&
+                                                     empty($lr->doc_status->date_issued_back) &&
+                                                     empty($lr->doc_status->date_received_back))
+                                            <i class="fas fa-paper-plane fa-lg orange-text material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Submitted"></i>
+                                            @elseif (!empty($lr->doc_status->date_issued) &&
+                                                     !empty($lr->doc_status->date_received) &&
+                                                     empty($lr->doc_status->date_issued_back) &&
+                                                     empty($lr->doc_status->date_received_back))
+                                            <i class="fas fa-hand-holding fa-lg text-success material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Received"></i>
+                                            @elseif (!empty($lr->doc_status->date_issued) &&
+                                                     !empty($lr->doc_status->date_received) &&
+                                                     !empty($lr->doc_status->date_issued_back) &&
+                                                     empty($lr->doc_status->date_received_back))
+                                            <i class="fas fa-undo-alt fa-lg orange-text material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Sumbitted Back"></i>
+                                            @elseif (!empty($lr->doc_status->date_issued) &&
+                                                     !empty($lr->doc_status->date_received) &&
+                                                     !empty($lr->doc_status->date_issued_back) &&
+                                                     !empty($lr->doc_status->date_received_back))
+                                            <i class="fas fa-hand-holding fa-lg text-success material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Received"></i>
                                                 @else
-                                        <tr class="hidden-xs">
+                                            <i class="far fa-lg fa-file material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Pending"></i>
                                                 @endif
-                                            <td align="center">
-                                                @if (!empty($lr->date_liquidated))
-                                                <i class="fas fa-file-signature fa-lg green-text material-tooltip-main"
-                                                   data-toggle="tooltip" data-placement="right" title="Liquidated"></i>
-                                                @else
-                                                    @if (!empty($lr->doc_status->date_issued) &&
-                                                         empty($lr->doc_status->date_received) &&
-                                                         empty($lr->doc_status->date_issued_back) &&
-                                                         empty($lr->doc_status->date_received_back))
-                                                <i class="fas fa-paper-plane fa-lg orange-text material-tooltip-main"
-                                                   data-toggle="tooltip" data-placement="right" title="Submitted"></i>
-                                                @elseif (!empty($lr->doc_status->date_issued) &&
-                                                         !empty($lr->doc_status->date_received) &&
-                                                         empty($lr->doc_status->date_issued_back) &&
-                                                         empty($lr->doc_status->date_received_back))
-                                                <i class="fas fa-hand-holding fa-lg text-success material-tooltip-main"
-                                                   data-toggle="tooltip" data-placement="right" title="Received"></i>
-                                                @elseif (!empty($lr->doc_status->date_issued) &&
-                                                         !empty($lr->doc_status->date_received) &&
-                                                         !empty($lr->doc_status->date_issued_back) &&
-                                                         empty($lr->doc_status->date_received_back))
-                                                <i class="fas fa-undo-alt fa-lg orange-text material-tooltip-main"
-                                                   data-toggle="tooltip" data-placement="right" title="Sumbitted Back"></i>
-                                                @elseif (!empty($lr->doc_status->date_issued) &&
-                                                         !empty($lr->doc_status->date_received) &&
-                                                         !empty($lr->doc_status->date_issued_back) &&
-                                                         !empty($lr->doc_status->date_received_back))
-                                                <i class="fas fa-hand-holding fa-lg text-success material-tooltip-main"
-                                                   data-toggle="tooltip" data-placement="right" title="Received"></i>
-                                                    @else
-                                                <i class="far fa-lg fa-file material-tooltip-main"
-                                                   data-toggle="tooltip" data-placement="right" title="Pending"></i>
-                                                    @endif
-                                                @endif
-                                            </td>
-                                            <td align="center"></td>
-                                            <td>{{ !empty($lr->serial_no) ? $lr->serial_no : 'NA' }}</td>
-                                            <td>
-                                                <i class="fas fa-caret-right"></i> {{
-                                                    (strlen($lr->particulars) > 150) ?
-                                                    substr($lr->particulars, 0, 150).'...' : $lr->particulars
-                                                }}
-                                            </td>
-                                            <td>{{ $lr->empclaimant['firstname'] }} {{ $lr->empclaimant['lastname'] }}</td>
-                                            <td align="center">
-                                                @if (!empty($lr->date_liquidated))
-                                                    @if ((Auth::user()->role == 1 || Auth::user()->role == 4))
-                                                        @if (!empty($lr->doc_status->issued_remarks) &&
-                                                             !empty($lr->doc_status->date_issued) &&
-                                                             empty($lr->doc_status->date_issued_back))
-                                                <span class="red-text">
-                                                    <a data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
-                                                        <i class="fas fa-exclamation-triangle fa-sm"></i>
-                                                    </a>
-                                                </span>
-                                                        @endif
-                                                    @else
-                                                        @if (!empty($lr->doc_status->issued_back_remarks) &&
-                                                             !empty($lr->doc_status->date_issued) &&
-                                                             !empty($lr->doc_status->date_issued_back))
-                                                <span class="red-text">
-                                                    <a data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
-                                                        <i class="fas fa-exclamation-triangle fa-sm"></i>
-                                                    </a>
-                                                </span>
-                                                        @endif
-                                                    @endif
-                                                @endif
-                                                <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
-                                                   data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal"
-                                                   data-toggle="tooltip" data-placement="left" title="Open">
-                                                    <i class="fas fa-folder-open"></i>
+                                            @endif
+                                        </td>
+                                        <td align="center"></td>
+                                        <td>{{ !empty($lr->serial_no) ? $lr->serial_no : 'NA' }}</td>
+                                        <td>
+                                            <i class="fas fa-caret-right"></i> {{
+                                                (strlen($lr->particulars) > 150) ?
+                                                substr($lr->particulars, 0, 150).'...' : $lr->particulars
+                                            }}
+                                        </td>
+                                        <td>{{ $lr->empclaimant['firstname'] }} {{ $lr->empclaimant['lastname'] }}</td>
+                                        <td align="center">
+                                            @if (!empty($lr->date_liquidated))
+                                                @if ((Auth::user()->role == 1 || Auth::user()->role == 4))
+                                                    @if (!empty($lr->doc_status->issued_remarks) &&
+                                                         !empty($lr->doc_status->date_issued) &&
+                                                         empty($lr->doc_status->date_issued_back))
+                                            <span class="red-text">
+                                                <a data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
+                                                    <i class="fas fa-exclamation-triangle fa-sm"></i>
                                                 </a>
-                                            </td>
-                                        </tr>
-                                            @endforeach
-                                        @else
-                                        <tr>
-                                            <td colspan="6" class="text-center py-5">
-                                                <h6 class="red-text">
-                                                    No available data.
-                                                </h6>
-                                            </td>
-                                        </tr>
-                                        @endif
-                                    </form>
+                                            </span>
+                                                    @endif
+                                                @else
+                                                    @if (!empty($lr->doc_status->issued_back_remarks) &&
+                                                         !empty($lr->doc_status->date_issued) &&
+                                                         !empty($lr->doc_status->date_issued_back))
+                                            <span class="red-text">
+                                                <a data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
+                                                    <i class="fas fa-exclamation-triangle fa-sm"></i>
+                                                </a>
+                                            </span>
+                                                    @endif
+                                                @endif
+                                            @endif
+                                            <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
+                                               data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal"
+                                               data-toggle="tooltip" data-placement="left" title="Open">
+                                                <i class="fas fa-folder-open"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                        @endforeach
+                                    @else
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <h6 class="red-text">
+                                                No available data.
+                                            </h6>
+                                        </td>
+                                    </tr>
+                                    @endif
                                 </tbody>
                                 <!--Table body-->
                             </table>
