@@ -58,7 +58,7 @@
 
                                 <!--Table head-->
                                 <thead class="mdb-color darken-3 white-text">
-                                    <tr class="hidden-xs">
+                                    <tr>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="13%">
@@ -81,9 +81,9 @@
                                         @foreach ($list as $listCtr => $dv)
 
                                             @if (!$roleHasOrdinary && empty($dv->doc_status->date_issued))
-                                        <tr class="hidden-xs d-none">
+                                        <tr class="d-none">
                                                 @else
-                                        <tr class="hidden-xs">
+                                        <tr>
                                             @endif
                                         <td align="center">
                                             @if (!empty($dv->date_disbursed))
