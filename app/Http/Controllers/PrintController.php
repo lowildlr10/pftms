@@ -2022,7 +2022,7 @@ class PrintController extends Controller
                         'group_no' => $groupNumbers,
                         'rfq' => $instanceRFQ,
                         'sig_rfq' => $sigRFQ,
-                        'canvassed_by' => $sigRFQ];
+                        'canvassed_by' => $canvassedBy];
     }
 
     private function getDataPR($id) {
