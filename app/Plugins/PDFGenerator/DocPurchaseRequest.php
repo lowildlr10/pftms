@@ -70,6 +70,11 @@ class DocPurchaseRequest extends PDF {
         //Table footer
         $this->MultiCell(0, 5, 'Purpose: ' . $data->pr->purpose, 'BLR', 'L');
 
+        if ($data->pr->funding['source_name']) {
+            $this->MultiCell(0, 5, 'Charged to: ' . $data->pr->funding['source_name'], 'BLR', 'L');
+        }
+
+
         $this->Cell($pageWidth * 0.138, 5, "", "TLR", "", "L");
         $this->Cell($pageWidth * 0.362, 5, "Requested by: ", "TLR", "", "L");
         $this->Cell(0, 5, "Approved by: ", "TLR", "", "L");
