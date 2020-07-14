@@ -10,7 +10,7 @@ $(document).ready(function () {
                 return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
             }
         }],
-        'order': [[1, 'asc']],
+        //'order': [[1, 'asc']],
         'select': {
             style: 'os',
             selector: 'td:first-child'
