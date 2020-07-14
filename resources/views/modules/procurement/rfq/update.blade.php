@@ -115,9 +115,10 @@
     <div class="row">
         <div class="col-md-6">
             <div class="md-form">
-                <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                <select class="mdb-select crud-select md-form" searchable="Search here.."
                         name="canvassed_by">
                     <option value="" disabled selected>Choose a canvasser</option>
+                    <option value="">-- None --</option>
 
                     @if (count($users) > 0)
                         @foreach ($users as $emp)
@@ -128,7 +129,7 @@
                     @endif
                 </select>
                 <label class="mdb-main-label">
-                    Canvassed By <span class="red-text">*</span>
+                    Canvassed By
                 </label>
             </div>
         </div>

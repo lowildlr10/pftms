@@ -138,7 +138,14 @@ class DocRequestQuotation extends PDF {
             $this->Ln(5);
 
             $this->SetFont('helvetica', 'IB', 10 + ($fontScale * 10));
-            $this->Cell(0, 5, "Canvassed by:_______________________", 0, 0, 'L');
+
+            if ($data->canvassed_by->name) {
+                $this->Cell($pageWidth * 0.13, 5, "Canvassed by: ", 0, 0, 'L');
+                $this->SetFont('helvetica', 'IU', 10 + ($fontScale * 10));
+                $this->Cell(0, 5, ' '.$data->canvassed_by->name.' ', 0, 0, 'L');
+            } else {
+                $this->Cell(0, 5, "Canvassed by:_______________________", 0, 0, 'L');
+            }
 
         /* ------------------------------------- End of Doc ------------------------------------- */
         }

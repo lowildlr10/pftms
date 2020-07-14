@@ -1960,6 +1960,7 @@ class PrintController extends Controller
         $instancePR = $this->getDataPR($prID)->pr;
         $instanceSignatory = new Signatory;
         $sigRFQ = $instanceSignatory->getSignatory($instanceRFQ->sig_rfq);
+        $canvassedBy = Auth::user()->getEmployee($instanceRFQ->canvassed_by);
         $groupNumbers = $this->getItemGroup($prID);
 
         foreach ($groupNumbers as $groupNo) {
@@ -2020,13 +2021,14 @@ class PrintController extends Controller
         return (object)['pr' => $instancePR,
                         'group_no' => $groupNumbers,
                         'rfq' => $instanceRFQ,
-                        'sig_rfq' => $sigRFQ];
+                        'sig_rfq' => $sigRFQ,
+                        'canvassed_by' => $sigRFQ];
     }
 
     private function getDataPR($id) {
         $tableData = [];
         $total = 0;
-        $instancePR = PurchaseRequest::find($id);
+        $instancePR = PurchaseRequest::with('funding')->find($id);
         $instanceSignatory = new Signatory;
         $prItems = DB::table('purchase_request_items as item')
                      ->join('item_unit_issues as unit', 'unit.id', '=', 'item.unit_issue')
