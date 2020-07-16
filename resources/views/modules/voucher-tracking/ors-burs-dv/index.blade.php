@@ -7,7 +7,7 @@
         <tr>
             <td width="2%"></td>
             <td class="table-divider" colspan="8" width="44%">Obligation / Budget Utilization & Request Status</td>
-            <td class="table-divider" colspan="6" width="36%">Disbursement Voucher</td>
+            <td class="table-divider" colspan="7" width="36%">Disbursement Voucher</td>
             <td class="table-divider" colspan="2" width="10%">Date Time Count</td>
             <td class="table-divider" width="10%"></td>
         </tr>
@@ -26,10 +26,11 @@
             <td>Obligated On</td>
 
             <td class="table-divider">Code</td>
-            <td>Issued By</td>
+            <td>Submitted By</td>
             <td>Submitted On</td>
             <td>Received By</td>
             <td>Received On</td>
+            <td>Disbursed By</td>
             <td>Disbursed On</td>
 
             <td class="table-divider" width="5%">
@@ -81,9 +82,10 @@
         <td class="table-border-left" align="center">{{ $log->dv_document_status->date_issued }}</td>
         <td class="table-border-left">{{ strtoupper($log->dv_document_status->received_by) }}</td>
         <td class="table-border-left" align="center">{{ $log->dv_document_status->date_received }}</td>
+        <td class="table-border-left" align="center">{{ $log->disbursed_by }}</td>
         <td class="table-border-left" align="center">{{ $log->date_disbursed }}</td>
         @else
-        <td colspan="6" class="table-divider" align="center">
+        <td colspan="7" class="table-divider" align="center">
             <h6>
                 <strong class="red-text">Not yet created.</strong>
             </h6>
@@ -123,7 +125,7 @@
         @else
 
     <tr>
-        <td colspan="18">
+        <td colspan="19">
             <h4>
                 <p align="center" class="text-danger">
                     <strong>No available data.</strong>
@@ -133,7 +135,7 @@
     </tr>
         @for($row = 1; $row <= 20; $row++)
     <tr>
-        <td colspan="18"></td>
+        <td colspan="19"></td>
     </tr>
         @endfor
 
