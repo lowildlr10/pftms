@@ -8,6 +8,7 @@ use Webpatser\Uuid\Uuid;
 use App\Notifications\RequestQuotation as Notif;
 use App\User;
 use Kyslik\ColumnSortable\Sortable;
+use App\Models\PurchaseRequest;
 
 class RequestQuotation extends Model
 {
@@ -73,7 +74,8 @@ class RequestQuotation extends Model
     public function notifyIssued($id, $responsiblePerson, $requestedBy) {
         $rfqData = $this::with('pr')->find($id);
         $prID = $rfqData->pr_id;
-        $prNo = $rfqData->pr->pr_no;
+        $prData = PurchaseRequest::find($prID);
+        $prNo = $prData->pr_no;
 
         if ($responsiblePerson == $requestedBy) {
             $user = User::find($requestedBy);
@@ -119,7 +121,8 @@ class RequestQuotation extends Model
     public function notifyReceived($id, $receivedBy, $responsiblePerson, $requestedBy) {
         $rfqData = $this::with('pr')->find($id);
         $prID = $rfqData->pr_id;
-        $prNo = $rfqData->pr->pr_no;
+        $prData = PurchaseRequest::find($prID);
+        $prNo = $prData->pr_no;
         $user = new User;
         $receivedByName = $user->getEmployee($receivedBy)->name;
         $requestedByName = $user->getEmployee($requestedBy)->name;

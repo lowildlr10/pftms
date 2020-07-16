@@ -261,8 +261,9 @@ class RequestQuotationController extends Controller
             $instanceDocLog = new DocLog;
             $instanceRFQ = RequestQuotation::with('pr')->where('id', $id)->first();
             $prID = $instanceRFQ->pr_id;
-            $prNo = $instanceRFQ->pr->pr_no;
-            $requestedBy = $instanceRFQ->pr->requested_by;
+            $instancePR = PurchaseRequest::find($prID);
+            $prNo = $instancePR->pr_no;
+            $requestedBy = $instancePR->requested_by;
 
             $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
             $docStatus = $instanceDocLog->checkDocStatus($id);
@@ -306,8 +307,9 @@ class RequestQuotationController extends Controller
             $docStatus = $instanceDocLog->checkDocStatus($id);
             $instanceRFQ = RequestQuotation::with('pr')->where('id', $id)->first();
             $prID = $instanceRFQ->pr_id;
-            $prNo = $instanceRFQ->pr->pr_no;
-            $requestedBy = $instanceRFQ->pr->requested_by;
+            $instancePR = PurchaseRequest::find($prID);
+            $prNo = $instancePR->pr_no;
+            $requestedBy = $instancePR->requested_by;
             $responsiblePerson = $docStatus->issued_to_id;
 
             $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received", $remarks);

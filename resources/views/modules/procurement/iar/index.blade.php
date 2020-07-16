@@ -152,7 +152,7 @@
                                                             @foreach ($pr->iar as $listCtr1 => $item)
                                                             <tr class="row-item">
                                                                 <td align="center">
-                                                                    @if ($pr->po[$listCtr1]->status > 9)
+                                                                    @if ($item->status > 9)
                                                                     <i class="fas fa-search fa-lg green-text material-tooltip-main"
                                                                        data-toggle="tooltip" data-placement="right" title="Inspected"></i>
                                                                     @else
@@ -353,7 +353,7 @@
                     <!-- End Regenerate PO/JO Button Section -->
 
                     @if (!empty($item->doc_status->date_issued))
-                        @if ($pr->po[$listCtr1]->status > 9)
+                        @if ($item->status > 9)
                             @if ($item->inventory_count == 0)
 
                     <!-- Create Inventory Stocks Button Section -->
