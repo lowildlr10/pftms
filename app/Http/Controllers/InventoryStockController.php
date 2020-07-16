@@ -84,7 +84,7 @@ class InventoryStockController extends Controller
             });
         }
 
-        $invStocksData = $invStocksData->sortable(['created_at' => 'desc'])->paginate(15);
+        $invStocksData = $invStocksData->sortable(['inventory_no' => 'desc'])->paginate(15);
         $instanceInvClass = InventoryClassification::orderBy('classification_name')->get();
 
         foreach ($invStocksData as $invStock) {
