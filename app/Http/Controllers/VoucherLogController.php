@@ -219,7 +219,8 @@ class VoucherLogController extends Controller
                   ->select('pr.id as pr_code', 'rfq.id as rfq_code',
                            'pr.date_pr_approved', 'pr.pr_no', 'pr.id')
                   ->leftJoin('request_quotations as rfq', 'rfq.pr_id', '=', 'pr.id')
-                  ->whereBetween(DB::raw('DATE(pr.created_at)'), array($dateFrom, $dateTo));
+                  ->whereBetween(DB::raw('DATE(pr.created_at)'), array($dateFrom, $dateTo))
+                  ->whereNull('pr.deleted_at');
 
         if (!empty($search)) {
             $data = $data->where(function ($query) use ($search) {
@@ -263,7 +264,8 @@ class VoucherLogController extends Controller
                            'abstract.date_abstract_approved', 'rfq.pr_id', 'pr.pr_no')
                   ->join('purchase_requests as pr', 'pr.id', '=', 'rfq.pr_id')
                   ->leftJoin('abstract_quotations as abstract', 'abstract.pr_id', '=', 'rfq.pr_id')
-                  ->whereBetween(DB::raw('DATE(rfq.created_at)'), array($dateFrom, $dateTo));
+                  ->whereBetween(DB::raw('DATE(rfq.created_at)'), array($dateFrom, $dateTo))
+                  ->whereNull('rfq.deleted_at');
 
         if (!empty($search)) {
             $data = $data->where(function ($query) use ($search) {
@@ -297,7 +299,8 @@ class VoucherLogController extends Controller
                            'abstract.date_abstract_approved', 'po.date_po_approved')
                   ->leftJoin('purchase_requests as pr', 'pr.id', '=', 'abstract.pr_id')
                   ->leftJoin('purchase_job_orders as po', 'po.pr_id', '=', 'abstract.pr_id')
-                  ->whereBetween(DB::raw('DATE(abstract.created_at)'), array($dateFrom, $dateTo));
+                  ->whereBetween(DB::raw('DATE(abstract.created_at)'), array($dateFrom, $dateTo))
+                  ->whereNull('abstract.deleted_at');
 
         if (!empty($search)) {
             $data = $data->where(function ($query) use ($search) {
@@ -337,7 +340,8 @@ class VoucherLogController extends Controller
                            'po.created_at as po_created_at')
                   ->leftJoin('purchase_requests as pr', 'pr.id', '=', 'po.pr_id')
                   ->leftJoin('obligation_request_status as ors', 'ors.po_no', '=', 'po.po_no')
-                  ->whereBetween(DB::raw('DATE(po.created_at)'), array($dateFrom, $dateTo));
+                  ->whereBetween(DB::raw('DATE(po.created_at)'), array($dateFrom, $dateTo))
+                  ->whereNull('po.deleted_at');
 
         if (!empty($search)) {
             $data = $data->where(function ($query) use ($search) {
@@ -383,7 +387,8 @@ class VoucherLogController extends Controller
                            'po.document_type', 'po.date_po_approved')
                   ->leftJoin('purchase_requests as pr', 'pr.id', '=', 'po.pr_id')
                   ->leftJoin('inspection_acceptance_reports as iar', 'iar.iar_no', 'LIKE', DB::Raw("CONCAT('%', po.po_no, '%')"))
-                  ->whereBetween(DB::raw('DATE(po.created_at)'), array($dateFrom, $dateTo));
+                  ->whereBetween(DB::raw('DATE(po.created_at)'), array($dateFrom, $dateTo))
+                  ->whereNull('po.deleted_at');
 
         if (!empty($search)) {
             $data = $data->where(function ($query) use ($search) {
@@ -434,7 +439,8 @@ class VoucherLogController extends Controller
                   ->leftJoin('inventory_stocks as inv', 'iar.po_id', '=', 'inv.po_id')
                   ->leftJoin('item_classifications as invclass',
                              'invclass.id', '=', 'inv.inventory_classification')
-                  ->whereBetween(DB::raw('DATE(iar.created_at)'), array($dateFrom, $dateTo));
+                  ->whereBetween(DB::raw('DATE(iar.created_at)'), array($dateFrom, $dateTo))
+                  ->whereNull('iar.deleted_at');
 
         if (!empty($search)) {
             $data = $data->where(function ($query) use ($search) {
@@ -503,7 +509,8 @@ class VoucherLogController extends Controller
                            'dv.date_disbursed')
                   ->leftJoin('purchase_requests as pr', 'pr.id', '=', 'iar.pr_id')
                   ->leftJoin('disbursement_vouchers as dv', 'dv.ors_id', '=', 'iar.ors_id')
-                  ->whereBetween(DB::raw('DATE(iar.created_at)'), array($dateFrom, $dateTo));
+                  ->whereBetween(DB::raw('DATE(iar.created_at)'), array($dateFrom, $dateTo))
+                  ->whereNull('iar.deleted_at');
 
         if (!empty($search)) {
             $data = $data->where(function ($query) use ($search) {
@@ -546,10 +553,12 @@ class VoucherLogController extends Controller
         $data = DB::table('obligation_request_status as ors')
                   ->select('ors.id as ors_code', 'dv.id as dv_code', 'ors.document_type as doc_type',
                             DB::raw('CONCAT(obligated_by.firstname, " ", obligated_by.lastname) AS obligated_by'),
+                            DB::raw('CONCAT(disbursed_by.firstname, " ", disbursed_by.lastname) AS disbursed_by'),
                             'ors.date_obligated', 'ors.serial_no', 'dv.dv_no', 'dv.date_disbursed', 'dv.id as dv_id',
-                            'ors.id as ors_id', 'dv.disbursed_by')
-                  ->leftJoin('emp_accounts as obligated_by', 'obligated_by.emp_id', '=', 'ors.obligated_by')
+                            'ors.id as ors_id')
                   ->leftJoin('disbursement_vouchers as dv', 'dv.ors_id', '=', 'ors.id')
+                  ->leftJoin('emp_accounts as obligated_by', 'obligated_by.id', '=', 'ors.obligated_by')
+                  ->leftJoin('emp_accounts as disbursed_by', 'disbursed_by.id', '=', 'dv.disbursed_by')
                   ->whereBetween(DB::raw('DATE(ors.created_at)'), array($dateFrom, $dateTo))
                   ->whereNull('ors.deleted_at');
 
