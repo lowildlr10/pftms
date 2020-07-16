@@ -34,7 +34,7 @@ class VoucherLogController extends Controller
     {
         //$paperSizes = PaperSize::all();
 
-        return view('pages.voucher-logs', [//'paperSizes' => $paperSizes,
+        return view('modules.voucher-tracking.index', [//'paperSizes' => $paperSizes,
                                            'toggle' => $toggle,
                                            'type' => '']);
     }
@@ -547,10 +547,11 @@ class VoucherLogController extends Controller
                   ->select('ors.id as ors_code', 'dv.id as dv_code', 'ors.document_type as doc_type',
                             DB::raw('CONCAT(obligated_by.firstname, " ", obligated_by.lastname) AS obligated_by'),
                             'ors.date_obligated', 'ors.serial_no', 'dv.dv_no', 'dv.date_disbursed', 'dv.id as dv_id',
-                            'ors.id as ors_id')
+                            'ors.id as ors_id', 'dv.disbursed_by')
                   ->leftJoin('emp_accounts as obligated_by', 'obligated_by.emp_id', '=', 'ors.obligated_by')
                   ->leftJoin('disbursement_vouchers as dv', 'dv.ors_id', '=', 'ors.id')
-                  ->whereBetween(DB::raw('DATE(ors.created_at)'), array($dateFrom, $dateTo));
+                  ->whereBetween(DB::raw('DATE(ors.created_at)'), array($dateFrom, $dateTo))
+                  ->whereNull('ors.deleted_at');
 
         if (!empty($search)) {
             $data = $data->where(function ($query)  use ($search) {

@@ -169,7 +169,13 @@ class DocumentLog extends Model
                         break;
 
                     case 'received':
-                        $history .= "<strong class='green-text'>*</strong>$log->created_at : Document received.<br>";
+                        if (empty($log->remarks)) {
+                            $history .= "<strong class='green-text'>*</strong>$log->created_at : Document received.<br>";
+                        } else {
+                            $history .= "<strong class='green-text'>*</strong>$log->created_at : Document received ($log->remarks).<br>";
+                        }
+
+
                         break;
 
                     case 'issued_back':
@@ -181,7 +187,11 @@ class DocumentLog extends Model
                         break;
 
                     case 'received_back':
-                        $history .= "<strong class='green-text'>*</strong>$log->created_at : Document received back.<br>";
+                        if (empty($log->remarks)) {
+                            $history .= "<strong class='green-text'>*</strong>$log->created_at : Document received back.<br>";
+                        } else {
+                            $history .= "<strong class='green-text'>*</strong>$log->created_at : Document received back ($log->remarks).<br>";
+                        }
                         break;
 
                     default:
