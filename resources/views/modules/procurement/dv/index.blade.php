@@ -133,29 +133,29 @@
                                                      empty($dv->doc_status->date_received) &&
                                                      empty($dv->doc_status->date_issued_back) &&
                                                      empty($dv->doc_status->date_received_back))
-                                        <i class="fas fa-paper-plane fa-lg orange-text material-tooltip-main"
-                                           data-toggle="tooltip" data-placement="right" title="Submitted"></i>
+                                            <i class="fas fa-paper-plane fa-lg orange-text material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Submitted"></i>
                                                 @elseif (!empty($dv->doc_status->date_issued) &&
-                                                         !empty($dv->doc_status->date_received) &&
-                                                         empty($dv->doc_status->date_issued_back) &&
-                                                         empty($dv->doc_status->date_received_back))
-                                        <i classs fa-hand-holding fa-lg text-success material-tooltip-main"
-                                           data-toggle="tooltip" data-placement="right" title="Received"></i>
+                                                        !empty($dv->doc_status->date_received) &&
+                                                        empty($dv->doc_status->date_issued_back) &&
+                                                        empty($dv->doc_status->date_received_back))
+                                            <i class="fas fa-hand-holding fa-lg text-success material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Received"></i>
                                                 @elseif (!empty($dv->doc_status->date_issued) &&
-                                                         !empty($dv->doc_status->date_received) &&
-                                                         !empty($dv->doc_status->date_issued_back) &&
-                                                         empty($dv->doc_status->date_received_back))
-                                        <i class="fas fa-undo-alt fa-lg orange-text material-tooltip-main"
-                                           data-toggle="tooltip" data-placement="right" title="Submitted Back"></i>
+                                                        !empty($dv->doc_status->date_received) &&
+                                                        !empty($dv->doc_status->date_issued_back) &&
+                                                        empty($dv->doc_status->date_received_back))
+                                            <i class="fas fa-undo-alt fa-lg orange-text material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Sumbitted Back"></i>
                                                 @elseif (!empty($dv->doc_status->date_issued) &&
-                                                         !empty($dv->doc_status->date_received) &&
-                                                         !empty($dv->doc_status->date_issued_back) &&
-                                                         !empty($dv->doc_status->date_received_back))
-                                        <i class="fas fa-hand-holding fa-lg text-success material-tooltip-main"
-                                           data-toggle="tooltip" data-placement="right" title="Received"></i>
+                                                        !empty($dv->doc_status->date_received) &&
+                                                        !empty($dv->doc_status->date_issued_back) &&
+                                                        !empty($dv->doc_status->date_received_back))
+                                            <i class="fas fa-hand-holding fa-lg text-success material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Received"></i>
                                                 @else
-                                        <i class="far fa-lg fa-file material-tooltip-main"
-                                           data-toggle="tooltip" data-placement="right" title="Pending"></i>
+                                            <i class="far fa-lg fa-file material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Pending"></i>
                                                 @endif
                                             @endif
 
