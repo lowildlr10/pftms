@@ -79,7 +79,8 @@
                                 <tbody>
                                     @if (count($list) > 0)
                                         @foreach ($list as $listCtr => $ors)
-                                            @if (!$roleHasOrdinary && empty($ors->doc_status->date_issued))
+                                            @if (!$roleHasOrdinary && empty($ors->doc_status->date_issued) &&
+                                                 Auth::user()->id != $ors->payee)
                                     <tr class="d-none">
                                             @else
                                     <tr>
