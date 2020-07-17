@@ -159,7 +159,7 @@ class AbstractQuotationController extends Controller
      */
     public function showCreate($id) {
         $instanceAbstract = AbstractQuotation::with('pr')->find($id);
-        $prID = $instanceAbstract->pr->id;
+        $prID = $instanceAbstract->pr_id;
         $items = $this->getAbstractTable($prID);
         $suppliers = Supplier::orderBy('company_name')->get();
         $procurementModes = ProcurementMode::orderBy('mode_name')->get();
