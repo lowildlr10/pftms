@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 use App\Notifications\AbstractQuotation as Notif;
 use App\User;
+use App\Models\PurchaseRequest;
 use Kyslik\ColumnSortable\Sortable;
 
 class AbstractQuotation extends Model
@@ -76,8 +77,9 @@ class AbstractQuotation extends Model
     public function notifyApprovedForPO($id, $currentUser) {
         $absData = $this::with('pr')->find($id);
         $prID = $absData->pr_id;
-        $prNo = $absData->pr->pr_no;
-        $requestedBy = $absData->pr->requested_by;
+        $prData = PurchaseRequest::find($prID);
+        $prNo = $prData->pr_no;
+        $requestedBy = $prData->requested_by;
         $user = User::find($requestedBy);
         $currentUseryName = $user->getEmployee($currentUser)->name;
         $requestedByName = $user->getEmployee($requestedBy)->name;

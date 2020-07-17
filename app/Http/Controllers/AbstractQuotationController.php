@@ -131,7 +131,7 @@ class AbstractQuotationController extends Controller
      */
     public function showItemSegment(Request $request, $id) {
         $instanceAbstract = AbstractQuotation::with('pr')->find($id);
-        $prID = $instanceAbstract->pr->id;
+        $prID = $instanceAbstract->pr_id;
         $supplierList = Supplier::orderBy('company_name')->get();
         $bidderCount = $request->bidder_count;
         $groupKey = $request->group_key;
@@ -208,7 +208,8 @@ class AbstractQuotationController extends Controller
 
         try {
             $instanceAbstract = AbstractQuotation::with('pr')->find($id);
-            $prNo = $instanceAbstract->pr->pr_no;
+            $prData = PurchaseRequest::find($instanceAbstract->pr_id);
+            $prNo = $prData->pr_no;
             $instanceAbstract->sig_chairperson = $sigChairperson;
             $instanceAbstract->sig_vice_chairperson = $sigViceChairperson;
             $instanceAbstract->sig_first_member = $sigFirstMember;
@@ -278,7 +279,7 @@ class AbstractQuotationController extends Controller
             $documentType = $json->document_type;
             $awardedRemark = $json->awarded_remark;
             $instanceAbstract = AbstractQuotation::with('pr')->find($id);
-            $prID = $instanceAbstract->pr->id;
+            $prID = $instanceAbstract->pr_id;
 
             foreach ($selectedSuppliers as $selectedCtr => $selectedsuplier) {
                 $selectedSuplier = $selectedsuplier->selected_supplier;
@@ -320,7 +321,7 @@ class AbstractQuotationController extends Controller
      */
     public function showEdit($id) {
         $instanceAbstract = AbstractQuotation::with('pr')->find($id);
-        $prID = $instanceAbstract->pr->id;
+        $prID = $instanceAbstract->pr_id;
         $abstractDate = $instanceAbstract->date_abstract;
         $procurementMode = $instanceAbstract->mode_procurement;
         $chairperson = $instanceAbstract->sig_chairperson;
@@ -403,7 +404,7 @@ class AbstractQuotationController extends Controller
             $awardedRemark = $json->awarded_remark;
 
             $instanceAbstract = AbstractQuotation::with('pr')->find($id);
-            $prID = $instanceAbstract->pr->id;
+            $prID = $instanceAbstract->pr_id;
             $prNo = $instanceAbstract->pr->pr_no;
 
             $groupNo = $this->getGroupNo($prIDItem);
@@ -522,7 +523,8 @@ class AbstractQuotationController extends Controller
     public function deleteItems(Request $request, $id) {
         try {
             $instanceAbstract = AbstractQuotation::with('pr')->find($id);
-            $prNo = $instanceAbstract->pr->pr_no;
+            $prData = PurchaseRequest::find($instanceAbstract->pr_id);
+            $prNo = $prData->pr_no;
             AbstractQuotationItem::where('abstract_id', $id)->delete();
 
             $msg = "Abstract of Quotation items for quotation number '$prNo' successfully deleted.";
@@ -548,7 +550,7 @@ class AbstractQuotationController extends Controller
         try {
             $instanceDocLog = new DocLog;
             $instanceAbstract = AbstractQuotation::with('pr')->find($id);
-            $prID = $instanceAbstract->pr->id;
+            $prID = $instanceAbstract->pr_id;
             $prNo = $instanceAbstract->pr->pr_no;
             $instancePR = PurchaseRequest::find($prID);
 
