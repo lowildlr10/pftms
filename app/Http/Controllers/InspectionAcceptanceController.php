@@ -154,9 +154,9 @@ class InspectionAcceptanceController extends Controller
         $poID = $instanceIAR->po_id;
         $instancePO = PurchaseJobOrder::with('awardee')->find($poID);
         $instancePR = PurchaseRequest::with('div')->find($prID);
-        $poDate = $instanceIAR->po->date_po;
+        $poDate = $instancePO->date_po;
         $division = $instancePR->div['division_name'];
-        $poNo = $instanceIAR->po->po_no;
+        $poNo = $instancePO->po_no;
         $awardee = $instancePO->awardee['company_name'];
         $poItem = PurchaseJobOrderItem::with('unitissue')
                                       ->where([
@@ -282,6 +282,7 @@ class InspectionAcceptanceController extends Controller
 
         try {
             $instanceIAR = InspectionAcceptance::with(['po', 'ors'])->find($id);
+            $instancePO = PurchaseJobOrder::find($instanceIAR->po_id);
             $poID = $instanceIAR->po_id;
             $iarNo = $instanceIAR->iar_no;
             $inspectedBy = $instanceIAR->sig_inspection;
@@ -293,7 +294,7 @@ class InspectionAcceptanceController extends Controller
                 $instanceDV->pr_id = $instanceIAR->pr_id;
                 $instanceDV->ors_id = $instanceIAR->ors_id;
                 $instanceDV->particulars = "To payment of...";
-                $instanceDV->payee = $instanceIAR->po->awarded_to;
+                $instanceDV->payee = $instancePO->awarded_to;
                 $instanceDV->sig_certified = $instanceIAR->ors->sig_certified_1;
                 $instanceDV->sig_accounting = $instanceIAR->po['sig_funds_available'];
                 $instanceDV->sig_agency_head = $instanceIAR->po['sig_approval'];
