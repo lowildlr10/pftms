@@ -57,13 +57,13 @@ $(function() {
 	}
 
 	$.fn.generate = function(toggle) {
-		var withError = inputValidation(false);
+		const withError = inputValidation(false);
 
 		if (!withError) {
-			var dateFrom = $('#date-from').val();
-			var dateTo = $('#date-to').val();
-			var search = $('#input-search').val();
-			$('#input-search').val('');
+			const dateFrom = $('#date-from').val(),
+			      dateTo = $('#date-to').val(),
+			      search = $('#input-search').val();
+			//$('#input-search').val('');
 			$('#btn-generate').prop('disabled', true);
 			$('#btn-generate-table').prop('disabled', true);
 			$('#table-generate').html(modalLoadingContent)

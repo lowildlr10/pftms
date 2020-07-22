@@ -597,48 +597,4 @@ class VoucherLogController extends Controller
 
         return $data;
     }
-
-    private function getEmployeeName($empID) {
-        $employee = DB::table('emp_accounts')
-                      ->where('emp_id', $empID)
-                      ->first();
-        $fullname = "";
-
-        if ($employee) {
-            if (!empty($employee->middlename)) {
-                $fullname = $employee->firstname . " " . $employee->middlename[0] . ". " .
-                            $employee->lastname;
-            } else {
-                $fullname = $employee->firstname . " " . $employee->lastname;
-            }
-
-            $fullname = strtoupper($fullname);
-        }
-
-        return $fullname;
-    }
-
-    private function getSignatoryName($id) {
-        $signatory = DB::table('signatories as sig')
-                       ->select('sig.id as sig_id', 'emp.firstname', 'emp.middlename',
-                                'emp.lastname')
-                       ->join('emp_accounts as emp', 'emp.emp_id', '=', 'sig.emp_id')
-                       ->where('sig.id', $id)
-                       ->first();
-
-        $fullname = "";
-
-        if ($signatory) {
-            if (!empty($signatory->middlename)) {
-                $fullname = $signatory->firstname . " " . $signatory->middlename[0] . ". " .
-                            $signatory->lastname;
-            } else {
-                $fullname = $signatory->firstname . " " . $signatory->lastname;
-            }
-
-            $fullname = strtoupper($fullname);
-        }
-
-        return $fullname;
-    }
 }
