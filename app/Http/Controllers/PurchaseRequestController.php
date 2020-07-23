@@ -754,7 +754,7 @@ class PurchaseRequestController extends Controller
 
         $groupNos = [];
 
-
+        try {
             $instancePR = PurchaseRequest::find($id);
             $instancePR->date_pr = $prDate;
             $instancePR->funding_source = $projectID;
@@ -879,7 +879,7 @@ class PurchaseRequestController extends Controller
             $msg = "Purchase Request '$prNo' successfully updated.";
             Auth::user()->log($request, $msg);
             return redirect()->route('pr', ['keyword' => $id])
-                             ->with('success', $msg);try {
+                             ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
