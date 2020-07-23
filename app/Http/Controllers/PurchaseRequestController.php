@@ -754,7 +754,7 @@ class PurchaseRequestController extends Controller
 
         $groupNos = [];
 
-        try {
+
             $instancePR = PurchaseRequest::find($id);
             $instancePR->date_pr = $prDate;
             $instancePR->funding_source = $projectID;
@@ -793,11 +793,17 @@ class PurchaseRequestController extends Controller
                 $totalCost =  $quantity * $unitCost;
 
                 if ($instancePR->status < 5) {
+                    /*
                     if ($arrayKey == 0) {
                         PurchaseRequestItem::where('pr_id', $id)->delete();
+                    }*/
+
+                    $instancePRItem = PurchaseRequestItem::find($itemID);
+
+                    if (!$instancePRItem) {
+                        $instancePRItem = new PurchaseRequestItem;
                     }
 
-                    $instancePRItem = new PurchaseRequestItem;
                     $instancePRItem->pr_id = $id;
                     $instancePRItem->item_no = $arrayKey + 1;
                     $instancePRItem->quantity = $quantity;
@@ -873,7 +879,7 @@ class PurchaseRequestController extends Controller
             $msg = "Purchase Request '$prNo' successfully updated.";
             Auth::user()->log($request, $msg);
             return redirect()->route('pr', ['keyword' => $id])
-                             ->with('success', $msg);
+                             ->with('success', $msg);try {
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
