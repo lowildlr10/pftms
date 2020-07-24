@@ -547,12 +547,12 @@ class AbstractQuotationController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function approveForPO(Request $request, $id) {
-        try {
+
             $instanceDocLog = new DocLog;
             $instanceAbstract = AbstractQuotation::with('pr')->find($id);
             $prID = $instanceAbstract->pr_id;
-            $prNo = $instanceAbstract->pr->pr_no;
             $instancePR = PurchaseRequest::find($prID);
+            $prNo = $instancePR->pr_no;
 
             $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
             $prItemGroups = $this->getGroups($prID);
@@ -574,20 +574,31 @@ class AbstractQuotationController extends Controller
                             $poNo = "$prNo-".$this->poLetters[$winCounter];
                             $awardedTo = $win->awarded_to;
                             $documentType = $win->document_type;
-                            $countPO = PurchaseJobOrder::where('po_no', $poNo)->count();
+                            $withPO = DB::table('purchase_job_orders')->where('po_no', $poNo)->first();
                             $instancePRItems = PurchaseRequestItem::where([
                                 ['pr_id', $prID],
                                 ['awarded_to', $awardedTo],
                                 ['group_no', $group]
                             ])->orderBy('item_no')->get();
 
-                            if ($countPO > 0) {
+                            if ($withPO) {
+                                /*
                                 $instancePO = PurchaseJobOrder::where('po_no', $poNo)->first();
                                 $instancePO->document_type = $documentType;
                                 $instancePO->awarded_to = $awardedTo;
                                 $instancePO->with_ors_burs = 'n';
                                 $instancePO->status = 6;
-                                $instancePO->save();
+                                $instancePO->save();*/
+
+                                DB::table('purchase_job_orders')
+                                  ->where('po_no', $poNo)
+                                  ->update([
+                                      'document_type' => $documentType,
+                                      'awarded_to' => $awardedTo,
+                                      'with_ors_burs' => 'n',
+                                      'status' => 6,
+                                      'updated_at' => Carbon::now()
+                                    ]);
 
                                 foreach ($instancePRItems as $item) {
                                     $prItemID = $item->id;
@@ -616,7 +627,7 @@ class AbstractQuotationController extends Controller
                 Auth::user()->log($request, $msg);
                 return redirect()->route('abstract', ['keyword' => $id])
                                  ->with('warning', $msg);
-            }
+            }try {
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
