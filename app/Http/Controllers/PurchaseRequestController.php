@@ -646,9 +646,10 @@ class PurchaseRequestController extends Controller
 
         try {
             // Auto Generate pr_no if empty
-            $prSequence = PurchaseRequest::select('id', 'pr_no')
-                                         ->orderBy('pr_no')
-                                         ->get();
+            $prSequence = DB::table('purchase_requests')
+                            ->select('id', 'pr_no')
+                            ->orderBy('pr_no')
+                            ->get();
             $currentYearMonth = date('y') . date('m');
 
             if (count($prSequence) > 0) {
