@@ -141,7 +141,7 @@
                     @if (count($fundingSources) > 0)
                         @foreach ($fundingSources as $fund)
                     <option value="{{ $fund->id }}" {{ $fund->id == $fundingSource ? 'selected' : '' }}>
-                        {!! $fund->funding_name !!}
+                        {!! $fund->source_name !!}
                     </option>
                         @endforeach
                     @endif
