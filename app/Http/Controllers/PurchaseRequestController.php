@@ -16,6 +16,7 @@ use App\Models\DisbursementVoucher;
 use App\Models\InventoryStock;
 use App\Models\InventoryStockItem;
 use App\Models\InventoryStockIssue;
+use App\Models\InventoryStockIssueItem;
 
 use App\User;
 use App\Models\EmpGroup;
@@ -547,6 +548,7 @@ class PurchaseRequestController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showEdit($id) {
+        $itemOriginalIDs = [];
         $prData = PurchaseRequest::where('id', $id)->first();
         $prItemData = PurchaseRequestItem::where('pr_id', $id)
                                          ->orderBy('item_no')
@@ -595,6 +597,10 @@ class PurchaseRequestController extends Controller
             $sig->module = json_decode($sig->module);
         }
 
+        foreach ($prItemData as $item) {
+            $itemOriginalIDs[] = $item->id;
+        }
+
         return view('modules.procurement.pr.update', [
             'id' => $id,
             'users' => $users,
@@ -613,7 +619,8 @@ class PurchaseRequestController extends Controller
             'division' => $division,
             'approvedBy' => $approvedBy,
             'recommendedBy' => $recommendedBy,
-            'prItems' => $prItemData
+            'prItems' => $prItemData,
+            'itemOriginalIDs' => serialize($itemOriginalIDs)
         ]);
     }
 
@@ -752,6 +759,7 @@ class PurchaseRequestController extends Controller
         $quantities = $request->quantity;
         $unitCosts = $request->unit_cost;
         $totalCosts = $request->total_cost;
+        $itemOriginalIDs = unserialize($request->item_original_ids);
 
         $groupNos = [];
 
@@ -768,21 +776,6 @@ class PurchaseRequestController extends Controller
             $instancePR->office = $office;
 
             $prNo = $instancePR->pr_no;
-
-            // Delete other dependent documents
-            if ($instancePR->status >= 5) {
-                /*
-                RequestQuotation::where('pr_id', $id)->forceDelete();
-                AbstractQuotation::where('pr_id', $id)->forceDelete();
-                AbstractQuotationItem::where('pr_id', $id)->delete();
-                PurchaseJobOrder::where('pr_id', $id)->forceDelete();
-                PurchaseJobOrderItem::where('pr_id', $id)->delete();
-                ObligationRequestStatus::where('pr_id', $id)->forceDelete();
-                InspectionAcceptance::where('pr_id', $id)->forceDelete();
-                DisbursementVoucher::where('pr_id', $id)->forceDelete();
-                InventoryStock::where('pr_id', $id)->forceDelete();
-                InventoryStockIssue::where('pr_id', $id)->delete();*/
-            }
 
             // Update pr items
             foreach ($unitIssues as $arrayKey => $unit) {
@@ -873,6 +866,36 @@ class PurchaseRequestController extends Controller
                     $instancePRItem->est_total_cost = $totalCost;
                     $instancePRItem->save();
                 }
+
+                // Get the items to be removed/delete
+                if ($instancePRItem && $itemID) {
+                    $originalIDKey = array_search($itemID, $itemOriginalIDs);
+                    unset($itemOriginalIDs[$originalIDKey]);
+                    array_values($itemOriginalIDs);
+                }
+            }
+
+            // Delete removed items from the form
+            foreach ($itemOriginalIDs as $itmID) {
+                $poItemData = PurchaseJobOrderItem::where('pr_item_id', $itmID)
+                                                  ->first();
+
+                if ($poItemData) {
+                    $poItemID = $poItemData->id;
+                    $invStockItemData = InventoryStockItem::where('po_item_id', $poItemID)->first();
+
+                    if ($invStockItemData) {
+                        $invStockItemID = $invStockItemData->id;
+                        $invStockIssueItemData = InventoryStockIssueItem::where('inv_stock_item_id', $invStockItemID)
+                                                                        ->delete();
+                        $invStockItemData->forceDelete();
+                    }
+
+                    $poItemData->forceDelete();
+                }
+
+                AbstractQuotationItem::where('pr_item_id', $itmID)->forceDelete();
+                PurchaseRequestItem::destroy($itmID);
             }
 
             $instancePR->save();
