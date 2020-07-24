@@ -260,4 +260,5 @@
     </div>
 
     <input id="item-count" value="{{ $itemNo }}" type="hidden">
+    <input name="item_original_ids" value="{{ $itemOriginalIDs }}" type="hidden">
 </form>
