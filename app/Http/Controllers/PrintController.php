@@ -575,7 +575,7 @@ class PrintController extends Controller
         $multiplier = 1;
 
         foreach ($invStockIssueItemData as $item) {
-            $invstockitem = InventoryStockItem::where('inv_stock_id', $inventoryStockID)
+            $invstockitem = InventoryStockItem::where('id', $item->inv_stock_item_id)
                                               ->first();
             $propertyNos = unserialize($item->prop_stock_no);
             $dateAcquired = $item->date_issued;
@@ -684,7 +684,7 @@ class PrintController extends Controller
         $tableData = [];
 
         foreach ($invStockIssueItemData as $item) {
-            $invstockitem = InventoryStockItem::where('inv_stock_id', $inventoryStockID)
+            $invstockitem = InventoryStockItem::where('id', $item->inv_stock_item_id)
                                               ->first();
             $unitData = ItemUnitIssue::find($invstockitem->unit_issue);
             $propertyNo = implode(', ', unserialize($item->prop_stock_no));
@@ -800,7 +800,7 @@ class PrintController extends Controller
         $tableData = [];
 
         foreach ($invStockIssueItemData as $item) {
-            $invstockitem = InventoryStockItem::where('inv_stock_id', $inventoryStockID)
+            $invstockitem = InventoryStockItem::where('id', $item->inv_stock_item_id)
                                               ->first();
             $unitData = ItemUnitIssue::find($invstockitem->unit_issue);
             $propertyNo = implode(', ', unserialize($item->prop_stock_no));
@@ -927,7 +927,7 @@ class PrintController extends Controller
         $tableData = [];
 
         foreach ($invStockIssueItemData as $item) {
-            $invstockitem = InventoryStockItem::where('inv_stock_id', $inventoryStockID)
+            $invstockitem = InventoryStockItem::where('id', $item->inv_stock_item_id)
                                               ->first();
             $unitData = ItemUnitIssue::find($invstockitem->unit_issue);
             $propertyNo = implode(', ', unserialize($item->prop_stock_no));
