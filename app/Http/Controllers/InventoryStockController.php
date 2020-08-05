@@ -293,9 +293,9 @@ class InventoryStockController extends Controller
             $documentType = 'Inventory Stocks';
             $routeName = 'stocks';
 
-            $msg = "$documentType successfully created.";
+            $msg = "$documentType with an inventory number of $inventoryNo is successfully created.";
             Auth::user()->log($request, $msg);
-            return redirect()->route($routeName)
+            return redirect()->route($routeName, ['keyword' => $inventoryNo])
                              ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
@@ -497,9 +497,9 @@ class InventoryStockController extends Controller
             $documentType = 'Inventory Stocks';
             $routeName = 'stocks';
 
-            $msg = "$documentType successfully update.";
+            $msg = "$documentType with an inventory number of $inventoryNo is successfully update.";
             Auth::user()->log($request, $msg);
-            return redirect()->route($routeName)
+            return redirect()->route($routeName, ['keyword' => $inventoryNo])
                              ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
