@@ -91,9 +91,11 @@ class InventoryStockController extends Controller
             foreach ($invStock->stockitems as $item) {
                 $stockItem = InventoryStockItem::with('stockissueditems')
                                               ->find($item->id);
+                $stockIssuedItem = InventoryStockIssueItem::where('inv_stock_item_id', $item->id)
+                                                          ->get();
                 $item->available_quantity = $stockItem->quantity;
 
-                foreach ($stockItem->stockissueditems as $issuedItem) {
+                foreach ($stockIssuedItem as $issuedItem) {
                     $item->available_quantity -= $issuedItem->quantity;
                 }
             }
@@ -341,7 +343,7 @@ class InventoryStockController extends Controller
         $poNo = $invStockData->po_no;
         $datePO = $invStockData->date_po;
         $supplier = $invStockData->supplier;
-        $items = $invStockData->stockitems;
+        $items = InventoryStockItem::where('inv_stock_id', $id)->get();
 
         $divisions = EmpDivision::orderBy('division_name')->get();
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
@@ -617,12 +619,13 @@ class InventoryStockController extends Controller
         $divisionData = EmpDivision::find($invStockData->division);
 
         foreach ($invStockData->stockitems as $item) {
-            $stockItem = InventoryStockItem::with('stockissueditems')
-                                           ->find($item->id);
+            $stockItem = InventoryStockItem::find($item->id);
+            $stockIssueItem = InventoryStockIssueItem::where('inv_stock_item_id', $item->id)
+                                                     ->get();
             $item->available_quantity = $stockItem->quantity;
 
-            foreach ($stockItem->stockissueditems as $issuedItem) {
-                $item->available_quantity -= $issuedItem['quantity'];
+            foreach ($stockIssueItem as $issuedItem) {
+                $item->available_quantity -= $issuedItem->quantity;
             }
 
             $unitIssueData = ItemUnitIssue::find($item->unit_issue);
@@ -633,7 +636,7 @@ class InventoryStockController extends Controller
         $stocks = $invStockData->stockitems;
         $inventoryNo = $invStockData->inventory_no;
         $office = $invStockData->office;
-        $division = $divisionData->division_name;
+        $division = isset($divisionData->division_name) ? $divisionData->division_name : NULL;
         $poNo = $invStockData->po_no;
         $poDate = $invStockData->date_po;
         $supplier = $supplierData->company_name;
@@ -697,7 +700,7 @@ class InventoryStockController extends Controller
             $sigReceivedFrom = $request->sig_received_from;
         }
 
-        try {
+
             $instanceInvStocks = InventoryStock::find($invStockID);
             $instanceInvStockIssue = InventoryStockIssue::where([
                 ['inv_stock_id', $invStockID], ['sig_received_by', $sigReceivedBy]
@@ -782,8 +785,8 @@ class InventoryStockController extends Controller
 
             $msg = "$documentType successfully issued.";
             Auth::user()->log($request, $msg);
-            return redirect()->route($routeName)
-                             ->with('success', $msg);
+            return redirect()->route($routeName, ['keyword' => $invStockID])
+                             ->with('success', $msg);try {
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
@@ -806,17 +809,22 @@ class InventoryStockController extends Controller
         $divisionData = EmpDivision::find($invStockData->division);
 
         foreach ($invStockIssueItemData as $item) {
-            $stockItem = InventoryStockItem::with('stockissueditems')
-                                           ->find($item->inv_stock_item_id);
-            $item->available_quantity = $item->invstockitems->quantity;
+            $stockItem = InventoryStockItem::find($item->inv_stock_item_id);
+            $stockIssuedItems = InventoryStockIssueItem::where('inv_stock_item_id', $item->inv_stock_item_id)
+                                                       ->get();
+            $item->available_quantity = $stockItem->quantity;
             $item->prop_stock_no = unserialize($item->prop_stock_no);
             $item->prop_stock_no = implode(', ', $item->prop_stock_no);
+            $item->description = $stockItem->description;
+            $item->quantity = $stockItem->quantity;
+            $item->issued_quantity = $item->quantity;
+            $item->amount = $stockItem->amount;
 
-            foreach ($stockItem->stockissueditems as $issuedItem) {
-                $item->available_quantity -= $issuedItem['quantity'];
+            foreach ($stockIssuedItems as $issuedItem) {
+                $item->available_quantity -= $issuedItem->quantity;
             }
 
-            $unitIssueData = ItemUnitIssue::find($item->invstockitems->unit_issue);
+            $unitIssueData = ItemUnitIssue::find($stockItem->unit_issue);
             $item->unit = $unitIssueData->unit_name;
         }
 
@@ -969,7 +977,7 @@ class InventoryStockController extends Controller
 
             $msg = "$documentType successfully updated issued.";
             Auth::user()->log($request, $msg);
-            return redirect()->route($routeName)
+            return redirect()->route($routeName, ['keyword' => $invStockID])
                              ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
@@ -1012,6 +1020,7 @@ class InventoryStockController extends Controller
     public function deleteIssue(Request $request, $invStockIssueID) {
         try {
             $instanceInvStockIssue = InventoryStockIssue::find($invStockIssueID);
+            $invStockID = $instanceInvStockIssue->inv_stock_id;
             $documentType = 'All issued items';
             InventoryStockIssueItem::where('inv_stock_issue_id', $invStockIssueID)->delete();
             $instanceInvStockIssue->forceDelete();
@@ -1019,12 +1028,12 @@ class InventoryStockController extends Controller
             $msg = "$documentType '$invStockIssueID' successfully deleted.";
             Auth::user()->log($request, $msg);
 
-            return redirect()->route('stocks')
+            return redirect()->route('stocks', ['keyword' => $invStockID])
                              ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
-            return redirect()->route('stocks')
+            return redirect()->route('stocks', ['keyword' => $invStockID])
                              ->with('failed', $msg);
         }
     }
@@ -1039,12 +1048,12 @@ class InventoryStockController extends Controller
             $msg = "$documentType '$id' successfully deleted.";
             Auth::user()->log($request, $msg);
 
-            return redirect()->route('stocks')
+            return redirect()->route('stocks', ['keyword' => $id])
                              ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
-            return redirect()->route('stocks')
+            return redirect()->route('stocks', ['keyword' => $id])
                              ->with('failed', $msg);
         }
     }

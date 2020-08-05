@@ -99,7 +99,7 @@
                                     <div class="md-form form-sm my-0">
                                         <textarea class="md-textarea form-control required"
                                                   placeholder="Item description..."
-                                                  rows="1" readonly>{{ $stock->invstockitems->description }}</textarea>
+                                                  rows="1" readonly>{{ $stock->description }}</textarea>
                                     </div>
                                 </td>
                                 <td align="center">
@@ -129,7 +129,7 @@
                                         <input class="form-control form-control-sm quantity required" type="number"
                                                name="quantity[]" min="0" max="{{ $stock->available_quantity }}"
                                                placeholder="avail: {{ $stock->available_quantity }}"
-                                               value="{{ $stock->quantity }}">
+                                               value="{{ $stock->issued_quantity }}">
                                     </div>
                                 </td>
                                 <td>
