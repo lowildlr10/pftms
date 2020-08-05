@@ -554,6 +554,7 @@ class PrintController extends Controller
     private function getDataPropertyLabel($invStockIssueID) {
         $stockID = [];
         $invStockIssueData = InventoryStockIssue::find($invStockIssueID);
+        $inventoryStockID = $invStockIssueData->inv_stock_id;
         $invStockIssueItemData = InventoryStockIssueItem::with('invstockitems')
                                                     ->where('inv_stock_issue_id', $invStockIssueID)
                                                     ->where('excluded', 'n')
@@ -574,11 +575,13 @@ class PrintController extends Controller
         $multiplier = 1;
 
         foreach ($invStockIssueItemData as $item) {
+            $invstockitem = InventoryStockItem::where('inv_stock_id', $inventoryStockID)
+                                              ->first();
             $propertyNos = unserialize($item->prop_stock_no);
             $dateAcquired = $item->date_issued;
-            $description = (strlen($item->invstockitems->description) > 300) ?
-                            substr($item->invstockitems->description, 0, 300).'...' :
-                            $item->invstockitems->description;
+            $description = (strlen($invstockitem->description) > 300) ?
+                            substr($invstockitem->description, 0, 300).'...' :
+                            $invstockitem->description;
 
             if (!empty($dateAcquired)) {
                 $dateAcquired = new DateTime($dateAcquired);
@@ -655,6 +658,7 @@ class PrintController extends Controller
     private function getDataICS($invStockIssueID) {
         $invStockIssueData = InventoryStockIssue::with('invstocks')
                                                 ->find($invStockIssueID);
+        $inventoryStockID = $invStockIssueData->inv_stock_id;
         $invStockIssueItemData = InventoryStockIssueItem::with('invstockitems')
                                                     ->where('inv_stock_issue_id', $invStockIssueID)
                                                     ->where('excluded', 'n')
@@ -680,7 +684,9 @@ class PrintController extends Controller
         $tableData = [];
 
         foreach ($invStockIssueItemData as $item) {
-            $unitData = ItemUnitIssue::find($item->invstockitems->unit_issue);
+            $invstockitem = InventoryStockItem::where('inv_stock_id', $inventoryStockID)
+                                              ->first();
+            $unitData = ItemUnitIssue::find($invstockitem->unit_issue);
             $propertyNo = implode(', ', unserialize($item->prop_stock_no));
             $unitName = $unitData->unit_name;
 
@@ -689,7 +695,7 @@ class PrintController extends Controller
                 $item->date_issued = $item->date_issued->format('F j, Y');
             }
 
-            if (strpos($item->invstockitems->description, "\n") !== FALSE) {
+            if (strpos($invstockitem->description, "\n") !== FALSE) {
                 $searchStr = ["\r\n", "\n", "\r"];
                 $item->description = str_replace($searchStr, '<br>', $item->description);
             }
@@ -697,9 +703,9 @@ class PrintController extends Controller
             $tableData[] = [
                 $item->quantity,
                 $unitName,
-                number_format($item->invstockitems->amount/$item->quantity, 2),
-                number_format($item->invstockitems->amount, 2),
-                $item->invstockitems->description,
+                number_format($invstockitem->amount/$item->quantity, 2),
+                number_format($invstockitem->amount, 2),
+                $invstockitem->description,
                 $item->date_issued,
                 $propertyNo,
                 $item->est_useful_life
@@ -762,6 +768,7 @@ class PrintController extends Controller
     private function getDataRIS($invStockIssueID) {
         $invStockIssueData = InventoryStockIssue::with('invstocks')
                                                 ->find($invStockIssueID);
+        $inventoryStockID = $invStockIssueData->inv_stock_id;
         $invStockIssueItemData = InventoryStockIssueItem::with('invstockitems')
                                                     ->where('inv_stock_issue_id', $invStockIssueID)
                                                     ->where('excluded', 'n')
@@ -793,13 +800,15 @@ class PrintController extends Controller
         $tableData = [];
 
         foreach ($invStockIssueItemData as $item) {
-            $unitData = ItemUnitIssue::find($item->invstockitems->unit_issue);
+            $invstockitem = InventoryStockItem::where('inv_stock_id', $inventoryStockID)
+                                              ->first();
+            $unitData = ItemUnitIssue::find($invstockitem->unit_issue);
             $propertyNo = implode(', ', unserialize($item->prop_stock_no));
             $unitName = $unitData->unit_name;
             $yes = "";
             $no = "";
 
-            if (strpos($item->invstockitems->description, "\n") !== FALSE) {
+            if (strpos($invstockitem->description, "\n") !== FALSE) {
                 $searchStr = ["\r\n", "\n", "\r"];
                 $item->description = str_replace($searchStr, '<br>', $item->description);
             }
@@ -818,8 +827,8 @@ class PrintController extends Controller
             $tableData[] = [
                 $propertyNo,
                 $unitName,
-                $item->invstockitems->description,
-                $item->invstockitems->quantity,
+                $invstockitem->description,
+                $invstockitem->quantity,
                 $yes,
                 $no,
                 $item->quantity,
@@ -893,6 +902,7 @@ class PrintController extends Controller
     private function getDataPAR($invStockIssueID) {
         $invStockIssueData = InventoryStockIssue::with('invstocks')
                                                 ->find($invStockIssueID);
+        $inventoryStockID = $invStockIssueData->inv_stock_id;
         $invStockIssueItemData = InventoryStockIssueItem::with('invstockitems')
                                                     ->where('inv_stock_issue_id', $invStockIssueID)
                                                     ->where('excluded', 'n')
@@ -917,7 +927,9 @@ class PrintController extends Controller
         $tableData = [];
 
         foreach ($invStockIssueItemData as $item) {
-            $unitData = ItemUnitIssue::find($item->invstockitems->unit_issue);
+            $invstockitem = InventoryStockItem::where('inv_stock_id', $inventoryStockID)
+                                              ->first();
+            $unitData = ItemUnitIssue::find($invstockitem->unit_issue);
             $propertyNo = implode(', ', unserialize($item->prop_stock_no));
             $unitName = $unitData->unit_name;
 
@@ -926,7 +938,7 @@ class PrintController extends Controller
                 $item->date_issued = $item->date_issued->format('F j, Y');
             }
 
-            if (strpos($item->invstockitems->description, "\n") !== FALSE) {
+            if (strpos($invstockitem->description, "\n") !== FALSE) {
                 $searchStr = ["\r\n", "\n", "\r"];
                 $item->description = str_replace($searchStr, '<br>', $item->description);
             }
@@ -934,10 +946,10 @@ class PrintController extends Controller
             $tableData[] = [
                 $item->quantity,
                 $unitName,
-                $item->invstockitems->description,
+                $invstockitem->description,
                 $propertyNo,
                 $item->date_issued,
-                number_format($item->invstockitems->amount, 2)
+                number_format($invstockitem->amount, 2)
             ];
         }
 
