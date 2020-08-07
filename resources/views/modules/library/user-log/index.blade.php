@@ -95,7 +95,7 @@
                                         @foreach ($list as $listCtr => $log)
                                     <tr>
                                         <td></td>
-                                        <td>{{ $log->name }}</td>
+                                        <td>{{ $log->name ? $log->name : 'Guest' }}</td>
                                         <td>{{ $log->request }}</td>
                                         <td>{{ $log->method }}</td>
                                         <td>{{ $log->host }}</td>
