@@ -23,6 +23,8 @@ use Carbon\Carbon;
 use DB;
 use Auth;
 
+use App\Plugins\Notification as Notif;
+
 class RequestQuotationController extends Controller
 {
     /**
@@ -259,6 +261,7 @@ class RequestQuotationController extends Controller
 
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instanceRFQ = RequestQuotation::with('pr')->where('id', $id)->first();
             $prID = $instanceRFQ->pr_id;
             $instancePR = PurchaseRequest::find($prID);
@@ -273,7 +276,7 @@ class RequestQuotationController extends Controller
                     $instanceDocLog->logDocument($id, Auth::user()->id, $issuedTo, "issued", $remarks);
                     $issuedToName = Auth::user()->getEmployee($issuedTo)->name;
 
-                    $instanceRFQ->notifyIssued($id, $issuedTo, $requestedBy);
+                    $instanceNotif->notifyIssuedRFQ($id, $issuedTo);
 
                     $msg = "Request for Quotation '$prNo' successfully issued to $issuedToName.";
                     Auth::user()->log($request, $msg);
@@ -304,6 +307,7 @@ class RequestQuotationController extends Controller
 
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $docStatus = $instanceDocLog->checkDocStatus($id);
             $instanceRFQ = RequestQuotation::with('pr')->where('id', $id)->first();
             $prID = $instanceRFQ->pr_id;
@@ -328,7 +332,7 @@ class RequestQuotationController extends Controller
                 AbstractQuotation::where('pr_id', $id)->restore();
             }
 
-            $instanceRFQ->notifyReceived($id, Auth::user()->id, $responsiblePerson, $requestedBy);
+            $instanceNotif->notifyReceivedRFQ($id, Auth::user()->id, $responsiblePerson);
 
             $msg = "Request for Quotation '$prNo' successfully received and ready for Abstract
                     of Quotation.";

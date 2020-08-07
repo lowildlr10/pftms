@@ -31,6 +31,8 @@ use DB;
 use Auth;
 use Carbon\Carbon;
 
+use App\Plugins\Notification as Notif;
+
 class PurchaseRequestController extends Controller
 {
     /**
@@ -632,6 +634,7 @@ class PurchaseRequestController extends Controller
      */
     public function store(Request $request) {
         $instanceDocLog = new DocLog;
+        $instanceNotif = new Notif;
 
         // Parent variables
         $prDate = $request->date_pr;
@@ -712,7 +715,7 @@ class PurchaseRequestController extends Controller
                     $instancePRItem->save();
                 }
 
-                $instancePR->notifyForApproval($prNo, $requestedBy);
+                $instanceNotif->notifyForApprovalPR($prID);
                 $instanceDocLog->logDocument($prID, Auth::user()->id, NULL, 'issued');
 
                 $msg = "Purchase Request '$prNo' successfully created.";
@@ -939,6 +942,7 @@ class PurchaseRequestController extends Controller
     public function approve(Request $request, $id) {
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instanceRFQ = RequestQuotation::where('pr_id', $id)->first();
             $instancePR = PurchaseRequest::find($id);
             $prNo = $instancePR->pr_no;
@@ -957,7 +961,7 @@ class PurchaseRequestController extends Controller
                 $instanceDocLog->logDocument($id, Auth::user()->id, NULL, 'received');
             }
 
-            $instancePR->notifyApproved($prNo, $requestedBy);
+            $instanceNotif->notifyApprovedPR($id);
 
             $msg = "Purchase request '$prNo' successfully approved.";
             Auth::user()->log($request, $msg);
@@ -973,6 +977,7 @@ class PurchaseRequestController extends Controller
     public function disapprove(Request $request, $id) {
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instancePR = PurchaseRequest::find($id);
             $prNo = $instancePR->pr_no;
             $requestedBy = $instancePR->requested_by;
@@ -981,7 +986,7 @@ class PurchaseRequestController extends Controller
             $instancePR->save();
 
             $instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
-            $instancePR->notifyDisapproved($prNo, $requestedBy);
+            $instanceNotif->notifyDisapprovedPR($id);
 
             $msg = "Purchase request '$prNo' successfully disapproved.";
             Auth::user()->log($request, $msg);
@@ -997,6 +1002,7 @@ class PurchaseRequestController extends Controller
     public function cancel(Request $request, $id) {
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instancePR = PurchaseRequest::find($id);
             $prNo = $instancePR->pr_no;
             $requestedBy = $instancePR->requested_by;
@@ -1005,7 +1011,7 @@ class PurchaseRequestController extends Controller
             $instancePR->save();
 
             $instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
-            $instancePR->notifyCancelled($prNo, $requestedBy);
+            $instanceNotif->notifyCancelledPR($id);
 
             $msg = "Purchase request '$prNo' successfully cancelled.";
             Auth::user()->log($request, $msg);
@@ -1021,6 +1027,7 @@ class PurchaseRequestController extends Controller
     public function uncancel(Request $request, $id) {
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instancePR = PurchaseRequest::find($id);
             $prNo = $instancePR->pr_no;
             $requestedBy = $instancePR->requested_by;
@@ -1029,9 +1036,9 @@ class PurchaseRequestController extends Controller
             $instancePR->save();
 
             //$instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
-            //$instancePR->notifyCancelled($prNo, $requestedBy);
+            $instanceNotif->notifyRestoredPR($id);
 
-            $msg = "Purchase request '$prNo' successfully un-cancelled.";
+            $msg = "Purchase request '$prNo' successfully restored.";
             Auth::user()->log($request, $msg);
             return redirect()->route('pr', ['keyword' => $id])
                              ->with('success', $msg);

@@ -372,8 +372,7 @@
     <!-- sidebar-footer  -->
     <div class="sidebar-footer stylish-color-dark">
         <div class="dropdown">
-            <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-               onclick="$(this).displayNotifications();">
+            <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-bell"></i>
                 @if (count(Auth::user()->unreadNotifications) > 0)
                 <span class="badge badge-pill badge-danger notification">
@@ -392,23 +391,32 @@
                 <div id="notif-body">
                     @if (count(Auth::user()->unreadNotifications) > 0)
                         @foreach(Auth::user()->unreadNotifications as $notification)
-                            @if ($notification->data['type'] != 'message')
-                    <a class="dropdown-item" href="#">
+                    <a onclick="$(this).redirectToDoc('{{ route($notification->data['sub_module']) }}',
+                       '{{ $notification->data['id'] }}');" class="dropdown-item">
                         <div class="notification-content">
                             <div class="icon">
-                                <i class="far fa-file text-info border border-info"></i>
+                                @if ($notification->data['module'] == 'cash_advance')
+                                <i class="fas fa-money-bill-wave-alt mdb-color-text"></i>
+                                @elseif ($notification->data['module'] == 'procurement')
+                                <i class="fas fa-shopping-cart mdb-color-text"></i>
+                                @elseif ($notification->data['module'] == 'payment')
+                                <i class="fas fa-money-check-alt mdb-color-text"></i>
+                                @elseif ($notification->data['module'] == 'inventory')
+                                <i class="fas fa-box mdb-color-text"></i>
+                                @elseif ($notification->data['module'] == 'account_management')
+                                <i class="fas fa-user mdb-color-text"></i>
+                                @endif
                             </div>
                             <div class="content">
                                 <div class="notification-detail text-wrap">
                                     {!! $notification->data['msg'] !!}
                                 </div>
                                 <div class="notification-time">
-                                    <i class="far fa-calendar-alt"></i> {{ $notification->created_at }}
+                                    <i class="far fa-calendar-alt"></i> {{ \Carbon\Carbon::parse($notification->created_at)->diffForHumans() }}
                                 </div>
                             </div>
                         </div>
                     </a>
-                            @endif
                         @endforeach
                     @else
                     <a class="dropdown-item" href="#">
@@ -426,7 +434,7 @@
                     @endif
                 </div>
                 <!-- End notification content -->
-                <div class="dropdown-divider"></div>
+                <div class="dropdown-divider mb-0"></div>
                 <a class="dropdown-item text-center" href="{{ url('notification/show-all') }}">
                     View all notifications
                 </a>
@@ -435,12 +443,14 @@
         <div class="dropdown">
             <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-envelope"></i>
+                <!--
                 @if (count(Auth::user()->unreadNotifications) > 0)
                 <span class="badge badge-pill badge-success notification">
                     {{ count(Auth::user()->unreadNotifications) > 99 ? '99+' :
                        count(Auth::user()->unreadNotifications) }}
                 </span>
                 @endif
+                -->
             </a>
             <div class="dropdown-menu messages" aria-labelledby="dropdownMenuMessage">
                 <div class="messages-header">
@@ -451,17 +461,16 @@
 
                 @if (count(Auth::user()->unreadNotifications) > 0)
                     @foreach(Auth::user()->unreadNotifications as $notification)
-                        @if ($notification->data['type'] == 'message')
+                    <!--
                     <a class="dropdown-item"
-                       @if ($notification->data['module'] == 'proc-ors-burs')
+                        @if ($notification->data['module'] == 'proc-ors-burs')
                        onclick="$(this).redirectToDoc('{{ route('proc-ors-burs') }}', '{{ $notification->data['ors_id'] }}');"
-                       @endif
+                        @endif
                     >
                         <div class="message-content">
-                            <!--
                             <div class="pic">
                                 <img src="#" alt="">
-                            </div>-->
+                            </div>
                             <div class="content w-100">
                                 <div class="message-title">
                                     @if ($notification->data['module'] == 'proc-ors-burs')
@@ -475,7 +484,7 @@
                             </div>
                         </div>
                     </a>
-                        @endif
+                    -->
                     @endforeach
                 @else
                     <a class="dropdown-item" href="#">

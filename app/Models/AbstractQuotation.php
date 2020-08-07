@@ -73,26 +73,4 @@ class AbstractQuotation extends Model
     public $sortable = [
         'date_abstract',
     ];
-
-    public function notifyApprovedForPO($id, $currentUser) {
-        $absData = $this::with('pr')->find($id);
-        $prID = $absData->pr_id;
-        $prData = PurchaseRequest::find($prID);
-        $prNo = $prData->pr_no;
-        $requestedBy = $prData->requested_by;
-        $user = User::find($requestedBy);
-        $currentUseryName = $user->getEmployee($currentUser)->name;
-        $requestedByName = $user->getEmployee($requestedBy)->name;
-        $msgNotif = "Your Abstract of Quotation '$prNo' has been
-                    approved for PO/JO.";
-        $data = (object) [
-            'abstract_id' => $id,
-            'pr_id' => $prID,
-            'pr_no' => $prNo,
-            'module' => 'proc-abstract',
-            'type' => 'approved',
-            'msg' => $msgNotif,
-        ];
-        $user->notify(new Notif($data));
-    }
 }

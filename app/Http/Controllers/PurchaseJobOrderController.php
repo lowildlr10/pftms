@@ -25,6 +25,8 @@ use Carbon\Carbon;
 use Auth;
 use DB;
 
+use App\Plugins\Notification as Notif;
+
 class PurchaseJobOrderController extends Controller
 {
     protected $poLetters = [
@@ -478,6 +480,7 @@ class PurchaseJobOrderController extends Controller
     public function accountantSigned(Request $request, $id) {
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instancePO = PurchaseJobOrder::find($id);
             $poNo = $instancePO->po_no;
             $documentType = $instancePO->document_type == 'po' ?
@@ -488,6 +491,8 @@ class PurchaseJobOrderController extends Controller
             if ($isDocGenerated) {
                 $instancePO->date_accountant_signed = Carbon::now();
                 $instancePO->save();
+
+                $instanceNotif->notifyAccountantSignedPO($id);
 
                 $msg = "$documentType '$poNo' is successfully set to
                        'Cleared/Signed by Accountant'.";
@@ -510,6 +515,7 @@ class PurchaseJobOrderController extends Controller
     public function approve(Request $request, $id) {
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instancePO = PurchaseJobOrder::find($id);
             $poNo = $instancePO->po_no;
             $documentType = $instancePO->document_type == 'po' ?
@@ -517,6 +523,8 @@ class PurchaseJobOrderController extends Controller
 
             $instancePO->date_po_approved = Carbon::now();
             $instancePO->save();
+
+            $instanceNotif->notifyApprovedPO($id);
 
             $msg = "$documentType '$poNo' is successfully set to
                    'Approved'.";
@@ -545,6 +553,7 @@ class PurchaseJobOrderController extends Controller
 
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instancePO = PurchaseJobOrder::find($id);
             $poNo = $instancePO->po_no;
             $documentType = $instancePO->document_type == 'po' ?
@@ -553,7 +562,7 @@ class PurchaseJobOrderController extends Controller
             $instanceDocLog->logDocument($id, Auth::user()->id, $issuedTo, "issued", $remarks);
             $issuedToName = Auth::user()->getEmployee($issuedTo)->name;
 
-            //$instanceRFQ->notifyIssued($id, $issuedTo, $requestedBy);
+            $instanceNotif->notifyIssuedPO($id, $issuedTo);
 
             $msg = "$documentType '$poNo' successfully issued to $issuedToName.";
             Auth::user()->log($request, $msg);
@@ -578,14 +587,14 @@ class PurchaseJobOrderController extends Controller
 
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instancePO = PurchaseJobOrder::find($id);
             $poNo = $instancePO->po_no;
             $documentType = $instancePO->document_type == 'po' ?
                             'Purchase Order' : 'Job Order';
 
             $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received", $remarks);
-
-            //$instanceRFQ->notifyReceived($id, Auth::user()->id, $responsiblePerson, $requestedBy);
+            $instanceNotif->notifyReceivedPO($id);
 
             $msg = "$documentType '$poNo' successfully received.";
             Auth::user()->log($request, $msg);
@@ -602,6 +611,7 @@ class PurchaseJobOrderController extends Controller
     public function delivery(Request $request, $id) {
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instancePO = PurchaseJobOrder::find($id);
             $poNo = $instancePO->po_no;
             $documentType = $instancePO->document_type == 'po' ?
@@ -610,6 +620,8 @@ class PurchaseJobOrderController extends Controller
             if ($instancePO->status == 7) {
                 $instancePO->status = 8;
                 $instancePO->save();
+
+                $instanceNotif->notifyDeliveredPO($id);
 
                 $msg = "$documentType '$poNo' is successfully set to
                        'For Delivery'.";
@@ -633,6 +645,7 @@ class PurchaseJobOrderController extends Controller
     public function inspection(Request $request, $id) {
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instancePO = PurchaseJobOrder::with('ors')->find($id);
             $poNo = $instancePO->po_no;
             $prID = $instancePO->pr_id;
@@ -655,6 +668,8 @@ class PurchaseJobOrderController extends Controller
             $instancePO->status = 9;
             $instancePO->save();
 
+            $instanceNotif->notifyInspectionPO($id);
+
             $msg = "$documentType '$poNo' is now ready for inspection.";
             Auth::user()->log($request, $msg);
             return redirect()->route('po-jo', ['keyword' => $id])
@@ -669,13 +684,14 @@ class PurchaseJobOrderController extends Controller
     public function cancel(Request $request, $id) {
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instancePO = PurchaseJobOrder::find($id);
             $poNo = $instancePO->po_no;
             $instancePO->date_cancelled = Carbon::now();
             $instancePO->save();
 
             //$instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
-            //$instancePR->notifyCancelled($poNo, $requestedBy);
+            $instanceNotif->notifyCancelledPO($id);
 
             $msg = "Purchase/Job Order '$poNo' successfully cancelled.";
             Auth::user()->log($request, $msg);
@@ -691,12 +707,13 @@ class PurchaseJobOrderController extends Controller
     public function uncancel(Request $request, $id) {
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instancePO = PurchaseJobOrder::find($id);
             $poNo = $instancePO->po_no;
             $instancePO->date_cancelled = NULL;
             $instancePO->save();
 
-            //$instancePR->notifyCancelled($poNo, $requestedBy);
+            $instanceNotif->notifyRestoredPO($id);
 
             $msg = "Purchase/Job Order '$poNo' successfully un-cancelled.";
             Auth::user()->log($request, $msg);

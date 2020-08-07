@@ -26,6 +26,8 @@ use Carbon\Carbon;
 use DB;
 use Auth;
 
+use App\Plugins\Notification as Notif;
+
 class AbstractQuotationController extends Controller
 {
     protected $poLetters = [
@@ -547,8 +549,9 @@ class AbstractQuotationController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function approveForPO(Request $request, $id) {
-
+        try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instanceAbstract = AbstractQuotation::with('pr')->find($id);
             $prID = $instanceAbstract->pr_id;
             $instancePR = PurchaseRequest::find($prID);
@@ -616,7 +619,7 @@ class AbstractQuotationController extends Controller
                 $instancePR->status = 6;
                 $instancePR->save();
 
-                $instanceAbstract->notifyApprovedForPO($id, Auth::user()->id);
+                $instanceNotif->notifyApprovedForPOAbstract($id);
 
                 $msg = "Abstract of Quotation '$prNo' successfully approved for Po/JO.";
                 Auth::user()->log($request, $msg);
@@ -627,7 +630,7 @@ class AbstractQuotationController extends Controller
                 Auth::user()->log($request, $msg);
                 return redirect()->route('abstract', ['keyword' => $id])
                                  ->with('warning', $msg);
-            }try {
+            }
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
