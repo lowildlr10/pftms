@@ -94,6 +94,8 @@ class LoginController extends Controller
         }
 
         $user->log($request, $msg);
+
+        return $isAuthenticated;
     }
 
     /**
