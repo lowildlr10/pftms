@@ -408,7 +408,7 @@
                         <button type="button" class="btn btn-outline-blue-grey waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showUncancel('{{ route('po-jo-uncancel', ['id' => $item->id]) }}',
                                                               `{{ strtoupper($item->document_type).' '.$item->po_no }}`);">
-                            <i class="fas fa-lock-open fa-lg black-text"></i> Uncancel Document
+                            <i class="fas fa-lock-open"></i> Restore Document
                         </button>
                     </li>
                         @endif

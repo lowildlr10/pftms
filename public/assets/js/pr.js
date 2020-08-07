@@ -219,20 +219,24 @@ $(function() {
 		});
     }
 
+    $.fn.cancel = function() {
+        $('#form-cancel').submit();
+    }
+
     $.fn.showUncancel = function(url, name) {
-		$('#modal-body-cancel').html(`Are you sure you want to un-cancel '${name}'?`);
-        $("#modal-cancel").modal({keyboard: false, backdrop: 'static'})
+		$('#modal-body-uncancel').html(`Are you sure you want to restore '${name}'?`);
+        $("#modal-uncancel").modal({keyboard: false, backdrop: 'static'})
 						  .on('shown.bs.modal', function() {
-            $('#cancel-title').html('Un-cancel Purchase Request');
-            $('#form-cancel').attr('action', url);
+            $('#uncancel-title').html('Restore Purchase Request');
+            $('#form-uncancel').attr('action', url);
 		}).on('hidden.bs.modal', function() {
-             $('#modal-cancel-body').html('');
-             $('#form-cancel').attr('action', '#');
+             $('#modal-uncancel-body').html('');
+             $('#form-uncancel').attr('action', '#');
 		});
     }
 
-    $.fn.cancel = function() {
-        $('#form-cancel').submit();
+    $.fn.unCancel = function() {
+        $('#form-uncancel').submit();
     }
 
     $('.material-tooltip-main').tooltip({

@@ -195,7 +195,7 @@
                 $isVisibleViewAttachment = false;
                 $isVisibleTrackPR = false;
                 $isVisibleCancel = false;
-                $isVisibleUncancel = false;
+                //$isVisibleUncancel = false;
             }
         }
         @endphp
@@ -340,11 +340,13 @@
                         @endif
                     <!-- End Disapprove Button Section -->
 
-                        @if (empty($pr->date_pr_cancelled))
+                    @endif
+
+                    @if (empty($pr->date_pr_cancelled))
 
                     <!-- Cancel Button Section -->
-                            @if ($isVisibleCancel)
-                                @php $countVisible++ @endphp
+                        @if ($isVisibleCancel)
+                            @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-red waves-effect btn-md btn-block btn-rounded"
                                 onclick="$(this).showCancel('{{ route('pr-cancel', ['id' => $pr->id]) }}',
@@ -352,25 +354,24 @@
                             <i class="fas fa-ban"></i> Cancel
                         </button>
                     </li>
-                            @endif
+                        @endif
                     <!-- End Cancel Button Section -->
 
-                        @else
+                    @else
 
                     <!-- Un-cancel Button Section -->
-                            @if ($isVisibleUncancel)
-                                @php $countVisible++ @endphp
+                        @if ($isVisibleUncancel)
+                            @php $countVisible++ @endphp
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-blue-grey waves-effect btn-md btn-block btn-rounded"
                                 onclick="$(this).showUncancel('{{ route('pr-uncancel', ['id' => $pr->id]) }}',
                                                             '{{ $pr->pr_no }}');">
-                            <i class="fas fa-lock-open"></i> Un-cancel
+                            <i class="fas fa-lock-open"></i> Restore Document
                         </button>
                     </li>
-                            @endif
+                        @endif
                     <!-- End Un-cancel Button Section -->
 
-                        @endif
                     @endif
 
                     @if ($pr->status >= 5)
@@ -417,6 +418,7 @@
 @include('modals.approve')
 @include('modals.disapprove')
 @include('modals.cancel')
+@include('modals.uncancel')
 @include('modals.print')
 @include('modals.attachment')
 

@@ -715,7 +715,7 @@ class PurchaseJobOrderController extends Controller
 
             $instanceNotif->notifyRestoredPO($id);
 
-            $msg = "Purchase/Job Order '$poNo' successfully un-cancelled.";
+            $msg = "Purchase/Job Order '$poNo' successfully restored.";
             Auth::user()->log($request, $msg);
             return redirect()->route('po-jo', ['keyword' => $id])
                              ->with('success', $msg);

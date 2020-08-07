@@ -59,7 +59,7 @@ class PurchaseRequestController extends Controller
         $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
         $isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
         $isAllowedCancel = Auth::user()->getModuleAccess($module, 'cancel');
-        $isAllowedUncancel = $isAllowedCancel;
+        $isAllowedUncancel = Auth::user()->getModuleAccess($module, 'uncancel');;
         $isAllowedApprove = Auth::user()->getModuleAccess($module, 'approve');
         $isAllowedDisapprove = Auth::user()->getModuleAccess($module, 'disapprove');
         $isAllowedRFQ = Auth::user()->getModuleAccess('proc_rfq', 'is_allowed');
