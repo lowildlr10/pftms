@@ -767,6 +767,7 @@ class PurchaseRequestController extends Controller
         $groupNos = [];
 
         try {
+            $instanceNotif = new Notif;
             $instancePR = PurchaseRequest::find($id);
             $instancePR->date_pr = $prDate;
             $instancePR->funding_source = $projectID;
@@ -812,7 +813,7 @@ class PurchaseRequestController extends Controller
                 } else {
                     if ($itemCount == $arrayKey) {
                         $instancePR->status = 1;
-                        $instancePR->notifyForApproval($prNo, $requestedBy);
+                        $instanceNotif->notifyForApprovalPR($id);
                         $instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
                         $instanceDocLog->logDocument($id, Auth::user()->id, NULL, 'issued');
 
