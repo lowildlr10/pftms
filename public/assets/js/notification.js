@@ -1,6 +1,6 @@
 $(function() {
     $.fn.setAsReadNotification = function(notifID) {
-        var url = baseURL + "/notification/mark-as-read/" + notifID;
+        const url = baseURL + "/notification/mark-as-read/" + notifID;
 
         $.get(url, function(notifCount) {
             if (notifCount > 0) {
@@ -18,7 +18,7 @@ $(function() {
     }
 
     $.fn.displayNotifications = function() {
-        var url = baseURL + "/notification/display";
+        const url = baseURL + "/notification/display";
 
         $.get(url, function() {
             $('.sidebar-wrapper').find('span.notification')

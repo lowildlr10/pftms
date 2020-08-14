@@ -16,81 +16,36 @@
                     <div class="card p-5">
                         @if (count(Auth::user()->notifications) > 0)
                             @foreach(Auth::user()->notifications as $notification)
-                                @switch($notification->data['module'])
-                                    @case('proc-pr')
-                        <a onclick="$(this).redirectToDoc('{{ route('pr') }}', '{{ $notification->data['pr_id'] }}');"
-                           class="dropdown-item">
+                        <a onclick="$(this).redirectToDoc('{{ route($notification->data['sub_module']) }}',
+                        '{{ $notification->data['id'] }}');" class="dropdown-item">
                             <div class="notification-content">
-                                <div class="content">
-                                    <div class="notification-detail">
-                                        <i class="far fa-file text-info border border-info"></i>
-                                        {!! str_replace('<br>', ' ', $notification->data['msg']) !!}
-                                    </div>
-                                    <div class="notification-time">
-                                        <i class="far fa-calendar-alt"></i> {{ $notification->created_at }}
-                                        <small class="grey-text"><em>...Procurement</em></small>
-                                    </div>
+                                <div class="icon font-weight-bolder pb-3">
+                                    @if ($notification->data['module'] == 'cash_advance')
+                                    <i class="fas fa-money-bill-wave-alt mdb-color-text"></i> CASH ADVANCE, REIMBURSEMENT, AND LIQUIDATION REPORT
+                                    @elseif ($notification->data['module'] == 'procurement')
+                                    <i class="fas fa-shopping-cart mdb-color-text"></i> PROCUREMENT
+                                    @elseif ($notification->data['module'] == 'payment')
+                                    <i class="fas fa-money-check-alt mdb-color-text"></i> PAYMENT
+                                    @elseif ($notification->data['module'] == 'inventory')
+                                    <i class="fas fa-box mdb-color-text"></i> INVENTORY
+                                    @elseif ($notification->data['module'] == 'account_management')
+                                    <i class="fas fa-user mdb-color-text"></i> ACCOUNT MANAGEMENT
+                                    @endif
                                 </div>
-                            </div>
-                        </a>
-                                        @break
-                                    @case('proc-rfq')
-                        <a onclick="$(this).redirectToDoc('{{ route('rfq') }}', '{{ $notification->data['rfq_id'] }}');"
-                           class="dropdown-item">
-                            <div class="notification-content">
                                 <div class="content">
-                                    <div class="notification-detail">
-                                        <i class="far fa-file text-info border border-info"></i>
-                                        {!! str_replace('<br>', ' ', $notification->data['msg']) !!}
-                                    </div>
-                                    <div class="notification-time">
-                                        <i class="far fa-calendar-alt"></i> {{ $notification->created_at }}
-                                        <small class="grey-text"><em>...Procurement</em></small>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                                        @break
-                                    @case('proc-abstract')
-                        <a onclick="$(this).redirectToDoc('{{ route('abstract') }}', '{{ $notification->data['abs_id'] }}');"
-                           class="dropdown-item">
-                            <div class="notification-content">
-                                <div class="content">
-                                    <div class="notification-detail">
-                                        <i class="far fa-file text-info border border-info"></i>
-                                        {!! str_replace('<br>', ' ', $notification->data['msg']) !!}
-                                    </div>
-                                    <div class="notification-time">
-                                        <i class="far fa-calendar-alt"></i> {{ $notification->created_at }}
-                                        <small class="grey-text"><em>...Procurement</em></small>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                                        @break
-                                    @case('proc-po-jo')
+                                    <div class="notification-detail text-wrap">
+                                        @if ($notification->read_at)
 
-                                        @break
-                                    @case('proc-ors-burs')
-                        <a onclick="$(this).redirectToDoc('{{ route('proc-ors-burs') }}', '{{ $notification->data['ors_id'] }}');"
-                           class="dropdown-item">
-                            <div class="notification-content">
-                                <div class="content">
-                                    <div class="notification-detail">
-                                        <i class="far fa-file text-info border border-info"></i>
-                                        {!! str_replace('<br>', ' ', $notification->data['msg']) !!}
+                                        @endif
+                                        {!! $notification->data['msg'] !!}
                                     </div>
                                     <div class="notification-time">
-                                        <i class="far fa-calendar-alt"></i> {{ $notification->created_at }}
-                                        <small class="grey-text"><em>...Procurement</em></small>
+                                        <i class="far fa-calendar-alt"></i> {{ \Carbon\Carbon::parse($notification->created_at)->diffForHumans() }}
                                     </div>
                                 </div>
                             </div>
                         </a>
-                                        @break
-                                    @default
-                                @endswitch
-                        <div class="dropdown-divider"></div>
+                        <hr>
                             @endforeach
                         <a class="dropdown-item text-center" href="#">
                             -- End of Notification --
