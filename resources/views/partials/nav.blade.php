@@ -375,7 +375,7 @@
             <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-bell"></i>
                 @if (count(Auth::user()->unreadNotifications) > 0)
-                <span class="badge badge-pill badge-danger notification">
+                <span class="badge badge-pill badge-danger notification" id="disp-notif-count">
                     {{ count(Auth::user()->unreadNotifications) > 99 ? '99+' :
                        count(Auth::user()->unreadNotifications) }}
                 </span>
@@ -392,7 +392,8 @@
                     @if (count(Auth::user()->unreadNotifications) > 0)
                         @foreach(Auth::user()->unreadNotifications as $notification)
                     <a onclick="$(this).redirectToDoc('{{ route($notification->data['sub_module']) }}',
-                       '{{ $notification->data['id'] }}');" class="dropdown-item">
+                       '{{ $notification->data['id'] }}'); $(this).setAsReadNotification('{{ $notification->id }}');"
+                       class="dropdown-item">
                         <div class="notification-content">
                             <div class="icon">
                                 @if ($notification->data['module'] == 'cash_advance')
