@@ -51,7 +51,10 @@ class InventoryStockController extends Controller
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
+        /*
         $invStocksData = InventoryStock::with(['stockitems', 'procstatus', 'inventoryclass'])
+                                       ->has('stockitems', '>', 0);*/
+        $invStocksData = InventoryStock::with(['procstatus', 'inventoryclass'])
                                        ->has('stockitems', '>', 0);
 
         if (!empty($keyword)) {
@@ -88,9 +91,12 @@ class InventoryStockController extends Controller
         $instanceInvClass = InventoryClassification::orderBy('classification_name')->get();
 
         foreach ($invStocksData as $invStock) {
+            $invStock->stockitems = InventoryStockItem::where('inv_stock_id', $invStock->id)
+                                                      ->orderBy('item_no')
+                                                      ->get();
+
             foreach ($invStock->stockitems as $item) {
-                $stockItem = InventoryStockItem::with('stockissueditems')
-                                              ->find($item->id);
+                $stockItem = InventoryStockItem::find($item->id);
                 $stockIssuedItem = InventoryStockIssueItem::where('inv_stock_item_id', $item->id)
                                                           ->get();
                 $item->available_quantity = $stockItem->quantity;
@@ -229,7 +235,7 @@ class InventoryStockController extends Controller
 
             $msg = "$documentType successfully created.";
             Auth::user()->log($request, $msg);
-            return redirect()->route($routeName)
+            return redirect()->route($routeName, ['keyword' => $poID])
                              ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
@@ -443,7 +449,7 @@ class InventoryStockController extends Controller
 
             $msg = "$documentType successfully updated.";
             Auth::user()->log($request, $msg);
-            return redirect()->route($routeName)
+            return redirect()->route($routeName, ['keyword' => $poID])
                              ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
@@ -606,19 +612,19 @@ class InventoryStockController extends Controller
     }*/
 
     public function showCreateIssueItem($invStockID, $invStockItemID, $classification, $type) {
+        $invStockData = InventoryStock::find($invStockID);
+
         if ($type == 'multiple') {
-            $invStockData = InventoryStock::with('stockitems')->find($invStockID);
+            $invStockItemData = InventoryStockItem::where('inv_stock_id', $invStockID)->get();
         } else {
-            $invStockData = InventoryStock::with(['stockitems' => function($query) use ($invStockItemID) {
-                $query->where('id', $invStockItemID);
-            }])->find($invStockID);
+            $invStockItemData = InventoryStockItem::where('id', $invStockItemID)->get();
         }
 
         $prData = PurchaseRequest::find($invStockData->pr_id);
         $supplierData = Supplier::find($invStockData->supplier);
         $divisionData = EmpDivision::find($invStockData->division);
 
-        foreach ($invStockData->stockitems as $item) {
+        foreach ($invStockItemData as $item) {
             $stockItem = InventoryStockItem::find($item->id);
             $stockIssueItem = InventoryStockIssueItem::where('inv_stock_item_id', $item->id)
                                                      ->get();
@@ -633,14 +639,13 @@ class InventoryStockController extends Controller
         }
 
         $requestedBy = $prData ? $prData->requested_by : NULL;
-        $stocks = $invStockData->stockitems;
+        $stocks = $invStockItemData;
         $inventoryNo = $invStockData->inventory_no;
         $office = $invStockData->office;
         $division = isset($divisionData->division_name) ? $divisionData->division_name : NULL;
         $poNo = $invStockData->po_no;
         $poDate = $invStockData->date_po;
         $supplier = $supplierData->company_name;
-        $unitIssue = $unitIssueData->unit_name;
 
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
@@ -656,20 +661,20 @@ class InventoryStockController extends Controller
             return view('modules.inventory.stock.ris-create-issue', compact(
                 'invStockID', 'classification',
                 'stocks', 'inventoryNo', 'poNo', 'poDate', 'supplier',
-                'unitIssue', 'signatories', 'employees', 'office', 'division',
+                'signatories', 'employees', 'office', 'division',
                 'requestedBy'
             ));
         } else if ($classification == 'par') {
             return view('modules.inventory.stock.par-create-issue', compact(
                 'invStockID', 'invStockItemID', 'classification',
                 'stocks', 'inventoryNo', 'poNo', 'poDate', 'supplier',
-                'unitIssue', 'signatories', 'employees'
+                'signatories', 'employees'
             ));
         } else {
             return view('modules.inventory.stock.ics-create-issue', compact(
                 'invStockID', 'invStockItemID', 'classification',
                 'stocks', 'inventoryNo', 'poNo', 'poDate', 'supplier',
-                'unitIssue', 'signatories', 'employees'
+                'signatories', 'employees'
             ));
         }
     }
