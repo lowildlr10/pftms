@@ -135,6 +135,7 @@ $(function() {
         $("#modal-issue").modal({keyboard: false, backdrop: 'static'})
 						 .on('shown.bs.modal', function() {
             $('#issue-title').html('Submit Liquidation Report');
+            $(this).find('.btn-orange').html('<i class="fas fa-paper-plane"></i> Submit');
 		}).on('hidden.bs.modal', function() {
             $('#modal-body-issue').html('').css('display', 'none');
 		});

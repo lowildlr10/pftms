@@ -17,6 +17,8 @@ use Auth;
 use DB;
 use Intervention\Image\ImageManagerStatic as Image;
 
+use App\Plugins\Notification as Notif;
+
 class AccountController extends Controller
 {
     protected $moduleLabels = [
@@ -56,6 +58,7 @@ class AccountController extends Controller
             'pr_delete' => 'Delete',
             'pr_destroy' => 'Destroy',
             'pr_cancel' => 'Cancel',
+            'pr_uncancel' => 'Restore',
             'pr_approve' => 'Approve',
             'pr_disapprove' => 'Disapprove',
         'proc_rfq' => 'Procurement - Request for Quotation',
@@ -72,10 +75,10 @@ class AccountController extends Controller
             'po_jo_update' => 'Update',
             'po_jo_delete' => 'Delete',
             'po_jo_destroy' => 'Destroy',
-            'po_jo_signed' => 'signed',
+            'po_jo_signed' => 'Cleared/Signed',
             'po_jo_approve' => 'Approve',
             'po_jo_cancel' => 'Cancel',
-            'po_jo_uncancel' => 'Un-cancel',
+            'po_jo_uncancel' => 'Restore',
             'po_jo_issue' => 'Issue',
             'po_jo_receive' => 'Receive',
             'po_jo_delivery' => 'Set to For Delivery',
@@ -247,6 +250,7 @@ class AccountController extends Controller
             'pr_delete' => 'delete',
             'pr_destroy' => 'destroy',
             'pr_cancel' => 'cancel',
+            'pr_uncancel' => 'uncancel',
             'pr_approve' => 'approve',
             'pr_disapprove' => 'disapprove',
         ],
@@ -627,7 +631,9 @@ class AccountController extends Controller
             $isActive = $request->is_active;
         }
 
-        try {
+
+            $instanceNotif = new Notif;
+
             $instanceEmpAccount = new User;
             $instanceEmpAccount->emp_id = $empID;
             $instanceEmpAccount->firstname = $firstname;
@@ -670,12 +676,16 @@ class AccountController extends Controller
 
             $instanceEmpAccount->save();
 
+            if ($type == 'profile') {
+                $instanceNotif->notifyAccountRegistered($empID);
+            }
+
             $msgAlertType = 'success';
             $msg = $type == 'profile' ?
                    "Profile successfully created. Please contact your
                     administrator for your account approval." :
                     "User account of '$firstname' with an employee ID of
-                    '$empID' successfully created.";
+                    '$empID' successfully created.";try {
         } catch (\Throwable $th) {
             $msgAlertType = 'failed';
             $msg = "Unknown error has occured. Please try again.";

@@ -7,6 +7,7 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\User;
 
 class LoginController extends Controller
 {
@@ -58,11 +59,43 @@ class LoginController extends Controller
                 'password' => $request->password,
                 'is_active' => 'y'];
     }
+
+    /**
+     * Get the needed authorization credentials from the request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
     protected function credentials(Request $request)
     {
         return ['username' => $request->{$this->username()},
                 'password' => $request->password,
                 'is_active' => 'y'];
+    }
+
+    /**
+     * Attempt to log the user into the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return bool
+     */
+    protected function attemptLogin(Request $request)
+    {
+        $user = new User;
+        $username = $request->{$this->username()};
+        $clientIP = $request->getClientIp();
+        $isAuthenticated = $this->guard()->attempt(
+            $this->credentials($request), $request->filled('remember')
+        );
+        $msg = "Login authenticated by the system [$username@$clientIP].";
+
+        if (!$isAuthenticated) {
+            $msg = "Attempting login with invalid credentials [$username@$clientIP] [pw: $request->password].";
+        }
+
+        $user->log($request, $msg);
+
+        return $isAuthenticated;
     }
 
     /**
@@ -74,7 +107,10 @@ class LoginController extends Controller
      */
     protected function authenticated(Request $request, $user)
     {
+        $fullname = $user->getEmployee($user->id)->name;
+        $msg = "$fullname successfully logged in.";
 
+        $user->log($request, $msg);
         $user->last_login = Carbon::now();
         $user->save();
     }

@@ -69,7 +69,7 @@
                                     <div class="md-form form-sm my-0">
                                         <textarea class="md-textarea form-control required"
                                                   placeholder="Item description..."
-                                                  rows="1" readonly>{{ $stock->invstockitems->description }}</textarea>
+                                                  rows="1" readonly>{{ $stock->description }}</textarea>
                                     </div>
                                 </td>
                                 <td>
@@ -87,7 +87,7 @@
                                 <td>
                                     <div class="md-form form-sm my-0">
                                         <input class="form-control form-control-sm" type="number"
-                                               readonly="readonly" value="{{ $stock->invstockitems->amount }}">
+                                               readonly="readonly" value="{{ $stock->amount }}">
                                     </div>
                                 </td>
                                 <td>

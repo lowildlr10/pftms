@@ -24,6 +24,8 @@ use Carbon\Carbon;
 use Auth;
 use DB;
 
+use App\Plugins\Notification as Notif;
+
 class ObligationRequestStatusController extends Controller
 {
     /**
@@ -232,6 +234,8 @@ class ObligationRequestStatusController extends Controller
         $orsDocumentType = $request->ors_document_type;
 
         try {
+            $instanceNotif = new Notif;
+
             $instancePO = PurchaseJobOrder::find($poID);
             $poNo = $instancePO->po_no;
             $prID = $instancePO->pr_id;
@@ -263,6 +267,8 @@ class ObligationRequestStatusController extends Controller
                 }
 
                 $instancePO->save();
+
+                $instanceNotif->notifyCreatedORS($poNo);
 
                 $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';
                 $msg = "$documentType '$poNo' successfully created the ORS/BURS document.";
@@ -619,6 +625,7 @@ class ObligationRequestStatusController extends Controller
 
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instanceORS = ObligationRequestStatus::find($id);
             $moduleClass = $instanceORS->module_class;
             $documentType = $instanceORS->document_type;
@@ -638,7 +645,7 @@ class ObligationRequestStatusController extends Controller
                 if ($isDocGenerated) {
                     $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "issued", $remarks);
 
-                    $instanceORS->notifyIssued($id, Auth::user()->id);
+                    $instanceNotif->notifyIssuedORS($id, $routeName);
 
                     $msg = "$documentType '$id' successfully submitted to budget unit.";
                     Auth::user()->log($request, $msg);
@@ -683,6 +690,7 @@ class ObligationRequestStatusController extends Controller
 
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instanceORS = ObligationRequestStatus::find($id);
             $moduleClass = $instanceORS->module_class;
             $documentType = $instanceORS->document_type;
@@ -696,7 +704,7 @@ class ObligationRequestStatusController extends Controller
             }
 
             $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received", $remarks);
-            $instanceORS->notifyReceived($id, Auth::user()->id);
+            $instanceNotif->notifyReceivedORS($id, $routeName);
 
             $msg = "$documentType '$id' successfully received.";
             Auth::user()->log($request, $msg);
@@ -729,6 +737,7 @@ class ObligationRequestStatusController extends Controller
 
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instanceORS = ObligationRequestStatus::find($id);
             $moduleClass = $instanceORS->module_class;
             $documentType = $instanceORS->document_type;
@@ -742,7 +751,7 @@ class ObligationRequestStatusController extends Controller
             }
 
             $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "issued_back", $remarks);
-            $instanceORS->notifyIssuedBack($id, Auth::user()->id);
+            //$instanceNotif->notifyIssuedBackORS($id, $routeName);
 
             $msg = "$documentType '$id' successfully submitted back.";
             Auth::user()->log($request, $msg);
@@ -775,6 +784,7 @@ class ObligationRequestStatusController extends Controller
 
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instanceORS = ObligationRequestStatus::find($id);
             $moduleClass = $instanceORS->module_class;
             $documentType = $instanceORS->document_type;
@@ -789,6 +799,7 @@ class ObligationRequestStatusController extends Controller
 
             $instanceDocLog->logDocument($id, NULL, NULL, "-", NULL);
             $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received_back", $remarks);
+            //$instanceNotif->notifyReceivedBackORS($id, $routeName);
 
             $msg = "$documentType '$id' successfully received back.";
             Auth::user()->log($request, $msg);
@@ -823,6 +834,7 @@ class ObligationRequestStatusController extends Controller
 
         try {
             $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instanceORS = ObligationRequestStatus::with('po')->find($id);
             $moduleClass = $instanceORS->module_class;
             $documentType = $instanceORS->document_type;
@@ -843,7 +855,7 @@ class ObligationRequestStatusController extends Controller
             $instanceORS->serial_no = $serialNo;
             $instanceORS->save();
 
-            $instanceORS->notifyObligated($id, Auth::user()->id);
+            $instanceNotif->notifyObligatedORS($id, $routeName);
 
             $msg = "$documentType with a serial number of '$serialNo'
                     is successfully obligated.";

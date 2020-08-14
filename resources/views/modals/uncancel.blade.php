@@ -6,7 +6,7 @@
             <!--Header-->
             <div class="modal-header rgba-red-strong white-text">
                 <h7 class="mt-1">
-                    <i class="fas fa-ban"></i>
+                    <i class="fas fa-lock-open"></i>
                     <span id="uncancel-title"></span>
                 </h7>
                 <button type="button" class="close white-text" data-dismiss="modal"
@@ -25,7 +25,7 @@
             <div class="modal-footer p-1">
                 <button type="button" class="btn btn-danger btn-sm waves-effect waves-light"
                         onclick="$(this).unCancel();">
-                        <i class="fas fa-ban"></i> Un-cancel
+                        <i class="fas fa-lock-open"></i> Restore
                 </button>
                 <button type="button" class="btn btn btn-light btn-sm waves-effect" data-dismiss="modal">
                     <i class="far fa-window-close"></i> Close
