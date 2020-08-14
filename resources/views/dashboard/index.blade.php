@@ -171,7 +171,7 @@
                                         </form>
 
                                         <a class="btn btn-grey btn-block p-4" target="_blank"
-                                           href="https://drive.google.com/file/d/1BWrfhqUy93qpT4KgvGWvN3zqQ7jBrwLa/view?usp=sharing">
+                                           href="https://drive.google.com/file/d/1_MPlkJelVDM8ErQpNmSq4ktvjph2oe7q/view?usp=sharing">
                                             <h6 class="p-0 m-0 font-weight-bolder">
                                                 <i class="fa fa-file-pdf"></i> Click to Download User's Manual
                                             </h6>
