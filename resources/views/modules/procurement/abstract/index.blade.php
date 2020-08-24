@@ -243,6 +243,7 @@
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
                                 @elseif ($abs->toggle == 'update' && $isVisibleDelete)
+                                    @if (!$abs->abstract['date_abstract_approved'])
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showDelete('{{ route('abstract-delete-items',
@@ -250,6 +251,13 @@
                                                                               '{{ $abs->pr_no }}');">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
+                                    @else
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light"
+                                        disabled="disabled">
+                                    <i class="fas fa-trash-alt red-text"></i> Delete
+                                </button>
+                                    @endif
                                 @endif
                                 <!-- End Edit Button Section -->
 
