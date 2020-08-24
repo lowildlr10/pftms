@@ -24,6 +24,8 @@ use Carbon\Carbon;
 use Auth;
 use DB;
 
+use App\Plugins\Notification as Notif;
+
 class InspectionAcceptanceController extends Controller
 {
     /**
@@ -238,9 +240,10 @@ class InspectionAcceptanceController extends Controller
     public function issue(Request $request, $id) {
         $issuedTo = $request->issued_to;
         $remarks = $request->remarks;
-        $instanceDocLog = new DocLog;
 
         try {
+            $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
 
             if ($isDocGenerated) {
@@ -250,7 +253,7 @@ class InspectionAcceptanceController extends Controller
                 $instanceDocLog->logDocument($id, Auth::user()->id, $issuedTo, "issued", $remarks);
                 $issuedToName = Auth::user()->getEmployee($issuedTo)->name;
 
-                //$instanceRFQ->notifyIssued($id, $issuedTo, $requestedBy);
+                $instanceNotif->notifyIssuedIAR($id, $issuedTo);
 
                 $msg = "Inspection and Acceptance Report '$iarNo' successfully issued to $issuedToName.";
                 Auth::user()->log($request, $msg);
@@ -278,9 +281,10 @@ class InspectionAcceptanceController extends Controller
 
     public function inspect(Request $request, $id) {
         $remarks = $request->remarks;
-        $instanceDocLog = new DocLog;
 
         try {
+            $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
             $instanceIAR = InspectionAcceptance::with(['po', 'ors'])->find($id);
             $instancePO = PurchaseJobOrder::find($instanceIAR->po_id);
             $poID = $instanceIAR->po_id;
@@ -308,6 +312,7 @@ class InspectionAcceptanceController extends Controller
             $instancePO->save();
 
             $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received", $remarks);
+            $instanceNotif->notifyInspectIAR($id);
 
             $msg = "Inspection and Acceptance Report '$iarNo' is successfully set to
                    'Inspected' and ready for Disbursement Voucher.";

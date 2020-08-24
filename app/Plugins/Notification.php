@@ -703,6 +703,48 @@ class Notification {
     }
 
     // Inspection and Acceptance Report
+    public function notifyIssuedIAR($id, $responsiblePerson) {
+        $iarData = InspectionAcceptance::find($id);
+        $prID = $iarData->pr_id;
+        $prData = PurchaseRequest::find($prID);
+        $iarNo = $iarData->iar_no;
+        $requestedBy = $prData->requested_by;
 
+        $user = User::find($requestedBy);
+        $responsiblePersonName = $user->getEmployee($responsiblePerson)->name;
+        $msgNotif = "The <b>Inspection and Acceptance Report</b> with an IAR number of <b>$iarNo</b>
+                    has been issued to <b>$responsiblePersonName</b> for inspection.";
+        $data = (object) [
+            'id' => $id,
+            'module' => 'procurement',
+            'sub_module' => 'iar',
+            'msg' => $msgNotif,
+        ];
+        $user->notify(new ProcNotify($data));
+    }
+
+    public function notifyInspectIAR($id) {
+        $iarData = InspectionAcceptance::find($id);
+        $prID = $iarData->pr_id;
+        $prData = PurchaseRequest::find($prID);
+        $poID = $iarData->po_id;
+        $requestedBy = $prData->requested_by;
+        $poData = PurchaseJobOrder::find($poID);
+        $poNo = $poData->po_no;
+        $documentType = $poData->document_type == 'po' ?
+                        'Purchase Order' : 'Job Order';
+        $documentTypeAbbr = strtoupper($poData->document_type);
+
+        $user = User::find($requestedBy);
+        $msgNotif = "The items in your <b>$documentType</b> with a $documentTypeAbbr number of
+                    <b>$poNo</b> has been <b>Inspected</b>.";
+        $data = (object) [
+            'id' => $id,
+            'module' => 'procurement',
+            'sub_module' => 'iar',
+            'msg' => $msgNotif,
+        ];
+        $user->notify(new ProcNotify($data));
+    }
 
 }
