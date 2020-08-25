@@ -41,26 +41,6 @@
                             <strong>Operating Unit</strong>
                         </label>
                     </div>
-                    <div class="md-form form-sm">
-                        <select id="dv-id" name="dv_id" searchable="Search here.."
-                                searchable="Search here.." class="mdb-select md-form required my-0 crud-select">
-                            <option value="" disabled selected
-                            > DV Document</option>
-                            <option value="">None</option>
-
-                            @if (count($dvList) > 0)
-                                @foreach ($dvList as $dv)
-                            <option value="{{ $dv->id }}" {{ ($lddap->dv_id == $dv->id) ? 'selected' : '' }}
-                                >DV No: {{ $dv->dv_no }} ( {{ $dv->particulars }} )
-                            </option>
-                                @endforeach
-                            @else
-                            <option value="" disabled>
-                                No data...
-                            </option>
-                            @endif
-                        </select>
-                    </div>
                 </div>
                 <div class="col-md-2"></div>
                 <div class="col-md-5">
@@ -102,13 +82,17 @@
 
             <div class="row">
                 <div class="col-md-12">
-                    <div class="md-form form-sm">
-                        <input type="text" id="mds-gsb-accnt-no" name="mds_gsb_accnt_no"
-                               class="form-control required" value="{{ $lddap->mds_gsb_accnt_no }}">
-                        <label for="mds-gsb-accnt-no" class="{{ !empty($lddap->mds_gsb_accnt_no) ? 'active' : '' }}">
+                    <div class="form-group form-sm">
+                        <label for="mds-gsb-accnt-no my-3" class="active">
                             <span class="red-text">* </span>
                             <strong>MDS-GSB BRANCH/MDS SUB ACCOUNT NO.</strong>
                         </label>
+                        <select class="mdb-select required mds-gsb-tokenizer"
+                                name="mds_gsb_accnt_no[]" id="mds-gsb-accnt-no">
+                            <option value="{{ $mdsGSB->id }}" selected>
+                                {{ $mdsGSB->branch }} / {{ $mdsGSB->sub_account_no }}
+                            </option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -191,31 +175,35 @@
                             <tr id="current-row-{{ $ctrCurrent + 1 }}" class="current-row">
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea class="md-textarea form-control required form-control-sm py-2"
-                                                  name="current_creditor_name[]"
-                                                  placeholder=" Value..." rows="1"
-                                            >{{ $item->creditor_name }}</textarea>
+                                        <textarea name="current_creditor_name[]" placeholder=" Value..."
+                                                  class="md-textarea required form-control-sm w-100 py-1"
+                                                  >{{ $item->creditor_name }}</textarea>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="text" class="form-control required form-control-sm"
-                                               placeholder=" Value..." name="current_creditor_acc_no[]"
-                                               value="{{ $item->creditor_acc_no }}">
+                                        <textarea name="current_creditor_acc_no[]" placeholder=" Value..."
+                                                  class="md-textarea required form-control-sm w-100 py-1"
+                                                  >{{ $item->creditor_acc_no }}</textarea>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="md-form my-0">
+                                        <select class="mdb-select required ors-tokenizer" multiple="multiple"
+                                                name="current_ors_no[0][]">
+                                            @if (count($item->ors_data) > 0)
+                                                @foreach ($item->ors_data as $ors)
+                                            <option value="{{ $ors->id }}" selected>{{ $ors->serial_no }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="text" class="form-control required form-control-sm"
-                                               placeholder=" Value..." name="current_ors_no[]"
-                                               value="{{ $item->ors_no }}">
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="md-form form-sm my-0">
-                                        <input type="text" class="form-control required form-control-sm"
-                                               placeholder=" Value..." name="current_allot_class_uacs[]"
-                                               value="{{ $item->allot_class_uacs }}">
+                                        <textarea name="current_allot_class_uacs[]" placeholder=" Value..."
+                                                  class="md-textarea required form-control-sm w-100 py-1"
+                                                  >{{ $item->allot_class_uacs }}</textarea>
                                     </div>
                                 </td>
                                 <td>
@@ -247,10 +235,9 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea class="md-textarea form-control form-control-sm py-2"
-                                                  name="current_remarks[]"
-                                                  placeholder=" Value..." rows="1"
-                                            >{{ $item->remarks }}</textarea>
+                                        <textarea name="current_remarks[]" placeholder=" Value..."
+                                                  class="md-textarea form-control-sm w-100 py-1"
+                                                  >{{ $item->remarks }}</textarea>
                                     </div>
                                 </td>
                                 <td>
@@ -339,31 +326,35 @@
                             <tr id="prior-row-{{ $ctrPrior + 1 }}" class="prior-row">
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea class="md-textarea form-control required form-control-sm py-2"
-                                                  name="prior_creditor_name[]"
-                                                  placeholder=" Value..." rows="1"
-                                            >{{ $item->creditor_name }}</textarea>
+                                        <textarea name="prior_creditor_name[]" placeholder=" Value..."
+                                                  class="md-textarea required form-control-sm w-100 py-1"
+                                                  >{{ $item->creditor_name }}</textarea>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="text" class="form-control required form-control-sm"
-                                               placeholder=" Value..." name="prior_creditor_acc_no[]"
-                                               value="{{ $item->creditor_acc_no }}">
+                                        <textarea name="prior_creditor_acc_no[]" placeholder=" Value..."
+                                                  class="md-textarea required form-control-sm w-100 py-1"
+                                                  >{{ $item->creditor_acc_no }}</textarea>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="md-form my-0">
+                                        <select class="mdb-select required ors-tokenizer" multiple="multiple"
+                                                name="prior_ors_no[0][]">
+                                            @if (count($item->ors_data) > 0)
+                                                @foreach ($item->ors_data as $ors)
+                                            <option value="{{ $ors->id }}" selected>{{ $ors->serial_no }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="text" class="form-control required form-control-sm"
-                                               placeholder=" Value..." name="prior_ors_no[]"
-                                               value="{{ $item->ors_no }}">
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="md-form form-sm my-0">
-                                        <input type="text" class="form-control required form-control-sm"
-                                               placeholder=" Value..." name="prior_allot_class_uacs[]"
-                                               value="{{ $item->allot_class_uacs }}">
+                                        <textarea name="prior_allot_class_uacs[]" placeholder=" Value..."
+                                                  class="md-textarea required form-control-sm w-100 py-1"
+                                                  >{{ $item->allot_class_uacs }}</textarea>
                                     </div>
                                 </td>
                                 <td>
@@ -395,10 +386,9 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea class="md-textarea form-control form-control-sm py-2"
-                                                  name="prior_remarks[]"
-                                                  placeholder=" Value..." rows="1"
-                                            >{{ $item->remarks }}</textarea>
+                                        <textarea name="prior_remarks[]" placeholder=" Value..."
+                                                  class="md-textarea form-control-sm w-100 py-1"
+                                                  >{{ $item->remarks }}</textarea>
                                     </div>
                                 </td>
                                 <td>

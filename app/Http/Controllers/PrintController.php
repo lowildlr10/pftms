@@ -27,6 +27,7 @@ use App\Models\PaperSize;
 use App\Models\Supplier;
 use App\Models\ItemUnitIssue;
 use App\Models\EmpDivision;
+use App\Models\MdsGsb;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -995,6 +996,7 @@ class PrintController extends Controller
         $lddap = DB::table('list_demand_payables')
                    ->where('id', $id)
                    ->first();
+        $mdsGSB = MdsGsb::find($lddap->mds_gsb_accnt_no);
         $lddapItems = DB::table('list_demand_payable_items')
                         ->where('lddap_id', $id)
                         ->get();
@@ -1023,10 +1025,21 @@ class PrintController extends Controller
                 $item->creditor_acc_no = str_replace($searchStr, '<br>', $item->creditor_acc_no);
             }
 
+            /*
             if (strpos($item->ors_no, "\n") !== FALSE) {
                 $searchStr = ["\r\n", "\n", "\r"];
                 $item->ors_no = str_replace($searchStr, '<br>', $item->ors_no);
+            }*/
+
+            $item->ors_no = unserialize($item->ors_no);
+            $orsNos = [];
+
+            foreach ($item->ors_no as $orsID) {
+                $orsData = ObligationRequestStatus::find($orsID);
+                $orsNos[] = $orsData->serial_no;
             }
+
+            $orsNo = implode(', ', $orsNos);
 
             if (strpos($item->allot_class_uacs, "\n") !== FALSE) {
                 $searchStr = ["\r\n", "\n", "\r"];
@@ -1048,7 +1061,7 @@ class PrintController extends Controller
                 $item->net_amount = number_format($item->net_amount, 2);
 
                 $currentTableData[] = [$item->creditor_name, $item->creditor_acc_no,
-                                       $item->ors_no, $item->allot_class_uacs,
+                                       $orsNo, $item->allot_class_uacs,
                                        $item->gross_amount, $item->withold_tax,
                                        $item->net_amount, $item->remarks];
             } else if ($item->category == 'prior_year') {
@@ -1061,7 +1074,7 @@ class PrintController extends Controller
                 $item->net_amount = number_format($item->net_amount, 2);
 
                 $priorTableData[] = [$item->creditor_name, $item->creditor_acc_no,
-                                     $item->ors_no, $item->allot_class_uacs,
+                                     $orsNo, $item->allot_class_uacs,
                                      $item->gross_amount, $item->withold_tax,
                                      $item->net_amount, $item->remarks];
             }
@@ -1197,6 +1210,8 @@ class PrintController extends Controller
 
         return (object)[
             'lddap' => $lddap,
+            'mds_gsb_branch' => $mdsGSB->branch,
+            'mds_gsb_sub_account_no' => $mdsGSB->sub_account_no,
             'table_data' => $data,
             'sig_cert_correct' => $certCorrect,
             'sig_cert_correct_position' => $certCorrectPosition,

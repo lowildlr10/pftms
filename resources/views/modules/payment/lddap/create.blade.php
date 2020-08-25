@@ -41,41 +41,21 @@
                             <strong>Operating Unit</strong>
                         </label>
                     </div>
-                    <div class="md-form form-sm">
-                        <select id="dv-id" name="dv_id" searchable="Search here.."
-                                searchable="Search here.." class="mdb-select md-form required my-0 crud-select">
-                            <option value="" disabled selected
-                            > DV Document</option>
-                            <option value="">None</option>
-
-                            @if (count($dvList) > 0)
-                                @foreach ($dvList as $dv)
-                            <option value="{{ $dv->id }}"
-                                >DV No: {{ $dv->dv_no }} ( {{ $dv->particulars }} )
-                            </option>
-                                @endforeach
-                            @else
-                            <option value="" disabled>
-                                No data...
-                            </option>
-                            @endif
-                        </select>
-                    </div>
                 </div>
                 <div class="col-md-2"></div>
                 <div class="col-md-5">
                     <div class="md-form form-sm">
                         <input type="text" id="nca-no" name="nca_no"
-                               class="form-control required">
-                        <label for="nca-no">
+                               class="form-control required" value="NCA-BMB-">
+                        <label for="nca-no" class="active">
                             <span class="red-text">* </span>
                             <strong>NCA No.</strong>
                         </label>
                     </div>
                     <div class="md-form form-sm">
                         <input type="text" id="lddap-ada-no" name="lddap_ada_no"
-                               class="form-control required">
-                        <label for="lddap-ada-no">
+                               class="form-control required" value="01101101 ">
+                        <label for="lddap-ada-no" class="active">
                             <span class="red-text">* </span>
                             <strong>LDDAP-ADA No.</strong>
                         </label>
@@ -101,19 +81,19 @@
 
             <div class="row">
                 <div class="col-md-12">
-                    <div class="md-form form-sm">
-                        <input type="text" id="mds-gsb-accnt-no" name="mds_gsb_accnt_no"
-                               class="form-control required">
-                        <label for="mds-gsb-accnt-no">
+                    <div class="form-group form-sm">
+                        <label for="mds-gsb-accnt-no my-3" class="active">
                             <span class="red-text">* </span>
                             <strong>MDS-GSB BRANCH/MDS SUB ACCOUNT NO.</strong>
                         </label>
+                        <select class="mdb-select required mds-gsb-tokenizer"
+                                name="mds_gsb_accnt_no[]" id="mds-gsb-accnt-no"></select>
                     </div>
                 </div>
             </div>
 
 
-            <div class="row">
+            <div class="row mt-3">
                 <div class="col-md-12 border border-bottom-0 border-dark px-0 text-center">
                     <div class="p-2 border-bottom border-dark">
                         <strong>LIST OF DUE AND DEMANDABLE ACCOUNTS PAYABLE (LDDAP)</strong>
@@ -187,34 +167,36 @@
                             <tr id="current-row-1" class="current-row">
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="text" class="form-control required form-control-sm"
-                                               placeholder=" Value..." name="current_creditor_name[]">
+                                        <textarea name="current_creditor_name[]" placeholder=" Value..."
+                                                  class="md-textarea required form-control-sm w-100 py-1"></textarea>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="text" class="form-control required form-control-sm"
-                                               placeholder=" Value..." name="current_creditor_acc_no[]">
+                                        <textarea name="current_creditor_acc_no[]" placeholder=" Value..."
+                                                  class="md-textarea required form-control-sm w-100 py-1"></textarea>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="md-form my-0">
+                                        <select class="mdb-select required ors-tokenizer" multiple="multiple"
+                                                name="current_ors_no[0][]"></select>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="text" class="form-control required form-control-sm"
-                                               placeholder=" Value..." name="current_ors_no[]">
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="md-form form-sm my-0">
-                                        <input type="text" class="form-control required form-control-sm"
-                                               placeholder=" Value..." name="current_allot_class_uacs[]">
+                                        <textarea name="current_allot_class_uacs[]" placeholder=" Value..."
+                                                  class="md-textarea required form-control-sm w-100 py-1"></textarea>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
                                         <input type="number" placeholder=" Value..." name="current_gross_amount[]"
                                                class="form-control required form-control-sm current-gross-amount"
+                                               id="current-gross-amount-0"
                                                onkeyup="$(this).computeGrossTotal('current')"
-                                               onchange="$(this).computeGrossTotal('current')">
+                                               onchange="$(this).computeGrossTotal('current')"
+                                               onclick="$(this).showCalc('#current-gross-amount-0', 'current')">
                                     </div>
                                 </td>
                                 <td>
@@ -235,8 +217,8 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="text" class="form-control form-control-sm"
-                                               placeholder=" Value..." name="current_remarks[]">
+                                        <textarea name="current_remarks[]" placeholder=" Value..."
+                                                  class="md-textarea form-control-sm w-100 py-1"></textarea>
                                     </div>
                                 </td>
                                 <td>
@@ -374,7 +356,7 @@
             </div>
 
             <div class="row">
-                <div class="col-md-6 formborder border-dark">
+                <div class="col-md-6 border border-dark">
                     <div class="md-">
                         <small>
                             <span class="red-text">* </span>

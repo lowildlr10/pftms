@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ListDemandPayable;
 use App\Models\ListDemandPayableItem;
+use App\Models\ObligationRequestStatus;
 use App\Models\DisbursementVoucher;
 
 use App\User;
@@ -14,6 +15,7 @@ use App\Models\Signatory;
 use App\Models\DocumentLog as DocLog;
 use App\Models\PaperSize;
 use App\Models\Supplier;
+use App\Models\MdsGsb;
 use DB;
 use Auth;
 use Carbon\Carbon;
@@ -55,18 +57,28 @@ class LDDAPController extends Controller
                     ->orWhere('date_lddap', 'like', "%$keyword%")
                     ->orWhere('total_amount_words', 'like', "%$keyword%")
                     ->orWhere('total_amount', 'like', "%$keyword%")
-                    ->orWhere('status', 'like', "%$keyword%")
-                    ->orWhereHas('dv', function($query) use ($keyword) {
-                        $query->where('id', 'like', "%$keyword%")
-                              ->orWhere('dv_no', 'like', "%$keyword%");
-                    });
+                    ->orWhere('status', 'like', "%$keyword%");
             });
         }
 
         $lddapData = $lddapData->sortable(['created_at' => 'desc'])->paginate(15);
 
         foreach ($lddapData as $lddapDat) {
-            $lddapDat->has_dv = DisbursementVoucher::where('id', $lddapDat->dv_id)->count();
+            $lddapItems = ListDemandPayableItem::where('lddap_id', $lddapDat->id)
+                                               ->orderBy('item_no')
+                                               ->get();
+            $orsNos = [];
+
+            foreach ($lddapItems as $item) {
+                $orsIDs = unserialize($item->ors_no);
+
+                foreach ($orsIDs as $orsID) {
+                    $orsData = ObligationRequestStatus::find($orsID);
+                    $orsNos[] = $orsData->serial_no;
+                }
+            }
+
+            $lddapDat->ors_nos = $orsNos;
         }
 
         return view('modules.payment.lddap.index', [
@@ -117,7 +129,7 @@ class LDDAPController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request) {
-        $dvID = $request->dv_id;
+        //$dvID = $request->dv_id;
         $sigCertCorrect = $request->sig_cert_correct;
         $sigApproval1 = $request->sig_approval_1;
         $sigApproval2 = $request->sig_approval_2;
@@ -135,7 +147,7 @@ class LDDAPController extends Controller
         $lddapAdaNo = $request->lddap_ada_no;
         $lddapDate = $request->lddap_date;
         $fundCluster = $request->fund_cluster;
-        $mdsGsbAccntNo = $request->mds_gsb_accnt_no;
+        $mdsGsbAccntNo = $request->mds_gsb_accnt_no[0];
         $listCurrentCreditorName = $request->current_creditor_name;
         $listCurrentCreditorAccNo = $request->current_creditor_acc_no;
         $listCurrentOrsNo = $request->current_ors_no;
@@ -153,9 +165,34 @@ class LDDAPController extends Controller
         $listPriorNetAmount = $request->prior_net_amount;
         $listPriorRemarks = $request->prior_remarks;
 
+        $isMdsGsbUUID = preg_match('/^[a-f\d]{8}(-[a-f\d]{4}){4}[a-f\d]{8}$/i', $mdsGsbAccntNo);
+        $documentType = 'LDDAP';
+        $routeName = 'lddap';
+
         try {
+            if (!$isMdsGsbUUID) {
+                $explodeMDSGSB = explode('/', $mdsGsbAccntNo);
+
+                if (count($explodeMDSGSB) == 2) {
+                    $instanceMDSGSB = new MdsGsb;
+                    $instanceMDSGSB->branch = trim($explodeMDSGSB[0]);
+                    $instanceMDSGSB->sub_account_no = trim($explodeMDSGSB[1]);
+                    $instanceMDSGSB->save();
+
+                    $mdsGSBData = MdsGsb::where([['branch', trim($explodeMDSGSB[0])], ['sub_account_no', trim($explodeMDSGSB[1])]])
+                                        ->first();
+                    $mdsGSBID = $mdsGSBData->id;
+                } else {
+                    $msg = "Please separate the MDS-GSB BRANCH and DS SUB ACCOUNT NO. with '/'.";
+                    return redirect()->route($routeName)
+                                     ->with('warning', $msg);
+                }
+            } else {
+                $mdsGSBID = $mdsGsbAccntNo;
+            }
+
             $instanceLDDAP = new ListDemandPayable;
-            $instanceLDDAP->dv_id = $dvID;
+            //$instanceLDDAP->dv_id = $dvID;
             $instanceLDDAP->sig_cert_correct = $sigCertCorrect;
             $instanceLDDAP->sig_approval_1 = $sigApproval1;
             $instanceLDDAP->sig_approval_2 = $sigApproval2;
@@ -173,7 +210,7 @@ class LDDAPController extends Controller
             $instanceLDDAP->lddap_ada_no = $lddapAdaNo;
             $instanceLDDAP->date_lddap = $lddapDate;
             $instanceLDDAP->fund_cluster = $fundCluster;
-            $instanceLDDAP->mds_gsb_accnt_no = $mdsGsbAccntNo;
+            $instanceLDDAP->mds_gsb_accnt_no = $mdsGSBID;
             $instanceLDDAP->save();
 
             $lastLDDAP = ListDemandPayable::orderBy('created_at', 'desc')->first();
@@ -191,7 +228,7 @@ class LDDAPController extends Controller
                         $instanceLDDAPItem->category = $category;
                         $instanceLDDAPItem->creditor_name = $creditorName;
                         $instanceLDDAPItem->creditor_acc_no = $listCurrentCreditorAccNo[$ctr];
-                        $instanceLDDAPItem->ors_no = $listCurrentOrsNo[$ctr];
+                        $instanceLDDAPItem->ors_no = serialize($listCurrentOrsNo[$ctr]);
                         $instanceLDDAPItem->allot_class_uacs = $listcurrentAllotClassUacs[$ctr];
                         $instanceLDDAPItem->gross_amount = $listCurrentGrossAmount[$ctr];
                         $instanceLDDAPItem->withold_tax = $listCurrentWitholdTax[$ctr];
@@ -214,7 +251,7 @@ class LDDAPController extends Controller
                         $instanceLDDAPItem->category = $category;
                         $instanceLDDAPItem->creditor_name = $creditorName;
                         $instanceLDDAPItem->creditor_acc_no = $listPriorCreditorAccNo[$ctr];
-                        $instanceLDDAPItem->ors_no = $listPriorOrsNo[$ctr];
+                        $instanceLDDAPItem->ors_no = serialize($listPriorOrsNo[$ctr]);
                         $instanceLDDAPItem->allot_class_uacs = $listPriorAllotClassUacs[$ctr];
                         $instanceLDDAPItem->gross_amount = $listPriorGrossAmount[$ctr];
                         $instanceLDDAPItem->withold_tax = $listPriorWitholdTax[$ctr];
@@ -224,9 +261,6 @@ class LDDAPController extends Controller
                     }
                 }
             }
-
-            $documentType = 'LDDAP';
-            $routeName = 'lddap';
 
             $msg = "$documentType successfully created.";
             Auth::user()->log($request, $msg);
@@ -258,6 +292,7 @@ class LDDAPController extends Controller
         $totalNet = 0;
 
         $lddap = ListDemandPayable::find($id);
+        $mdsGSB = MdsGsb::find($lddap->mds_gsb_accnt_no);
         $sigCertCorrect = $lddap->sig_cert_correct;
         $sigApproval1 = $lddap->sig_approval_1;
         $sigApproval2 = $lddap->sig_approval_2;
@@ -269,9 +304,41 @@ class LDDAPController extends Controller
         $currentItems = ListDemandPayableItem::where([
             ['lddap_id', $id], ['category', 'current_year']
         ])->orderBy('item_no')->get();
+
+        foreach ($currentItems as $curritem) {
+            $curritem->ors_no = unserialize($curritem->ors_no);
+            $orsLists = [];
+
+            foreach ($curritem->ors_no as $orsNo) {
+                $orsData = ObligationRequestStatus::find($orsNo);
+                $orsLists[] = (object) [
+                    'id' => $orsData->id,
+                    'serial_no' => $orsData->serial_no
+                ];
+            }
+
+            $curritem->ors_data = $orsLists;
+        }
+
         $priorItems = ListDemandPayableItem::where([
             ['lddap_id', $id], ['category', 'prior_year']
         ])->orderBy('item_no')->get();
+
+        foreach ($priorItems as $priorItem) {
+            $priorItem->ors_no = unserialize($priorItem->ors_no);
+            $orsLists = [];
+
+            foreach ($priorItem->ors_no as $orsNo) {
+                $orsData = ObligationRequestStatus::find($orsNo);
+                $orsLists[] = (object) [
+                    'id' => $orsData->id,
+                    'serial_no' => $orsData->serial_no
+                ];
+            }
+
+            $priorItem->ors_data = $orsLists;
+        }
+
         $dvList = DisbursementVoucher::whereNotNull('dv_no')
                                      ->orderBy('dv_no')
                                      ->get();
@@ -292,7 +359,8 @@ class LDDAPController extends Controller
             'totalNet', 'priorGross', 'priorWithholding',
             'priorNet', 'sigCertCorrect', 'sigApproval1',
             'sigApproval2', 'sigApproval3', 'sigAgencyAuth1',
-            'sigAgencyAuth2', 'sigAgencyAuth3', 'sigAgencyAuth4'
+            'sigAgencyAuth2', 'sigAgencyAuth3', 'sigAgencyAuth4',
+            'mdsGSB'
         ));
     }
 
@@ -322,7 +390,7 @@ class LDDAPController extends Controller
         $lddapAdaNo = $request->lddap_ada_no;
         $lddapDate = $request->lddap_date;
         $fundCluster = $request->fund_cluster;
-        $mdsGsbAccntNo = $request->mds_gsb_accnt_no;
+        $mdsGsbAccntNo = $request->mds_gsb_accnt_no[0];
         $listCurrentCreditorName = $request->current_creditor_name;
         $listCurrentCreditorAccNo = $request->current_creditor_acc_no;
         $listCurrentOrsNo = $request->current_ors_no;
@@ -340,7 +408,32 @@ class LDDAPController extends Controller
         $listPriorNetAmount = $request->prior_net_amount;
         $listPriorRemarks = $request->prior_remarks;
 
+        $isMdsGsbUUID = preg_match('/^[a-f\d]{8}(-[a-f\d]{4}){4}[a-f\d]{8}$/i', $mdsGsbAccntNo);
+        $documentType = 'LDDAP';
+        $routeName = 'lddap';
+
         try {
+            if (!$isMdsGsbUUID) {
+                $explodeMDSGSB = explode('/', $mdsGsbAccntNo);
+
+                if (count($explodeMDSGSB) == 2) {
+                    $instanceMDSGSB = new MdsGsb;
+                    $instanceMDSGSB->branch = trim($explodeMDSGSB[0]);
+                    $instanceMDSGSB->sub_account_no = trim($explodeMDSGSB[1]);
+                    $instanceMDSGSB->save();
+
+                    $mdsGSBData = MdsGsb::where([['branch', trim($explodeMDSGSB[0])], ['sub_account_no', trim($explodeMDSGSB[1])]])
+                                        ->first();
+                    $mdsGSBID = $mdsGSBData->id;
+                } else {
+                    $msg = "Please separate the MDS-GSB BRANCH and DS SUB ACCOUNT NO. with '/'.";
+                    return redirect()->route($routeName)
+                                     ->with('warning', $msg);
+                }
+            } else {
+                $mdsGSBID = $mdsGsbAccntNo;
+            }
+
             $instanceLDDAP = ListDemandPayable::find($id);
             $instanceLDDAP->dv_id = $dvID;
             $instanceLDDAP->sig_cert_correct = $sigCertCorrect;
@@ -360,7 +453,7 @@ class LDDAPController extends Controller
             $instanceLDDAP->lddap_ada_no = $lddapAdaNo;
             $instanceLDDAP->date_lddap = $lddapDate;
             $instanceLDDAP->fund_cluster = $fundCluster;
-            $instanceLDDAP->mds_gsb_accnt_no = $mdsGsbAccntNo;
+            $instanceLDDAP->mds_gsb_accnt_no = $mdsGSBID;
             $instanceLDDAP->save();
 
             if ((is_array($listCurrentCreditorName) && count($listCurrentCreditorName) > 0) ||
@@ -380,7 +473,7 @@ class LDDAPController extends Controller
                         $instanceLDDAPItem->category = $category;
                         $instanceLDDAPItem->creditor_name = $creditorName;
                         $instanceLDDAPItem->creditor_acc_no = $listCurrentCreditorAccNo[$ctr];
-                        $instanceLDDAPItem->ors_no = $listCurrentOrsNo[$ctr];
+                        $instanceLDDAPItem->ors_no = serialize($listCurrentOrsNo[$ctr]);
                         $instanceLDDAPItem->allot_class_uacs = $listcurrentAllotClassUacs[$ctr];
                         $instanceLDDAPItem->gross_amount = $listCurrentGrossAmount[$ctr];
                         $instanceLDDAPItem->withold_tax = $listCurrentWitholdTax[$ctr];
@@ -403,7 +496,7 @@ class LDDAPController extends Controller
                         $instanceLDDAPItem->category = $category;
                         $instanceLDDAPItem->creditor_name = $creditorName;
                         $instanceLDDAPItem->creditor_acc_no = $listPriorCreditorAccNo[$ctr];
-                        $instanceLDDAPItem->ors_no = $listPriorOrsNo[$ctr];
+                        $instanceLDDAPItem->ors_no = serialize($listPriorOrsNo[$ctr]);
                         $instanceLDDAPItem->allot_class_uacs = $listPriorAllotClassUacs[$ctr];
                         $instanceLDDAPItem->gross_amount = $listPriorGrossAmount[$ctr];
                         $instanceLDDAPItem->withold_tax = $listPriorWitholdTax[$ctr];
@@ -413,9 +506,6 @@ class LDDAPController extends Controller
                     }
                 }
             }
-
-            $documentType = 'LDDAP';
-            $routeName = 'lddap';
 
             $msg = "$documentType '$id' successfully updated.";
             Auth::user()->log($request, $msg);
@@ -570,5 +660,18 @@ class LDDAPController extends Controller
             Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
+    }
+
+    public function getListMDSGSB() {
+        $mdsGsbData = MdsGsb::select('id', 'branch', 'sub_account_no')
+                            ->orderBy('sub_account_no')->get();
+        return response()->json($mdsGsbData);
+    }
+
+    public function getListORSBURS() {
+        $orsData = ObligationRequestStatus::select('id', 'serial_no')
+                                          ->whereNotNull('serial_no')
+                                          ->get();
+        return response()->json($orsData);
     }
 }

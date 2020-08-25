@@ -270,6 +270,16 @@ html, body, header, .view {
     height: 6px;
 }
 
+.select2-search__field {
+    padding: 5px 0 !important;
+    background: transparent !important;
+}
+
+.select2-container--default .select2-selection--multiple {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+}
 
 /* Extra Small devices (landscape phones, atmost 575px) */
 @media (max-width: 575px) {
