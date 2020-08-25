@@ -191,17 +191,16 @@
                             <tr id="current-row-{{ $ctrCurrent + 1 }}" class="current-row">
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea class="md-textarea form-control required form-control-sm py-2"
-                                                  name="current_creditor_name[]"
-                                                  placeholder=" Value..." rows="1"
-                                            >{{ $item->creditor_name }}</textarea>
+                                        <textarea name="current_creditor_name[]" placeholder=" Value..."
+                                                  class="md-textarea required form-control-sm w-100 py-1"
+                                                  >{{ $item->creditor_name }}</textarea>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="text" class="form-control required form-control-sm"
-                                               placeholder=" Value..." name="current_creditor_acc_no[]"
-                                               value="{{ $item->creditor_acc_no }}">
+                                        <textarea name="current_creditor_acc_no[]" placeholder=" Value..."
+                                                  class="md-textarea required form-control-sm w-100 py-1"
+                                                  >{{ $item->creditor_acc_no }}</textarea>
                                     </div>
                                 </td>
                                 <td>
@@ -213,9 +212,9 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="text" class="form-control required form-control-sm"
-                                               placeholder=" Value..." name="current_allot_class_uacs[]"
-                                               value="{{ $item->allot_class_uacs }}">
+                                        <textarea name="current_allot_class_uacs[]" placeholder=" Value..."
+                                                  class="md-textarea required form-control-sm w-100 py-1"
+                                                  >{{ $item->allot_class_uacs }}</textarea>
                                     </div>
                                 </td>
                                 <td>
@@ -247,10 +246,9 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea class="md-textarea form-control form-control-sm py-2"
-                                                  name="current_remarks[]"
-                                                  placeholder=" Value..." rows="1"
-                                            >{{ $item->remarks }}</textarea>
+                                        <textarea name="current_remarks[]" placeholder=" Value..."
+                                                  class="md-textarea form-control-sm w-100 py-1"
+                                                  >{{ $item->remarks }}</textarea>
                                     </div>
                                 </td>
                                 <td>
@@ -339,17 +337,16 @@
                             <tr id="prior-row-{{ $ctrPrior + 1 }}" class="prior-row">
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea class="md-textarea form-control required form-control-sm py-2"
-                                                  name="prior_creditor_name[]"
-                                                  placeholder=" Value..." rows="1"
-                                            >{{ $item->creditor_name }}</textarea>
+                                        <textarea name="prior_creditor_name[]" placeholder=" Value..."
+                                                  class="md-textarea required form-control-sm w-100 py-1"
+                                                  >{{ $item->creditor_name }}</textarea>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="text" class="form-control required form-control-sm"
-                                               placeholder=" Value..." name="prior_creditor_acc_no[]"
-                                               value="{{ $item->creditor_acc_no }}">
+                                        <textarea name="prior_creditor_acc_no[]" placeholder=" Value..."
+                                                  class="md-textarea required form-control-sm w-100 py-1"
+                                                  >{{ $item->creditor_acc_no }}</textarea>
                                     </div>
                                 </td>
                                 <td>
@@ -361,9 +358,9 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="text" class="form-control required form-control-sm"
-                                               placeholder=" Value..." name="prior_allot_class_uacs[]"
-                                               value="{{ $item->allot_class_uacs }}">
+                                        <textarea name="prior_allot_class_uacs[]" placeholder=" Value..."
+                                                  class="md-textarea required form-control-sm w-100 py-1"
+                                                  >{{ $item->allot_class_uacs }}</textarea>
                                     </div>
                                 </td>
                                 <td>
@@ -395,10 +392,9 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea class="md-textarea form-control form-control-sm py-2"
-                                                  name="prior_remarks[]"
-                                                  placeholder=" Value..." rows="1"
-                                            >{{ $item->remarks }}</textarea>
+                                        <textarea name="prior_remarks[]" placeholder=" Value..."
+                                                  class="md-textarea form-control-sm w-100 py-1"
+                                                  >{{ $item->remarks }}</textarea>
                                     </div>
                                 </td>
                                 <td>

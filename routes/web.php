@@ -961,6 +961,16 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'pay_lddap',
         'access' => 'summary'
     ])->name('lddap-summary');
+    Route::get('payment/lddap/get-mds-gsb', [
+        'uses' => 'LDDAPController@getListMDSGSB',
+        'module' => 'pay_lddap',
+        'access' => 'is_allowed'
+    ]);
+    Route::get('payment/lddap/get-ors-burs', [
+        'uses' => 'LDDAPController@getListORSBURS',
+        'module' => 'pay_lddap',
+        'access' => 'is_allowed'
+    ]);
 
     /*===================== SYSTEM LIBRARIES ROUTES =====================*/
 

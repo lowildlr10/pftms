@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ListDemandPayable;
 use App\Models\ListDemandPayableItem;
+use App\Models\ObligationRequestStatus;
 use App\Models\DisbursementVoucher;
 
 use App\User;
@@ -14,6 +15,7 @@ use App\Models\Signatory;
 use App\Models\DocumentLog as DocLog;
 use App\Models\PaperSize;
 use App\Models\Supplier;
+use App\Models\MdsGsb;
 use DB;
 use Auth;
 use Carbon\Carbon;
@@ -117,7 +119,7 @@ class LDDAPController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request) {
-        $dvID = $request->dv_id;
+        //$dvID = $request->dv_id;
         $sigCertCorrect = $request->sig_cert_correct;
         $sigApproval1 = $request->sig_approval_1;
         $sigApproval2 = $request->sig_approval_2;
@@ -135,7 +137,7 @@ class LDDAPController extends Controller
         $lddapAdaNo = $request->lddap_ada_no;
         $lddapDate = $request->lddap_date;
         $fundCluster = $request->fund_cluster;
-        $mdsGsbAccntNo = $request->mds_gsb_accnt_no;
+        $mdsGsbAccntNo = $request->mds_gsb_accnt_no[0];
         $listCurrentCreditorName = $request->current_creditor_name;
         $listCurrentCreditorAccNo = $request->current_creditor_acc_no;
         $listCurrentOrsNo = $request->current_ors_no;
@@ -153,9 +155,13 @@ class LDDAPController extends Controller
         $listPriorNetAmount = $request->prior_net_amount;
         $listPriorRemarks = $request->prior_remarks;
 
+        $explodeMDSGSB = explode('/', $mdsGsbAccntNo);
+        dd($explodeMDSGSB);
+        dd($mdsGsbAccntNo);
+
         try {
             $instanceLDDAP = new ListDemandPayable;
-            $instanceLDDAP->dv_id = $dvID;
+            //$instanceLDDAP->dv_id = $dvID;
             $instanceLDDAP->sig_cert_correct = $sigCertCorrect;
             $instanceLDDAP->sig_approval_1 = $sigApproval1;
             $instanceLDDAP->sig_approval_2 = $sigApproval2;
@@ -570,5 +576,18 @@ class LDDAPController extends Controller
             Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
+    }
+
+    public function getListMDSGSB() {
+        $mdsGsbData = MdsGsb::select('id', 'branch', 'sub_account_no')
+                            ->orderBy('sub_account_no')->get();
+        return response()->json($mdsGsbData);
+    }
+
+    public function getListORSBURS() {
+        $orsData = ObligationRequestStatus::select('id', 'serial_no')
+                                          ->whereNotNull('serial_no')
+                                          ->get();
+        return response()->json($orsData);
     }
 }

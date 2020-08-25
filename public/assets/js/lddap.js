@@ -1,7 +1,67 @@
 $(function() {
+    //testing lang
+
+    let orsSerialNos = [],
+        msdGSBs = [];
+
     const template = '<div class="tooltip md-tooltip">' +
                      '<div class="tooltip-arrow md-arrow"></div>' +
                      '<div class="tooltip-inner md-inner stylish-color"></div></div>';
+
+    function initializeSelect2() {
+        $(".ors-tokenizer").select2({
+            //data: states,
+            tokenSeparators: [',', ' '],
+            placeholder: "Value...",
+            width: '100%',
+            ajax: {
+                url: `${baseURL}/payment/lddap/get-ors-burs`,
+                dataType: 'json',
+                delay: 250,
+                processResults: function(data) {
+                    return {
+                        results: $.map(data, function(item) {
+                            return {
+                                text: item.serial_no,
+                                id: item.id
+                            }
+                        }),
+                        pagination: {
+                            more: true
+                        }
+                    };
+                },
+                cache: true
+            }
+            //theme: "material"
+        });
+
+        $('.mds-gsb-tokenizer').select2({
+            placeholder: "For adding a new data, use '/' to separate MDS-GSB BRANCH and MDS SUB ACCOUNT NO.",
+            width: '100%',
+            tags: true,
+            ajax: {
+                url: `${baseURL}/payment/lddap/get-mds-gsb`,
+                dataType: 'json',
+                delay: 250,
+                processResults: function(data) {
+                    return {
+                        results: $.map(data, function(item) {
+                            return {
+                                text: `${item.branch} / ${item.sub_account_no}`,
+                                id: item.id
+                            }
+                        }),
+                        pagination: {
+                            more: true
+                        }
+                    };
+                },
+                cache: true
+            }
+            //theme: "material"
+        });
+    }
 
     function filterNaN(inputVal) {
         let outputVal = isNaN(inputVal) ? 0 : inputVal;
@@ -148,22 +208,21 @@ $(function() {
         let _lastRowID = lastRowID.split('-');
         let newID = parseInt(_lastRowID[2]) + 1;
 
-        let creditorName = '<td><div class="md-form form-sm my-0">'+
-                           '<input type="text" class="form-control required form-control-sm"'+
-                           'placeholder=" Value..." name="'+_lastRowID[0]+'_creditor_name[]">'+
-                           '</div></td>';
-        let creditorAccntNo = '<td><div class="md-form form-sm my-0">'+
-                              '<input type="text" class="form-control required form-control-sm"'+
-                              'placeholder=" Value..." name="'+_lastRowID[0]+'_creditor_acc_no[]">'+
-                              '</div></td>';
-        let orsNo = '<td> <div class="md-form form-sm my-0">'+
-                    '<input type="text" class="form-control required form-control-sm"'+
-                    'placeholder=" Value..." name="'+_lastRowID[0]+'_ors_no[]">'+
-                    '</div></td>';
-        let allotClassUacs = '<td><div class="md-form form-sm my-0">'+
-                             '<input type="text" class="form-control required form-control-sm"'+
-                             'placeholder=" Value..." name="'+_lastRowID[0]+'_allot_class_uacs[]">'+
-                             '</div></td>';
+        let creditorName = `<td><div class="md-form form-sm my-0">
+                            <textarea name="${_lastRowID[0]}_creditor_name[]" placeholder=" Value..."
+                            class="md-textarea required form-control-sm w-100 py-1"></textarea>
+                            </div></td>`;
+        let creditorAccntNo = `<td><div class="md-form form-sm my-0">
+                               <textarea name="${_lastRowID[0]}_creditor_acc_no[]" placeholder=" Value..."
+                               class="md-textarea required form-control-sm w-100 py-1"></textarea>
+                               </div></td>`;
+        let orsNo = `<td><div class="md-form my-0">
+                    <select class="mdb-select required ors-tokenizer" multiple="multiple"
+                    name="${_lastRowID[0]}_ors_no[${newID-1}][]"></select></div></td>`;
+        let allotClassUacs = `<td><div class="md-form form-sm my-0">
+                              <textarea name="${_lastRowID[0]}_allot_class_uacs[]" placeholder=" Value..."
+                              class="md-textarea required form-control-sm w-100 py-1"></textarea>
+                              </div></td>`;
         let grossAmmount = '<td><div class="md-form form-sm my-0">'+
                            '<input type="number" class="form-control required form-control-sm '+
                            _lastRowID[0]+'-gross-amount'+'" '+
@@ -185,10 +244,10 @@ $(function() {
                         'onkeyup="$(this).computeNetAmountTotal('+"'"+_lastRowID[0]+"'"+')" '+
                         'onchange="$(this).computeNetAmountTotal('+"'"+_lastRowID[0]+"'"+')">'+
                         '</div></td>';
-        let remarks = '<td><div class="md-form form-sm my-0">'+
-                      '<input type="text" class="form-control form-control-sm"'+
-                      'placeholder=" Value..." name="'+_lastRowID[0]+'_remarks[]" '+
-                      '</div></td>';
+        let remarks = `<td><div class="md-form form-sm my-0">
+                       <textarea name="${_lastRowID[0]}_remarks[]" placeholder=" Value..."
+                       class="md-textarea form-control-sm w-100 py-1"></textarea>
+                       </div></td>`;
         let deleteButton = '<td><a onclick="'+
                            "$(this).deleteRow('#"+_lastRowID[0]+'-row-'+newID+"');" +'"'+
                            'class="btn btn-outline-red px-1 py-0">'+
@@ -200,6 +259,7 @@ $(function() {
                         deleteButton + '</tr>';
 
         $(rowOutput).insertAfter('#' + lastRowID);
+        initializeSelect2();
     }
 
     $.fn.deleteRow = function(row) {
@@ -275,6 +335,18 @@ $(function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
+            initializeSelect2();
+
+            $('#sig-cert-correct option:eq(2)').attr('selected', 'selected');
+
+            $('#sig-approval-1 option:eq(4)').attr('selected', 'selected');
+            $('#sig-approval-2 option:eq(2)').attr('selected', 'selected');
+            $('#sig-approval-3 option:eq(3)').attr('selected', 'selected');
+
+            $('#sig-agency-auth-1 option:eq(5)').attr('selected', 'selected');
+            $('#sig-agency-auth-2 option:eq(4)').attr('selected', 'selected');
+            $('#sig-agency-auth-3 option:eq(2)').attr('selected', 'selected');
+            $('#sig-agency-auth-4 option:eq(3)').attr('selected', 'selected');
         });
         $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
@@ -298,6 +370,7 @@ $(function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
+            initializeSelect2();
         });
         $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {
