@@ -81,11 +81,11 @@ $(function() {
         let grandTotalWithholding = currentTotalWithholding + priorTotalWithholding;
         let grandTotalNet = currentTotalNet + priorTotalNet;
 
-        $('#total-gross-amount').val(parseFloat(grandTotalGross, 2));
-        $('#total-withholding-tax').val(parseFloat(grandTotalWithholding, 2));
-        $('#total-net-amount').val(parseFloat(grandTotalNet, 2));
+        $('#total-gross-amount').val(parseFloat(grandTotalGross, 2).toFixed(2));
+        $('#total-withholding-tax').val(parseFloat(grandTotalWithholding, 2).toFixed(2));
+        $('#total-net-amount').val(parseFloat(grandTotalNet, 2).toFixed(2));
 
-        $('#total-amount').val(parseFloat(grandTotalNet, 2));
+        $('#total-amount').val(parseFloat(grandTotalNet, 2).toFixed(2));
     }
 
     $.fn.computeGrossTotal = function(type) {
@@ -227,8 +227,10 @@ $(function() {
                            '<input type="number" class="form-control required form-control-sm '+
                            _lastRowID[0]+'-gross-amount'+'" '+
                            'placeholder=" Value..." name="'+_lastRowID[0]+'_gross_amount[]" '+
+                           `id="${_lastRowID[0]}-gross-amount-${newID-1}" `+
                            'onkeyup="$(this).computeGrossTotal('+"'"+_lastRowID[0]+"'"+')" '+
-                           'onchange="$(this).computeGrossTotal('+"'"+_lastRowID[0]+"'"+')">'+
+                           'onchange="$(this).computeGrossTotal('+"'"+_lastRowID[0]+"'"+')" '+
+                           'onclick="$(this).showCalc('+`'#${_lastRowID[0]}-gross-amount-${newID-1}', '${_lastRowID[0]}'`+')">'+
                            '</div></td>';
         let withholdingTax = '<td><div class="md-form form-sm my-0">'+
                              '<input type="number" class="form-control required form-control-sm '+
@@ -318,6 +320,27 @@ $(function() {
                 }
             }
 		}
+    }
+
+    $.fn.showCalc = function(inputID, type) {
+        $("#modal-calculator").modal({keyboard: false, backdrop: 'static'})
+                        .on('shown.bs.modal', function() {
+            let result = 0.00;
+
+            $('#input-calc').unbind('keyup').keyup(function() {
+                const inputText = $(this).val().split('+');
+
+                $.each(inputText, function(ctr, value) {
+                    result += parseFloat(value);
+                });
+
+                $(inputID).val(result.toFixed(2));
+                result = 0;
+            }).focus();
+        }).on('hidden.bs.modal', function() {
+            $('#input-calc').val('');
+            $(this).computeGrossTotal(type);
+        });
     }
 
     $.fn.createUpdateDoc = function() {

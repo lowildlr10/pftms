@@ -17,7 +17,8 @@ class DocListDueDemandable extends PDF {
         $ncaNo = $data->lddap->nca_no;
         $lddapNo = $data->lddap->lddap_ada_no;
         $fundCluster = $data->lddap->fund_cluster;
-        $mdsgsbBranch = $data->lddap->mds_gsb_accnt_no;
+        $mdsgsbBranch = $data->mds_gsb_branch;
+        $mdsgsbSubAccount = $data->mds_gsb_sub_account_no;
         $totalAmountWords = $data->lddap->total_amount_words;
         $totalAmount = number_format($data->lddap->total_amount, 2);
 
@@ -91,7 +92,7 @@ class DocListDueDemandable extends PDF {
         $this->Cell(0, 4, 'Fund Cluster : ' . $fundCluster, 0, 0, 'L');
         $this->Ln();
 
-        $this->Cell(0, 10, 'MDS-GSB BRANCH/MDS SUB ACCOUNT NO.: ' . $mdsgsbBranch, 0, 0, 'C');
+        $this->Cell(0, 10, 'MDS-GSB BRANCH/MDS SUB ACCOUNT NO.: ' . "$mdsgsbBranch / $mdsgsbSubAccount", 0, 0, 'C');
         $this->Ln();
 
         //Table Data
@@ -253,7 +254,7 @@ class DocListDueDemandable extends PDF {
         $this->Ln();
 
         $this->SetFont('Times', '', 8 + ($fontScale * 8));
-        $this->Cell(0, 4, "Please debit MDS Sub-Account Number : $mdsgsbBranch", 'LR', 0, 'l', false, '', 1, true);
+        $this->Cell(0, 4, "Please debit MDS Sub-Account Number : $mdsgsbSubAccount", 'LR', 0, 'l', false, '', 1, true);
         $this->Ln();
 
         $this->Cell(0, 4,

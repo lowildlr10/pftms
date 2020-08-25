@@ -82,21 +82,12 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group form-sm">
-
                         <label for="mds-gsb-accnt-no my-3" class="active">
                             <span class="red-text">* </span>
                             <strong>MDS-GSB BRANCH/MDS SUB ACCOUNT NO.</strong>
                         </label>
                         <select class="mdb-select required mds-gsb-tokenizer"
                                 name="mds_gsb_accnt_no[]" id="mds-gsb-accnt-no"></select>
-
-                        <!--
-                        <input type="text" id="mds-gsb-accnt-no" name="mds_gsb_accnt_no"
-                               class="form-control required">
-                        <label for="mds-gsb-accnt-no">
-                            <span class="red-text">* </span>
-                            <strong>MDS-GSB BRANCH/MDS SUB ACCOUNT NO.</strong>
-                        </label>-->
                     </div>
                 </div>
             </div>
@@ -202,8 +193,10 @@
                                     <div class="md-form form-sm my-0">
                                         <input type="number" placeholder=" Value..." name="current_gross_amount[]"
                                                class="form-control required form-control-sm current-gross-amount"
+                                               id="current-gross-amount-0"
                                                onkeyup="$(this).computeGrossTotal('current')"
-                                               onchange="$(this).computeGrossTotal('current')">
+                                               onchange="$(this).computeGrossTotal('current')"
+                                               onclick="$(this).showCalc('#current-gross-amount-0', 'current')">
                                     </div>
                                 </td>
                                 <td>
@@ -363,7 +356,7 @@
             </div>
 
             <div class="row">
-                <div class="col-md-6 formborder border-dark">
+                <div class="col-md-6 border border-dark">
                     <div class="md-">
                         <small>
                             <span class="red-text">* </span>

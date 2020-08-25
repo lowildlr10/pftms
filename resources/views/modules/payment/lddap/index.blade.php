@@ -2,6 +2,7 @@
 
 @section('custom-css')
 
+<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/calc.css') }}" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="{{ asset('plugins/select2/css/select2.min.css') }}" rel="stylesheet">
 
 @endsection
@@ -71,7 +72,7 @@
                                             <strong>LDDAP Date</strong>
                                         </th>
                                         <th class="th-md" width="15%">
-                                            <strong>DV No</strong>
+                                            <strong>ORS Nos</strong>
                                         </th>
                                         <th class="th-md" width="24%">
                                             <strong>LDDAP ADA No</strong>
@@ -112,7 +113,19 @@
                                         </td>
                                         <td></td>
                                         <td>{{ $lddap->date_lddap }}</td>
-                                        <td>{{ $lddap->dv['dv_no'] ? $lddap->dv['dv_no'] : 'NA' }}</td>
+                                        <td>
+                                            @if (count($lddap->ors_nos) > 0)
+                                                @foreach ($lddap->ors_nos as $orsNo)
+                                            <a onclick="window.open('{{ route('proc-ors-burs', ['keyword' => $orsNo]) }}');
+                                                        window.open('{{ route('ca-ors-burs', ['keyword' => $orsNo]) }}');"
+                                               target="_blank" class="blue-text">
+                                                [{{ $orsNo }}]
+                                            </a>
+                                                @endforeach
+                                            @else
+                                            N/A
+                                            @endif
+                                        </td>
                                         <td>{{ $lddap->lddap_ada_no }}</td>
                                         <td>{{ $lddap->nca_no }}</td>
                                         <td>P{{ number_format($lddap->total_amount, 2) }}</td>
@@ -280,6 +293,7 @@
 @include('modals.approval')
 @include('modals.summary')
 @include('modals.print')
+@include('modals.calculator')
 
 @endsection
 
@@ -288,6 +302,7 @@
 <script type="text/javascript" src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/lddap.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/calculator.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/attachment.js') }}"></script>
 <script>
