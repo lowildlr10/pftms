@@ -662,16 +662,33 @@ class LDDAPController extends Controller
         }
     }
 
-    public function getListMDSGSB() {
-        $mdsGsbData = MdsGsb::select('id', 'branch', 'sub_account_no')
-                            ->orderBy('sub_account_no')->get();
+    public function getListMDSGSB(Request $request) {
+        $search = trim($request->search);
+        $mdsGsbData = MdsGsb::select('id', 'branch', 'sub_account_no');
+
+        if ($search) {
+            $mdsGsbData = $mdsGsbData->where('sub_account_no', 'like', "%$search%")
+                                     ->orWhere('branch', 'like', "%$search%");
+        }
+
+        $mdsGsbData = $mdsGsbData->orderBy('sub_account_no')->get();
+
         return response()->json($mdsGsbData);
     }
 
-    public function getListORSBURS() {
+    public function getListORSBURS(Request $request) {
+        $search = trim($request->search);
         $orsData = ObligationRequestStatus::select('id', 'serial_no')
                                           ->whereNotNull('serial_no')
-                                          ->get();
+                                          ->where([['serial_no', '<>', '-'],
+                                                   ['serial_no', '<>', '.']]);
+
+        if ($search) {
+            $orsData = $orsData->where('serial_no', 'like', "%$search%");
+        }
+
+        $orsData = $orsData->get();
+
         return response()->json($orsData);
     }
 }

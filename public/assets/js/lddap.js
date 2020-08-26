@@ -1,3 +1,4 @@
+var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 $(function() {
     //testing lang
 
@@ -10,14 +11,20 @@ $(function() {
 
     function initializeSelect2() {
         $(".ors-tokenizer").select2({
-            //data: states,
-            tokenSeparators: [',', ' '],
+            tokenSeparators: [','],
             placeholder: "Value...",
             width: '100%',
             ajax: {
                 url: `${baseURL}/payment/lddap/get-ors-burs`,
+                type: "post",
                 dataType: 'json',
                 delay: 250,
+                data: function (params) {
+                    return {
+                        _token: CSRF_TOKEN,
+                        search: params.term
+                    };
+                },
                 processResults: function(data) {
                     return {
                         results: $.map(data, function(item) {
@@ -37,13 +44,21 @@ $(function() {
         });
 
         $('.mds-gsb-tokenizer').select2({
+            tokenSeparators: [','],
             placeholder: "For adding a new data, use '/' to separate MDS-GSB BRANCH and MDS SUB ACCOUNT NO.",
             width: '100%',
             tags: true,
             ajax: {
                 url: `${baseURL}/payment/lddap/get-mds-gsb`,
+                type: "post",
                 dataType: 'json',
                 delay: 250,
+                data: function (params) {
+                    return {
+                        _token: CSRF_TOKEN,
+                        search: params.term
+                    };
+                },
                 processResults: function(data) {
                     return {
                         results: $.map(data, function(item) {

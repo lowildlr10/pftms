@@ -10,7 +10,7 @@ class DocListDueDemandable extends PDF {
 
         $docSubject = "List of Due And Demandable Accounts Payable - Advice to Debit Accounts";
 
-        $lddapDate = $data->lddap->date_lddap;
+        $lddapDate = date('j F Y', strtotime($data->lddap->date_lddap));
         $department = $data->lddap->department;
         $entityName = $data->lddap->entity_name;
         $operatingUnit = $data->lddap->operating_unit;

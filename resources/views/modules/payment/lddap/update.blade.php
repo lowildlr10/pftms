@@ -190,7 +190,7 @@
                                 <td>
                                     <div class="md-form my-0">
                                         <select class="mdb-select required ors-tokenizer" multiple="multiple"
-                                                name="current_ors_no[0][]">
+                                                name="current_ors_no[{{ $ctrCurrent }}][]">
                                             @if (count($item->ors_data) > 0)
                                                 @foreach ($item->ors_data as $ors)
                                             <option value="{{ $ors->id }}" selected>{{ $ors->serial_no }}</option>
@@ -341,7 +341,7 @@
                                 <td>
                                     <div class="md-form my-0">
                                         <select class="mdb-select required ors-tokenizer" multiple="multiple"
-                                                name="prior_ors_no[0][]">
+                                                name="prior_ors_no[{{ $ctrPrior }}][]">
                                             @if (count($item->ors_data) > 0)
                                                 @foreach ($item->ors_data as $ors)
                                             <option value="{{ $ors->id }}" selected>{{ $ors->serial_no }}</option>
