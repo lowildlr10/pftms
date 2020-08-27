@@ -612,6 +612,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'proc_po_jo',
         'access' => 'uncancel'
     ])->name('po-jo-uncancel');
+    Route::post('procurement/po-jo/restore/{id}', [
+        'uses' => 'PurchaseJobOrderController@restore',
+        'module' => 'proc_po_jo',
+        'access' => 'uncancel'
+    ])->name('po-jo-restore');
     Route::post('procurement/po-jo/delivery/{id}', [
         'uses' => 'PurchaseJobOrderController@delivery',
         'module' => 'proc_po_jo',

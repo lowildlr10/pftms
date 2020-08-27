@@ -317,7 +317,7 @@ class RequestQuotationController extends Controller
             $responsiblePerson = $docStatus->issued_to_id;
 
             $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received", $remarks);
-            $instanceAbstract = AbstractQuotation::where('pr_id', $prID)->first();
+            $instanceAbstract = DB::table('abstract_quotations')->where('pr_id', $prID)->first();
 
             if (!$instanceAbstract) {
                 $instanceAbstract = new AbstractQuotation;
