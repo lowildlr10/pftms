@@ -385,6 +385,9 @@
                 <div class="notifications-header">
                     <i class="fa fa-bell"></i>
                     Notifications
+                    <a href="#" class="btn btn-link p-1" onclick="$(this).clearAllNotifications();">
+                        <small class="blue-text">Clear</small>
+                    </a>
                 </div>
                 <div class="dropdown-divider"></div>
                 <!-- Notification content -->

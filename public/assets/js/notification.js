@@ -17,7 +17,7 @@ $(function() {
         });
     }
 
-    $.fn.displayNotifications = function() {
+    $.fn.clearAllNotifications = function() {
         const url = baseURL + "/notification/display";
 
         $.get(url, function() {
