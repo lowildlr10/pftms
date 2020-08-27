@@ -105,6 +105,22 @@ $(function() {
         $('#form-inspect').submit();
     }
 
+    $.fn.showRestore = function(url) {
+		$('#modal-body-restore').html(`Are you sure you want to restore Purchase/Job Order?`);
+        $("#modal-restore").modal({keyboard: false, backdrop: 'static'})
+						   .on('shown.bs.modal', function() {
+            $('#restore-title').html('Restore Purchase/Job Order');
+            $('#form-restore').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-restore-body').html('');
+             $('#form-restore').attr('action', '#');
+		});
+    }
+
+    $.fn.restore = function() {
+        $('#form-restore').submit();
+    }
+
     $('.material-tooltip-main').tooltip({
         template: template
     });

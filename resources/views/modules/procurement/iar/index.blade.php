@@ -152,17 +152,22 @@
                                                             @foreach ($pr->iar as $listCtr1 => $item)
                                                             <tr class="row-item">
                                                                 <td align="center">
-                                                                    @if ($item->status > 9)
+                                                                    @if (empty($pr->po[$listCtr1]->deleted_at))
+                                                                        @if ($item->status > 9)
                                                                     <i class="fas fa-search fa-lg green-text material-tooltip-main"
                                                                        data-toggle="tooltip" data-placement="right" title="Inspected"></i>
-                                                                    @else
-                                                                        @if (!empty($item->doc_status->date_issued))
+                                                                        @else
+                                                                            @if (!empty($item->doc_status->date_issued))
                                                                     <i class="fas fa-lg fa-paper-plane orange-text material-tooltip-main"
                                                                        data-toggle="tooltip" data-placement="right" title="Issued"></i>
-                                                                        @else
+                                                                            @else
                                                                     <i class="far fa-lg fa-file material-tooltip-main"
                                                                        data-toggle="tooltip" data-placement="right" title="Pending"></i>
+                                                                            @endif
                                                                         @endif
+                                                                    @else
+                                                                    <i class="fas fa-folder-minus fa-lg red-text material-tooltip-main"
+                                                                       data-toggle="tooltip" data-placement="right" title="PO/JO Deleted"></i>
                                                                     @endif
                                                                 </td>
                                                                 <td align="center"><strong>{{ $item->iar_no }}</strong></td>
@@ -179,17 +184,29 @@
                                                                         </span>
                                                                     </strong>
 
-                                                                @if (!empty($pr->po[$listCtr1]->date_cancelled))
-                                                                    <strong class="text-danger">[ Cancelled On: {{ $pr->po[$listCtr1]->date_cancelled }}]</strong>
-                                                                @endif
-
+                                                                    @if (!empty($pr->po[$listCtr1]->deleted_at))
+                                                                    <strong class="text-danger">[ Deleted On: {{ $pr->po[$listCtr1]->deleted_at }} ]</strong>
+                                                                    @else
+                                                                        @if (!empty($pr->po[$listCtr1]->date_cancelled))
+                                                                    <strong class="text-danger">[ Cancelled On: {{ $pr->po[$listCtr1]->date_cancelled }} ]</strong>
+                                                                        @endif
+                                                                    @endif
                                                                 </td>
+
                                                                 <td align="center">
+                                                                    @if (empty($pr->po[$listCtr1]->deleted_at))
                                                                     <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
                                                                         data-target="#right-modal-{{ ($listCtr + 1) + (($list->currentpage() - 1) * $list->perpage()) }}-{{ $listCtr1 }}"
                                                                         data-toggle="modal" data-toggle="tooltip" data-placement="left" title="Open">
                                                                         <i class="fas fa-folder-open"></i>
                                                                     </a>
+                                                                    @else
+                                                                    <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
+                                                                       title="Restore" data-toggle="tooltip"
+                                                                       onclick="$(this).showRestore('{{ route('po-jo-restore', $pr->po[$listCtr1]->id) }}');">
+                                                                        <i class="fas fa-trash-restore"></i>
+                                                                    </a>
+                                                                    @endif
                                                                 </td>
                                                             </tr>
                                                             @endforeach
@@ -459,6 +476,7 @@
 @include('modals.inspect')
 @include('modals.print')
 @include('modals.attachment')
+@include('modals.restore')
 
 @endsection
 

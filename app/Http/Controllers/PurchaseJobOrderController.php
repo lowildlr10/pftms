@@ -725,4 +725,24 @@ class PurchaseJobOrderController extends Controller
             return redirect(url()->previous())->with('failed', $msg);
         }
     }
+
+    public function restore(Request $request, $id) {
+        try {
+            $instanceDocLog = new DocLog;
+            PurchaseJobOrder::withTrashed()
+                            ->where('id', $id)
+                            ->restore();
+            $instancePO = PurchaseJobOrder::find($id);
+            $poNo = $instancePO->po_no;
+
+            $msg = "Purchase/Job Order '$poNo' successfully restored.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route('po-jo', ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
 }

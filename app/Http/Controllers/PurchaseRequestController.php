@@ -944,7 +944,7 @@ class PurchaseRequestController extends Controller
         try {
             $instanceDocLog = new DocLog;
             $instanceNotif = new Notif;
-            $instanceRFQ = RequestQuotation::where('pr_id', $id)->first();
+            $instanceRFQ = DB::table('request_quotations')->where('pr_id', $id)->first();
             $instancePR = PurchaseRequest::find($id);
             $prNo = $instancePR->pr_no;
             $requestedBy = $instancePR->requested_by;
