@@ -16,6 +16,7 @@ $(function() {
         '#ics',
         '#lr',
         '#lddap',
+        '#summary',
     ];
 
     function convertAccessToJson() {
