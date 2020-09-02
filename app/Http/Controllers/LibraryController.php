@@ -72,6 +72,11 @@ class LibraryController extends Controller
             'lddap_cert_correct' => 'Certified Correct',
             'lddap_approval' => 'Approval',
             'lddap_agency_auth' => 'Agency Authorized Signatories',
+        'summary' => 'Summary of LDDAP-ADAs Issued and Invalidated ADA Entries',
+            'summary_cert_correct' => 'Certified Correct',
+            'summary_approved_by' => 'Approved By',
+            'summary_delivered_by' => 'Delivered By',
+            'summary_received_by' => 'Received By',
     ];
     protected $modules = [
         'pr' => [
@@ -128,6 +133,12 @@ class LibraryController extends Controller
             'lddap_cert_correct' => 'cert_correct',
             'lddap_approval' => 'approval',
             'lddap_agency_auth' => 'agency_auth',
+        ],
+        'summary' => [
+            'summary_cert_correct' => 'cert_correct',
+            'summary_approved_by' => 'approved_by',
+            'summary_delivered_by' => 'delivered_by',
+            'summary_received_by' => 'received_by',
         ],
     ];
 
