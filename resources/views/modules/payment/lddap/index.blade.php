@@ -65,7 +65,7 @@
 
                                 <!--Table head-->
                                 <thead class="mdb-color darken-3 white-text">
-                                    <tr class="hidden-xs">
+                                    <tr>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="8%">
@@ -302,7 +302,6 @@
 <script type="text/javascript" src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/lddap.js') }}"></script>
-<script type="text/javascript" src="{{ asset('assets/js/calculator.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/attachment.js') }}"></script>
 <script>

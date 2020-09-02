@@ -977,6 +977,13 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'is_allowed'
     ]);
 
+    // Summary of LDDAP Module
+    Route::any('payment/summary', [
+        'uses' => 'SummaryLDDAP@index',
+        'module' => 'pay_summary',
+        'access' => 'is_allowed'
+    ])->name('summary');
+
     /*===================== SYSTEM LIBRARIES ROUTES =====================*/
 
     // Item Classification Module
