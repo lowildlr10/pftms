@@ -983,6 +983,51 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'pay_summary',
         'access' => 'is_allowed'
     ])->name('summary');
+    Route::get('payment/summary/show-create', [
+        'uses' => 'SummaryLDDAP@showCreate',
+        'module' => 'pay_summary',
+        'access' => 'create'
+    ])->name('summary-show-create');
+    Route::get('payment/summary/show-edit/{id}', [
+        'uses' => 'SummaryLDDAP@showEdit',
+        'module' => 'pay_summary',
+        'access' => 'update'
+    ])->name('summary-show-edit');
+    Route::post('payment/summary/store', [
+        'uses' => 'SummaryLDDAP@store',
+        'module' => 'pay_summary',
+        'access' => 'create'
+    ])->name('summary-store');
+    Route::post('payment/summary/update/{id}', [
+        'uses' => 'SummaryLDDAP@update',
+        'module' => 'pay_summary',
+        'access' => 'update'
+    ])->name('summary-update');
+    Route::post('payment/summary/delete/{id}', [
+        'uses' => 'SummaryLDDAP@delete',
+        'module' => 'pay_summary',
+        'access' => 'delete'
+    ])->name('summary-delete');
+    Route::post('payment/summary/for-approval/{id}', [
+        'uses' => 'SummaryLDDAP@forApproval',
+        'module' => 'pay_summary',
+        'access' => 'approval'
+    ])->name('summary-for-approval');
+    Route::post('payment/summary/approve/{id}', [
+        'uses' => 'SummaryLDDAP@approve',
+        'module' => 'pay_summary',
+        'access' => 'approve'
+    ])->name('summary-approve');
+    Route::post('payment/summary/submission/{id}', [
+        'uses' => 'SummaryLDDAP@submission',
+        'module' => 'pay_summary',
+        'access' => 'submission'
+    ])->name('summary-submission');
+    Route::post('payment/summary/get-lddap', [
+        'uses' => 'SummaryLDDAP@getListLDDAP',
+        'module' => 'pay_summary',
+        'access' => 'is_allowed'
+    ]);
 
     /*===================== SYSTEM LIBRARIES ROUTES =====================*/
 

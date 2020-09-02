@@ -1,7 +1,6 @@
-var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
-$(function() {
-    //testing lang
+const CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 
+$(function() {
     let orsSerialNos = [],
         msdGSBs = [];
 

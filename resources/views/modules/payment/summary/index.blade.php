@@ -14,7 +14,7 @@
             <div class="card-body">
                 <h5 class="card-title white-text">
                     <strong>
-                        <i class="fas fa-money-check-alt"></i> List of Due and Demandable Accounts Payable
+                        <i class="fas fa-money-check-alt"></i> Summary of LDDAP-ADAs Issued and Invalidated ADA Entries
                     </strong>
                 </h5>
                 <hr class="white">
@@ -23,8 +23,16 @@
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
                     <li>
-                        <a href="{{ url('payment/lddap') }}" class="waves-effect waves-light white-text">
+                        <a href="{{ route('lddap') }}" class="waves-effect waves-light white-text">
                             List of Due and Demandable Accounts Payable
+                        </a>
+                    </li>
+                    <li>
+                        <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
+                    </li>
+                    <li>
+                        <a href="{{ route('summary') }}" class="waves-effect waves-light cyan-text">
+                            Summary of LDDAP-ADAs Issued and Invalidated ADA Entries
                         </a>
                     </li>
                 </ul>
@@ -38,7 +46,7 @@
                                 align-items-center">
                         <div>
                             <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
-                                    onclick="$(this).showCreate('{{ route('lddap-show-create') }}');">
+                                    onclick="$(this).showCreate('{{ route('summary-show-create') }}');">
                                 <i class="fas fa-pencil-alt"></i> Create
                             </button>
                         </div>
@@ -49,7 +57,7 @@
                                 <i class="fas fa-search"></i> {{ !empty($keyword) ? (strlen($keyword) > 15) ?
                                 'Search: '.substr($keyword, 0, 15).'...' : 'Search: '.$keyword : '' }}
                             </button>
-                            <a href="{{ route('lddap') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
+                            <a href="{{ route('summary') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
                             </a>
                         </div>
@@ -68,16 +76,24 @@
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="8%">
-                                            <strong>SLIIAE Date</strong>
+                                            <strong>
+                                                @sortablelink('date_sliiae', 'SLIIAE Date', [], ['class' => 'white-text'])
+                                            </strong>
                                         </th>
                                         <th class="th-md" width="63%">
-                                            <strong>SLIIAE No</strong>
+                                            <strong>
+                                                @sortablelink('sliiae_no', 'SLIIAE No', [], ['class' => 'white-text'])
+                                            </strong>
                                         </th>
                                         <th class="th-md" width="10%">
-                                            <strong>Total Amount</strong>
+                                            <strong>
+                                                @sortablelink('date_sliiae', 'Total Amount', [], ['class' => 'white-text'])
+                                            </strong>
                                         </th>
                                         <th class="th-md" width="10%">
-                                            <strong>Status</strong>
+                                            <strong>
+                                                @sortablelink('status', 'Status', [], ['class' => 'white-text'])
+                                            </strong>
                                         </th>
                                         <th class="th-md" width="3%"></th>
                                     </tr>
@@ -86,11 +102,50 @@
 
                                 <!--Table body-->
                                 <tbody>
+                                    @if (count($list) > 0)
+                                        @foreach ($list as $listCtr => $summary)
+                                    <tr>
+                                        <td align="center" class="border-left">
+                                            @if ($summary->status == 'pending')
+                                            <i class="fas fa-spinner fa-lg faa-spin fa-pulse material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Pending"></i>
+                                            @elseif ($summary->status == 'for_approval')
+                                            <i class="fas fa-sign fa-lg black-text material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="For Approval"></i>
+                                            @elseif ($summary->status == 'approved')
+                                            <i class="fas fa-check fa-lg text-success material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Approved"></i>
+                                            @elseif ($summary->status == 'for_submission_bank')
+                                            <i class="fas fa-list-alt fa-lg text-success material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="For Summary"></i>
+                                            @endif
+                                        </td>
+                                        <td></td>
+                                        <td>{{ $summary->date_sliiae }}</td>
+                                        <td>{{ $summary->sliiae_no }}</td>
+                                        <td>P{{ number_format($summary->total_amount, 2) }}</td>
+                                        <td>
+                                            <strong>{{ strtoupper(str_replace('_', ' ', $summary->status)) }}</strong>
+                                        </td>
 
-
-
-
-
+                                        <td align="center">
+                                            <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
+                                               data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal"
+                                               data-toggle="tooltip" data-placement="left" title="Open">
+                                                <i class="fas fa-folder-open"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                        @endforeach
+                                    @else
+                                    <tr>
+                                        <td class="p-5" colspan="7" class="text-center py-5">
+                                            <h6 class="red-text text-center">
+                                                No available data.
+                                            </h6>
+                                        </td>
+                                    </tr>
+                                    @endif
                                 </tbody>
                                 <!--Table body-->
                             </table>
@@ -98,9 +153,7 @@
                         </div>
 
                         <div class="mt-3">
-                            <!--
                             {!! $list->appends(\Request::except('page'))->render('pagination') !!}
-                            -->
                         </div>
                     </div>
                 </div>
@@ -111,6 +164,121 @@
 </div>
 
 <!-- Modals -->
+
+@if (count($list) > 0)
+    @foreach ($list as $listCtr => $lddap)
+<div class="modal custom-rightmenu-modal fade right" id="right-modal-{{ $listCtr + 1 }}" tabindex="-1"
+     role="dialog">
+    <div class="modal-dialog modal-full-height modal-righty" role="document">
+        <!--Content-->
+        <div class="modal-content">
+            <!--Header-->
+            <div class="modal-header stylish-color-dark white-text">
+                <h6>
+                    <i class="fas fa-money-check-alt"></i>
+                    <strong>LDDAP ID: {{ $lddap->lddap_id }}</strong>
+                </h6>
+                <button type="button" class="close white-text" data-dismiss="modal"
+                        aria-label="Close">
+                    &times;
+                </button>
+            </div>
+            <!--Body-->
+            <div class="modal-body">
+                <div class="card card-cascade z-depth-1 mb-3">
+                    <div class="gradient-card-header rgba-white-light p-0">
+                        <div class="p-0">
+                            <div class="btn-group btn-menu-1 p-0">
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light"
+                                        onclick="$(this).showPrint('{{ $lddap->id }}', 'pay_lddap');">
+                                    <i class="fas fa-print blue-text"></i> Print LDDAP
+                                </button>
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light"
+                                       onclick="$(this).showEdit('{{ route('lddap-show-edit',
+                                                 ['id' => $lddap->id]) }}');">
+                                    <i class="fas fa-trash-alt orange-text"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light"
+                                        onclick="$(this).showDelete('{{ route('lddap-delete', ['id' => $lddap->id]) }}',
+                                                                              '{{ $lddap->id }}');">
+                                    <i class="fas fa-trash-alt red-text"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            <strong>Department: </strong> {{ $lddap->department }}<br>
+                            <strong>Entity Name: </strong> {{ $lddap->entity_name }}<br>
+                            <strong>Operating Unit: </strong> {{ $lddap->operating_unit }}<br>
+                            <strong>NCA No: </strong> {{ $lddap->nca_no }}<br>
+                            <strong>LDDAP-ADA No: </strong> {{ $lddap->lddap_ada_no }}<br>
+                            <strong>Date: </strong> {{ $lddap->date_lddap }}<br>
+                            <strong>Fund Cluster: </strong> {{ $lddap->fund_cluster }}<br>
+                            <strong>MDS-GSB Branch/MDS Sub Account: </strong> {{ $lddap->mds_gsb_accnt_no }}<br>
+                        </p>
+                        <!--
+                        <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
+                                btn-block waves-effect mb-2"
+                                onclick="$(this).showAttachment('{{ $lddap->lddap_id }}');">
+                            <i class="fas fa-paperclip fa-lg"></i> View Attachment
+                        </button>
+                        -->
+                    </div>
+                </div>
+                <hr>
+                <ul class="list-group z-depth-0">
+                    <li class="list-group-item justify-content-between">
+                        <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
+                    </li>
+
+                    @if ($lddap->status == 'pending')
+                    <li class="list-group-item justify-content-between">
+                        <button type="button" class="btn btn-outline-black waves-effect btn-block btn-md btn-rounded"
+                                onclick="$(this).showApproval('{{ route('lddap-for-approval',
+                                                              ['id' => $lddap->id]) }}');">
+                            <i class="fas fa-flag"></i> For Approval
+                        </button>
+                    </li>
+                    @elseif ($lddap->status == 'for_approval')
+                    <li class="list-group-item justify-content-between">
+                        <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
+                                onclick="$(this).showApprove('{{ route('lddap-approve',
+                                                          ['id' => $lddap->id]) }}');">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                    </li>
+                    @elseif ($lddap->status == 'approved')
+                    <li class="list-group-item justify-content-between">
+                        <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
+                                onclick="$(this).showSummary('{{ route('lddap-summary',
+                                                          ['id' => $lddap->id]) }}');">
+                            <i class="fas fa-list-alt"></i> For Summary
+                        </button>
+                    </li>
+                    @else
+                    <li class="list-group-item justify-content-between">
+                        No more actions available.
+                    </li>
+                    @endif
+                </ul>
+            </div>
+            <!--Footer-->
+            <div class="modal-footer justify-content-end rgba-stylish-strong p-1">
+                <a type="button" class="btn btn-sm btn btn-light waves-effect py-1" data-dismiss="modal">
+                    <i class="far fa-window-close"></i> Close
+                </a>
+            </div>
+        </div>
+      <!--/.Content-->
+    </div>
+</div>
+    @endforeach
+@endif
+
 @include('modals.search-post')
 @include('modals.show')
 @include('modals.create')

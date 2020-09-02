@@ -69,22 +69,32 @@
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="8%">
-                                            <strong>LDDAP Date</strong>
+                                            <strong>
+                                                @sortablelink('date_lddap', 'LDDAP Date', [], ['class' => 'white-text'])
+                                            </strong>
                                         </th>
                                         <th class="th-md" width="15%">
                                             <strong>ORS Nos</strong>
                                         </th>
                                         <th class="th-md" width="24%">
-                                            <strong>LDDAP ADA No</strong>
+                                            <strong>
+                                                @sortablelink('lddap_no', 'LDDAP ADA No', [], ['class' => 'white-text'])
+                                            </strong>
                                         </th>
                                         <th class="th-md" width="24%">
-                                            <strong>NCA No</strong>
+                                            <strong>
+                                                @sortablelink('nca_no', 'NCA No', [], ['class' => 'white-text'])
+                                            </strong>
                                         </th>
                                         <th class="th-md" width="10%">
-                                            <strong>Total Amount</strong>
+                                            <strong>
+                                                @sortablelink('total_amount', 'Total Amount', [], ['class' => 'white-text'])
+                                            </strong>
                                         </th>
                                         <th class="th-md" width="10%">
-                                            <strong>Status</strong>
+                                            <strong>
+                                                @sortablelink('status', 'Status', [], ['class' => 'white-text'])
+                                            </strong>
                                         </th>
                                         <th class="th-md" width="3%"></th>
                                     </tr>
@@ -95,7 +105,7 @@
                                 <tbody>
                                     @if (count($list) > 0)
                                         @foreach ($list as $listCtr => $lddap)
-                                    <tr class="hidden-xs">
+                                    <tr>
                                         <td align="center" class="border-left">
                                             @if ($lddap->status == 'pending')
                                             <i class="fas fa-spinner fa-lg faa-spin fa-pulse material-tooltip-main"

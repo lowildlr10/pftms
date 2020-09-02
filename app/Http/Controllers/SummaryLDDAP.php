@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\SummaryLDDAP as Summary;
+use App\Models\SummaryLDDAPItem as SummaryItem;
 use App\Models\ListDemandPayable;
 use App\Models\ListDemandPayableItem;
 
@@ -40,10 +42,28 @@ class SummaryLDDAP extends Controller
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
+        $summaryData = Summary::whereNull('deleted_at');
 
         if (!empty($keyword)) {
-
+            $summaryData = $summaryData->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('department', 'like', "%$keyword%")
+                    ->orWhere('entity_name', 'like', "%$keyword%")
+                    ->orWhere('operating_unit', 'like', "%$keyword%")
+                    ->orWhere('fund_cluster', 'like', "%$keyword%")
+                    ->orWhere('sliiae_no', 'like', "%$keyword%")
+                    ->orWhere('date_sliiae', 'like', "%$keyword%")
+                    ->orWhere('to', 'like', "%$keyword%")
+                    ->orWhere('bank_name', 'like', "%$keyword%")
+                    ->orWhere('bank_address', 'like', "%$keyword%")
+                    ->orWhere('lddap_no_pcs', 'like', "%$keyword%")
+                    ->orWhere('total_amount_words', 'like', "%$keyword%")
+                    ->orWhere('total_amount', 'like', "%$keyword%")
+                    ->orWhere('status', 'like', "%$keyword%");
+            });
         }
+
+        $summaryData = $summaryData->sortable(['created_at' => 'desc'])->paginate(15);
 
         return view('modules.payment.summary.index', [
             'list' => $summaryData,
@@ -64,9 +84,21 @@ class SummaryLDDAP extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
-        //
+    public function showCreate() {
+        $mdsGSBs = MdsGsb::all();
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
+        }
+
+        return view('modules.payment.summary.create', compact(
+            'mdsGSBs', 'signatories'
+        ));
     }
 
     /**
@@ -123,5 +155,19 @@ class SummaryLDDAP extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function getListLDDAP(Request $request) {
+        $search = trim($request->search);
+        $lddapData = ListDemandPayable::select('id', 'lddap_ada_no',
+                                               'total_amount', 'date_lddap');
+
+        if ($search) {
+            $lddapData = $lddapData->where('lddap_ada_no', 'like', "%$search%");
+        }
+
+        $lddapData = $lddapData->orderBy('lddap_ada_no')->get();
+
+        return response()->json($lddapData);
     }
 }

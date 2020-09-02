@@ -62,7 +62,8 @@
                     </div>
                     <div class="md-form form-sm">
                         <input type="date" id="lddap-date" name="lddap_date"
-                               class="form-control required">
+                               class="form-control required"
+                               value="{{ \Carbon\Carbon::today()->toDateString() }}">
                         <label for="lddap-date" class="active mt-3">
                             <span class="red-text">* </span>
                             <strong>Date</strong>
