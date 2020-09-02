@@ -983,6 +983,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'pay_summary',
         'access' => 'is_allowed'
     ])->name('summary');
+<<<<<<< HEAD
     Route::get('payment/summary/show-create', [
         'uses' => 'SummaryLDDAP@showCreate',
         'module' => 'pay_summary',
@@ -1028,6 +1029,8 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'pay_summary',
         'access' => 'is_allowed'
     ]);
+=======
+>>>>>>> 542f94613c4a8f19188142c9be57be2ac965cea1
 
     /*===================== SYSTEM LIBRARIES ROUTES =====================*/
 
