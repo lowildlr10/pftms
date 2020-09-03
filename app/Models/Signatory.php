@@ -77,6 +77,7 @@ class Signatory extends Model
             $icsDesignation = $signatoryData->module->ics->designation;
             $lrDesignation = $signatoryData->module->lr->designation;
             $lddapDesignation = $signatoryData->module->lddap->designation;
+            $summaryDesignation = $signatoryData->module->summary->designation;
 
             return (object) [
                 'name' => $fullname,
@@ -93,6 +94,7 @@ class Signatory extends Model
                 'ics_designation' => $icsDesignation,
                 'lr_designation' => $lrDesignation,
                 'lddap_designation' => $lddapDesignation,
+                'summary_designation' => $summaryDesignation,
                 'signature' => $signature
             ];
         } else {
@@ -111,6 +113,7 @@ class Signatory extends Model
                 'ics_designation' => NULL,
                 'lr_designation' => NULL,
                 'lddap_designation' => NULL,
+                'summary_designation' => NULL,
                 'signature' => NULL
             ];
         }

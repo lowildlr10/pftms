@@ -93,7 +93,8 @@ $(function() {
             tokenSeparators: [','],
             placeholder: "LDDAP No...",
             width: '100%',
-            tags: true,
+            maximumSelectionSize: 4,
+            allowClear: true,
             ajax: {
                 url: `${baseURL}/payment/summary/get-lddap`,
                 type: "post",

@@ -376,7 +376,7 @@ class SummaryLDDAPController extends Controller
                                                'total_amount', 'date_lddap');
 
         if ($search) {
-            $lddapData = $lddapData->where('lddap_ada_no', 'like', "%$search%");
+            $lddapData = $lddapData->orWhere('lddap_ada_no', 'like', "%$search%");
         }
 
         $lddapData = $lddapData->orderBy('lddap_ada_no')->get();

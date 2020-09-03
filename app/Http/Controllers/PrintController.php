@@ -48,6 +48,7 @@ use App\Plugins\PDFGenerator\DocInspectionAcceptanceReport;
 use App\Plugins\PDFGenerator\DocDisbursementVoucher;
 use App\Plugins\PDFGenerator\DocLiquidationReport;
 use App\Plugins\PDFGenerator\DocListDueDemandable;
+use App\Plugins\PDFGenerator\DocSummaryListDueDemandable;
 use App\Plugins\PDFGenerator\DocPropertyAcknowledgement;
 use App\Plugins\PDFGenerator\DocInventoryCustodian;
 use App\Plugins\PDFGenerator\DocRequisitionIssueSlip;
@@ -331,25 +332,45 @@ class PrintController extends Controller
                 }
                 break;
 
-                case 'pay_lddap':
-                    $data = $this->getDataLDDAP($key);
-                    $data->doc_type = $documentType;
+            case 'pay_lddap':
+                $data = $this->getDataLDDAP($key);
+                $data->doc_type = $documentType;
 
-                    if ($test == 'true') {
-                        $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                        $msg = "Generated the List of Due and Demandable Accounts Payable '$key' document.";
-                        Auth::user()->log($request, $msg);
-                    } else {
-                        $this->generateLDDAP(
-                            $data,
-                            $fontScale,
-                            $pageHeight,
-                            $pageWidth,
-                            $pageUnit,
-                            $previewToggle
-                        );
-                    }
-                    break;
+                if ($test == 'true') {
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
+                    $msg = "Generated the List of Due and Demandable Accounts Payable '$key' document.";
+                    Auth::user()->log($request, $msg);
+                } else {
+                    $this->generateLDDAP(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
+                }
+                break;
+
+            case 'pay_summary':
+                $data = $this->getDataSummary($key);
+                $data->doc_type = $documentType;
+
+                if ($test == 'true') {
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
+                    $msg = "Generated the Summary of LDDAP-ADAs Issued and Invalidated ADA Entries '$key' document.";
+                    Auth::user()->log($request, $msg);
+                } else {
+                    $this->generateSummary(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
+                }
+                break;
 
             case 'inv_par':
                 $data = $this->getDataPAR($key);
@@ -989,6 +1010,146 @@ class PrintController extends Controller
             'issued_by_position' => $sigIssuedByPosition,
             'received_by_name' => $sigReceivedByName,
             'received_by_position' => $sigReceivedByPosition,
+        ];
+    }
+
+    private function getDataSummary($id) {
+        $summary = DB::table('summary_lddaps')
+                     ->where('id', $id)
+                     ->first();
+        $mdsGSB = MdsGsb::find($summary->mds_gsb_id);
+        $summaryItems = DB::table('summary_lddap_items')
+                          ->where('sliiae_id', $id)
+                          ->orderBy('item_no')
+                          ->get();
+
+        $itemTableData = [];
+        $allotmentPS = 0;
+        $allotmentMOOE = 0;
+        $allotmentCO = 0;
+        $allotmentFE = 0;
+        $multiplier = 9 / 10;
+
+        if (strpos($summary->bank_address, "\n") !== FALSE) {
+            $searchStr = ["\r\n", "\n", "\r"];
+            $summary->bank_address = str_replace($searchStr, '<br>', $summary->bank_address);
+        }
+
+        foreach ($summaryItems as $ctr => $item) {
+            $lddap = DB::table('list_demand_payables')
+                       ->where('id', $item->lddap_id)
+                       ->first();
+
+            if (strpos($item->allotment_ps_remarks, "\n") !== FALSE) {
+                $searchStr = ["\r\n", "\n", "\r"];
+                $item->allotment_ps_remarks = str_replace($searchStr, '<br>', $item->allotment_ps_remarks);
+            }
+
+            if (strpos($item->allotment_mooe_remarks, "\n") !== FALSE) {
+                $searchStr = ["\r\n", "\n", "\r"];
+                $item->allotment_mooe_remarks = str_replace($searchStr, '<br>', $item->allotment_mooe_remarks);
+            }
+
+            if (strpos($item->allotment_co_remarks, "\n") !== FALSE) {
+                $searchStr = ["\r\n", "\n", "\r"];
+                $item->allotment_co_remarks = str_replace($searchStr, '<br>', $item->allotment_co_remarks);
+            }
+
+            if (strpos($item->allotment_fe_remarks, "\n") !== FALSE) {
+                $searchStr = ["\r\n", "\n", "\r"];
+                $item->allotment_fe_remarks = str_replace($searchStr, '<br>', $item->allotment_fe_remarks);
+            }
+
+            $allotmentPS += $item->allotment_ps;
+            $allotmentMOOE += $item->allotment_mooe;
+            $allotmentCO += $item->allotment_co;
+            $allotmentFE += $item->allotment_fe;
+
+            $item->total = $item->total ? number_format($item->total, 2) : '-';
+            $item->allotment_ps = $item->allotment_ps ? number_format($item->allotment_ps, 2) : '-';
+            $item->allotment_mooe = $item->allotment_mooe ? number_format($item->allotment_mooe, 2) : '-';
+            $item->allotment_co = $item->allotment_co ? number_format($item->allotment_co, 2) : '-';
+            $item->allotment_fe = $item->allotment_fe ? number_format($item->allotment_fe, 2) : '-';
+
+            $itemTableData[] = [
+                ($ctr + 1) . '. ' . $lddap->lddap_ada_no,
+                $item->date_issue,
+                $item->total,
+                $item->allotment_ps,
+                $item->allotment_mooe,
+                $item->allotment_co,
+                $item->allotment_fe,
+                $item->allotment_ps_remarks,
+                $item->allotment_mooe_remarks,
+                $item->allotment_co_remarks,
+                $item->allotment_fe_remarks,
+            ];
+        }
+
+        if (count($itemTableData) < 15) {
+            $itemDataCount = count($itemTableData);
+
+            for ($i = $itemDataCount; $i <= 14; $i++) {
+                $itemTableData[] = ['', '', '', '', '', '', '', '', '', '', ''];
+            }
+        }
+
+        $totalAmount = number_format($summary->total_amount, 2);
+        $allotmentPS = $allotmentPS ? number_format($allotmentPS, 2) : '-';
+        $allotmentMOOE = $allotmentMOOE ? number_format($allotmentMOOE, 2) : '-';
+        $allotmentCO = $allotmentCO ? number_format($allotmentCO, 2) : '-';
+        $allotmentFE = $allotmentFE ? number_format($allotmentFE, 2) : '-';
+
+        $itemTableData[] = [
+            'Total', '',
+            $totalAmount,
+            $allotmentPS,
+            $allotmentMOOE,
+            $allotmentCO,
+            $allotmentFE,
+            '', '', '', ''
+        ];
+
+        $instanceSignatory = new Signatory;
+        $certCorrect = $instanceSignatory->getSignatory($summary->sig_cert_correct)->name;
+        $certCorrectPosition = $instanceSignatory->getSignatory($summary->sig_cert_correct)->summary_designation;
+        $approvedBy = $instanceSignatory->getSignatory($summary->sig_approved_by)->name;
+        $approvedByPosition = $instanceSignatory->getSignatory($summary->sig_approved_by)->summary_designation;
+        $deliveredBy = $instanceSignatory->getSignatory($summary->sig_delivered_by)->name;
+        $deliveredByPosition = $instanceSignatory->getSignatory($summary->sig_delivered_by)->summary_designation;
+
+        $data = [
+            [
+                'aligns' => ['C', 'R', 'R', 'R', 'R', 'R', 'R', 'L', 'L', 'L', 'L'],
+                'widths' => [
+                    20 * $multiplier,
+                    10 * $multiplier,
+                    10 * $multiplier,
+                    10 * $multiplier,
+                    10 * $multiplier,
+                    10 * $multiplier,
+                    10 * $multiplier,
+                    7.7 * $multiplier,
+                    7.7 * $multiplier,
+                    7.7 * $multiplier,
+                    7.7 * $multiplier,
+                ],
+                'font-styles' => ['', '', '', '', '', '', '', '', '', '', ''],
+                'type' => 'row-data',
+                'data' => $itemTableData
+            ]
+        ];
+
+        return (object)[
+            'summary' => $summary,
+            'mds_account_no' => $mdsGSB->sub_account_no,
+            'table_data' => $data,
+            'sig_cert_correct' => strtoupper($certCorrect),
+            'sig_cert_correct_position' => $certCorrectPosition,
+            'sig_approved_by' => strtoupper($approvedBy),
+            'sig_approved_by_position' => $approvedByPosition,
+            'sig_delivered_by' => strtoupper($deliveredBy),
+            'sig_delivered_by_position' => strtoupper($deliveredByPosition),
         ];
     }
 
@@ -2540,56 +2701,38 @@ class PrintController extends Controller
             $data->lddap->lddap_date = $data->lddap->lddap_date->format('j F Y');
         }
 
-        /*
-        $serialNo = $data->liq->serial_no;
-        $dateLiquidation = $data->liq->date_liquidation;
-        $claimant = $this->getEmployee($data->liq->sig_claimant)->name;
-        $supervisor = $this->getSignatory($data->liq->sig_supervisor)->name;
-        $accounting = $this->getSignatory($data->liq->sig_accounting)->name;
-        $dateClaimant = $data->liq->date_claimant;
-        $dateSupervisor = $data->liq->date_supervisor;
-        $dateAccountant = $data->liq->date_accounting;
-
-        if (empty($serialNo)) {
-            $serialNo = '______________';
-        }
-
-        if (!empty($dateLiquidation)) {
-            $dateLiquidation = new DateTime($dateLiquidation);
-            $dateLiquidation = $dateLiquidation->format('F j, Y');
-        }
-
-        if (!empty($dateClaimant)) {
-            $dateClaimant = new DateTime($dateClaimant);
-            $dateClaimant = $dateClaimant->format('F j, Y');
-        } else {
-            $dateClaimant = ' ______________________';
-        }
-
-        if (!empty($dateSupervisor)) {
-            $dateSupervisor = new DateTime($dateSupervisor);
-            $dateSupervisor = $dateSupervisor->format('F j, Y');
-        } else {
-            $dateSupervisor = ' ______________________';
-        }
-
-        if (!empty($dateAccountant)) {
-            $dateAccountant = new DateTime($dateAccountant);
-            $dateAccountant = $dateAccountant->format('F j, Y');
-        } else {
-            $dateAccountant = ' ______________________';
-        }
-
-        if (empty($data->liq->jev_no)) {
-            $data->liq->jev_no = ' ___________________';
-        }*/
-
         //Set document information
         $this->setDocumentInfo($pdf, $docCode, $docRev, $docRevDate, $docTitle,
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
         $pdf->printLDDAP($data);
+
+        //Print the document
+        $this->printDocument($pdf, $docTitle, $previewToggle);
+    }
+
+    private function generateSummary($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
+        //Initiated variables
+        $pageSize = [$pageWidth, $pageHeight];
+        $pdf = new DocSummaryListDueDemandable('P', $pageUnit, $pageSize);
+        $docCode = "";
+        $docRev = "";
+        $docRevDate = "";
+        $docTitle = "summary_".$data->summary->sliiae_no /*$data->ddap->lddap_id*/;
+        $docCreator = "DOST-CAR";
+        $docAuthor = "DOST-CAR";
+        $docSubject = "Summary of LDDAP-ADAs Issued and Invalidated ADA Entries";
+        $docKeywords = "LDDAP, lddap, List, Due, Demandable, Accounts, Payable,
+                        Advice, Debit, Accounts, summary, Summary, sliiae, SLIIAE,
+                        of, Issued, Invalidated, ADA, ada, Entries";
+
+        //Set document information
+        $this->setDocumentInfo($pdf, $docCode, $docRev, $docRevDate, $docTitle,
+                               $docCreator, $docAuthor, $docSubject, $docKeywords);
+
+        //Main document generation code file
+        $pdf->printSummary($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);
