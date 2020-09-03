@@ -13,9 +13,9 @@
         <div class="card mdb-color darken-3">
             <div class="card-body">
                 <h5 class="card-title white-text">
-                    <strong>
-                        <i class="fas fa-money-check-alt"></i> Summary of LDDAP-ADAs Issued and Invalidated ADA Entries
-                    </strong>
+                    <b>
+                        <i class="fas fa-money-check-alt"></i> Summary of summary-ADAs Issued and Invalidated ADA Entries
+                    </b>
                 </h5>
                 <hr class="white">
                 <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text">
@@ -32,7 +32,7 @@
                     </li>
                     <li>
                         <a href="{{ route('summary') }}" class="waves-effect waves-light cyan-text">
-                            Summary of LDDAP-ADAs Issued and Invalidated ADA Entries
+                            Summary of summary-ADAs Issued and Invalidated ADA Entries
                         </a>
                     </li>
                 </ul>
@@ -76,24 +76,24 @@
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="8%">
-                                            <strong>
+                                            <b>
                                                 @sortablelink('date_sliiae', 'SLIIAE Date', [], ['class' => 'white-text'])
-                                            </strong>
+                                            </b>
                                         </th>
                                         <th class="th-md" width="63%">
-                                            <strong>
+                                            <b>
                                                 @sortablelink('sliiae_no', 'SLIIAE No', [], ['class' => 'white-text'])
-                                            </strong>
+                                            </b>
                                         </th>
                                         <th class="th-md" width="10%">
-                                            <strong>
+                                            <b>
                                                 @sortablelink('date_sliiae', 'Total Amount', [], ['class' => 'white-text'])
-                                            </strong>
+                                            </b>
                                         </th>
                                         <th class="th-md" width="10%">
-                                            <strong>
+                                            <b>
                                                 @sortablelink('status', 'Status', [], ['class' => 'white-text'])
-                                            </strong>
+                                            </b>
                                         </th>
                                         <th class="th-md" width="3%"></th>
                                     </tr>
@@ -125,7 +125,7 @@
                                         <td>{{ $summary->sliiae_no }}</td>
                                         <td>P{{ number_format($summary->total_amount, 2) }}</td>
                                         <td>
-                                            <strong>{{ strtoupper(str_replace('_', ' ', $summary->status)) }}</strong>
+                                            <b>{{ strtoupper(str_replace('_', ' ', $summary->status)) }}</b>
                                         </td>
 
                                         <td align="center">
@@ -166,7 +166,7 @@
 <!-- Modals -->
 
 @if (count($list) > 0)
-    @foreach ($list as $listCtr => $lddap)
+    @foreach ($list as $listCtr => $summary)
 <div class="modal custom-rightmenu-modal fade right" id="right-modal-{{ $listCtr + 1 }}" tabindex="-1"
      role="dialog">
     <div class="modal-dialog modal-full-height modal-righty" role="document">
@@ -176,7 +176,7 @@
             <div class="modal-header stylish-color-dark white-text">
                 <h6>
                     <i class="fas fa-money-check-alt"></i>
-                    <strong>LDDAP ID: {{ $lddap->lddap_id }}</strong>
+                    <b>SLIIAE No: {{ $summary->sliiae_no }}</b>
                 </h6>
                 <button type="button" class="close white-text" data-dismiss="modal"
                         aria-label="Close">
@@ -191,19 +191,19 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $lddap->id }}', 'pay_lddap');">
-                                    <i class="fas fa-print blue-text"></i> Print LDDAP
+                                        onclick="$(this).showPrint('{{ $summary->id }}', 'pay_summary');">
+                                    <i class="fas fa-print blue-text"></i> Print Summary
                                 </button>
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                       onclick="$(this).showEdit('{{ route('lddap-show-edit',
-                                                 ['id' => $lddap->id]) }}');">
+                                       onclick="$(this).showEdit('{{ route('summary-show-edit',
+                                                 ['id' => $summary->id]) }}');">
                                     <i class="fas fa-trash-alt orange-text"></i> Edit
                                 </button>
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showDelete('{{ route('lddap-delete', ['id' => $lddap->id]) }}',
-                                                                              '{{ $lddap->id }}');">
+                                        onclick="$(this).showDelete('{{ route('summary-delete', ['id' => $summary->id]) }}',
+                                                                    '{{ $summary->id }}');">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
                             </div>
@@ -211,19 +211,20 @@
                     </div>
                     <div class="card-body">
                         <p>
-                            <strong>Department: </strong> {{ $lddap->department }}<br>
-                            <strong>Entity Name: </strong> {{ $lddap->entity_name }}<br>
-                            <strong>Operating Unit: </strong> {{ $lddap->operating_unit }}<br>
-                            <strong>NCA No: </strong> {{ $lddap->nca_no }}<br>
-                            <strong>LDDAP-ADA No: </strong> {{ $lddap->lddap_ada_no }}<br>
-                            <strong>Date: </strong> {{ $lddap->date_lddap }}<br>
-                            <strong>Fund Cluster: </strong> {{ $lddap->fund_cluster }}<br>
-                            <strong>MDS-GSB Branch/MDS Sub Account: </strong> {{ $lddap->mds_gsb_accnt_no }}<br>
+                            <b>MDS Account Number: </b> {{ $summary->mds_gsb_id }}<br>
+                            <b>Department: </b> {{ $summary->department }}<br>
+                            <b>Entity Name: </b> {{ $summary->entity_name }}<br>
+                            <b>Operating Unit: </b> {{ $summary->operating_unit }}<br>
+                            <b>Fund Cluster: </b> {{ $summary->fund_cluster }}<br>
+                            <b>Date: </b> {{ $summary->date_sliiae }}<br><br>
+                            <b>To: </b> {{ $summary->to }}<br>
+                            {{ $summary->bank_name }}<br>
+                            {{ $summary->bank_address }}<br>
                         </p>
                         <!--
                         <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
                                 btn-block waves-effect mb-2"
-                                onclick="$(this).showAttachment('{{ $lddap->lddap_id }}');">
+                                onclick="$(this).showAttachment('{{ $summary->lddap_id }}');">
                             <i class="fas fa-paperclip fa-lg"></i> View Attachment
                         </button>
                         -->
@@ -232,31 +233,31 @@
                 <hr>
                 <ul class="list-group z-depth-0">
                     <li class="list-group-item justify-content-between">
-                        <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
+                        <h5><b><i class="fas fa-pen-nib"></i> Actions</b></h5>
                     </li>
 
-                    @if ($lddap->status == 'pending')
+                    @if ($summary->status == 'pending')
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-black waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showApproval('{{ route('lddap-for-approval',
-                                                              ['id' => $lddap->id]) }}');">
+                                onclick="$(this).showApproval('{{ route('summary-for-approval',
+                                                              ['id' => $summary->id]) }}');">
                             <i class="fas fa-flag"></i> For Approval
                         </button>
                     </li>
-                    @elseif ($lddap->status == 'for_approval')
+                    @elseif ($summary->status == 'for_approval')
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showApprove('{{ route('lddap-approve',
-                                                          ['id' => $lddap->id]) }}');">
+                                onclick="$(this).showApprove('{{ route('summary-approve',
+                                                          ['id' => $summary->id]) }}');">
                             <i class="fas fa-check"></i> Approve
                         </button>
                     </li>
-                    @elseif ($lddap->status == 'approved')
+                    @elseif ($summary->status == 'for_submission_bank')
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showSummary('{{ route('lddap-summary',
-                                                          ['id' => $lddap->id]) }}');">
-                            <i class="fas fa-list-alt"></i> For Summary
+                                onclick="$(this).showSummary('{{ route('summary-submission',
+                                                          ['id' => $summary->id]) }}');">
+                            <i class="fas fa-list-alt"></i> For Submission to Bank
                         </button>
                     </li>
                     @else
@@ -267,7 +268,7 @@
                 </ul>
             </div>
             <!--Footer-->
-            <div class="modal-footer justify-content-end rgba-stylish-strong p-1">
+            <div class="modal-footer justify-content-end rgba-stylish-b p-1">
                 <a type="button" class="btn btn-sm btn btn-light waves-effect py-1" data-dismiss="modal">
                     <i class="far fa-window-close"></i> Close
                 </a>

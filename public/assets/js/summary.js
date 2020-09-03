@@ -141,14 +141,6 @@ $(function() {
                 $(elem).find('.allotment-fe').attr('max', totalAmount);
             });
 
-            /*
-            $(this).closest('td').siblings().find('.date-issue').val(lddapDate);
-            $(this).closest('td').siblings().find('.total').val(totalAmount);
-            $(this).closest('td').siblings().find('.allotment-ps').attr('max', totalAmount);
-            $(this).closest('td').siblings().find('.allotment-mooe').attr('max', totalAmount);
-            $(this).closest('td').siblings().find('.allotment-co').attr('max', totalAmount);
-            $(this).closest('td').siblings().find('.allotment-fe').attr('max', totalAmount);*/
-
             computeGrandTotal();
             initializeMaxValue();
         });
@@ -310,7 +302,6 @@ $(function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
-
             initializeSelect2();
         });
         $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
@@ -327,5 +318,29 @@ $(function() {
 		if (!withError) {
 			$('#form-store').submit();
         }
+    }
+
+    $.fn.showEdit = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-edit').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $(this).slideToggle(500);
+            initializeSelect2();
+        });
+        $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
+						   .on('shown.bs.modal', function() {
+            $('#edit-title').html('Update Summary of LDDAP');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-edit').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.update = function() {
+        const withError = inputValidation(false);
+
+		if (!withError) {
+			$('#form-update').submit();
+		}
     }
 });

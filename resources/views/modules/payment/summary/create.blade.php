@@ -7,9 +7,9 @@
                 <div class="col-md-12">
                     <div class="md-form row">
                         <div class="col-md-12 text-center">
-                            <strong class="h5">
+                            <b class="h5">
                                 SUMMARY OF LDDAP-ADAs ISSUED AND INVALIDATED ADA ENTRIES
-                            </strong>
+                            </b>
                             <div class="md-form">
                                 <select class="mdb-select crud-select md-form required" searchable="Search here.."
                                         name="mds_gsb_id">
@@ -25,7 +25,7 @@
                                 </select>
                                 <label class="mdb-main-label">
                                     <span class="red-text">* </span>
-                                    <strong>For MDS Account Number</strong>
+                                    <b>For MDS Account Number</b>
                                 </label>
                             </div>
                         </div>
@@ -40,7 +40,7 @@
                                class="form-control form-control-sm required" value="DOST-CAR">
                         <label for="department" class="active">
                             <span class="red-text">* </span>
-                            <strong>Department</strong>
+                            <b>Department</b>
                         </label>
                     </div>
                     <div class="md-form form-sm">
@@ -48,7 +48,7 @@
                                class="form-control form-control-sm required" value="DOST-CAR">
                         <label for="entity-name" class="active">
                             <span class="red-text">* </span>
-                            <strong>Entity Name</strong>
+                            <b>Entity Name</b>
                         </label>
                     </div>
                     <div class="md-form form-sm">
@@ -56,7 +56,7 @@
                                class="form-control form-control-sm required" value="DOST-CAR">
                         <label for="operating-unit" class="active">
                             <span class="red-text">* </span>
-                            <strong>Operating Unit</strong>
+                            <b>Operating Unit</b>
                         </label>
                     </div>
                 </div>
@@ -67,7 +67,7 @@
                                class="form-control form-control-sm required" value="01">
                         <label for="fund-cluster" class="active">
                             <span class="red-text">* </span>
-                            <strong>Fund Cluster</strong>
+                            <b>Fund Cluster</b>
                         </label>
                     </div>
                     <div class="md-form form-sm">
@@ -75,7 +75,7 @@
                                class="form-control form-control-sm required" value="{{ date('Y-m-') }}">
                         <label for="sliiae-no" class="active">
                             <span class="red-text">* </span>
-                            <strong>SLIIAE No.</strong>
+                            <b>SLIIAE No.</b>
                         </label>
                     </div>
                     <div class="md-form form-sm">
@@ -84,7 +84,7 @@
                                value="{{ \Carbon\Carbon::today()->toDateString() }}">
                         <label for="sliiae-date" class="active mt-3">
                             <span class="red-text">* </span>
-                            <strong>Date</strong>
+                            <b>Date</b>
                         </label>
                     </div>
                 </div>
@@ -97,7 +97,7 @@
                                class="form-control form-control-sm required">
                         <label for="to">
                             <span class="red-text">* </span>
-                            <strong>To</strong>
+                            <b>To</b>
                         </label>
                     </div>
                     <div class="md-form form-sm">
@@ -107,7 +107,7 @@
                             >Land Bank of the Philippines&#13;&#10;La Trinidad Branch</textarea>
                             <label for="bank-name" class="active my-2">
                                 <span class="red-text">* </span>
-                                <strong>Name of Bank</strong>
+                                <b>Name of Bank</b>
                             </label>
                         </div>
                     </div>
@@ -118,7 +118,7 @@
                                 >Km.5, La Trinidad, Benguet</textarea>
                             <label for="bank-address" class="active my-2">
                                 <span class="red-text">* </span>
-                                <strong>Address of Bank</strong>
+                                <b>Address of Bank</b>
                             </label>
                         </div>
                     </div>
@@ -322,7 +322,7 @@
                                                class="form-control required">
                                         <label for="total-amount">
                                             <span class="red-text">* </span>
-                                            <strong>Total Amount</strong>
+                                            <b>Total Amount</b>
                                         </label>
                                     </div>
                                 </td>
@@ -334,7 +334,7 @@
                                                class="form-control required">
                                         <label for="total-amount-words">
                                             <span class="red-text">* </span>
-                                            <strong>Amount in Words</strong>
+                                            <b>Amount in Words</b>
                                         </label>
                                     </div>
                                 </td>
@@ -364,7 +364,7 @@
                         </select>
                         <label class="mdb-main-label">
                             <span class="red-text">* </span>
-                            <strong>Certified Correct By</strong>
+                            <b>Certified Correct By</b>
                         </label>
                     </div>
                 </div>
@@ -386,7 +386,7 @@
                         </select>
                         <label class="mdb-main-label">
                             <span class="red-text">* </span>
-                            <strong>Approved By</strong>
+                            <b>Approved By</b>
                         </label>
                     </div>
                 </div>
@@ -416,7 +416,7 @@
                         </select>
                         <label class="mdb-main-label">
                             <span class="red-text">* </span>
-                            <strong>Delivered By</strong>
+                            <b>Delivered By</b>
                         </label>
                     </div>
                 </div>
