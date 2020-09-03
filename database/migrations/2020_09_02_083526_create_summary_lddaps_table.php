@@ -37,8 +37,8 @@ class CreateSummaryLddapsTable extends Migration
             $table->foreign('sig_approved_by')->references('id')->on('signatories');
             $table->uuid('sig_delivered_by')->nullable();
             $table->foreign('sig_delivered_by')->references('id')->on('signatories');
-            $table->uuid('sig_received_by')->nullable();
-            $table->foreign('sig_received_by')->references('id')->on('signatories');
+            //$table->uuid('sig_received_by')->nullable();
+            //$table->foreign('sig_received_by')->references('id')->on('signatories');
             $table->unsignedInteger('lddap_no_pcs')->default(0);
             $table->text('total_amount_words');
             $table->double('total_amount', 50, 2)->default('0.00');
