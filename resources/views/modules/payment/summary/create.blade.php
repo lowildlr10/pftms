@@ -1,5 +1,5 @@
 <form id="form-store" class="wow animated fadeIn d-flex justify-content-center" method="POST"
-      action="{{ route('lddap-store') }}">
+      action="{{ route('summary-store') }}">
     @csrf
     <div class="card w-responsive">
         <div class="card-body py-1">
@@ -12,7 +12,7 @@
                             </strong>
                             <div class="md-form">
                                 <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                                        name="project">
+                                        name="mds_gsb_id">
                                     <option value="" disabled selected>Choose a MDS account number</option>
 
                                     @if (count($mdsGSBs) > 0)
@@ -191,7 +191,7 @@
                                     <div class="md-form form-sm my-0">
                                         <input type="number" placeholder=" Value..." name="total[]"
                                                class="form-control required form-control-sm total"
-                                               id="total-0"
+                                               id="total-0" min="0"
                                                onkeyup="$(this).computeAll()"
                                                onchange="$(this).computeAll()">
                                     </div>
@@ -200,7 +200,7 @@
                                     <div class="md-form form-sm my-0">
                                         <input type="number" placeholder=" Value..." name="allotment_ps[]"
                                                class="form-control required form-control-sm allotment-ps"
-                                               id="allotment-ps-0"
+                                               id="allotment-ps-0" min="0"
                                                onkeyup="$(this).computeAll()"
                                                onchange="$(this).computeAll()">
                                     </div>
@@ -209,7 +209,7 @@
                                     <div class="md-form form-sm my-0">
                                         <input type="number" placeholder=" Value..." name="allotment_mooe[]"
                                                class="form-control required form-control-sm allotment-mooe"
-                                               id="allotment-mooe-0"
+                                               id="allotment-mooe-0" min="0"
                                                onkeyup="$(this).computeAll()"
                                                onchange="$(this).computeAll()">
                                     </div>
@@ -218,7 +218,7 @@
                                     <div class="md-form form-sm my-0">
                                         <input type="number" placeholder=" Value..." name="allotment_co[]"
                                                class="form-control required form-control-sm allotment-co"
-                                               id="allotment-co-0"
+                                               id="allotment-co-0" min="0"
                                                onkeyup="$(this).computeAll()"
                                                onchange="$(this).computeAll()">
                                     </div>
@@ -227,7 +227,7 @@
                                     <div class="md-form form-sm my-0">
                                         <input type="number" placeholder=" Value..." name="allotment_fe[]"
                                                class="form-control required form-control-sm allotment-fe"
-                                               id="allotment-fe-0"
+                                               id="allotment-fe-0" min="0"
                                                onkeyup="$(this).computeAll()"
                                                onchange="$(this).computeAll()">
                                     </div>
@@ -420,28 +420,7 @@
                         </label>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="md-form">
-                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                                name="received_by">
-                            <option value="" disabled selected>Choose a signatory</option>
-
-                            @if (count($signatories) > 0)
-                                @foreach ($signatories as $sig)
-                                    @if (isset($sig->module->summary->received_by))
-                            <option value="{{ $sig->id }}">
-                                {!! $sig->name !!} [{!! $sig->module->summary->designation !!}]
-                            </option>
-                                    @endif
-                                @endforeach
-                            @endif
-                        </select>
-                        <label class="mdb-main-label">
-                            <span class="red-text">* </span>
-                            <strong>Received By</strong>
-                        </label>
-                    </div>
-                </div>
+                <div class="col-md-6"></div>
             </div>
 
         </div>

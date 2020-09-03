@@ -6,6 +6,88 @@ $(function() {
                      '<div class="tooltip-inner md-inner stylish-color"></div></div>';
     let lddapData = {};
 
+    function initializeMaxValue() {
+		$('.allotment-ps').each(function() {
+			const maxLength = $(this).attr('max');
+
+            $(this).unbind('keydown').unbind('keyup');
+			$(this).keydown(function () {
+			    // Save old value.
+			    if (!$(this).val() || (parseFloat($(this).val()) <= maxLength &&
+			    	parseFloat($(this).val()) >= 0)) {
+			    	$(this).data("old", $(this).val());
+			    }
+			}).keyup(function () {
+			    // Check correct, else revert back to old value.
+			    if (!$(this).val() || (parseFloat($(this).val()) <= maxLength &&
+			    	parseFloat($(this).val()) >= 0)) {
+			    } else {
+			      $(this).val($(this).data("old"));
+			    }
+			});
+        });
+
+        $('.allotment-mooe').each(function() {
+			const maxLength = $(this).attr('max');
+
+            $(this).unbind('keydown').unbind('keyup');
+			$(this).keydown(function () {
+			    // Save old value.
+			    if (!$(this).val() || (parseFloat($(this).val()) <= maxLength &&
+			    	parseFloat($(this).val()) >= 0)) {
+			    	$(this).data("old", $(this).val());
+			    }
+			}).keyup(function () {
+			    // Check correct, else revert back to old value.
+			    if (!$(this).val() || (parseFloat($(this).val()) <= maxLength &&
+			    	parseFloat($(this).val()) >= 0)) {
+			    } else {
+			      $(this).val($(this).data("old"));
+			    }
+			});
+        });
+
+        $('.allotment-co').each(function() {
+			const maxLength = $(this).attr('max');
+
+            $(this).unbind('keydown').unbind('keyup');
+			$(this).keydown(function () {
+			    // Save old value.
+			    if (!$(this).val() || (parseFloat($(this).val()) <= maxLength &&
+			    	parseFloat($(this).val()) >= 0)) {
+			    	$(this).data("old", $(this).val());
+			    }
+			}).keyup(function () {
+			    // Check correct, else revert back to old value.
+			    if (!$(this).val() || (parseFloat($(this).val()) <= maxLength &&
+			    	parseFloat($(this).val()) >= 0)) {
+			    } else {
+			      $(this).val($(this).data("old"));
+			    }
+			});
+        });
+
+        $('.allotment-fe').each(function() {
+            const maxLength = $(this).attr('max');
+
+            $(this).unbind('keydown').unbind('keyup');
+			$(this).keydown(function () {
+			    // Save old value.
+			    if (!$(this).val() || (parseFloat($(this).val()) <= maxLength &&
+			    	parseFloat($(this).val()) >= 0)) {
+			    	$(this).data("old", $(this).val());
+			    }
+			}).keyup(function () {
+			    // Check correct, else revert back to old value.
+			    if (!$(this).val() || (parseFloat($(this).val()) <= maxLength &&
+			    	parseFloat($(this).val()) >= 0)) {
+			    } else {
+			      $(this).val($(this).data("old"));
+			    }
+			});
+		});
+    }
+
     function initializeSelect2() {
         $('.lddap-tokenizer').select2({
             tokenSeparators: [','],
@@ -50,9 +132,25 @@ $(function() {
                   lddapDate = lddapData[lddapID].date_lddap,
                   totalAmount = lddapData[lddapID].total_amount;
 
+            $(this).closest('tr').children().each(function(i, elem) {
+                $(elem).find('.date-issue').val(lddapDate);
+                $(elem).find('.total').val(totalAmount);
+                $(elem).find('.allotment-ps').attr('max', totalAmount);
+                $(elem).find('.allotment-mooe').attr('max', totalAmount);
+                $(elem).find('.allotment-co').attr('max', totalAmount);
+                $(elem).find('.allotment-fe').attr('max', totalAmount);
+            });
+
+            /*
             $(this).closest('td').siblings().find('.date-issue').val(lddapDate);
             $(this).closest('td').siblings().find('.total').val(totalAmount);
+            $(this).closest('td').siblings().find('.allotment-ps').attr('max', totalAmount);
+            $(this).closest('td').siblings().find('.allotment-mooe').attr('max', totalAmount);
+            $(this).closest('td').siblings().find('.allotment-co').attr('max', totalAmount);
+            $(this).closest('td').siblings().find('.allotment-fe').attr('max', totalAmount);*/
+
             computeGrandTotal();
+            initializeMaxValue();
         });
     }
 
@@ -73,35 +171,35 @@ $(function() {
         let total = `<td><div class="md-form form-sm my-0">
                     <input type="number" placeholder=" Value..." name="total[]"
                     class="form-control required form-control-sm total"
-                    id="total-${newID-1}"
+                    id="total-${newID-1}" min="0"
                     onkeyup="$(this).computeAll()"
                     onchange="$(this).computeAll()">
                     </div></td>`;
         let ps = `<td><div class="md-form form-sm my-0">
                 <input type="number" placeholder=" Value..." name="allotment_ps[]"
                 class="form-control required form-control-sm allotment-ps"
-                id="allotment-ps-${newID-1}"
+                id="allotment-ps-${newID-1}" min="0"
                 onkeyup="$(this).computeAll()"
                 onchange="$(this).computeAll()">
                 </div></td>`;
         let mooe = `<td><div class="md-form form-sm my-0">
                 <input type="number" placeholder=" Value..." name="allotment_mooe[]"
                 class="form-control required form-control-sm allotment-mooe"
-                id="allotment-mooe-${newID-1}"
+                id="allotment-mooe-${newID-1}" min="0"
                 onkeyup="$(this).computeAll()"
                 onchange="$(this).computeAll()">
                 </div></td>`;
         let co = `<td><div class="md-form form-sm my-0">
                 <input type="number" placeholder=" Value..." name="allotment_co[]"
                 class="form-control required form-control-sm allotment-co"
-                id="allotment-co-${newID-1}"
+                id="allotment-co-${newID-1}" min="0"
                 onkeyup="$(this).computeAll()"
                 onchange="$(this).computeAll()">
                 </div></td>`;
         let fe = `<td><div class="md-form form-sm my-0">
                 <input type="number" placeholder=" Value..." name="allotment_fe[]"
                 class="form-control required form-control-sm allotment-fe"
-                id="allotment-fe-0"
+                id="allotment-fe-${newID-1}" min="0"
                 onkeyup="$(this).computeAll()"
                 onchange="$(this).computeAll()">
                 </div></td>`;
@@ -145,25 +243,6 @@ $(function() {
 
             if (rowCount > 1) {
                 $(row).fadeOut(300, function() {
-                    /*
-                    let grossAmount = parseFloat($(this).find('.current-gross-amount').val());
-                    let withholding = parseFloat($(this).find('.current-withold-tax').val());
-                    let netAmmount = parseFloat($(this).find('.current-net-amount').val());
-
-                    let totalGross = parseFloat($('#current-total-gross').val());
-                    let totalWithholding = parseFloat($('#current-total-withholdingtax').val());
-                    let totalNet = parseFloat($('#current-total-netamount').val());
-
-                    totalGross = parseFloat(totalGross - grossAmount, 2);
-                    totalWithholding = parseFloat(totalWithholding - withholding, 2);
-                    totalNet = parseFloat(totalNet - netAmmount, 2);
-
-                    $('#current-total-gross').val(totalGross);
-                    $('#current-total-withholdingtax').val(totalWithholding);
-                    $('#current-total-netamount').val(totalNet);
-
-                    computeGrandTotal();*/
-
                     $(this).remove();
                     $('#lddap-no-pcs').text($('.item-row').length);
                     $(this).computeAll();
@@ -194,28 +273,35 @@ $(function() {
         $('#total-amount').val(parseFloat(grandTotal).toFixed(2));
     }
 
-    function computeTotalPS() {
+    function computeAllotment() {
+        const allotmentElems = [
+            '.allotment-ps',
+            '.allotment-mooe',
+            '.allotment-co',
+            '.allotment-fe'
+        ], allotmentTotalElems = [
+            '#total-ps',
+            '#total-mooe',
+            '#total-co',
+            '#total-fe'
+        ];
 
-    }
+        $.each(allotmentElems, function(ctr, elem) {
+            let allotmentTotal = 0;
 
-    function computeTotalMOOE() {
+            $(elem).each(function() {
+                let value = filterNaN(parseFloat($(this).val()));
 
-    }
+                allotmentTotal += value;
+            });
 
-    function computeTotalCO() {
-
-    }
-
-    function computeTotalFE() {
-
+            $(allotmentTotalElems[ctr]).val(parseFloat(allotmentTotal).toFixed(2));
+        });
     }
 
     $.fn.computeAll = function() {
         computeGrandTotal();
-        computeTotalPS();
-        computeTotalMOOE();
-        computeTotalCO();
-        computeTotalFE();
+        computeAllotment();
     }
 
     $.fn.showCreate = function(url) {

@@ -107,9 +107,98 @@ class SummaryLDDAP extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        //
+    public function store(Request $request) {
+        $mdsGsbID = $request->mds_gsb_id;
+        $department = $request->department;
+        $entityName = $request->entity_name;
+        $operatingUnit = $request->operating_unit;
+        $fundCluster = $request->fund_cluster;
+        $sliiaeNo = $request->sliiae_no;
+        $sliiaeDate = $request->sliiae_date;
+        $to = $request->to;
+        $bankName = $request->bank_name;
+        $bankAddress = $request->bank_address;
+        $totalAmount = $request->total_amount;
+        $totalAmountWords = $request->total_amount_words;
+        $sigCertCorrect = $request->cert_correct;
+        $sigApprovedBy = $request->approved_by;
+        $sigDeliveredBy = $request->delivered_by;
+
+        $lddapIDs = $request->lddap_id;
+        $dateIssues = $request->date_issue;
+        $totals = $request->total;
+        $allotmentPSs = $request->allotment_ps;
+        $allotmentMOOEs = $request->allotment_mooe;
+        $allotmentCOs = $request->allotment_co;
+        $allotmentFEs = $request->allotment_fe;
+        $allotmentPSRemarks = $request->allotment_ps_remarks;
+        $allotmentMOOERemarks = $request->allotment_mooe_remarks;
+        $allotmentCORemarks = $request->allotment_co_remarks;
+        $allotmentFERemarks = $request->allotment_fe_remarks;
+
+        $countLDDAP = count($lddapIDs);
+        $documentType = 'Summary of LDDAP-ADAs Issued and Invalidated ADA Entries';
+        $routeName = 'summary';
+        //dd($mdsGsbID);
+
+
+            $instanceSummary = new Summary;
+            $instanceSummary->mds_gsb_id = $mdsGsbID;
+            $instanceSummary->department = $department;
+            $instanceSummary->entity_name = $entityName;
+            $instanceSummary->operating_unit = $operatingUnit;
+            $instanceSummary->fund_cluster = $fundCluster;
+            $instanceSummary->sliiae_no = $sliiaeNo;
+            $instanceSummary->date_sliiae = $sliiaeDate;
+            $instanceSummary->to = $to;
+            $instanceSummary->bank_name = $bankName;
+            $instanceSummary->bank_address = $bankAddress;
+            $instanceSummary->total_amount = $totalAmount;
+            $instanceSummary->total_amount_words = $totalAmountWords;
+            $instanceSummary->lddap_no_pcs = $countLDDAP;
+            $instanceSummary->sig_cert_correct = $sigCertCorrect;
+            $instanceSummary->sig_approved_by = $sigApprovedBy;
+            $instanceSummary->sig_delivered_by = $sigDeliveredBy;
+            $instanceSummary->save();
+
+            $lastSummary = Summary::orderBy('created_at', 'desc')->first();
+            $lastID = $lastSummary->id;
+
+            if (is_array($lddapIDs)) {
+                if (count($lddapIDs) > 0) {
+                    foreach ($lddapIDs as $ctr => $lddapID) {
+                        $itemNo = $ctr + 1;
+                        $instanceSummaryItem = new SummaryItem;
+                        $instanceSummaryItem->sliiae_id = $lastID;
+                        $instanceSummaryItem->item_no = $itemNo;
+                        $instanceSummaryItem->lddap_id = $lddapID;
+                        $instanceSummaryItem->date_issue = $dateIssues[$ctr];
+                        $instanceSummaryItem->total = $totals[$ctr];
+                        $instanceSummaryItem->allotment_ps = $allotmentPSs[$ctr];
+                        $instanceSummaryItem->allotment_mooe = $allotmentMOOEs[$ctr];
+                        $instanceSummaryItem->allotment_co = $allotmentCOs[$ctr];
+                        $instanceSummaryItem->allotment_fe = $allotmentFEs[$ctr];
+                        $instanceSummaryItem->allotment_ps_remarks = $allotmentPSRemarks[$ctr];
+                        $instanceSummaryItem->allotment_mooe_remarks = $allotmentMOOERemarks[$ctr];
+                        $instanceSummaryItem->allotment_co_remarks = $allotmentCORemarks[$ctr];
+                        $instanceSummaryItem->allotment_fe_remarks = $allotmentFERemarks[$ctr];
+                        $instanceSummaryItem->save();
+                    }
+                }
+            }
+
+            /*
+            $msg = "$documentType successfully created.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName)
+                             ->with('success', $msg);*/try {
+        } catch (\Throwable $th) {
+            /*
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())
+                                 ->with('failed', $msg);*/
+        }
     }
 
     /**
