@@ -22,7 +22,7 @@ class CreateSummaryLddapItemsTable extends Migration
             $table->unsignedInteger('item_no');
             $table->uuid('lddap_id');
             $table->foreign('lddap_id')->references('id')->on('list_demand_payables');
-            $table->dateTime('date_issue');
+            $table->date('date_issue');
             $table->double('total', 50, 2)->default(0.00);
             $table->double('allotment_ps', 50, 2)->default(0.00);
             $table->double('allotment_mooe', 50, 2)->default(0.00);
