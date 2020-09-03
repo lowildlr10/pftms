@@ -97,6 +97,10 @@ $(function() {
                 $('#print-title').html('Generate List of Due and Demandable Accounts Payable');
                 setPaperSize('A4');
                 break;
+            case 'pay_summary':
+                $('#print-title').html('Generate Summary of LDDAP-ADAs Issued and Invalidated ADA Entries');
+                setPaperSize('A4');
+                break;
             case 'inv_par':
                 $('#print-title').html('Generate Property Acknowledgement Reciept');
                 setPaperSize('A4');

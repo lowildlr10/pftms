@@ -1,7 +1,6 @@
-var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
-$(function() {
-    //testing lang
+const CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 
+$(function() {
     let orsSerialNos = [],
         msdGSBs = [];
 
@@ -14,6 +13,8 @@ $(function() {
             tokenSeparators: [','],
             placeholder: "Value...",
             width: '100%',
+            maximumSelectionSize: 4,
+            allowClear: true,
             ajax: {
                 url: `${baseURL}/payment/lddap/get-ors-burs`,
                 type: "post",
@@ -48,6 +49,8 @@ $(function() {
             placeholder: "For adding a new data, use '/' to separate MDS-GSB BRANCH and MDS SUB ACCOUNT NO.",
             width: '100%',
             tags: true,
+            maximumSelectionSize: 4,
+            allowClear: true,
             ajax: {
                 url: `${baseURL}/payment/lddap/get-mds-gsb`,
                 type: "post",

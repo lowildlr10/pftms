@@ -977,6 +977,58 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'is_allowed'
     ]);
 
+    // Summary of LDDAP Module
+    Route::any('payment/summary', [
+        'uses' => 'SummaryLDDAPController@index',
+        'module' => 'pay_summary',
+        'access' => 'is_allowed'
+    ])->name('summary');
+    Route::get('payment/summary/show-create', [
+        'uses' => 'SummaryLDDAPController@showCreate',
+        'module' => 'pay_summary',
+        'access' => 'create'
+    ])->name('summary-show-create');
+    Route::get('payment/summary/show-edit/{id}', [
+        'uses' => 'SummaryLDDAPController@showEdit',
+        'module' => 'pay_summary',
+        'access' => 'update'
+    ])->name('summary-show-edit');
+    Route::post('payment/summary/store', [
+        'uses' => 'SummaryLDDAPController@store',
+        'module' => 'pay_summary',
+        'access' => 'create'
+    ])->name('summary-store');
+    Route::post('payment/summary/update/{id}', [
+        'uses' => 'SummaryLDDAPController@update',
+        'module' => 'pay_summary',
+        'access' => 'update'
+    ])->name('summary-update');
+    Route::post('payment/summary/delete/{id}', [
+        'uses' => 'SummaryLDDAPController@delete',
+        'module' => 'pay_summary',
+        'access' => 'delete'
+    ])->name('summary-delete');
+    Route::post('payment/summary/for-approval/{id}', [
+        'uses' => 'SummaryLDDAPController@forApproval',
+        'module' => 'pay_summary',
+        'access' => 'approval'
+    ])->name('summary-for-approval');
+    Route::post('payment/summary/approve/{id}', [
+        'uses' => 'SummaryLDDAPController@approve',
+        'module' => 'pay_summary',
+        'access' => 'approve'
+    ])->name('summary-approve');
+    Route::post('payment/summary/submission/{id}', [
+        'uses' => 'SummaryLDDAPController@submission',
+        'module' => 'pay_summary',
+        'access' => 'submission'
+    ])->name('summary-submission');
+    Route::post('payment/summary/get-lddap', [
+        'uses' => 'SummaryLDDAPController@getListLDDAP',
+        'module' => 'pay_summary',
+        'access' => 'is_allowed'
+    ]);
+
     /*===================== SYSTEM LIBRARIES ROUTES =====================*/
 
     // Item Classification Module
