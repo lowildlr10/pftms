@@ -213,7 +213,7 @@
                                         btn-sm px-2 waves-effect waves-light"
                                        onclick="$(this).showEdit('{{ route('lddap-show-edit',
                                                  ['id' => $lddap->id]) }}');">
-                                    <i class="fas fa-trash-alt orange-text"></i> Edit
+                                    <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"

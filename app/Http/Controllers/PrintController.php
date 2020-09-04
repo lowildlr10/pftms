@@ -1030,11 +1030,6 @@ class PrintController extends Controller
         $allotmentFE = 0;
         $multiplier = 9 / 10;
 
-        if (strpos($summary->bank_address, "\n") !== FALSE) {
-            $searchStr = ["\r\n", "\n", "\r"];
-            $summary->bank_address = str_replace($searchStr, '<br>', $summary->bank_address);
-        }
-
         foreach ($summaryItems as $ctr => $item) {
             $lddap = DB::table('list_demand_payables')
                        ->where('id', $item->lddap_id)
@@ -1122,7 +1117,7 @@ class PrintController extends Controller
             [
                 'aligns' => ['C', 'R', 'R', 'R', 'R', 'R', 'R', 'L', 'L', 'L', 'L'],
                 'widths' => [
-                    20 * $multiplier,
+                    20.3 * $multiplier,
                     10 * $multiplier,
                     10 * $multiplier,
                     10 * $multiplier,

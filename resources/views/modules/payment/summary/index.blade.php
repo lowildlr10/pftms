@@ -14,7 +14,7 @@
             <div class="card-body">
                 <h5 class="card-title white-text">
                     <b>
-                        <i class="fas fa-money-check-alt"></i> Summary of summary-ADAs Issued and Invalidated ADA Entries
+                        <i class="fas fa-money-check-alt"></i> Summary of LDDAP-ADAs Issued and Invalidated ADA Entries
                     </b>
                 </h5>
                 <hr class="white">
@@ -32,7 +32,7 @@
                     </li>
                     <li>
                         <a href="{{ route('summary') }}" class="waves-effect waves-light cyan-text">
-                            Summary of summary-ADAs Issued and Invalidated ADA Entries
+                            Summary of LDDAP-ADAs Issued and Invalidated ADA Entries
                         </a>
                     </li>
                 </ul>
@@ -198,7 +198,7 @@
                                         btn-sm px-2 waves-effect waves-light"
                                        onclick="$(this).showEdit('{{ route('summary-show-edit',
                                                  ['id' => $summary->id]) }}');">
-                                    <i class="fas fa-trash-alt orange-text"></i> Edit
+                                    <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
