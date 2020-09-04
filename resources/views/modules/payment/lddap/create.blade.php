@@ -54,7 +54,7 @@
                     </div>
                     <div class="md-form form-sm">
                         <input type="text" id="lddap-ada-no" name="lddap_ada_no"
-                               class="form-control required" value="01101101 ">
+                               class="form-control required" value="01101101">
                         <label for="lddap-ada-no" class="active">
                             <span class="red-text">* </span>
                             <strong>LDDAP-ADA No.</strong>
