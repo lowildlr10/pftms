@@ -76,7 +76,7 @@ class DocSummaryListDueDemandable extends PDF {
         $this->Cell(0, 4, strtoupper($docSubject), 'LR', 0, 'C');
         $this->Ln();
 
-        $this->SetFont('Times', '', 9 + ($fontScale * 9));
+        $this->SetFont('Times', '', 8 + ($fontScale * 8));
         $this->Cell(0, 3, "For MDS Account Number: $mdsNo", 'LR', 0, 'C');
         $this->Ln();
 
@@ -110,7 +110,7 @@ class DocSummaryListDueDemandable extends PDF {
         $this->Ln();
 
         //Table Header
-        $this->SetFont('Times', 'B', 8 + ($fontScale * 8));
+        $this->SetFont('Times', 'B', 7 + ($fontScale * 7));
         $this->Cell($pageWidth * 0.174, 4, '', 'TLR', 0, 'C');
         $this->Cell($pageWidth * 0.086, 4, '', 'TLR', 0, 'C');
         $this->Cell($pageWidth * 0.4282, 4, 'Amount', 'TLR', 0, 'C');
@@ -119,7 +119,7 @@ class DocSummaryListDueDemandable extends PDF {
 
         $this->Cell($pageWidth * 0.174, 4, 'LDDAP-ADA No.', 'LR', 0, 'C');
         $this->Cell($pageWidth * 0.086, 4, 'Date of Issue', 'LR', 0, 'C');
-        $this->SetFont('Times', '', 8 + ($fontScale * 8));
+        $this->SetFont('Times', '', 7 + ($fontScale * 7));
         $this->Cell($pageWidth * 0.08564, 4, '', 'TLR', 0, 'C');
         $this->Cell($pageWidth * 0.34256, 4, 'Allotment/Object Class', 'TLR', 0, 'C');
         $this->Cell(0, 4, '', 'TLR', 0, 'C');
@@ -136,7 +136,7 @@ class DocSummaryListDueDemandable extends PDF {
         $this->Ln();
 
         //Table Content
-        $this->SetFont('Times', '', 8 + ($fontScale * 8));
+        $this->SetFont('Times', '', 7 + ($fontScale * 7));
         $this->htmlTable($data->table_data);
 
         $this->Cell($pageWidth * 0.26, 4, "No. of pcs of LDDAP-ADA : $countLDDAP", 'LR', 0, 'C');
@@ -156,14 +156,14 @@ class DocSummaryListDueDemandable extends PDF {
         $this->Cell(0, 4, 'OF WHICH INVALIDATED ENTRIES OF PREVIOUSLY ISSUED LDDAP-ADAs', 'LR', 0, 'C');
         $this->Ln();
 
-        $this->SetFont('Times', 'B', 8 + ($fontScale * 8));
+        $this->SetFont('Times', 'B', 7 + ($fontScale * 7));
         $this->Cell($pageWidth * 0.174, 4, 'LDDAP-ADA No.', 'LR', 0, 'C');
         $this->Cell($pageWidth * 0.086, 4, 'Amount', 'LR', 0, 'C');
         $this->Cell($pageWidth * 0.08564, 4, 'Date Issued', 'LR', 0, 'C');
         $this->Cell(0, 4, 'Allotment/Object Class', 'TLR', 0, 'C');
         $this->Ln();
 
-        $this->SetFont('Times', '', 8 + ($fontScale * 8));
+        $this->SetFont('Times', '', 7 + ($fontScale * 7));
         $this->Cell($pageWidth * 0.174, 4, '', 'LR', 0, 'C');
         $this->Cell($pageWidth * 0.086, 4, '', 'LR', 0, 'C');
         $this->Cell($pageWidth * 0.08564, 4, '', 'LR', 0, 'C');
@@ -189,6 +189,7 @@ class DocSummaryListDueDemandable extends PDF {
         $this->Cell(0, 4, '', 'LR', 0, 'C');
         $this->Ln();
 
+        $this->SetFont('Times', '', 8 + ($fontScale * 8));
         $this->Cell($pageWidth * 0.685, 4, 'Certified Correct by:', 'L', 0, 'L');
         $this->Cell(0, 4, 'Approved by:', 'R', 0, 'L');
         $this->Ln();
@@ -232,18 +233,18 @@ class DocSummaryListDueDemandable extends PDF {
 
         $this->SetFont('Times', 'B', 8 + ($fontScale * 8));
         $this->Cell($pageWidth * 0.35, 4, $deliveredBy, 'L', 0, 'C');
-        $this->Cell($pageWidth * 0.36, 4, '', 0, 0, 'L');
+        $this->Cell($pageWidth * 0.34, 4, '', 0, 0, 'L');
         $this->SetFont('Times', '', 8 + ($fontScale * 8));
         $this->Cell(0, 4, '(Signature)', 'R', 0, 'L');
         $this->Ln();
 
         $this->Cell($pageWidth * 0.35, 4, $deliveredByPosition, 'L', 0, 'C');
-        $this->Cell($pageWidth * 0.36, 4, '', 0, 0, 'L');
+        $this->Cell($pageWidth * 0.34, 4, '', 0, 0, 'L');
         $this->Cell(0, 4, '(Name in Print)', 'R', 0, 'L');
         $this->Ln();
 
         $this->Cell($pageWidth * 0.35, 4, '', 'L', 0, 'C');
-        $this->Cell($pageWidth * 0.36, 4, '', 0, 0, 'L');
+        $this->Cell($pageWidth * 0.34, 4, '', 0, 0, 'L');
         $this->Cell(0, 4, 'Designation', 'R', 0, 'L');
         $this->Ln();
 
