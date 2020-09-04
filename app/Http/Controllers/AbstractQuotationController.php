@@ -619,9 +619,16 @@ class AbstractQuotationController extends Controller
                 $instancePR->status = 6;
                 $instancePR->save();
 
+                PurchaseJobOrder::withTrashed()->where('pr_id', $prID)->restore();
+                $poData = PurchaseJobOrder::withTrashed()->where('pr_id', $prID)->get();
+
+                foreach ($poData as $po) {
+                    $instanceDocLog->logDocument($po->id, Auth::user()->id, NULL, '-');
+                }
+
                 $instanceNotif->notifyApprovedForPOAbstract($id);
 
-                $msg = "Abstract of Quotation '$prNo' successfully approved for Po/JO.";
+                $msg = "Abstract of Quotation '$prNo' successfully approved for PO/JO.";
                 Auth::user()->log($request, $msg);
                 return redirect()->route('abstract', ['keyword' => $id])
                                  ->with('success', $msg);

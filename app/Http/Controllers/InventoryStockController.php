@@ -171,7 +171,7 @@ class InventoryStockController extends Controller
         $itemClassifications = $request->item_classifications;
 
         try {
-            foreach ($inventoryClassifications as $invClass) {
+            foreach ($inventoryClassifications as $ctr => $invClass) {
                 $instancePO = PurchaseJobOrder::with('poitems')->find($poID);
                 $prID = $instancePO->pr_id;
                 $poNo = $instancePO->po_no;
@@ -227,6 +227,10 @@ class InventoryStockController extends Controller
                         $instanceInvStockItem->amount = $amount;
                         $instanceInvStockItem->save();
                     }
+                }
+
+                if ($ctr == 0) {
+                    InventoryStock::withTrashed()->where('pr_id', $prID)->restore();
                 }
             }
 

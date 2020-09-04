@@ -944,7 +944,7 @@ class PurchaseRequestController extends Controller
         try {
             $instanceDocLog = new DocLog;
             $instanceNotif = new Notif;
-            $instanceRFQ = DB::table('request_quotations')->where('pr_id', $id)->first();
+            $instanceRFQ = RequestQuotation::withTrashed()->where('pr_id', $id)->first();
             $instancePR = PurchaseRequest::find($id);
             $prNo = $instancePR->pr_no;
             $requestedBy = $instancePR->requested_by;
@@ -960,6 +960,9 @@ class PurchaseRequestController extends Controller
                 $rfqData = RequestQuotation::where('pr_id', $id)->first();
                 $rfqID = $rfqData->id;
                 $instanceDocLog->logDocument($id, Auth::user()->id, NULL, 'received');
+            } else {
+                $instanceDocLog->logDocument($instanceRFQ->id, Auth::user()->id, NULL, '-');
+                RequestQuotation::where('pr_id', $id)->restore();
             }
 
             $instanceNotif->notifyApprovedPR($id);
@@ -1010,6 +1013,15 @@ class PurchaseRequestController extends Controller
             $instancePR->date_pr_cancelled = Carbon::now();
             $instancePR->status = 3;
             $instancePR->save();
+
+            // Soft deletes dependent documents
+            RequestQuotation::where('pr_id', $id)->delete();
+            AbstractQuotation::where('pr_id', $id)->delete();
+            PurchaseJobOrder::where('pr_id', $id)->delete();
+            ObligationRequestStatus::where('pr_id', $id)->delete();
+            InspectionAcceptance::where('pr_id', $id)->delete();
+            DisbursementVoucher::where('pr_id', $id)->delete();
+            InventoryStock::where('pr_id', $id)->delete();
 
             $instanceDocLog->logDocument($id, Auth::user()->id, NULL, '-');
             $instanceNotif->notifyCancelledPR($id);

@@ -654,7 +654,7 @@ class PurchaseJobOrderController extends Controller
                             'Purchase Order' : 'Job Order';
 
             $iarNo = "IAR-" . $poNo;
-            $instanceIAR = InspectionAcceptance::where('iar_no', $iarNo)->first();
+            $instanceIAR = InspectionAcceptance::withTrashed()->where('iar_no', $iarNo)->first();
 
             if (!$instanceIAR) {
                 $instanceIAR = new InspectionAcceptance;
@@ -663,6 +663,9 @@ class PurchaseJobOrderController extends Controller
                 $instanceIAR->ors_id = $orsID;
                 $instanceIAR->po_id = $id;
                 $instanceIAR->save();
+            } else {
+                $instanceDocLog->logDocument($instanceIAR->id, Auth::user()->id, NULL, '-');
+                InspectionAcceptance::withTrashed()->where('iar_no', $iarNo)->restore();
             }
 
             $instancePO->status = 9;
