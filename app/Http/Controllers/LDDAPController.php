@@ -567,8 +567,8 @@ class LDDAPController extends Controller
         try {
             $instanceLDDAP = ListDemandPayable::find($id);
             $documentType = 'LDDAP';
-            $instanceLDDAP->forceDelete();
             ListDemandPayableItem::where('lddap_id', $id)->delete();
+            $instanceLDDAP->forceDelete();
 
             $msg = "$documentType '$id' permanently deleted.";
             Auth::user()->log($request, $msg);

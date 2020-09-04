@@ -116,8 +116,8 @@
                                             <i class="fas fa-check fa-lg text-success material-tooltip-main"
                                                data-toggle="tooltip" data-placement="right" title="Approved"></i>
                                             @elseif ($summary->status == 'for_submission_bank')
-                                            <i class="fas fa-list-alt fa-lg text-success material-tooltip-main"
-                                               data-toggle="tooltip" data-placement="right" title="For Summary"></i>
+                                            <i class="fas fa-piggy-bank fa-lg text-success material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="For Submission to Bank"></i>
                                             @endif
                                         </td>
                                         <td></td>
@@ -203,7 +203,7 @@
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showDelete('{{ route('summary-delete', ['id' => $summary->id]) }}',
-                                                                    '{{ $summary->id }}');">
+                                                                    '{{ $summary->sliiae_no }}');">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
                             </div>
@@ -252,12 +252,12 @@
                             <i class="fas fa-check"></i> Approve
                         </button>
                     </li>
-                    @elseif ($summary->status == 'for_submission_bank')
+                    @elseif ($summary->status == 'approved')
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showSummary('{{ route('summary-submission',
+                                onclick="$(this).showSubmissionBank('{{ route('summary-submission',
                                                           ['id' => $summary->id]) }}');">
-                            <i class="fas fa-list-alt"></i> For Submission to Bank
+                            <i class="fas fa-piggy-bank"></i> For Submission to Bank
                         </button>
                     </li>
                     @else
@@ -287,7 +287,7 @@
 @include('modals.delete-destroy')
 @include('modals.approve')
 @include('modals.approval')
-@include('modals.summary')
+@include('modals.submission-bank')
 @include('modals.print')
 
 @endsection

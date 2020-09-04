@@ -1019,7 +1019,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'approve'
     ])->name('summary-approve');
     Route::post('payment/summary/submission/{id}', [
-        'uses' => 'SummaryLDDAPController@submission',
+        'uses' => 'SummaryLDDAPController@submissionBank',
         'module' => 'pay_summary',
         'access' => 'submission'
     ])->name('summary-submission');
