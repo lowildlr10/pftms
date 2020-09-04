@@ -134,6 +134,7 @@ class DisbursementVoucherController extends Controller
         $paperSizes = PaperSize::orderBy('paper_type')->get();
 
         if ($type == 'procurement') {
+            /*
             $dvData = DisbursementVoucher::select('id', 'pr_id', 'particulars', 'module_class', 'dv_no')
                                          ->with(['bidpayee',
             'procors' => function($query) {
@@ -142,7 +143,17 @@ class DisbursementVoucherController extends Controller
             'pr' => function($query) use($empDivisionAccess) {
                 $query->whereIn('division', $empDivisionAccess)
                       ->whereNull('date_pr_cancelled');
-            }])->where('disbursement_vouchers.module_class', 3);
+            }])->where('disbursement_vouchers.module_class', 3);*/
+
+            $dvData = DisbursementVoucher::select('id', 'pr_id', 'particulars', 'module_class', 'dv_no')
+                                         ->whereHas('pr', function($query)
+                                                use($empDivisionAccess) {
+                $query->whereIn('division', $empDivisionAccess)
+                    ->whereNull('date_pr_cancelled');
+            })->whereHas('procors', function($query)
+                         use($empDivisionAccess) {
+                $query->select('id', 'po_no');
+            })->with('bidpayee');
 
             if (!empty($keyword)) {
                 $dvData = $dvData->where(function($qry) use ($keyword) {

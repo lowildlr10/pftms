@@ -186,8 +186,6 @@ class RequestQuotationController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id) {
-        $instanceDocLog = new DocLog;
-
         $itemIDs = $request->pr_item_id;
         $groupNos = $request->canvass_group;
         $rfqDate = $request->date_canvass;
@@ -195,6 +193,7 @@ class RequestQuotationController extends Controller
         $canvassedBy = $request->canvassed_by;
 
         try {
+            $instanceDocLog = new DocLog;
             $instanceRFQ = RequestQuotation::find($id);
             $prID = $instanceRFQ->pr_id;
             $instanceRFQ->date_canvass = $rfqDate;
@@ -212,19 +211,16 @@ class RequestQuotationController extends Controller
 
             $instancePR = PurchaseRequest::find($prID);
             $prNo = $instancePR->pr_no;
-            $instancePR->status = 5;
-            $instancePR->save();
+            //$instancePR->status = 5;
+            //$instancePR->save();
 
-            // Delete dependent documents
-            AbstractQuotation::where('pr_id', $prID)->delete();
-            //DB::table('tblabstract_items')->where('pr_id', $prID)->delete();
-            PurchaseJobOrder::where('pr_id', $prID)->delete();
-            //DB::table('tblpo_jo_items')->where('pr_id', $prID)->delete();
-            ObligationRequestStatus::where('pr_id', $prID)->delete();
-            InspectionAcceptance::where('pr_id', $prID)->delete();
-            DisbursementVoucher::where('pr_id', $prID)->delete();
-            InventoryStock::where('pr_id', $prID)->delete();
-            //DB::table('tblinventory_stocks_issue')->where('pr_id', $id)->delete();
+            // Soft deletes dependent documents
+            //AbstractQuotation::where('pr_id', $id)->delete();
+            //PurchaseJobOrder::where('pr_id', $id)->delete();
+            //ObligationRequestStatus::where('pr_id', $id)->delete();
+            //InspectionAcceptance::where('pr_id', $id)->delete();
+            //DisbursementVoucher::where('pr_id', $id)->delete();
+            //InventoryStock::where('pr_id', $id)->delete();
 
             $instanceDocLog->logDocument($id, NULL, NULL, '-');
 
@@ -309,7 +305,7 @@ class RequestQuotationController extends Controller
             $instanceDocLog = new DocLog;
             $instanceNotif = new Notif;
             $docStatus = $instanceDocLog->checkDocStatus($id);
-            $instanceRFQ = RequestQuotation::with('pr')->where('id', $id)->first();
+            $instanceRFQ = RequestQuotation::find($id);
             $prID = $instanceRFQ->pr_id;
             $instancePR = PurchaseRequest::find($prID);
             $prNo = $instancePR->pr_no;
@@ -317,7 +313,7 @@ class RequestQuotationController extends Controller
             $responsiblePerson = $docStatus->issued_to_id;
 
             $instanceDocLog->logDocument($id, Auth::user()->id, NULL, "received", $remarks);
-            $instanceAbstract = DB::table('abstract_quotations')->where('pr_id', $prID)->first();
+            $instanceAbstract = AbstractQuotation::withTrashed()->where('pr_id', $prID)->first();
 
             if (!$instanceAbstract) {
                 $instanceAbstract = new AbstractQuotation;
@@ -329,7 +325,7 @@ class RequestQuotationController extends Controller
 
                 $instanceDocLog->logDocument($abstractID, Auth::user()->id, NULL, "issued");
             } else {
-                AbstractQuotation::where('pr_id', $id)->restore();
+                AbstractQuotation::withTrashed()->where('pr_id', $prID)->restore();
             }
 
             $instanceNotif->notifyReceivedRFQ($id, Auth::user()->id, $responsiblePerson);

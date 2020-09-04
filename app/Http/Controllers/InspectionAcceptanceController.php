@@ -304,7 +304,9 @@ class InspectionAcceptanceController extends Controller
             $iarNo = $instanceIAR->iar_no;
             $inspectedBy = $instanceIAR->sig_inspection;
 
-            $instanceDV = DisbursementVoucher::where('ors_id', $instanceIAR->ors_id)->first();
+            $instanceDV = DisbursementVoucher::withTrashed()
+                                             ->where('ors_id', $instanceIAR->ors_id)
+                                             ->first();
 
             if (!$instanceDV) {
                 $instanceDV = new DisbursementVoucher;
@@ -318,6 +320,14 @@ class InspectionAcceptanceController extends Controller
                 $instanceDV->amount = $instanceIAR->ors->amount;
                 $instanceDV->module_class = 3;
                 $instanceDV->save();
+            } else {
+                $instanceDocLog->logDocument($instanceDV->id, Auth::user()->id, NULL, '-');
+                $instanceDV->date_disbursed = NULL;
+                $instanceDV->disbursed_by = NULL;
+                $instanceDV->save();
+                DisbursementVoucher::withTrashed()
+                                   ->where('ors_id', $instanceIAR->ors_id)
+                                   ->restore();
             }
 
             $instancePO = PurchaseJobOrder::find($poID);

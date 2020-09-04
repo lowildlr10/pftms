@@ -234,6 +234,7 @@ class ObligationRequestStatusController extends Controller
         $orsDocumentType = $request->ors_document_type;
 
         try {
+            $instanceDocLog = new DocLog;
             $instanceNotif = new Notif;
 
             $instancePO = PurchaseJobOrder::find($poID);
@@ -244,7 +245,9 @@ class ObligationRequestStatusController extends Controller
             $grandTotal = $instancePO->grand_total;
 
             if ($grandTotal > 0) {
-                $instanceORS = ObligationRequestStatus::where('po_no', $poNo)->first();
+                $instanceORS = ObligationRequestStatus::withTrashed()
+                                                      ->where('po_no', $poNo)
+                                                      ->first();
 
                 if (!$instanceORS) {
                     $instanceORS = new ObligationRequestStatus;
@@ -257,6 +260,12 @@ class ObligationRequestStatusController extends Controller
                     $instanceORS->amount = $instancePO->grand_total;
                     $instanceORS->module_class = 3;
                     $instanceORS->save();
+                } else {
+                    $instanceDocLog->logDocument($instanceORS->id, Auth::user()->id, NULL, '-');
+                    $instanceORS->date_obligated = NULL;
+                    $instanceORS->obligated_by = NULL;
+                    $instanceORS->save();
+                    ObligationRequestStatus::withTrashed()->where('po_no', $poNo)->restore();
                 }
 
                 $instancePO->for_approval = 'y';
