@@ -1006,8 +1006,9 @@ class InventoryStockController extends Controller
         $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
 
         foreach ($invStockIssues as $invStockIssue) {
+            $invStock = InventoryStock::find($invStockIssue->inv_stock_id);
             $invClassData = InventoryClassification::find(
-                $invStockIssue->invstocks->inventory_classification
+                $invStock->inventory_classification
             );
 
             $invStockIssue->classification = strtolower($invClassData->abbrv);
