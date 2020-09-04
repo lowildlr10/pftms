@@ -360,14 +360,73 @@ class SummaryLDDAPController extends Controller
     }
 
     /**
+     * Soft deletes the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function delete(Request $request, $id) {
+        $isDestroy = $request->destroy;
+
+        if ($isDestroy) {
+            $response = $this->destroy($request, $id);
+
+            if ($response->alert_type == 'success') {
+                return redirect()->route('summary', ['keyword' => $response->id])
+                                 ->with($response->alert_type, $response->msg);
+            } else {
+                return redirect()->route('summary')
+                                 ->with($response->alert_type, $response->msg);
+            }
+        } else {
+
+                $instanceSummary = Summary::find($id);
+                $documentType = 'Summary';
+                $instanceSummary->delete();
+
+                $msg = "$documentType '$id' successfully deleted.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('summary', ['keyword' => $id])
+                                 ->with('success', $msg);try {
+            } catch (\Throwable $th) {
+                $msg = "Unknown error has occured. Please try again.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route('summary')
+                                 ->with('failed', $msg);
+            }
+        }
+    }
+
+    /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
-        //
+    public function destroy($request, $id) {
+        try {
+            $instanceSummary = Summary::find($id);
+            $documentType = 'Summary';
+            SummaryItem::where('sliiae_id', $id)->delete();
+            $instanceSummary->forceDelete();
+
+            $msg = "$documentType '$id' permanently deleted.";
+            Auth::user()->log($request, $msg);
+
+            return (object) [
+                'msg' => $msg,
+                'alert_type' => 'success',
+                'id' => $id
+            ];
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+
+            return (object) [
+                'msg' => $msg,
+                'alert_type' => 'failed'
+            ];
+        }
     }
 
     public function getListLDDAP(Request $request) {
@@ -382,5 +441,78 @@ class SummaryLDDAPController extends Controller
         $lddapData = $lddapData->orderBy('lddap_ada_no')->get();
 
         return response()->json($lddapData);
+    }
+
+    public function forApproval(Request $request, $id) {
+        $documentType = 'Summary of LDDAP-ADAs Issued and Invalidated ADA Entries';
+        $routeName = 'summary';
+
+        try {
+            $instanceDocLog = new DocLog;
+            $isDocGenerated = $instanceDocLog->checkDocGenerated($id);
+
+            if ($isDocGenerated) {
+                $instanceSummary = Summary::find($id);
+                $instanceSummary->status = 'for_approval';
+                $instanceSummary->date_for_approval = Carbon::now();
+                $instanceSummary->save();
+
+                $msg = "$documentType '$id' successfully set to 'For Approval'.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route($routeName, ['keyword' => $id])
+                                ->with('success', $msg);
+            } else {
+                $msg = "Document for $documentType '$id' should be generated first.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route($routeName, ['keyword' => $id])
+                                 ->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function approve(Request $request, $id) {
+        $documentType = 'Summary of LDDAP-ADAs Issued and Invalidated ADA Entries';
+        $routeName = 'summary';
+
+        try {
+            $instanceSummary = Summary::find($id);
+            $instanceSummary->status = 'approved';
+            $instanceSummary->date_approved = Carbon::now();
+            $instanceSummary->save();
+
+            $msg = "$documentType '$id' successfully set to 'Approved'.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function submissionBank(Request $request, $id) {
+        $documentType = 'Summary of LDDAP-ADAs Issued and Invalidated ADA Entries';
+        $routeName = 'summary';
+
+        try {
+            $instanceSummary = Summary::find($id);
+            $instanceSummary->status = 'for_submission_bank';
+            $instanceSummary->date_for_submission_bank = Carbon::now();
+            $instanceSummary->save();
+
+            $msg = "$documentType '$id' successfully set to 'For Submission to Bank'.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
     }
 }

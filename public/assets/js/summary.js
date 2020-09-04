@@ -344,4 +344,76 @@ $(function() {
 			$('#form-update').submit();
 		}
     }
+
+    $.fn.showDelete = function(url, name) {
+		$('#modal-body-delete').html(`Are you sure you want to delete this ${name} `+
+                                     `document?`);
+        $("#modal-delete").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#delete-title').html('Delete Summary of LDDAP');
+            $('#form-delete').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-delete-body').html('');
+             $('#form-delete').attr('action', '#');
+		});
+    }
+
+    $.fn.delete = function() {
+        $('#form-delete').submit();
+    }
+
+    $.fn.showApproval = function(url, name) {
+        $('#modal-body-approval').html(`Are you sure you want to set this
+                                       document to 'For Approval'?`);
+        $("#modal-approval").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#approval-title').html('Approval Summary of LDDAP');
+            $('#form-approval').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-approval-body').html('');
+             $('#form-approval').attr('action', '#');
+		});
+    }
+
+    $.fn.approval = function() {
+        $('#form-approval').submit();
+    }
+
+    $.fn.showApprove = function(url, name) {
+        $('#modal-body-approve').html(`Are you sure you want to set this
+                                       document to 'Approved'?`);
+        $("#modal-approve").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#approve-title').html('Approve Summary of LDDAP');
+            $('#form-approve').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-approve-body').html('');
+             $('#form-approve').attr('action', '#');
+		});
+    }
+
+    $.fn.showSubmissionBank = function(url, name) {
+        $('#modal-body-submission-bank').html(`Are you sure you want to set this
+                                       document to 'For Submission to Bank'?`);
+        $("#modal-submission-bank").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#submission-bank-title').html('Submission to Bank');
+            $('#form-submission-bank').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-submission-bank-body').html('');
+             $('#form-submission-bank').attr('action', '#');
+		});
+    }
+
+    $.fn.submissionBank = function() {
+        $('#form-submission-bank').submit();
+    }
+
+    $.fn.approve = function() {
+        $('#form-approve').submit();
+    }
+
+    $('.material-tooltip-main').tooltip({
+        template: template
+    });
 });
