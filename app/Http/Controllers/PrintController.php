@@ -1322,10 +1322,11 @@ class PrintController extends Controller
         $position2 = $instanceSignatory->getSignatory($dv->sig_accounting)->dv_designation;
         $position3 = $instanceSignatory->getSignatory($dv->sig_agency_head)->dv_designation;
 
+        $amount = number_format($dv->amount, 2);
+
         $tableData[] = [$dv->particulars,
                         $dv->responsibility_center,
-                        $dv->mfo_pap, ""];
-        $amount = number_format($dv->amount, 2);
+                        $dv->mfo_pap, $amount];
 
         if ($dv->module_class == 3) {
             $payee = $dv->company_name;

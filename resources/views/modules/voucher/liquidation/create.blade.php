@@ -133,7 +133,9 @@
                                             @if (count($dvList) > 0)
                                                 @foreach ($dvList as $dv)
                                             <option value="{{ $dv->id }}" {{ $dvID == $dv->id ? 'selected' : '' }}>
-                                                DV NO. {{ $dv->dv_no }} : {{ $dv->particulars }}
+                                                {{ $dv->dv_no && $dv->dv_no != '.' ?
+                                                   "DV Number: $dv->dv_no ($dv->particulars)" :
+                                                   $dv->particulars }}
                                             </option>
                                                 @endforeach
                                             @endif

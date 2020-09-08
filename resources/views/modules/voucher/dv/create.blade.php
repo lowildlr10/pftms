@@ -21,7 +21,9 @@
 
                                         @foreach ($orsList as $orsDat)
                                         <option class="red-text" value="{{ $orsDat->id }}" {{ $orsID == $orsDat->id ? 'selected' : '' }}>
-                                            Serial no. {{ $orsDat->serial_no }} : {{ $orsDat->particulars }}
+                                            {{ $orsDat->serial_no && $orsDat->serial_no != '.' ?
+                                               "Serial Number: $orsDat->serial_no ($orsDat->particulars)" :
+                                               $orsDat->particulars }}
                                         </option>
                                         @endforeach
                                     </select>
