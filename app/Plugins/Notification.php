@@ -443,7 +443,7 @@ class Notification {
         } else {
             $user = User::find($responsiblePerson);
             $msgNotif = "<b>Request for Quotation</b> with a quotation number of <b>$prNo</b> of
-                        <b>$requestedByName<b> has been received by <b>$receivedByName</b>, and it
+                        <b>$requestedByName</b> has been received by <b>$receivedByName</b>, and it
                         is now ready for <b>Abstract for Quotation</b>.";
             $data = (object) [
                 'id' => $id,
