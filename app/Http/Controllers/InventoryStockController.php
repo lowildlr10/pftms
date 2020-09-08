@@ -810,9 +810,10 @@ class InventoryStockController extends Controller
         $invStockIssueItemData = InventoryStockIssueItem::with('invstockitems')
                                                         ->where('inv_stock_issue_id', $invStockIssueID)
                                                         ->get();
+        $invStockData = InventoryStock::find($invStockIssueData->inv_stock_id);
         $invStockID = $invStockIssueData->inv_stock_id;
 
-        $invStockData = $invStockIssueData->invstocks;
+        //$invStockData = $invStockIssueData->invstocks;
         $prData = PurchaseRequest::find($invStockData->pr_id);
         $supplierData = Supplier::find($invStockData->supplier);
         $divisionData = EmpDivision::find($invStockData->division);

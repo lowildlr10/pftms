@@ -685,13 +685,14 @@ class PrintController extends Controller
                                                     ->where('inv_stock_issue_id', $invStockIssueID)
                                                     ->where('excluded', 'n')
                                                     ->get();
+        $invStockData = InventoryStock::find($inventoryStockID);
 
-        $entityName = $invStockIssueData->invstocks->entity_name;
-        $fundCluster = $invStockIssueData->invstocks->fund_cluster;
-        $inventoryNo = $invStockIssueData->invstocks->inventory_no;
-        $poNo = $invStockIssueData->invstocks->po_no;
-        $datePO = $invStockIssueData->invstocks->date_po;
-        $supplierData = Supplier::find($invStockIssueData->invstocks->supplier);
+        $entityName = $invStockData->entity_name;
+        $fundCluster = $invStockData->fund_cluster;
+        $inventoryNo = $invStockData->inventory_no;
+        $poNo = $invStockData->po_no;
+        $datePO = $invStockData->date_po;
+        $supplierData = Supplier::find($invStockData->supplier);
         $supplier = $supplierData->company_name;
 
         $instanceSignatory = new Signatory;
@@ -795,14 +796,15 @@ class PrintController extends Controller
                                                     ->where('inv_stock_issue_id', $invStockIssueID)
                                                     ->where('excluded', 'n')
                                                     ->get();
+        $invStockData = InventoryStock::find($inventoryStockID);
 
-        $fundCluster = $invStockIssueData->invstocks->fund_cluster;
-        $divisionData = EmpDivision::find($invStockIssueData->invstocks->division);
+        $fundCluster = $invStockData->fund_cluster;
+        $divisionData = EmpDivision::find($invStockData->division);
         $division = $divisionData->division_name;
-        $office = $invStockIssueData->invstocks->office;
-        $purpose = $invStockIssueData->invstocks->purpose;
-        $inventoryNo = $invStockIssueData->invstocks->inventory_no;
-        $responsibilityCenter = $invStockIssueData->invstocks->responsibility_center;
+        $office = $invStockData->office;
+        $purpose = $invStockData->purpose;
+        $inventoryNo = $invStockData->inventory_no;
+        $responsibilityCenter = $invStockData->responsibility_center;
 
         $instanceSignatory = new Signatory;
         $sigIssuedBy = $invStockIssueData->sig_issued_by;
@@ -929,12 +931,13 @@ class PrintController extends Controller
                                                     ->where('inv_stock_issue_id', $invStockIssueID)
                                                     ->where('excluded', 'n')
                                                     ->get();
+        $invStockData = InventoryStock::find($inventoryStockID);
 
-        $fundCluster = $invStockIssueData->invstocks->fund_cluster;
-        $inventoryNo = $invStockIssueData->invstocks->inventory_no;
-        $poNo = $invStockIssueData->invstocks->po_no;
-        $datePO = $invStockIssueData->invstocks->date_po;
-        $supplierData = Supplier::find($invStockIssueData->invstocks->supplier);
+        $fundCluster = $invStockData->fund_cluster;
+        $inventoryNo = $invStockData->inventory_no;
+        $poNo = $invStockData->po_no;
+        $datePO = $invStockData->date_po;
+        $supplierData = Supplier::find($invStockData->supplier);
         $supplier = $supplierData->company_name;
 
         $instanceSignatory = new Signatory;
