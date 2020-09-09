@@ -11,8 +11,8 @@
                         <i class="fas fa-shopping-cart"></i> Purchase/Job Order
                     </strong>
                 </h5>
-                <hr class="white">
-                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text">
+                <hr class="white hidden-xs">
+                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text hidden-xs">
                     <li>
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
@@ -76,8 +76,8 @@
                             <table id="dtmaterial" class="table table-hover" cellspacing="0" width="100%">
 
                                 <!--Table head-->
-                                <thead class="mdb-color darken-3 white-text">
-                                    <tr>
+                                <thead class="mdb-color darken-3 white-text hidden-xs">
+                                    <tr class="hidden-xs">
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%" style="text-align: center;"></th>
                                         <th class="th-md" width="8%">
@@ -103,7 +103,7 @@
                                 <tbody>
                                     @if (count($list) > 0)
                                         @foreach ($list as $listCtr => $pr)
-                                    <tr>
+                                    <tr class="hidden-xs">
                                         <td align="center">
                                             <i class="fas fa-folder fa-lg material-tooltip-main"
                                                data-toggle="tooltip" data-placement="right" title="PR Document"></i>
@@ -125,15 +125,20 @@
                                         </td>
                                         <td>{{ Auth::user()->getEmployee($pr->requestor['id'])->name }}</td>
                                     </tr>
-                                    <tr class="blue-grey lighten-2">
+                                    <tr class="d-none show-xs">
+                                        <td colspan="7" class="text-center">
+                                            <b>PR NO : {{ $pr->pr_no }}</b>
+                                        </td>
+                                    </tr>
+                                    <tr class="blue-grey lighten-2 po-jo-table-items">
                                         <td colspan="7">
-                                            <div class="card card-cascade narrower mx-3 my-2 z-depth-4">
+                                            <div class="card card-cascade narrower mx-3 my-2">
                                                 <div class="card-body p-2">
                                                     <table class="table table-sm z-depth-1 mb-0">
 
                                                         @if (count($pr->po) > 0)
-                                                        <thead class="mdb-color darken-1 white-text">
-                                                            <tr>
+                                                        <thead class="mdb-color darken-1 white-text hidden-xs">
+                                                            <tr class="hidden-xs">
                                                                 <th class="th-md" width="3%"></th>
                                                                 <th class="th-md" width="10%" style="text-align: center;"><strong>PO/JO Number</strong></th>
                                                                 <th class="th-md" width="84%" style="text-align: center;"><strong>Awarded To</strong></th>
@@ -142,7 +147,7 @@
                                                         </thead>
                                                         <tbody>
                                                             @foreach ($pr->po as $listCtr1 => $item)
-                                                            <tr class="row-item">
+                                                            <tr class="row-item hidden-xs">
                                                                 <td align="center">
                                                                     @if (empty($item->date_cancelled))
                                                                         @if ($item->status == 3)
@@ -206,11 +211,58 @@
                                                                     </a>
                                                                 </td>
                                                             </tr>
+
+                                                            <tr class="d-none show-xs">
+                                                                <td data-target="#right-modal-{{ ($listCtr + 1) + (($list->currentpage() - 1) * $list->perpage()) }}-{{ $listCtr1 }}"
+                                                                    data-toggle="modal" colspan="4" class="px-3">
+                                                                    [ {{ strtoupper($item->document_type) }} NO: {{ $item->po_no }} ] <i class="fas fa-caret-right"></i>
+                                                                    {{ $item->company_name }}
+                                                                    @if ($item->with_ors_burs == 'y')
+                                                                    <br><em>
+                                                                        <small class="grey-text">(ORS/BURS Created)</small>
+                                                                    </em>
+                                                                    @endif
+                                                                    <br>
+                                                                    <small>
+                                                                        @if (empty($item->date_cancelled))
+                                                                            @if ($item->status == 3)
+                                                                        <b>Status:</b> Cancelled
+                                                                            @elseif ($item->status == 8)
+                                                                        <b>Status:</b> For Delivery
+                                                                            @elseif ($item->status >= 9)
+                                                                        <b>Status:</b> Complete
+                                                                            @else
+                                                                                @if (empty($item->date_accountant_signed) && empty($item->date_po_approved))
+                                                                        <b>Status:</b> Pending
+                                                                                @elseif (!empty($item->date_accountant_signed) && empty($item->date_po_approved))
+                                                                        <b>Status:</b> Clear/Signed by the Accountant
+                                                                                @elseif (!empty($item->date_accountant_signed) && !empty($item->date_po_approved))
+                                                                        <b>Status:</b> Approved
+                                                                                @endif
+                                                                            @endif
+                                                                        @else
+                                                                        <b>Status:</b> Cancelled
+                                                                        @endif
+                                                                    </small><br>
+                                                                    <small>
+                                                                        <b>Requested By:</b> {{ Auth::user()->getEmployee($pr->requestor['id'])->name }}
+                                                                    </small>
+                                                                </td>
+                                                            </tr>
                                                             @endforeach
 
-                                                            <tr class="row-item">
+                                                            <tr class="row-item hidden-xs">
                                                                 <td colspan="4" class="p-0">
                                                                     <button class="btn btn-outline-mdb-color btn-block btn-sm waves-effect py-3"
+                                                                            onclick="$(this).showCreate('{{ route('po-jo-show-create', ['prID' => $pr->id]) }}');">
+                                                                        <i class="fas fa-plus"></i> Add PO/JO Document
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr class="row-item d-none show-xs">
+                                                                <td colspan="4" class="p-0">
+                                                                    <button class="btn btn-link btn-block btn-sm waves-effect py-2"
                                                                             onclick="$(this).showCreate('{{ route('po-jo-show-create', ['prID' => $pr->id]) }}');">
                                                                         <i class="fas fa-plus"></i> Add PO/JO Document
                                                                     </button>
@@ -234,6 +286,7 @@
                                         </td>
                                     </tr>
                                     @endif
+
                                 </tbody>
                                 <!--Table body-->
                             </table>
@@ -361,29 +414,30 @@
                             <strong>Requested By: </strong> {{ Auth::user()->getEmployee($pr->requestor['id'])->name }}<br>
                         </p>
 
-                        <!-- View Attachment Button Section-->
-                        @if ($isVisibleViewAttachment)
-                        <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
-                                btn-block waves-effect mb-2"
-                                onclick="$(this).showAttachment('{{ $pr->id }}', 'proc-rfq');">
-                            <i class="fas fa-paperclip fa-lg"></i> View Attachment
-                        </button>
-                        @endif
-                        <!-- End View Attachment Button Section -->
+                        <div class="btn-menu-2">
+                            <!-- View Attachment Button Section-->
+                            @if ($isVisibleViewAttachment)
+                            <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
+                                    btn-block waves-effect mb-2"
+                                    onclick="$(this).showAttachment('{{ $pr->id }}', 'proc-rfq');">
+                                <i class="fas fa-paperclip fa-lg"></i> View Attachment
+                            </button>
+                            @endif
+                            <!-- End View Attachment Button Section -->
 
-                        <!-- View Items Button Section-->
-                        <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
-                                btn-block waves-effect mb-2"
-                                onclick="$(this).showPrint('{{ $pr->id }}', 'proc-po-jo');">
-                            <i class="far fa-list-alt fa-lg"></i> View Items
-                        </button>
-                        <!-- End View Items Button Section -->
-
+                            <!-- View Items Button Section-->
+                            <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
+                                    btn-block waves-effect mb-2"
+                                    onclick="$(this).showPrint('{{ $pr->id }}', 'proc-po-jo');">
+                                <i class="far fa-list-alt fa-lg"></i> View Items
+                            </button>
+                            <!-- End View Items Button Section -->
+                        </div>
                     </div>
                 </div>
                 <hr>
-                <ul class="list-group z-depth-0">
-                    <li class="list-group-item justify-content-between">
+                <ul class="btn-menu-3 list-group z-depth-0">
+                    <li class="list-action-header list-group-item justify-content-between">
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
 

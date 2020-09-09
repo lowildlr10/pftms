@@ -17,8 +17,8 @@
                         <i class="fas fa-money-check-alt"></i> Summary of LDDAP-ADAs Issued and Invalidated ADA Entries
                     </b>
                 </h5>
-                <hr class="white">
-                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text">
+                <hr class="white hidden-xs">
+                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text hidden-xs">
                     <li>
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
@@ -71,7 +71,7 @@
                             <table id="dtmaterial" class="table table-hover" cellspacing="0" width="100%">
 
                                 <!--Table head-->
-                                <thead class="mdb-color darken-3 white-text">
+                                <thead class="mdb-color darken-3 white-text hidden-xs">
                                     <tr>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
@@ -104,7 +104,7 @@
                                 <tbody>
                                     @if (count($list) > 0)
                                         @foreach ($list as $listCtr => $summary)
-                                    <tr>
+                                    <tr class="hidden-xs">
                                         <td align="center" class="border-left">
                                             @if ($summary->status == 'pending')
                                             <i class="fas fa-spinner fa-lg faa-spin fa-pulse material-tooltip-main"
@@ -134,6 +134,25 @@
                                                data-toggle="tooltip" data-placement="left" title="Open">
                                                 <i class="fas fa-folder-open"></i>
                                             </a>
+                                        </td>
+                                    </tr>
+                                    <tr class="d-none show-xs">
+                                        <td data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
+                                            <b>SLIIAE No:</b> {{ $summary->sliiae_no }}<br>
+                                            <small>
+                                                <b>Total Amount: </b> P{{ number_format($summary->total_amount, 2) }}
+                                            </small><br>
+                                            <small>
+                                                @if ($summary->status == 'pending')
+                                                <b>Status: </b> Pending
+                                                @elseif ($summary->status == 'for_approval')
+                                                <b>Status: </b> For Approval
+                                                @elseif ($summary->status == 'approved')
+                                                <b>Status: </b> Approved
+                                                @elseif ($summary->status == 'for_submission_bank')
+                                                <b>Status: </b> For Submission to Bank
+                                                @endif
+                                            </small>
                                         </td>
                                     </tr>
                                         @endforeach
@@ -231,8 +250,8 @@
                     </div>
                 </div>
                 <hr>
-                <ul class="list-group z-depth-0">
-                    <li class="list-group-item justify-content-between">
+                <ul class="btn-menu-3 list-group z-depth-0">
+                    <li class="list-action-header list-group-item justify-content-between">
                         <h5><b><i class="fas fa-pen-nib"></i> Actions</b></h5>
                     </li>
 

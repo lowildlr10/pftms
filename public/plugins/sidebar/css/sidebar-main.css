@@ -207,7 +207,7 @@
     }
 }
 
-@media (min-width: 1281px) and (max-width: 1366px) {
+@media (min-width: 1281px) and (max-width: 1367px) {
     .sidebar-wrapper .sidebar-menu {
         height: 67vh;
     }
@@ -563,7 +563,7 @@ body {
 }
 @media screen and (min-width: 768px) {
     .page-wrapper.toggled .page-content {
-        padding-left: 280px;
+        /*padding-left: 280px;*/
     }
 }
 @media screen and (max-width: 768px) {

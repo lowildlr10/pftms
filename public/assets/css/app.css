@@ -378,9 +378,32 @@ html, body, header, .view {
     .page-link {
         font-size: 8pt !important;
     }
+    .page-content {
+        padding-top: 31px !important;
+    }
     .module-container {
         margin-bottom: 135px !important;
-        padding: 0 0 0 16px !important;
+        padding: 0 10px !important;
+    }
+    .module-container>.card>.card-body>.card-title {
+        text-align: center;
+        font-size: 10pt;
+    }
+    .module-container>.card {
+        border-radius: 0 !important;
+    }
+    .module-container>.card>.card-body {
+        padding-left: 2px !important;
+        padding-right: 2px !important;
+    }
+    .gradient-card-header>div>.btn {
+        font-size: 6pt !important;
+    }
+    .gradient-card-header>div>.dropdown>.btn {
+        font-size: 6pt !important;
+    }
+    .dropdown-menu>a {
+        font-size: 8pt !important;
     }
     .module-table-container>.card-body>.breadcrumb {
         padding: 0px 10px 0px 10px !important;
@@ -427,16 +450,71 @@ html, body, header, .view {
         flex-direction: row !important;
         overflow: hidden;
     }
-
-    #edit-title {
+    .btn-menu-1>.btn {
+        font-size: 6pt !important;
+    }
+    .btn-menu-2>.btn {
+        font-size: 6pt !important;
+    }
+    .btn-menu-3>.list-group-item {
+        padding: 5px 0;
+    }
+    .list-action-header h5 {
+        font-size: 10pt !important;
+        text-align: center !important;
+    }
+    .list-action-header {
+        padding: 7px !important;
+    }
+    .btn-menu-3>.list-group-item>.btn {
+        font-size: 6pt !important;
+        padding: 10px 0 !important;
+        border-radius: 0;
+        border: darkgrey 1px solid !important;
+    }
+    .navbar-toggler {
         font-size: 9pt;
     }
-
+    .footer-copyright {
+        font-size: 8pt;
+        padding: 0px 5px;
+    }
+    .sidebar-wrapper .sidebar-menu .sidebar-dropdown .sidebar-submenu li a {
+        font-size: 7pt;
+    }
+    .po-jo-table-items>td {
+        padding: 0 !important;
+    }
+    .po-jo-table-items>td>.card {
+        margin: 5px !important;
+    }
+    .sidebar-wrapper .sidebar-menu {
+        height: 60vh;
+    }
     .hidden-xs {
         display: none !important;
     }
     .show-xs {
         display: block !important;
+    }
+
+    #edit-title {
+        font-size: 9pt;
+    }
+    #dtmaterial tbody>tr>td {
+        font-size: 8pt !important;
+    }
+    #modal-lg-create>.modal-dialog>.modal-content>.modal-body {
+        padding: 0 !important;
+    }
+    #modal-lg-edit>.modal-dialog>.modal-content>.modal-body {
+        padding: 0 !important;
+    }
+    #modal-lg-create>.modal-dialog>.modal-content>.modal-body>.card>.card-body {
+        padding: 8px !important;
+    }
+    #modal-lg-edit>.modal-dialog>.modal-content>.modal-body>.card>.card-body {
+        padding: 8px !important;
     }
 }
 

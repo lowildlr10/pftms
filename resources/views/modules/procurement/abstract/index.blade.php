@@ -11,8 +11,8 @@
                         <i class="fas fa-shopping-cart"></i> Abstract of Bids & Quotations
                     </strong>
                 </h5>
-                <hr class="white">
-                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text">
+                <hr class="white hidden-xs">
+                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text hidden-xs">
                     <li>
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
@@ -96,7 +96,7 @@
                                 <tbody>
                                     @if (count($list) > 0)
                                         @foreach ($list as $listCtr => $abs)
-                                    <tr>
+                                    <tr class="hidden-xs">
                                         <td align="center"></td>
                                         <td align="center">
                                             @if($abs->status >= 6)
@@ -125,6 +125,24 @@
                                                data-toggle="tooltip" data-placement="left" title="Open">
                                                 <i class="fas fa-folder-open"></i>
                                             </a>
+                                        </td>
+                                    </tr>
+                                    <tr class="d-none show-xs">
+                                        <td data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
+                                            [ PR NO: {{ $abs->pr_no }} ] <i class="fas fa-caret-right"></i> {{
+                                                (strlen($abs->purpose) > 150) ?
+                                                substr($abs->purpose, 0, 150).'...' : $abs->purpose
+                                            }}<br>
+                                            <small>
+                                                @if($abs->status >= 6)
+                                                <b>Status:</b> Approved for PO/JO
+                                                @else
+                                                <b>Status:</b> Pending
+                                                @endif
+                                            </small><br>
+                                            <small>
+                                                <b>Requested By:</b> {{ Auth::user()->getEmployee($abs->requestor['id'])->name }}
+                                            </small>
                                         </td>
                                     </tr>
                                         @endforeach
@@ -277,26 +295,28 @@
                             <strong>Requested By: </strong> {{ Auth::user()->getEmployee($abs->requestor['id'])->name }}<br>
                         </p>
 
-                        <!-- View Attachment Button Section -->
-                            @if ($isVisibleViewAttachment)
-                        <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
-                                btn-block waves-effect mb-2"
-                                onclick="$(this).showAttachment('{{ $abs->id }}', 'proc-rfq');">
-                            <i class="fas fa-paperclip fa-lg"></i> View Attachment
-                        </button>
-                            @endif
-                        <!-- End View Attachment Button Section -->
+                        <div class="btn-menu-2">
+                            <!-- View Attachment Button Section -->
+                                @if ($isVisibleViewAttachment)
+                            <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
+                                    btn-block waves-effect mb-2"
+                                    onclick="$(this).showAttachment('{{ $abs->id }}', 'proc-rfq');">
+                                <i class="fas fa-paperclip fa-lg"></i> View Attachment
+                            </button>
+                                @endif
+                            <!-- End View Attachment Button Section -->
 
-                        <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
-                                btn-block waves-effect mb-2"
-                                onclick="$(this).showItem('{{ route('pr-show-items', ['id' => $abs->id]) }}');">
-                            <i class="far fa-list-alt fa-lg"></i> View Items
-                        </button>
+                            <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
+                                    btn-block waves-effect mb-2"
+                                    onclick="$(this).showItem('{{ route('pr-show-items', ['id' => $abs->id]) }}');">
+                                <i class="far fa-list-alt fa-lg"></i> View Items
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <hr>
-                <ul class="list-group z-depth-1">
-                    <li class="list-group-item justify-content-between">
+                <ul class="btn-menu-3 list-group z-depth-1">
+                    <li class="list-action-header list-group-item justify-content-between">
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
 

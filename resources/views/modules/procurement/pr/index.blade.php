@@ -11,8 +11,8 @@
                         <i class="fas fa-shopping-cart"></i> Purchase Request
                     </strong>
                 </h5>
-                <hr class="white">
-                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text">
+                <hr class="white hidden-xs">
+                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text hidden-xs">
                     <li>
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
@@ -90,7 +90,7 @@
                                 <tbody>
                                     @if (count($list) > 0)
                                         @foreach ($list as $listCtr => $pr)
-                                    <tr>
+                                    <tr class="hidden-xs">
                                         <td align="center"></td>
                                         <td align="center">
                                             @if ($pr->stat['id'] == 1)
@@ -132,6 +132,20 @@
                                                data-toggle="tooltip" data-placement="left" title="Open">
                                                 <i class="fas fa-folder-open"></i>
                                             </a>
+                                        </td>
+                                    </tr>
+                                    <tr class="d-none show-xs">
+                                        <td data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
+                                            [ PR NO: {{ $pr->pr_no }} ] <i class="fas fa-caret-right"></i> {{
+                                                (strlen($pr->purpose) > 150) ?
+                                                substr($pr->purpose, 0, 150).'...' : $pr->purpose
+                                            }}<br>
+                                            <small>
+                                                <b>Status:</b> {{ $pr->stat['status_name'] }}
+                                            </small><br>
+                                            <small>
+                                                <b>Requested By:</b> {{ Auth::user()->getEmployee($pr->requestor['id'])->name }}
+                                            </small>
                                         </td>
                                     </tr>
                                         @endforeach
@@ -276,39 +290,40 @@
                             <strong>Requested By: </strong> {{ Auth::user()->getEmployee($pr->requestor['id'])->name }}<br>
                         </p>
 
-                        <!-- View Items Button Section -->
-                        <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
-                                btn-block waves-effect mb-2"
-                                onclick="$(this).showItem('{{ route('pr-show-items', ['id' => $pr->id]) }}');">
-                            <i class="far fa-list-alt fa-lg"></i> View Items
-                        </button>
-                        <!-- End View Items Button Section -->
+                        <div class="btn-menu-2">
+                            <!-- View Items Button Section -->
+                            <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
+                                    btn-block waves-effect mb-2"
+                                    onclick="$(this).showItem('{{ route('pr-show-items', ['id' => $pr->id]) }}');">
+                                <i class="far fa-list-alt fa-lg"></i> View Items
+                            </button>
+                            <!-- End View Items Button Section -->
 
-                        <!-- View Attachment Button Section -->
-                        @if ($isVisibleViewAttachment)
-                        <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
-                                btn-block waves-effect mb-2"
-                                onclick="$(this).showAttachment('{{ $pr->id }}', 'proc-rfq');">
-                            <i class="fas fa-paperclip fa-lg"></i> View Attachment
-                        </button>
-                        @endif
-                        <!-- End View Attachment Button Section -->
+                            <!-- View Attachment Button Section -->
+                            @if ($isVisibleViewAttachment)
+                            <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
+                                    btn-block waves-effect mb-2"
+                                    onclick="$(this).showAttachment('{{ $pr->id }}', 'proc-rfq');">
+                                <i class="fas fa-paperclip fa-lg"></i> View Attachment
+                            </button>
+                            @endif
+                            <!-- End View Attachment Button Section -->
 
-                        <!-- Track PR Status Button Section -->
-                        @if ($isVisibleTrackPR)
-                        <a class="btn btn-sm btn-outline-mdb-color btn-rounded
-                                  btn-block waves-effect"
-                           href="{{ route('pr-tracker', ['prNo' => $pr->pr_no] ) }}">
-                            <i class="far fa-eye"></i> Track PR Status
-                        </a>
-                        @endif
-                        <!-- End Track PR Status Button Section -->
-
+                            <!-- Track PR Status Button Section -->
+                            @if ($isVisibleTrackPR)
+                            <a class="btn btn-sm btn-outline-mdb-color btn-rounded
+                                    btn-block waves-effect"
+                            href="{{ route('pr-tracker', ['prNo' => $pr->pr_no] ) }}">
+                                <i class="far fa-eye"></i> Track PR Status
+                            </a>
+                            @endif
+                            <!-- End Track PR Status Button Section -->
+                        </div>
                     </div>
                 </div>
                 <hr>
-                <ul class="list-group z-depth-1">
-                    <li class="list-group-item justify-content-between">
+                <ul class="btn-menu-3 list-group z-depth-1">
+                    <li class="list-action-header list-group-item justify-content-between">
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
 

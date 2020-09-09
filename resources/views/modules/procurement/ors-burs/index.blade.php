@@ -11,8 +11,8 @@
                         <i class="fas fa-money-bill-wave-alt"></i> Obligation / Budget Utilization & Request Status
                     </strong>
                 </h5>
-                <hr class="white">
-                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text">
+                <hr class="white hidden-xs">
+                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text hidden-xs">
                     <li>
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
@@ -84,7 +84,7 @@
                             <table id="dtmaterial" class="table table-hover" cellspacing="0" width="100%">
 
                                 <!--Table head-->
-                                <thead class="mdb-color darken-3 white-text">
+                                <thead class="mdb-color darken-3 white-text hidden-xs">
                                     <tr>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
@@ -113,7 +113,7 @@
                                                  empty($ors->doc_status->date_issued))
                                     <tr class="d-none">
                                             @else
-                                    <tr>
+                                    <tr class="hidden-xs">
                                             @endif
                                         <td align="center">
                                             @if (!empty($ors->ors['date_obligated']))
@@ -189,6 +189,49 @@
                                                data-toggle="tooltip" data-placement="left" title="Open">
                                                 <i class="fas fa-folder-open"></i>
                                             </a>
+                                        </td>
+                                    </tr>
+                                    <tr class="d-none show-xs">
+                                        <td data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
+                                            [ PO NO: {{ $ors->po_no }} ] <i class="fas fa-caret-right"></i> {{
+                                                (strlen($ors->ors['particulars']) > 150) ?
+                                                substr($ors->ors['particulars'], 0, 150).'...' : $ors->ors['particulars']
+                                            }}<br>
+                                            <small>
+                                                <b>Serial No:</b> {{ !empty($ors->ors['serial_no']) && $ors->ors['serial_no'] != '.' ? $ors->ors['serial_no'] : 'NA' }}
+                                            </small><br>
+                                            <small>
+                                                @if (!empty($ors->ors['date_obligated']))
+                                                <b>Status:</b> Obligated
+                                                @else
+                                                    @if (!empty($ors->doc_status->date_issued) &&
+                                                        empty($ors->doc_status->date_received) &&
+                                                        empty($ors->doc_status->date_issued_back) &&
+                                                        empty($ors->doc_status->date_received_back))
+                                                <b>Status:</b> Submitted
+                                                @elseif (!empty($ors->doc_status->date_issued) &&
+                                                        !empty($ors->doc_status->date_received) &&
+                                                        empty($ors->doc_status->date_issued_back) &&
+                                                        empty($ors->doc_status->date_received_back))
+                                                <b>Status:</b> Received
+                                                @elseif (!empty($ors->doc_status->date_issued) &&
+                                                        !empty($ors->doc_status->date_received) &&
+                                                        !empty($ors->doc_status->date_issued_back) &&
+                                                        empty($ors->doc_status->date_received_back))
+                                                <b>Status:</b> Submitted Back
+                                                @elseif (!empty($ors->doc_status->date_issued) &&
+                                                        !empty($ors->doc_status->date_received) &&
+                                                        !empty($ors->doc_status->date_issued_back) &&
+                                                        !empty($ors->doc_status->date_received_back))
+                                                <b>Status:</b> Received
+                                                    @else
+                                                <b>Status:</b> Pending
+                                                    @endif
+                                                @endif
+                                            </small><br>
+                                            <small>
+                                                <b>Payee:</b> {{ $ors->bidpayee['company_name'] }}
+                                            </small>
                                         </td>
                                     </tr>
                                         @endforeach
@@ -348,30 +391,31 @@
                             @endif
                         </p>
 
-                        <!-- View Attachment Button Section -->
-                        @if ($isVisibleViewAttachment)
-                        <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
-                                btn-block waves-effect mb-2"
-                                onclick="$(this).showAttachment('{{ $ors->pr->id }}', 'proc-rfq');">
-                            <i class="fas fa-paperclip fa-lg"></i> View Attachment
-                        </button>
-                        @endif
-                        <!-- End View Attachment Button Section -->
+                        <div class="btn-menu-2">
+                            <!-- View Attachment Button Section -->
+                            @if ($isVisibleViewAttachment)
+                            <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
+                                    btn-block waves-effect mb-2"
+                                    onclick="$(this).showAttachment('{{ $ors->pr->id }}', 'proc-rfq');">
+                                <i class="fas fa-paperclip fa-lg"></i> View Attachment
+                            </button>
+                            @endif
+                            <!-- End View Attachment Button Section -->
 
-                        <!-- View Remarks Button Section -->
-                        <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
-                                btn-block waves-effect mb-2"
-                                onclick="$(this).showRemarks('{{ route('proc-ors-burs-show-remarks',
-                                                             ['id' => $ors->ors['id']]) }}');">
-                            <i class="far fa-comment-dots"></i> View Remarks
-                        </button>
-                        <!-- End View Remarks Button Section -->
-
+                            <!-- View Remarks Button Section -->
+                            <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
+                                    btn-block waves-effect mb-2"
+                                    onclick="$(this).showRemarks('{{ route('proc-ors-burs-show-remarks',
+                                                                ['id' => $ors->ors['id']]) }}');">
+                                <i class="far fa-comment-dots"></i> View Remarks
+                            </button>
+                            <!-- End View Remarks Button Section -->
+                        </div>
                     </div>
                 </div>
                 <hr>
-                <ul class="list-group z-depth-0">
-                    <li class="list-group-item justify-content-between">
+                <ul class="btn-menu-3 list-group z-depth-0">
+                    <li class="list-action-header list-group-item justify-content-between">
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
 

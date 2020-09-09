@@ -11,8 +11,8 @@
                         <i class="fas fa-money-bill-wave-alt"></i> Obligation / Budget Utilization & Request Status
                     </strong>
                 </h5>
-                <hr class="white">
-                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text">
+                <hr class="white hidden-xs">
+                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text hidden-xs">
                     <li>
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
@@ -57,7 +57,7 @@
                             <table id="dtmaterial" class="table table-hover" cellspacing="0" width="100%">
 
                                 <!--Table head-->
-                                <thead class="mdb-color darken-3 white-text">
+                                <thead class="mdb-color darken-3 white-text hidden-xs">
                                     <tr>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
@@ -83,7 +83,7 @@
                                                  Auth::user()->id != $ors->payee)
                                     <tr class="d-none">
                                             @else
-                                    <tr>
+                                    <tr class="hidden-xs">
                                             @endif
                                         <td align="center">
                                             @if (!empty($ors->date_obligated))
@@ -158,6 +158,48 @@
                                                data-toggle="tooltip" data-placement="left" title="Open">
                                                 <i class="fas fa-folder-open"></i>
                                             </a>
+                                        </td>
+                                    </tr>
+                                    <tr class="d-none show-xs">
+                                        <td data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
+                                            [ <b>Serial No:</b> {{
+                                                !empty($ors->serial_no) && $ors->serial_no != '.' ?
+                                                $ors->serial_no : 'NA' }} ] <i class="fas fa-caret-right"></i> {{
+                                                (strlen($ors->particulars) > 150) ?
+                                                substr($ors->particulars, 0, 150).'...' : $ors->particulars
+                                            }}<br>
+                                            <small>
+                                                @if (!empty($ors->ors['date_obligated']))
+                                                <b>Status:</b> Obligated
+                                                @else
+                                                    @if (!empty($ors->doc_status->date_issued) &&
+                                                        empty($ors->doc_status->date_received) &&
+                                                        empty($ors->doc_status->date_issued_back) &&
+                                                        empty($ors->doc_status->date_received_back))
+                                                <b>Status:</b> Submitted
+                                                @elseif (!empty($ors->doc_status->date_issued) &&
+                                                        !empty($ors->doc_status->date_received) &&
+                                                        empty($ors->doc_status->date_issued_back) &&
+                                                        empty($ors->doc_status->date_received_back))
+                                                <b>Status:</b> Received
+                                                @elseif (!empty($ors->doc_status->date_issued) &&
+                                                        !empty($ors->doc_status->date_received) &&
+                                                        !empty($ors->doc_status->date_issued_back) &&
+                                                        empty($ors->doc_status->date_received_back))
+                                                <b>Status:</b> Submitted Back
+                                                @elseif (!empty($ors->doc_status->date_issued) &&
+                                                        !empty($ors->doc_status->date_received) &&
+                                                        !empty($ors->doc_status->date_issued_back) &&
+                                                        !empty($ors->doc_status->date_received_back))
+                                                <b>Status:</b> Received
+                                                    @else
+                                                <b>Status:</b> Pending
+                                                    @endif
+                                                @endif
+                                            </small><br>
+                                            <small>
+                                                <b>Payee:</b> {{ $ors->emppayee['firstname'] }} {{ $ors->emppayee['lastname'] }}
+                                            </small>
                                         </td>
                                     </tr>
                                         @endforeach
@@ -295,22 +337,25 @@
                                 @endif
                             @endif
                         </p>
-                        <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
-                                btn-block waves-effect mb-2"
-                                onclick="$(this).showAttachment('{{ $ors->id }}', 'proc-rfq');">
-                            <i class="fas fa-paperclip fa-lg"></i> View Attachment
-                        </button>
-                        <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
-                                btn-block waves-effect mb-2"
-                                onclick="$(this).showRemarks('{{ route('ca-ors-burs-show-remarks',
-                                                             ['id' => $ors->id]) }}');">
-                            <i class="far fa-comment-dots"></i> View Remarks
-                        </button>
+
+                        <div class="btn-menu-2">
+                            <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
+                                    btn-block waves-effect mb-2"
+                                    onclick="$(this).showAttachment('{{ $ors->id }}', 'proc-rfq');">
+                                <i class="fas fa-paperclip fa-lg"></i> View Attachment
+                            </button>
+                            <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
+                                    btn-block waves-effect mb-2"
+                                    onclick="$(this).showRemarks('{{ route('ca-ors-burs-show-remarks',
+                                                                ['id' => $ors->id]) }}');">
+                                <i class="far fa-comment-dots"></i> View Remarks
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <hr>
-                <ul class="list-group z-depth-0">
-                    <li class="list-group-item justify-content-between">
+                <ul class="btn-menu-3 list-group z-depth-0">
+                    <li class="list-action-header list-group-item justify-content-between">
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
 

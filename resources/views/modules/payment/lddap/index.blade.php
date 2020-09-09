@@ -2,7 +2,6 @@
 
 @section('custom-css')
 
-<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/calc.css') }}" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="{{ asset('plugins/select2/css/select2.min.css') }}" rel="stylesheet">
 
 @endsection
@@ -18,8 +17,8 @@
                         <i class="fas fa-money-check-alt"></i> List of Due and Demandable Accounts Payable
                     </strong>
                 </h5>
-                <hr class="white">
-                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text">
+                <hr class="white hidden-xs">
+                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text hidden-xs">
                     <li>
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
@@ -64,7 +63,7 @@
                             <table id="dtmaterial" class="table table-hover" cellspacing="0" width="100%">
 
                                 <!--Table head-->
-                                <thead class="mdb-color darken-3 white-text">
+                                <thead class="mdb-color darken-3 white-text hidden-xs">
                                     <tr>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
@@ -105,7 +104,7 @@
                                 <tbody>
                                     @if (count($list) > 0)
                                         @foreach ($list as $listCtr => $lddap)
-                                    <tr>
+                                    <tr class="hidden-xs">
                                         <td align="center" class="border-left">
                                             @if ($lddap->status == 'pending')
                                             <i class="fas fa-spinner fa-lg faa-spin fa-pulse material-tooltip-main"
@@ -149,6 +148,50 @@
                                                data-toggle="tooltip" data-placement="left" title="Open">
                                                 <i class="fas fa-folder-open"></i>
                                             </a>
+                                        </td>
+                                    </tr>
+                                    <tr class="d-none show-xs">
+                                        <td data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
+                                            <b>LDDAP ADA No:</b> {{ $lddap->lddap_ada_no }}<br>
+                                            <small>
+                                                <b>Total Cost: </b> P{{ number_format($lddap->total_amount, 2) }}
+                                            </small><br>
+                                            <small>
+                                                @if ($lddap->status == 'pending')
+                                                <b>Status: </b> Pending
+                                                @elseif ($lddap->status == 'for_approval')
+                                                <b>Status: </b> For Approval
+                                                @elseif ($lddap->status == 'approved')
+                                                <b>Status: </b> Approved
+                                                @elseif ($lddap->status == 'for_summary')
+                                                <b>Status: </b> For Summary
+                                                @endif
+                                            </small>
+                                        </td>
+                                    </tr>
+                                    <tr class="d-none show-xs">
+                                        <td class="p-0 pl-3 m-0">
+                                            <table class="table table-condensed my-0 py-0">
+                                                <tr>
+                                                    <td class="py-1">
+                                                        <small>
+                                                            <b>ORS Nos: </b>
+                                                        </small>
+                                                @if (count($lddap->ors_nos) > 0)
+                                                    @foreach ($lddap->ors_nos as $orsNo)
+
+                                                        <a onclick="window.open('{{ route('proc-ors-burs', ['keyword' => $orsNo]) }}');
+                                                                    window.open('{{ route('ca-ors-burs', ['keyword' => $orsNo]) }}');"
+                                                            target="_blank" class="blue-text">
+                                                            [{{ $orsNo }}]
+                                                        </a>
+                                                    @endforeach
+                                                @else
+                                                N/A
+                                            @endif
+                                                    </td>
+                                                </tr>
+                                            </table>
                                         </td>
                                     </tr>
                                         @endforeach
@@ -245,8 +288,8 @@
                     </div>
                 </div>
                 <hr>
-                <ul class="list-group z-depth-0">
-                    <li class="list-group-item justify-content-between">
+                <ul class="btn-menu-3 list-group z-depth-0">
+                    <li class="list-action-header list-group-item justify-content-between">
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
 

@@ -11,13 +11,13 @@
                         <i class="fas fa-money-bill-wave-alt"></i> Disbursement Voucher
                     </strong>
                 </h5>
-                <hr class="white">
-                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text">
+                <hr class="white hidden-xs">
+                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text hidden-xs">
                     <li>
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
                     <li class="active">
-                        <a href="{{ url('procurement/dv') }}" class="waves-effect waves-light cyan-text">
+                        <a href="{{ route('ca-dv') }}" class="waves-effect waves-light cyan-text">
                             Disbursement Voucher
                         </a>
                     </li>
@@ -57,7 +57,7 @@
                             <table id="dtmaterial" class="table table-hover" cellspacing="0" width="100%">
 
                                 <!--Table head-->
-                                <thead class="mdb-color darken-3 white-text">
+                                <thead class="mdb-color darken-3 white-text hidden-xs">
                                     <tr>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
@@ -83,7 +83,7 @@
                                                  Auth::user()->id != $dv->payee)
                                         <tr class="d-none">
                                                 @else
-                                        <tr>
+                                        <tr class="hidden-xs">
                                             @endif
                                         <td align="center">
                                             @if (!empty($dv->date_disbursed))
@@ -135,6 +135,46 @@
                                                data-toggle="tooltip" data-placement="left" title="Open">
                                                 <i class="fas fa-folder-open"></i>
                                             </a>
+                                        </td>
+                                    </tr>
+                                    <tr class="d-none show-xs">
+                                        <td data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
+                                            [ <b>DV No:</b> {{ !empty($dv->dv_no) && $dv->dv_no != '.' ? $dv->dv_no : 'NA' }} ] <i class="fas fa-caret-right"></i> {{
+                                                (strlen($dv->particulars) > 150) ?
+                                                substr($dv->particulars, 0, 150).'...' : $dv->particulars
+                                            }}<br>
+                                            <small>
+                                                @if (!empty($dv->procdv['date_disbursed']))
+                                                <b>Status:</b> Disbursed
+                                                @else
+                                                    @if (!empty($dv->doc_status->date_issued) &&
+                                                        empty($dv->doc_status->date_received) &&
+                                                        empty($dv->doc_status->date_issued_back) &&
+                                                        empty($dv->doc_status->date_received_back))
+                                                <b>Status:</b> Submitted
+                                                    @elseif (!empty($dv->doc_status->date_issued) &&
+                                                            !empty($dv->doc_status->date_received) &&
+                                                            empty($dv->doc_status->date_issued_back) &&
+                                                            empty($dv->doc_status->date_received_back))
+                                                <b>Status:</b> Received
+                                                    @elseif (!empty($dv->doc_status->date_issued) &&
+                                                            !empty($dv->doc_status->date_received) &&
+                                                            !empty($dv->doc_status->date_issued_back) &&
+                                                            empty($dv->doc_status->date_received_back))
+                                                <b>Status:</b> Submitted Back
+                                                    @elseif (!empty($dv->doc_status->date_issued) &&
+                                                            !empty($dv->doc_status->date_received) &&
+                                                            !empty($dv->doc_status->date_issued_back) &&
+                                                            !empty($dv->doc_status->date_received_back))
+                                                <b>Status:</b> Received
+                                                    @else
+                                                <b>Status:</b> Pending
+                                                    @endif
+                                                @endif
+                                            </small><br>
+                                            <small>
+                                                <b>Payee:</b> {{ $dv->emppayee['firstname'] }} {{ $dv->emppayee['lastname'] }}
+                                            </small>
                                         </td>
                                     </tr>
                                         @endforeach
@@ -271,22 +311,25 @@
                                 @endif
                             @endif
                         </p>
-                        <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
-                                btn-block waves-effect mb-2"
-                                onclick="$(this).showAttachment('{{ $dv->id }}', 'proc-rfq');">
-                            <i class="fas fa-paperclip fa-lg"></i> View Attachment
-                        </button>
-                        <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
-                                btn-block waves-effect mb-2"
-                                onclick="$(this).showRemarks('{{ route('ca-dv-show-remarks',
-                                                             ['id' => $dv->id]) }}');">
-                            <i class="far fa-comment-dots"></i> View Remarks
-                        </button>
+
+                        <div class="btn-menu-2">
+                            <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
+                                    btn-block waves-effect mb-2"
+                                    onclick="$(this).showAttachment('{{ $dv->id }}', 'proc-rfq');">
+                                <i class="fas fa-paperclip fa-lg"></i> View Attachment
+                            </button>
+                            <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
+                                    btn-block waves-effect mb-2"
+                                    onclick="$(this).showRemarks('{{ route('ca-dv-show-remarks',
+                                                                ['id' => $dv->id]) }}');">
+                                <i class="far fa-comment-dots"></i> View Remarks
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <hr>
-                <ul class="list-group z-depth-0">
-                    <li class="list-group-item justify-content-between">
+                <ul class="btn-menu-3 list-group z-depth-0">
+                    <li class="list-action-header list-group-item justify-content-between">
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
                     </li>
 

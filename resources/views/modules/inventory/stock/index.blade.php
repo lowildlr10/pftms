@@ -11,8 +11,8 @@
                         <i class="fas fa-box"></i> Inventory Stocks
                     </strong>
                 </h5>
-                <hr class="white">
-                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text">
+                <hr class="white hidden-xs">
+                <ul class="breadcrumb mdb-color darken-3 mb-0 p-1 white-text hidden-xs">
                     <li>
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
@@ -82,7 +82,7 @@
                             <table id="dtmaterial" class="table table-hover" cellspacing="0" width="100%">
 
                                 <!--Table head-->
-                                <thead class="mdb-color darken-3 white-text">
+                                <thead class="mdb-color darken-3 white-text hidden-xs">
                                     <tr class="hidden-xs">
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
@@ -107,7 +107,7 @@
                                 <tbody>
                                     @if (count($list) > 0)
                                         @foreach ($list as $listCtr => $inv)
-                                    <tr>
+                                    <tr class="hidden-xs">
                                         <td align="center">
                                             @if ($inv->procstatus['id'] == 12)
                                             <i class="fas fa-file-signature fa-lg orange-text material-tooltip-main"
@@ -172,6 +172,61 @@
                                                data-toggle="tooltip" data-placement="left" title="Open">
                                                 <i class="fas fa-folder-open"></i>
                                             </a>
+                                        </td>
+                                    </tr>
+                                    <tr class="d-none show-xs">
+                                        <td data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
+                                            Inventory No: {{ $inv->inventory_no }} {!!
+                                                !$inv->po_id ? '<br><em><small class="grey-text">(Manually Added)</small></em>' : ''
+                                            !!}<br>
+                                            <small>
+                                                @if ($inv->procstatus['id'] == 12)
+                                                <b>Status:</b> Recorded
+                                                @else
+                                                <b>Status:</b> Issued
+                                                @endif
+                                            </small><br>
+                                            <small>
+                                                <b>Classification Name:</b> {{ $inv->inventoryclass['classification_name'] }}
+                                            </small>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="p-0 pl-3 m-0">
+                                            <table class="table table-condensed my-0 py-0">
+                                                @if (count($inv->stockitems) > 0)
+                                                    @foreach ($inv->stockitems as $cntr => $item)
+                                                <tr class="d-none show-xs">
+                                                    <td onclick="$(this).showCreateIssueItem(`{{ route('stocks-show-create-issue-item', [
+                                                            'invStockID' => $inv->id,
+                                                            'invStockItemID' => $item->id,
+                                                            'classification' => strtolower($inv->inventoryclass['abbrv']),
+                                                            'type' => 'single'
+                                                        ]) }}`);" class="py-1">
+
+                                                        <i class="fas fa-caret-right"></i>
+
+                                                                @if (strlen($item->item_description) > 20)
+                                                        <strong>{{ $cntr + 1 }}.|</strong> {{ substr($item->description, 0, 20) }}...
+                                                                @else
+                                                        <strong>{{ $cntr + 1 }}.|</strong> {{ $item->description }}.
+                                                                @endif
+
+                                                                @if ($item->available_quantity > 0)
+                                                        <strong class="green-text">
+                                                            [{{ $item->available_quantity }}/{{ $item->quantity }}]
+                                                        </strong>
+                                                                @else
+                                                        <strong class="red-text">
+                                                            [{{ $item->available_quantity }}/{{ $item->quantity }}] - <i class="fas fa-ban"></i> Out of Stock
+                                                        </strong>
+                                                                @endif
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            @endif
+                                            </table>
                                         </td>
                                     </tr>
                                         @endforeach
