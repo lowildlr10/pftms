@@ -38,7 +38,7 @@
     </form>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top top-nav-collapse"> <!-- scrolling-navbar -->
+    <nav id="system-top-nav" class="navbar navbar-expand-lg navbar-dark fixed-top top-nav-collapse"> <!-- scrolling-navbar -->
         <!--<div class="container-fluid">-->
 
             <!-- Brand -->
@@ -46,7 +46,10 @@
             <a class="navbar-brand nav-link waves-effect waves-light" href="{{ url('/') }}">
                 <img class="d-inline-block align-top" src="{{ asset('images/logo/pftms-logo-2.jpg') }}"
                      height="30" alt="pfms logo">
-                <strong></strong>
+                <strong>P-F-T-M-S</strong>
+                <strong class="d-none show-xs mt-2" style="font-size: 7pt;">
+                    Procurement & Financial Transaction<br>Management System v2
+                </strong>
             </a>
             @endguest
 

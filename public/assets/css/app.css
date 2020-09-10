@@ -246,24 +246,29 @@ html, body, header, .view {
     }
 }
 ::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
     background-color: #F5F5F5;
     border-radius: 10px;
 }
 ::-webkit-scrollbar {
-    width: 12px;background-color: #F5F5F5;
+    width: 12px;
+    background-color: #263238;
 }
 ::-webkit-scrollbar-thumb {
     border-radius: 10px;
     -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
-    background-image: -webkit-linear-gradient(330deg, #d4fc79 0%, #96e6a1 100%);
-    background-image: linear-gradient(120deg, #0f54d4 0%, #39ada7 100%);
+    background-image: -webkit-gradient(linear,
+									   left bottom,
+									   left top,
+									   color-stop(0.44, rgb(122,153,217)),
+									   color-stop(0.72, rgb(73,125,189)),
+									   color-stop(0.86, rgb(28,58,148)));
 }
 ::-webkit-scrollbar-track {
-    border-radius:0!important;
+    /*border-radius:0!important;*/
 }
 ::-webkit-scrollbar-thumb {
-    border-radius:0!important;
+    /*border-radius:0!important;*/
 }
 ::-webkit-scrollbar {
     width: 6px;
@@ -372,7 +377,7 @@ html, body, header, .view {
 
     #module-body {
         padding: 0 0 0 0;
-        margin-top: 13px !important;
+        margin-top: 11px !important;
         font-size: 8pt !important;
     }
     .page-link {
@@ -491,6 +496,9 @@ html, body, header, .view {
     .sidebar-wrapper .sidebar-menu {
         height: 60vh;
     }
+    html, body, header, .view {
+        height: 100%;
+    }
     .hidden-xs {
         display: none !important;
     }
@@ -498,6 +506,49 @@ html, body, header, .view {
         display: block !important;
     }
 
+    #system-top-nav>.navbar-brand {
+        text-align: center !important;
+        display: block !important;
+        width: 100% !important;
+        margin-right: 0 !important;
+    }
+    #login-content {
+        padding: 0 !important;
+    }
+    #login-content>.card {
+        background: #0000006b !important;
+        padding: 100% 0 !important;
+        margin-top: 30px !important;
+    }
+    #login-content>.card>.card-body>form>h6 {
+        color: #FFF !important;
+    }
+    #login-content>.card>.card-body>form>.md-form {
+        color: #FFF !important;
+    }
+    #login-content>.card>.card-body>form>.md-form>label {
+        color: #FFF !important;
+    }
+    #login-content>.card>.card-body>form>.md-form>input {
+        color: #FFF !important;
+    }
+    #login-content>.card>.card-body>form>.md-form>i {
+        color: #FFF !important;
+    }
+    #login-content>.card>.card-body>form>.md-form>svg {
+        color: #FFF !important;
+    }
+    #login-content>.card>.card-body>form>.form-check>label {
+        color: #FFF !important;
+    }
+    #login-content>.card>.card-body>form>.form-check>input {
+        color: #FFF !important;
+    }
+    #login-content>.card>.card-body>form>.login-buttons>.btn {
+        color: #FFF !important;
+        display: block !important;
+        width: 100% !important;
+    }
     #edit-title {
         font-size: 9pt;
     }

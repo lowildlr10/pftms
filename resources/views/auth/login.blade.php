@@ -12,10 +12,10 @@
         <div class="container">
 
             <!--Grid row-->
-            <div class="row wow animated fadeIn">
+            <div class="row wow animated fadeIn ">
 
                 <!--Grid column-->
-                <div id="login-title" class="col-md-6 mb-4 white-text text-center text-md-left p-4">
+                <div id="login-title" class="col-sm-12 col-md-6 mb-4 white-text text-center text-md-left p-4 hidden-xs">
                     <h2 class="font-weight-bold text-center">
                         <img class="d-inline-block align-top mb-3" src="{{ asset('images/logo/pftms-logo.jpg') }}"
                              height="85" alt="dost logo"><br>
@@ -30,7 +30,7 @@
                 <!--Grid column-->
 
                 <!--Grid column-->
-                <div class="col-md-6 col-xl-5 mb-4">
+                <div id="login-content" class="col-sm-12 col-md-6 col-xl-5 mb-4">
 
                     <!--Card-->
                     <div class="card rounded-0">
@@ -80,7 +80,7 @@
                                     <label for="checkbox1" class="form-check-label dark-grey-text">Remember Me</label>
                                 </fieldset>
                                 <hr>
-                                <div class="text-center">
+                                <div class="login-buttons text-center">
                                     <button class="btn btn-mdb-color btn-md">
                                         <i class="fas fa-door-open"></i> Log-in
                                     </button>
