@@ -384,7 +384,7 @@ html, body, header, .view {
         font-size: 8pt !important;
     }
     .page-content {
-        padding-top: 31px !important;
+        padding-top: 29px !important;
     }
     .module-container {
         margin-bottom: 135px !important;
@@ -446,10 +446,11 @@ html, body, header, .view {
 
     .paginator-container {
         position: fixed;
-        bottom: 37px;
+        bottom: 23px;
         background: #fff;
         right: 0;
         left: 0;
+        border-top: 15px #1c2a47 solid !important;
     }
     .paginator-container>.flex-row-reverse {
         flex-direction: row !important;
