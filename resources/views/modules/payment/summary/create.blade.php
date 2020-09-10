@@ -354,7 +354,7 @@
 
                             @if (count($signatories) > 0)
                                 @foreach ($signatories as $sig)
-                                    @if (isset($sig->module->summary->cert_correct))
+                                    @if (isset($sig->module->summary->cert_correct) && $sig->module->summary->cert_correct)
                             <option value="{{ $sig->id }}">
                                 {!! $sig->name !!} [{!! $sig->module->summary->designation !!}]
                             </option>
@@ -376,7 +376,7 @@
 
                             @if (count($signatories) > 0)
                                 @foreach ($signatories as $sig)
-                                    @if (isset($sig->module->summary->approved_by))
+                                    @if (isset($sig->module->summary->approved_by) && $sig->module->summary->approved_by)
                             <option value="{{ $sig->id }}">
                                 {!! $sig->name !!} [{!! $sig->module->summary->designation !!}]
                             </option>
@@ -406,7 +406,7 @@
 
                             @if (count($signatories) > 0)
                                 @foreach ($signatories as $sig)
-                                    @if (isset($sig->module->summary->delivered_by))
+                                    @if (isset($sig->module->summary->delivered_by) && $sig->module->summary->delivered_by)
                             <option value="{{ $sig->id }}">
                                 {!! $sig->name !!} [{!! $sig->module->summary->designation !!}]
                             </option>
