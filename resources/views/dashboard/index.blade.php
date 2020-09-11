@@ -206,4 +206,59 @@
     });
 </script>
 
+@if (Session::has('login_msg'))
+    <div class="modal fade right" id="login-msg" tabindex="-1" role="dialog"
+         data-backdrop="true">
+        <div class="modal-dialog modal-side modal-top-right modal-notify modal-info" role="document">
+            <!--Content-->
+            <div class="modal-content">
+                <!--Header-->
+                <div class="modal-header">
+                    <p class="heading">Message</p>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="white-text">&times;</span>
+                    </button>
+                </div>
+
+                <!--Body-->
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-5">
+                            @if (session('user_gender') == 'male' && empty(session('user_avatar')))
+                            <img width="150" class="rounded-circle img-fluid z-depth-2" alt="" alt="avatar"
+                                src="{{ asset('images/avatar/male.png') }}" style="width: 120px;">
+                            @elseif (session('user_gender') == 'female' && empty(session('user_avatar')))
+                            <img width="150" class="rounded-circle img-fluid z-depth-2" alt="" alt="avatar"
+                                src="{{ asset('images/avatar/female.png') }}" alt="avatar" style="width: 120px;">
+                            @else
+                                @if (!empty(session('user_avatar')))
+                            <img width="150" class="rounded-circle img-fluid z-depth-2" alt="avatar"
+                                src="{{ url(session('user_avatar')) }}" alt="avatar" style="width: 120px;">
+                                @endif
+                            @endif
+                        </div>
+
+                        <div class="col-7">
+                            <p>{!! session('login_msg') !!}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-link btn-block">
+                        Close
+                    </button>
+                </div>
+            </div>
+            <!--/.Content-->
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(function() {
+            $('#login-msg').modal();
+        });
+    </script>
+@endif
+
 @endsection

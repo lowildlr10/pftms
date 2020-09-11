@@ -113,5 +113,15 @@ class LoginController extends Controller
         $user->log($request, $msg);
         $user->last_login = Carbon::now();
         $user->save();
+
+        $countUserNotif = count($user->unreadNotifications);
+        $msg = $countUserNotif > 0 ?
+            "Welcome back!<br><strong>$fullname</strong>.<br><br>
+            <i class='fas fa-info-circle'></i>
+            You have <strong>$countUserNotif</strong> notification" . ($countUserNotif > 1 ? 's.' : '.'):
+            "Welcome back $fullname!";
+        $request->session()->flash('login_msg', $msg);
+        $request->session()->flash('user_avatar', $user->avatar);
+        $request->session()->flash('user_gender', $user->gender);
     }
 }
