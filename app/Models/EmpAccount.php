@@ -237,6 +237,29 @@ class User extends Authenticatable
         return true;
     }
 
+    public function hasCashierRole($userID = '') {
+        if (empty($userID)) {
+            $roles = !empty($this->roles) ? unserialize($this->roles) : [];
+        } else {
+            $userData = $this::find($userID);
+            $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
+        }
+
+        if (empty($roles)) {
+            return true;
+        } else {
+            foreach ($roles as $role) {
+                $roleData = Role::find($role);
+
+                if ($roleData->is_cashier == 'n') {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public function hasPropertySupplyRole($userID = '') {
         if (empty($userID)) {
             $roles = !empty($this->roles) ? unserialize($this->roles) : [];
