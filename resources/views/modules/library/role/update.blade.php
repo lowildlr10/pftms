@@ -136,6 +136,22 @@
 
     <div class="md-form">
         <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_cashier">
+            <option value="" disabled selected>Choose a value</option>
+            <option value="y" {{ $isCashier == 'y' ? 'selected': '' }}>
+                Yes
+            </option>
+            <option value="n" {{ $isCashier == 'n' ? 'selected': '' }}>
+                No
+            </option>
+        </select>
+        <label class="mdb-main-label">
+            Is a Cashier Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
                 name="is_property_supply">
             <option value="" disabled selected>Choose a value</option>
             <option value="y" {{ $isPropertySupply == 'y' ? 'selected': '' }}>

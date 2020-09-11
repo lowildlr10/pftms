@@ -112,6 +112,18 @@
 
     <div class="md-form">
         <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_cashier">
+            <option value="" disabled selected>Choose a value</option>
+            <option value="y">Yes</option>
+            <option value="n">No</option>
+        </select>
+        <label class="mdb-main-label">
+            Is a Cashier Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
                 name="is_property_supply">
             <option value="" disabled selected>Choose a value</option>
             <option value="y">Yes</option>

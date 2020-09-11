@@ -918,6 +918,7 @@ class AccountController extends Controller
         $isPropertySupply = $userRoleData->is_property_supply;
         $isBudget = $userRoleData->is_budget;
         $isAccountant = $userRoleData->is_accountant;
+        $isCashier = $userRoleData->is_cashier;
         $isAdministrator = $userRoleData->is_administrator;
         $isDeveloper = $userRoleData->is_developer;
         $module = json_decode($userRoleData->module_access);
@@ -932,6 +933,7 @@ class AccountController extends Controller
             'isPropertySupply' => $isPropertySupply,
             'isBudget' => $isBudget,
             'isAccountant' => $isAccountant,
+            'isCashier' => $isCashier,
             'isAdministrator' => $isAdministrator,
             'isDeveloper' => $isDeveloper,
         ]);
@@ -943,6 +945,7 @@ class AccountController extends Controller
         $isPropertySupply = $request->is_property_supply;
         $isBudget = $request->is_budget;
         $isAccountant = $request->is_accountant;
+        $isCashier = $request->is_cashier;
         $isAdministrator = $request->is_administrator;
         $isDeveloper = $request->is_developer;
         $moduleAccess = $request->module_access;
@@ -958,6 +961,7 @@ class AccountController extends Controller
                 $instanceEmpRole->is_property_supply = $isPropertySupply;
                 $instanceEmpRole->is_budget = $isBudget;
                 $instanceEmpRole->is_accountant = $isAccountant;
+                $instanceEmpRole->is_cashier = $isCashier;
                 $instanceEmpRole->is_administrator = $isAdministrator;
                 $instanceEmpRole->is_developer = $isDeveloper;
                 $instanceEmpRole->module_access = $moduleAccess;
@@ -981,6 +985,7 @@ class AccountController extends Controller
         $isPropertySupply = $request->is_property_supply;
         $isBudget = $request->is_budget;
         $isAccountant = $request->is_accountant;
+        $isCashier = $request->is_cashier;
         $isAdministrator = $request->is_administrator;
         $isDeveloper = $request->is_developer;
         $moduleAccess = $request->module_access;
@@ -995,6 +1000,7 @@ class AccountController extends Controller
             $instanceEmpRole->is_property_supply = $isPropertySupply;
             $instanceEmpRole->is_budget = $isBudget;
             $instanceEmpRole->is_accountant = $isAccountant;
+            $instanceEmpRole->is_cashier = $isCashier;
             $instanceEmpRole->is_administrator = $isAdministrator;
             $instanceEmpRole->is_developer = $isDeveloper;
             $instanceEmpRole->module_access = $moduleAccess;
