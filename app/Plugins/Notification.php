@@ -778,7 +778,6 @@ class Notification {
     public function notifySummaryLDDAP($id) {
         $lddapData = ListDemandPayable::find($id);
         $lddapNo = $lddapData->lddap_ada_no;
-        $approvedBy = User::find($_approvedBy);
 
         $msgNotif = "The <b>List of Due and Demandable Accounts Payable</b> with a LDDAP number of <b>$lddapNo</b>
                     is now ready for <b>Summary</b>.";

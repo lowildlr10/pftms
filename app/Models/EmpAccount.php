@@ -161,6 +161,8 @@ class User extends Authenticatable
 
                 if ($roleData->is_developer == 'n') {
                     return false;
+                } else {
+                    return true;
                 }
             }
         }
@@ -184,6 +186,8 @@ class User extends Authenticatable
 
                 if ($roleData->is_administrator == 'n') {
                     return false;
+                } else {
+                    return true;
                 }
             }
         }
@@ -207,6 +211,8 @@ class User extends Authenticatable
 
                 if ($roleData->is_accountant == 'n') {
                     return false;
+                } else {
+                    return true;
                 }
             }
         }
@@ -230,6 +236,8 @@ class User extends Authenticatable
 
                 if ($roleData->is_budget == 'n') {
                     return false;
+                } else {
+                    return true;
                 }
             }
         }
@@ -253,6 +261,8 @@ class User extends Authenticatable
 
                 if ($roleData->is_cashier == 'n') {
                     return false;
+                } else {
+                    return true;
                 }
             }
         }
@@ -276,6 +286,8 @@ class User extends Authenticatable
 
                 if ($roleData->is_property_supply == 'n') {
                     return false;
+                } else {
+                    return true;
                 }
             }
         }
@@ -299,6 +311,8 @@ class User extends Authenticatable
 
                 if ($roleData->is_ordinary == 'n') {
                     return false;
+                } else {
+                    return true;
                 }
             }
         }
