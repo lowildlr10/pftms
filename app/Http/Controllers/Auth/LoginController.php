@@ -119,7 +119,7 @@ class LoginController extends Controller
             "Welcome back!<br><strong>$fullname</strong>.<br><br>
             <i class='fas fa-info-circle'></i>
             You have <strong>$countUserNotif</strong> notification" . ($countUserNotif > 1 ? 's.' : '.'):
-            "Welcome back $fullname!";
+            "Welcome back!<br><strong>$fullname</strong>.";
         $request->session()->flash('login_msg', $msg);
         $request->session()->flash('user_avatar', $user->avatar);
         $request->session()->flash('user_gender', $user->gender);

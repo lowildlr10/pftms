@@ -214,7 +214,9 @@
             <div class="modal-content">
                 <!--Header-->
                 <div class="modal-header">
-                    <p class="heading">Message</p>
+                    <p class="heading">
+                        <i class="fas fa-envelope"></i> System Message
+                    </p>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true" class="white-text">&times;</span>
@@ -246,7 +248,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm btn-link btn-block">
+                    <button type="button" class="btn btn-sm btn-light btn-block" data-dismiss="modal">
                         Close
                     </button>
                 </div>
