@@ -15,6 +15,7 @@ use App\Models\DisbursementVoucher;
 use App\Models\LiquidationReport;
 use App\Models\InventoryStock;
 use App\Models\ListDemandPayable;
+use App\Models\SummaryLDDAP;
 
 use App\User;
 use Auth;
@@ -747,4 +748,84 @@ class Notification {
         $user->notify(new ProcNotify($data));
     }
 
+    public function notifyApproveLDDAP($id, $_approvedBy) {
+        $lddapData = ListDemandPayable::find($id);
+        $lddapNo = $lddapData->lddap_ada_no;
+        $approvedBy = User::find($_approvedBy);
+        $approvedByName = Auth::user()->getEmployee($_approvedBy)->name;
+
+        $msgNotif = "The <b>List of Due and Demandable Accounts Payable</b> with a LDDAP number of <b>$lddapNo</b>
+                    has been <b>Approved</b> by <b>$approvedByName</b>.";
+        $data = (object) [
+            'id' => $id,
+            'module' => 'payment',
+            'sub_module' => 'lddap',
+            'msg' => $msgNotif,
+        ];
+        $_user = User::all();
+
+        foreach ($_user as $user) {
+            $userID = $user->id;
+
+            $hasAccountantRole = $user->hasAccountantRole($userID);
+
+            if ($hasAccountantRole) {
+                $user->notify(new ProcNotify($data));
+            }
+        }
+    }
+
+    public function notifySummaryLDDAP($id) {
+        $lddapData = ListDemandPayable::find($id);
+        $lddapNo = $lddapData->lddap_ada_no;
+        $approvedBy = User::find($_approvedBy);
+
+        $msgNotif = "The <b>List of Due and Demandable Accounts Payable</b> with a LDDAP number of <b>$lddapNo</b>
+                    is now ready for <b>Summary</b>.";
+        $data = (object) [
+            'id' => $id,
+            'module' => 'payment',
+            'sub_module' => 'lddap',
+            'msg' => $msgNotif,
+        ];
+        $_user = User::all();
+
+        foreach ($_user as $user) {
+            $userID = $user->id;
+
+            $hasCashierRole = $user->hasCashierRole($userID);
+
+            if ($hasCashierRole) {
+                $user->notify(new ProcNotify($data));
+            }
+        }
+    }
+
+    public function notifyApproveSummary($id, $_approvedBy) {
+        $summaryData = SummaryLDDAP::find($id);
+        $sliiaeNo = $summaryData->sliiae_no;
+        $approvedBy = User::find($_approvedBy);
+        $approvedByName = Auth::user()->getEmployee($_approvedBy)->name;
+
+        $msgNotif = "The <b>Summary of LDDAP-ADAs Issued and Invalidated ADA Entries</b>
+                    with a SLIIAE number of <b>$sliiaeNo</b>
+                    has been <b>Approved</b> by <b>$approvedByName</b>.";
+        $data = (object) [
+            'id' => $id,
+            'module' => 'payment',
+            'sub_module' => 'summary',
+            'msg' => $msgNotif,
+        ];
+        $_user = User::all();
+
+        foreach ($_user as $user) {
+            $userID = $user->id;
+
+            $hasCashierRole = $user->hasCashierRole($userID);
+
+            if ($hasCashierRole) {
+                $user->notify(new ProcNotify($data));
+            }
+        }
+    }
 }

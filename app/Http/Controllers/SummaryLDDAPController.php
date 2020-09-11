@@ -20,6 +20,8 @@ use DB;
 use Auth;
 use Carbon\Carbon;
 
+use App\Plugins\Notification as Notif;
+
 class SummaryLDDAPController extends Controller
 {
     /**
@@ -479,10 +481,13 @@ class SummaryLDDAPController extends Controller
         $routeName = 'summary';
 
         try {
+            $instanceNotif = new Notif;
             $instanceSummary = Summary::find($id);
             $instanceSummary->status = 'approved';
             $instanceSummary->date_approved = Carbon::now();
             $instanceSummary->save();
+
+            $instanceNotif->notifyApproveSummary($id, Auth::user()->id);
 
             $msg = "$documentType '$id' successfully set to 'Approved'.";
             Auth::user()->log($request, $msg);

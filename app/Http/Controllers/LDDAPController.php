@@ -20,6 +20,8 @@ use DB;
 use Auth;
 use Carbon\Carbon;
 
+use App\Plugins\Notification as Notif;
+
 class LDDAPController extends Controller
 {
     /**
@@ -73,6 +75,7 @@ class LDDAPController extends Controller
                 $orsIDs = unserialize($item->ors_no);
 
                 foreach ($orsIDs as $orsID) {
+
                     $orsData = ObligationRequestStatus::find($orsID);
                     $orsNos[] = $orsData->serial_no;
                 }
@@ -625,10 +628,13 @@ class LDDAPController extends Controller
         $routeName = 'lddap';
 
         try {
+            $instanceNotif = new Notif;
             $instanceLDDAP = ListDemandPayable::find($id);
             $instanceLDDAP->status = 'approved';
             $instanceLDDAP->date_approved = Carbon::now();
             $instanceLDDAP->save();
+
+            $instanceNotif->notifyApproveLDDAP($id, Auth::user()->id);
 
             $msg = "$documentType '$id' successfully set to 'Approved'.";
             Auth::user()->log($request, $msg);
@@ -646,10 +652,13 @@ class LDDAPController extends Controller
         $routeName = 'lddap';
 
         try {
+            $instanceNotif = new Notif;
             $instanceLDDAP = ListDemandPayable::find($id);
             $instanceLDDAP->status = 'for_summary';
             $instanceLDDAP->date_for_summary = Carbon::now();
             $instanceLDDAP->save();
+
+            $instanceNotif->notifySummaryLDDAP($id);
 
             $msg = "$documentType '$id' successfully set to 'For Summary'.";
             Auth::user()->log($request, $msg);
