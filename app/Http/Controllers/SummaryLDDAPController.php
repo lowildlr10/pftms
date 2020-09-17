@@ -432,12 +432,21 @@ class SummaryLDDAPController extends Controller
     }
 
     public function getListLDDAP(Request $request) {
-        $search = trim($request->search);
+        $keyword = trim($request->search);
         $lddapData = ListDemandPayable::select('id', 'lddap_ada_no',
                                                'total_amount', 'date_lddap');
 
-        if ($search) {
-            $lddapData = $lddapData->orWhere('lddap_ada_no', 'like', "%$search%");
+        if ($keyword) {
+            $lddapData = $lddapData->where(function($qry) use ($keyword) {
+                $qry->where('lddap_ada_no', 'like', "%$keyword%");
+                $keywords = explode('/\s+/', $keyword);
+
+                if (count($keywords) > 0) {
+                    foreach ($keywords as $tag) {
+                        $qry->orWhere('lddap_ada_no', 'like', "%$tag%");
+                    }
+                }
+            });
         }
 
         $lddapData = $lddapData->orderBy('lddap_ada_no')->get();
@@ -457,6 +466,7 @@ class SummaryLDDAPController extends Controller
                 $instanceSummary = Summary::find($id);
                 $instanceSummary->status = 'for_approval';
                 $instanceSummary->date_for_approval = Carbon::now();
+                $instanceSummary->for_approval_by = Auth::user()->id;
                 $instanceSummary->save();
 
                 $msg = "$documentType '$id' successfully set to 'For Approval'.";
@@ -485,6 +495,7 @@ class SummaryLDDAPController extends Controller
             $instanceSummary = Summary::find($id);
             $instanceSummary->status = 'approved';
             $instanceSummary->date_approved = Carbon::now();
+            $instanceSummary->approved_by = Auth::user()->id;
             $instanceSummary->save();
 
             $instanceNotif->notifyApproveSummary($id, Auth::user()->id);
@@ -508,6 +519,7 @@ class SummaryLDDAPController extends Controller
             $instanceSummary = Summary::find($id);
             $instanceSummary->status = 'for_submission_bank';
             $instanceSummary->date_for_submission_bank = Carbon::now();
+            $instanceSummary->for_submission_bank_by = Auth::user()->id;
             $instanceSummary->save();
 
             $msg = "$documentType '$id' successfully set to 'For Submission to Bank'.";

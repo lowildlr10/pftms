@@ -358,7 +358,7 @@
 
             <div class="row">
                 <div class="col-md-6 border border-dark">
-                    <div class="md-">
+                    <div class="md-form">
                         <small>
                             <span class="red-text">* </span>
                             I hereby warant that the above List of Due and Demmandable A/Ps

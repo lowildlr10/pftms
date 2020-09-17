@@ -604,6 +604,7 @@ class LDDAPController extends Controller
                 $instanceLDDAP = ListDemandPayable::find($id);
                 $instanceLDDAP->status = 'for_approval';
                 $instanceLDDAP->date_for_approval = Carbon::now();
+                $instanceLDDAP->for_approval_by = Auth::user()->id;
                 $instanceLDDAP->save();
 
                 $msg = "$documentType '$id' successfully set to 'For Approval'.";
@@ -632,6 +633,7 @@ class LDDAPController extends Controller
             $instanceLDDAP = ListDemandPayable::find($id);
             $instanceLDDAP->status = 'approved';
             $instanceLDDAP->date_approved = Carbon::now();
+            $instanceLDDAP->approved_by = Auth::user()->id;
             $instanceLDDAP->save();
 
             $instanceNotif->notifyApproveLDDAP($id, Auth::user()->id);
@@ -656,9 +658,12 @@ class LDDAPController extends Controller
             $instanceLDDAP = ListDemandPayable::find($id);
             $instanceLDDAP->status = 'for_summary';
             $instanceLDDAP->date_for_summary = Carbon::now();
-            $instanceLDDAP->save();
+            $instanceLDDAP->for_summary_by = Auth::user()->id;
+            //$instanceLDDAP->save();
 
             $instanceNotif->notifySummaryLDDAP($id);
+
+            $this->setRelatedDVDisbursed($id);
 
             $msg = "$documentType '$id' successfully set to 'For Summary'.";
             Auth::user()->log($request, $msg);
@@ -686,18 +691,48 @@ class LDDAPController extends Controller
     }
 
     public function getListORSBURS(Request $request) {
-        $search = trim($request->search);
+        $keyword = trim($request->search);
         $orsData = ObligationRequestStatus::select('id', 'serial_no')
                                           ->whereNotNull('serial_no')
+                                          ->whereNotNull('date_obligated')
                                           ->where([['serial_no', '<>', '-'],
                                                    ['serial_no', '<>', '.']]);
 
-        if ($search) {
-            $orsData = $orsData->where('serial_no', 'like', "%$search%");
+        if ($keyword) {
+            $orsData = $orsData->where(function($qry) use ($keyword) {
+                $qry->where('serial_no', 'like', "%$keyword%");
+                $keywords = explode('/\s+/', $keyword);
+
+                if (count($keywords) > 0) {
+                    foreach ($keywords as $tag) {
+                        $qry->orWhere('serial_no', 'like', "%$tag%");
+                    }
+                }
+            });
         }
 
-        $orsData = $orsData->get();
+        $orsData = $orsData->whereHas('procdv', function($query) {
+            $query->whereNotNull('date_for_payment');
+        })->get();
 
         return response()->json($orsData);
+    }
+
+    private function setRelatedDVDisbursed($id) {
+        $lddapItems = ListDemandPayableItem::where('lddap_id', $id)
+                                           ->get();
+
+        foreach ($lddapItems as $item) {
+            $orsIDs = unserialize($item->ors_no);
+
+            if (count($orsIDs) > 0) {
+                foreach ($orsIDs as $orsID) {
+                    $instanceDV = DisbursementVoucher::where('ors_id', $orsID)->first();
+                    $instanceDV->disbursed_by = Auth::user()->id;
+                    $instanceDV->date_disbursed = Carbon::now();
+                    $instanceDV->save();
+                }
+            }
+        }
     }
 }
