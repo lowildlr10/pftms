@@ -42,6 +42,7 @@ class AccountController extends Controller
             'cadv_receive' => 'Receive',
             'cadv_receive_back' => 'Receive Back',
             'cadv_payment' => 'Set to For Payment',
+            'cadv_disburse' => 'Set to Disbursed',
         'ca_lr' => 'Cash Advance, Reimbursement, & Liquidation - Liquidation Report',
             'calr_create' => 'Create',
             'calr_update' => 'Update',
@@ -106,7 +107,8 @@ class AccountController extends Controller
             'pdv_issue_back' => 'Issue Back',
             'pdv_receive' => 'Receive',
             'pdv_receive_back' => 'Receive Back',
-            'pdv_payment' => 'Payment',
+            'pdv_payment' => 'Set to For Payment',
+            'pdv_disburse' => 'Set to Disbursed',
         'inv_stocks' => 'Inventory - Item/Property Stocks',
             'stocks_create' => 'Create',
             'stocks_update' => 'Update',
@@ -240,6 +242,7 @@ class AccountController extends Controller
             'cadv_receive' => 'receive',
             'cadv_receive_back' => 'receive_back',
             'cadv_payment' => 'payment',
+            'cadv_disburse' => 'disburse',
         ],
         'ca_lr' => [
             'calr_create' => 'create',
@@ -313,6 +316,7 @@ class AccountController extends Controller
             'pdv_receive' => 'receive',
             'pdv_receive_back' => 'receive_back',
             'pdv_payment' => 'payment',
+            'pdv_disburse' => 'disburse',
         ],
         'pay_lddap' => [
             'lddap_create' => 'create',
