@@ -86,9 +86,14 @@
                                         <tr class="hidden-xs">
                                             @endif
                                         <td align="center">
-                                            @if (!empty($dv->date_disbursed))
-                                            <i class="far fa-money-bill-alt fa-lg text-success material-tooltip-main"
+                                            @if (!empty($dv->date_for_payment))
+                                                @if (empty($dv->date_disbursed))
+                                        <i class="fas fa-money-check-alt fa-lg text-success material-tooltip-main"
+                                           data-toggle="tooltip" data-placement="right" title="For Payment"></i>
+                                                @else
+                                        <i class="far fa-money-bill-alt fa-lg text-success material-tooltip-main"
                                            data-toggle="tooltip" data-placement="right" title="Disbursed"></i>
+                                                @endif
                                             @else
                                                 @if (!empty($dv->doc_status->date_issued) &&
                                                      empty($dv->doc_status->date_received) &&
@@ -144,8 +149,12 @@
                                                 substr($dv->particulars, 0, 150).'...' : $dv->particulars
                                             }}<br>
                                             <small>
-                                                @if (!empty($dv->procdv['date_disbursed']))
+                                                @if (!empty($dv->date_for_payment))
+                                                    @if (!empty($dv->date_disbursed))
                                                 <b>Status:</b> Disbursed
+                                                    @else
+                                                <b>Status:</b> For Payment
+                                                    @endif
                                                 @else
                                                     @if (!empty($dv->doc_status->date_issued) &&
                                                         empty($dv->doc_status->date_received) &&
@@ -241,7 +250,7 @@
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
 
-                                @if (!$dv->date_disbursed)
+                                @if (!$dv->date_for_payment)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showDelete('{{ route('ca-dv-delete', ['id' => $dv->id]) }}',
@@ -267,7 +276,7 @@
                             }}<br>
                             <strong>Payee: </strong> {{ $dv->emppayee['firstname'] }} {{ $dv->emppayee['lastname'] }}<br>
 
-                            @if (!empty($dv->dv['date_disbursed']))
+                            @if (!empty($dv->date_for_payment))
                                 @if (!empty($dv->doc_status->issued_remarks) &&
                                      !empty($dv->doc_status->date_issued) &&
                                      empty($dv->doc_status->date_received) &&
@@ -362,7 +371,7 @@
                         @endif
                     @endif
 
-                    @if (empty($dv->date_disbursed))
+                    @if (empty($dv->date_for_payment))
                         @if (empty($dv->doc_status->date_issued) &&
                              empty($dv->doc_status->date_received) &&
                              empty($dv->doc_status->date_issued_back) &&
@@ -396,7 +405,7 @@
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showPayment('{{ route('ca-dv-show-payment', ['id' => $dv->id]) }}',
                                                               `{{ 'Disbursement Voucher '.$dv->id }}`);">
-                            <i class="fas fa-angle-double-right"></i> Payment/LDDAP
+                            <i class="fas fa-money-check-alt"></i> Payment/LDDAP
                         </button>
                     </li>
                             @endif
@@ -424,13 +433,29 @@
                     </li>
                         @endif
                     @else
+                    <!-- Generate Payment/LDDAP Button Section -->
                         @if ($isAllowedPayment)
                     <li class="list-group-item justify-content-between">
                         <a onclick="$(this).redirectToDoc('{{ route('lddap') }}', '{{ $dv->id }}');"
                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
-                            <i class="fas fa-angle-double-right"></i> Generate Payment/LDDAP
+                            Generate Payment/LDDAP <i class="fas fa-angle-double-right"></i>
                         </a>
                     </li>
+                        @endif
+                    <!-- End Generate Payment/LDDAP Button Section -->
+
+                        @if (empty($dv->date_disbursed))
+                    <!-- Disburse Button Section -->
+                            @if ($isAllowedDisburse)
+                    <li class="list-group-item justify-content-between">
+                        <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
+                                onclick="$(this).showDisburse('{{ route('ca-dv-show-disburse', ['id' => $dv->id]) }}',
+                                                              `{{ 'Disbursement Voucher '.$dv->id }}`);">
+                            <i class="fas fa-cash-register"></i> Disburse
+                        </button>
+                    </li>
+                            @endif
+                    <!-- End Disburse Button Section -->
                         @endif
                     @endif
                 </ul>
@@ -458,6 +483,7 @@
 @include('modals.issue-back')
 @include('modals.receive-back')
 @include('modals.payment')
+@include('modals.disburse')
 @include('modals.print')
 @include('modals.attachment')
 

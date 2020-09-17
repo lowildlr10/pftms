@@ -265,6 +265,16 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'ca_dv',
         'access' => 'payment'
     ])->name('ca-dv-payment');
+    Route::get('cadv-reim-liquidation/dv/show-disburse/{id}', [
+        'uses' => 'DisbursementVoucherController@showDisburse',
+        'module' => 'ca_dv',
+        'access' => 'disburse'
+    ])->name('ca-dv-show-disburse');
+    Route::post('cadv-reim-liquidation/dv/disburse/{id}', [
+        'uses' => 'DisbursementVoucherController@disburse',
+        'module' => 'ca_dv',
+        'access' => 'disburse'
+    ])->name('ca-dv-disburse');
     Route::get('cadv-reim-liquidation/dv/show-remarks/{id}', [
         'uses' => 'DisbursementVoucherController@showLogRemarks',
         'module' => 'ca_dv',
@@ -821,7 +831,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     Route::post('procurement/dv/disburse/{id}', [
         'uses' => 'DisbursementVoucherController@disburse',
         'module' => 'proc_dv',
-        'access' => 'payment'
+        'access' => 'diburse'
     ])->name('proc-dv-disburse');
     Route::get('procurement/dv/show-remarks/{id}', [
         'uses' => 'DisbursementVoucherController@showLogRemarks',

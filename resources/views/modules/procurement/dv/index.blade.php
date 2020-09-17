@@ -192,8 +192,12 @@
                                                 <b>DV No:</b> {{ !empty($dv->dv_no) && $dv->dv_no != '.' ? $dv->dv_no : 'NA' }}
                                             </small><br>
                                             <small>
-                                                @if (!empty($dv->procdv['date_disbursed']))
+                                                @if (!empty($dv->date_for_payment))
+                                                    @if (!empty($dv->date_disbursed))
                                                 <b>Status:</b> Disbursed
+                                                    @else
+                                                <b>Status:</b> For Payment
+                                                    @endif
                                                 @else
                                                     @if (!empty($dv->doc_status->date_issued) &&
                                                         empty($dv->doc_status->date_received) &&
@@ -337,7 +341,7 @@
                             }}<br>
                             <strong>Payee: </strong> {{ $dv->bidpayee['company_name'] }}<br>
 
-                            @if (!empty($dv->dv['date_disbursed']))
+                            @if (!empty($dv->date_disbursed))
                                 @if (!empty($dv->doc_status->issued_remarks) &&
                                      !empty($dv->doc_status->date_issued) &&
                                      empty($dv->doc_status->date_received) &&
@@ -516,7 +520,7 @@
                     <li class="list-group-item justify-content-between">
                         <a onclick="$(this).redirectToDoc('{{ route('lddap') }}', '{{ $dv->id }}');"
                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
-                            <i class="fas fa-angle-double-right"></i> Generate Payment/LDDAP
+                            Generate Payment/LDDAP <i class="fas fa-angle-double-right"></i>
                         </a>
                     </li>
                         @endif
@@ -536,7 +540,6 @@
                             @endif
                     <!-- End Disburse Button Section -->
                         @endif
-
                     @endif
 
                     @if (!$countVisible)
