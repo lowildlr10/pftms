@@ -813,6 +813,16 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'proc_dv',
         'access' => 'payment'
     ])->name('proc-dv-payment');
+    Route::get('procurement/dv/show-disburse/{id}', [
+        'uses' => 'DisbursementVoucherController@showDisburse',
+        'module' => 'proc_dv',
+        'access' => 'disburse'
+    ])->name('proc-dv-show-disburse');
+    Route::post('procurement/dv/disburse/{id}', [
+        'uses' => 'DisbursementVoucherController@disburse',
+        'module' => 'proc_dv',
+        'access' => 'payment'
+    ])->name('proc-dv-disburse');
     Route::get('procurement/dv/show-remarks/{id}', [
         'uses' => 'DisbursementVoucherController@showLogRemarks',
         'module' => 'proc_dv',

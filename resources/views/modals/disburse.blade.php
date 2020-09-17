@@ -1,4 +1,4 @@
-<div class="modal fade top" id="modal-payment" tabindex="-1"
+<div class="modal fade top" id="modal-disburse" tabindex="-1"
      role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-top" role="document">
         <!--Content-->
@@ -6,8 +6,8 @@
             <!--Header-->
             <div class="modal-header success-color-dark white-text">
                 <h7 class="mt-1">
-                    <i class="fas fa-money-check-alt"></i>
-                    <span id="payment-title"></span>
+                    <i class="fas fa-cash-register"></i>
+                    <span id="disburse-title"></span>
                 </h7>
                 <button type="button" class="close white-text" data-dismiss="modal"
                         aria-label="Close">
@@ -19,7 +19,7 @@
             <div class="modal-body p-4">
                 <div class="card">
                     <div class="card-body">
-                        <div id="modal-body-payment" style="display: none;"></div>
+                        <div id="modal-body-disburse" style="display: none;"></div>
                     </div>
                 </div>
             </div>
@@ -27,8 +27,8 @@
             <!--Footer-->
             <div class="modal-footer p-1">
                 <button type="button" class="btn btn-green btn-sm waves-effect waves-light"
-                        onclick="$(this).payment();">
-                        <i class="fas fa-file-signature"></i> Payment
+                        onclick="$(this).disburse();">
+                        <i class="fas fa-file-signature"></i> Disburse
                 </button>
                 <button type="button" class="btn btn btn-light btn-sm waves-effect" data-dismiss="modal">
                     <i class="far fa-window-close"></i> Close
