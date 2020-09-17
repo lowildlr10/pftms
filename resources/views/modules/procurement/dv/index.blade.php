@@ -125,9 +125,14 @@
                                     <tr class="hidden-xs">
                                             @endif
                                         <td align="center">
-                                            @if (!empty($dv->procdv['date_disbursed']))
+                                            @if (!empty($dv->date_for_payment))
+                                                @if (empty($dv->date_disbursed))
+                                        <i class="fas fa-money-check-alt fa-lg text-success material-tooltip-main"
+                                           data-toggle="tooltip" data-placement="right" title="For Payment"></i>
+                                                @else
                                         <i class="far fa-money-bill-alt fa-lg text-success material-tooltip-main"
                                            data-toggle="tooltip" data-placement="right" title="Disbursed"></i>
+                                                @endif
                                             @else
                                                 @if (!empty($dv->doc_status->date_issued) &&
                                                      empty($dv->doc_status->date_received) &&
@@ -260,6 +265,7 @@
         $isVisibleReceive = $isAllowedReceive;
         $isVisibleReceiveBack = $isAllowedReceiveBack;
         $isVisiblePayment = $isAllowedPayment;
+        $isVisibleDisburse = $isAllowedDisburse;
         $isVisibleIAR = $isAllowedIAR;
         $isVisibleLDDAP = $isAllowedLDDAP;
 
@@ -271,6 +277,7 @@
             $isVisibleReceive = false;
             $isVisibleReceiveBack = false;
             $isVisiblePayment = false;
+            $isVisibleDisburse = false;
         }
         @endphp
 <div class="modal custom-rightmenu-modal fade right" id="right-modal-{{ $listCtr + 1 }}" tabindex="-1"
@@ -413,9 +420,9 @@
                         </a>
                     </li>
                     @endif
-                     <!-- End Regenerate IAR Button Section -->
 
-                    @if (empty($dv->procdv['date_disbursed']))
+                    <!-- End Regenerate IAR Button Section -->
+                    @if (empty($dv->date_for_payment))
                         @if (empty($dv->doc_status->date_issued) &&
                              empty($dv->doc_status->date_received) &&
                              empty($dv->doc_status->date_issued_back) &&
@@ -464,7 +471,7 @@
                         <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
                                 onclick="$(this).showPayment('{{ route('proc-dv-show-payment', ['id' => $dv->id]) }}',
                                                               `{{ 'Disbursement Voucher '.$dv->id }}`);">
-                            <i class="fas fa-angle-double-right"></i> Payment/LDDAP
+                            <i class="fas fa-money-check-alt"></i> Payment/LDDAP
                         </button>
                     </li>
                             @endif
@@ -503,7 +510,6 @@
 
                         @endif
                     @else
-
                     <!-- Generate Payment/LDDAP Button Section -->
                         @if ($isVisiblePayment)
                             @php $countVisible++ @endphp
@@ -515,6 +521,21 @@
                     </li>
                         @endif
                     <!-- End Generate Payment/LDDAP Button Section -->
+
+                        @if (empty($dv->date_disbursed))
+                    <!-- Disburse Button Section -->
+                            @if ($isVisibleDisburse)
+                                @php $countVisible++ @endphp
+                    <li class="list-group-item justify-content-between">
+                        <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
+                                onclick="$(this).showDisburse('{{ route('proc-dv-show-disburse', ['id' => $dv->id]) }}',
+                                                              `{{ 'Disbursement Voucher '.$dv->id }}`);">
+                            <i class="fas fa-cash-register"></i> Disburse
+                        </button>
+                    </li>
+                            @endif
+                    <!-- End Disburse Button Section -->
+                        @endif
 
                     @endif
 
@@ -546,6 +567,7 @@
 @include('modals.issue-back')
 @include('modals.receive-back')
 @include('modals.payment')
+@include('modals.disburse')
 @include('modals.print')
 @include('modals.attachment')
 

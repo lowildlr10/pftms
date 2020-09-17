@@ -257,6 +257,28 @@ $(function() {
         }
     }
 
+    $.fn.showDisburse = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-disburse').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $(this).slideToggle(500);
+        });
+        $("#modal-disburse").modal({keyboard: false, backdrop: 'static'})
+						        .on('shown.bs.modal', function() {
+            $('#disburse-title').html('Disburse');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-disburse').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.disburse = function() {
+        const withError = inputValidation(false);
+
+        if (!withError) {
+            $('#form-disburse').submit();
+        }
+    }
+
     $('.material-tooltip-main').tooltip({
         template: template
     });

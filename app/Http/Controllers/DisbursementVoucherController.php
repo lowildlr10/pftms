@@ -58,6 +58,7 @@ class DisbursementVoucherController extends Controller
         $isAllowedReceive = Auth::user()->getModuleAccess($module, 'receive');
         $isAllowedReceiveBack = Auth::user()->getModuleAccess($module, 'receive_back');
         $isAllowedPayment = Auth::user()->getModuleAccess($module, 'payment');
+        $isAllowedDisburse = Auth::user()->getModuleAccess($module, 'disburse');
         $isAllowedIAR = Auth::user()->getModuleAccess('proc_iar', 'is_allowed');
         $isAllowedLDDAP = Auth::user()->getModuleAccess('pay_lddap', 'is_allowed');
 
@@ -67,6 +68,7 @@ class DisbursementVoucherController extends Controller
             'paperSizes' => $data->paper_sizes,
             'isAllowedUpdate' => $isAllowedUpdate,
             'isAllowedPayment' => $isAllowedPayment,
+            'isAllowedDisburse' => $isAllowedDisburse,
             'isAllowedIssue' => $isAllowedIssue,
             'isAllowedIssueBack'=> $isAllowedIssueBack,
             'isAllowedReceive' => $isAllowedReceive,
@@ -145,7 +147,8 @@ class DisbursementVoucherController extends Controller
                       ->whereNull('date_pr_cancelled');
             }])->where('disbursement_vouchers.module_class', 3);*/
 
-            $dvData = DisbursementVoucher::select('id', 'pr_id', 'particulars', 'module_class', 'dv_no')
+            $dvData = DisbursementVoucher::select('id', 'pr_id', 'particulars', 'module_class', 'dv_no',
+                                                  'date_for_payment', 'date_disbursed')
                                          ->whereHas('pr', function($query)
                                                 use($empDivisionAccess) {
                 $query->whereIn('division', $empDivisionAccess)
@@ -903,7 +906,8 @@ class DisbursementVoucherController extends Controller
 
         return view($viewFile, [
             'id' => $id,
-            'dvNo' => $dvNo
+            'dvNo' => $dvNo,
+            'readOnly' => false,
         ]);
     }
 
@@ -926,8 +930,8 @@ class DisbursementVoucherController extends Controller
                 $routeName = 'ca-dv';
             }
 
-            $instanceDV->date_disbursed = Carbon::now();
-            $instanceDV->disbursed_by = Auth::user()->id;
+            $instanceDV->date_for_payment = Carbon::now();
+            $instanceDV->for_payment_by = Auth::user()->id;
             $instanceDV->for_payment = 'y';
             $instanceDV->dv_no = $dvNo;
             $instanceDV->save();
@@ -936,6 +940,61 @@ class DisbursementVoucherController extends Controller
 
             $msg = "$documentType with a DV number of '$dvNo'
                     is successfully set to 'For Payment'.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function showDisburse($id) {
+        $instanceDV = DisbursementVoucher::find($id);
+        $moduleClass = $instanceDV->module_class;
+        $dvNo = $instanceDV->dv_no;
+
+        if ($moduleClass == 3) {
+            $viewFile = 'modules.procurement.dv.disburse';
+        } else if ($moduleClass == 2) {
+            $viewFile = 'modules.voucher.dv.disburse';
+        }
+
+        return view($viewFile, [
+            'id' => $id,
+            'dvNo' => $dvNo,
+            'readOnly' => true,
+        ]);
+    }
+
+    public function disburse(Request $request, $id) {
+        $dvNo = $request->dv_no;
+
+        try {
+            $instanceDocLog = new DocLog;
+            $instanceDV = DisbursementVoucher::with('procors')->find($id);
+            $moduleClass = $instanceDV->module_class;
+            $documentType = 'Disbursement Voucher';
+
+            if ($moduleClass == 3) {
+                $routeName = 'proc-dv';
+                $instancePO = PurchaseJobOrder::where('po_no', $instanceDV->procors->po_no)
+                                              ->first();
+                $instancePO->status = 11;
+                $instancePO->save();
+            } else if ($moduleClass == 2) {
+                $routeName = 'ca-dv';
+            }
+
+            $instanceDV->date_disbursed = Carbon::now();
+            $instanceDV->disbursed_by = Auth::user()->id;
+            $instanceDV->save();
+
+            //$instanceDV->notifyDisburse($id, Auth::user()->id);
+
+            $msg = "$documentType with a DV number of '$dvNo'
+                    is successfully set to 'For Disbursement'.";
             Auth::user()->log($request, $msg);
             return redirect()->route($routeName, ['keyword' => $id])
                              ->with('success', $msg);
