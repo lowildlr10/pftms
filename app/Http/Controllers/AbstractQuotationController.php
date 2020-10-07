@@ -480,27 +480,32 @@ class AbstractQuotationController extends Controller
 
     private function processPOItemData($prID, $prIDItem, $awardedTo, $poCount, $documentType) {
         $instancePRItem = PurchaseRequestItem::with('pr')->find($prIDItem);
-        $prNo = $instancePRItem->pr->pr_no;
+        $instancePR = PurchaseRequest::find($prID);
+        $prNo = $instancePR->pr_no;
         $instancePOs = PurchaseJobOrder::where([
             ['pr_id', $prID], ['awarded_to', $awardedTo]
         ])->whereNull('date_po_approved')->get();
         $hasParentPO = false;
 
         foreach ($instancePOs as $instancePO) {
-            $_instancePOItem = PurchaseJobOrderItem::with('pritem')
-                                                   ->where('po_no', $instancePO->po_no)
+            $_instancePOItem = PurchaseJobOrderItem::where('po_no', $instancePO->po_no)
                                                    ->first();
 
-            if ($_instancePOItem->pritem->group_no == $instancePRItem->group_no &&
-                $instancePO->document_type == $documentType) {
-                $this->addItemPO(
-                    $instancePO->po_no,
-                    $prID,
-                    $prIDItem,
-                    $awardedTo
-                );
-                $hasParentPO = true;
-                break;
+            if ($_instancePOItem) {
+                $prItemID = $_instancePOItem->pr_item_id;
+                $_instancePRItem = PurchaseRequestItem::find($prItemID);
+
+                if ($_instancePRItem->group_no == $instancePRItem->group_no &&
+                    $instancePO->document_type == $documentType) {
+                    $this->addItemPO(
+                        $instancePO->po_no,
+                        $prID,
+                        $prIDItem,
+                        $awardedTo
+                    );
+                    $hasParentPO = true;
+                    break;
+                }
             }
         }
 

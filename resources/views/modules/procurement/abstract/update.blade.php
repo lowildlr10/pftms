@@ -293,11 +293,11 @@
                                                                             </label>
                                                                             <select class="browser-default custom-select document-type"
                                                                                     searchable="Search here..">
-                                                                                <option value="po">
+                                                                                <option value="po" {{ $item->document_type == 'po' ? 'selected' : '' }}>
                                                                                     Purchase Order (PO)
                                                                                 </option>
-                                                                                <option value="jo">
-                                                                                Job Order (JO)
+                                                                                <option value="jo" {{ $item->document_type == 'jo' ? 'selected' : '' }}>
+                                                                                    Job Order (JO)
                                                                                 </option>
                                                                             </select>
                                                                         </div>
