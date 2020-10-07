@@ -310,7 +310,7 @@ $(function() {
 			$('#mdb-preloader').css('background', '#000000ab')
                                .fadeIn(300, function() {
                 processData();
-                //$('#form-update').submit();
+                $('#form-update').submit();
             });
 		}
     }
