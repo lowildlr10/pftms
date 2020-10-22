@@ -69,10 +69,7 @@
                                 <thead class="mdb-color darken-3 white-text">
                                     <tr>
                                         <th class="th-md" width="3%"></th>
-                                        <th class="th-md" width="10%">
-                                            <strong>Reference Code</strong>
-                                        </th>
-                                        <th class="th-md" width="81%">
+                                        <th class="th-md" width="91%">
                                             <strong>Funding Source/Charging</strong>
                                         </th>
                                         <th class="th-md" width="3%"></th>
@@ -87,8 +84,7 @@
                                         @foreach ($list as $listCtr => $project)
                                     <tr>
                                         <td></td>
-                                        <td>{{ $project->reference_code }}</td>
-                                        <td>{{ $project->source_name }}</td>
+                                        <td>{{ $project->project_name }}</td>
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-orange p-2 waves-effect material-tooltip-main mr-0"
                                                onclick="$(this).showEdit('{{ route('funding-source-show-edit',
@@ -100,7 +96,7 @@
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-red p-2 waves-effect material-tooltip-main mr-0"
                                                onclick="$(this).showDelete('{{ route('funding-source-delete', ['id' => $project->id]) }}',
-                                                                           '{{ $project->source_name }}');"
+                                                                           '{{ $project->project_name }}');"
                                                data-toggle="tooltip" data-placement="left" title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </a>

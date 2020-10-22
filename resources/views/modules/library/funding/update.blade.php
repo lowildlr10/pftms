@@ -2,14 +2,6 @@
     @csrf
 
     <div class="md-form">
-        <input type="text" id="reference-code" class="form-control"
-               name="reference_code" value="{{ $referenceCode }}">
-        <label for="reference-code" class="{{ !empty($referenceCode) ? 'active' : '' }}">
-            Reference Code
-        </label>
-    </div>
-
-    <div class="md-form">
         <input type="text" id="source-name" class="form-control required"
                name="source_name" value="{{ $funding }}">
         <label for="source-name" class="{{ !empty($funding) ? 'active' : '' }}">

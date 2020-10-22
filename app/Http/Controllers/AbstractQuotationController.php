@@ -15,7 +15,7 @@ use App\Models\DisbursementVoucher;
 use App\Models\InventoryStock;
 
 use App\User;
-use App\Models\FundingSource;
+use App\Models\FundingProject;
 use App\Models\DocumentLog as DocLog;
 use App\Models\PaperSize;
 use App\Models\Supplier;

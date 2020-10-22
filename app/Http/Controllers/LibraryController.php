@@ -11,7 +11,7 @@ use App\User;
 use App\Models\EmpDivision;
 use App\Models\EmpGroup;
 use App\Models\EmpRole;
-use App\Models\FundingSource;
+use App\Models\FundingProject;
 use App\Models\InventoryClassification;
 use App\Models\ItemClassification;
 use App\Models\ItemUnitIssue;
@@ -248,7 +248,7 @@ class LibraryController extends Controller
      *  Funding Source Module
     **/
     public function indexFundingSource(Request $request) {
-        $fundingData = FundingSource::orderBy('source_name')
+        $fundingData = FundingProject::orderBy('project_name')
                                     ->get();
 
         return view('modules.library.funding.index', [
@@ -261,13 +261,11 @@ class LibraryController extends Controller
     }
 
     public function showEditFundingSource($id) {
-        $fundingData = FundingSource::find($id);
-        $referenceCode = $fundingData->reference_code;
-        $funding = $fundingData->source_name;
+        $fundingData = FundingProject::find($id);
+        $funding = $fundingData->project_name;
 
         return view('modules.library.funding.update', [
             'id' => $id,
-            'referenceCode' => $referenceCode,
             'funding' => $funding
         ]);
     }
@@ -278,9 +276,8 @@ class LibraryController extends Controller
 
         try {
             if (!$this->checkDuplication('FundingSource', $sourceName)) {
-                $instanceFundSrc = new FundingSource;
-                $instanceFundSrc->reference_code = $referenceCode;
-                $instanceFundSrc->source_name = $sourceName;
+                $instanceFundSrc = new FundingProject;
+                $instanceFundSrc->project_name = $sourceName;
                 $instanceFundSrc->save();
 
                 $msg = "Funding source '$sourceName' successfully created.";
@@ -300,9 +297,8 @@ class LibraryController extends Controller
         $sourceName = $request->source_name;
 
         try {
-            $instanceFundSrc = FundingSource::find($id);
-            $instanceFundSrc->reference_code = $referenceCode;
-            $instanceFundSrc->source_name = $sourceName;
+            $instanceFundSrc = FundingProject::find($id);
+            $instanceFundSrc->project_name = $sourceName;
             $instanceFundSrc->save();
 
             $msg = "Funding source '$sourceName' successfully created.";
@@ -315,7 +311,7 @@ class LibraryController extends Controller
 
     public function deleteFundingSource($id) {
         try {
-            $instanceFundSrc = FundingSource::find($id);
+            $instanceFundSrc = FundingProject::find($id);
             $sourceName = $instanceFundSrc->source_name;
             $instanceFundSrc->delete();
 
@@ -329,7 +325,7 @@ class LibraryController extends Controller
 
     public function destroyFundingSource($id) {
         try {
-            $instanceFundSrc = FundingSource::find($id);
+            $instanceFundSrc = FundingProject::find($id);
             $sourceName = $instanceFundSrc->source_name;
             $instanceFundSrc->destroy();
 
@@ -1264,9 +1260,9 @@ class LibraryController extends Controller
                                             ->count();
                 break;
             case 'FundingSource':
-                $dataCount = FundingSource::where('source_name', $data)
-                                          ->orWhere('source_name', strtolower($data))
-                                          ->orWhere('source_name', strtoupper($data))
+                $dataCount = FundingProject::where('project_name', $data)
+                                          ->orWhere('project_name', strtolower($data))
+                                          ->orWhere('project_name', strtoupper($data))
                                           ->count();
                 break;
             case 'Signatory':

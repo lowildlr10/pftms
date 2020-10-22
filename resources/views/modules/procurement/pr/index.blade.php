@@ -70,7 +70,7 @@
                                             @sortablelink('date_pr', 'PR Date', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="10%">
-                                            @sortablelink('funding.source_name', 'Funding/Charging', [], ['class' => 'white-text'])
+                                            @sortablelink('funding.project_name', 'Funding/Charging', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="41%">
                                             @sortablelink('purpose', 'Purpose', [], ['class' => 'white-text'])
@@ -114,7 +114,7 @@
                                             {{ $pr->pr_no }}
                                         </td>
                                         <td>{{ $pr->date_pr }}</td>
-                                        <td>{{ $pr->funding['source_name'] }}</td>
+                                        <td>{{ $pr->funding['project_name'] }}</td>
                                         <td>
                                             <i class="fas fa-caret-right"></i> {{
                                                 (strlen($pr->purpose) > 150) ?
@@ -282,7 +282,7 @@
                     <div class="card-body">
                         <p>
                             <strong>PR Date: </strong> {{ $pr->date_pr }}<br>
-                            <strong>Charging: </strong> {{ $pr->funding['source_name'] }}<br>
+                            <strong>Charging: </strong> {{ $pr->funding['project_name'] }}<br>
                             <strong>Purpose: </strong> {{
                                 (strlen($pr->purpose) > 150) ?
                                 substr($pr->purpose, 0, 150).'...' : $pr->purpose

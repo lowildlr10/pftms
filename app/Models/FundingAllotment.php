@@ -3,20 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
-use Kyslik\ColumnSortable\Sortable;
 
-class FundingSource extends Model
+class FundingAllotment extends Model
 {
-    use SoftDeletes, Sortable;
-
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'funding_sources';
+    protected $table = 'funding_allotments';
 
      /**
      * The attributes that are mass assignable.
@@ -24,9 +20,11 @@ class FundingSource extends Model
      * @var array
      */
     protected $fillable = [
-        'id',
-        'reference_code',
-        'source_name'
+        'project_id',
+        'budget_id',
+        'allotment_class',
+        'order_no',
+        'allotment_name',
     ];
 
     /**
@@ -37,18 +35,13 @@ class FundingSource extends Model
     public $incrementing = false;
 
     public static function boot() {
-         parent::boot();
-         self::creating(function($model) {
-             $model->id = self::generateUuid();
-         });
+        parent::boot();
+        self::creating(function($model) {
+            $model->id = self::generateUuid();
+        });
     }
 
     public static function generateUuid() {
-         return Uuid::generate();
+        return Uuid::generate();
     }
-
-    public $sortable = [
-        'reference_code',
-        'source_name'
-    ];
 }

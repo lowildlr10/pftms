@@ -22,7 +22,7 @@ use App\User;
 use App\Models\EmpGroup;
 use App\Models\EmpDivision;
 use App\Models\ItemUnitIssue;
-use App\Models\FundingSource;
+use App\Models\FundingProject;
 use App\Models\Signatory;
 use App\Models\DocumentLog as DocLog;
 use App\Models\PaperSize;
@@ -97,7 +97,7 @@ class PurchaseRequestController extends Controller
                     ->orWhere('date_pr', 'like', "%$keyword%")
                     ->orWhere('purpose', 'like', "%$keyword%")
                     ->orWhereHas('funding', function($query) use ($keyword) {
-                        $query->where('source_name', 'like', "%$keyword%");
+                        $query->where('project_name', 'like', "%$keyword%");
                     })->orWhereHas('stat', function($query) use ($keyword) {
                         $query->where('status_name', 'like', "%$keyword%");
                     })->orWhereHas('requestor', function($query) use ($keyword) {
@@ -505,7 +505,7 @@ class PurchaseRequestController extends Controller
         $roleHasBudget = Auth::user()->hasBudgetRole();
         $roleHasAccountant = Auth::user()->hasAccountantRole();
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
-        $fundingSources = FundingSource::orderBy('source_name')->get();
+        $fundingSources = FundingProject::orderBy('project_name')->get();
         $empDivisionAccess = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
                               [Auth::user()->division] :
                               Auth::user()->getDivisionAccess();
@@ -570,7 +570,7 @@ class PurchaseRequestController extends Controller
         $roleHasBudget = Auth::user()->hasBudgetRole();
         $roleHasAccountant = Auth::user()->hasAccountantRole();
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
-        $fundingSources = FundingSource::orderBy('source_name')->get();
+        $fundingSources = FundingProject::orderBy('project_name')->get();
 
         $empDivisionAccess = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
                               [Auth::user()->division] :

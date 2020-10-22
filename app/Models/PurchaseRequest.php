@@ -76,7 +76,7 @@ class PurchaseRequest extends Model
     }
 
     public function funding() {
-        return $this->hasOne('App\Models\FundingSource', 'id', 'funding_source');
+        return $this->hasOne('App\Models\FundingProject', 'id', 'funding_source');
     }
 
     public function requestor() {
