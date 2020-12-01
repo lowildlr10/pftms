@@ -148,7 +148,7 @@ $(function() {
 
     function multiplyInputs(element) {
 		const unitCost = parseFloat(element.val()),
-		      quantity = parseInt(element.prev('input').val());
+              quantity = parseInt(element.siblings('.quantity').val());
 		let totalCost = unitCost * quantity;
 
 		if (totalCost == null || totalCost == 0) {
