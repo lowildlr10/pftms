@@ -19,7 +19,7 @@ class UpdateFundingSourcesTable extends Migration
         });
         Schema::rename('funding_sources', 'funding_projects');
         Schema::table('purchase_requests', function (Blueprint $table) {
-            $table->foreign('funding_source')->references('id')->on('funding_projects');
+            //$table->foreign('funding_source')->references('id')->on('funding_projects');
         });
     }
 

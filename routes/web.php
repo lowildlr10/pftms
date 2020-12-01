@@ -1049,6 +1049,17 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'is_allowed'
     ]);
 
+    /*===================== FUND UTILIZATION ROUTES =====================*/
+
+    // Source of Funds / Projects Module
+    Route::any('fund-utilization/projects', [
+        'uses' => 'FundProjectController@index',
+        'module' => 'pay_summary',
+        'access' => 'is_allowed'
+    ])->name('fund-project');
+
+    // Ledger Module
+
     /*===================== SYSTEM LIBRARIES ROUTES =====================*/
 
     // Item Classification Module

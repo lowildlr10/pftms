@@ -141,10 +141,10 @@
                     <div class="sidebar-submenu">
                         <ul>
                             <li>
-                                <a href="{{ route('lddap')  }}" class="waves-effect">LLDAP</a>
+                                <a href="{{ route('lddap') }}" class="waves-effect">LLDAP</a>
                             </li>
                             <li>
-                                <a href="{{ route('summary')  }}" class="waves-effect">Summary</a>
+                                <a href="{{ route('summary') }}" class="waves-effect">Summary</a>
                             </li>
                         </ul>
                     </div>
@@ -157,7 +157,10 @@
                     <div class="sidebar-submenu">
                         <ul>
                             <li>
-                                <a href="#" class="waves-effect">--</a>
+                                <a href="{{ route('fund-project') }}" class="waves-effect">Source of Funds / Projects</a>
+                            </li>
+                            <li>
+                                <a href="#" class="waves-effect">Ledger</a>
                             </li>
                         </ul>
                     </div>
