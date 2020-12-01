@@ -231,36 +231,36 @@
                                                                             <input class="quantity" type="hidden" value="{{ $item->quantity }}">
                                                                             <input class="abstract-item-id" type="hidden" value="{{ $absItem->id }}">
                                                                             <input type="number" class="form-control form-control-sm unit-cost required"
-                                                                                   id="unit_cost-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $key }}" min="0"
+                                                                                   id="unit_cost-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $absItemCtr }}" min="0"
                                                                                    value="{{ $absItem->unit_cost }}">
-                                                                            <label for="unit_cost-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $key }}"
+                                                                            <label for="unit_cost-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $absItemCtr }}"
                                                                                    class="{{ !empty($absItem->unit_cost) ? 'active' : '' }}">
                                                                                 Unit Cost <span class="red-text">*</span>
                                                                             </label>
                                                                         </div>
                                                                         <div class="md-form form-sm">
                                                                             <input type="number" class="form-control form-control-sm total-cost required"
-                                                                                   id="total_cost-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $key }}" min="0"
+                                                                                   id="total_cost-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $absItemCtr }}" min="0"
                                                                                    value="{{ $absItem->total_cost }}">
-                                                                            <label for="total_cost-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $key }}"
+                                                                            <label for="total_cost-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $absItemCtr }}"
                                                                                    class="{{ !empty($absItem->total_cost) ? 'active' : '' }}">
                                                                                 Total Cost <span class="red-text">*</span>
                                                                             </label>
                                                                         </div>
                                                                         <div class="md-form form-sm">
                                                                             <textarea class="md-textarea form-control form-control-sm specification"
-                                                                                    id="specification-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $key }}"
+                                                                                    id="specification-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $absItemCtr }}"
                                                                                     style="resize: none;" rows="3">{{ $absItem->specification }}</textarea>
-                                                                            <label for="specification-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $key }}"
+                                                                            <label for="specification-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $absItemCtr }}"
                                                                                    class="{{ !empty($absItem->specification) ? 'active' : '' }}">
                                                                                 Specifications
                                                                             </label>
                                                                         </div>
                                                                         <div class="md-form form-sm">
                                                                             <textarea class="md-textarea form-control form-control-sm remarks"
-                                                                                    id="remarks-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $key }}"
+                                                                                    id="remarks-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $absItemCtr }}"
                                                                                     style="resize: none;" rows="3">{{ $absItem->remarks }}</textarea>
-                                                                            <label for="remarks-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $key }}"
+                                                                            <label for="remarks-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $absItemCtr }}"
                                                                                    class="{{ !empty($absItem->remarks) ? 'active' : '' }}">
                                                                                 Remarks
                                                                             </label>
