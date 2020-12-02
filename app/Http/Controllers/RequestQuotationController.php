@@ -14,7 +14,7 @@ use App\Models\DisbursementVoucher;
 use App\Models\InventoryStock;
 
 use App\User;
-use App\Models\FundingSource;
+use App\Models\FundingProject;
 use App\Models\ItemUnitIssue;
 use App\Models\Signatory;
 use App\Models\DocumentLog as DocLog;
@@ -88,7 +88,7 @@ class RequestQuotationController extends Controller
                     ->orWhere('date_pr', 'like', "%$keyword%")
                     ->orWhere('purpose', 'like', "%$keyword%")
                     ->orWhereHas('funding', function($query) use ($keyword) {
-                        $query->where('source_name', 'like', "%$keyword%");
+                        $query->where('project_name', 'like', "%$keyword%");
                     })->orWhereHas('stat', function($query) use ($keyword) {
                         $query->where('status_name', 'like', "%$keyword%");
                     })->orWhereHas('requestor', function($query) use ($keyword) {

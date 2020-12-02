@@ -75,7 +75,7 @@ class InspectionAcceptanceController extends Controller
                     ->orWhere('date_pr', 'like', "%$keyword%")
                     ->orWhere('purpose', 'like', "%$keyword%")
                     ->orWhereHas('funding', function($query) use ($keyword) {
-                        $query->where('source_name', 'like', "%$keyword%");
+                        $query->where('project_name', 'like', "%$keyword%");
                     })->orWhereHas('stat', function($query) use ($keyword) {
                         $query->where('status_name', 'like', "%$keyword%");
                     })->orWhereHas('requestor', function($query) use ($keyword) {
