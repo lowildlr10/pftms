@@ -4,15 +4,19 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Mpdels\FundingAllotment;
-use App\Mpdels\FundingAllotmentRealignment;
-use App\Mpdels\FundingBudget;
-use App\Mpdels\FundingBudgetRealignment;
-use App\Mpdels\FundingLedger;
-use App\Mpdels\FundingLedgerItem;
-use App\Mpdels\FundingProject;
+use App\Models\FundingAllotment;
+use App\Models\FundingAllotmentRealignment;
+use App\Models\FundingBudget;
+use App\Models\FundingBudgetRealignment;
+use App\Models\FundingLedger;
+use App\Models\FundingLedgerItem;
+use App\Models\FundingProject;
+
+use App\User;
+use App\Models\PaperSize;
 use DB;
 use Auth;
+use Carbon\Carbon;
 
 class FundProjectController extends Controller
 {
@@ -21,8 +25,36 @@ class FundProjectController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() {
-        return view('modules.fund-utilization.fund-project.index');
+    public function index(Request $request) {
+        $keyword = trim($request->keyword);
+
+        // Get module access
+        $module = 'fund_project';
+        $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
+        $isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
+
+        // Main data
+        $paperSizes = PaperSize::orderBy('paper_type')->get();
+        $fundProjData = FundingProject::whereNull('deleted_at');
+
+        if (!empty($keyword)) {
+            $fundProjData = $fundProjData->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('project_name', 'like', "%$keyword%");
+            });
+        }
+
+        $fundProjData = $fundProjData->orderBy('project_name')
+                                     ->sortable(['created_at' => 'desc'])
+                                     ->paginate(15);
+
+        return view('modules.fund-utilization.fund-project.index', [
+            'list' => $fundProjData,
+            'keyword' => $keyword,
+            'paperSizes' => $paperSizes,
+        ]);
     }
 
     /**
@@ -31,7 +63,7 @@ class FundProjectController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create() {
-        //
+        return view('modules.fund-utilization.fund-project.create');
     }
 
     /**
@@ -50,8 +82,7 @@ class FundProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
+    public function show($id) {
         //
     }
 
@@ -61,9 +92,18 @@ class FundProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
-    {
-        //
+    public function edit($id) {
+        $fundProjectData = FundingProject::find($id);
+
+        $projectID = $fundProjectData->id;
+        $projectName = $fundProjectData->project_name;
+
+        $fundBudget = FundingBudget::where('project_id', $projectID)->first();
+
+        return view('modules.fund-utilization.fund-project.update', [
+            'id' => $id,
+            'projectName' => $projectName
+        ]);
     }
 
     /**
@@ -73,8 +113,7 @@ class FundProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, $id) {
         //
     }
 
@@ -84,8 +123,7 @@ class FundProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
+    public function destroy($id) {
         //
     }
 }
