@@ -1049,6 +1049,27 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'is_allowed'
     ]);
 
+    /*===================== FUND UTILIZATION ROUTES =====================*/
+
+    // Source of Funds / Projects Module
+    Route::any('fund-utilization/projects', [
+        'uses' => 'FundProjectController@index',
+        'module' => 'pay_summary',
+        'access' => 'is_allowed'
+    ])->name('fund-project');
+    Route::get('fund-utilization/projects/show-create', [
+        'uses' => 'FundProjectController@create',
+        'module' => 'pay_summary',
+        'access' => 'is_allowed'
+    ])->name('fund-project-show-create');
+    Route::get('fund-utilization/projects/show-edit/{id}', [
+        'uses' => 'FundProjectController@edit',
+        'module' => 'pay_summary',
+        'access' => 'is_allowed'
+    ])->name('fund-project-show-edit');
+
+    // Ledger Module
+
     /*===================== SYSTEM LIBRARIES ROUTES =====================*/
 
     // Item Classification Module
