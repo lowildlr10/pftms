@@ -74,6 +74,10 @@ class PurchaseRequestController extends Controller
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
 
+        if ($roleHasOrdinary && Auth::user()->getDivisionAccess()) {
+            $empDivisionAccess = Auth::user()->getDivisionAccess();
+        }
+
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
         $prData = PurchaseRequest::with(['funding', 'requestor', 'stat'])
