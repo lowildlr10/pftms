@@ -24,8 +24,7 @@
    APP_DEBUG, DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, and 
    DB_PASSWORD
      example:
-       <p>
-       APP_NAME="Procurement and Financial Transactions Management System"
+       APP_NAME=Procurement-and-Financia-Transactions-Management-System
        APP_DEBUG=false
        
        DB_HOST=127.0.0.1
@@ -33,8 +32,6 @@
        DB_DATABASE=pftms_db
        DB_USERNAME=pftms
        DB_PASSWORD=pftms
-       
-       </p>
        
  6. Then run this commands:
       - "composer install"
