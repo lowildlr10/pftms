@@ -4,16 +4,16 @@
 1. Go to the directory where the repository is being stored/cloned by using 
    the "cd" command.
      example: 
-       cd /var/www
-       cd C:\xampp\htdocs
+       - cd /var/www
+       - cd C:\xampp\htdocs
         
 2. Clone this repository using "git clone <URL> <folder_name>" command
      example: 
-       git clone https://github.com/lowildlr10/pftms_v2.git pftms
+       - git clone https://github.com/lowildlr10/pftms_v2.git pftms
    
 3. Navigate inside the cloned repository by using "cd" command
      example:
-       cd pftms
+       - cd pftms
         
 4. Run this command "cp .env.examples .env" (Linux or MAC) or 
    "copy .env.examples .env" or simply duplicate ".env.examples"
@@ -24,6 +24,7 @@
    APP_DEBUG, DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, and 
    DB_PASSWORD
      example:
+       <p>
        APP_NAME="Procurement and Financial Transactions Management System"
        APP_DEBUG=false
        
@@ -33,17 +34,19 @@
        DB_USERNAME=pftms
        DB_PASSWORD=pftms
        
+       </p>
+       
  6. Then run this commands:
-      "composer install"
-      "php artisan key:generate"
-      "php artisan migrate:fresh --seed"
-      "php artisan cache:clear"
-      "php artisan config:clear"
-      "php artisan view:clear"
+      - "composer install"
+      - "php artisan key:generate"
+      - "php artisan migrate:fresh --seed"
+      - "php artisan cache:clear"
+      - "php artisan config:clear"
+      - "php artisan view:clear"
       
  7. Access the site then login this admin credentials:
-      Username: dostcarmis
-      Password: dostcarmis
+      - Username: dostcarmis
+      - Password: dostcarmis
       
 8. Change immediately the password then entry all the
    necessary data in the following libraries:
