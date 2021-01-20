@@ -41,21 +41,23 @@ class DocRequestQuotation extends PDF {
 
         /* ------------------------------------- Start of Doc ------------------------------------- */
 
+            $this->Ln(5);
+
+            $this->SetFont('helvetica', '', 10  + ($fontScale * 10));
             $this->Cell($pageWidth * 0.452, 5, "QTN. NO: " . $data->pr->pr_no . "", 0, '', 'L');
             $this->Cell(0, 5, "Date: " . $data->rfq->date_canvass, 0, '', 'R');
-            $this->Ln();
+            $this->Ln(10);
 
             //Title
             $this->MultiCell(0, '5', 'REQUEST FOR BIDS/QUOTATION', 0, 'C');
             $this->Ln();
 
-            $this->SetFont('helvetica', '', 10  + ($fontScale * 10));
             $this->Cell(0, 5, 'Sir/Madam:');
             $this->Ln();
             $this->MultiCell(0, 5,
-                            "       This is a request for quotation on items enumerated hereunder.".
-                            " If you are interested to and in a position to furnish the same, we shall be ".
-                            "glad to have your best prices, terms and conditions of delivery.",
+                            "             This is a request for quotation on items enumerated hereunder. If ".
+                            "you are interested to and in a position to furnish the same, we shall be glad ".
+                            "to have your best prices, terms and conditions of delivery.",
                             0, 'L');
             $this->Ln(5);
 
@@ -63,86 +65,126 @@ class DocRequestQuotation extends PDF {
             $this->htmlTable($groupNo->table_data);
 
             //Footer
-            $this->Cell($pageWidth * 0.5, 5,"                         Terms of Delivery:");
-            $this->Cell($pageWidth * 0.405, 5,"             Terms of Payment:");
+            $this->SetFont('helvetica', 'BI', 10  + ($fontScale * 10));
+            $this->Cell($pageWidth * 0.5, 5, "     Delivery Term (Complete)");
+            $this->SetFont('helvetica', '', 10  + ($fontScale * 10));
+            $this->Cell($pageWidth * 0.068, 5, "Payment");
+            $this->SetFont('helvetica', 'BI', 10  + ($fontScale * 10));
+            $this->Cell($pageWidth * 0, 5, "Term");
             $this->Ln();
-            $this->Cell($pageWidth * 0.5, 5,"                          _______ Pick-up");
-            $this->Cell($pageWidth * 0.405, 5,"             _______ After Inspection & Acceptance");
+
+            $this->SetFont('helvetica', '', 10  + ($fontScale * 10));
+            $this->Cell($pageWidth * 0.5, 5, "________ Pick-up");
+            $this->Cell($pageWidth * 0.405, 5, "________ After Inspection & Acceptance");
             $this->Ln();
-            $this->Cell($pageWidth * 0.5, 5,"                          _______On-site Delivery");
-            $this->Ln();
-            $this->Ln();
-            $this->Cell(0, 5,"Deadline for Submission: " . $deadlineDate);
+
+            $this->Cell($pageWidth * 0.205, 5, "________  On-site delivery");
+            $this->SetFont('helvetica', 'BI', 10  + ($fontScale * 10));
+            $this->Cell(0, 5, "to _____________");
             $this->Ln(8);
 
-            $this->Cell($pageWidth * 0.57,  5, "Very truly yours,");
-            $this->Cell($pageWidth * 0.19,  5, "Prices quoted above are");
-            $this->SetFont('helvetica','B', 10 + ($fontScale * 10));
-            $this->Cell(0,  5, "valid until_______ ", 0);
-            $this->SetFont('helvetica','', 10 + ($fontScale * 10));
+            $this->SetFont('helvetica', 'BI', 10  + ($fontScale * 10));
+            $this->Cell($pageWidth * 0.09, 5, "Warranty: ",);
+            $this->SetFont('helvetica', '', 10  + ($fontScale * 10));
+            $this->Cell(0, 5, "___________________________________");
             $this->Ln();
 
-            $this->Cell($pageWidth * 0.5, 5, '');
-            $this->Cell($pageWidth * 0.405, 5, "               Certified Correct:", 0, 0, 'L');
+            $this->SetFont('helvetica', 'BI', 10  + ($fontScale * 10));
+            $this->Cell($pageWidth * 0.184, 5, "After Sales Service/s: ",);
+            $this->SetFont('helvetica', '', 10  + ($fontScale * 10));
+            $this->Cell(0, 4, "_________________________");
             $this->Ln();
+
+            $this->Cell(0, 4, "____________________________________________");
+            $this->Ln();
+
+            $this->Cell(0, 4, "____________________________________________");
+            $this->Ln(12);
+
+            $this->Cell(0, 5,"Deadline for Submission: _____________________" . $deadlineDate);
+            $this->Ln(15);
+
+            $this->Cell($pageWidth * 0.55,  5, "Very truly yours,");
+            $this->Cell($pageWidth * 0.188,  5, "Prices quoted above are");
+            $this->SetFont('helvetica','B', 10 + ($fontScale * 10));
+            $this->Cell($pageWidth * 0.045,  5, "valid", 0);
+            $this->SetFont('helvetica','', 10 + ($fontScale * 10));
+            $this->Cell(0,  5, "until _________", 0);
+            $this->Ln();
+
+            $this->Cell($pageWidth * 0.55, 5, '');
+            $this->Cell(0, 5, "and Certified Correct:", 0, 0, 'L');
+            $this->Ln();
+
             $this->SetFont('helvetica', 'B', 10  + ($fontScale * 10));
             $this->Cell(0, 5,"DEPARTMENT OF SCIENCE AND TECHNOLOGY", 0, 'B', 'L');
             $this->Ln(8);
 
-            $this->Cell($pageWidth * 0.5, 5," ");
-            $this->Cell(0, 5,"      ________________________________", 0, 0, 'C');
+            $this->Cell($pageWidth * 0.55, 5," ");
+            $this->Cell(0, 5,"______________________________");
             $this->Ln();
+
+
             $this->SetFont('helvetica','B', 10 + ($fontScale * 10));
-            $this->Cell($pageWidth * 0.5, 5, " ");
+            $this->Cell($pageWidth * 0.55, 5, " ");
             $this->SetFont('helvetica', '', 10 + ($fontScale * 10));
-            $this->Cell($pageWidth * 0.405, 5, "    Name of Firm/Company and Address:", 0, 0, 'C');
-            $this->Ln();
-            $this->SetFont('helvetica','B', 10 + ($fontScale * 10));
-            $this->Cell($pageWidth * 0.5, 5, " ");
-            $this->SetFont('helvetica', '', 10 + ($fontScale * 10));
-            $this->Cell($pageWidth * 0.405, 5, " ");
-            $this->Ln();
-            $this->Cell($pageWidth * 0.5, 5, " ");
-            $this->Cell($pageWidth * 0.405, 5, " ");
-            $this->Ln();
+            $this->Cell(0, 5, "Name of Firm/Company and Address:", 0, 0);
+            $this->Ln(10);
 
-            $this->SetFont('helvetica', 'B', 11 + ($fontScale * 11));
-            $this->Cell($pageWidth * 0.405, 5, "".$data->sig_rfq->name."",'B','','C');
+            $this->SetFont('helvetica', 'B', 10 + ($fontScale * 10));
+            $this->Cell($pageWidth * 0.39, 5, strtoupper($data->sig_rfq->name), 'B', 0, 'C');
+            $this->Cell($pageWidth * 0.16, 5, '');
             $this->SetFont('helvetica', '', 10 + ($fontScale * 10));
-            $this->Cell($pageWidth * 0.5, 5, "");
+            $this->Cell(0, 5, "");
             $this->Ln();
 
             $this->SetFont('helvetica', '', 10 + ($fontScale * 10));
-            $this->Cell($pageWidth * 0.405, 5, "Property & Supply Officer/ PSTD ", 0, 0, 'C');
-            $this->Cell($pageWidth * 0.1645, 5, "",'','','C');
-            $this->Cell(0, 5, "Signature over Printed Name of Authorized", 'T', 0, 'L');
-            $this->Ln();
-            $this->Cell('83', 5, " ", 0, 0, 'C');
-            //$this->Cell($pageWidth * 0.452, 5," Representative",0,'','L');
+            $this->Cell($pageWidth * 0.39, 5, "Property & Supply Officer/ PSTD", 0, 0, 'C');
+            $this->Cell($pageWidth * 0.16, 5, '');
+            $this->Cell(0, 5, "Signature over Printed Name of Authorized", 'T');
             $this->Ln();
 
+            $this->Cell($pageWidth * 0.55, 5, "");
+            $this->Cell(0, 5, "Representative");
+            $this->Ln(12);
 
             $this->Cell(0, 5, "IMPORTANT:", 0);
             $this->Ln();
-            $this->Cell($pageWidth * 0.75, 5, '          Prices should be in ink and clearly quoted. '.
-                                            'When offering substitute/equivalent, specify brand. ', 0);
+
+            $html = '<span style="text-align:justify;">&nbsp;&nbsp;&nbsp;&nbsp;'.
+                    '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Prices should be in ink and clearly quoted. '.
+                    "When offering substitute/ equivalent, specify brand. <b>Submit quotations in ".
+                    "a sealed envelope.</b></span>";
+            $this->writeHTML($html, true, 0, true, true);
+            $this->Ln();
+
+            $html = '<span style="text-align:justify;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.
+                    '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DOST-CAR office reserves the right to reject '.
+                    "any or all bids, to waive any defect therein and accept the offer most advantageous ".
+                    "to the DOST-CAR Office.</span>";
+            $this->writeHTML($html, true, 0, true, true);
+
+            /*
+            $this->Cell($pageWidth * 0.77, 5,
+                        "           Prices should be in ink and clearly quoted.  ".
+                        "When offering substitute/ equivalent, specify brand.", 0, 0, 'J');
             $this->SetFont('helvetica','B', 10 + ($fontScale * 10));
-            $this->Cell(0, 5, 'Submit quotations');
+            $this->Cell(0, 5, 'Submit', 0, 0, 'R');
             $this->Ln();
-            $this->Cell(0, 5, 'in a sealed envelope.');
+
+            $this->Cell(0, 5, 'quotations in a sealed envelope.');
             $this->Ln();
+
             $this->SetFont('helvetica','', 10 + ($fontScale * 10));
             $this->MultiCell(0, 5, "\n          DOST-CAR office reserves the right to reject any or all bids, ".
                                 "to waive any defect therein and accept the offer most ".
-                                "advantageous to the DOST-CAR Office.", 0, 'L');
+                                "advantageous to the DOST-CAR Office.", 0, 'L');*/
             $this->Ln(5);
-
-            $this->SetFont('helvetica', 'IB', 10 + ($fontScale * 10));
 
             if ($data->canvassed_by->name) {
                 $this->Cell($pageWidth * 0.13, 5, "Canvassed by: ", 0, 0, 'L');
-                $this->SetFont('helvetica', 'IU', 10 + ($fontScale * 10));
-                $this->Cell(0, 5, ' '.$data->canvassed_by->name.' ', 0, 0, 'L');
+                $this->SetFont('helvetica', 'U', 10 + ($fontScale * 10));
+                $this->Cell(0, 5, strtoupper($data->canvassed_by->name), 0, 0, 'L');
             } else {
                 $this->Cell(0, 5, "Canvassed by:_______________________", 0, 0, 'L');
             }
