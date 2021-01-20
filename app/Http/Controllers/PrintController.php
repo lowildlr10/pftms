@@ -2177,29 +2177,29 @@ class PrintController extends Controller
                 [
                     'aligns' => ['C', 'C', 'C', 'C', 'C', 'C'],
                     'widths' => [$multiplier * 7.14, $multiplier * 6.19,
-                                 $multiplier * 7.62, $multiplier * 44.3,
-                                 $multiplier * 15.2, $multiplier * 11.9],
-                    'font-styles' => ['B', 'B', 'B', 'B', 'B', 'B'],
-                    'type' => 'row-title',
-                    'data' => [['ITEM NO.', 'QTY', 'UNIT', 'ARTICLES/PARTICULARS',
-                                'Approved Budget for the Contract', 'UNIT PRICE']]],
-                [
-                    'aligns' => ['C','C','C','L','R','R'],
-                    'widths' => [$multiplier * 7.14, $multiplier * 6.19,
-                                 $multiplier * 7.62, $multiplier * 44.3,
-                                 $multiplier * 15.2, $multiplier * 11.9],
+                                 $multiplier * 7.62, $multiplier * 49.3,
+                                 $multiplier * 13.2, $multiplier * 8.9],
                     'font-styles' => ['', '', '', '', '', ''],
                     'type' => 'row-data',
-                    'data' => $tableData],
-                [
+                    'data' => [['ITEM NO.', 'QTY', 'UNIT', 'ARTICLES/PARTICULARS',
+                                'Approved Budget for the Contract (unit)', 'UNIT PRICE']]
+                ], [
+                    'aligns' => ['C','C','C','L','R','R'],
+                    'widths' => [$multiplier * 7.14, $multiplier * 6.19,
+                                 $multiplier * 7.62, $multiplier * 49.3,
+                                 $multiplier * 13.2, $multiplier * 8.9],
+                    'font-styles' => ['', '', '', '', '', ''],
+                    'type' => 'row-data',
+                    'data' => $tableData
+                ], count($tableData) == 0 ? [
                     'aligns' => ['C','C','C','C','R','R'],
                     'widths' => [$multiplier * 7.14, $multiplier * 6.19,
-                                 $multiplier * 7.62, $multiplier * 44.3,
-                                 $multiplier * 15.2, $multiplier * 11.9],
+                                 $multiplier * 7.62, $multiplier * 49.3,
+                                 $multiplier * 13.2, $multiplier * 8.9],
                     'font-styles' => ['', '', '', '', '', ''],
                     'type' => 'other',
                     'data' => [['', '', '', '', '', '']]
-                ]
+                ] : null
             ];
 
             $groupNo->table_data = (object)$data;
@@ -2342,8 +2342,10 @@ class PrintController extends Controller
         $pdf->setFontScale($fontScale);
 
         $docCode = "FM-FAS-PUR F06";
-        $docRev = "Revision 1";
-        $docRevDate = "02-28-18";
+        //$docRev = "Revision 1";
+        //$docRevDate = "02-28-18";
+        $docRev = "Revision 2";
+        $docRevDate = "10-16-2020";
         $docTitle = "rfq_" . $data->pr->pr_no;
         $docCreator = "DOST-CAR";
         $docAuthor = "DOST-CAR";
