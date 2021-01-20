@@ -12,6 +12,7 @@ class PDF extends TCPDF {
     public $docRev;
     public $docRevDate;
     public $fontScale = 0;
+    public $customPageNo = null;
 
     /*
     //Set the array of column alignments
@@ -60,6 +61,10 @@ class PDF extends TCPDF {
 
     public function setFontScale($fontScale) {
         $this->fontScale = $fontScale;
+    }
+
+    public function setCustomPageNo($customPageNo) {
+        $this->customPageNo = $customPageNo;
     }
 
     private function htmlFontStyle($key) {
@@ -187,7 +192,12 @@ class PDF extends TCPDF {
         $xCoor = $this->GetX();
         $yCoor = $this->GetY();
         $pageWidth = $this->w;
-        $PageNo = 'Page '.$this->getAliasNumPage().' of '.$this->getAliasNbPages();
+
+        $aliasNumberPage = $this->getAliasNumPage();
+        $aliasNbPages = $this->getAliasNbPages();
+        $pageNo = !$this->customPageNo ?
+                  "Page $aliasNumberPage of $aliasNbPages" :
+                  $this->customPageNo;
 
         if ($curOrientation == 'P') {
             $mulltiplier1 = 0.09;;
@@ -228,7 +238,7 @@ class PDF extends TCPDF {
             $this->Cell($pageWidth * $mulltiplier1, 4, '');
             $this->Cell($pageWidth * $mulltiplier2, 4, 'Cordillera Administrative Region');
             $this->SetFont('helvetica', '', 8);
-            $this->Cell(0, 4, "\t".$PageNo, 'LR');
+            $this->Cell(0, 4, "\t".$pageNo, 'LR');
             $this->Ln();
 
             $this->SetFont('helvetica', '', 9);
@@ -268,7 +278,7 @@ class PDF extends TCPDF {
         $this->SetFont('helvetica', '', 10);
         // Print current and total page numbers
 
-        //$this->Cell(0,10,'Page '.$this->PageNo().'/{nb}',0,0,'C');
+        //$this->Cell(0,10,'Page '.$this->pageNo().'/{nb}',0,0,'C');
 
         $this->Cell(0, 4, 'This document shall be deemed uncontrolled unless labelled "CONTROLLED"', 0, 0, 'C');
         $this->ln();
@@ -280,8 +290,8 @@ class PDF extends TCPDF {
 
         $this->SetFont('helvetica', 'I', 7);
 
-        $PageNo = 'Page '.$this->getAliasNumPage().' of '.$this->getAliasNbPages();
-        $this->Cell(0, 3, $PageNo, 0, 0, 'R');
+        $pageNo = 'Page '.$this->getAliasNumPage().' of '.$this->getAliasNbPages();
+        $this->Cell(0, 3, $pageNo, 0, 0, 'R');
     }
 
 }
