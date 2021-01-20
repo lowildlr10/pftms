@@ -2340,6 +2340,7 @@ class PrintController extends Controller
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new DocRequestQuotation('P', $pageUnit, $pageSize);
         $pdf->setFontScale($fontScale);
+        $pdf->setCustomPageNo('Page 2 of 2');
 
         $docCode = "FM-FAS-PUR F06";
         //$docRev = "Revision 1";
