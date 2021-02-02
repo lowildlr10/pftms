@@ -85,21 +85,24 @@
         </div>
     </div>
 
-    <div class="table-responsive-md table-responsive-sm table-responsive-lg text-nowrap my-3">
-        <table class="table z-depth-1" style="width: 100%;">
+    <div class="table-responsive-md table-responsive-sm table-responsive-lg my-1">
+        <table id="add-pr-table" class="table border" style="width: 100%;">
             <thead class="mdb-color white-text">
                 <tr>
-                    <th class="text-center">
+                    <th width="15%" class="text-center">
                         Stock/Property No.
                     </th>
-                    <th class="text-center">
+                    <th width="52%" class="text-center">
                         Description
                     </th>
-                    <th class="text-center">
+                    <th width="10%" class="text-center">
                         Unit
                     </th>
-                    <th class="text-center">
+                    <th width="13%" class="text-center">
                         Quantity
+                    </th>
+                    <th width="10%" class="text-center">
+                        Excluded? <span class="red-text">*</span>
                     </th>
                 </tr>
             </thead>
@@ -119,6 +122,20 @@
                     </td>
                     <td class="text-center">
                         {{ $item->quantity }}
+                    </td>
+                    <td>
+                        <div class="md-form">
+                            <input type="hidden" name="po_item_id[]" value="{{ $item->id }}">
+                            <select class="mdb-select crud-select md-form required"
+                                    name="iar_excluded[]">
+                                <option value="y" {{ $item->iar_excluded == 'y' ? 'selected' : ''}}>
+                                    Yes
+                                </option>
+                                <option value="n" {{ $item->iar_excluded == 'n' ? 'selected' : ''}}>
+                                    No
+                                </option>
+                            </select>
+                        </div>
                     </td>
                 </tr>
                     @endforeach
