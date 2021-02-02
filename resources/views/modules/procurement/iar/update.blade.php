@@ -142,7 +142,7 @@
                 @endif
 
                 <tr>
-                    <td class="text-center" colspan="4">
+                    <td class="text-center" colspan="5">
                         *** Nothing Follows ***
                     </td>
                 </tr>
