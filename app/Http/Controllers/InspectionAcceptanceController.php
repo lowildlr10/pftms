@@ -218,6 +218,9 @@ class InspectionAcceptanceController extends Controller
         $sigInspection = $request->sig_inspection;
         $sigSupply = $request->sig_prop_supply;
 
+        $poItemIDs = $request->po_item_id;
+        $iarExcludeds = $request->iar_excluded;
+
         try {
             $instanceIAR = InspectionAcceptance::find($id);
             $iarNo = $instanceIAR->iar_no;
@@ -228,6 +231,12 @@ class InspectionAcceptanceController extends Controller
             $instanceIAR->sig_inspection = $sigInspection;
             $instanceIAR->sig_supply = $sigSupply;
             $instanceIAR->save();
+
+            foreach ($poItemIDs as $itemCtr => $poItemID) {
+                $instanceItem = PurchaseJobOrderItem::find($poItemID);
+                $instanceItem->iar_excluded = $iarExcludeds[$itemCtr];
+                $instanceItem->save();
+            }
 
             $msg = "Inspection and Acceptance Report '$iarNo' successfully updated.";
             Auth::user()->log($request, $msg);

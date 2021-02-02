@@ -1600,9 +1600,11 @@ class PrintController extends Controller
                 $item->item_description = str_replace($searchStr, '<br>', $item->item_description);
             }
 
-            $tableData[] = [$item->stock_no,
-                            $item->item_description,
-                            $item->unit_name, $item->quantity];
+            if ($item->iar_excluded == 'n') {
+                $tableData[] = [$item->stock_no,
+                                $item->item_description,
+                                $item->unit_name, $item->quantity];
+            }
         }
 
         $data = [
