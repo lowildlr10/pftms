@@ -152,15 +152,17 @@
                 <li class="sidebar-dropdown">
                     <a href="#">
                         <i class="fas fa-hand-holding-usd"></i>
-                        <span class="menu-text">Fund Utilization</span>
+                        <span class="menu-text">Fund Utilization Transaction</span>
                     </a>
                     <div class="sidebar-submenu">
                         <ul>
                             <li>
-                                <a href="{{ route('fund-project') }}" class="waves-effect">Source of Funds / Projects</a>
+                                <a href="{{ route('fund-project-lib') }}" class="waves-effect">
+                                    Project Line-Item Budgets
+                                </a>
                             </li>
                             <li>
-                                <a href="#" class="waves-effect">Ledger</a>
+                                <a href="#" class="waves-effect">Realignments</a>
                             </li>
                         </ul>
                     </div>
@@ -224,6 +226,15 @@
                             </li>
                             <li>
                                 <a href="#" class="waves-effect">PCPPE</a>
+                            </li>
+                            <li>
+                                <a href="#" class="waves-effect">Budget Ledger</a>
+                            </li>
+                            <li>
+                                <a href="#" class="waves-effect">Accounting Ledger</a>
+                            </li>
+                            <li>
+                                <a href="#" class="waves-effect">Line-Item Budget</a>
                             </li>
                         </ul>
                     </div>
@@ -308,7 +319,7 @@
                                 <a href="{{ route('procurement-mode') }}" class="waves-effect">Modes of Procurement</a>
                             </li>
                             <li>
-                                <a href="{{ route('funding-source') }}" class="waves-effect">Source of Funds</a>
+                                <a href="{{ route('funding-source') }}" class="waves-effect">Projects</a>
                             </li>
                             <li>
                                 <a href="{{ route('signatory') }}" class="waves-effect">Signatories</a>

@@ -1051,24 +1051,36 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
 
     /*===================== FUND UTILIZATION ROUTES =====================*/
 
-    // Source of Funds / Projects Module
-    Route::any('fund-utilization/projects', [
-        'uses' => 'FundProjectController@index',
+    // Fund Utilization Module
+    Route::any('fund-utilization/project-lib', [
+        'uses' => 'LineItemBudgetController@index',
         'module' => 'pay_summary',
         'access' => 'is_allowed'
-    ])->name('fund-project');
-    Route::get('fund-utilization/projects/show-create', [
-        'uses' => 'FundProjectController@create',
+    ])->name('fund-project-lib');
+    Route::get('fund-utilization/project-lib/show-create', [
+        'uses' => 'LineItemBudgetController@showCreate',
         'module' => 'pay_summary',
-        'access' => 'is_allowed'
-    ])->name('fund-project-show-create');
-    Route::get('fund-utilization/projects/show-edit/{id}', [
-        'uses' => 'FundProjectController@edit',
+        'access' => 'create'
+    ])->name('fund-project-lib-show-create');
+    Route::post('fund-utilization/project-lib/store', [
+        'uses' => 'LineItemBudgetController@store',
         'module' => 'pay_summary',
-        'access' => 'is_allowed'
-    ])->name('fund-project-show-edit');
+        'access' => 'create'
+    ])->name('fund-project-lib-store');
+    Route::get('fund-utilization/project-lib/show-edit/{id}', [
+        'uses' => 'LineItemBudgetController@showEdit',
+        'module' => 'pay_summary',
+        'access' => 'update'
+    ])->name('fund-project-lib-show-edit');
+    Route::post('fund-utilization/project-lib/update/{id}', [
+        'uses' => 'LineItemBudgetController@update',
+        'module' => 'pay_summary',
+        'access' => 'update'
+    ])->name('fund-project-lib-update');
 
-    // Ledger Module
+    /*===================== REPORTS ROUTES =====================*/
+
+
 
     /*===================== SYSTEM LIBRARIES ROUTES =====================*/
 

@@ -8,7 +8,7 @@
             <div class="card-body">
                 <h5 class="card-title white-text">
                     <strong>
-                        <i class="fas fa-hand-holding-usd"></i> Source of Funds / Projects
+                        <i class="fas fa-hand-holding-usd"></i> Project Line-Items Budget
                     </strong>
                 </h5>
                 <hr class="white hidden-xs">
@@ -17,8 +17,8 @@
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
                     <li>
-                        <a href="{{ route('fund-project') }}" class="waves-effect waves-light white-text">
-                            Source of Funds / Projects
+                        <a href="{{ route('fund-project-lib') }}" class="waves-effect waves-light white-text">
+                            Project Line-Items Budget
                         </a>
                     </li>
                 </ul>
@@ -31,9 +31,13 @@
                                 narrower py-2 px-2 mb-1 d-flex justify-content-between
                                 align-items-center">
                         <div>
+                            <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
+                                    onclick="$(this).showCreate('{{ route('fund-project-lib-show-create') }}');">
+                                <i class="fas fa-pencil-alt"></i> Create
+                            </button>
                             <a type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
                                     href="{{ route('funding-source') }}">
-                                <i class="fas fa-pencil-alt"></i> Create
+                                Go to Projects <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
                         <div>
@@ -43,7 +47,7 @@
                                 <i class="fas fa-search"></i> {{ !empty($keyword) ? (strlen($keyword) > 15) ?
                                 'Search: '.substr($keyword, 0, 15).'...' : 'Search: '.$keyword : '' }}
                             </button>
-                            <a href="{{ route('fund-project') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
+                            <a href="{{ route('funding-source') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
                             </a>
                         </div>
@@ -59,11 +63,16 @@
                                 <!--Table head-->
                                 <thead class="mdb-color darken-3 white-text hidden-xs">
                                     <tr>
+                                        <th class="th-md text-center" width="3%">#</th>
                                         <th class="th-md" width="3%"></th>
-                                        <th class="th-md" width="3%"></th>
-                                        <th class="th-md" width="70%">
+                                        <th class="th-md" width="55%">
                                             <b>
                                                 @sortablelink('project_name', 'Project Name', [], ['class' => 'white-text'])
+                                            </b>
+                                        </th>
+                                        <th class="th-md" width="15%">
+                                            <b>
+                                                Date Covered
                                             </b>
                                         </th>
                                         <th class="th-md" width="21%">
@@ -81,13 +90,22 @@
                                     @if (count($list) > 0)
                                         @foreach ($list as $listCtr => $fund)
                                     <tr class="hidden-xs">
-                                        <td align="center" class="border-left">
-                                            <i class="fas fa-project-diagram fa-lg black-text material-tooltip-main"
-                                               data-toggle="tooltip" data-placement="right" title="For Approval"></i>
-                                        </td>
                                         <td></td>
+                                        <td align="center">
+                                            <i class="fas fa-spinner fa-lg faa-spin fa-pulse material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Pending"></i>
+                                        </td>
                                         <td>{{ $fund->project_name }}</td>
-                                        <td>
+                                        <td>2020</td>
+                                        <td class="material-tooltip-main" data-toggle="tooltip" data-placement="right" data-html="true"
+                                            title='{!!
+                                                "Current Approved Budget:<br>
+                                                2,000,000.00 <br><br>
+                                                Budget Realignments: <br>
+                                                1st = 2,000,154.50 <br>
+                                                2nd = 2,568,478.00 <br>
+                                                3rd = 2,704,586.54- <br>"
+                                            !!}'>
                                             -
                                         </td>
 
@@ -148,7 +166,7 @@
             <!--Header-->
             <div class="modal-header stylish-color-dark white-text">
                 <h6>
-                    <i class="fas fa-project-diagram"></i>
+                    <i class="fas fa-hand-holding-usd"></i>
                     <b>Project Details</b>
                 </h6>
                 <button type="button" class="close white-text" data-dismiss="modal"
@@ -164,7 +182,7 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showEdit('{{ route('fund-project-show-edit',
+                                        onclick="$(this).showEdit('{{ route('fund-project-lib-show-edit',
                                                  ['id' => $fund->id]) }}');">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
@@ -180,20 +198,10 @@
                     <div class="card-body">
                         <p>
                             <b>Project Name: </b> {{ $fund->project_name }}<br>
-                            <b>Current Approved Budget: </b> -<br>
-                            <b>Budget for the Previous Year: </b> -<br>
+                            <b>Current Approved Budget: </b><br>
+                            <b>Realignments: </b><br>
                         </p>
 
-                        <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
-                                btn-block waves-effect mb-2"
-                                onclick="$(this).showAttachment('{{ $fund->lddap_id }}');">
-                            <i class="fas fa-paperclip fa-lg"></i> View Attachment
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
-                                btn-block waves-effect mb-2"
-                                onclick="$(this).showAttachment('{{ $fund->lddap_id }}');">
-                            <i class="fas fa-paperclip fa-lg"></i> View Attachment
-                        </button>
                         <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showAttachment('{{ $fund->lddap_id }}');">
