@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 
-class FundingLedger extends Model
+class MooeAccountTitle extends Model
 {
     use SoftDeletes;
 
@@ -15,19 +15,19 @@ class FundingLedger extends Model
      *
      * @var string
      */
-    protected $table = 'funding_ledgers';
+    protected $table = 'mooe_account_titles';
 
-     /**
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'project_id',
-        'date_ledger',
-        'ledger_for',
-        'realignments',
-        'is_lgia',
+        'classification_id',
+        'account_title',
+        'uacs_code',
+        'description',
+        'order_no',
     ];
 
     /**
@@ -46,17 +46,5 @@ class FundingLedger extends Model
 
     public static function generateUuid() {
         return Uuid::generate();
-    }
-
-    public function ledgerItems() {
-        return $this->hasMany('App\Models\FundingLedgerItem', 'id', 'ledger_id');
-    }
-
-    public function project() {
-        return $this->hasOne('App\Models\FundingProject', 'id', 'project_id');
-    }
-
-    public function allotments() {
-        return $this->hasMany('App\Models\FundingAllotment', 'id', 'allotment_id');
     }
 }

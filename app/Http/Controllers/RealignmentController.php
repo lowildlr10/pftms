@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class LedgerController extends Controller
+class RealignmentController extends Controller
 {
     /**
      * Display a listing of the resource.

@@ -18,7 +18,7 @@
             <div class="card-body">
                 <h5 class="card-title white-text">
                     <strong>
-                        <i class="fas fa-book"></i> Libraries: Charging/Funding
+                        <i class="fas fa-book"></i> Libraries: Projects
                     </strong>
                 </h5>
                 <hr class="white">
@@ -28,7 +28,7 @@
                     </li>
                     <li class="active">
                         <a href="{{ route('funding-source') }}" class="waves-effect waves-light cyan-text">
-                            Charging/Funding
+                            Projects
                         </a>
                     </li>
                 </ul>
@@ -45,6 +45,10 @@
                                     onclick="$(this).showCreate('{{ route('funding-source-show-create') }}');">
                                 <i class="fas fa-pencil-alt"></i> Create
                             </button>
+                            <a type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
+                                    href="{{ route('fund-project-lib') }}">
+                                Go to Line-Item Budgets <i class="fas fa-arrow-right"></i>
+                            </a>
                         </div>
                         <div>
                             <button class="btn btn-outline-white btn-rounded btn-sm px-2"
@@ -70,7 +74,7 @@
                                     <tr>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="91%">
-                                            <strong>Funding Source/Charging</strong>
+                                            <strong>Project</strong>
                                         </th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>

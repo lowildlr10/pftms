@@ -4,27 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Models\FundingAllotment;
-use App\Models\FundingAllotmentRealignment;
-use App\Models\FundingBudget;
-use App\Models\FundingBudgetRealignment;
+use App\Models\FundingProject;
 use App\Models\FundingLedger;
 use App\Models\FundingLedgerItem;
-use App\Models\FundingProject;
-
-use App\User;
 use App\Models\PaperSize;
-use DB;
-use Auth;
-use Carbon\Carbon;
 
-class FundProjectController extends Controller
+use Auth;
+
+class LineItemBudgetController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index(Request $request) {
         $keyword = trim($request->keyword);
 
@@ -50,7 +38,7 @@ class FundProjectController extends Controller
                                      ->sortable(['created_at' => 'desc'])
                                      ->paginate(15);
 
-        return view('modules.fund-utilization.fund-project.index', [
+        return view('modules.fund-utilization.fund-project-lib.index', [
             'list' => $fundProjData,
             'keyword' => $keyword,
             'paperSizes' => $paperSizes,
@@ -62,8 +50,11 @@ class FundProjectController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create() {
-        return view('modules.fund-utilization.fund-project.create');
+    public function showCreate() {
+        $projects = FundingProject::orderBy('project_name')->get();
+        return view('modules.fund-utilization.fund-project-lib.create', compact(
+            'projects'
+        ));
     }
 
     /**
@@ -77,33 +68,13 @@ class FundProjectController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id) {
-        //
-    }
-
-    /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id) {
-        $fundProjectData = FundingProject::find($id);
+    public function showEdit($id) {
 
-        $projectID = $fundProjectData->id;
-        $projectName = $fundProjectData->project_name;
-
-        $fundBudget = FundingBudget::where('project_id', $projectID)->first();
-
-        return view('modules.fund-utilization.fund-project.update', [
-            'id' => $id,
-            'projectName' => $projectName
-        ]);
     }
 
     /**
