@@ -1078,6 +1078,17 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'update'
     ])->name('fund-project-lib-update');
 
+    Route::post('fund-utilization/project-lib/get-allot-class', [
+        'uses' => 'LineItemBudgetController@getListAllotmentClass',
+        'module' => 'pay_summary',
+        'access' => 'is_allowed'
+    ]);
+    Route::post('fund-utilization/project-lib/get-account-title', [
+        'uses' => 'LineItemBudgetController@getListAccountTitle',
+        'module' => 'pay_summary',
+        'access' => 'is_allowed'
+    ]);
+
     /*===================== REPORTS ROUTES =====================*/
 
 

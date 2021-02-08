@@ -49,4 +49,9 @@ class FundingProject extends Model
     public $sortable = [
         'project_name'
     ];
+
+    public function budget() {
+        return $this->hasOne('App\Models\FundingBudget', 'project_id', 'id')
+                    ->where('is_active', 'y');
+    }
 }

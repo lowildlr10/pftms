@@ -12,8 +12,10 @@ class AllotmentClassSeeder extends Seeder
      */
     public function run() {
         $classes = [
+            'Personnel Services (PS)',
+            'Maintenance and other Operating Expenses (MOOE)',
+            'Financial Expenses (FinEx)',
             'Capital Outlay (CO)',
-            'Maintenance and other Operating Expenses (MOOE)'
         ];
 
         foreach ($classes as $class) {

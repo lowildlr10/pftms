@@ -31,7 +31,7 @@
                     <div class="md-form form-sm">
                         <input type="date" id="date_from" name="date_from"
                                class="form-control form-control-sm required">
-                        <label for="date_from" class="active mt-3">
+                        <label for="date_from" class="active">
                             <span class="red-text">* </span>
                             <b>Date From</b>
                         </label>
@@ -41,7 +41,7 @@
                     <div class="md-form form-sm">
                         <input type="date" id="date_to" name="date_to"
                                class="form-control form-control-sm required">
-                        <label for="date_to" class="active mt-3">
+                        <label for="date_to" class="active">
                             <span class="red-text">* </span>
                             <b>Date To</b>
                         </label>
@@ -54,11 +54,24 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="md-form form-sm">
-                        <input type="number" id="to" name="to"
-                               class="form-control form-control-sm required">
-                        <label for="to">
+                        <input type="number" id="approved-budget" name="approved_budget"
+                               class="form-control form-control-sm required"
+                               onkeyup="$(this).totalBudgetIsValid();"
+                               onchange="$(this).totalBudgetIsValid();">
+                        <label for="approved-budget">
                             <span class="red-text">* </span>
                             <b>Budget</b>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="md-form form-sm">
+                        <input type="number" id="remaining-budget" material-tooltip-main"
+                               data-toggle="tooltip" data-placement="right" value="0.00"
+                               readonly class="form-control form-control-sm"
+                               title="This should be equals or greater than zero.">
+                        <label for="remaining-budget" class="active">
+                            <b>Remaining Budget</b>
                         </label>
                     </div>
                 </div>
@@ -70,24 +83,19 @@
                 <table class="table table-sm table-hover table-bordered">
                     <thead class="text-center">
                         <tr>
-                            <th class="align-middle" width="30%">
+                            <th class="align-middle" width="33%">
                                 <b>
                                     <span class="red-text">* </span> Allotment Name
                                 </b>
                             </th>
-                            <th class="align-middle" width="26%">
+                            <th class="align-middle" width="33%">
                                 <b>
-                                    <span class="red-text">* </span> Allotment Classification
+                                    <span class="red-text">* </span> Allotment Class
                                 </b>
                             </th>
-                            <th class="align-middle" width="26%">
+                            <th class="align-middle" width="31%">
                                 <b>
-                                    MOOE Account Title
-                                </b>
-                            </th>
-                            <th class="align-middle" width="15%">
-                                <b>
-                                    <span class="red-text">* </span> Alloted Budget
+                                    <span class="red-text">* </span> Allotted Budget
                                 </b>
                             </th>
                             <th width="3%"></th>
@@ -98,30 +106,24 @@
                         <tr id="item-row-1" class="item-row">
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input type="text" placeholder=" Value..." name="date_issue[]"
-                                           class="form-control required form-control-sm date-issue"
-                                           id="date-issue-0">
+                                    <input type="text" placeholder=" Value..." name="allotment_name[]"
+                                           class="form-control required form-control-sm allotment-name py-1"
+                                           id="allotment-name-0">
                                 </div>
                             </td>
                             <td>
                                 <div class="md-form my-0">
-                                    <select class="mdb-select required allot-class-tokenizer" multiple="multiple"
-                                            name="allotment_classes[0][]"></select>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="md-form my-0">
-                                    <select class="mdb-select mooe-tokenizer" multiple="multiple"
-                                            name="mooe_account_titles[0][]"></select>
+                                    <select class="mdb-select form-control-sm required allot-class-tokenizer"
+                                            name="allot_class[0]"></select>
                                 </div>
                             </td>
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input type="number" placeholder=" Value..." name="allotment_co[]"
-                                           class="form-control required form-control-sm allotment-co"
-                                           id="allotment-co-0" min="0"
-                                           onkeyup="$(this).computeAll()"
-                                           onchange="$(this).computeAll()">
+                                    <input type="number" placeholder=" Value..." name="allotted_budget[]"
+                                           class="form-control required form-control-sm allotted-budget py-1"
+                                           id="allotted-budget-0" min="0"
+                                           onkeyup="$(this).totalBudgetIsValid();"
+                                           onchange="$(this).totalBudgetIsValid();">
                                 </div>
                             </td>
                             <td>

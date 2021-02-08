@@ -25,6 +25,7 @@ class FundingAllotment extends Model
         'allotment_class',
         'order_no',
         'allotment_name',
+        'allotted_budget',
     ];
 
     /**

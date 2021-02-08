@@ -4,16 +4,24 @@ $(function() {
     const template = '<div class="tooltip md-tooltip">' +
                      '<div class="tooltip-arrow md-arrow"></div>' +
                      '<div class="tooltip-inner md-inner stylish-color"></div></div>';
+    let allotClassData = {},
+        accountTitleData = {};
+
+    function filterNaN(inputVal) {
+        let outputVal = isNaN(inputVal) ? 0 : inputVal;
+
+        return outputVal;
+    }
 
     function initializeSelect2() {
-        $(".allot-class-tokenizer").select2({
+        $('.allot-class-tokenizer').select2({
             tokenSeparators: [','],
             placeholder: "Value...",
             width: '100%',
             maximumSelectionSize: 4,
             allowClear: true,
             ajax: {
-                url: `${baseURL}/payment/lddap/get-ors-burs`,
+                url: `${baseURL}/fund-utilization/project-lib/get-allot-class`,
                 type: "post",
                 dataType: 'json',
                 delay: 250,
@@ -26,8 +34,12 @@ $(function() {
                 processResults: function(data) {
                     return {
                         results: $.map(data, function(item) {
+                            let jsonData = {};
+                            jsonData['class_name'] = item.class_name;
+                            allotClassData[item.id] = jsonData;
+
                             return {
-                                text: item.serial_no,
+                                text: `${item.class_name}`,
                                 id: item.id
                             }
                         }),
@@ -37,44 +49,34 @@ $(function() {
                     };
                 },
                 cache: true
-            }
+            },
             //theme: "material"
+        });
+    }
+
+    $.fn.totalBudgetIsValid = () => {
+        let totalBudget = $('#approved-budget').val(),
+            totalAllotted = 0;
+
+        $('.allotted-budget').each(function() {
+            totalAllotted += parseFloat($(this).val())
         });
 
-        $(".mooe-tokenizer").select2({
-            tokenSeparators: [','],
-            placeholder: "Value...",
-            width: '100%',
-            maximumSelectionSize: 4,
-            allowClear: true,
-            ajax: {
-                url: `${baseURL}/payment/lddap/get-ors-burs`,
-                type: "post",
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return {
-                        _token: CSRF_TOKEN,
-                        search: params.term
-                    };
-                },
-                processResults: function(data) {
-                    return {
-                        results: $.map(data, function(item) {
-                            return {
-                                text: item.serial_no,
-                                id: item.id
-                            }
-                        }),
-                        pagination: {
-                            more: true
-                        }
-                    };
-                },
-                cache: true
-            }
-            //theme: "material"
-        });
+        totalBudget -= totalAllotted;
+
+        $('#remaining-budget').val(filterNaN(totalBudget).toFixed(2));
+
+        if (totalBudget < 0) {
+            $('#remaining-budget').addClass('input-error-highlighter')
+                                  .tooltip('enable')
+                                  .tooltip('toggle');
+
+            return false;
+        }
+
+        $('#remaining-budget').removeClass('input-error-highlighter')
+                              .tooltip('dispose');
+        return true;
     }
 
     $.fn.addRow = function(rowClass, type) {
@@ -83,70 +85,62 @@ $(function() {
         let _lastRowID = lastRowID.split('-');
         let newID = parseInt(_lastRowID[2]) + 1;
 
-        let allotmentName = ``,
-            allotmentType = ``,
-            allotmentClassification = ``,
-            allotmentBudget = ``;
+        let allotmentName = `
+            <td>
+                <div class="md-form form-sm my-0">
+                    <input type="text" placeholder=" Value..." name="allotment_name[]"
+                        class="form-control required form-control-sm allotment-name py-1"
+                        id="allotment-name-${newID}">
+                </div>
+            </td>`,
+            allotmentClassification = `
+            <td>
+                <div class="md-form my-0">
+                    <select class="mdb-select required allot-class-tokenizer"
+                            name="allot_class[${newID}]"></select>
+                </div>
+            </td>`,
+            allotmentBudget = `
+            <td>
+                <div class="md-form form-sm my-0">
+                    <input type="number" placeholder=" Value..." name="allotted_budget[]"
+                        class="form-control required form-control-sm allotted-budget py-1"
+                        id="allotted-budget-${newID}" min="0"
+                        onkeyup="$(this).totalBudgetIsValid();"
+                        onchange="$(this).totalBudgetIsValid();">
+                </div>
+            </td>`,
+            deleteButton = `
+            <td>
+                <a onclick="$(this).deleteRow('#item-row-${newID}');"
+                   class="btn btn-outline-red px-1 py-0">
+                    <i class="fas fa-minus-circle"></i>
+                </a>
+            </td>`;
 
-
-
-        $(rowOutput).insertAfter('#' + lastRowID);
-
-        /*
-        let creditorName = `<td><div class="md-form form-sm my-0">
-                            <textarea name="${_lastRowID[0]}_creditor_name[]" placeholder=" Value..."
-                            class="md-textarea required form-control-sm w-100 py-1"></textarea>
-                            </div></td>`;
-        let creditorAccntNo = `<td><div class="md-form form-sm my-0">
-                               <textarea name="${_lastRowID[0]}_creditor_acc_no[]" placeholder=" Value..."
-                               class="md-textarea required form-control-sm w-100 py-1"></textarea>
-                               </div></td>`;
-        let orsNo = `<td><div class="md-form my-0">
-                    <select class="mdb-select required ors-tokenizer" multiple="multiple"
-                    name="${_lastRowID[0]}_ors_no[${newID-1}][]"></select></div></td>`;
-        let allotClassUacs = `<td><div class="md-form form-sm my-0">
-                              <textarea name="${_lastRowID[0]}_allot_class_uacs[]" placeholder=" Value..."
-                              class="md-textarea required form-control-sm w-100 py-1"></textarea>
-                              </div></td>`;
-        let grossAmmount = '<td><div class="md-form form-sm my-0">'+
-                           '<input type="number" class="form-control required form-control-sm '+
-                           _lastRowID[0]+'-gross-amount'+'" '+
-                           'placeholder=" Value..." name="'+_lastRowID[0]+'_gross_amount[]" '+
-                           `id="${_lastRowID[0]}-gross-amount-${newID-1}" `+
-                           'onkeyup="$(this).computeGrossTotal('+"'"+_lastRowID[0]+"'"+')" '+
-                           'onchange="$(this).computeGrossTotal('+"'"+_lastRowID[0]+"'"+')" '+
-                           'onclick="$(this).showCalc('+`'#${_lastRowID[0]}-gross-amount-${newID-1}', '${_lastRowID[0]}'`+')">'+
-                           '</div></td>';
-        let withholdingTax = '<td><div class="md-form form-sm my-0">'+
-                             '<input type="number" class="form-control required form-control-sm '+
-                             _lastRowID[0]+'-withold-tax'+'" '+
-                             'placeholder=" Value..." name="'+_lastRowID[0]+'_withold_tax[]" '+
-                             'onkeyup="$(this).computeWithholdingTaxTotal('+"'"+_lastRowID[0]+"'"+')" '+
-                             'onchange="$(this).computeWithholdingTaxTotal('+"'"+_lastRowID[0]+"'"+')">'+
-                             '</div></td>';
-        let netAmount = '<td><div class="md-form form-sm my-0">'+
-                        '<input type="number" class="form-control required form-control-sm '+
-                        _lastRowID[0]+'-net-amount'+'" '+
-                        'placeholder=" Value..." name="'+_lastRowID[0]+'_net_amount[]" '+
-                        'onkeyup="$(this).computeNetAmountTotal('+"'"+_lastRowID[0]+"'"+')" '+
-                        'onchange="$(this).computeNetAmountTotal('+"'"+_lastRowID[0]+"'"+')">'+
-                        '</div></td>';
-        let remarks = `<td><div class="md-form form-sm my-0">
-                       <textarea name="${_lastRowID[0]}_remarks[]" placeholder=" Value..."
-                       class="md-textarea form-control-sm w-100 py-1"></textarea>
-                       </div></td>`;
-        let deleteButton = '<td><a onclick="'+
-                           "$(this).deleteRow('#"+_lastRowID[0]+'-row-'+newID+"');" +'"'+
-                           'class="btn btn-outline-red px-1 py-0">'+
-                           '<i class="fas fa-minus-circle"></i></a></td>';
-
-        let rowOutput = '<tr id="'+_lastRowID[0]+'-row-'+newID+'" class="'+_lastRowID[0]+'-row">'+
-                        creditorName + creditorAccntNo + orsNo + allotClassUacs +
-                        grossAmmount + withholdingTax + netAmount + remarks +
-                        deleteButton + '</tr>';
+        let rowOutput = '<tr id="item-row-'+newID+'" class="item-row">'+
+            allotmentName + allotmentClassification + allotmentBudget +
+            deleteButton + '</tr>';
 
         $(rowOutput).insertAfter('#' + lastRowID);
-        initializeSelect2();*/
+        initializeSelect2();
+    }
+
+    $.fn.deleteRow = function(row) {
+        if (confirm('Are you sure you want to delete this row?')) {
+            let _row = row.split('-');
+            let rowClass = '.item-' + _row[1];
+            let rowCount = $(rowClass).length;
+
+            if (rowCount > 1) {
+                $(row).fadeOut(300, function() {
+                    $(this).remove();
+                    $(this).totalBudgetIsValid();
+                });
+            } else {
+                alert('Cannot delete all row.');
+            }
+		}
     }
 
     $.fn.showCreate = function(url) {
@@ -168,7 +162,7 @@ $(function() {
     $.fn.store = function() {
         const withError = inputValidation(false);
 
-		if (!withError) {
+		if ($(this).totalBudgetIsValid() && !withError) {
 			$('#form-store').submit();
         }
     }
@@ -212,4 +206,8 @@ $(function() {
     $.fn.delete = function() {
         $('#form-delete').submit();
     }
+
+    $('.material-tooltip-main').tooltip({
+        template: template
+    });
 });
