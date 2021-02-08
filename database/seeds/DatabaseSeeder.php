@@ -17,6 +17,9 @@ class DatabaseSeeder extends Seeder
             ProvincesTableSeeder::class,
             RolesTableSeeder::class,
             UsersTableSeeder::class,
+            AllotmentClassSeeder::class,
+            MOOEClassificationSeeder::class,
+            MOOEAccountTitleSeeder::class,
         ]);
     }
 }

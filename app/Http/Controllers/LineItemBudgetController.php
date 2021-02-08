@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\FundingProject;
 use App\Models\FundingLedger;
 use App\Models\FundingLedgerItem;
+use App\Models\AllotmentClass;
+use App\Models\MooeAccountTitle;
 use App\Models\PaperSize;
 
 use Auth;
@@ -52,8 +54,12 @@ class LineItemBudgetController extends Controller
      */
     public function showCreate() {
         $projects = FundingProject::orderBy('project_name')->get();
+        $allotmentClassifications = AllotmentClass::orderBy('class_name')->get();
+        $mooeTitles = MooeAccountTitle::orderBy('account_title')->get();
         return view('modules.fund-utilization.fund-project-lib.create', compact(
-            'projects'
+            'projects',
+            'allotmentClassifications',
+            'mooeTitles'
         ));
     }
 
@@ -96,5 +102,61 @@ class LineItemBudgetController extends Controller
      */
     public function destroy($id) {
         //
+    }
+
+    public function getListAllotmentClass(Request $request) {
+        $keyword = trim($request->search);
+        $orsData = ObligationRequestStatus::select('id', 'serial_no')
+                                          ->whereNotNull('serial_no')
+                                          ->whereNotNull('date_obligated')
+                                          ->where([['serial_no', '<>', '-'],
+                                                   ['serial_no', '<>', '.']]);
+
+        if ($keyword) {
+            $orsData = $orsData->where(function($qry) use ($keyword) {
+                $qry->where('serial_no', 'like', "%$keyword%");
+                $keywords = explode('/\s+/', $keyword);
+
+                if (count($keywords) > 0) {
+                    foreach ($keywords as $tag) {
+                        $qry->orWhere('serial_no', 'like', "%$tag%");
+                    }
+                }
+            });
+        }
+
+        $orsData = $orsData->whereHas('procdv', function($query) {
+            $query->whereNotNull('date_for_payment');
+        })->get();
+
+        return response()->json($orsData);
+    }
+
+    public function getListAccountTitle(Request $request) {
+        $keyword = trim($request->search);
+        $orsData = ObligationRequestStatus::select('id', 'serial_no')
+                                          ->whereNotNull('serial_no')
+                                          ->whereNotNull('date_obligated')
+                                          ->where([['serial_no', '<>', '-'],
+                                                   ['serial_no', '<>', '.']]);
+
+        if ($keyword) {
+            $orsData = $orsData->where(function($qry) use ($keyword) {
+                $qry->where('serial_no', 'like', "%$keyword%");
+                $keywords = explode('/\s+/', $keyword);
+
+                if (count($keywords) > 0) {
+                    foreach ($keywords as $tag) {
+                        $qry->orWhere('serial_no', 'like', "%$tag%");
+                    }
+                }
+            });
+        }
+
+        $orsData = $orsData->whereHas('procdv', function($query) {
+            $query->whereNotNull('date_for_payment');
+        })->get();
+
+        return response()->json($orsData);
     }
 }

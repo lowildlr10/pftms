@@ -29,9 +29,9 @@
 
                 <div class="col-md-3">
                     <div class="md-form form-sm">
-                        <input type="date" id="sliiae-date" name="sliiae_date"
+                        <input type="date" id="date_from" name="date_from"
                                class="form-control form-control-sm required">
-                        <label for="sliiae-date" class="active mt-3">
+                        <label for="date_from" class="active mt-3">
                             <span class="red-text">* </span>
                             <b>Date From</b>
                         </label>
@@ -39,9 +39,9 @@
                 </div>
                 <div class="col-md-3">
                     <div class="md-form form-sm">
-                        <input type="date" id="sliiae-date" name="sliiae_date"
+                        <input type="date" id="date_to" name="date_to"
                                class="form-control form-control-sm required">
-                        <label for="sliiae-date" class="active mt-3">
+                        <label for="date_to" class="active mt-3">
                             <span class="red-text">* </span>
                             <b>Date To</b>
                         </label>
@@ -77,12 +77,12 @@
                             </th>
                             <th class="align-middle" width="26%">
                                 <b>
-                                    <span class="red-text">* </span> Type
+                                    <span class="red-text">* </span> Allotment Classification
                                 </b>
                             </th>
                             <th class="align-middle" width="26%">
                                 <b>
-                                    <span class="red-text">* </span> Classification
+                                    MOOE Account Title
                                 </b>
                             </th>
                             <th class="align-middle" width="15%">
@@ -104,35 +104,15 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="md-form form-sm my-0">
-                                    <select class="mdb-select crud-select md-form my-0 required" searchable="Search here.."
-                                            name="delivered_by">
-                                        <option value="" disabled selected>Choose an allotment type</option>
-
-                                        @if (count($projects) > 0)
-                                            @foreach ($projects as $project)
-                                        <option value="{{ $project->id }}">
-                                            {!! $project->project_name !!}
-                                        </option>
-                                            @endforeach
-                                        @endif
-                                    </select>
+                                <div class="md-form my-0">
+                                    <select class="mdb-select required allot-class-tokenizer" multiple="multiple"
+                                            name="allotment_classes[0][]"></select>
                                 </div>
                             </td>
                             <td>
-                                <div class="md-form form-sm my-0">
-                                    <select class="mdb-select crud-select md-form my-0 required" searchable="Search here.."
-                                            name="delivered_by">
-                                        <option value="" disabled selected>Choose a project</option>
-
-                                        @if (count($projects) > 0)
-                                            @foreach ($projects as $project)
-                                        <option value="{{ $project->id }}">
-                                            {!! $project->project_name !!}
-                                        </option>
-                                            @endforeach
-                                        @endif
-                                    </select>
+                                <div class="md-form my-0">
+                                    <select class="mdb-select mooe-tokenizer" multiple="multiple"
+                                            name="mooe_account_titles[0][]"></select>
                                 </div>
                             </td>
                             <td>

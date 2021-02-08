@@ -1,7 +1,81 @@
+const CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+
 $(function() {
     const template = '<div class="tooltip md-tooltip">' +
                      '<div class="tooltip-arrow md-arrow"></div>' +
                      '<div class="tooltip-inner md-inner stylish-color"></div></div>';
+
+    function initializeSelect2() {
+        $(".allot-class-tokenizer").select2({
+            tokenSeparators: [','],
+            placeholder: "Value...",
+            width: '100%',
+            maximumSelectionSize: 4,
+            allowClear: true,
+            ajax: {
+                url: `${baseURL}/payment/lddap/get-ors-burs`,
+                type: "post",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        _token: CSRF_TOKEN,
+                        search: params.term
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: $.map(data, function(item) {
+                            return {
+                                text: item.serial_no,
+                                id: item.id
+                            }
+                        }),
+                        pagination: {
+                            more: true
+                        }
+                    };
+                },
+                cache: true
+            }
+            //theme: "material"
+        });
+
+        $(".mooe-tokenizer").select2({
+            tokenSeparators: [','],
+            placeholder: "Value...",
+            width: '100%',
+            maximumSelectionSize: 4,
+            allowClear: true,
+            ajax: {
+                url: `${baseURL}/payment/lddap/get-ors-burs`,
+                type: "post",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        _token: CSRF_TOKEN,
+                        search: params.term
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: $.map(data, function(item) {
+                            return {
+                                text: item.serial_no,
+                                id: item.id
+                            }
+                        }),
+                        pagination: {
+                            more: true
+                        }
+                    };
+                },
+                cache: true
+            }
+            //theme: "material"
+        });
+    }
 
     $.fn.addRow = function(rowClass, type) {
         let lastRow = $(rowClass).last();
@@ -81,6 +155,7 @@ $(function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
+            initializeSelect2();
         });
         $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
