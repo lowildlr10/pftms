@@ -26,7 +26,8 @@ class LineItemBudgetController extends Controller
         $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
         $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
         $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
-        $isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
+        //$isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
+        $isAllowedDestroy = true;
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
@@ -50,6 +51,10 @@ class LineItemBudgetController extends Controller
             'list' => $fundBudget,
             'keyword' => $keyword,
             'paperSizes' => $paperSizes,
+            'isAllowedCreate' => $isAllowedCreate,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedDelete' => $isAllowedDelete,
+            'isAllowedDestroy' => $isAllowedDestroy,
         ]);
     }
 
@@ -61,11 +66,9 @@ class LineItemBudgetController extends Controller
     public function showCreate() {
         $projects = FundingProject::orderBy('project_name')->get();
         $allotmentClassifications = AllotmentClass::orderBy('class_name')->get();
-        $mooeTitles = MooeAccountTitle::orderBy('account_title')->get();
         return view('modules.fund-utilization.fund-project-lib.create', compact(
             'projects',
             'allotmentClassifications',
-            'mooeTitles'
         ));
     }
 
@@ -115,8 +118,8 @@ class LineItemBudgetController extends Controller
                     $instanceAllotment->budget_id = $lastID;
                     $instanceAllotment->allotment_class = $allotmentClass;
                     $instanceAllotment->order_no = $orderNo;
-                    $instanceAllotment->allotment_name = $allotmentNames[$orderNo - 1];
-                    $instanceAllotment->allotted_budget = $allottedBudgets[$orderNo - 1];
+                    $instanceAllotment->allotment_name = $allotmentNames[$ctr];
+                    $instanceAllotment->allotted_budget = $allottedBudgets[$ctr];
                     $instanceAllotment->save();
                 }
             }
@@ -140,7 +143,24 @@ class LineItemBudgetController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showEdit($id) {
+        $budget = FundingBudget::find($id);
+        $budgetID = $budget->id;
+        $remainingBudget = $budget->approved_budget;
+        $allotments = FundingAllotment::where('budget_id', $budgetID)->get();
+        $projects = FundingProject::orderBy('project_name')->get();
+        $allotmentClassifications = AllotmentClass::orderBy('class_name')->get();
 
+        foreach ($allotmentClassifications as $item) {
+            $remainingBudget -= $item->allotted_budget;
+        }
+        return view('modules.fund-utilization.fund-project-lib.update', compact(
+            'id',
+            'projects',
+            'allotmentClassifications',
+            'budget',
+            'allotments',
+            'remainingBudget'
+        ));
     }
 
     /**
@@ -151,7 +171,107 @@ class LineItemBudgetController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id) {
-        //
+        $project = $request->project;
+        $dateFrom = $request->date_from;
+        $dateTo = $request->date_to;
+        $approvedBudget = $request->approved_budget;
+        $isActive = $request->is_active;
+
+        $allotmentIDs = $request->allotment_id;
+        $allotmentNames = $request->allotment_name;
+        $allotmentClasses = $request->allot_class;
+        $allottedBudgets = $request->allotted_budget;
+
+        $documentType = 'Line-Item Budgets';
+        $routeName = 'fund-project-lib';
+
+
+            $instanceFundingBudget = FundingBudget::find($id);
+            $projectID = $instanceFundingBudget->project_id;
+
+            if ($isActive == 'y') {
+                DB::table('funding_budgets')
+                  ->where([
+                      ['project_id', $projectID],
+                      ['id', '<>', $id]
+                    ])
+                  ->update(['is_active' => 'n']);
+            }
+
+            $instanceFundingBudget->project_id = $project;
+            $instanceFundingBudget->date_from = $dateFrom;
+            $instanceFundingBudget->date_to = $dateTo;
+            $instanceFundingBudget->approved_budget = $approvedBudget;
+            $instanceFundingBudget->is_active = $isActive;
+            $instanceFundingBudget->save();
+
+            if (count($allotmentIDs) > 0) {
+                $orderNo = 0;
+
+                foreach ($allotmentIDs as $ctr => $allotmentID) {
+                    $orderNo += 1;
+                    $instanceAllotment = FundingAllotment::find($allotmentID);
+                    $instanceAllotment->allotment_class = $allotmentClasses[$ctr];
+                    $instanceAllotment->order_no = $orderNo;
+                    $instanceAllotment->allotment_name = $allotmentNames[$ctr];
+                    $instanceAllotment->allotted_budget = $allottedBudgets[$ctr];
+                    $instanceAllotment->save();
+                }
+
+                FundingAllotment::whereNotIn('id', $allotmentIDs)
+                                ->where('budget_id', $id)
+                                ->delete();
+            }
+        try {
+            $msg = "$documentType successfully updated.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName)
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())
+                                 ->with('failed', $msg);
+        }
+    }
+
+    /**
+     * Soft deletes the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function delete(Request $request, $id) {
+        $isDestroy = $request->destroy;
+        $routeName = 'fund-project-lib';
+
+        if ($isDestroy) {
+            $response = $this->destroy($request, $id);
+
+            if ($response->alert_type == 'success') {
+                return redirect()->route($routeName, ['keyword' => $response->id])
+                                 ->with($response->alert_type, $response->msg);
+            } else {
+                return redirect()->route($routeName)
+                                 ->with($response->alert_type, $response->msg);
+            }
+        } else {
+            try {
+                $instanceBudget = FundingBudget::find($id);
+                $documentType = 'Line-Item Budgets';
+                $instanceBudget->delete();
+
+                $msg = "$documentType '$id' successfully deleted.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route($routeName, ['keyword' => $id])
+                                 ->with('success', $msg);
+            } catch (\Throwable $th) {
+                $msg = "Unknown error has occured. Please try again.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route($routeName)
+                                 ->with('failed', $msg);
+            }
+        }
     }
 
     /**
@@ -160,8 +280,32 @@ class LineItemBudgetController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id) {
-        //
+    public function destroy($request, $id) {
+        try {
+            FundingAllotment::where('budget_id', $id)
+                            ->delete();
+
+            $instanceBudget = FundingBudget::find($id);
+            $documentType = 'Line-Item Budgets';
+            $instanceBudget->forceDelete();
+
+            $msg = "$documentType '$id' permanently deleted.";
+            Auth::user()->log($request, $msg);
+
+            return (object) [
+                'msg' => $msg,
+                'alert_type' => 'success',
+                'id' => $id
+            ];
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+
+            return (object) [
+                'msg' => $msg,
+                'alert_type' => 'failed'
+            ];
+        }
     }
 
     public function getListAllotmentClass(Request $request) {

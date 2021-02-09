@@ -4,8 +4,7 @@ $(function() {
     const template = '<div class="tooltip md-tooltip">' +
                      '<div class="tooltip-arrow md-arrow"></div>' +
                      '<div class="tooltip-inner md-inner stylish-color"></div></div>';
-    let allotClassData = {},
-        accountTitleData = {};
+    let allotClassData = {};
 
     function filterNaN(inputVal) {
         let outputVal = isNaN(inputVal) ? 0 : inputVal;
@@ -55,11 +54,11 @@ $(function() {
     }
 
     $.fn.totalBudgetIsValid = () => {
-        let totalBudget = $('#approved-budget').val(),
+        let totalBudget = filterNaN($('#approved-budget').val()),
             totalAllotted = 0;
 
         $('.allotted-budget').each(function() {
-            totalAllotted += parseFloat($(this).val())
+            totalAllotted += filterNaN(parseFloat($(this).val()));
         });
 
         totalBudget -= totalAllotted;
@@ -88,7 +87,7 @@ $(function() {
         let allotmentName = `
             <td>
                 <div class="md-form form-sm my-0">
-                    <input type="text" placeholder=" Value..." name="allotment_name[]"
+                    <input type="text" placeholder=" Value..." name="allotment_name[${newID}]"
                         class="form-control required form-control-sm allotment-name py-1"
                         id="allotment-name-${newID}">
                 </div>
@@ -103,7 +102,7 @@ $(function() {
             allotmentBudget = `
             <td>
                 <div class="md-form form-sm my-0">
-                    <input type="number" placeholder=" Value..." name="allotted_budget[]"
+                    <input type="number" placeholder=" Value..." name="allotted_budget[${newID}]"
                         class="form-control required form-control-sm allotted-budget py-1"
                         id="allotted-budget-${newID}" min="0"
                         onkeyup="$(this).totalBudgetIsValid();"
@@ -173,10 +172,11 @@ $(function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
+            initializeSelect2()
         });
         $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {
-            $('#edit-title').html('Update Source of Funds / Project');
+            $('#edit-title').html('Update Project Line-Item Budget');
 		}).on('hidden.bs.modal', function() {
             $('#modal-body-edit').html('').css('display', 'none');
 		});
