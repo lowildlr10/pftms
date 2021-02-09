@@ -52,7 +52,8 @@ class FundingBudget extends Model
     public $sortable = [
         'date_from',
         'date_to',
-        'approved_budget'
+        'approved_budget',
+        'is_active'
     ];
 
     public function project() {

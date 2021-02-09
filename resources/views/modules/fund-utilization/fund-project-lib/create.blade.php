@@ -100,13 +100,12 @@
                             </th>
                             <th width="3%"></th>
                         </tr>
-                        </tr>
                     </thead>
                     <tbody>
                         <tr id="item-row-1" class="item-row">
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input type="text" placeholder=" Value..." name="allotment_name[]"
+                                    <input type="text" placeholder=" Value..." name="allotment_name[0]"
                                            class="form-control required form-control-sm allotment-name py-1"
                                            id="allotment-name-0">
                                 </div>
@@ -119,7 +118,7 @@
                             </td>
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input type="number" placeholder=" Value..." name="allotted_budget[]"
+                                    <input type="number" placeholder=" Value..." name="allotted_budget[0]"
                                            class="form-control required form-control-sm allotted-budget py-1"
                                            id="allotted-budget-0" min="0"
                                            onkeyup="$(this).totalBudgetIsValid();"

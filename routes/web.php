@@ -1077,7 +1077,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'pay_summary',
         'access' => 'update'
     ])->name('fund-project-lib-update');
-
+    Route::post('fund-utilization/project-lib/delete/{id}', [
+        'uses' => 'LineItemBudgetController@delete',
+        'module' => 'pay_summary',
+        'access' => 'delete'
+    ])->name('fund-project-lib-delete');
     Route::post('fund-utilization/project-lib/get-allot-class', [
         'uses' => 'LineItemBudgetController@getListAllotmentClass',
         'module' => 'pay_summary',

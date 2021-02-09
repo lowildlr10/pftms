@@ -71,7 +71,7 @@
                                     <tr>
                                         <th class="th-md text-center" width="3%">#</th>
                                         <th class="th-md" width="3%"></th>
-                                        <th class="th-md" width="44%">
+                                        <th class="th-md" width="41%">
                                             <b>
                                                 @sortablelink('project.project_name', 'Project Name', [], ['class' => 'white-text'])
                                             </b>
@@ -86,9 +86,14 @@
                                                 @sortablelink('date_to', 'To', [], ['class' => 'white-text'])
                                             </b>
                                         </th>
-                                        <th class="th-md" width="21%">
+                                        <th class="th-md" width="15%">
                                             <b>
                                                 @sortablelink('approved_budget', 'Current Budget', [], ['class' => 'white-text'])
+                                            </b>
+                                        </th>
+                                        <th class="th-md" width="9%">
+                                            <b>
+                                                @sortablelink('is_active', 'Active?', [], ['class' => 'white-text'])
                                             </b>
                                         </th>
                                         <th class="th-md" width="3%"></th>
@@ -118,6 +123,7 @@
                                                 <b>3rd =</b> &#8369; 2,704,586.54- <br></h6>'>
                                             &#8369; {{ number_format($fund->approved_budget, 2) }}
                                         </td>
+                                        <td>{{ $fund->is_active == 'y' ? 'Yes' : 'No' }}</td>
 
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
@@ -203,8 +209,9 @@
                                 </button>
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        {{-- onclick="$(this).showDelete('route('#',['id'=>$fund->id])',
-                                                                    '{{ $fund->project_name }}');" --}}>
+                                        onclick="$(this).showDelete('{{ route('fund-project-lib-delete',
+                                                                        ['id' => $fund->id]) }}',
+                                                                    '{{ $fund->project->project_name.' LIB' }}');">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
                             </div>
@@ -312,7 +319,7 @@
 @include('modals.show')
 @include('modals.create')
 @include('modals.edit')
-{{-- @include('modals.delete-destroy') --}}
+@include('modals.delete-destroy')
 @include('modals.print')
 
 @endsection
