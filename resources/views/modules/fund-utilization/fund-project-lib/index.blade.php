@@ -269,37 +269,7 @@
                         <h5><b><i class="fas fa-pen-nib"></i> Actions</b></h5>
                     </li>
 
-                    {{--
-                    @if ($fund->status == 'pending')
-                    <li class="list-group-item justify-content-between">
-                        <button type="button" class="btn btn-outline-black waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showApproval('{{ route('fund-for-approval',
-                                                              ['id' => $fund->id]) }}');">
-                            <i class="fas fa-flag"></i> For Approval
-                        </button>
-                    </li>
-                    @elseif ($fund->status == 'for_approval')
-                    <li class="list-group-item justify-content-between">
-                        <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showApprove('{{ route('fund-approve',
-                                                          ['id' => $fund->id]) }}');">
-                            <i class="fas fa-check"></i> Approve
-                        </button>
-                    </li>
-                    @elseif ($fund->status == 'approved')
-                    <li class="list-group-item justify-content-between">
-                        <button type="button" class="btn btn-outline-green waves-effect btn-block btn-md btn-rounded"
-                                onclick="$(this).showSubmissionBank('{{ route('fund-submission',
-                                                          ['id' => $fund->id]) }}');">
-                            <i class="fas fa-piggy-bank"></i> For Submission to Bank
-                        </button>
-                    </li>
-                    @else
-                    <li class="list-group-item justify-content-between">
-                        No more actions available.
-                    </li>
-                    @endif
-                    --}}
+
                 </ul>
             </div>
             <!--Footer-->
