@@ -21,10 +21,14 @@ class FundingBudgetRealignment extends Model
      */
     protected $fillable = [
         'project_id',
+        'date_disapproved',
+        'date_approved',
         'budget_id',
         'realigned_budget',
         'realignment_order',
-        'specification',
+        'created_by',
+        'disapproved_by',
+        'approved_by',
     ];
 
     /**
@@ -43,5 +47,9 @@ class FundingBudgetRealignment extends Model
 
     public static function generateUuid() {
         return Uuid::generate();
+    }
+
+    public function allotmentrealigments() {
+        return $this->hasMany('App\FundingAllotmentRealignment', 'budget_realign_id', 'id');
     }
 }

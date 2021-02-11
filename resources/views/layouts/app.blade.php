@@ -138,6 +138,7 @@
 
     <!-- JQuery -->
     <script type="text/javascript" src="{{ asset('plugins/mdb/js/jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('plugins/jquery-ui/jquery-ui.min.js') }}"></script>
 
     <!-- Bootstrap tooltips -->
     <script type="text/javascript" src="{{ asset('plugins/mdb/js/popper.min.js') }}"></script>

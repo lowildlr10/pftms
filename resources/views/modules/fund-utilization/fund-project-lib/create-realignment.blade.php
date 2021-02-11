@@ -1,55 +1,9 @@
 <form id="form-store" class="wow animated fadeIn d-flex justify-content-center" method="POST"
-      action="{{ route('fund-project-lib-store') }}">
+      action="{{ route('fund-project-lib-store-realignment', ['id' => $id]) }}">
     @csrf
     <div class="card w-responsive">
         <div class="card-body">
-            <h4>Project & Date Covered</h4>
-            <hr>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="md-form form-sm">
-                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                                name="project">
-                            <option value="" disabled selected>Choose a project</option>
-
-                            @if (count($projects) > 0)
-                                @foreach ($projects as $project)
-                            <option value="{{ $project->id }}">
-                                {!! $project->project_name !!}
-                            </option>
-                                @endforeach
-                            @endif
-                        </select>
-                        <label class="mdb-main-label">
-                            <span class="red-text">* </span>
-                            <b>Project</b>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="md-form form-sm">
-                        <input type="date" id="date_from" name="date_from"
-                               class="form-control form-control-sm required">
-                        <label for="date_from" class="active">
-                            <span class="red-text">* </span>
-                            <b>Date From</b>
-                        </label>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="md-form form-sm">
-                        <input type="date" id="date_to" name="date_to"
-                               class="form-control form-control-sm required">
-                        <label for="date_to" class="active">
-                            <span class="red-text">* </span>
-                            <b>Date To</b>
-                        </label>
-                    </div>
-                </div>
-            </div><br>
-
-            <h4>Proposed Budget</h4>
+            <h4>New Proposed Budget</h4>
             <hr>
             <div class="row">
                 <div class="col-md-6">
@@ -57,8 +11,9 @@
                         <input type="number" id="approved-budget" name="approved_budget"
                                class="form-control form-control-sm required"
                                onkeyup="$(this).totalBudgetIsValid();"
-                               onchange="$(this).totalBudgetIsValid();">
-                        <label for="approved-budget">
+                               onchange="$(this).totalBudgetIsValid();"
+                               value="{{ $approvedBudget }}">
+                        <label for="approved-budget" class="active">
                             <span class="red-text">* </span>
                             <b>Budget</b>
                         </label>
@@ -67,9 +22,10 @@
                 <div class="col-md-6">
                     <div class="md-form form-sm">
                         <input type="number" id="remaining-budget" material-tooltip-main"
-                               data-toggle="tooltip" data-placement="right" value="0.00"
+                               data-toggle="tooltip" data-placement="right"
                                readonly class="form-control form-control-sm"
-                               title="This should be equals or greater than zero.">
+                               title="This should be equals or greater than zero."
+                               value="{{ $remainingBudget }}">
                         <label for="remaining-budget" class="active">
                             <b>Remaining Budget</b>
                         </label>
@@ -95,39 +51,50 @@
                             </th>
                             <th class="align-middle" width="31%">
                                 <b>
-                                    <span class="red-text">* </span> Allotted Budget
+                                    <span class="red-text">* </span> Allotted Proposed Budget
                                 </b>
                             </th>
                             <th width="3%"></th>
                         </tr>
                     </thead>
                     <tbody class="sortable">
-                        <tr id="item-row-1" class="item-row">
+                        @if (count($allotments))
+                            @foreach ($allotments as $ctr => $item)
+                        <tr id="item-row-{{ $ctr + 1 }}" class="item-row">
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input type="text" placeholder=" Value..." name="allotment_name[0]"
-                                           class="form-control required form-control-sm allotment-name py-1"
-                                           id="allotment-name-0">
+                                    <input type="hidden" name="allotment_id[{{ $ctr }}]" value="{{ $item->id }}">
+                                    <input type="text" placeholder=" Value..." name="allotment_name[{{ $ctr }}]"
+                                            class="form-control required form-control-sm allotment-name py-1"
+                                            id="allotment-name-{{ $ctr + 1 }}" value="{{ $item->allotment_name }}">
                                 </div>
                             </td>
                             <td>
                                 <div class="md-form my-0">
                                     <select class="mdb-select form-control-sm required allot-class-tokenizer"
-                                            name="allot_class[0]"></select>
+                                            name="allot_class[{{ $ctr }}]">
+                                        @foreach ($allotmentClassifications as $class)
+                                        <option {{ $class->id == $item->allotment_class ? 'selected' : '' }}
+                                                value="{{ $class->id }}">
+                                            {{ $class->class_name }}
+                                        </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </td>
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input type="number" placeholder=" Value..." name="allotted_budget[0]"
-                                           class="form-control required form-control-sm allotted-budget py-1"
-                                           id="allotted-budget-0" min="0"
-                                           onkeyup="$(this).totalBudgetIsValid();"
-                                           onchange="$(this).totalBudgetIsValid();">
+                                    <input type="number" placeholder=" Value..." name="allotted_budget[{{ $ctr }}]"
+                                            class="form-control required form-control-sm allotted-budget py-1"
+                                            id="allotted-budget-{{ $ctr + 1 }}" min="0"
+                                            onkeyup="$(this).totalBudgetIsValid();"
+                                            onchange="$(this).totalBudgetIsValid();"
+                                            value="{{ $item->allotted_budget }}">
                                 </div>
                             </td>
                             <td class="align-middle">
-                                <a onclick="$(this).deleteRow('#item-row-1');"
-                                   class="btn btn-outline-red px-1 py-0">
+                                <a onclick="$(this).deleteRow('#item-row-{{ $ctr + 1 }}');"
+                                    class="btn btn-outline-red px-1 py-0">
                                     <i class="fas fa-minus-circle"></i>
                                 </a>
                             </td>
@@ -137,6 +104,8 @@
                                 </a>
                             </td>
                         </tr>
+                            @endforeach
+                        @endif
 
                         <tr class="exclude-sortable">
                             <td colspan="12">

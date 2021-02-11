@@ -1062,6 +1062,16 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'pay_summary',
         'access' => 'create'
     ])->name('fund-project-lib-show-create');
+    Route::get('fund-utilization/project-lib/show-create-realignment/{id}', [
+        'uses' => 'LineItemBudgetController@showCreateRealignment',
+        'module' => 'pay_summary',
+        'access' => 'create'
+    ])->name('fund-project-lib-show-create-realignment');
+    Route::post('fund-utilization/project-lib/store-realignment/{id}', [
+        'uses' => 'LineItemBudgetController@storeRealignment',
+        'module' => 'pay_summary',
+        'access' => 'create'
+    ])->name('fund-project-lib-store-realignment');
     Route::post('fund-utilization/project-lib/store', [
         'uses' => 'LineItemBudgetController@store',
         'module' => 'pay_summary',
@@ -1072,6 +1082,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'pay_summary',
         'access' => 'update'
     ])->name('fund-project-lib-show-edit');
+    Route::get('fund-utilization/project-lib/show-edit-realignment/{id}', [
+        'uses' => 'LineItemBudgetController@showEditRealignment',
+        'module' => 'pay_summary',
+        'access' => 'update'
+    ])->name('fund-project-lib-show-edit-realignment');
     Route::post('fund-utilization/project-lib/update/{id}', [
         'uses' => 'LineItemBudgetController@update',
         'module' => 'pay_summary',
