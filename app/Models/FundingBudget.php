@@ -50,10 +50,16 @@ class FundingBudget extends Model
     }
 
     public $sortable = [
+        'project_id',
+        'date_disapproved',
+        'date_approved',
         'date_from',
         'date_to',
         'approved_budget',
-        'is_active'
+        'is_active',
+        'created_by',
+        'approved_by',
+        'disapproved_by',
     ];
 
     public function project() {
@@ -66,5 +72,16 @@ class FundingBudget extends Model
 
     public function allotments() {
         return $this->hasMany('App\Models\FundingAllotment', 'budget_id', 'id');
+    }
+
+    public function currentrealignment() {
+        return $this->HasOne('App\Models\FundingBudgetRealignment', 'id', 'budget_id')
+                    ->whereNotNull('date_approved')
+                    ->orderBy('realignment_order', 'desc');
+    }
+
+    public function realignments() {
+        return $this->hasMany('App\Models\FundingBudgetRealignment', 'budget_id', 'id')
+                    ->orderBy('realignment_order');
     }
 }

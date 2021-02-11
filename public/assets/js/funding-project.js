@@ -53,6 +53,13 @@ $(function() {
         });
     }
 
+    function initializeSortable() {
+        $('.sortable').sortable({
+            items: '> tr:not(.exclude-sortable)'
+        });
+        $('.sortable').disableSelection();
+    }
+
     $.fn.totalBudgetIsValid = () => {
         let totalBudget = filterNaN($('#approved-budget').val()),
             totalAllotted = 0;
@@ -67,14 +74,13 @@ $(function() {
 
         if (totalBudget < 0) {
             $('#remaining-budget').addClass('input-error-highlighter')
-                                  .tooltip('enable')
-                                  .tooltip('toggle');
+                                  .tooltip('show');
 
             return false;
         }
 
         $('#remaining-budget').removeClass('input-error-highlighter')
-                              .tooltip('dispose');
+                              .tooltip('hide');
         return true;
     }
 
@@ -110,16 +116,22 @@ $(function() {
                 </div>
             </td>`,
             deleteButton = `
-            <td>
+            <td class="align-middle">
                 <a onclick="$(this).deleteRow('#item-row-${newID}');"
                    class="btn btn-outline-red px-1 py-0">
                     <i class="fas fa-minus-circle"></i>
+                </a>
+            </td>`,
+            sortableButton = `
+            <td class="align-middle">
+                <a href="#" class="grey-text">
+                    <i class="fas fa-ellipsis-v"></i>
                 </a>
             </td>`;
 
         let rowOutput = '<tr id="item-row-'+newID+'" class="item-row">'+
             allotmentName + allotmentClassification + allotmentBudget +
-            deleteButton + '</tr>';
+            deleteButton + sortableButton + '</tr>';
 
         $(rowOutput).insertAfter('#' + lastRowID);
         initializeSelect2();
@@ -149,10 +161,28 @@ $(function() {
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
             initializeSelect2();
+            initializeSortable();
         });
         $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
             $('#create-title').html('Create Project Line-Item Budget');
+		}).on('hidden.bs.modal', function() {
+		    $('#modal-body-create').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.showCreateRealignment = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-create').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $(this).slideToggle(500);
+            initializeSelect2();
+            initializeSortable();
+        });
+        $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
+						     .on('shown.bs.modal', function() {
+            $('#create-title').html('Create Realignment for Line-Item Budget');
 		}).on('hidden.bs.modal', function() {
 		    $('#modal-body-create').html('').css('display', 'none');
 		});
@@ -172,11 +202,29 @@ $(function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
-            initializeSelect2()
+            initializeSelect2();
+            initializeSortable();
         });
         $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {
             $('#edit-title').html('Update Project Line-Item Budget');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-edit').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.showEditRealignment = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-edit').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $(this).slideToggle(500);
+            initializeSelect2();
+            initializeSortable();
+        });
+        $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
+						   .on('shown.bs.modal', function() {
+            $('#edit-title').html('Update Realignment for Line-Item Budget');
 		}).on('hidden.bs.modal', function() {
             $('#modal-body-edit').html('').css('display', 'none');
 		});

@@ -10,6 +10,8 @@ use App\Models\FundingAllotment;
 use App\Models\FundingLedger;
 use App\Models\FundingLedgerItem;
 use App\Models\AllotmentClass;
+use App\Models\FundingBudgetRealignment;
+use App\Models\FundingAllotmentRealignment;
 use App\Models\MooeAccountTitle;
 use App\Models\PaperSize;
 
@@ -31,21 +33,71 @@ class LineItemBudgetController extends Controller
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
-        $fundBudget = FundingBudget::has('project')->with('allotments');
+        $fundBudget = FundingBudget::has('project');
 
-        /*
         if (!empty($keyword)) {
             $fundBudget = $fundBudget->where(function($qry) use ($keyword) {
                 $qry->where('id', 'like', "%$keyword%")
-                    ->orWhere('project_name', 'like', "%$keyword%");
+                    ->orWhere('date_from', 'like', "%$keyword%")
+                    ->orWhere('date_to', 'like', "%$keyword%")
+                    ->orWhere('approved_budget', 'like', "%$keyword%")
+                    ->orWhere('is_active', 'like', "%$keyword%");
             });
-        }*/
+        }
 
         $fundBudget = $fundBudget->sortable(['created_at' => 'desc'])
                                  ->paginate(15);
 
-        //dd( $fundBudget);
+        foreach ($fundBudget as $key => $budget) {
+            $realignments = [];
+            $budgetID = $budget->id;
+            $realignedBudgets = DB::table('funding_budget_realignments')
+                                  ->where('budget_id', $budgetID)
+                                  ->orderBy('realignment_order')
+                                  ->get();
 
+            foreach ($realignedBudgets as $budRealign) {
+                $budgetRealignID = $budRealign->id;
+                $allotments = [];
+                $realignedAllots = DB::table('funding_allotment_realignments as r_allot')
+                                     ->join('funding_allotments as allot', 'allot.id', '=',
+                                            'r_allot.allotment_id')
+                                     ->where('r_allot.budget_realign_id', $budgetRealignID)
+                                     ->orderBy('allot.order_no')
+                                     ->get();
+
+                foreach ($realignedAllots as $allotRealign) {
+                    $allotments[] = (object) [
+                        'id' => $allotRealign->id,
+                        'allotment_id' => $allotRealign->allotment_id,
+                        'budget_realign_id' => $budgetRealignID,
+                        'allotment_class' => $allotRealign->allotment_class,
+                        'allotment_name' => $allotRealign->allotment_name,
+                        'order_no' => $allotRealign->order_no,
+                        'allotted_budget' => $allotRealign->realigned_allotment,
+                    ];
+                }
+
+                $realignments[] = (object) [
+                    'id' => $budRealign->id,
+                    'date_disapproved' => $budRealign->date_disapproved,
+                    'date_approved' => $budRealign->date_approved,
+                    'realigned_budget' => $budRealign->realigned_budget,
+                    'realigned_allotments' => $allotments
+                ];
+            }
+
+            $budget->realignments = (object) $realignments;
+            $countRealignments = count($realignments);
+            $budget->current_budget = isset($realignments[$countRealignments - 1]) ?
+                                      $realignments[$countRealignments - 1]->realigned_budget :
+                                      $budget->approved_budget;
+            $budget->current_realigned_allotments = isset($realignments[$countRealignments - 1]) ?
+                                                    $realignments[$countRealignments - 1]->realigned_allotments :
+                                                    FundingAllotment::where('budget_id', $budget->id)
+                                                                    ->orderBy('order_no')
+                                                                    ->get();
+        }
 
         return view('modules.fund-utilization.fund-project-lib.index', [
             'list' => $fundBudget,
@@ -69,6 +121,46 @@ class LineItemBudgetController extends Controller
         return view('modules.fund-utilization.fund-project-lib.create', compact(
             'projects',
             'allotmentClassifications',
+        ));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @param  int  $id
+     */
+    public function showCreateRealignment($id) {
+        $remainingBudget = 0;
+        $allotmentClassifications = AllotmentClass::orderBy('class_name')->get();
+        $budgetData = FundingBudget::find($id);
+        $budgetRealignedData = FundingBudgetRealignment::whereNotNull(
+            'date_disapproved'
+        )->where('budget_id', $id)
+        ->orderBy('realignment_order', 'desc')
+        ->first();
+
+        $approvedBudget = $budgetRealignedData ? $budgetRealignedData->realigned_budget :
+                          $budgetData->approved_budget;
+        $allotments = $budgetRealignedData ?
+            DB::table('funding_allotment_realignments as r_allot')
+              ->select('allot.id as id', 'allot.allotment_name as allotment_name',
+                       'r_allot.realigned_allotment as allotted_budget',
+                       'allot.allotment_class as allotment_class')
+              ->join('funding_allotments as allot', 'allot.id', '=',
+                     'r_allot.allotment_id')
+              ->where('r_allot.budget_realign_id', $budgetRealignID)
+              ->orderBy('allot.order_no')
+              ->get() :
+            FundingAllotment::where('budget_id', $id)
+                            ->orderBy('order_no')
+                            ->get();
+
+        return view('modules.fund-utilization.fund-project-lib.create-realignment', compact(
+            'id',
+            'approvedBudget',
+            'remainingBudget',
+            'allotments',
+            'allotmentClassifications'
         ));
     }
 
@@ -103,6 +195,7 @@ class LineItemBudgetController extends Controller
             $instanceFundingBudget->date_to = $dateTo;
             $instanceFundingBudget->approved_budget = $approvedBudget;
             $instanceFundingBudget->is_active = 'y';
+            $instanceFundingBudget->created_by = Auth::user()->id;
             $instanceFundingBudget->save();
 
             $lastFundBudget = FundingBudget::orderBy('created_at', 'desc')->first();
@@ -137,6 +230,102 @@ class LineItemBudgetController extends Controller
     }
 
     /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function storeRealignment(Request $request, $id) {
+        $proposedBudget = $request->approved_budget;
+
+        $allotmentIDs = $request->allotment_id;
+        $allotmentNames = $request->allotment_name;
+        $allotmentClasses = $request->allot_class;
+        $allottedBudgets = $request->allotted_budget;
+
+        //dd([$proposedBudget, $allotmentIDs, $allotmentNames, $allotmentClasses, $allottedBudgets]);
+
+
+
+            $budgetRealignedData = FundingBudgetRealignment::whereNotNull(
+                'date_disapproved'
+            )->where('budget_id', $id)
+            ->orderBy('realignment_order', 'desc')
+            ->first();
+
+            $fundingBudgetData = FundingBudget::find($id);
+            $projectID = $fundingBudgetData->project_id;
+            $realignmentOrder = $budgetRealignedData ?
+                                $budgetRealignedData->realignment_order + 1 :
+                                1;
+
+            $instanceBudgetRealigned = new FundingBudgetRealignment;
+            $instanceBudgetRealigned->project_id = $projectID;
+            $instanceBudgetRealigned->budget_id = $id;
+            $instanceBudgetRealigned->realigned_budget = $proposedBudget;
+            $instanceBudgetRealigned->realignment_order = $realignmentOrder;
+            $instanceBudgetRealigned->created_by = Auth::user()->id;
+            $instanceBudgetRealigned->save();
+
+            $orderNo = 0;
+            $lastID = DB::table('funding_budget_realignments')
+                        ->where('realignment_order', $realignmentOrder)
+                        ->first();
+
+            foreach ($allottedBudgets as $ctr => $allotBudget) {
+                $orderNo++;
+                $instanceRealignedAllot = new FundingAllotmentRealignment;
+                $instanceRealignedAllot->project_id = $projectID;
+                $instanceRealignedAllot->budget_id = $id;
+                $instanceRealignedAllot->allotment_id = isset($allotmentIDs[$ctr]) ?
+                    $allotmentIDs[$ctr] :
+                    $this->storeAdditionalAllotment($projectID, $id, $allotmentClasses[$ctr],
+                                                    $allotmentNames[$ctr], $orderNo);
+                $instanceRealignedAllot->budget_realign_id = $lastID->id;
+                $instanceRealignedAllot->realigned_allotment = $allottedBudgets[$ctr];
+                $instanceRealignedAllot->save();
+
+                if (isset($allotmentIDs[$ctr])) {
+                    $this->updateAllotment($allotmentIDs[$ctr], $allotmentNames[$ctr], $allotmentClasses[$ctr],
+                                           $orderNo);
+                }
+            }
+        try {
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+    }
+
+    public function storeAdditionalAllotment($projectID, $budgetID, $allotmentClass,
+                                             $allotmentName, $orderNo) {
+        $instanceAllotment = new FundingAllotment;
+        $instanceAllotment->project_id = $projectID;
+        $instanceAllotment->budget_id = $budgetID;
+        $instanceAllotment->allotment_class = $allotmentClass;
+        $instanceAllotment->order_no = $orderNo;
+        $instanceAllotment->allotment_name = $allotmentName;
+        $instanceAllotment->allotted_budget = 0.00;
+        $instanceAllotment->save();
+
+        $lastID = DB::table('funding_allotments')
+                    ->where([
+            ['budget_id', $budgetID],
+            ['allotment_name', $allotmentName]
+        ])->first();
+
+        return $lastID->id;
+    }
+
+    public function updateAllotment($id, $allotmentName, $allotmentClass, $orderNo) {
+        $instanceAllotment = FundingAllotment::find($id);
+        $instanceAllotment->allotment_name = $allotmentName;
+        $instanceAllotment->allotment_class = $allotmentClass;
+        $instanceAllotment->order_no = $orderNo;
+        $instanceAllotment->save();
+    }
+
+    /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
@@ -146,7 +335,9 @@ class LineItemBudgetController extends Controller
         $budget = FundingBudget::find($id);
         $budgetID = $budget->id;
         $remainingBudget = $budget->approved_budget;
-        $allotments = FundingAllotment::where('budget_id', $budgetID)->get();
+        $allotments = FundingAllotment::where('budget_id', $budgetID)
+                                      ->orderBy('order_no')
+                                      ->get();
         $projects = FundingProject::orderBy('project_name')->get();
         $allotmentClassifications = AllotmentClass::orderBy('class_name')->get();
 
@@ -185,7 +376,7 @@ class LineItemBudgetController extends Controller
         $documentType = 'Line-Item Budgets';
         $routeName = 'fund-project-lib';
 
-
+        try {
             $instanceFundingBudget = FundingBudget::find($id);
             $projectID = $instanceFundingBudget->project_id;
 
@@ -222,7 +413,7 @@ class LineItemBudgetController extends Controller
                                 ->where('budget_id', $id)
                                 ->delete();
             }
-        try {
+
             $msg = "$documentType successfully updated.";
             Auth::user()->log($request, $msg);
             return redirect()->route($routeName)
