@@ -108,8 +108,16 @@
                                     <tr class="hidden-xs">
                                         <td></td>
                                         <td align="center">
+                                            @if (!$fund->date_approved && !$fund->date_disapproved)
                                             <i class="fas fa-spinner fa-lg faa-spin fa-pulse material-tooltip-main"
                                                data-toggle="tooltip" data-placement="right" title="Pending"></i>
+                                            @elseif (!$fund->date_approved && $fund->date_disapproved)
+                                            <i class="fas fa-thumbs-down fa-lg material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Disapproved"></i>
+                                            @elseif ($fund->date_approved && !$fund->date_disapproved)
+                                            <i class="fas fa-thumbs-up fa-lg green-text material-tooltip-main"
+                                               data-toggle="tooltip" data-placement="right" title="Approved"></i>
+                                            @endif
                                         </td>
                                         <td>{{ $fund->project->project_name }}</td>
                                         <td>{{ date_format(date_create($fund->date_from), "F j, Y") }}</td>
@@ -117,15 +125,19 @@
                                         <td class="material-tooltip-main" data-toggle="tooltip" data-placement="left"
                                             data-html="true" title='
                                                 <h6 class="text-left"><b>Original Approved Budget:</b><br>
-                                                &#8369; {!! number_format($fund->current_budget, 2) !!}<br><br>
+                                                - &#8369; {!! number_format($fund->approved_budget, 2) !!}<br><br>
                                                 <b>Realignments:</b> <br>
 
-                                                @foreach($fund->realignments as $ctrRealign => $realignment)
-                                                <b>R{!! $ctrRealign + 1 !!} = </b>
+                                                @if ($fund->count_realignments > 0)
+                                                    @foreach($fund->realignments as $ctrRealign => $realignment)
+                                                <b>- R{!! $ctrRealign + 1 !!} = </b>
                                                 &#8369; {!! number_format($realignment->realigned_budget) !!} <br>
-                                                @endforeach
+                                                    @endforeach
+                                                @else
+                                                <b>- None</b>
+                                                @endif
                                                 </h6>'>
-                                            &#8369; {{ number_format($fund->approved_budget, 2) }}
+                                            &#8369; {{ number_format($fund->current_budget, 2) }}
                                         </td>
                                         <td>{{ $fund->is_active == 'y' ? 'Yes' : 'No' }}</td>
 
@@ -221,6 +233,7 @@
                                     </button>
                                 @endif
 
+                                @if (!$fund->date_approved)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showDelete('{{ route('fund-project-lib-delete',
@@ -228,55 +241,115 @@
                                                                     '{{ $fund->project->project_name.' LIB' }}');">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
+                                @else
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light" disabled>
+                                    <i class="fas fa-trash-alt red-text"></i> Delete
+                                </button>
+                                @endif
                             </div>
                         </div>
                     </div>
                     <div class="card-body">
                         <p>
                             <b>Project Name: </b> {{ $fund->project->project_name }}<br>
-                            <b>Approved Budget: &#8369; {{ number_format($fund->approved_budget, 2) }}</b><br>
-                            <b>Realignments: </b><br>
+                            <b>Approved Budget: </b> &#8369; {{ number_format($fund->approved_budget, 2) }}<br>
+                            <b>Realignments: </b>
 
-                            @foreach($fund->realignments as $ctrRealign => $realignment)
-                            <b>R{!! $ctrRealign + 1 !!} = </b>
-                            &#8369; {!! number_format($realignment->realigned_budget) !!} <br>
-                            @endforeach
+                            @if ($fund->count_realignments > 0)
+                            <br>
+                                @foreach($fund->realignments as $ctrRealign => $realignment)
+                            <b>&nbsp;&nbsp;R{!! $ctrRealign + 1 !!} = </b>
+                            &#8369; {!! number_format($realignment->realigned_budget) !!}
+
+                                    @if ($realignment->date_approved)
+                            <i class="fas fa-check-circle green-text material-tooltip-main"
+                               data-toggle="tooltip" data-placement="left" title="Approved"></i>
+                                    @elseif ($realignment->date_disapproved)
+                            <i class="fas fa-thumbs-down material-tooltip-main"
+                               data-toggle="tooltip" data-placement="right" title="Disapproved"></i>
+                                    @else
+                            <i class="fas fa-spinner faa-spin fa-pulse material-tooltip-main"
+                               data-toggle="tooltip" data-placement="right" title="Pending"></i>
+                                    @endif
+                            <br>
+                                @endforeach
+                            @else
+                            <span class="red-text">None</span>
+                            @endif
                         </p>
 
+                        @if ($fund->date_approved)
+                            @if ($fund->count_realignments > 0)
+                                @if ($fund->current_realigned_budget->date_approved &&
+                                     !$fund->current_realigned_budget->date_disapproved)
                         <button type="button" class="btn btn-sm btn-dark-green btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showCreateRealignment(
                                     '{{ route('fund-project-lib-show-create-realignment',
-                                    ['id' => $fund->id]) }}');">
-                                <i class="fas fa-indent"></i> Request/Create Realignment
+                                    ['id' => $fund->id,
+                                     'type' => 'create']) }}');">
+                                <i class="fas fa-pencil-alt"></i> Request/Create Realignment
                         </button>
+                                @elseif (!$fund->current_realigned_budget->date_approved ||
+                                         !$fund->current_realigned_budget->date_disapproved)
                         <button type="button" class="btn btn-sm btn-deep-orange btn-rounded
                                 btn-block waves-effect mb-2"
-                                onclick="$(this).showEditRealignment('{{ $fund->lddap_id }}');">
-                                <i class="fas fa-indent"></i> Edit Realignment
+                                onclick="$(this).showEditRealignment(
+                                    '{{ route('fund-project-lib-show-edit-realignment',
+                                    ['id' => $fund->id,
+                                     'type' => 'update']) }}');">
+                                <i class="far fa-edit"></i> Edit Realignment
                         </button>
+                                @endif
+                            @else
+                        <button type="button" class="btn btn-sm btn-dark-green btn-rounded
+                                btn-block waves-effect mb-2"
+                                onclick="$(this).showCreateRealignment(
+                                    '{{ route('fund-project-lib-show-create-realignment',
+                                    ['id' => $fund->id,
+                                     'type' => 'create']) }}');">
+                                <i class="fas fa-pencil-alt"></i> Request/Create Realignment
+                        </button>
+                            @endif
+                        @endif
                     </div>
                 </div>
                 <hr>
                 <ul class="list-group z-depth-1">
                     <li class="list-group-item justify-content-between">
-                        <h6><strong><i class="fas fa-list-ol"></i> Allotments</strong></h6>
+                        <h6><b><i class="fas fa-list-ol"></i> Allotments</b></h6>
                     </li>
-                    <li class="list-group-item justify-content-between">
+                    <li class="list-group-item justify-content-between overflow-auto" style="height: 200px;">
                         @if (count($fund->current_realigned_allotments) > 0)
                             @foreach ($fund->current_realigned_allotments as $cntr => $item)
                         <i class="fas fa-caret-right"></i>
 
                             @if (strlen($item->allotment_name) > 60)
-                        <strong>{{ $cntr + 1 }}.|</strong> {{ substr($item->allotment_name, 0, 60) }}...
+                        <span class="font-weight-bold">
+                            {{ $cntr + 1 }}.| {{ substr($item->allotment_name, 0, 60) }}...:<br>
+                        </span>
                             @else
-                        <strong>{{ $cntr + 1 }}.|</strong> {{ $item->allotment_name }}.
+                        <span class="font-weight-bold">
+                            {{ $cntr + 1 }}.| {{ $item->allotment_name }}:<br>
+                        </span>
                             @endif
 
-                        <span class="font-weight-bold">
-                            &#8369; {{ number_format($item->allotted_budget, 2) }}
+                        <span class="text-center w-100 p-4">
+                            @if ($fund->current_realigned_budget->date_approved)
+                            <i class="fas fa-check-circle green-text material-tooltip-main"
+                               data-toggle="tooltip" data-placement="left" title="Approved"></i>
+                            @elseif ($fund->current_realigned_budget->date_disapproved)
+                            <i class="fas fa-thumbs-down material-tooltip-main"
+                               data-toggle="tooltip" data-placement="right" title="Disapproved"></i>
+                            @else
+                            <i class="fas fa-spinner faa-spin fa-pulse material-tooltip-main"
+                               data-toggle="tooltip" data-placement="right" title="Pending"></i>
+                            @endif
+
+                            &nbsp;&nbsp;<em>&#8369; {{ number_format($item->allotted_budget, 2) }}</em>
                         </span>
-                        <br>
+                        <hr class="my-1">
                             @endforeach
                         @endif
                     </li>
@@ -287,19 +360,50 @@
                         <h5><b><i class="fas fa-pen-nib"></i> Actions</b></h5>
                     </li>
 
+                    @if (!$fund->date_disapproved && !$fund->date_approved)
                     <!-- Approve Button Section -->
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-md btn-block btn-rounded"
-                                onclick="$(this).showApprove('{{ route('pr-approve', ['id' => $fund->id]) }}',
-                                                             '{{ $fund->id }}');">
+                                onclick="$(this).showApprove(
+                                    '{{ route('fund-project-lib-approve', [
+                                            'id' => $fund->id,
+                                            'isRealignment' => 0
+                                        ]) }}',
+                                    '{{ $fund->id }}'
+                                );">
                             <i class="fas fa-thumbs-up"></i> Approve LIB
                         </button>
                     </li>
 
+                    <!-- Disapprove Button Section -->
+                    <li class="list-group-item justify-content-between">
+                        <button type="button" class="btn btn-outline-black waves-effect btn-md btn-block btn-rounded"
+                                onclick="$(this).showDisapprove(
+                                    '{{ route('fund-project-lib-disapprove', [
+                                            'id' => $fund->id,
+                                            'isRealignment' => 0
+                                        ]) }}',
+                                    '{{ $fund->id }}'
+                                );">
+                            <i class="fas fa-thumbs-down"></i> Disapprove LIB
+                        </button>
+                    </li>
+                    @endif
+
+                    @if ($fund->date_approved)
+                        @if ($fund->count_realignments > 0)
+                            @if (!$fund->current_realigned_budget->date_approved &&
+                                 !$fund->current_realigned_budget->date_disapproved)
+                    <!-- Approve Button Section -->
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-md btn-block btn-rounded"
-                                onclick="$(this).showApprove('{{ route('pr-approve', ['id' => $fund->id]) }}',
-                                                             '{{ $fund->id }}');">
+                                onclick="$(this).showApprove(
+                                    '{{ route('fund-project-lib-approve', [
+                                            'id' => $fund->current_realigned_budget->id,
+                                            'isRealignment' => 1
+                                        ]) }}',
+                                    '{{ $fund->id }}'
+                                );">
                             <i class="fas fa-thumbs-up"></i> Approve Realignment
                         </button>
                     </li>
@@ -307,18 +411,27 @@
                     <!-- Disapprove Button Section -->
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-black waves-effect btn-md btn-block btn-rounded"
-                                onclick="$(this).showDisapprove('{{ route('pr-disapprove', ['id' => $fund->id]) }}',
-                                                                '{{ $fund->id }}');">
-                            <i class="fas fa-thumbs-down"></i> Disapprove LIB
-                        </button>
-                    </li>
-                    <li class="list-group-item justify-content-between">
-                        <button type="button" class="btn btn-outline-black waves-effect btn-md btn-block btn-rounded"
-                                onclick="$(this).showDisapprove('{{ route('pr-disapprove', ['id' => $fund->id]) }}',
-                                                                '{{ $fund->id }}');">
+                                onclick="$(this).showDisapprove(
+                                    '{{ route('fund-project-lib-disapprove', [
+                                            'id' => $fund->current_realigned_budget->id,
+                                            'isRealignment' => 1
+                                        ]) }}',
+                                    '{{ $fund->id }}'
+                                );">
                             <i class="fas fa-thumbs-down"></i> Disapprove Realignment
                         </button>
                     </li>
+                            @else
+                    <li class="list-group-item justify-content-between text-center">
+                        No more available actions.
+                    </li>
+                            @endif
+                        @else
+                    <li class="list-group-item justify-content-between text-center">
+                        No more available actions.
+                    </li>
+                        @endif
+                    @endif
                 </ul>
             </div>
             <!--Footer-->
@@ -340,6 +453,8 @@
 @include('modals.edit')
 @include('modals.delete-destroy')
 @include('modals.print')
+@include('modals.approve')
+@include('modals.disapprove')
 
 @endsection
 
