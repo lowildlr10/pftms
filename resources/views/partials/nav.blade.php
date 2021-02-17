@@ -161,9 +161,6 @@
                                     Project Line-Item Budgets
                                 </a>
                             </li>
-                            <li>
-                                <a href="#" class="waves-effect">Realignments</a>
-                            </li>
                         </ul>
                     </div>
                 </li>

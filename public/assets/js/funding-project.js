@@ -255,6 +255,58 @@ $(function() {
         $('#form-delete').submit();
     }
 
+    $.fn.showApprove = function(url, isRealignment) {
+        let msg = `Are you sure you want to set this
+                   document to 'Approved'?`,
+            title = 'Approve Line-Item Budgets';
+
+        if (isRealignment) {
+            msg = `Are you sure you want to set this
+                   realignment to 'Approved'?`;
+            title = 'Approve Realignment';
+        }
+
+        $('#modal-body-approve').html(msg);
+        $("#modal-approve").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#approve-title').html(title);
+            $('#form-approve').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-approve-body').html('');
+             $('#form-approve').attr('action', '#');
+		});
+    }
+
+    $.fn.approve = function() {
+        $('#form-approve').submit();
+    }
+
+    $.fn.showDisapprove = function(url, isRealignment) {
+        let msg = `Are you sure you want to set this
+                   document to 'Disapproved'?`,
+            title = 'Disapprove Line-Item Budgets';
+
+        if (isRealignment) {
+            msg = `Are you sure you want to set this
+                   realignment to 'Disapproved'?`;
+            title = 'Disapprove Realignment';
+        }
+
+        $('#modal-body-disapprove').html(msg);
+        $("#modal-disapprove").modal({keyboard: false, backdrop: 'static'})
+						  .on('shown.bs.modal', function() {
+            $('#disapprove-title').html(title);
+            $('#form-disapprove').attr('action', url);
+		}).on('hidden.bs.modal', function() {
+             $('#modal-disapprove-body').html('');
+             $('#form-disapprove').attr('action', '#');
+		});
+    }
+
+    $.fn.disapprove = function() {
+        $('#form-disapprove').submit();
+    }
+
     $('.material-tooltip-main').tooltip({
         template: template
     });
