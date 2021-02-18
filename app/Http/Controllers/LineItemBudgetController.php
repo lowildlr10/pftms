@@ -42,7 +42,13 @@ class LineItemBudgetController extends Controller
                     ->orWhere('date_from', 'like', "%$keyword%")
                     ->orWhere('date_to', 'like', "%$keyword%")
                     ->orWhere('approved_budget', 'like', "%$keyword%")
-                    ->orWhere('is_active', 'like', "%$keyword%");
+                    ->orWhere('is_active', 'like', "%$keyword%")
+                    ->orWhereHas('allotments', function($query) use ($keyword) {
+                        $query->where('budget_id', 'like', "%$keyword%")
+                              ->orWhere('budget_id', "%$keyword%")
+                              ->orWhere('allotment_name', "%$keyword%")
+                              ->orWhere('allotted_budget', "%$keyword%");
+                    });
             });
         }
 
@@ -464,7 +470,9 @@ class LineItemBudgetController extends Controller
 
             foreach ($allottedBudgets as $ctr => $allotBudget) {
                 $orderNo++;
-                $instanceRealignedAllot = FundingAllotmentRealignment::find($realignedAllotIDs[$ctr]);
+                $instanceRealignedAllot = isset($realignedAllotIDs[$ctr]) ?
+                                          FundingAllotmentRealignment::find($realignedAllotIDs[$ctr]) :
+                                          new FundingAllotmentRealignment;
                 $instanceRealignedAllot->project_id = $projectID;
                 $instanceRealignedAllot->budget_id = $id;
                 $instanceRealignedAllot->allotment_id = isset($allotmentIDs[$ctr]) ? $allotmentIDs[$ctr] :
@@ -616,6 +624,27 @@ class LineItemBudgetController extends Controller
                 'msg' => $msg,
                 'alert_type' => 'failed'
             ];
+        }
+    }
+
+    public function destroyRealignment(Request $request, $id) {
+        $routeName = 'fund-project-lib';
+        $documentType = 'List-Item Budget Realignments';
+
+        try {
+            FundingAllotmentRealignment::where('budget_realign_id', $id)
+                                       ->delete();
+            FundingBudgetRealignment::destroy($id);
+
+            $msg = "$documentType '$id' successfully deleted.";
+                Auth::user()->log($request, $msg);
+                return redirect()->route($routeName, ['keyword' => $id])
+                                 ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName)
+                             ->with('failed', $msg);
         }
     }
 
