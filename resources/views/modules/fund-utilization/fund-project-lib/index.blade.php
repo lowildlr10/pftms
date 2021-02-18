@@ -131,7 +131,18 @@
                                                 @if ($fund->count_realignments > 0)
                                                     @foreach($fund->realignments as $ctrRealign => $realignment)
                                                 <b>- R{!! $ctrRealign + 1 !!} = </b>
-                                                &#8369; {!! number_format($realignment->realigned_budget) !!} <br>
+                                                &#8369; {!! number_format($realignment->realigned_budget, 2) !!}
+                                                        @if ($realignment->date_approved)
+                                                <i class="fas fa-check-circle green-text material-tooltip-main"
+                                                    data-toggle="tooltip" data-placement="left" title="Approved"></i>
+                                                        @elseif ($realignment->date_disapproved)
+                                                <i class="fas fa-thumbs-down material-tooltip-main"
+                                                    data-toggle="tooltip" data-placement="right" title="Disapproved"></i>
+                                                        @else
+                                                <i class="fas fa-spinner faa-spin fa-pulse material-tooltip-main"
+                                                    data-toggle="tooltip" data-placement="right" title="Pending"></i>
+                                                        @endif
+                                                <br>
                                                     @endforeach
                                                 @else
                                                 <b>- None</b>
@@ -260,7 +271,7 @@
                             <br>
                                 @foreach($fund->realignments as $ctrRealign => $realignment)
                             <b>&nbsp;&nbsp;R{!! $ctrRealign + 1 !!} = </b>
-                            &#8369; {!! number_format($realignment->realigned_budget) !!}
+                            &#8369; {!! number_format($realignment->realigned_budget, 2) !!}
 
                                     @if ($realignment->date_approved)
                             <i class="fas fa-check-circle green-text material-tooltip-main"
@@ -271,6 +282,33 @@
                                     @else
                             <i class="fas fa-spinner faa-spin fa-pulse material-tooltip-main"
                                data-toggle="tooltip" data-placement="right" title="Pending"></i>
+                                    @endif
+
+                                    @if ((!$realignment->date_approved && !$realignment->date_disapproved) ||
+                                         ($realignment->date_disapproved && !$realignment->date_approved))
+                            <br>
+                            <button type="button" class="btn btn-link btn-md ml-1 my-0 p-1
+                                    waves-effect waves-light"
+                                    onclick="$(this).showEditRealignment(
+                                        '{{ route('fund-project-lib-show-edit-realignment',
+                                        ['id' => $fund->id,
+                                        'type' => 'update']) }}');">
+                                <b>
+                                    [ <i class="far fa-edit deep-orange-text"></i>
+                                    Edit (R{{ $fund->count_realignments }}) ]
+                                </b>
+                            </button>
+                            <button type="button" class="btn btn-link btn-md ml-0 my-0 p-1
+                                    waves-effect waves-light"
+                                    onclick="$(this).showDelete(
+                                        '{{ route('fund-project-lib-destroy-realignment',
+                                        ['id' => $fund->current_realigned_budget->id]) }}',
+                                        '{{ $fund->project->project_name.' LIB Realignments' }}');">
+                                <b>
+                                    [ <i class="far fa-trash-alt red-text"></i>
+                                    Discard (R{{$fund->count_realignments}}) ]
+                                </b>
+                            </button>
                                     @endif
                             <br>
                                 @endforeach
@@ -290,16 +328,6 @@
                                     ['id' => $fund->id,
                                      'type' => 'create']) }}');">
                                 <i class="fas fa-pencil-alt"></i> Request/Create Realignment
-                        </button>
-                                @elseif (!$fund->current_realigned_budget->date_approved ||
-                                         !$fund->current_realigned_budget->date_disapproved)
-                        <button type="button" class="btn btn-sm btn-deep-orange btn-rounded
-                                btn-block waves-effect mb-2"
-                                onclick="$(this).showEditRealignment(
-                                    '{{ route('fund-project-lib-show-edit-realignment',
-                                    ['id' => $fund->id,
-                                     'type' => 'update']) }}');">
-                                <i class="far fa-edit"></i> Edit Realignment
                         </button>
                                 @endif
                             @else
