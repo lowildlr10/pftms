@@ -307,6 +307,12 @@
                     <div class="sidebar-submenu">
                         <ul>
                             <li>
+                                <a href="{{ route('project') }}" class="waves-effect">Agency/LGUs</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('project') }}" class="waves-effect">Industry/Sectors</a>
+                            </li>
+                            <li>
                                 <a href="{{ route('inventory-classification') }}" class="waves-effect">Inventory Classifications</a>
                             </li>
                             <li>
@@ -316,7 +322,7 @@
                                 <a href="{{ route('procurement-mode') }}" class="waves-effect">Modes of Procurement</a>
                             </li>
                             <li>
-                                <a href="{{ route('funding-source') }}" class="waves-effect">Projects</a>
+                                <a href="{{ route('project') }}" class="waves-effect">Projects</a>
                             </li>
                             <li>
                                 <a href="{{ route('signatory') }}" class="waves-effect">Signatories</a>
@@ -348,6 +354,9 @@
                                 <a href="{{ route('emp-division') }}" class="waves-effect">Divisions</a>
                             </li>
                             <li>
+                                <a href="{{ route('emp-division') }}" class="waves-effect">Units</a>
+                            </li>
+                            <li>
                                 <a href="{{ route('emp-role') }}" class="waves-effect">Roles</a>
                             </li>
                             <li>
@@ -371,10 +380,13 @@
                     <div class="sidebar-submenu">
                         <ul>
                             <li>
-                                <a href="{{ route('region') }}" class="waves-effect">Region</a>
+                                <a href="{{ route('region') }}" class="waves-effect">Regions</a>
                             </li>
                             <li>
-                                <a href="{{ route('province') }}" class="waves-effect">Province</a>
+                                <a href="{{ route('province') }}" class="waves-effect">Provinces</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('province') }}" class="waves-effect">Municipalities</a>
                             </li>
                         </ul>
                     </div>

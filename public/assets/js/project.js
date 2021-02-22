@@ -8,10 +8,11 @@ $(function() {
         $('#modal-body-create').load(url,function() {
             $('#mdb-preloader').fadeOut(300);
             $(this).slideToggle(500);
+            $('.mdb-select').materialSelect();
         });
         $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
-            $('#create-title').html('Create Funding Source');
+            $('#create-title').html('Create Project');
 		}).on('hidden.bs.modal', function() {
 		    $('#modal-body-create').html('').css('display', 'none');
 		});
@@ -30,10 +31,11 @@ $(function() {
         $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $(this).slideToggle(500);
+            $('.mdb-select').materialSelect();
         });
         $("#modal-sm-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {
-            $('#edit-title').html('Update Funding Source');
+            $('#edit-title').html('Update Project');
 		}).on('hidden.bs.modal', function() {
 		    $('#modal-body-edit').html('').css('display', 'none');
 		});
@@ -51,7 +53,7 @@ $(function() {
 		$('#modal-body-delete').html(`Are you sure you want to delete '${name}'?`);
         $("#modal-delete").modal({keyboard: false, backdrop: 'static'})
 						  .on('shown.bs.modal', function() {
-            $('#delete-title').html('Delete Funding Source');
+            $('#delete-title').html('Delete Project');
             $('#form-delete').attr('action', url);
 		}).on('hidden.bs.modal', function() {
              $('#modal-delete-body').html('');

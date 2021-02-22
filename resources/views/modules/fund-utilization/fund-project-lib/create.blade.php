@@ -15,7 +15,7 @@
                             @if (count($projects) > 0)
                                 @foreach ($projects as $project)
                             <option value="{{ $project->id }}">
-                                {!! $project->project_name !!}
+                                {!! $project->project_title !!}
                             </option>
                                 @endforeach
                             @endif

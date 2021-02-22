@@ -101,7 +101,7 @@ class PurchaseRequestController extends Controller
                     ->orWhere('date_pr', 'like', "%$keyword%")
                     ->orWhere('purpose', 'like', "%$keyword%")
                     ->orWhereHas('funding', function($query) use ($keyword) {
-                        $query->where('project_name', 'like', "%$keyword%");
+                        $query->where('project_title', 'like', "%$keyword%");
                     })->orWhereHas('stat', function($query) use ($keyword) {
                         $query->where('status_name', 'like', "%$keyword%");
                     })->orWhereHas('requestor', function($query) use ($keyword) {
@@ -509,7 +509,7 @@ class PurchaseRequestController extends Controller
         $roleHasBudget = Auth::user()->hasBudgetRole();
         $roleHasAccountant = Auth::user()->hasAccountantRole();
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
-        $fundingSources = FundingProject::orderBy('project_name')->get();
+        $fundingSources = FundingProject::orderBy('project_title')->get();
         $empDivisionAccess = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
                               [Auth::user()->division] :
                               Auth::user()->getDivisionAccess();
@@ -574,7 +574,7 @@ class PurchaseRequestController extends Controller
         $roleHasBudget = Auth::user()->hasBudgetRole();
         $roleHasAccountant = Auth::user()->hasAccountantRole();
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
-        $fundingSources = FundingProject::orderBy('project_name')->get();
+        $fundingSources = FundingProject::orderBy('project_title')->get();
 
         $empDivisionAccess = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
                               [Auth::user()->division] :

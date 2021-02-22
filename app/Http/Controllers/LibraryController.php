@@ -22,6 +22,7 @@ use App\Models\Region;
 use App\Models\Signatory;
 use App\Models\Supplier;
 use App\Models\SupplierClassification;
+use App\Models\IndustrySector;
 
 use DB;
 use Auth;
@@ -245,39 +246,44 @@ class LibraryController extends Controller
     }
 
     /**
-     *  Funding Source Module
+     *  Project Module
     **/
-    public function indexFundingSource(Request $request) {
-        $fundingData = FundingProject::orderBy('project_name')
+    public function indexProject(Request $request) {
+        $projectData = FundingProject::orderBy('project_title')
                                     ->get();
 
-        return view('modules.library.funding.index', [
-            'list' => $fundingData
+        return view('modules.library.project.index', [
+            'list' => $projectData
         ]);
     }
 
-    public function showCreateFundingSource() {
-        return view('modules.library.funding.create');
+    public function showCreateProject() {
+        $industries = IndustrySector::orderBy('sector_name')->get();
+        $municipalities = IndustrySector::orderBy('sector_name')->get();
+        return view('modules.library.project.create', compact(
+            'industries',
+
+        ));
     }
 
-    public function showEditFundingSource($id) {
+    public function showEditProject($id) {
         $fundingData = FundingProject::find($id);
-        $funding = $fundingData->project_name;
+        $funding = $fundingData->project_title;
 
-        return view('modules.library.funding.update', [
+        return view('modules.library.project.update', [
             'id' => $id,
             'funding' => $funding
         ]);
     }
 
-    public function storeFundingSource(Request $request) {
+    public function storeProject(Request $request) {
         $referenceCode = $request->reference_code;
         $sourceName = $request->source_name;
 
         try {
             if (!$this->checkDuplication('FundingSource', $sourceName)) {
                 $instanceFundSrc = new FundingProject;
-                $instanceFundSrc->project_name = $sourceName;
+                $instanceFundSrc->project_title = $sourceName;
                 $instanceFundSrc->save();
 
                 $msg = "Funding source '$sourceName' successfully created.";
@@ -292,13 +298,13 @@ class LibraryController extends Controller
         }
     }
 
-    public function updateFundingSource(Request $request, $id) {
+    public function updateProject(Request $request, $id) {
         $referenceCode = $request->reference_code;
         $sourceName = $request->source_name;
 
         try {
             $instanceFundSrc = FundingProject::find($id);
-            $instanceFundSrc->project_name = $sourceName;
+            $instanceFundSrc->project_title = $sourceName;
             $instanceFundSrc->save();
 
             $msg = "Funding source '$sourceName' successfully created.";
@@ -309,7 +315,7 @@ class LibraryController extends Controller
         }
     }
 
-    public function deleteFundingSource($id) {
+    public function deleteProject($id) {
         try {
             $instanceFundSrc = FundingProject::find($id);
             $sourceName = $instanceFundSrc->source_name;
@@ -323,7 +329,7 @@ class LibraryController extends Controller
         }
     }
 
-    public function destroyFundingSource($id) {
+    public function destroyProject($id) {
         try {
             $instanceFundSrc = FundingProject::find($id);
             $sourceName = $instanceFundSrc->source_name;
@@ -1260,9 +1266,9 @@ class LibraryController extends Controller
                                             ->count();
                 break;
             case 'FundingSource':
-                $dataCount = FundingProject::where('project_name', $data)
-                                          ->orWhere('project_name', strtolower($data))
-                                          ->orWhere('project_name', strtoupper($data))
+                $dataCount = FundingProject::where('project_title', $data)
+                                          ->orWhere('project_title', strtolower($data))
+                                          ->orWhere('project_title', strtoupper($data))
                                           ->count();
                 break;
             case 'Signatory':

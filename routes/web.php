@@ -1171,42 +1171,42 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'destroy'
     ])->name('item-classification-destroy');
 
-    // Funding Source Module
-    Route::any('libraries/funding-source', [
-        'uses' => 'LibraryController@indexFundingSource',
+    // Project
+    Route::any('libraries/project', [
+        'uses' => 'LibraryController@indexProject',
         'module' => 'lib_funding',
         'access' => 'is_allowed'
-    ])->name('funding-source');
-    Route::get('libraries/funding-source/show-create', [
-        'uses' => 'LibraryController@showCreateFundingSource',
+    ])->name('project');
+    Route::get('libraries/project/show-create', [
+        'uses' => 'LibraryController@showCreateProject',
         'module' => 'lib_funding',
         'access' => 'create'
-    ])->name('funding-source-show-create');
-    Route::post('libraries/funding-source/store', [
-        'uses' => 'LibraryController@storeFundingSource',
+    ])->name('project-show-create');
+    Route::post('libraries/project/store', [
+        'uses' => 'LibraryController@storeProject',
         'module' => 'lib_funding',
         'access' => 'create'
-    ])->name('funding-source-store');
-    Route::get('libraries/funding-source/show-edit/{id}', [
-        'uses' => 'LibraryController@showEditFundingSource',
+    ])->name('project-store');
+    Route::get('libraries/project/show-edit/{id}', [
+        'uses' => 'LibraryController@showEditProject',
         'module' => 'lib_funding',
         'access' => 'update'
-    ])->name('funding-source-show-edit');
-    Route::post('libraries/funding-source/update/{id}', [
-        'uses' => 'LibraryController@updateFundingSource',
+    ])->name('project-show-edit');
+    Route::post('libraries/project/update/{id}', [
+        'uses' => 'LibraryController@updateProject',
         'module' => 'lib_funding',
         'access' => 'update'
-    ])->name('funding-source-update');
-    Route::post('libraries/funding-source/delete/{id}', [
-        'uses' => 'LibraryController@deleteFundingSource',
+    ])->name('project-update');
+    Route::post('libraries/project/delete/{id}', [
+        'uses' => 'LibraryController@deleteProject',
         'module' => 'lib_funding',
         'access' => 'delete'
-    ])->name('funding-source-delete');
-    Route::post('libraries/funding-source/destroy/{id}', [
-        'uses' => 'LibraryController@destroyFundingSource',
+    ])->name('project-delete');
+    Route::post('libraries/project/destroy/{id}', [
+        'uses' => 'LibraryController@destroyProject',
         'module' => 'lib_funding',
         'access' => 'destroy'
-    ])->name('funding-source-destroy');
+    ])->name('project-destroy');
 
     // Signatory Module
     Route::any('libraries/signatory', [

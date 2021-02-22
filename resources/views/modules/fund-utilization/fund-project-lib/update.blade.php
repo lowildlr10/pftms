@@ -16,7 +16,7 @@
                                 @foreach ($projects as $project)
                             <option {{ $project->id == $budget->project_id ? 'selected' : '' }}
                                     value="{{ $project->id }}">
-                                {!! $project->project_name !!}
+                                {!! $project->project_title !!}
                             </option>
                                 @endforeach
                             @endif

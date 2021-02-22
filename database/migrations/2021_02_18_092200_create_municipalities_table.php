@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateIndustrySectorsTable extends Migration
+class CreateMunicipalitiesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,15 @@ class CreateIndustrySectorsTable extends Migration
      */
     public function up()
     {
-        Schema::create('industry_sectors', function (Blueprint $table) {
+        Schema::create('municipalities', function (Blueprint $table) {
             $table->engine = 'InnoDB';
 
             $table->uuid('id')->primary();
-            $table->string('sector_name');
+            $table->uuid('region')->nullable();
+            $table->foreign('region')->references('id')->on('regions');
+            $table->uuid('province')->nullable();
+            $table->foreign('province')->references('id')->on('provinces');
+            $table->string('municipality_name');
             $table->softDeletes();
             $table->timestamps();
         });
@@ -30,6 +34,6 @@ class CreateIndustrySectorsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('industry_sectors');
+        Schema::dropIfExists('municipalities');
     }
 }

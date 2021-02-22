@@ -42,7 +42,7 @@
                                 <i class="fas fa-pencil-alt"></i> Create
                             </button>
                             <a type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
-                                    href="{{ route('funding-source') }}">
+                                    href="{{ route('project') }}">
                                 Go to Projects <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
@@ -73,7 +73,7 @@
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="41%">
                                             <b>
-                                                @sortablelink('project.project_name', 'Project Name', [], ['class' => 'white-text'])
+                                                @sortablelink('project.project_title', 'Project Name', [], ['class' => 'white-text'])
                                             </b>
                                         </th>
                                         <th class="th-md" width="13%">
@@ -119,7 +119,7 @@
                                                data-toggle="tooltip" data-placement="right" title="Approved"></i>
                                             @endif
                                         </td>
-                                        <td>{{ $fund->project->project_name }}</td>
+                                        <td>{{ $fund->project->project_title }}</td>
                                         <td>{{ date_format(date_create($fund->date_from), "F j, Y") }}</td>
                                         <td>{{ date_format(date_create($fund->date_to), "F j, Y") }}</td>
                                         <td class="material-tooltip-main" data-toggle="tooltip" data-placement="left"
@@ -162,7 +162,7 @@
                                     </tr>
                                     <tr class="d-none show-xs">
                                         <td data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
-                                            <b>Project Name:</b> {{ $fund->project_name }}<br>
+                                            <b>Project Name:</b> {{ $fund->project_title }}<br>
                                             <small>
                                                 <b>Current Approved Budget: </b>
                                                 &#8369; {!! number_format($fund->current_budget, 2) !!}
@@ -249,7 +249,7 @@
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showDelete('{{ route('fund-project-lib-delete',
                                                                         ['id' => $fund->id]) }}',
-                                                                    '{{ $fund->project->project_name.' LIB' }}');">
+                                                                    '{{ $fund->project->project_title.' LIB' }}');">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
                                 @else
@@ -263,7 +263,7 @@
                     </div>
                     <div class="card-body">
                         <p>
-                            <b>Project Name: </b> {{ $fund->project->project_name }}<br>
+                            <b>Project Name: </b> {{ $fund->project->project_title }}<br>
                             <b>Approved Budget: </b> &#8369; {{ number_format($fund->approved_budget, 2) }}<br>
                             <b>Realignments: </b>
 
@@ -303,7 +303,7 @@
                                     onclick="$(this).showDelete(
                                         '{{ route('fund-project-lib-destroy-realignment',
                                         ['id' => $fund->current_realigned_budget->id]) }}',
-                                        '{{ $fund->project->project_name.' LIB Realignments' }}');">
+                                        '{{ $fund->project->project_title.' LIB Realignments' }}');">
                                 <b>
                                     [ <i class="far fa-trash-alt red-text"></i>
                                     Discard (R{{$fund->count_realignments}}) ]

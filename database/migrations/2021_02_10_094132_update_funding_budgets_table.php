@@ -33,6 +33,9 @@ class UpdateFundingBudgetsTable extends Migration
     public function down()
     {
         Schema::table('funding_budgets', function (Blueprint $table) {
+            $table->dropForeign('funding_budgets_created_by_foreign');
+            $table->dropForeign('funding_budgets_approved_by_foreign');
+            $table->dropForeign('funding_budgets_disapproved_by_foreign');
             $table->dropColumn('created_by');
             $table->dropColumn('approved_by');
             $table->dropColumn('disapproved_by');

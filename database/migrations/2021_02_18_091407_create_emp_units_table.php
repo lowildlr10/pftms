@@ -14,7 +14,13 @@ class CreateEmpUnitsTable extends Migration
     public function up()
     {
         Schema::create('emp_units', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->engine = 'InnoDB';
+
+            $table->uuid('id')->primary();
+            $table->uuid('division')->nullable();
+            $table->foreign('division')->references('id')->on('emp_divisions');
+            $table->string('unit_name');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
