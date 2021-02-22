@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 use Kyslik\ColumnSortable\Sortable;
 
-class FundingProject extends Model
+class Municipality extends Model
 {
     use SoftDeletes, Sortable;
 
@@ -16,7 +16,7 @@ class FundingProject extends Model
      *
      * @var string
      */
-    protected $table = 'funding_projects';
+    protected $table = 'municipalities';
 
     /**
      * The attributes that are mass assignable.
@@ -25,15 +25,9 @@ class FundingProject extends Model
      */
     protected $fillable = [
         'id',
-        'industry_sector',
-        'project_site ',
-        'proponent_units',
-        'comimplementing_agency_lgus',
-        'date_from',
-        'date_to',
-        'project_cost',
-        'project_title',
-        'industry_sector',
+        'region',
+        'province',
+        'municipality_name',
     ];
 
     /**
@@ -51,18 +45,10 @@ class FundingProject extends Model
     }
 
     public static function generateUuid() {
-         return Uuid::generate();
+        return Uuid::generate();
     }
 
     public $sortable = [
-        'date_from',
-        'date_to',
-        'project_cost',
-        'project_title',
+        'municipality_name',
     ];
-
-    public function budget() {
-        return $this->hasOne('App\Models\FundingBudget', 'project_id', 'id')
-                    ->where('is_active', 'y');
-    }
 }

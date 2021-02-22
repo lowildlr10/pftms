@@ -3,6 +3,22 @@
     @csrf
     <div class="card w-responsive">
         <div class="card-body">
+            <h4>Realignment Date</h4>
+            <hr>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="md-form form-sm">
+                        <input type="date" id="date_realignment" name="date_realignment"
+                               class="form-control form-control-sm required">
+                        <label for="date_realignment" class="active">
+                            <span class="red-text">* </span>
+                            <b>Date</b>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6"></div>
+            </div><br>
+
             <h4>New Proposed Budget</h4>
             <hr>
             <div class="row">

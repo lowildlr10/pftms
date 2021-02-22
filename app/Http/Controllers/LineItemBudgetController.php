@@ -97,8 +97,8 @@ class LineItemBudgetController extends Controller
             $budget->realignments = (object) $realignments;
             $countRealignments = count($realignments);
             $budget->count_realignments = $countRealignments;
-            $budget->current_budget = isset($realignments[$countRealignments - 1]) ?
-                                      $realignments[$countRealignments - 1]->realigned_budget :
+            $budget->current_budget = isset($realignments[$countRealignments - 2]) ?
+                                      $realignments[$countRealignments - 2]->realigned_budget :
                                       $budget->approved_budget;
             $budget->current_realigned_budget = isset($realignments[$countRealignments - 1]) ?
                                                 $realignments[$countRealignments - 1] :
@@ -127,7 +127,7 @@ class LineItemBudgetController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showCreate() {
-        $projects = FundingProject::orderBy('project_name')->get();
+        $projects = FundingProject::orderBy('project_title')->get();
         $allotmentClassifications = AllotmentClass::orderBy('class_name')->get();
         return view('modules.fund-utilization.fund-project-lib.create', compact(
             'projects',
@@ -254,6 +254,7 @@ class LineItemBudgetController extends Controller
      */
     public function storeRealignment(Request $request, $id) {
         $proposedBudget = $request->approved_budget;
+        $dateRealignment = $request->date_realignment;
 
         $allotmentIDs = $request->allotment_id;
         $allotmentNames = $request->allotment_name;
@@ -277,6 +278,7 @@ class LineItemBudgetController extends Controller
             $instanceBudgetRealigned = new FundingBudgetRealignment;
             $instanceBudgetRealigned->project_id = $projectID;
             $instanceBudgetRealigned->budget_id = $id;
+            $instanceBudgetRealigned->date_realignment = $dateRealignment;
             $instanceBudgetRealigned->realigned_budget = $proposedBudget;
             $instanceBudgetRealigned->realignment_order = $realignmentOrder;
             $instanceBudgetRealigned->created_by = Auth::user()->id;
@@ -351,7 +353,7 @@ class LineItemBudgetController extends Controller
         $allotments = FundingAllotment::where('budget_id', $budgetID)
                                       ->orderBy('order_no')
                                       ->get();
-        $projects = FundingProject::orderBy('project_name')->get();
+        $projects = FundingProject::orderBy('project_title')->get();
         $allotmentClassifications = AllotmentClass::orderBy('class_name')->get();
 
         foreach ($allotmentClassifications as $item) {
@@ -523,6 +525,7 @@ class LineItemBudgetController extends Controller
             FundingAllotment::where('budget_id', $id)
                             ->orderBy('order_no')
                             ->get();
+        $deteRealignment = $budgetRealignedData ? $budgetRealignedData->date_realignment : NULL;
         $approvedBudget = round($approvedBudget, 2);
         $remainingBudget = $approvedBudget;
 
@@ -539,6 +542,7 @@ class LineItemBudgetController extends Controller
 
         return view($viewFile, compact(
             'id',
+            'deteRealignment',
             'approvedBudget',
             'remainingBudget',
             'allotments',
