@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCoimplementingAgencyLgusTable extends Migration
+class CreateAgencyLgusTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateCoimplementingAgencyLgusTable extends Migration
      */
     public function up()
     {
-        Schema::create('coimplementing_agency_lgus', function (Blueprint $table) {
+        Schema::create('agency_lgus', function (Blueprint $table) {
             $table->engine = 'InnoDB';
 
             $table->uuid('id')->primary();
@@ -36,6 +36,6 @@ class CreateCoimplementingAgencyLgusTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('coimplementing_agency_lgus');
+        Schema::dropIfExists('agency_lgus');
     }
 }

@@ -9,6 +9,7 @@ use App\AbstractItem;
 
 use App\User;
 use App\Models\EmpDivision;
+use App\Models\EmpUnit;
 use App\Models\EmpGroup;
 use App\Models\EmpRole;
 use App\Models\FundingProject;
@@ -23,6 +24,9 @@ use App\Models\Signatory;
 use App\Models\Supplier;
 use App\Models\SupplierClassification;
 use App\Models\IndustrySector;
+use App\Models\Municipality;
+use App\Models\MonitoringOffice;
+use App\Models\AgencyLGU;
 
 use DB;
 use Auth;
@@ -259,10 +263,17 @@ class LibraryController extends Controller
 
     public function showCreateProject() {
         $industries = IndustrySector::orderBy('sector_name')->get();
-        $municipalities = IndustrySector::orderBy('sector_name')->get();
+        $municipalities = Municipality::orderBy('municipality_name')->get();
+        $empUnits = EmpUnit::orderBy('unit_name')->get();
+        $agencies = AgencyLGU::orderBy('agency_name')->get();
+        $monitoringOffices = MonitoringOffice::orderBy('office_name')->get();
+
         return view('modules.library.project.create', compact(
             'industries',
-
+            'municipalities',
+            'empUnits',
+            'agencies',
+            'monitoringOffices',
         ));
     }
 
@@ -1299,5 +1310,21 @@ class LibraryController extends Controller
         }
 
         return ($dataCount > 0) ? 1 : 0;;
+    }
+
+    public function getListAgencyLGU() {
+        $keyword = trim($request->search);
+        $agencyLGUData = AgencyLGU::select('id', 'agency_name');
+
+        if ($keyword) {
+            $agencyLGUData = $agencyLGUData->where(function($qry) use ($keyword) {
+                $qry->where('agency_name', 'like', "%$keyword%");
+            });
+        }
+
+        $agencyLGUData = $agencyLGUData->orderBy('agency_name')
+                                       ->get();
+
+        return response()->json($agencyLGUData);
     }
 }

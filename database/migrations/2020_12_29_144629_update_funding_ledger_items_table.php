@@ -29,6 +29,7 @@ class UpdateFundingLedgerItemsTable extends Migration
     {
         Schema::table('funding_ledger_items', function (Blueprint $table) {
             $table->dropColumn('order_no');
+            $table->dropForeign('funding_ledger_items_mooe_account_title_id_foreign');
             $table->dropColumn('mooe_account_title_id');
         });
     }

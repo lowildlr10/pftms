@@ -2,6 +2,8 @@
 
 @section('custom-css')
 
+<link rel="stylesheet" type="text/css" href="{{ asset('plugins/select2/css/select2.min.css') }}" rel="stylesheet">
+
 <!-- DataTables CSS -->
 <link rel="stylesheet" type="text/css" href="{{ asset('plugins/mdb/css/addons/datatables.min.css') }}" rel="stylesheet">
 
@@ -133,6 +135,8 @@
 @endsection
 
 @section('custom-js')
+
+<script type="text/javascript" src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
 
 <!-- DataTables JS -->
 <script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables.min.js') }}"></script>
