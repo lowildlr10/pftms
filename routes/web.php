@@ -1134,6 +1134,13 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
 
     /*===================== SYSTEM LIBRARIES ROUTES =====================*/
 
+    // Agencies amd LGUs Module
+    Route::post('libraries/agency-lgu/get-agencies-lgus', [
+        'uses' => 'LibraryController@storeItemClassification',
+        'module' => 'lib_item_class',
+        'access' => 'create'
+    ])->name('agency-lgu');
+
     // Item Classification Module
     Route::any('libraries/item-classification', [
         'uses' => 'LibraryController@indexItemClassification',
