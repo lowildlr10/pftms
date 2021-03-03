@@ -16,7 +16,7 @@
                 name="industry_sector">
             <option value="" disabled selected>Choose an Industry/Sector</option>
 
-            @if (count($agencies) > 0)
+            @if (count($industries) > 0)
                 @foreach ($industries as $industry)
             <option value="{{ $industry->id }}">
                 {!! $industry->sector_name !!}

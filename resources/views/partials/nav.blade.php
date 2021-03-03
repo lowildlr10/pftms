@@ -307,7 +307,7 @@
                     <div class="sidebar-submenu">
                         <ul>
                             <li>
-                                <a href="{{ route('project') }}" class="waves-effect">Agency/LGUs</a>
+                                <a href="{{ route('agency-lgu') }}" class="waves-effect">Agency/LGUs</a>
                             </li>
                             <li>
                                 <a href="{{ route('project') }}" class="waves-effect">Industry/Sectors</a>

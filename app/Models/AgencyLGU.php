@@ -52,4 +52,16 @@ class AgencyLGU extends Model
     public $sortable = [
         'agency_name',
     ];
+
+    public function region() {
+        return $this->hasOne('App\Models\Region', 'id', 'region');
+    }
+
+    public function province() {
+        return $this->hasOne('App\Models\Province', 'id', 'province');
+    }
+
+    public function municipality() {
+        return $this->hasOne('App\Models\Municipality', 'id', 'municipality');
+    }
 }
