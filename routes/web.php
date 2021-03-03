@@ -1135,11 +1135,41 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     /*===================== SYSTEM LIBRARIES ROUTES =====================*/
 
     // Agencies amd LGUs Module
-    Route::post('libraries/agency-lgu/get-agencies-lgus', [
-        'uses' => 'LibraryController@storeItemClassification',
+    Route::any('libraries/agency-lgu', [
+        'uses' => 'LibraryController@indexAgencyLGU',
+        'module' => 'lib_item_class',
+        'access' => 'is_allowed'
+    ])->name('agency-lgu');
+    Route::get('libraries/agency-lgu/show-create', [
+        'uses' => 'LibraryController@showCreateAgencyLGU',
         'module' => 'lib_item_class',
         'access' => 'create'
-    ])->name('agency-lgu');
+    ])->name('agency-lgu-show-create');
+    Route::post('libraries/agency-lgu/store', [
+        'uses' => 'LibraryController@storeAgencyLGU',
+        'module' => 'lib_item_class',
+        'access' => 'create'
+    ])->name('agency-lgu-store');
+    Route::get('libraries/agency-lgu/show-edit/{id}', [
+        'uses' => 'LibraryController@showEditAgencyLGU',
+        'module' => 'lib_item_class',
+        'access' => 'update'
+    ])->name('agency-lgu-show-edit');
+    Route::post('libraries/agency-lgu/update/{id}', [
+        'uses' => 'LibraryController@updateAgencyLGU',
+        'module' => 'lib_item_class',
+        'access' => 'update'
+    ])->name('agency-lgu-update');
+    Route::post('libraries/agency-lgu/delete/{id}', [
+        'uses' => 'LibraryController@deleteAgencyLGU',
+        'module' => 'lib_item_class',
+        'access' => 'delete'
+    ])->name('agency-lgu-delete');
+    Route::post('libraries/agency-lgu/destroy/{id}', [
+        'uses' => 'LibraryController@destroyAgencyLGU',
+        'module' => 'lib_item_class',
+        'access' => 'destroy'
+    ])->name('agency-lgu-destroy');
 
     // Item Classification Module
     Route::any('libraries/item-classification', [

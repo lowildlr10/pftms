@@ -159,6 +159,137 @@ class LibraryController extends Controller
     }*/
 
     /**
+     *  Agency/LGU Module
+    **/
+    public function indexAgencyLGU(Request $request) {
+        $agencyData = AgencyLGU::orderBy('agency_name')
+                               ->with(['region', 'province', 'municipality'])
+                               ->get();
+
+        foreach ($agencyData as $agency) {
+            $agency->region_name = $agency->region ? $agency->region->region_name : NULL;
+            $agency->province_name = $agency->province ? $agency->province->province_name : NULL;
+            $agency->municipality_name = $agency->municipality ? $agency->municipality->region_name : NULL;
+        }
+
+        return view('modules.library.agency-lgu.index', [
+            'list' => $agencyData
+        ]);
+    }
+
+    public function showCreateAgencyLGU() {
+        $regions = Region::orderBy('region_name')->get();
+        $provinces = Province::orderBy('province_name')->get();
+        $municipalities = Municipality::orderBy('municipality_name')->get();
+
+        return view('modules.library.agency-lgu.create', compact(
+            'regions',
+            'provinces',
+            'municipalities',
+        ));
+    }
+
+    public function showEditAgencyLGU($id) {
+        $agencyData = AgencyLGU::find($id);
+        $regions = Region::orderBy('region_name')->get();
+        $provinces = Province::orderBy('province_name')->get();
+        $municipalities = Municipality::orderBy('municipality_name')->get();
+
+        $region = $agencyData->region;
+        $province = $agencyData->province;
+        $municipality = $agencyData->municipality;
+        $agencyName = $agencyData->agency_name;
+
+        return view('modules.library.agency-lgu.update', compact(
+            'id',
+            'region',
+            'province',
+            'municipality',
+            'agencyName',
+            'regions',
+            'provinces',
+            'municipalities',
+        ));
+    }
+
+    public function storeAgencyLGU(Request $request) {
+        $region = $request->region;
+        $province = $request->province;
+        $municipality = $request->municipality;
+        $agencyName = $request->agency_lgu;
+
+        try {
+            if (!$this->checkDuplication('agencyLGU', $agencyName)) {
+                $instanceAgency = new AgencyLGU;
+                $instanceAgency->region = $region;
+                $instanceAgency->province = $province;
+                $instanceAgency->municipality = $municipality;
+                $instanceAgency->agency_name = $agencyName;
+                $instanceAgency->save();
+
+                $msg = "Agency/LGU '$agencyName' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Agency/LGU '$agencyName' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function updateAgencyLGU(Request $request, $id) {
+        $region = $request->region;
+        $province = $request->province;
+        $municipality = $request->municipality;
+        $agencyName = $request->agency_lgu;
+
+        try {
+            $instanceAgency = AgencyLGU::find($id);
+            $instanceAgency->region = $region;
+            $instanceAgency->province = $province;
+            $instanceAgency->municipality = $municipality;
+            $instanceAgency->agency_name = $agencyName;
+            $instanceAgency->save();
+
+            $msg = "Agency/LGU '$agencyName' successfully updated.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function deleteAgencyLGU($id) {
+        try {
+            $instanceFundSrc = FundingProject::find($id);
+            $sourceName = $instanceFundSrc->source_name;
+            $instanceFundSrc->delete();
+
+            $msg = "Funding source '$sourceName' successfully deleted.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function destroyAgencyLGU($id) {
+        try {
+            $instanceFundSrc = FundingProject::find($id);
+            $sourceName = $instanceFundSrc->source_name;
+            $instanceFundSrc->destroy();
+
+            $msg = "Funding source '$sourceName' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    /**
      *  Item Classification Module
     **/
     public function indexItemClassification(Request $request) {
@@ -1258,6 +1389,12 @@ class LibraryController extends Controller
 
     public function checkDuplication($model, $data) {
         switch ($model) {
+            case 'agencyLGU':
+                $dataCount = AgencyLGU::where('agency_name', $data)
+                                      ->orWhere('agency_name', strtolower($data))
+                                      ->orWhere('agency_name', strtoupper($data))
+                                      ->count();
+                break;
             case 'EmpDivision':
                 $dataCount = EmpDivision::where('division_name', $data)
                                         ->orWhere('division_name', strtolower($data))
