@@ -163,13 +163,16 @@ class LibraryController extends Controller
     **/
     public function indexAgencyLGU(Request $request) {
         $agencyData = AgencyLGU::orderBy('agency_name')
-                               ->with(['region', 'province', 'municipality'])
+                               ->with(['_region', '_province', '_municipality'])
                                ->get();
 
         foreach ($agencyData as $agency) {
-            $agency->region_name = $agency->region ? $agency->region->region_name : NULL;
-            $agency->province_name = $agency->province ? $agency->province->province_name : NULL;
-            $agency->municipality_name = $agency->municipality ? $agency->municipality->region_name : NULL;
+            $agency->region_name = $agency->region ?
+                                   $agency->_region->region_name : NULL;
+            $agency->province_name = $agency->province ?
+                                     $agency->_province->province_name : NULL;
+            $agency->municipality_name = $agency->municipality ?
+                                         $agency->_municipality->region_name : NULL;
         }
 
         return view('modules.library.agency-lgu.index', [
@@ -219,7 +222,7 @@ class LibraryController extends Controller
         $agencyName = $request->agency_lgu;
 
         try {
-            if (!$this->checkDuplication('agencyLGU', $agencyName)) {
+            if (!$this->checkDuplication('AgencyLGU', $agencyName)) {
                 $instanceAgency = new AgencyLGU;
                 $instanceAgency->region = $region;
                 $instanceAgency->province = $province;
@@ -263,11 +266,11 @@ class LibraryController extends Controller
 
     public function deleteAgencyLGU($id) {
         try {
-            $instanceFundSrc = FundingProject::find($id);
-            $sourceName = $instanceFundSrc->source_name;
-            $instanceFundSrc->delete();
+            $instanceAgency = AgencyLGU::find($id);
+            $agencyName = $instanceAgency->agency_name;
+            $instanceAgency->delete();
 
-            $msg = "Funding source '$sourceName' successfully deleted.";
+            $msg = "Agency/LGU '$agencyName' successfully deleted.";
             return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
@@ -277,11 +280,102 @@ class LibraryController extends Controller
 
     public function destroyAgencyLGU($id) {
         try {
-            $instanceFundSrc = FundingProject::find($id);
-            $sourceName = $instanceFundSrc->source_name;
-            $instanceFundSrc->destroy();
+            $instanceAgency = AgencyLGU::find($id);
+            $agencyName = $instanceAgency->agency_name;
+            $instanceAgency->destroy();
 
-            $msg = "Funding source '$sourceName' successfully destroyed.";
+            $msg = "Agency/LGU '$agencyName' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    /**
+     *  Industry/Sector Module
+    **/
+    public function indexIndustrySector(Request $request) {
+        $industryData = IndustrySector::orderBy('sector_name')
+                                      ->get();
+
+        return view('modules.library.industry-sector.index', [
+            'list' => $industryData
+        ]);
+    }
+
+    public function showCreateIndustrySector() {
+        return view('modules.library.industry-sector.create');
+    }
+
+    public function showEditIndustrySector($id) {
+        $industryData = IndustrySector::find($id);
+        $industrySector = $industryData->sector_name;
+
+        return view('modules.library.industry-sector.update', compact(
+            'id',
+            'industrySector',
+        ));
+    }
+
+    public function storeIndustrySector(Request $request) {
+        $industrySector = $request->industry_sector;
+
+        try {
+            if (!$this->checkDuplication('IndustrySector', $industrySector)) {
+                $instanceIndustry = new IndustrySector;
+                $instanceIndustry->sector_name = $industrySector;
+                $instanceIndustry->save();
+
+                $msg = "Industry/Sector '$industrySector' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Industry/Sector '$industrySector' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function updateIndustrySector(Request $request, $id) {
+        $industrySector = $request->industry_sector;
+
+        try {
+            $instanceIndustry = IndustrySector::find($id);
+            $instanceIndustry->sector_name = $industrySector;
+            $instanceIndustry->save();
+
+            $msg = "Industry/Sector '$industrySector' successfully updated.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function deleteIndustrySector($id) {
+        try {
+            $instanceIndustry = IndustrySector::find($id);
+            $industrySector = $instanceIndustry->sector_name;
+            $instanceIndustry->delete();
+
+            $msg = "Industry/Sector '$industrySector' successfully deleted.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function destroyIndustrySector($id) {
+        try {
+            $instanceIndustry = IndustrySector::find($id);
+            $industrySector = $instanceIndustry->sector_name;
+            $instanceIndustry->destroy();
+
+            $msg = "Industry/Sector '$industrySector' successfully destroyed.";
             return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
@@ -1389,10 +1483,16 @@ class LibraryController extends Controller
 
     public function checkDuplication($model, $data) {
         switch ($model) {
-            case 'agencyLGU':
+            case 'AgencyLGU':
                 $dataCount = AgencyLGU::where('agency_name', $data)
                                       ->orWhere('agency_name', strtolower($data))
                                       ->orWhere('agency_name', strtoupper($data))
+                                      ->count();
+                break;
+            case 'IndustrySector':
+                $dataCount = IndustrySector::where('sector_name', $data)
+                                      ->orWhere('sector_name', strtolower($data))
+                                      ->orWhere('sector_name', strtoupper($data))
                                       ->count();
                 break;
             case 'EmpDivision':

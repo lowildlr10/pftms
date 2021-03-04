@@ -53,15 +53,15 @@ class AgencyLGU extends Model
         'agency_name',
     ];
 
-    public function region() {
+    public function _region() {
         return $this->hasOne('App\Models\Region', 'id', 'region');
     }
 
-    public function province() {
+    public function _province() {
         return $this->hasOne('App\Models\Province', 'id', 'province');
     }
 
-    public function municipality() {
+    public function _municipality() {
         return $this->hasOne('App\Models\Municipality', 'id', 'municipality');
     }
 }

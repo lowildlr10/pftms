@@ -310,7 +310,7 @@
                                 <a href="{{ route('agency-lgu') }}" class="waves-effect">Agency/LGUs</a>
                             </li>
                             <li>
-                                <a href="{{ route('project') }}" class="waves-effect">Industry/Sectors</a>
+                                <a href="{{ route('industry-sector') }}" class="waves-effect">Industry/Sectors</a>
                             </li>
                             <li>
                                 <a href="{{ route('inventory-classification') }}" class="waves-effect">Inventory Classifications</a>

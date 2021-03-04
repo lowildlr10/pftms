@@ -1171,6 +1171,43 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'destroy'
     ])->name('agency-lgu-destroy');
 
+    // Industry/Sectors Module
+    Route::any('libraries/industry-sector', [
+        'uses' => 'LibraryController@indexIndustrySector',
+        'module' => 'lib_item_class',
+        'access' => 'is_allowed'
+    ])->name('industry-sector');
+    Route::get('libraries/industry-sector/show-create', [
+        'uses' => 'LibraryController@showCreateIndustrySector',
+        'module' => 'lib_item_class',
+        'access' => 'create'
+    ])->name('industry-sector-show-create');
+    Route::post('libraries/industry-sector/store', [
+        'uses' => 'LibraryController@storeIndustrySector',
+        'module' => 'lib_item_class',
+        'access' => 'create'
+    ])->name('industry-sector-store');
+    Route::get('libraries/industry-sector/show-edit/{id}', [
+        'uses' => 'LibraryController@showEditIndustrySector',
+        'module' => 'lib_item_class',
+        'access' => 'update'
+    ])->name('industry-sector-show-edit');
+    Route::post('libraries/industry-sector/update/{id}', [
+        'uses' => 'LibraryController@updateIndustrySector',
+        'module' => 'lib_item_class',
+        'access' => 'update'
+    ])->name('industry-sector-update');
+    Route::post('libraries/industry-sector/delete/{id}', [
+        'uses' => 'LibraryController@deleteIndustrySector',
+        'module' => 'lib_item_class',
+        'access' => 'delete'
+    ])->name('industry-sector-delete');
+    Route::post('libraries/industry-sector/destroy/{id}', [
+        'uses' => 'LibraryController@destroyIndustrySector',
+        'module' => 'lib_item_class',
+        'access' => 'destroy'
+    ])->name('industry-sector-destroy');
+
     // Item Classification Module
     Route::any('libraries/item-classification', [
         'uses' => 'LibraryController@indexItemClassification',

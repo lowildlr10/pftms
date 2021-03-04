@@ -27,8 +27,8 @@
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
                     <li class="active">
-                        <a href="{{ route('agency-lgu') }}" class="waves-effect waves-light cyan-text">
-                            Agency/LGUs
+                        <a href="{{ route('industry-sector') }}" class="waves-effect waves-light cyan-text">
+                            Industry/Sector
                         </a>
                     </li>
                 </ul>
@@ -42,7 +42,7 @@
                                 align-items-center">
                         <div>
                             <a href="#" class="btn btn-outline-white btn-rounded btn-sm px-2"
-                               onclick="$(this).showCreate('{{ route('agency-lgu-show-create') }}');">
+                               onclick="$(this).showCreate('{{ route('industry-sector-show-create') }}');">
                                 <i class="fas fa-pencil-alt"></i> Create
                             </a>
                         </div>
@@ -51,7 +51,7 @@
                                     data-target="#top-fluid-modal" data-toggle="modal">
                                 <i class="fas fa-search"></i>
                             </button>
-                            <a href="{{ route('agency-lgu') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
+                            <a href="{{ route('industry-sector') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
                             </a>
 
@@ -69,17 +69,8 @@
                                 <thead class="mdb-color darken-3 white-text">
                                     <tr>
                                         <th class="th-md" width="3%"></th>
-                                        <th class="th-md" width="18%">
-                                            <strong>Region</strong>
-                                        </th>
-                                        <th class="th-md" width="18%">
-                                            <strong>Province</strong>
-                                        </th>
-                                        <th class="th-md" width="18%">
-                                            <strong>Municipality</strong>
-                                        </th>
-                                        <th class="th-md" width="37%">
-                                            <strong>Agency/LGU</strong>
+                                        <th class="th-md" width="91%">
+                                            <strong>Industry/Sector</strong>
                                         </th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
@@ -90,25 +81,22 @@
                                 <!--Table body-->
                                 <tbody>
                                     @if (count($list) > 0)
-                                        @foreach ($list as $listCtr => $agency)
+                                        @foreach ($list as $listCtr => $sector)
                                     <tr>
                                         <td></td>
-                                        <td>{{ $agency->region_name }}</td>
-                                        <td>{{ $agency->province_name }}</td>
-                                        <td>{{ $agency->municipality_name }}</td>
-                                        <td>{{ $agency->agency_name }}</td>
+                                        <td>{{ $sector->sector_name }}</td>
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-orange p-2 waves-effect material-tooltip-main mr-0"
-                                               onclick="$(this).showEdit('{{ route('agency-lgu-show-edit',
-                                                                                   ['id' => $agency->id]) }}');"
+                                               onclick="$(this).showEdit('{{ route('industry-sector-show-edit',
+                                                                                   ['id' => $sector->id]) }}');"
                                                data-toggle="tooltip" data-placement="left" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         </td>
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-red p-2 waves-effect material-tooltip-main mr-0"
-                                               onclick="$(this).showDelete('{{ route('agency-lgu-delete', ['id' => $agency->id]) }}',
-                                                                           '{{ $agency->agency_name }}');"
+                                               onclick="$(this).showDelete('{{ route('industry-sector-delete', ['id' => $sector->id]) }}',
+                                                                           '{{ $sector->agency_name }}');"
                                                data-toggle="tooltip" data-placement="left" title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </a>
@@ -149,7 +137,7 @@
 <script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables-select.min.js') }}"></script>
 
 <script src="{{ asset('assets/js/input-validation.js') }}"></script>
-<script src="{{ asset('assets/js/agency-lgu.js') }}"></script>
+<script src="{{ asset('assets/js/industry-sector.js') }}"></script>
 <script src="{{ asset('assets/js/custom-datatables.js') }}"></script>
 
 @if (!empty(session("success")))
