@@ -50,4 +50,8 @@ class EmpUnit extends Model
     public $sortable = [
         'unit_name',
     ];
+
+    public function _division() {
+        return $this->hasOne('App\Models\EmpDivision', 'id', 'division');
+    }
 }

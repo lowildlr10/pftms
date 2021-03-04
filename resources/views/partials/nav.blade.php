@@ -354,7 +354,7 @@
                                 <a href="{{ route('emp-division') }}" class="waves-effect">Divisions</a>
                             </li>
                             <li>
-                                <a href="{{ route('emp-division') }}" class="waves-effect">Units</a>
+                                <a href="{{ route('emp-unit') }}" class="waves-effect">Units</a>
                             </li>
                             <li>
                                 <a href="{{ route('emp-role') }}" class="waves-effect">Roles</a>

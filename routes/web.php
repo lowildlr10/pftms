@@ -1581,6 +1581,43 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'destroy'
     ])->name('emp-division-destroy');
 
+    // Employee Unit Module
+    Route::any('account-management/emp-unit', [
+        'uses' => 'AccountController@indexUnit',
+        'module' => 'acc_division',
+        'access' => 'is_allowed'
+    ])->name('emp-unit');
+    Route::get('account-management/emp-unit/show-create', [
+        'uses' => 'AccountController@showCreateUnit',
+        'module' => 'acc_division',
+        'access' => 'create'
+    ])->name('emp-unit-show-create');
+    Route::post('account-management/emp-unit/store', [
+        'uses' => 'AccountController@storeUnit',
+        'module' => 'acc_division',
+        'access' => 'create'
+    ])->name('emp-unit-store');
+    Route::get('account-management/emp-unit/show-edit/{id}', [
+        'uses' => 'AccountController@showEditUnit',
+        'module' => 'acc_division',
+        'access' => 'update'
+    ])->name('emp-unit-show-edit');
+    Route::post('account-management/emp-unit/update/{id}', [
+        'uses' => 'AccountController@updateUnit',
+        'module' => 'acc_division',
+        'access' => 'update'
+    ])->name('emp-unit-update');
+    Route::post('account-management/emp-unit/delete/{id}', [
+        'uses' => 'AccountController@deleteUnit',
+        'module' => 'acc_division',
+        'access' => 'delete'
+    ])->name('emp-unit-delete');
+    Route::post('account-management/emp-unit/destroy/{id}', [
+        'uses' => 'AccountController@destroyUnit',
+        'module' => 'acc_division',
+        'access' => 'destroy'
+    ])->name('emp-unit-destroy');
+
     // Employee Role Module
     Route::any('account-management/emp-role', [
         'uses' => 'AccountController@indexRole',
