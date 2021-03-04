@@ -9,6 +9,7 @@ use App\User;
 use App\Models\EmpRole;
 use App\Models\EmpGroup;
 use App\Models\EmpDivision;
+use App\Models\EmpUnit;
 use App\Models\EmpLog;
 use App\Models\Province;
 use App\Models\Region;
@@ -804,10 +805,10 @@ class AccountController extends Controller
         ];
     }
 
-    /** Library for Roles, Groups, and Accounts */
+    /** Library for Division, Unit, Roles, Groups, and Accounts */
 
     /**
-     *  Employee Diviision Module
+     *  Employee Division Module
     **/
     public function indexDivision(Request $request) {
         $empDivData = EmpDivision::orderBy('division_name')
@@ -890,6 +891,115 @@ class AccountController extends Controller
             $instanceEmpDiv->destroy();
 
             $msg = "Employee division '$divisionName' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    /**
+     *  Employee Unit Module
+    **/
+    public function indexUnit(Request $request) {
+        $empUnitData = EmpUnit::orderBy('unit_name')
+                              ->with('_division')
+                              ->get();
+
+        foreach ($empUnitData as $unit) {
+            $unit->division_name = $unit->_division ? $unit->_division->division_name : NULL;
+        }
+
+        return view('modules.library.unit.index', [
+            'list' => $empUnitData
+        ]);
+    }
+
+    public function showCreateUnit() {
+        $divisions = EmpDivision::orderBy('division_name')
+                                ->get();
+        return view('modules.library.unit.create', compact(
+            'divisions'
+        ));
+    }
+
+    public function showEditUnit($id) {
+        $unitData = EmpUnit::find($id);
+        $division = $unitData->division;
+        $unitName = $unitData->unit_name;
+        $divisions = EmpDivision::orderBy('division_name')
+                                ->get();
+
+        return view('modules.library.unit.update', [
+            'id' => $id,
+            'division' => $division,
+            'unitName' => $unitName,
+            'divisions' => $divisions
+        ]);
+    }
+
+    public function storeUnit(Request $request) {
+        $division = $request->division;
+        $unitName = $request->unit_name;
+
+        try {
+            if (!$this->checkDuplication('EmpUnit', $unitName)) {
+                $instanceEmpUnit = new EmpUnit;
+                $instanceEmpUnit->division = $division;
+                $instanceEmpUnit->unit_name = $unitName;
+                $instanceEmpUnit->save();
+
+                $msg = "Employee unit '$unitName' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Employee unit '$unitName' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function updateUnit(Request $request, $id) {
+        $division = $request->division;
+        $unitName = $request->unit_name;
+
+        try {
+            $instanceEmpUnit = EmpUnit::find($id);
+            $instanceEmpUnit->division = $division;
+            $instanceEmpUnit->unit_name = $unitName;
+            $instanceEmpUnit->save();
+
+            $msg = "Employee unit '$unitName' successfully updated.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function deleteUnit($id) {
+        try {
+            $instanceEmpUnit = EmpUnit::find($id);
+            $unitName = $instanceEmpUnit->unit_name;
+            $instanceEmpUnit->delete();
+
+            $msg = "Employee unit '$unitName' successfully deleted.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function destroyUnit($id) {
+        try {
+            $instanceEmpUnit = EmpUnit::find($id);
+            $unitName = $instanceEmpUnit->unit_name;
+            $instanceEmpUnit->delete();
+
+            $msg = "Employee unit '$unitName' successfully destroyed.";
             return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
