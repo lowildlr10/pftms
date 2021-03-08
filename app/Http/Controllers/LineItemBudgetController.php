@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\FundingProject;
+use App\Models\FundingBudget;
+use App\Models\FundingAllotment;
 use App\Models\FundingLedger;
 use App\Models\FundingLedgerItem;
 use App\Models\AllotmentClass;
@@ -12,6 +14,7 @@ use App\Models\MooeAccountTitle;
 use App\Models\PaperSize;
 
 use Auth;
+use DB;
 
 class LineItemBudgetController extends Controller
 {
@@ -27,21 +30,24 @@ class LineItemBudgetController extends Controller
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
-        $fundProjData = FundingProject::whereNull('deleted_at');
+        $fundBudget = FundingBudget::has('project')->with('allotments');
 
+        /*
         if (!empty($keyword)) {
-            $fundProjData = $fundProjData->where(function($qry) use ($keyword) {
+            $fundBudget = $fundBudget->where(function($qry) use ($keyword) {
                 $qry->where('id', 'like', "%$keyword%")
                     ->orWhere('project_name', 'like', "%$keyword%");
             });
-        }
+        }*/
 
-        $fundProjData = $fundProjData->orderBy('project_name')
-                                     ->sortable(['created_at' => 'desc'])
-                                     ->paginate(15);
+        $fundBudget = $fundBudget->sortable(['created_at' => 'desc'])
+                                 ->paginate(15);
+
+        //dd( $fundBudget);
+
 
         return view('modules.fund-utilization.fund-project-lib.index', [
-            'list' => $fundProjData,
+            'list' => $fundBudget,
             'keyword' => $keyword,
             'paperSizes' => $paperSizes,
         ]);
@@ -70,7 +76,61 @@ class LineItemBudgetController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request) {
-        //
+        $project = $request->project;
+        $dateFrom = $request->date_from;
+        $dateTo = $request->date_to;
+        $approvedBudget = $request->approved_budget;
+
+        $allotmentNames = $request->allotment_name;
+        $allotmentClasses = $request->allot_class;
+        $allottedBudgets = $request->allotted_budget;
+
+        $documentType = 'Line-Item Budgets';
+        $routeName = 'fund-project-lib';
+
+        try {
+            $instanceFundingBudget = new FundingBudget;
+
+            DB::table('funding_budgets')
+              ->where('project_id', $project)
+              ->update(['is_active' => 'n']);
+
+            $instanceFundingBudget->project_id = $project;
+            $instanceFundingBudget->date_from = $dateFrom;
+            $instanceFundingBudget->date_to = $dateTo;
+            $instanceFundingBudget->approved_budget = $approvedBudget;
+            $instanceFundingBudget->is_active = 'y';
+            $instanceFundingBudget->save();
+
+            $lastFundBudget = FundingBudget::orderBy('created_at', 'desc')->first();
+            $lastID = $lastFundBudget->id;
+
+            if (count($allotmentClasses) > 0) {
+                $orderNo = 0;
+
+                foreach ($allotmentClasses as $ctr => $allotmentClass) {
+                    $orderNo += 1;
+                    $instanceAllotment = new FundingAllotment;
+                    $instanceAllotment->project_id = $project;
+                    $instanceAllotment->budget_id = $lastID;
+                    $instanceAllotment->allotment_class = $allotmentClass;
+                    $instanceAllotment->order_no = $orderNo;
+                    $instanceAllotment->allotment_name = $allotmentNames[$orderNo - 1];
+                    $instanceAllotment->allotted_budget = $allottedBudgets[$orderNo - 1];
+                    $instanceAllotment->save();
+                }
+            }
+
+            $msg = "$documentType successfully created.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName)
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())
+                                 ->with('failed', $msg);
+        }
     }
 
     /**
@@ -106,57 +166,49 @@ class LineItemBudgetController extends Controller
 
     public function getListAllotmentClass(Request $request) {
         $keyword = trim($request->search);
-        $orsData = ObligationRequestStatus::select('id', 'serial_no')
-                                          ->whereNotNull('serial_no')
-                                          ->whereNotNull('date_obligated')
-                                          ->where([['serial_no', '<>', '-'],
-                                                   ['serial_no', '<>', '.']]);
+        $classData = AllotmentClass::select('id', 'class_name');
 
         if ($keyword) {
-            $orsData = $orsData->where(function($qry) use ($keyword) {
-                $qry->where('serial_no', 'like', "%$keyword%");
+            $classData = $classData->where(function($qry) use ($keyword) {
+                $qry->where('class_name', 'like', "%$keyword%");
                 $keywords = explode('/\s+/', $keyword);
 
                 if (count($keywords) > 0) {
                     foreach ($keywords as $tag) {
-                        $qry->orWhere('serial_no', 'like', "%$tag%");
+                        $qry->orWhere('class_name', 'like', "%$tag%");
                     }
                 }
             });
         }
 
-        $orsData = $orsData->whereHas('procdv', function($query) {
-            $query->whereNotNull('date_for_payment');
-        })->get();
+        $classData = $classData->orderBy('class_name')
+                               ->get();
 
-        return response()->json($orsData);
+        return response()->json($classData);
     }
 
     public function getListAccountTitle(Request $request) {
         $keyword = trim($request->search);
-        $orsData = ObligationRequestStatus::select('id', 'serial_no')
-                                          ->whereNotNull('serial_no')
-                                          ->whereNotNull('date_obligated')
-                                          ->where([['serial_no', '<>', '-'],
-                                                   ['serial_no', '<>', '.']]);
+        $accountTitleData = MooeAccountTitle::select('id', 'account_title', 'uacs_code');
 
         if ($keyword) {
-            $orsData = $orsData->where(function($qry) use ($keyword) {
-                $qry->where('serial_no', 'like', "%$keyword%");
+            $accountTitleData = $accountTitleData->where(function($qry) use ($keyword) {
+                $qry->where('account_title', 'like', "%$keyword%")
+                    ->orWhere('uacs_code', 'like', "%$keyword%");
                 $keywords = explode('/\s+/', $keyword);
 
                 if (count($keywords) > 0) {
                     foreach ($keywords as $tag) {
-                        $qry->orWhere('serial_no', 'like', "%$tag%");
+                        $qry->orWhere('account_title', 'like', "%$tag%")
+                            ->orWhere('uacs_code', 'like', "%$tag%");
                     }
                 }
             });
         }
 
-        $orsData = $orsData->whereHas('procdv', function($query) {
-            $query->whereNotNull('date_for_payment');
-        })->get();
+        $accountTitleData = $accountTitleData->orderBy('account_title')
+                                             ->get();
 
-        return response()->json($orsData);
+        return response()->json($accountTitleData);
     }
 }

@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
+use Kyslik\ColumnSortable\Sortable;
 
 class FundingBudget extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Sortable;
 
     /**
      * The table associated with the model.
@@ -46,5 +47,23 @@ class FundingBudget extends Model
 
     public static function generateUuid() {
         return Uuid::generate();
+    }
+
+    public $sortable = [
+        'date_from',
+        'date_to',
+        'approved_budget'
+    ];
+
+    public function project() {
+        return $this->HasOne('App\Models\FundingProject', 'id', 'project_id');
+    }
+
+    public function budgets() {
+        return $this->hasMany('App\Models\FundingBudget', 'id', 'budget_id');
+    }
+
+    public function allotments() {
+        return $this->hasMany('App\Models\FundingAllotment', 'budget_id', 'id');
     }
 }

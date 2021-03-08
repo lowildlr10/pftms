@@ -1,5 +1,11 @@
 @extends('layouts.app')
 
+@section('custom-css')
+
+<link rel="stylesheet" type="text/css" href="{{ asset('plugins/select2/css/select2.min.css') }}" rel="stylesheet">
+
+@endsection
+
 @section('main-content')
 
 <div class="row wow animated fadeIn">
@@ -47,7 +53,7 @@
                                 <i class="fas fa-search"></i> {{ !empty($keyword) ? (strlen($keyword) > 15) ?
                                 'Search: '.substr($keyword, 0, 15).'...' : 'Search: '.$keyword : '' }}
                             </button>
-                            <a href="{{ route('funding-source') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
+                            <a href="{{ route('fund-project-lib') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
                             </a>
                         </div>
@@ -65,19 +71,24 @@
                                     <tr>
                                         <th class="th-md text-center" width="3%">#</th>
                                         <th class="th-md" width="3%"></th>
-                                        <th class="th-md" width="55%">
+                                        <th class="th-md" width="44%">
                                             <b>
-                                                @sortablelink('project_name', 'Project Name', [], ['class' => 'white-text'])
+                                                @sortablelink('project.project_name', 'Project Name', [], ['class' => 'white-text'])
                                             </b>
                                         </th>
-                                        <th class="th-md" width="15%">
+                                        <th class="th-md" width="13%">
                                             <b>
-                                                Date Covered
+                                                @sortablelink('date_from', 'From', [], ['class' => 'white-text'])
+                                            </b>
+                                        </th>
+                                        <th class="th-md" width="13%">
+                                            <b>
+                                                @sortablelink('date_to', 'To', [], ['class' => 'white-text'])
                                             </b>
                                         </th>
                                         <th class="th-md" width="21%">
                                             <b>
-                                                Current Approved Budget
+                                                @sortablelink('approved_budget', 'Current Budget', [], ['class' => 'white-text'])
                                             </b>
                                         </th>
                                         <th class="th-md" width="3%"></th>
@@ -95,18 +106,17 @@
                                             <i class="fas fa-spinner fa-lg faa-spin fa-pulse material-tooltip-main"
                                                data-toggle="tooltip" data-placement="right" title="Pending"></i>
                                         </td>
-                                        <td>{{ $fund->project_name }}</td>
-                                        <td>2020</td>
-                                        <td class="material-tooltip-main" data-toggle="tooltip" data-placement="right" data-html="true"
-                                            title='{!!
-                                                "Current Approved Budget:<br>
-                                                2,000,000.00 <br><br>
-                                                Budget Realignments: <br>
-                                                1st = 2,000,154.50 <br>
-                                                2nd = 2,568,478.00 <br>
-                                                3rd = 2,704,586.54- <br>"
-                                            !!}'>
-                                            -
+                                        <td>{{ $fund->project->project_name }}</td>
+                                        <td>{{ date_format(date_create($fund->date_from), "F j, Y") }}</td>
+                                        <td>{{ date_format(date_create($fund->date_to), "F j, Y") }}</td>
+                                        <td class="material-tooltip-main" data-toggle="tooltip" data-html="true"
+                                            title='<h6 class="text-left"><b>Original Approved Budget:</b><br>
+                                                &#8369; {!! number_format($fund->approved_budget, 2) !!}<br><br>
+                                                <b>Realignments:</b> <br>
+                                                <b>1st =</b> &#8369; 2,000,154.50 <br>
+                                                <b>2nd =</b> &#8369; 2,568,478.00 <br>
+                                                <b>3rd =</b> &#8369; 2,704,586.54- <br></h6>'>
+                                            &#8369; {{ number_format($fund->approved_budget, 2) }}
                                         </td>
 
                                         <td align="center">
@@ -167,7 +177,7 @@
             <div class="modal-header stylish-color-dark white-text">
                 <h6>
                     <i class="fas fa-hand-holding-usd"></i>
-                    <b>Project Details</b>
+                    <b>Line-Item Budget Details</b>
                 </h6>
                 <button type="button" class="close white-text" data-dismiss="modal"
                         aria-label="Close">
@@ -180,6 +190,11 @@
                     <div class="gradient-card-header rgba-white-light p-0">
                         <div class="p-0">
                             <div class="btn-group btn-menu-1 p-0">
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light"
+                                        onclick="$(this).showPrint('{{ $fund->id }}', 'pay_summary');">
+                                    <i class="fas fa-print blue-text"></i> Print LIB
+                                </button>
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showEdit('{{ route('fund-project-lib-show-edit',
@@ -197,17 +212,18 @@
                     </div>
                     <div class="card-body">
                         <p>
-                            <b>Project Name: </b> {{ $fund->project_name }}<br>
-                            <b>Current Approved Budget: </b><br>
+                            <b>Project Name: </b> {{ $fund->project->project_name }}<br>
+                            <b>Approved Budget: &#8369; {{ number_format($fund->approved_budget, 2) }}</b><br>
                             <b>Realignments: </b><br>
                         </p>
 
+                        {{--
                         <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showAttachment('{{ $fund->lddap_id }}');">
                             <i class="fas fa-paperclip fa-lg"></i> View Attachment
                         </button>
-                        {{--
+
                         <button type="button" class="btn btn-sm btn-outline-elegant btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showAttachment('{{ $fund->lddap_id }}');">
@@ -216,6 +232,30 @@
                         --}}
                     </div>
                 </div>
+                <hr>
+                <ul class="list-group z-depth-1">
+                    <li class="list-group-item justify-content-between">
+                        <h6><strong><i class="fas fa-list-ol"></i> Allotments</strong></h6>
+                    </li>
+                    <li class="list-group-item justify-content-between">
+                        @if (count($fund->allotments) > 0)
+                            @foreach ($fund->allotments as $cntr => $item)
+                        <i class="fas fa-caret-right"></i>
+
+                            @if (strlen($item->allotment_name) > 60)
+                        <strong>{{ $cntr + 1 }}.|</strong> {{ substr($item->allotment_name, 0, 60) }}...
+                            @else
+                        <strong>{{ $cntr + 1 }}.|</strong> {{ $item->allotment_name }}.
+                            @endif
+
+                        <span class="font-weight-bold">
+                            &#8369; {{ number_format($item->allotted_budget, 2) }}
+                        </span>
+                        <br>
+                            @endforeach
+                        @endif
+                    </li>
+                </ul>
                 <hr>
                 <ul class="btn-menu-3 list-group z-depth-0">
                     <li class="list-action-header list-group-item justify-content-between">
