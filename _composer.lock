@@ -854,6 +854,7 @@
         {
             "name": "laravel/framework",
 <<<<<<< HEAD
+<<<<<<< HEAD
             "version": "v6.20.12",
             "source": {
                 "type": "git",
@@ -865,6 +866,8 @@
                 "url": "https://api.github.com/repos/laravel/framework/zipball/49f9db00a754517f07d365ee5b0806df82e37029",
                 "reference": "49f9db00a754517f07d365ee5b0806df82e37029",
 =======
+=======
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
             "version": "v6.20.16",
             "source": {
                 "type": "git",
@@ -875,7 +878,10 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/framework/zipball/806082fb559fe595cb17cd6aa8571f03ed287814",
                 "reference": "806082fb559fe595cb17cd6aa8571f03ed287814",
+<<<<<<< HEAD
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
                 "shasum": ""
             },
             "require": {
@@ -1012,10 +1018,14 @@
                 "laravel"
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2021-01-15T15:35:47+00:00"
 =======
             "time": "2021-02-02T13:50:12+00:00"
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+            "time": "2021-02-02T13:50:12+00:00"
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
         },
         {
             "name": "laravel/tinker",
@@ -1382,6 +1392,7 @@
         {
             "name": "nesbot/carbon",
 <<<<<<< HEAD
+<<<<<<< HEAD
             "version": "2.43.0",
             "source": {
                 "type": "git",
@@ -1393,6 +1404,8 @@
                 "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/d32c57d8389113742f4a88725a170236470012e2",
                 "reference": "d32c57d8389113742f4a88725a170236470012e2",
 =======
+=======
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
             "version": "2.44.0",
             "source": {
                 "type": "git",
@@ -1403,7 +1416,10 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/e6ef33cb1f67a4bed831ed6d0f7e156739a5d8cd",
                 "reference": "e6ef33cb1f67a4bed831ed6d0f7e156739a5d8cd",
+<<<<<<< HEAD
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
                 "shasum": ""
             },
             "require": {
@@ -1480,10 +1496,14 @@
                 }
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2020-12-17T20:55:32+00:00"
 =======
             "time": "2021-01-26T20:46:41+00:00"
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+            "time": "2021-01-26T20:46:41+00:00"
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
         },
         {
             "name": "nikic/php-parser",
@@ -2165,6 +2185,7 @@
         {
             "name": "symfony/console",
 <<<<<<< HEAD
+<<<<<<< HEAD
             "version": "v4.4.18",
             "source": {
                 "type": "git",
@@ -2176,6 +2197,8 @@
                 "url": "https://api.github.com/repos/symfony/console/zipball/12e071278e396cc3e1c149857337e9e192deca0b",
                 "reference": "12e071278e396cc3e1c149857337e9e192deca0b",
 =======
+=======
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
             "version": "v4.4.19",
             "source": {
                 "type": "git",
@@ -2186,7 +2209,10 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/console/zipball/24026c44fc37099fa145707fecd43672831b837a",
                 "reference": "24026c44fc37099fa145707fecd43672831b837a",
+<<<<<<< HEAD
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
                 "shasum": ""
             },
             "require": {
@@ -2260,6 +2286,7 @@
                 }
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2020-12-18T07:41:31+00:00"
         },
         {
@@ -2275,6 +2302,8 @@
                 "url": "https://api.github.com/repos/symfony/css-selector/zipball/f789e7ead4c79e04ca9a6d6162fc629c89bd8054",
                 "reference": "f789e7ead4c79e04ca9a6d6162fc629c89bd8054",
 =======
+=======
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
             "time": "2021-01-27T09:09:26+00:00"
         },
         {
@@ -2289,7 +2318,10 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/css-selector/zipball/f65f217b3314504a1ec99c2d6ef69016bb13490f",
                 "reference": "f65f217b3314504a1ec99c2d6ef69016bb13490f",
+<<<<<<< HEAD
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
                 "shasum": ""
             },
             "require": {
@@ -2339,6 +2371,7 @@
                 }
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2020-12-08T17:02:38+00:00"
         },
         {
@@ -2369,6 +2402,22 @@
                 "url": "https://api.github.com/repos/symfony/debug/zipball/af4987aa4a5630e9615be9d9c3ed1b0f24ca449c",
                 "reference": "af4987aa4a5630e9615be9d9c3ed1b0f24ca449c",
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+            "time": "2021-01-27T10:01:46+00:00"
+        },
+        {
+            "name": "symfony/debug",
+            "version": "v4.4.19",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/debug.git",
+                "reference": "af4987aa4a5630e9615be9d9c3ed1b0f24ca449c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/debug/zipball/af4987aa4a5630e9615be9d9c3ed1b0f24ca449c",
+                "reference": "af4987aa4a5630e9615be9d9c3ed1b0f24ca449c",
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
                 "shasum": ""
             },
             "require": {
@@ -2422,10 +2471,14 @@
                 }
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2020-12-10T16:34:26+00:00"
 =======
             "time": "2021-01-27T09:09:26+00:00"
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+            "time": "2021-01-27T09:09:26+00:00"
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
         },
         {
             "name": "symfony/deprecation-contracts",
@@ -2480,6 +2533,7 @@
         {
             "name": "symfony/error-handler",
 <<<<<<< HEAD
+<<<<<<< HEAD
             "version": "v4.4.18",
             "source": {
                 "type": "git",
@@ -2502,6 +2556,18 @@
                 "url": "https://api.github.com/repos/symfony/error-handler/zipball/d603654eaeb713503bba3e308b9e748e5a6d3f2e",
                 "reference": "d603654eaeb713503bba3e308b9e748e5a6d3f2e",
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+            "version": "v4.4.19",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/error-handler.git",
+                "reference": "d603654eaeb713503bba3e308b9e748e5a6d3f2e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/error-handler/zipball/d603654eaeb713503bba3e308b9e748e5a6d3f2e",
+                "reference": "d603654eaeb713503bba3e308b9e748e5a6d3f2e",
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
                 "shasum": ""
             },
             "require": {
@@ -2555,6 +2621,7 @@
                 }
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2020-12-09T11:15:38+00:00"
         },
         {
@@ -2585,6 +2652,22 @@
                 "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/c352647244bd376bf7d31efbd5401f13f50dad0c",
                 "reference": "c352647244bd376bf7d31efbd5401f13f50dad0c",
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+            "time": "2021-01-27T09:09:26+00:00"
+        },
+        {
+            "name": "symfony/event-dispatcher",
+            "version": "v4.4.19",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/event-dispatcher.git",
+                "reference": "c352647244bd376bf7d31efbd5401f13f50dad0c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/c352647244bd376bf7d31efbd5401f13f50dad0c",
+                "reference": "c352647244bd376bf7d31efbd5401f13f50dad0c",
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
                 "shasum": ""
             },
             "require": {
@@ -2652,10 +2735,14 @@
                 }
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2020-12-18T07:41:31+00:00"
 =======
             "time": "2021-01-27T09:09:26+00:00"
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+            "time": "2021-01-27T09:09:26+00:00"
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
         },
         {
             "name": "symfony/event-dispatcher-contracts",
@@ -2722,6 +2809,7 @@
         {
             "name": "symfony/finder",
 <<<<<<< HEAD
+<<<<<<< HEAD
             "version": "v4.4.18",
             "source": {
                 "type": "git",
@@ -2744,6 +2832,18 @@
                 "url": "https://api.github.com/repos/symfony/finder/zipball/25d79cfccfc12e84e7a63a248c3f0720fdd92db6",
                 "reference": "25d79cfccfc12e84e7a63a248c3f0720fdd92db6",
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+            "version": "v4.4.19",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/finder.git",
+                "reference": "25d79cfccfc12e84e7a63a248c3f0720fdd92db6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/25d79cfccfc12e84e7a63a248c3f0720fdd92db6",
+                "reference": "25d79cfccfc12e84e7a63a248c3f0720fdd92db6",
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
                 "shasum": ""
             },
             "require": {
@@ -2789,10 +2889,14 @@
                 }
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2020-12-08T16:59:59+00:00"
 =======
             "time": "2021-01-27T09:09:26+00:00"
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+            "time": "2021-01-27T09:09:26+00:00"
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
         },
         {
             "name": "symfony/http-client-contracts",
@@ -2859,6 +2963,7 @@
         {
             "name": "symfony/http-foundation",
 <<<<<<< HEAD
+<<<<<<< HEAD
             "version": "v4.4.18",
             "source": {
                 "type": "git",
@@ -2870,6 +2975,8 @@
                 "url": "https://api.github.com/repos/symfony/http-foundation/zipball/5ebda66b51612516bf338d5f87da2f37ff74cf34",
                 "reference": "5ebda66b51612516bf338d5f87da2f37ff74cf34",
 =======
+=======
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
             "version": "v4.4.19",
             "source": {
                 "type": "git",
@@ -2880,7 +2987,10 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/http-foundation/zipball/8888741b633f6c3d1e572b7735ad2cae3e03f9c5",
                 "reference": "8888741b633f6c3d1e572b7735ad2cae3e03f9c5",
+<<<<<<< HEAD
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
                 "shasum": ""
             },
             "require": {
@@ -2933,6 +3043,7 @@
                 }
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2020-12-18T07:41:31+00:00"
         },
         {
@@ -2963,6 +3074,22 @@
                 "url": "https://api.github.com/repos/symfony/http-kernel/zipball/07ea794a327d7c8c5d76e3058fde9fec6a711cb4",
                 "reference": "07ea794a327d7c8c5d76e3058fde9fec6a711cb4",
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+            "time": "2021-01-27T09:09:26+00:00"
+        },
+        {
+            "name": "symfony/http-kernel",
+            "version": "v4.4.19",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/http-kernel.git",
+                "reference": "07ea794a327d7c8c5d76e3058fde9fec6a711cb4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/http-kernel/zipball/07ea794a327d7c8c5d76e3058fde9fec6a711cb4",
+                "reference": "07ea794a327d7c8c5d76e3058fde9fec6a711cb4",
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
                 "shasum": ""
             },
             "require": {
@@ -3051,6 +3178,7 @@
                 }
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2020-12-18T13:32:33+00:00"
         },
         {
@@ -3066,6 +3194,8 @@
                 "url": "https://api.github.com/repos/symfony/mime/zipball/de97005aef7426ba008c46ba840fc301df577ada",
                 "reference": "de97005aef7426ba008c46ba840fc301df577ada",
 =======
+=======
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
             "time": "2021-01-27T13:50:53+00:00"
         },
         {
@@ -3080,7 +3210,10 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/mime/zipball/7dee6a43493f39b51ff6c5bb2bd576fe40a76c86",
                 "reference": "7dee6a43493f39b51ff6c5bb2bd576fe40a76c86",
+<<<<<<< HEAD
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
                 "shasum": ""
             },
             "require": {
@@ -3147,10 +3280,14 @@
                 }
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2020-12-09T18:54:12+00:00"
 =======
             "time": "2021-02-02T06:10:15+00:00"
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+            "time": "2021-02-02T06:10:15+00:00"
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
         },
         {
             "name": "symfony/polyfill-ctype",
@@ -3779,6 +3916,7 @@
         {
             "name": "symfony/process",
 <<<<<<< HEAD
+<<<<<<< HEAD
             "version": "v4.4.18",
             "source": {
                 "type": "git",
@@ -3801,6 +3939,18 @@
                 "url": "https://api.github.com/repos/symfony/process/zipball/7e950b6366d4da90292c2e7fa820b3c1842b965a",
                 "reference": "7e950b6366d4da90292c2e7fa820b3c1842b965a",
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+            "version": "v4.4.19",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/process.git",
+                "reference": "7e950b6366d4da90292c2e7fa820b3c1842b965a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/process/zipball/7e950b6366d4da90292c2e7fa820b3c1842b965a",
+                "reference": "7e950b6366d4da90292c2e7fa820b3c1842b965a",
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
                 "shasum": ""
             },
             "require": {
@@ -3846,6 +3996,7 @@
                 }
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2020-12-08T16:59:59+00:00"
         },
         {
@@ -3861,6 +4012,8 @@
                 "url": "https://api.github.com/repos/symfony/routing/zipball/80b042c20b035818daec844723e23b9825134ba0",
                 "reference": "80b042c20b035818daec844723e23b9825134ba0",
 =======
+=======
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
             "time": "2021-01-27T09:09:26+00:00"
         },
         {
@@ -3875,7 +4028,10 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/routing/zipball/87529f6e305c7acb162840d1ea57922038072425",
                 "reference": "87529f6e305c7acb162840d1ea57922038072425",
+<<<<<<< HEAD
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
                 "shasum": ""
             },
             "require": {
@@ -3948,10 +4104,14 @@
                 }
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2020-12-08T16:59:59+00:00"
 =======
             "time": "2021-01-27T09:09:26+00:00"
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+            "time": "2021-01-27T09:09:26+00:00"
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
         },
         {
             "name": "symfony/service-contracts",
@@ -4018,6 +4178,7 @@
         {
             "name": "symfony/translation",
 <<<<<<< HEAD
+<<<<<<< HEAD
             "version": "v4.4.18",
             "source": {
                 "type": "git",
@@ -4040,6 +4201,18 @@
                 "url": "https://api.github.com/repos/symfony/translation/zipball/e1d0c67167a553556d9f974b5fa79c2448df317a",
                 "reference": "e1d0c67167a553556d9f974b5fa79c2448df317a",
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+            "version": "v4.4.19",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/translation.git",
+                "reference": "e1d0c67167a553556d9f974b5fa79c2448df317a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/translation/zipball/e1d0c67167a553556d9f974b5fa79c2448df317a",
+                "reference": "e1d0c67167a553556d9f974b5fa79c2448df317a",
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
                 "shasum": ""
             },
             "require": {
@@ -4112,10 +4285,14 @@
                 }
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2020-12-08T16:59:59+00:00"
 =======
             "time": "2021-01-27T09:09:26+00:00"
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+            "time": "2021-01-27T09:09:26+00:00"
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
         },
         {
             "name": "symfony/translation-contracts",
@@ -4181,6 +4358,7 @@
         {
             "name": "symfony/var-dumper",
 <<<<<<< HEAD
+<<<<<<< HEAD
             "version": "v4.4.18",
             "source": {
                 "type": "git",
@@ -4192,6 +4370,8 @@
                 "url": "https://api.github.com/repos/symfony/var-dumper/zipball/4f31364bbc8177f2a6dbc125ac3851634ebe2a03",
                 "reference": "4f31364bbc8177f2a6dbc125ac3851634ebe2a03",
 =======
+=======
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
             "version": "v4.4.19",
             "source": {
                 "type": "git",
@@ -4202,7 +4382,10 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/var-dumper/zipball/a1eab2f69906dc83c5ddba4632180260d0ab4f7f",
                 "reference": "a1eab2f69906dc83c5ddba4632180260d0ab4f7f",
+<<<<<<< HEAD
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
                 "shasum": ""
             },
             "require": {
@@ -4276,10 +4459,14 @@
                 }
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2020-12-08T16:59:59+00:00"
 =======
             "time": "2021-01-27T09:09:26+00:00"
 >>>>>>> e3c5c30 (Revised the funding_allotments table and Allotment seeder; Developed the store and view feature of LIB module; Updated the assets plugins (mdbootstrap & select2); Created the ajax routes for fetching allotment class list and expense class list;)
+=======
+            "time": "2021-01-27T09:09:26+00:00"
+>>>>>>> 256283e87485bba9dddf8d95b2197df729ab01fe
         },
         {
             "name": "tecnickcom/tcpdf",

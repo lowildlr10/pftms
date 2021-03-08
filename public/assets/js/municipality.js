@@ -37,7 +37,7 @@ $(function() {
 						   .on('shown.bs.modal', function() {
             $('#edit-title').html('Update Municipality');
 		}).on('hidden.bs.modal', function() {
-		    $('#modal-body-edit').html('').css('display', 'none');
+            $('#modal-body-edit').html('').css('display', 'none');
 		});
     }
 
