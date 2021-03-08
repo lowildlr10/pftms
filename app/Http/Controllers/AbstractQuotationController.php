@@ -407,7 +407,8 @@ class AbstractQuotationController extends Controller
 
             $instanceAbstract = AbstractQuotation::with('pr')->find($id);
             $prID = $instanceAbstract->pr_id;
-            $prNo = $instanceAbstract->pr->pr_no;
+            $instancePR = PurchaseRequest::find($prID);
+            $prNo = $instancePR->pr_no;
 
             $groupNo = $this->getGroupNo($prIDItem);
             $oldBidderCount = $this->getBidderCount($groupNo, $prID, 'this', $prIDItem);
@@ -449,7 +450,7 @@ class AbstractQuotationController extends Controller
             $instancePRItem = PurchaseRequestItem::find($prIDItem);
             $poCount = PurchaseJobOrder::where('pr_id', $prID)->count();
 
-            if ($poCount > 0 && $instanceAbstract->pr->status >= 6) {
+            if ($poCount > 0 && $instancePR->status >= 6) {
                 $instancePOItem = PurchaseJobOrderItem::with('po')
                                                       ->where('pr_item_id', $prIDItem)
                                                       ->first();
