@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Region;
 use App\Models\Province;
+use App\Models\Municipality;
 
 class PlaceController extends Controller
 {
@@ -220,6 +221,134 @@ class PlaceController extends Controller
         }
     }
 
+    /**
+     *  Municiaplity Module
+    **/
+    public function indexMunicipality(Request $request) {
+        $municipalityData = Municipality::addSelect([
+            'region_name' => Region::select('region_name')
+                                   ->whereColumn('id', 'municipalities.region')
+                                   ->limit(1),
+            'province_name' => Province::select('province_name')
+                                   ->whereColumn('id', 'municipalities.province')
+                                   ->limit(1)
+        ])->orderBy('municipality_name')->get();
+
+        return view('modules.library.municipality.index', [
+            'list' => $municipalityData
+        ]);
+    }
+
+    public function showCreateMunicipality() {
+        $regionData = Region::select('region_name', 'id')
+                            ->orderBy('region_name')
+                            ->get();
+        $provinceData = Province::select('province_name', 'id')
+                                ->orderBy('province_name')
+                                ->get();
+
+        return view('modules.library.municipality.create', [
+            'regions' => $regionData,
+            'provinces' => $provinceData
+        ]);
+    }
+
+    public function showEditMunicipality($id) {
+        $regionData = Region::select('region_name', 'id')
+                            ->orderBy('region_name')
+                            ->get();
+        $provinceData = Province::select('province_name', 'id')
+                                ->orderBy('province_name')
+                                ->get();
+
+        $municipalityData = Municipality::find($id);
+        $region = $municipalityData->region;
+        $province = $municipalityData->province;
+        $municipalityName = $municipalityData->municipality_name;
+
+        return view('modules.library.municipality.update', [
+            'id' => $id,
+            'regions' => $regionData,
+            'provinces' => $provinceData,
+            'region' => $region,
+            'province' => $province,
+            'municipality' => $municipalityName,
+        ]);
+    }
+
+    public function storeMunicipality(Request $request) {
+        $region = $request->region;
+        $province = $request->province;
+        $municipalityName = $request->municipality_name;
+
+        try {
+            if (!$this->checkDuplication('Municipality', $municipalityName)) {
+                $instanceMunicipality = new Municipality;
+                $instanceMunicipality->region = $region;
+                $instanceMunicipality->province = $province;
+                $instanceMunicipality->municipality_name = $municipalityName;
+                $instanceMunicipality->save();
+
+                $msg = "Province '$municipalityName' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Municipality '$municipalityName' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function updateMunicipality(Request $request, $id) {
+        $region = $request->region;
+        $province = $request->province;
+        $municipalityName = $request->municipality_name;
+
+        try {
+            $instanceMunicipality = Municipality::find($id);
+            $instanceMunicipality->region = $region;
+            $instanceMunicipality->province = $province;
+            $instanceMunicipality->municipality_name = $municipalityName;
+            $instanceMunicipality->save();
+
+            $msg = "Municipality '$municipalityName' successfully created.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function deleteMunicipality($id) {
+        try {
+            $instanceMunicipality = Municipality::find($id);
+            $municipalityName = $instanceMunicipality->municipality_name;
+            $instanceMunicipality->delete();
+
+            $msg = "Municipality '$municipalityName' successfully deleted.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function destroyMunicipality($id) {
+        try {
+            $instanceMunicipality = Province::find($id);
+            $municipalityName = $instanceMunicipality->municipality_name;
+            $instanceMunicipality->destroy();
+
+            $msg = "Municipality '$municipalityName' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
     public function checkDuplication($model, $data) {
         switch ($model) {
             case 'Region':
@@ -233,6 +362,12 @@ class PlaceController extends Controller
                                      ->orWhere('province_name', strtolower($data))
                                      ->orWhere('province_name', strtoupper($data))
                                      ->count();
+                break;
+            case 'Municipality':
+                $dataCount = Municipality::where('municipality_name', $data)
+                                         ->orWhere('municipality_name', strtolower($data))
+                                         ->orWhere('municipality_name', strtoupper($data))
+                                         ->count();
                 break;
             default:
                 $dataCount = 0;

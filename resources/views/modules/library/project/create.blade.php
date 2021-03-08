@@ -144,7 +144,7 @@
     <div class="md-form">
         <input type="date" id="date-from" class="form-control required"
                name="date_from">
-        <label for="date-from" class="active">
+        <label for="date-from">
             From <span class="red-text">*</span>
         </label>
     </div>
@@ -152,7 +152,7 @@
     <div class="md-form">
         <input type="date" id="date-to" class="form-control required"
                name="date_from">
-        <label for="date-to" class="active">
+        <label for="date-to">
             To <span class="red-text">*</span>
         </label>
     </div><br>

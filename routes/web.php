@@ -1816,4 +1816,41 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'place_province',
         'access' => 'destory'
     ])->name('province-destroy');
+
+    // Municipality Module
+    Route::any('places/municipality', [
+        'uses' => 'PlaceController@indexMunicipality',
+        'module' => 'place_province',
+        'access' => 'is_allowed'
+    ])->name('municipality');
+    Route::get('places/municipality/show-create', [
+        'uses' => 'PlaceController@showCreateMunicipality',
+        'module' => 'place_province',
+        'access' => 'create'
+    ])->name('municipality-show-create');
+    Route::post('places/municipality/store', [
+        'uses' => 'PlaceController@storeMunicipality',
+        'module' => 'place_province',
+        'access' => 'create'
+    ])->name('municipality-store');
+    Route::get('places/municipality/show-edit/{id}', [
+        'uses' => 'PlaceController@showEditMunicipality',
+        'module' => 'place_province',
+        'access' => 'update'
+    ])->name('municipality-show-edit');
+    Route::post('places/municipality/update/{id}', [
+        'uses' => 'PlaceController@updateMunicipality',
+        'module' => 'place_province',
+        'access' => 'update'
+    ])->name('municipality-update');
+    Route::post('places/municipality/delete/{id}', [
+        'uses' => 'PlaceController@deleteMunicipality',
+        'module' => 'place_province',
+        'access' => 'delete'
+    ])->name('municipality-delete');
+    Route::post('places/municipality/destroy/{id}', [
+        'uses' => 'PlaceController@destroyMunicipality',
+        'module' => 'place_province',
+        'access' => 'destory'
+    ])->name('municipality-destroy');
 });

@@ -386,7 +386,7 @@
                                 <a href="{{ route('province') }}" class="waves-effect">Provinces</a>
                             </li>
                             <li>
-                                <a href="{{ route('province') }}" class="waves-effect">Municipalities</a>
+                                <a href="{{ route('municipality') }}" class="waves-effect">Municipalities</a>
                             </li>
                         </ul>
                     </div>
