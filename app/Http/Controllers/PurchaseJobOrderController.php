@@ -443,6 +443,11 @@ class PurchaseJobOrderController extends Controller
             $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';
             $prID = $instancePO->pr_id;
             $poNo = $instancePO->po_no;
+            $poID = $instancePO->id;
+            $instanceORS = ObligationRequestStatus::where('po_no', $poNo)->first();
+            $orsID = $instanceORS ? $instanceORS->id : NULL;
+            $instanceDV = InspectionAcceptance::where('ors_id', $orsID)->first();
+            $instanceIAR = InspectionAcceptance::where('po_id', $poID)->first();
             $countPOItem = PurchaseJobOrderItem::where('po_no', $poNo)->count();
 
             if ($countPOItem > 0) {
@@ -454,6 +459,18 @@ class PurchaseJobOrderController extends Controller
                     'alert_type' => 'warning',
                     'pr_id' => $prID
                 ];
+            }
+
+            if ($instanceDV) {
+                $instanceDV->forceDelete();
+            }
+
+            if ($instanceIAR) {
+                $instanceIAR->forceDelete();
+            }
+
+            if ($instanceORS) {
+                $instanceORS->forceDelete();
             }
 
             $instancePO->forceDelete();
