@@ -1170,6 +1170,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'lib_item_class',
         'access' => 'destroy'
     ])->name('agency-lgu-destroy');
+    Route::post('libraries/agency-lgu/get-agencies-lgus', [
+        'uses' => 'LibraryController@getListAgencyLGU',
+        'module' => 'lib_item_class',
+        'access' => 'destroy'
+    ]);
 
     // Industry/Sectors Module
     Route::any('libraries/industry-sector', [

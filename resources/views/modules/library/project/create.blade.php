@@ -31,6 +31,24 @@
 
     <div class="md-form">
         <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                name="project_site">
+            <option value="" disabled selected>Choose a project site</option>
+
+            @if (count($municipalities) > 0)
+                @foreach ($municipalities as $municipality)
+            <option value="{{ $municipality->id }}">
+                {!! $municipality->municipality_name !!}
+            </option>
+                @endforeach
+            @endif
+        </select>
+        <label class="mdb-main-label">
+            Project Site <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select crud-select md-form required" searchable="Search here.."
                 name="implementing_agency">
             <option value="" disabled selected>Choose an Implementing Agency</option>
 
@@ -48,7 +66,8 @@
     </div>
 
     <div class="custom-control custom-checkbox">
-        <input type="checkbox" class="custom-control-input" id="coimplementing-agency">
+        <input type="checkbox" class="custom-control-input" id="coimplementing-agency"
+               name="with_coimplementing_agency">
         <label class="custom-control-label font-weight-bold" for="coimplementing-agency">
             With Co-implementing Agencies/LGUs?
         </label>
@@ -60,13 +79,13 @@
             <div class="coimplementing-form-group border rounded p-3"
                  id="coimplementing-form-group-0">
                 <div class="md-form">
-                    <select class="mdb-select form-control-sm required agencies-tokenizer"
+                    <select class="mdb-select form-control-sm agencies-tokenizer coimplementing-agency-lgus"
                             name="comimplementing_agency_lgus[]"></select>
                 </div>
 
                 <div class="md-form mt-3">
-                    <input type="number" id="coimplementing-project-cost" class="form-control required"
-                        name="coimplementing_project_costs[]" value="0.00">
+                    <input type="number" class="form-control coimplementing-project-cost"
+                           name="coimplementing_project_costs[]">
                     <label for="coimplementing-project-cost" class="active">
                         Project Cost (Co-implementing Agency/LGU) <span class="red-text">*</span>
                     </label>
@@ -86,13 +105,10 @@
     </div>
     <hr class="my-1"><br>
 
-
-
-
     <div class="md-form">
 
         <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                name="proponent_units" multiple>
+                name="proponent_units[]" multiple>
             <option value="" disabled selected>Choose a Proponent Units/PSTCs</option>
 
             @if (count($empUnits) > 0)
@@ -108,8 +124,6 @@
         </label>
     </div>
 
-
-
     <div class="md-form">
         <select class="mdb-select crud-select md-form required" searchable="Search here.."
                 name="monitoring_office">
@@ -118,7 +132,7 @@
             @if (count($monitoringOffices) > 0)
                 @foreach ($monitoringOffices as $office)
             <option value="{{ $office->id }}">
-                {!! $office->office_name !!}
+                {!! $office->agency_name !!}
             </option>
                 @endforeach
             @endif
@@ -144,15 +158,15 @@
     <div class="md-form">
         <input type="date" id="date-from" class="form-control required"
                name="date_from">
-        <label for="date-from">
+        <label for="date-from" class="active">
             From <span class="red-text">*</span>
         </label>
     </div>
 
     <div class="md-form">
         <input type="date" id="date-to" class="form-control required"
-               name="date_from">
-        <label for="date-to">
+               name="date_to">
+        <label for="date-to" class="active">
             To <span class="red-text">*</span>
         </label>
     </div><br>

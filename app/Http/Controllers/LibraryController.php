@@ -491,7 +491,7 @@ class LibraryController extends Controller
         $municipalities = Municipality::orderBy('municipality_name')->get();
         $empUnits = EmpUnit::orderBy('unit_name')->get();
         $agencies = AgencyLGU::orderBy('agency_name')->get();
-        $monitoringOffices = MonitoringOffice::orderBy('office_name')->get();
+        $monitoringOffices = AgencyLGU::orderBy('agency_name')->get();
 
         return view('modules.library.project.create', compact(
             'industries',
@@ -503,29 +503,92 @@ class LibraryController extends Controller
     }
 
     public function showEditProject($id) {
-        $fundingData = FundingProject::find($id);
-        $funding = $fundingData->project_title;
+        $projectData = FundingProject::find($id);
+        $industries = IndustrySector::orderBy('sector_name')->get();
+        $municipalities = Municipality::orderBy('municipality_name')->get();
+        $empUnits = EmpUnit::orderBy('unit_name')->get();
+        $agencies = AgencyLGU::orderBy('agency_name')->get();
+        $monitoringOffices = AgencyLGU::orderBy('agency_name')->get();
 
-        return view('modules.library.project.update', [
-            'id' => $id,
-            'funding' => $funding
-        ]);
+        $industrySector = $projectData->industry_sector;
+        $projectSite = $projectData->project_site;
+        $implementingAgency = $projectData->implementing_agency;
+        $comimplementingAgencyLGUs = unserialize($projectData->comimplementing_agency_lgus);
+        $proponentUnits = unserialize($projectData->proponent_units);
+        $dateFrom = $projectData->date_from;
+        $dateTo = $projectData->date_to;
+        $projectCost = $projectData->project_cost;
+        $monitoringOffice  = $projectData->monitoring_office ;
+        $projectTitle = $projectData->project_title;
+        $coimplementingCount = $comimplementingAgencyLGUs ? count($comimplementingAgencyLGUs) : 0;
+        $propenentCount = $proponentUnits ? count($proponentUnits) : 0;
+
+        return view('modules.library.project.update', compact(
+            'id',
+            'industries',
+            'municipalities',
+            'empUnits',
+            'agencies',
+            'monitoringOffices',
+            'industrySector',
+            'projectSite',
+            'implementingAgency',
+            'comimplementingAgencyLGUs',
+            'proponentUnits',
+            'dateFrom',
+            'dateTo',
+            'projectCost',
+            'monitoringOffice',
+            'projectTitle',
+            'coimplementingCount',
+            'propenentCount'
+        ));
     }
 
     public function storeProject(Request $request) {
-        $referenceCode = $request->reference_code;
-        $sourceName = $request->source_name;
+        $projectTitle = $request->project_title;
+        $industrySector = $request->industry_sector;
+        $projectSite = $request->project_site;
+        $implementingAgency = $request->implementing_agency;
+        $withCoimplementingAgency = $request->with_coimplementing_agency;
+        $projectCost = $request->project_cost;
+        $dateFrom = $request->date_from;
+        $dateTo = $request->date_to;
+        $monitoringOffice = $request->monitoring_office;
+
+        $comimplementingAgencyLGUs = $request->comimplementing_agency_lgus;
+        $coimplementingProjectCosts = $request->coimplementing_project_costs;
+        $proponentUnits = $request->proponent_units;
+        $coimplementingAgencies = [];
 
         try {
-            if (!$this->checkDuplication('FundingSource', $sourceName)) {
-                $instanceFundSrc = new FundingProject;
-                $instanceFundSrc->project_title = $sourceName;
-                $instanceFundSrc->save();
+            if ($withCoimplementingAgency) {
+                foreach ($comimplementingAgencyLGUs as $coimpCtr => $agency) {
+                    $coimplementingAgencies[] = [
+                        'comimplementing_agency_lgu' => $agency,
+                        'coimplementing_project_cost' => $coimplementingProjectCosts[$coimpCtr]
+                    ];
+                }
+            }
 
-                $msg = "Funding source '$sourceName' successfully created.";
+            if (!$this->checkDuplication('FundingSource', $projectTitle)) {
+                $instanceProject = new FundingProject;
+                $instanceProject->project_title = $projectTitle;
+                $instanceProject->industry_sector = $industrySector;
+                $instanceProject->project_site = $projectSite;
+                $instanceProject->implementing_agency = $implementingAgency;
+                $instanceProject->comimplementing_agency_lgus = serialize($coimplementingAgencies);
+                $instanceProject->proponent_units = serialize($proponentUnits);
+                $instanceProject->date_from = $dateFrom;
+                $instanceProject->date_to = $dateTo;
+                $instanceProject->project_cost = $projectCost;
+                $instanceProject->monitoring_office = $monitoringOffice;
+                $instanceProject->save();
+
+                $msg = "Project '$projectTitle' successfully created.";
                 return redirect(url()->previous())->with('success', $msg);
             } else {
-                $msg = "Funding source '$sourceName' has a duplicate.";
+                $msg = "Project '$projectTitle' has a duplicate.";
                 return redirect(url()->previous())->with('warning', $msg);
             }
         } catch (\Throwable $th) {
@@ -535,15 +598,45 @@ class LibraryController extends Controller
     }
 
     public function updateProject(Request $request, $id) {
-        $referenceCode = $request->reference_code;
-        $sourceName = $request->source_name;
+        $projectTitle = $request->project_title;
+        $industrySector = $request->industry_sector;
+        $projectSite = $request->project_site;
+        $implementingAgency = $request->implementing_agency;
+        $withCoimplementingAgency = $request->with_coimplementing_agency;
+        $projectCost = $request->project_cost;
+        $dateFrom = $request->date_from;
+        $dateTo = $request->date_to;
+        $monitoringOffice = $request->monitoring_office;
+
+        $comimplementingAgencyLGUs = $request->comimplementing_agency_lgus;
+        $coimplementingProjectCosts = $request->coimplementing_project_costs;
+        $proponentUnits = $request->proponent_units;
+        $coimplementingAgencies = [];
 
         try {
-            $instanceFundSrc = FundingProject::find($id);
-            $instanceFundSrc->project_title = $sourceName;
-            $instanceFundSrc->save();
+            if ($withCoimplementingAgency) {
+                foreach ($comimplementingAgencyLGUs as $coimpCtr => $agency) {
+                    $coimplementingAgencies[] = [
+                        'comimplementing_agency_lgu' => $agency,
+                        'coimplementing_project_cost' => $coimplementingProjectCosts[$coimpCtr]
+                    ];
+                }
+            }
 
-            $msg = "Funding source '$sourceName' successfully created.";
+            $instanceProject = FundingProject::find($id);
+            $instanceProject->project_title = $projectTitle;
+            $instanceProject->industry_sector = $industrySector;
+            $instanceProject->project_site = $projectSite;
+            $instanceProject->implementing_agency = $implementingAgency;
+            $instanceProject->comimplementing_agency_lgus = serialize($coimplementingAgencies);
+            $instanceProject->proponent_units = serialize($proponentUnits);
+            $instanceProject->date_from = $dateFrom;
+            $instanceProject->date_to = $dateTo;
+            $instanceProject->project_cost = $projectCost;
+            $instanceProject->monitoring_office = $monitoringOffice;
+            $instanceProject->save();
+
+            $msg = "Project '$projectTitle' successfully updated.";
             return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
@@ -553,11 +646,11 @@ class LibraryController extends Controller
 
     public function deleteProject($id) {
         try {
-            $instanceFundSrc = FundingProject::find($id);
-            $sourceName = $instanceFundSrc->source_name;
-            $instanceFundSrc->delete();
+            $instanceProject = FundingProject::find($id);
+            $projectTitle = $instanceProject->project_title;
+            $instanceProject->delete();
 
-            $msg = "Funding source '$sourceName' successfully deleted.";
+            $msg = "Project '$projectTitle' successfully deleted.";
             return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
@@ -567,11 +660,11 @@ class LibraryController extends Controller
 
     public function destroyProject($id) {
         try {
-            $instanceFundSrc = FundingProject::find($id);
-            $sourceName = $instanceFundSrc->source_name;
-            $instanceFundSrc->destroy();
+            $instanceProject = FundingProject::find($id);
+            $projectTitle = $instanceProject->project_title;
+            $instanceProject->delete();
 
-            $msg = "Funding source '$sourceName' successfully destroyed.";
+            $msg = "Project '$projectTitle' successfully destroyed.";
             return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
@@ -1549,7 +1642,7 @@ class LibraryController extends Controller
         return ($dataCount > 0) ? 1 : 0;;
     }
 
-    public function getListAgencyLGU() {
+    public function getListAgencyLGU(Request $request) {
         $keyword = trim($request->search);
         $agencyLGUData = AgencyLGU::select('id', 'agency_name');
 

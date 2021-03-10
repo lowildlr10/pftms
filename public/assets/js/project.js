@@ -28,11 +28,11 @@ $(function() {
                     return {
                         results: $.map(data, function(item) {
                             let jsonData = {};
-                            jsonData['class_name'] = item.class_name;
+                            jsonData['agency_name'] = item.agency_name;
                             agenciesData[item.id] = jsonData;
 
                             return {
-                                text: `${item.class_name}`,
+                                text: `${item.agency_name}`,
                                 id: item.id
                             }
                         }),
@@ -55,38 +55,14 @@ $(function() {
 			if (moduleCbox.is(':checked')) {
                 menuGroup.slideToggle(300);
                 initializeSelect2();
+                $('.coimplementing-agency-lgus').addClass('required');
+                $('.coimplementing-project-cost').addClass('required');
 			} else {
                 menuGroup.slideToggle(300);
+                $('.coimplementing-agency-lgus').removeClass('required input-error-highlighter');
+                $('.coimplementing-project-cost').removeClass('required input-error-highlighter');
             }
         });
-
-        /*
-
-        selectAllCheck.unbind('change').change(function() {
-            selectAllCheck.prop('indeterminate', false);
-
-            if (selectAllCheck.is(':checked')) {
-                menuGroup.find('input').not(_allowedCheck).each(function() {
-                    $(this).prop("checked", true);
-                });
-            } else {
-                menuGroup.find('input').not(_allowedCheck).each(function() {
-                    $(this).prop("checked", false);
-                });
-            }
-        });
-
-        menuGroup.find('input').not(_selectAllCheck)
-                 .not(_allowedCheck)
-                 .each(function() {
-            if ($(this).is(':checked')) {
-                $(selectAllCheck).prop('indeterminate', true);
-            }
-
-            $(this).unbind('change').change(function() {
-                $(selectAllCheck).prop('indeterminate', true);
-            });
-        });*/
 	}
 
     $.fn.addRow = function(rowClass) {
@@ -97,13 +73,13 @@ $(function() {
 
         let coimplementingAgency = `
             <div class="md-form">
-                <select class="mdb-select form-control-sm required agencies-tokenizer"
+                <select class="mdb-select form-control-sm agencies-tokenizer required coimplementing-agency-lgus"
                         name="comimplementing_agency_lgus[]"></select>
             </div>`,
             projectCost = `
             <div class="md-form mt-3">
-                <input type="number" id="coimplementing-project-cost" class="form-control required"
-                    name="coimplementing_project_costs[]" value="0.00">
+                <input type="number" class="form-control required coimplementing-project-cost"
+                       name="coimplementing_project_costs[]">
                 <label for="coimplementing-project-cost" class="active">
                     Project Cost (Co-implementing Agency/LGU) <span class="red-text">*</span>
                 </label>
