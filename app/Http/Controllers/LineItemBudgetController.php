@@ -14,6 +14,8 @@ use App\Models\FundingBudgetRealignment;
 use App\Models\FundingAllotmentRealignment;
 use App\Models\MooeAccountTitle;
 use App\Models\PaperSize;
+use App\Models\Signatory;
+use App\User;
 
 use Carbon\Carbon;
 use Auth;
@@ -121,6 +123,16 @@ class LineItemBudgetController extends Controller
         ]);
     }
 
+    public function showPrint($id) {
+        $realignments = FundingBudgetRealignment::where('budget_id', $id)
+                                                ->orderBy('realignment_order')
+                                                ->get();
+
+        return view('modules.fund-utilization.fund-project-lib.print', compact(
+            'id', 'realignments'
+        ));
+    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -132,51 +144,6 @@ class LineItemBudgetController extends Controller
         return view('modules.fund-utilization.fund-project-lib.create', compact(
             'projects',
             'allotmentClassifications',
-        ));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @param  int  $id
-     */
-    public function showCreateRealignment($id) {
-        $allotmentClassifications = AllotmentClass::orderBy('class_name')->get();
-        $budgetData = FundingBudget::find($id);
-        $budgetRealignedData = FundingBudgetRealignment::whereNull('date_disapproved')
-                                                       ->where('budget_id', $id)
-                                                       ->orderBy('realignment_order', 'desc')
-                                                       ->first();
-
-        $approvedBudget = $budgetRealignedData ? $budgetRealignedData->realigned_budget :
-                          $budgetData->approved_budget;
-        $allotments = $budgetRealignedData ?
-            DB::table('funding_allotment_realignments as r_allot')
-              ->select('allot.id as id', 'allot.allotment_name as allotment_name',
-                       'r_allot.realigned_allotment as allotted_budget',
-                       'allot.allotment_class as allotment_class')
-              ->join('funding_allotments as allot', 'allot.id', '=',
-                     'r_allot.allotment_id')
-              ->where('r_allot.budget_realign_id', $budgetRealignedData->id)
-              ->orderBy('allot.order_no')
-              ->get() :
-            FundingAllotment::where('budget_id', $id)
-                            ->orderBy('order_no')
-                            ->get();
-        $approvedBudget = round($approvedBudget, 2);
-        $remainingBudget = $approvedBudget;
-
-        foreach ($allotments as $item) {
-            $remainingBudget -= $item->allotted_budget;
-            $remainingBudget = round($remainingBudget, 2);
-        }
-
-        return view('modules.fund-utilization.fund-project-lib.create-realignment', compact(
-            'id',
-            'approvedBudget',
-            'remainingBudget',
-            'allotments',
-            'allotmentClassifications'
         ));
     }
 
@@ -260,6 +227,7 @@ class LineItemBudgetController extends Controller
         $allotmentNames = $request->allotment_name;
         $allotmentClasses = $request->allot_class;
         $allottedBudgets = $request->allotted_budget;
+        $justifications = $request->justification;
 
         $documentType = 'Line-Item Budget Realignment';
         $routeName = 'fund-project-lib';
@@ -300,6 +268,7 @@ class LineItemBudgetController extends Controller
                                                     $allotmentNames[$ctr], $orderNo);
                 $instanceRealignedAllot->budget_realign_id = $lastID->id;
                 $instanceRealignedAllot->realigned_allotment = $allotBudget;
+                $instanceRealignedAllot->justification = $justifications[$ctr];
                 $instanceRealignedAllot->save();
 
                 if (isset($allotmentIDs[$ctr])) {
@@ -449,6 +418,7 @@ class LineItemBudgetController extends Controller
         $allotmentNames = $request->allotment_name;
         $allotmentClasses = $request->allot_class;
         $allottedBudgets = $request->allotted_budget;
+        $justifications = $request->justification;
 
         $documentType = 'Line-Item Budget Realignment';
         $routeName = 'fund-project-lib';
@@ -482,6 +452,7 @@ class LineItemBudgetController extends Controller
                                                     $allotmentNames[$ctr], $orderNo);
                 $instanceRealignedAllot->budget_realign_id = $realignedBudgetID;
                 $instanceRealignedAllot->realigned_allotment = $allotBudget;
+                $instanceRealignedAllot->justification = $justifications[$ctr];
                 $instanceRealignedAllot->save();
 
                 if (isset($allotmentIDs[$ctr])) {
@@ -516,7 +487,7 @@ class LineItemBudgetController extends Controller
               ->select('allot.id as id', 'allot.allotment_name as allotment_name',
                        'r_allot.realigned_allotment as allotted_budget',
                        'allot.allotment_class as allotment_class',
-                       'r_allot.id as r_allot_id')
+                       'r_allot.id as r_allot_id', 'r_allot.justification')
               ->join('funding_allotments as allot', 'allot.id', '=',
                      'r_allot.allotment_id')
               ->where('r_allot.budget_realign_id', $budgetRealignedData->id)
@@ -525,7 +496,7 @@ class LineItemBudgetController extends Controller
             FundingAllotment::where('budget_id', $id)
                             ->orderBy('order_no')
                             ->get();
-        $deteRealignment = $budgetRealignedData ? $budgetRealignedData->date_realignment : NULL;
+        $dateRealignment = $budgetRealignedData ? $budgetRealignedData->date_realignment : NULL;
         $approvedBudget = round($approvedBudget, 2);
         $remainingBudget = $approvedBudget;
 
@@ -540,13 +511,23 @@ class LineItemBudgetController extends Controller
             $viewFile = 'modules.fund-utilization.fund-project-lib.update-realignment';
         }
 
+        $users = User::orderBy('firstname')
+                     ->get();
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+
         return view($viewFile, compact(
             'id',
-            'deteRealignment',
+            'dateRealignment',
             'approvedBudget',
             'remainingBudget',
             'allotments',
-            'allotmentClassifications'
+            'allotmentClassifications',
+            'users',
+            'signatories'
         ));
     }
 
@@ -711,7 +692,7 @@ class LineItemBudgetController extends Controller
             $budgetID = !$isRealignment ? $instanceBudget->id :
                         $instanceBudget->budget_id;
             $instanceBudget->date_approved = Carbon::now();
-            $instanceBudget->approved_by = Auth::user()->id;
+            //$instanceBudget->approved_by = Auth::user()->id;
             $instanceBudget->save();
 
             //$instanceNotif->notifyApproveSummary($id, Auth::user()->id);

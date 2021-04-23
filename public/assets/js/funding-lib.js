@@ -154,6 +154,20 @@ $(function() {
 		}
     }
 
+    $.fn.showPrintList = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-show').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $(this).slideToggle(500);
+        });
+        $("#modal-show").modal({keyboard: false, backdrop: 'static'})
+						     .on('shown.bs.modal', function() {
+            $('#show-title').html('Print Line-Item Budget');
+		}).on('hidden.bs.modal', function() {
+		    $('#modal-body-show').html('').css('display', 'none');
+		});
+    }
+
     $.fn.showCreate = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-create').load(url, function() {

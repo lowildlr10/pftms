@@ -10,7 +10,7 @@
                     <div class="md-form form-sm">
                         <input type="date" id="date_realignment" name="date_realignment"
                                class="form-control form-control-sm required"
-                               value="{{ $deteRealignment }}">
+                               value="{{ $dateRealignment }}">
                         <label for="date_realignment" class="active">
                             <span class="red-text">* </span>
                             <b>Date</b>
@@ -56,19 +56,24 @@
                 <table class="table table-sm table-hover table-bordered">
                     <thead class="text-center">
                         <tr>
-                            <th class="align-middle" width="33%">
+                            <th class="align-middle" width="30%">
                                 <b>
                                     <span class="red-text">* </span> Allotment Name
                                 </b>
                             </th>
-                            <th class="align-middle" width="33%">
+                            <th class="align-middle" width="25%">
                                 <b>
                                     <span class="red-text">* </span> Allotment Class
                                 </b>
                             </th>
-                            <th class="align-middle" width="31%">
+                            <th class="align-middle" width="16%">
                                 <b>
-                                    <span class="red-text">* </span> Allotted Proposed Budget
+                                    <span class="red-text">* </span> Proposed Budget
+                                </b>
+                            </th>
+                            <th class="align-middle" width="26%">
+                                <b>
+                                    <span class="red-text">* </span> Justification
                                 </b>
                             </th>
                             <th width="3%"></th>
@@ -108,6 +113,13 @@
                                             onkeyup="$(this).totalBudgetIsValid();"
                                             onchange="$(this).totalBudgetIsValid();"
                                             value="{{ $item->allotted_budget }}">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="md-form form-sm my-0">
+                                    <textarea id="justification" class="md-textarea form-control"
+                                              name="justification[{{ $ctr }}]" rows="2"
+                                              placeholder="Justification">{{ $item->justification }}</textarea>
                                 </div>
                             </td>
                             <td class="align-middle">

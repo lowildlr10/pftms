@@ -55,19 +55,24 @@
                 <table class="table table-sm table-hover table-bordered">
                     <thead class="text-center">
                         <tr>
-                            <th class="align-middle" width="33%">
+                            <th class="align-middle" width="30%">
                                 <b>
                                     <span class="red-text">* </span> Allotment Name
                                 </b>
                             </th>
-                            <th class="align-middle" width="33%">
+                            <th class="align-middle" width="25%">
                                 <b>
                                     <span class="red-text">* </span> Allotment Class
                                 </b>
                             </th>
-                            <th class="align-middle" width="31%">
+                            <th class="align-middle" width="16%">
                                 <b>
-                                    <span class="red-text">* </span> Allotted Proposed Budget
+                                    <span class="red-text">* </span> Proposed Budget
+                                </b>
+                            </th>
+                            <th class="align-middle" width="26%">
+                                <b>
+                                    <span class="red-text">* </span> Justification
                                 </b>
                             </th>
                             <th width="3%"></th>
@@ -108,6 +113,13 @@
                                             value="{{ $item->allotted_budget }}">
                                 </div>
                             </td>
+                            <td>
+                                <div class="md-form form-sm my-0">
+                                    <textarea id="justification" class="md-textarea form-control"
+                                              name="justification[{{ $ctr }}]" rows="2"
+                                              placeholder="Justification"></textarea>
+                                </div>
+                            </td>
                             <td class="align-middle">
                                 <a onclick="$(this).deleteRow('#item-row-{{ $ctr + 1 }}');"
                                     class="btn btn-outline-red px-1 py-0">
@@ -133,6 +145,52 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="md-form">
+                        <select id="submitted-by" name="submitted_by" searchable="Search here.."
+                                class="mdb-select crud-select md-form my-0 required">
+                            <option value="" disabled selected>
+                                Choose a signatory
+                            </option>
+
+                            @if (count($users) > 0)
+                                @foreach ($users as $user)
+                            <option value="{{ $user->id }}">
+                                {!! $user->firstname !!} [{!! $user->position !!}]
+                            </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <label class="mdb-main-label">
+                            Submitted By <span class="red-text">*</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="md-form">
+                        <select id="approved-by" name="approved_by" searchable="Search here.."
+                                class="mdb-select crud-select md-form my-0 required">
+                            <option value="" disabled selected>
+                                Choose a signatory
+                            </option>
+
+                            @if (count($users) > 0)
+                                @foreach ($users as $user)
+                            <option value="{{ $user->id }}">
+                                {!! $user->firstname !!} [{!! $user->position !!}]
+                            </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <label class="mdb-main-label">
+                            Approved By <span class="red-text">*</span>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

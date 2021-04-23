@@ -1057,6 +1057,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'pay_summary',
         'access' => 'is_allowed'
     ])->name('fund-project-lib');
+    Route::get('fund-utilization/project-lib/show-print/{id}', [
+        'uses' => 'LineItemBudgetController@showPrint',
+        'module' => 'pay_summary',
+        'access' => 'update'
+    ])->name('fund-project-lib-show-print');
     Route::get('fund-utilization/project-lib/show-create', [
         'uses' => 'LineItemBudgetController@showCreate',
         'module' => 'pay_summary',

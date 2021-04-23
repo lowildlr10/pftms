@@ -226,7 +226,8 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $fund->id }}', 'pay_summary');">
+                                        onclick="$(this).showPrintList('{{ route('fund-project-lib-show-print',
+                                                                        ['id' => $fund->id]) }}');">
                                     <i class="fas fa-print blue-text"></i> Print LIB
                                 </button>
 
@@ -490,7 +491,7 @@
 
 <script type="text/javascript" src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
-<script type="text/javascript" src="{{ asset('assets/js/funding-project.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/funding-lib.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/attachment.js') }}"></script>
 <script>

@@ -454,6 +454,48 @@ class PrintController extends Controller
                 }
                 break;
 
+            case 'fund_lib':
+                $data = $this->getDataLIB($key);
+
+                /*
+                $data->doc_type = $documentType;
+
+                if ($test == 'true') {
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
+                    $msg = "Generated the Line Item Budgets '$key' document.";
+                    Auth::user()->log($request, $msg);
+                } else {
+                    $this->generateLIB(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
+                }*/
+                break;
+
+            case 'fund_lib_realignment':
+                $data = $this->getDataLIBRealignment($key);
+                $data->doc_type = $documentType;
+
+                if ($test == 'true') {
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
+                    $msg = "Generated the Line Item Budgets Realignment '$key' document.";
+                    Auth::user()->log($request, $msg);
+                } else {
+                    $this->generateLIBRealignment(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
+                }
+                break;
+
             default:
                 # code...
                 break;
@@ -571,6 +613,160 @@ class PrintController extends Controller
                                            ->orderBy('group_no', 'asc')
                                            ->get();
         return $groupNumbers;
+    }
+
+    private function getDataLIB($budgetID) {
+        $lib = DB::table('funding_budgets')
+                 ->where('id', $budgetID)
+                 ->first();
+        $libAllotments = DB::table('funding_allotments')
+                           ->where('budget_id', $budgetID)
+                           ->orderBy('order_no')
+                           ->get();
+
+        $itemTableData = [];
+        $multiplier = 9 / 10;
+
+        foreach ($libAllotments as $allotment) {
+
+        }
+
+        dd($lib);
+
+
+        /*
+        $summary = DB::table('summary_lddaps')
+                     ->where('id', $id)
+                     ->first();
+        $mdsGSB = MdsGsb::find($summary->mds_gsb_id);
+        $summaryItems = DB::table('summary_lddap_items')
+                          ->where('sliiae_id', $id)
+                          ->orderBy('item_no')
+                          ->get();
+
+        $itemTableData = [];
+        $allotmentPS = 0;
+        $allotmentMOOE = 0;
+        $allotmentCO = 0;
+        $allotmentFE = 0;
+        $multiplier = 9 / 10;
+
+        foreach ($summaryItems as $ctr => $item) {
+            $lddap = DB::table('list_demand_payables')
+                       ->where('id', $item->lddap_id)
+                       ->first();
+
+            if (strpos($item->allotment_ps_remarks, "\n") !== FALSE) {
+                $searchStr = ["\r\n", "\n", "\r"];
+                $item->allotment_ps_remarks = str_replace($searchStr, '<br>', $item->allotment_ps_remarks);
+            }
+
+            if (strpos($item->allotment_mooe_remarks, "\n") !== FALSE) {
+                $searchStr = ["\r\n", "\n", "\r"];
+                $item->allotment_mooe_remarks = str_replace($searchStr, '<br>', $item->allotment_mooe_remarks);
+            }
+
+            if (strpos($item->allotment_co_remarks, "\n") !== FALSE) {
+                $searchStr = ["\r\n", "\n", "\r"];
+                $item->allotment_co_remarks = str_replace($searchStr, '<br>', $item->allotment_co_remarks);
+            }
+
+            if (strpos($item->allotment_fe_remarks, "\n") !== FALSE) {
+                $searchStr = ["\r\n", "\n", "\r"];
+                $item->allotment_fe_remarks = str_replace($searchStr, '<br>', $item->allotment_fe_remarks);
+            }
+
+            $allotmentPS += $item->allotment_ps;
+            $allotmentMOOE += $item->allotment_mooe;
+            $allotmentCO += $item->allotment_co;
+            $allotmentFE += $item->allotment_fe;
+
+            $item->total = $item->total ? number_format($item->total, 2) : '-';
+            $item->allotment_ps = $item->allotment_ps ? number_format($item->allotment_ps, 2) : '-';
+            $item->allotment_mooe = $item->allotment_mooe ? number_format($item->allotment_mooe, 2) : '-';
+            $item->allotment_co = $item->allotment_co ? number_format($item->allotment_co, 2) : '-';
+            $item->allotment_fe = $item->allotment_fe ? number_format($item->allotment_fe, 2) : '-';
+
+            $itemTableData[] = [
+                ($ctr + 1) . '. ' . $lddap->lddap_ada_no,
+                $item->date_issue,
+                $item->total,
+                $item->allotment_ps,
+                $item->allotment_mooe,
+                $item->allotment_co,
+                $item->allotment_fe,
+                $item->allotment_ps_remarks,
+                $item->allotment_mooe_remarks,
+                $item->allotment_co_remarks,
+                $item->allotment_fe_remarks,
+            ];
+        }
+
+        if (count($itemTableData) < 15) {
+            $itemDataCount = count($itemTableData);
+
+            for ($i = $itemDataCount; $i <= 14; $i++) {
+                $itemTableData[] = ['', '', '', '', '', '', '', '', '', '', ''];
+            }
+        }
+
+        $totalAmount = number_format($summary->total_amount, 2);
+        $allotmentPS = $allotmentPS ? number_format($allotmentPS, 2) : '-';
+        $allotmentMOOE = $allotmentMOOE ? number_format($allotmentMOOE, 2) : '-';
+        $allotmentCO = $allotmentCO ? number_format($allotmentCO, 2) : '-';
+        $allotmentFE = $allotmentFE ? number_format($allotmentFE, 2) : '-';
+
+        $itemTableData[] = [
+            'Total', '',
+            $totalAmount,
+            $allotmentPS,
+            $allotmentMOOE,
+            $allotmentCO,
+            $allotmentFE,
+            '', '', '', ''
+        ];
+
+        $instanceSignatory = new Signatory;
+        $certCorrect = $instanceSignatory->getSignatory($summary->sig_cert_correct)->name;
+        $certCorrectPosition = $instanceSignatory->getSignatory($summary->sig_cert_correct)->summary_designation;
+        $approvedBy = $instanceSignatory->getSignatory($summary->sig_approved_by)->name;
+        $approvedByPosition = $instanceSignatory->getSignatory($summary->sig_approved_by)->summary_designation;
+        $deliveredBy = $instanceSignatory->getSignatory($summary->sig_delivered_by)->name;
+        $deliveredByPosition = $instanceSignatory->getSignatory($summary->sig_delivered_by)->summary_designation;
+
+        $data = [
+            [
+                'aligns' => ['C', 'R', 'R', 'R', 'R', 'R', 'R', 'L', 'L', 'L', 'L'],
+                'widths' => [
+                    20.3 * $multiplier,
+                    10 * $multiplier,
+                    10 * $multiplier,
+                    10 * $multiplier,
+                    10 * $multiplier,
+                    10 * $multiplier,
+                    10 * $multiplier,
+                    7.7 * $multiplier,
+                    7.7 * $multiplier,
+                    7.7 * $multiplier,
+                    7.7 * $multiplier,
+                ],
+                'font-styles' => ['', '', '', '', '', '', '', '', '', '', ''],
+                'type' => 'row-data',
+                'data' => $itemTableData
+            ]
+        ];
+
+        return (object)[
+            'summary' => $summary,
+            'mds_account_no' => $mdsGSB->sub_account_no,
+            'table_data' => $data,
+            'sig_cert_correct' => strtoupper($certCorrect),
+            'sig_cert_correct_position' => $certCorrectPosition,
+            'sig_approved_by' => strtoupper($approvedBy),
+            'sig_approved_by_position' => $approvedByPosition,
+            'sig_delivered_by' => strtoupper($deliveredBy),
+            'sig_delivered_by_position' => strtoupper($deliveredByPosition),
+        ];*/
     }
 
     private function getDataPropertyLabel($invStockIssueID) {
@@ -2840,6 +3036,68 @@ class PrintController extends Controller
 
         //Main document generation code file
         $pdf->printPropertyLabel($data);
+
+        //Print the document
+        $this->printDocument($pdf, $docTitle, $previewToggle);
+    }
+
+    private function generateLIB($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
+        //Initiated variables
+        $pageSize = [$pageWidth, $pageHeight];
+        $pdf = new DocInventoryCustodian('P', $pageUnit, $pageSize);
+        $docCode = "FM-FAS-PUR F16";
+        $docRev = "Revision 1";
+        $docRevDate = "02-28-18";
+        $docTitle = strtolower($data->inventory_no);
+        $docCreator = "DOST-CAR";
+        $docAuthor = "DOST-CAR";
+        $docSubject = "Inventory Custodian Slip";
+        $docKeywords = "ICS, ics, inventory, custodian, slip, inventory custodian slip";
+
+        $poDate = "";
+
+        if (!empty($data->po->date_po)) {
+            $poDate = new DateTime($data->po->date_po);
+            $poDate = $poDate->format('F j, Y');
+        }
+
+        //Set document information
+        $this->setDocumentInfo($pdf, $docCode, $docRev, $docRevDate, $docTitle,
+                               $docCreator, $docAuthor, $docSubject, $docKeywords);
+
+        //Main document generation code file
+        $pdf->printICS($data);
+
+        //Print the document
+        $this->printDocument($pdf, $docTitle, $previewToggle);
+    }
+
+    private function generateLIBRealignment($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
+        //Initiated variables
+        $pageSize = [$pageWidth, $pageHeight];
+        $pdf = new DocInventoryCustodian('P', $pageUnit, $pageSize);
+        $docCode = "FM-FAS-PUR F16";
+        $docRev = "Revision 1";
+        $docRevDate = "02-28-18";
+        $docTitle = strtolower($data->inventory_no);
+        $docCreator = "DOST-CAR";
+        $docAuthor = "DOST-CAR";
+        $docSubject = "Inventory Custodian Slip";
+        $docKeywords = "ICS, ics, inventory, custodian, slip, inventory custodian slip";
+
+        $poDate = "";
+
+        if (!empty($data->po->date_po)) {
+            $poDate = new DateTime($data->po->date_po);
+            $poDate = $poDate->format('F j, Y');
+        }
+
+        //Set document information
+        $this->setDocumentInfo($pdf, $docCode, $docRev, $docRevDate, $docTitle,
+                               $docCreator, $docAuthor, $docSubject, $docKeywords);
+
+        //Main document generation code file
+        $pdf->printICS($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);

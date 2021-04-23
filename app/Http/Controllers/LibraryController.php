@@ -520,8 +520,11 @@ class LibraryController extends Controller
         $projectCost = $projectData->project_cost;
         $monitoringOffice  = $projectData->monitoring_office ;
         $projectTitle = $projectData->project_title;
+
         $coimplementingCount = $comimplementingAgencyLGUs ? count($comimplementingAgencyLGUs) : 0;
         $propenentCount = $proponentUnits ? count($proponentUnits) : 0;
+        $comimplementingAgencyLGUs = $coimplementingCount > 0 ? $comimplementingAgencyLGUs : [];
+        $proponentUnits = $propenentCount > 0 ? $proponentUnits : [];
 
         return view('modules.library.project.update', compact(
             'id',
