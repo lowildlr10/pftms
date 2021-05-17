@@ -20,11 +20,14 @@ class FundingAllotmentRealignment extends Model
      * @var array
      */
     protected $fillable = [
+        'id',
         'project_id',
         'budget_id',
         'allotment_id',
         'budget_realign_id',
-        'realigned_allotment',
+        'order_no',
+        'allotment_name',
+        'realigned_allotment_cost',
     ];
 
     /**

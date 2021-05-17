@@ -3,13 +3,13 @@
     @csrf
     <div class="card w-responsive">
         <div class="card-body">
-            <h4>Project & Date Covered</h4>
+            <h4>Project</h4>
             <hr>
             <div class="row">
                 <div class="col-md-6">
                     <div class="md-form form-sm">
                         <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                                name="project">
+                                name="project" id="project">
                             <option value="" disabled selected>Choose a project</option>
 
                             @if (count($projects) > 0)
@@ -27,26 +27,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-3">
-                    <div class="md-form form-sm">
-                        <input type="date" id="date_from" name="date_from"
-                               class="form-control form-control-sm required">
-                        <label for="date_from" class="active">
-                            <span class="red-text">* </span>
-                            <b>Date From</b>
-                        </label>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="md-form form-sm">
-                        <input type="date" id="date_to" name="date_to"
-                               class="form-control form-control-sm required">
-                        <label for="date_to" class="active">
-                            <span class="red-text">* </span>
-                            <b>Date To</b>
-                        </label>
-                    </div>
-                </div>
+                <div class="col-md-6"></div>
             </div><br>
 
             <h4>Proposed Budget</h4>
@@ -102,38 +83,13 @@
                         </tr>
                     </thead>
                     <tbody class="sortable">
-                        <tr id="item-row-1" class="item-row">
-                            <td>
-                                <div class="md-form form-sm my-0">
-                                    <input type="text" placeholder=" Value..." name="allotment_name[0]"
-                                           class="form-control required form-control-sm allotment-name py-1"
-                                           id="allotment-name-0">
-                                </div>
-                            </td>
-                            <td>
-                                <div class="md-form my-0">
-                                    <select class="mdb-select form-control-sm required allot-class-tokenizer"
-                                            name="allot_class[0]"></select>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="md-form form-sm my-0">
-                                    <input type="number" placeholder=" Value..." name="allotted_budget[0]"
-                                           class="form-control required form-control-sm allotted-budget py-1"
-                                           id="allotted-budget-0" min="0"
-                                           onkeyup="$(this).totalBudgetIsValid();"
-                                           onchange="$(this).totalBudgetIsValid();">
-                                </div>
-                            </td>
-                            <td class="align-middle">
-                                <a onclick="$(this).deleteRow('#item-row-1');"
-                                   class="btn btn-outline-red px-1 py-0">
-                                    <i class="fas fa-minus-circle"></i>
-                                </a>
-                            </td>
-                            <td class="align-middle">
-                                <a href="#" class="grey-text">
-                                    <i class="fas fa-ellipsis-v"></i>
+                        <tr id="item-row-1" class="item-row"></tr>
+
+                        <tr class="exclude-sortable">
+                            <td colspan="12">
+                                <a class="btn btn-outline-blue btn-sm btn-block z-depth-0"
+                                   onclick="$(this).addRow('.item-row', 'header');">
+                                    + Add Header Group
                                 </a>
                             </td>
                         </tr>
@@ -141,8 +97,17 @@
                         <tr class="exclude-sortable">
                             <td colspan="12">
                                 <a class="btn btn-outline-light-blue btn-sm btn-block z-depth-0"
-                                   onclick="$(this).addRow('.item-row');">
+                                   onclick="$(this).addRow('.item-row', 'item');">
                                     + Add Item
+                                </a>
+                            </td>
+                        </tr>
+
+                        <tr class="exclude-sortable">
+                            <td colspan="12">
+                                <a class="btn btn-outline-dark btn-sm btn-block z-depth-0"
+                                   onclick="$(this).addRow('.item-row', 'header-break');">
+                                    + Add Break Header Group
                                 </a>
                             </td>
                         </tr>
@@ -153,10 +118,10 @@
             <h4>Signatories</h4>
             <hr>
             <div class="row">
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <div class="md-form">
                         <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                                name="delivered_by">
+                                name="submitted_by">
                             <option value="" disabled selected>Choose a signatory</option>
 
                             @if (count($users) > 0)
@@ -169,58 +134,14 @@
                         </select>
                         <label class="mdb-main-label">
                             <span class="red-text">* </span>
-                            <b>Prepared By</b>
+                            <b>Submitted By</b>
                         </label>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <div class="md-form">
                         <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                                name="delivered_by">
-                            <option value="" disabled selected>Choose a signatory</option>
-
-                            @if (count($signatories) > 0)
-                                @foreach ($signatories as $sig)
-                                    @if (isset($sig->module->summary->delivered_by) && $sig->module->summary->delivered_by)
-                            <option value="{{ $sig->id }}">
-                                {!! $sig->name !!} [{!! $sig->module->summary->designation !!}]
-                            </option>
-                                    @endif
-                                @endforeach
-                            @endif
-                        </select>
-                        <label class="mdb-main-label">
-                            <span class="red-text">* </span>
-                            <b>Recommended By</b>
-                        </label>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="md-form">
-                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                                name="delivered_by">
-                            <option value="" disabled selected>Choose a signatory</option>
-
-                            @if (count($signatories) > 0)
-                                @foreach ($signatories as $sig)
-                                    @if (isset($sig->module->summary->delivered_by) && $sig->module->summary->delivered_by)
-                            <option value="{{ $sig->id }}">
-                                {!! $sig->name !!} [{!! $sig->module->summary->designation !!}]
-                            </option>
-                                    @endif
-                                @endforeach
-                            @endif
-                        </select>
-                        <label class="mdb-main-label">
-                            <span class="red-text">* </span>
-                            <b>Certified Funds Available</b>
-                        </label>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="md-form">
-                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                                name="delivered_by">
+                                name="approved_by">
                             <option value="" disabled selected>Choose a signatory</option>
 
                             @if (count($signatories) > 0)
@@ -239,19 +160,17 @@
                         </label>
                     </div>
                 </div>
-                <div class="col-md-3"></div>
-                <div class="col-md-3"></div>
-                <div class="col-md-3"></div>
-                <div class="col-md-3">
-                    <div class="md-form form-sm">
-                        <input type="date" id="date_approved" name="date_approved"
-                               class="form-control form-control-sm">
-                        <label for="date_from" class="active">
-                            <b>Date</b>
-                        </label>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 </form>
+
+<script type="text/javascript">
+    @foreach ($projects as $project)
+        projects.push({
+            'id': `{!! $project->id !!}`,
+            'project_title': `{!! $project->project_title !!}`,
+            'project_cost':  {!! $project->project_cost !!},
+        });
+    @endforeach
+</script>

@@ -18,10 +18,11 @@ class AllotmentClassSeeder extends Seeder
             'Capital Outlay (CO)',
         ];
 
-        foreach ($classes as $class) {
+        foreach ($classes as $ctr => $class) {
             try {
                 $instanceAllotmentClass = new AllotmentClass;
                 $instanceAllotmentClass->class_name = $class;
+                $instanceAllotmentClass->order_no = $ctr + 1;
                 $instanceAllotmentClass->save();
 
                 echo "Fund Allotment Class '$class' successfully created.\n";

@@ -169,7 +169,7 @@
             @if (count($monitoringOffices) > 0)
                 @foreach ($monitoringOffices as $office)
             <option value="{{ $office->id }}" {{ $office->id == $monitoringOffice ? 'selected' : '' }}>
-                {!! $office->agency_name !!}
+                {!! $office->office_name !!}
             </option>
                 @endforeach
             @endif

@@ -26,14 +26,15 @@ class FundingProject extends Model
     protected $fillable = [
         'id',
         'industry_sector',
-        'project_site ',
-        'proponent_units',
+        'project_site',
+        'implementing_agency',
         'comimplementing_agency_lgus',
+        'proponent_units',
         'date_from',
         'date_to',
         'project_cost',
         'project_title',
-        'industry_sector',
+        'monitoring_office',
     ];
 
     /**

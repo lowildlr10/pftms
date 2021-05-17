@@ -1255,6 +1255,43 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'destroy'
     ])->name('item-classification-destroy');
 
+    // Monitoring Office Module
+    Route::any('libraries/monitoring-office', [
+        'uses' => 'LibraryController@indexMonitoringOffice',
+        'module' => 'lib_item_class',
+        'access' => 'is_allowed'
+    ])->name('monitoring-office');
+    Route::get('libraries/monitoring-office/show-create', [
+        'uses' => 'LibraryController@showCreateMonitoringOffice',
+        'module' => 'lib_item_class',
+        'access' => 'create'
+    ])->name('monitoring-office-show-create');
+    Route::post('libraries/monitoring-office/store', [
+        'uses' => 'LibraryController@storeMonitoringOffice',
+        'module' => 'lib_item_class',
+        'access' => 'create'
+    ])->name('monitoring-office-store');
+    Route::get('libraries/monitoring-office/show-edit/{id}', [
+        'uses' => 'LibraryController@showEditMonitoringOffice',
+        'module' => 'lib_item_class',
+        'access' => 'update'
+    ])->name('monitoring-office-show-edit');
+    Route::post('libraries/monitoring-office/update/{id}', [
+        'uses' => 'LibraryController@updateMonitoringOffice',
+        'module' => 'lib_item_class',
+        'access' => 'update'
+    ])->name('monitoring-office-update');
+    Route::post('libraries/monitoring-office/delete/{id}', [
+        'uses' => 'LibraryController@deleteMonitoringOffice',
+        'module' => 'lib_item_class',
+        'access' => 'delete'
+    ])->name('monitoring-office-delete');
+    Route::post('libraries/monitoring-office/destroy/{id}', [
+        'uses' => 'LibraryController@destroyMonitoringOffice',
+        'module' => 'lib_item_class',
+        'access' => 'destroy'
+    ])->name('monitoring-office-destroy');
+
     // Project
     Route::any('libraries/project', [
         'uses' => 'LibraryController@indexProject',

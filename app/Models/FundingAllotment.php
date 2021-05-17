@@ -20,12 +20,13 @@ class FundingAllotment extends Model
      * @var array
      */
     protected $fillable = [
+        'id',
         'project_id',
         'budget_id',
         'allotment_class',
         'order_no',
         'allotment_name',
-        'allotted_budget',
+        'allotment_cost',
     ];
 
     /**

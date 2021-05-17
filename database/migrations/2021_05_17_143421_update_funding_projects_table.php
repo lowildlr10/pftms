@@ -27,7 +27,7 @@ class UpdateFundingProjectsTable extends Migration
             $table->date('date_to')->nullable()->after('date_from');
             $table->double('project_cost', 50, 2)->default(0.00)->after('date_to');
             $table->uuid('monitoring_office')->nullable()->after('project_cost');
-            $table->foreign('monitoring_office')->nullable()->references('id')->on('agency_lgus');
+            $table->foreign('monitoring_office')->nullable()->references('id')->on('monitoring_offices');
         });
     }
 
@@ -41,18 +41,19 @@ class UpdateFundingProjectsTable extends Migration
         Schema::table('funding_projects', function (Blueprint $table) {
             $table->dropForeign('funding_projects_industry_sector_foreign');
             $table->dropForeign('funding_projects_project_site_foreign');
-            $table->dropForeign('funding_projects_agency_lgus_foreign');
             $table->dropForeign('funding_projects_implementing_agency_foreign');
+            $table->dropForeign('funding_projects_monitoring_office_foreign');
+
             $table->renameColumn('project_title', 'project_name');
             $table->dropColumn('industry_sector');
             $table->dropColumn('project_site');
-            $table->dropColumn('proponent_units');
+            $table->dropColumn('implementing_agency');
             $table->dropColumn('comimplementing_agency_lgus');
+            $table->dropColumn('proponent_units');
             $table->dropColumn('project_cost');
             $table->dropColumn('date_from');
             $table->dropColumn('date_to');
-            $table->dropColumn('agency_lgus');
-            $table->dropColumn('implementing_agency');
+            $table->dropColumn('monitoring_office');
         });
     }
 }

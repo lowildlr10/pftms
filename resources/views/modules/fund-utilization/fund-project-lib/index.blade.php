@@ -71,7 +71,7 @@
                                     <tr>
                                         <th class="th-md text-center" width="3%">#</th>
                                         <th class="th-md" width="3%"></th>
-                                        <th class="th-md" width="41%">
+                                        <th class="th-md" width="50%">
                                             <b>
                                                 @sortablelink('project.project_title', 'Project Name', [], ['class' => 'white-text'])
                                             </b>
@@ -89,11 +89,6 @@
                                         <th class="th-md" width="15%">
                                             <b>
                                                 @sortablelink('approved_budget', 'Current Budget', [], ['class' => 'white-text'])
-                                            </b>
-                                        </th>
-                                        <th class="th-md" width="9%">
-                                            <b>
-                                                @sortablelink('is_active', 'Active?', [], ['class' => 'white-text'])
                                             </b>
                                         </th>
                                         <th class="th-md" width="3%"></th>
@@ -150,7 +145,6 @@
                                                 </h6>'>
                                             &#8369; {{ number_format($fund->current_budget, 2) }}
                                         </td>
-                                        <td>{{ $fund->is_active == 'y' ? 'Yes' : 'No' }}</td>
 
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
@@ -175,7 +169,7 @@
                                         @endforeach
                                     @else
                                     <tr>
-                                        <td class="p-5" colspan="8" class="text-center py-5">
+                                        <td class="p-5" colspan="7" class="text-center py-5">
                                             <h6 class="red-text text-center">
                                                 No available data.
                                             </h6>
@@ -250,7 +244,7 @@
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showDelete('{{ route('fund-project-lib-delete',
                                                                         ['id' => $fund->id]) }}',
-                                                                    '{{ $fund->project->project_title.' LIB' }}');">
+                                                                    `{{ $fund->project->project_title.' LIB' }}`);">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
                                 @else
@@ -304,7 +298,7 @@
                                     onclick="$(this).showDelete(
                                         '{{ route('fund-project-lib-destroy-realignment',
                                         ['id' => $fund->current_realigned_budget->id]) }}',
-                                        '{{ $fund->project->project_title.' LIB Realignments' }}');">
+                                        `{{ $fund->project->project_title.' LIB Realignments' }}`);">
                                 <b>
                                     [ <i class="far fa-trash-alt red-text"></i>
                                     Discard (R{{$fund->count_realignments}}) ]
@@ -356,11 +350,11 @@
 
                             @if (strlen($item->allotment_name) > 60)
                         <span class="font-weight-bold">
-                            {{ $cntr + 1 }}.| {{ substr($item->allotment_name, 0, 60) }}...:<br>
+                            {{ $cntr + 1 }}.| {{ substr($item->allotment_name, 0, 60) }}...<br>
                         </span>
                             @else
                         <span class="font-weight-bold">
-                            {{ $cntr + 1 }}.| {{ $item->allotment_name }}:<br>
+                            {{ $cntr + 1 }}.| {{ $item->allotment_name }}<br>
                         </span>
                             @endif
 
@@ -376,7 +370,7 @@
                                data-toggle="tooltip" data-placement="right" title="Pending"></i>
                             @endif
 
-                            &nbsp;&nbsp;<em>&#8369; {{ number_format($item->allotted_budget, 2) }}</em>
+                            &nbsp;&nbsp;<em>&#8369; {{ number_format($item->allotment_cost, 2) }}</em>
                         </span>
                         <hr class="my-1">
                             @endforeach
@@ -489,6 +483,7 @@
 
 @section('custom-js')
 
+<script>let projects = [];</script>
 <script type="text/javascript" src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/funding-lib.js') }}"></script>

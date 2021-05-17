@@ -3,7 +3,7 @@
     @csrf
     <div class="card w-responsive">
         <div class="card-body">
-            <h4>Project & Date Covered</h4>
+            <h4>Project</h4>
             <hr>
             <div class="row">
                 <div class="col-md-6">
@@ -28,51 +28,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-3">
-                    <div class="md-form form-sm">
-                        <input type="date" id="date_from" name="date_from"
-                               class="form-control form-control-sm required"
-                               value="{{ $budget->date_from }}">
-                        <label for="date_from" class="active">
-                            <span class="red-text">* </span>
-                            <b>Date From</b>
-                        </label>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="md-form form-sm">
-                        <input type="date" id="date_to" name="date_to"
-                               class="form-control form-control-sm required"
-                               value="{{ $budget->date_to }}">
-                        <label for="date_to" class="active">
-                            <span class="red-text">* </span>
-                            <b>Date To</b>
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="md-form form-sm">
-                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                                name="is_active">
-                            <option value="" disabled selected>Choose an status</option>
-
-                            <option {{ $budget->is_active == 'y' ? 'selected' : '' }}
-                                    value="y">
-                                Yes
-                            </option>
-                            <option {{ $budget->is_active == 'n' ? 'selected' : '' }}
-                                    value="n">
-                                No
-                            </option>
-                        </select>
-                        <label class="mdb-main-label">
-                            <span class="red-text">* </span>
-                            <b>Is Active?</b>
-                        </label>
-                    </div>
-                </div>
+                <div class="col-md-6"></div>
             </div>
             <br>
 
@@ -162,7 +118,7 @@
                                             id="allotted-budget-{{ $ctr + 1 }}" min="0"
                                             onkeyup="$(this).totalBudgetIsValid();"
                                             onchange="$(this).totalBudgetIsValid();"
-                                            value="{{ $item->allotted_budget }}">
+                                            value="{{ $item->allotment_cost }}">
                                 </div>
                             </td>
                             <td class="align-middle">
@@ -182,14 +138,79 @@
 
                         <tr class="exclude-sortable">
                             <td colspan="12">
+                                <a class="btn btn-outline-blue btn-sm btn-block z-depth-0"
+                                   onclick="$(this).addRow('.item-row', 'header');">
+                                    + Insert Header
+                                </a>
+                            </td>
+                        </tr>
+
+                        <tr class="exclude-sortable">
+                            <td colspan="12">
                                 <a class="btn btn-outline-light-blue btn-sm btn-block z-depth-0"
-                                   onclick="$(this).addRow('.item-row');">
+                                   onclick="$(this).addRow('.item-row', 'item');">
                                     + Add Item
+                                </a>
+                            </td>
+                        </tr>
+
+                        <tr class="exclude-sortable">
+                            <td colspan="12">
+                                <a class="btn btn-outline-dark btn-sm btn-block z-depth-0"
+                                   onclick="$(this).addRow('.item-row', 'header-break');">
+                                    + Add Break Header Group
                                 </a>
                             </td>
                         </tr>
                     </tbody>
                 </table>
+            </div><br>
+
+            <h4>Signatories</h4>
+            <hr>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="md-form">
+                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                                name="submitted_by">
+                            <option value="" disabled selected>Choose a signatory</option>
+
+                            @if (count($users) > 0)
+                                @foreach ($users as $user)
+                            <option value="{{ $user->id }}" {{ $user->id == $budget->sig_submitted_by ? 'selected' : '' }}>
+                                {!! $user->firstname !!} {!! $user->lastname !!} [{!! $user->position !!}]
+                            </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <label class="mdb-main-label">
+                            <span class="red-text">* </span>
+                            <b>Submitted By</b>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="md-form">
+                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                                name="approved_by">
+                            <option value="" disabled selected>Choose a signatory</option>
+
+                            @if (count($signatories) > 0)
+                                @foreach ($signatories as $sig)
+                                    @if (isset($sig->module->summary->delivered_by) && $sig->module->summary->delivered_by)
+                            <option value="{{ $sig->id }}" {{ $sig->id == $budget->sig_approved_by ? 'selected' : '' }}>
+                                {!! $sig->name !!} [{!! $sig->module->summary->designation !!}]
+                            </option>
+                                    @endif
+                                @endforeach
+                            @endif
+                        </select>
+                        <label class="mdb-main-label">
+                            <span class="red-text">* </span>
+                            <b>Approved by</b>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -89,52 +89,113 @@ $(function() {
         let lastRowID = (lastRow.length > 0) ? lastRow.attr('id') : type+'-row-0';
         let _lastRowID = lastRowID.split('-');
         let newID = parseInt(_lastRowID[2]) + 1;
+        let rowOutput = "";
 
-        let allotmentName = `
-            <td>
-                <div class="md-form form-sm my-0">
-                    <input type="text" placeholder=" Value..." name="allotment_name[${newID}]"
-                        class="form-control required form-control-sm allotment-name py-1"
-                        id="allotment-name-${newID}">
-                </div>
-            </td>`,
-            allotmentClassification = `
-            <td>
-                <div class="md-form my-0">
-                    <select class="mdb-select required allot-class-tokenizer"
-                            name="allot_class[${newID}]"></select>
-                </div>
-            </td>`,
-            allotmentBudget = `
-            <td>
-                <div class="md-form form-sm my-0">
-                    <input type="number" placeholder=" Value..." name="allotted_budget[${newID}]"
-                        class="form-control required form-control-sm allotted-budget py-1"
-                        id="allotted-budget-${newID}" min="0"
-                        onkeyup="$(this).totalBudgetIsValid();"
-                        onchange="$(this).totalBudgetIsValid();">
-                </div>
-            </td>`,
-            deleteButton = `
-            <td class="align-middle">
-                <a onclick="$(this).deleteRow('#item-row-${newID}');"
-                   class="btn btn-outline-red px-1 py-0">
-                    <i class="fas fa-minus-circle"></i>
-                </a>
-            </td>`,
-            sortableButton = `
-            <td class="align-middle">
-                <a href="#" class="grey-text">
-                    <i class="fas fa-ellipsis-v"></i>
-                </a>
-            </td>`;
+        if (type == 'item') {
+            let allotmentName = `
+                <td>
+                    <div class="md-form form-sm my-0">
+                        <input name="row_type[${newID}]" type="hidden" value="${type}">
+                        <input type="text" placeholder=" Value..." name="allotment_name[${newID}]"
+                            class="form-control required form-control-sm allotment-name py-1"
+                            id="allotment-name-${newID}">
+                    </div>
+                </td>`,
+                allotmentClassification = `
+                <td>
+                    <div class="md-form my-0">
+                        <select class="mdb-select required allot-class-tokenizer"
+                                name="allot_class[${newID}]"></select>
+                    </div>
+                </td>`,
+                allotmentBudget = `
+                <td>
+                    <div class="md-form form-sm my-0">
+                        <input type="number" placeholder=" Value..." name="allotted_budget[${newID}]"
+                            class="form-control required form-control-sm allotted-budget py-1"
+                            id="allotted-budget-${newID}" min="0"
+                            onkeyup="$(this).totalBudgetIsValid();"
+                            onchange="$(this).totalBudgetIsValid();">
+                    </div>
+                </td>`,
+                deleteButton = `
+                <td class="align-middle">
+                    <a onclick="$(this).deleteRow('#item-row-${newID}');"
+                    class="btn btn-outline-red px-1 py-0">
+                        <i class="fas fa-minus-circle"></i>
+                    </a>
+                </td>`,
+                sortableButton = `
+                <td class="align-middle">
+                    <a href="#" class="grey-text">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </a>
+                </td>`;
 
-        let rowOutput = '<tr id="item-row-'+newID+'" class="item-row">'+
-            allotmentName + allotmentClassification + allotmentBudget +
-            deleteButton + sortableButton + '</tr>';
+            rowOutput = '<tr id="item-row-'+newID+'" class="item-row">'+
+                        allotmentName + allotmentClassification + allotmentBudget +
+                        deleteButton + sortableButton + '</tr>';
 
-        $(rowOutput).insertAfter('#' + lastRowID);
-        initializeSelect2();
+            $(rowOutput).insertAfter('#' + lastRowID);
+            initializeSelect2();
+        } else if (type == 'header') {
+            let allotmentHeaderName = `
+                <td>
+                    <div class="md-form form-sm my-0">
+                        <input name="row_type[${newID}]" type="hidden" value="${type}">
+                        <input type="hidden"name="allot_class[${newID}]">
+                        <input type="hidden"name="allotted_budget[${newID}]">
+                        <input type="text" placeholder="Header Value..." name="allotment_name[${newID}]"
+                            class="form-control required form-control-sm allotment-name py-1"
+                            id="allotment-name-${newID}">
+                    </div>
+                </td>`,
+                deleteButton = `
+                <td class="align-middle">
+                    <a onclick="$(this).deleteRow('#header-row-${newID}');"
+                    class="btn btn-outline-red px-1 py-0">
+                        <i class="fas fa-minus-circle"></i>
+                    </a>
+                </td>`,
+                sortableButton = `
+                <td class="align-middle">
+                    <a href="#" class="grey-text">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </a>
+                </td>`;
+            rowOutput = '<tr id="header-row-'+newID+'" class="item-row">'+ allotmentHeaderName +
+                        '<td colspan="2"></td>' + deleteButton + sortableButton + '</tr>';
+
+            $(rowOutput).insertAfter('#' + lastRowID);
+        } else if (type == 'header-break') {
+             let allotmentHeaderName = `
+                <td colspan="3">
+                    <hr>
+                    <div class="md-form form-sm my-0">
+                        <input name="row_type[${newID}]" type="hidden" value="${type}">
+                        <input type="hidden"name="allot_class[${newID}]">
+                        <input type="hidden"name="allotted_budget[${newID}]">
+                        <input type="hidden" name="allotment_name[${newID}]" id="allotment-name-${newID}">
+                    </div>
+                </td>`,
+                deleteButton = `
+                <td class="align-middle">
+                    <a onclick="$(this).deleteRow('#headerbreak-row-${newID}');"
+                    class="btn btn-outline-red px-1 py-0">
+                        <i class="fas fa-minus-circle"></i>
+                    </a>
+                </td>`,
+                sortableButton = `
+                <td class="align-middle">
+                    <a href="#" class="grey-text">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </a>
+                </td>`;
+            rowOutput = '<tr id="header-row-'+newID+'" class="item-row">'+ allotmentHeaderName +
+                        deleteButton + sortableButton + '</tr>';
+
+            $(rowOutput).insertAfter('#' + lastRowID);
+        }
     }
 
     $.fn.deleteRow = function(row) {
@@ -173,6 +234,17 @@ $(function() {
         $('#modal-body-create').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
+            $('#project').on("change", function() {
+                const projID = $(this).val();
+
+                $.each(projects, function(projCtr, project) {
+                    if (project.id == projID) {
+                        $('#approved-budget').val(project.project_cost)
+                                             .siblings()
+                                             .addClass('active');
+                    }
+                });
+            });
             $(this).slideToggle(500);
             initializeSelect2();
             initializeSortable();

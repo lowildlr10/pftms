@@ -322,6 +322,9 @@
                                 <a href="{{ route('procurement-mode') }}" class="waves-effect">Modes of Procurement</a>
                             </li>
                             <li>
+                                <a href="{{ route('monitoring-office') }}" class="waves-effect">Monitoring Offices</a>
+                            </li>
+                            <li>
                                 <a href="{{ route('project') }}" class="waves-effect">Projects</a>
                             </li>
                             <li>

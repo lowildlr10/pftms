@@ -112,7 +112,7 @@
                                             id="allotted-budget-{{ $ctr + 1 }}" min="0"
                                             onkeyup="$(this).totalBudgetIsValid();"
                                             onchange="$(this).totalBudgetIsValid();"
-                                            value="{{ $item->allotted_budget }}">
+                                            value="{{ $item->allotment_cost }}">
                                 </div>
                             </td>
                             <td>
@@ -147,6 +147,53 @@
                         </tr>
                     </tbody>
                 </table>
+            </div><br>
+
+            <h4>Signatories</h4>
+            <hr>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="md-form">
+                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                                name="submitted_by">
+                            <option value="" disabled selected>Choose a signatory</option>
+
+                            @if (count($users) > 0)
+                                @foreach ($users as $user)
+                            <option value="{{ $user->id }}" {{ $user->id == $budgetData->sig_submitted_by ? 'selected' : '' }}>
+                                {!! $user->firstname !!} {!! $user->lastname !!} [{!! $user->position !!}]
+                            </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <label class="mdb-main-label">
+                            <span class="red-text">* </span>
+                            <b>Submitted By</b>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="md-form">
+                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                                name="approved_by">
+                            <option value="" disabled selected>Choose a signatory</option>
+
+                            @if (count($signatories) > 0)
+                                @foreach ($signatories as $sig)
+                                    @if (isset($sig->module->summary->delivered_by) && $sig->module->summary->delivered_by)
+                            <option value="{{ $sig->id }}" {{ $sig->id == $budgetData->sig_approved_by ? 'selected' : '' }}>
+                                {!! $sig->name !!} [{!! $sig->module->summary->designation !!}]
+                            </option>
+                                    @endif
+                                @endforeach
+                            @endif
+                        </select>
+                        <label class="mdb-main-label">
+                            <span class="red-text">* </span>
+                            <b>Approved by</b>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

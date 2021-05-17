@@ -25,6 +25,7 @@ class MonitoringOffice extends Model
      */
     protected $fillable = [
         'id',
+        'agency_lgu',
         'office_name',
     ];
 
@@ -49,4 +50,8 @@ class MonitoringOffice extends Model
     public $sortable = [
         'office_name',
     ];
+
+    public function _agencylgu() {
+        return $this->hasOne('App\Models\AgencyLGU', 'id', 'agency_lgu');
+    }
 }

@@ -20,15 +20,17 @@ class FundingBudgetRealignment extends Model
      * @var array
      */
     protected $fillable = [
+        'id',
         'project_id',
-        'date_disapproved',
-        'date_approved',
         'budget_id',
-        'realigned_budget',
+        'date_realignment',
+        'date_approved',
+        'date_disapproved',
+        'approved_realigned_budget',
         'realignment_order',
         'created_by',
-        'disapproved_by',
-        'approved_by',
+        'sig_submitted_by',
+        'sig_approved_by',
     ];
 
     /**

@@ -25,6 +25,7 @@ class AllotmentClass extends Model
     protected $fillable = [
         'code',
         'class_name',
+        'order_no',
     ];
 
     /**

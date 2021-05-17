@@ -24,11 +24,16 @@ class FundingBudget extends Model
      * @var array
      */
     protected $fillable = [
+        'id',
         'project_id',
+        'date_approved',
+        'date_disapproved',
         'date_from',
         'date_to',
         'approved_budget',
-        'is_active',
+        'created_by',
+        'sig_submitted_by',
+        'sig_approved_by',
     ];
 
     /**

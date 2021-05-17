@@ -458,7 +458,7 @@ class PrintController extends Controller
 
             case 'fund_lib':
                 $data = $this->getDataLIB($key);
-                $data->doc_type = $documentType;
+                //$data->doc_type = $documentType;
 
                 /*
                 if ($test == 'true') {
@@ -643,7 +643,7 @@ class PrintController extends Controller
 
         foreach ($libAllotments as $allotment) {
             if ($allotment->allotted_budget) {
-
+                dd($allotment);
             }
         }
 

@@ -475,6 +475,116 @@ class LibraryController extends Controller
     }
 
     /**
+     *  Monitoring Office Module
+    **/
+    public function indexMonitoringOffice(Request $request) {
+        $monitorOfficeData = MonitoringOffice::orderBy('office_name')
+                                             ->with(['_agencylgu'])
+                                             ->get();
+
+        foreach ($monitorOfficeData as $office) {
+            $office->agency_lgu_name = $office->agency_lgu ?
+                                       $office->_agencylgu->agency_name : NULL;
+        }
+
+        return view('modules.library.monitoring-office.index', [
+            'list' => $monitorOfficeData
+        ]);
+    }
+
+    public function showCreateMonitoringOffice() {
+        $agencyLGUs = AgencyLGU::orderBy('agency_name')->get();
+
+        return view('modules.library.monitoring-office.create', [
+            'agencies' => $agencyLGUs,
+        ]);
+    }
+
+    public function showEditMonitoringOffice($id) {
+        $monitorOfficeData = MonitoringOffice::find($id);
+        $agencies = AgencyLGU::orderBy('agency_name')->get();
+
+        $agencyLGU = $monitorOfficeData->agency_lgu;
+        $officeName = $monitorOfficeData->office_name;
+
+        return view('modules.library.monitoring-office.update', compact(
+            'id',
+            'agencies',
+            'agencyLGU',
+            'officeName'
+        ));
+    }
+
+    public function storeMonitoringOffice(Request $request) {
+        $agencyLGU = $request->agency_lgu;
+        $officeName = $request->office_name;
+
+        try {
+            if (!$this->checkDuplication('MonitoringOffice', $officeName)) {
+                $instanceMonitorOffice = new MonitoringOffice;
+                $instanceMonitorOffice->agency_lgu = $agencyLGU;
+                $instanceMonitorOffice->office_name = $officeName;
+                $instanceMonitorOffice->save();
+
+                $msg = "Monitoring office '$officeName' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Monitoring office '$officeName' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function updateMonitoringOffice(Request $request, $id) {
+        $agencyLGU = $request->agency_lgu;
+        $officeName = $request->office_name;
+
+        try {
+            $instanceMonitorOffice = MonitoringOffice::find($id);
+            $instanceMonitorOffice->agency_lgu = $agencyLGU;
+            $instanceMonitorOffice->office_name = $officeName;
+            $instanceMonitorOffice->save();
+
+            $msg = "Monitoring office '$officeName' successfully updated.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function deleteMonitoringOffice($id) {
+        try {
+            $instanceMonitorOffice = MonitoringOffice::find($id);
+            $officeName = $instanceMonitorOffice->office_name;
+            $instanceMonitorOffice->delete();
+
+            $msg = "Monitoring office '$officeName' successfully deleted.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function destroyMonitoringOffice($id) {
+        try {
+            $instanceMonitorOffice = MonitoringOffice::find($id);
+            $officeName = $instanceMonitorOffice->classification_name;
+            $instanceMonitorOffice->destroy();
+
+            $msg = "Monitoring office '$officeName' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    /**
      *  Project Module
     **/
     public function indexProject(Request $request) {
@@ -491,7 +601,7 @@ class LibraryController extends Controller
         $municipalities = Municipality::orderBy('municipality_name')->get();
         $empUnits = EmpUnit::orderBy('unit_name')->get();
         $agencies = AgencyLGU::orderBy('agency_name')->get();
-        $monitoringOffices = AgencyLGU::orderBy('agency_name')->get();
+        $monitoringOffices = MonitoringOffice::orderBy('office_name')->get();
 
         return view('modules.library.project.create', compact(
             'industries',
@@ -508,7 +618,7 @@ class LibraryController extends Controller
         $municipalities = Municipality::orderBy('municipality_name')->get();
         $empUnits = EmpUnit::orderBy('unit_name')->get();
         $agencies = AgencyLGU::orderBy('agency_name')->get();
-        $monitoringOffices = AgencyLGU::orderBy('agency_name')->get();
+        $monitoringOffices = MonitoringOffice::orderBy('office_name')->get();
 
         $industrySector = $projectData->industry_sector;
         $projectSite = $projectData->project_site;

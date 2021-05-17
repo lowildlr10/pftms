@@ -110,7 +110,7 @@
                                             id="allotted-budget-{{ $ctr + 1 }}" min="0"
                                             onkeyup="$(this).totalBudgetIsValid();"
                                             onchange="$(this).totalBudgetIsValid();"
-                                            value="{{ $item->allotted_budget }}">
+                                            value="{{ $item->allotment_cost }}">
                                 </div>
                             </td>
                             <td>
@@ -172,22 +172,23 @@
 
                 <div class="col-md-6">
                     <div class="md-form">
-                        <select id="approved-by" name="approved_by" searchable="Search here.."
-                                class="mdb-select crud-select md-form my-0 required">
-                            <option value="" disabled selected>
-                                Choose a signatory
-                            </option>
+                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                                name="approved_by">
+                            <option value="" disabled selected>Choose a signatory</option>
 
-                            @if (count($users) > 0)
-                                @foreach ($users as $user)
-                            <option value="{{ $user->id }}">
-                                {!! $user->firstname !!} [{!! $user->position !!}]
+                            @if (count($signatories) > 0)
+                                @foreach ($signatories as $sig)
+                                    @if (isset($sig->module->summary->delivered_by) && $sig->module->summary->delivered_by)
+                            <option value="{{ $sig->id }}">
+                                {!! $sig->name !!} [{!! $sig->module->summary->designation !!}]
                             </option>
+                                    @endif
                                 @endforeach
                             @endif
                         </select>
                         <label class="mdb-main-label">
-                            Approved By <span class="red-text">*</span>
+                            <span class="red-text">* </span>
+                            <b>Approved by</b>
                         </label>
                     </div>
                 </div>
