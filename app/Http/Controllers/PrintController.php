@@ -53,6 +53,8 @@ use App\Plugins\PDFGenerator\DocPropertyAcknowledgement;
 use App\Plugins\PDFGenerator\DocInventoryCustodian;
 use App\Plugins\PDFGenerator\DocRequisitionIssueSlip;
 use App\Plugins\PDFGenerator\DocPropertyLabel;
+use App\Plugins\PDFGenerator\DocLineItemBudget;
+use App\Plugins\PDFGenerator\DocLineItemBudgetRealignment;
 
 class PrintController extends Controller
 {
@@ -456,10 +458,9 @@ class PrintController extends Controller
 
             case 'fund_lib':
                 $data = $this->getDataLIB($key);
-
-                /*
                 $data->doc_type = $documentType;
 
+                /*
                 if ($test == 'true') {
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                     $msg = "Generated the Line Item Budgets '$key' document.";
@@ -616,6 +617,19 @@ class PrintController extends Controller
     }
 
     private function getDataLIB($budgetID) {
+        $periorCovered = "";
+        $projectTitle = "";
+        $proponent = "";
+        $cooperatingAgencies = "";
+
+
+
+        $preparedBy = "";
+        $recommendedBy = "";
+        $certifieFundsAvailable = "";
+        $approvedBy = "";
+        $dateApproved = "";
+
         $lib = DB::table('funding_budgets')
                  ->where('id', $budgetID)
                  ->first();
@@ -628,10 +642,10 @@ class PrintController extends Controller
         $multiplier = 9 / 10;
 
         foreach ($libAllotments as $allotment) {
+            if ($allotment->allotted_budget) {
 
+            }
         }
-
-        dd($lib);
 
 
         /*

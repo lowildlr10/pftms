@@ -2,8 +2,8 @@
 
 namespace App\Plugins\PDFGenerator;
 
-class DocLiquidationReport extends PDF {
-    public function printLR($data) {
+class DocLineItemBudget extends PDF {
+    public function printLIB($data) {
         $pageHeight = $this->h;
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;

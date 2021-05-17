@@ -141,9 +141,23 @@ class LineItemBudgetController extends Controller
     public function showCreate() {
         $projects = FundingProject::orderBy('project_title')->get();
         $allotmentClassifications = AllotmentClass::orderBy('class_name')->get();
+        $users = User::where('is_active', 'y')
+                     ->orderBy('firstname')->get();
+        $signatories = Signatory::addSelect([
+            'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
+                          ->whereColumn('id', 'signatories.emp_id')
+                          ->limit(1)
+        ])->where('is_active', 'y')->get();
+
+        foreach ($signatories as $sig) {
+            $sig->module = json_decode($sig->module);
+        }
+
         return view('modules.fund-utilization.fund-project-lib.create', compact(
             'projects',
             'allotmentClassifications',
+            'users',
+            'signatories'
         ));
     }
 

@@ -148,6 +148,109 @@
                         </tr>
                     </tbody>
                 </table>
+            </div><br>
+
+            <h4>Signatories</h4>
+            <hr>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="md-form">
+                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                                name="delivered_by">
+                            <option value="" disabled selected>Choose a signatory</option>
+
+                            @if (count($users) > 0)
+                                @foreach ($users as $user)
+                            <option value="{{ $user->id }}">
+                                {!! $user->firstname !!} {!! $user->lastname !!} [{!! $user->position !!}]
+                            </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <label class="mdb-main-label">
+                            <span class="red-text">* </span>
+                            <b>Prepared By</b>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="md-form">
+                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                                name="delivered_by">
+                            <option value="" disabled selected>Choose a signatory</option>
+
+                            @if (count($signatories) > 0)
+                                @foreach ($signatories as $sig)
+                                    @if (isset($sig->module->summary->delivered_by) && $sig->module->summary->delivered_by)
+                            <option value="{{ $sig->id }}">
+                                {!! $sig->name !!} [{!! $sig->module->summary->designation !!}]
+                            </option>
+                                    @endif
+                                @endforeach
+                            @endif
+                        </select>
+                        <label class="mdb-main-label">
+                            <span class="red-text">* </span>
+                            <b>Recommended By</b>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="md-form">
+                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                                name="delivered_by">
+                            <option value="" disabled selected>Choose a signatory</option>
+
+                            @if (count($signatories) > 0)
+                                @foreach ($signatories as $sig)
+                                    @if (isset($sig->module->summary->delivered_by) && $sig->module->summary->delivered_by)
+                            <option value="{{ $sig->id }}">
+                                {!! $sig->name !!} [{!! $sig->module->summary->designation !!}]
+                            </option>
+                                    @endif
+                                @endforeach
+                            @endif
+                        </select>
+                        <label class="mdb-main-label">
+                            <span class="red-text">* </span>
+                            <b>Certified Funds Available</b>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="md-form">
+                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                                name="delivered_by">
+                            <option value="" disabled selected>Choose a signatory</option>
+
+                            @if (count($signatories) > 0)
+                                @foreach ($signatories as $sig)
+                                    @if (isset($sig->module->summary->delivered_by) && $sig->module->summary->delivered_by)
+                            <option value="{{ $sig->id }}">
+                                {!! $sig->name !!} [{!! $sig->module->summary->designation !!}]
+                            </option>
+                                    @endif
+                                @endforeach
+                            @endif
+                        </select>
+                        <label class="mdb-main-label">
+                            <span class="red-text">* </span>
+                            <b>Approved by</b>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-3"></div>
+                <div class="col-md-3"></div>
+                <div class="col-md-3"></div>
+                <div class="col-md-3">
+                    <div class="md-form form-sm">
+                        <input type="date" id="date_approved" name="date_approved"
+                               class="form-control form-control-sm">
+                        <label for="date_from" class="active">
+                            <b>Date</b>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

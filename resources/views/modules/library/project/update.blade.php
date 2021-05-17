@@ -111,6 +111,27 @@
                 </a>
             </div>
                 @endforeach
+            @else
+            <div class="coimplementing-form-group border rounded p-3"
+                 id="coimplementing-form-group-0">
+                <div class="md-form">
+                    <select class="mdb-select form-control-sm agencies-tokenizer coimplementing-agency-lgus"
+                            name="comimplementing_agency_lgus[]"></select>
+                </div>
+
+                <div class="md-form mt-3">
+                    <input type="number" class="form-control coimplementing-project-cost"
+                           name="coimplementing_project_costs[]">
+                    <label for="coimplementing-project-cost" class="active">
+                        Project Cost (Co-implementing Agency/LGU) <span class="red-text">*</span>
+                    </label>
+                </div>
+
+                <a href="#" class="btn btn-outline-red btn-sm btn-block"
+                   onclick="$(this).deleteRow('#coimplementing-form-group-0');">
+                    Delete
+                </a>
+            </div>
             @endif
 
             <a id="btn-add-coimplementing" class="btn btn-outline-info btn-sm btn-block mt-2"
