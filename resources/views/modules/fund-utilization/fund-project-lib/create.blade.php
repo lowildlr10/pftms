@@ -87,7 +87,7 @@
 
                         <tr class="exclude-sortable">
                             <td colspan="12">
-                                <a class="btn btn-outline-blue btn-sm btn-block z-depth-0"
+                                <a class="btn btn-outline-indigo btn-sm btn-block z-depth-0"
                                    onclick="$(this).addRow('.item-row', 'header');">
                                     + Add Header Group
                                 </a>
@@ -105,9 +105,9 @@
 
                         <tr class="exclude-sortable">
                             <td colspan="12">
-                                <a class="btn btn-outline-dark btn-sm btn-block z-depth-0"
+                                <a class="btn btn-outline-primary btn-sm btn-block z-depth-0"
                                    onclick="$(this).addRow('.item-row', 'header-break');">
-                                    + Add Break Header Group
+                                    + Add Group Break
                                 </a>
                             </td>
                         </tr>
