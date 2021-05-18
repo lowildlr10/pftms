@@ -22,7 +22,7 @@ use App\Models\InventoryStockIssueItem;
 use App\Models\DocumentLog as DocLog;
 use App\Models\EmpLog;
 use App\Models\Signatory;
-use App\User;
+use App\Models\EmpAccount as User;
 use App\Models\PaperSize;
 use App\Models\Supplier;
 use App\Models\ItemUnitIssue;

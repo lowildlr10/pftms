@@ -51,7 +51,7 @@
                 <div class="col-md-6">
                     <div class="md-form form-sm">
                         <input type="number" id="remaining-budget" material-tooltip-main"
-                               data-toggle="tooltip" data-placement="right" value="0.00"
+                               data-toggle="tooltip" data-placement="right"
                                readonly class="form-control form-control-sm"
                                title="This should be equals or greater than zero."
                                value="{{ $remainingBudget }}">
@@ -80,28 +80,30 @@
                             </th>
                             <th class="align-middle" width="31%">
                                 <b>
-                                    <span class="red-text">* </span> Allotted Budget
+                                    <span class="red-text">* </span> As Approved
                                 </b>
                             </th>
                             <th width="3%"></th>
                         </tr>
                     </thead>
                     <tbody class="sortable">
-                        @if (count($allotments))
-                            @foreach ($allotments as $ctr => $item)
-                        <tr id="item-row-{{ $ctr + 1 }}" class="item-row">
+                        @if (count($groupedAllotments) > 0)
+                            @foreach ($groupedAllotments as $ctr => $item)
+                                @if (is_int($ctr))
+                        <tr id="item-row-{{ strtolower($ctr) }}" class="item-row">
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input type="hidden" name="allotment_id[{{ $ctr }}]" value="{{ $item->id }}">
-                                    <input type="text" placeholder=" Value..." name="allotment_name[{{ $ctr }}]"
+                                    <input type="hidden" name="allotment_id[{{  strtolower($ctr) }}]" value="{{ $item->id }}">
+                                    <input name="row_type[{{ strtolower($ctr) }}]" type="hidden" value="item">
+                                    <input type="text" placeholder=" Value..." name="allotment_name[{{ strtolower($ctr) }}]"
                                             class="form-control required form-control-sm allotment-name py-1"
-                                            id="allotment-name-{{ $ctr + 1 }}" value="{{ $item->allotment_name }}">
+                                            id="allotment-name-{{ strtolower($ctr) }}" value="{{ $item->allotment_name }}">
                                 </div>
                             </td>
                             <td>
                                 <div class="md-form my-0">
                                     <select class="mdb-select form-control-sm required allot-class-tokenizer"
-                                            name="allot_class[{{ $ctr }}]">
+                                            name="allot_class[{{ strtolower($ctr) }}]">
                                         @foreach ($allotmentClassifications as $class)
                                         <option {{ $class->id == $item->allotment_class ? 'selected' : '' }}
                                                 value="{{ $class->id }}">
@@ -113,16 +115,16 @@
                             </td>
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input type="number" placeholder=" Value..." name="allotted_budget[{{ $ctr }}]"
+                                    <input type="number" placeholder=" Value..." name="allotted_budget[{{ strtolower($ctr) }}]"
                                             class="form-control required form-control-sm allotted-budget py-1"
-                                            id="allotted-budget-{{ $ctr + 1 }}" min="0"
+                                            id="allotted-budget-{{ strtolower($ctr) }}" min="0"
                                             onkeyup="$(this).totalBudgetIsValid();"
                                             onchange="$(this).totalBudgetIsValid();"
                                             value="{{ $item->allotment_cost }}">
                                 </div>
                             </td>
                             <td class="align-middle">
-                                <a onclick="$(this).deleteRow('#item-row-{{ $ctr + 1 }}');"
+                                <a onclick="$(this).deleteRow('#item-row-{{ strtolower($ctr) }}');"
                                     class="btn btn-outline-red px-1 py-0">
                                     <i class="fas fa-minus-circle"></i>
                                 </a>
@@ -133,6 +135,110 @@
                                 </a>
                             </td>
                         </tr>
+                                @else
+                        <tr id="header-row-{{ strtolower($ctr) }}" class="item-row">
+                            <td>
+                                <div class="md-form form-sm my-0">
+                                    <input name="row_type[header-{{ strtolower($ctr) }}]" type="hidden" value="header">
+                                    <input type="hidden" name="allotment_id[header-{{ strtolower($ctr) }}]">
+                                    <input type="hidden"name="allot_class[header-{{ strtolower($ctr) }}]">
+                                    <input type="hidden"name="allotted_budget[header-{{ strtolower($ctr) }}]">
+                                    <input type="text" placeholder="Header Value..." name="allotment_name[header-{{ strtolower($ctr) }}]"
+                                           class="form-control required form-control-sm allotment-name py-1 font-weight-bold"
+                                           value="{{ str_replace('-', ' ', $ctr) }}"
+                                           id="allotment-name-header-{{ strtolower($ctr) }}">
+                                </div>
+                            </td>
+                            <td colspan="2"></td>
+                            <td class="align-middle">
+                                <a onclick="$(this).deleteRow('#header-row-{{ strtolower($ctr) }}');"
+                                class="btn btn-outline-red px-1 py-0">
+                                    <i class="fas fa-minus-circle"></i>
+                                </a>
+                            </td>
+                            <td class="align-middle">
+                                <a href="#" class="grey-text">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </a>
+                            </td>
+                        </tr>
+
+                                    @foreach ($item as $itmCtr => $itm)
+                        <tr id="item-row-{{ strtolower($ctr).($itmCtr + 1) }}" class="item-row">
+                            <td>
+                                <div class="md-form form-sm my-0">
+                                    <input name="row_type[{{ strtolower($ctr).($itmCtr + 1) }}]" type="hidden" value="item">
+                                    <input type="hidden" name="allotment_id[{{ strtolower($ctr).($itmCtr + 1) }}]"
+                                           value="{{ $itm->id }}">
+                                    <input type="text" placeholder=" Value..."
+                                           name="allotment_name[{{ strtolower($ctr).($itmCtr + 1) }}]"
+                                           class="form-control required form-control-sm allotment-name py-1"
+                                           id="allotment-name-{{ strtolower($ctr).($itmCtr + 1) }}"
+                                           value="{{ explode('::', $itm->allotment_name)[1] }}">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="md-form my-0">
+                                    <select class="mdb-select form-control-sm required allot-class-tokenizer"
+                                            name="allot_class[{{ strtolower($ctr).($itmCtr + 1) }}]">
+                                        @foreach ($allotmentClassifications as $class)
+                                        <option {{ $class->id == $itm->allotment_class ? 'selected' : '' }}
+                                                value="{{ $class->id }}">
+                                            {{ $class->class_name }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="md-form form-sm my-0">
+                                    <input type="number" placeholder=" Value..." name="allotted_budget[{{ strtolower($ctr).($itmCtr + 1) }}]"
+                                            class="form-control required form-control-sm allotted-budget py-1"
+                                            id="allotted-budget-{{ strtolower($ctr).($itmCtr + 1) }}" min="0"
+                                            onkeyup="$(this).totalBudgetIsValid();"
+                                            onchange="$(this).totalBudgetIsValid();"
+                                            value="{{ $itm->allotment_cost }}">
+                                </div>
+                            </td>
+                            <td class="align-middle">
+                                <a onclick="$(this).deleteRow('#item-row-{{ strtolower($ctr).($itmCtr + 1) }}');"
+                                    class="btn btn-outline-red px-1 py-0">
+                                    <i class="fas fa-minus-circle"></i>
+                                </a>
+                            </td>
+                            <td class="align-middle">
+                                <a href="#" class="grey-text">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </a>
+                            </td>
+                        </tr>
+                                    @endforeach
+
+                        <tr id="headerbreak-row-{{ strtolower($ctr) }}" class="item-row">
+                            <td colspan="3">
+                                <hr>
+                                <div class="md-form form-sm my-0">
+                                    <input name="row_type[headerbreak-{{ strtolower($ctr) }}]" type="hidden" value="headerbreak">
+                                    <input type="hidden" name="allotment_id[headerbreak-{{ strtolower($ctr) }}]">
+                                    <input type="hidden"name="allot_class[headerbreak-{{ strtolower($ctr) }}]">
+                                    <input type="hidden"name="allotted_budget[headerbreak-{{ strtolower($ctr) }}]">
+                                    <input type="hidden" name="allotment_name[headerbreak-{{ strtolower($ctr) }}]"
+                                           id="allotment-name-headerbreak-{{ strtolower($ctr) }}">
+                                </div>
+                            </td>
+                            <td class="align-middle">
+                                <a onclick="$(this).deleteRow('#headerbreak-row-{{ strtolower($ctr) }}');"
+                                class="btn btn-outline-red px-1 py-0">
+                                    <i class="fas fa-minus-circle"></i>
+                                </a>
+                            </td>
+                            <td class="align-middle">
+                                <a href="#" class="grey-text">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </a>
+                            </td>
+                        </tr>
+                                @endif
                             @endforeach
                         @endif
 

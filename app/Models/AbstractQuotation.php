@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 use App\Notifications\AbstractQuotation as Notif;
-use App\User;
+use App\Models\EmpAccount as User;
 use App\Models\PurchaseRequest;
 use Kyslik\ColumnSortable\Sortable;
 

@@ -88,7 +88,7 @@ class DisbursementVoucher extends Model
     }
 
     public function emppayee() {
-        return $this->hasOne('App\User', 'id', 'payee');
+        return $this->hasOne('App\Models\EmpAccount', 'id', 'payee');
     }
 
     public function bidpayee() {

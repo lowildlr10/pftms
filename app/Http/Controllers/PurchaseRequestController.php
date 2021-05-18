@@ -18,7 +18,7 @@ use App\Models\InventoryStockItem;
 use App\Models\InventoryStockIssue;
 use App\Models\InventoryStockIssueItem;
 
-use App\User;
+use App\Models\EmpAccount as User;
 use App\Models\EmpGroup;
 use App\Models\EmpDivision;
 use App\Models\ItemUnitIssue;

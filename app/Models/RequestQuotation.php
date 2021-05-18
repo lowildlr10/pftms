@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 use App\Notifications\RequestQuotation as Notif;
-use App\User;
+use App\Models\EmpAccount as User;
 use Kyslik\ColumnSortable\Sortable;
 use App\Models\PurchaseRequest;
 
@@ -64,7 +64,7 @@ class RequestQuotation extends Model
     }
 
     public function canvasser() {
-        return $this->hasOne('App\User', 'id', 'canvassed_by');
+        return $this->hasOne('App\Models\EmpAccount', 'id', 'canvassed_by');
     }
 
     public $sortable = [

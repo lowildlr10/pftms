@@ -77,7 +77,7 @@ class LiquidationReport extends Model
         return $this->hasOne('App\Models\DisbursementVoucher', 'id', 'dv_id');
     }
     public function empclaimant() {
-        return $this->hasOne('App\User', 'id', 'sig_claimant');
+        return $this->hasOne('App\Models\EmpAccount', 'id', 'sig_claimant');
     }
 
     public $sortable = [

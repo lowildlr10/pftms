@@ -54,6 +54,6 @@ class InventoryStockIssue extends Model
     }
 
     public function recipient() {
-        return $this->hasOne('App\User', 'id', 'sig_received_by');
+        return $this->hasOne('App\Models\EmpAccount', 'id', 'sig_received_by');
     }
 }

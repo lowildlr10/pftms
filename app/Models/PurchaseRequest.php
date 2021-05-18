@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
-use App\User;
+use App\Models\EmpAccount as User;
 use App\Models\DocumentLog as DocLog;
 use Kyslik\ColumnSortable\Sortable;
 
@@ -80,7 +80,7 @@ class PurchaseRequest extends Model
     }
 
     public function requestor() {
-        return $this->hasOne('App\User', 'id', 'requested_by');
+        return $this->hasOne('App\Models\EmpAccount', 'id', 'requested_by');
     }
 
     public function stat() {

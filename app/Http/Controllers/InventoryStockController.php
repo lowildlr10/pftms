@@ -16,7 +16,7 @@ use App\Models\InventoryStock;
 use App\Models\InventoryStockItem;
 use App\Models\InventoryStockIssueItem;
 
-use App\User;
+use App\Models\EmpAccount as User;
 use App\Models\DocumentLog as DocLog;
 use App\Models\InventoryClassification;
 use App\Models\ItemClassification;

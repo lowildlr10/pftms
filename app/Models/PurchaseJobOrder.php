@@ -83,7 +83,7 @@ class PurchaseJobOrder extends Model
     }
 
     public function emppayee() {
-        return $this->hasOne('App\User', 'id', 'awarded_to');
+        return $this->hasOne('App\Models\EmpAccount', 'id', 'awarded_to');
     }
 
     public function bidpayee() {

@@ -16,7 +16,7 @@ use App\Models\LiquidationReport;
 use App\Models\InventoryStock;
 use App\Models\ListDemandPayable;
 
-use App\User;
+use App\Models\EmpAccount as User;
 use App\Models\DocumentLog as DocLog;
 use App\Models\PaperSize;
 use App\Models\Supplier;

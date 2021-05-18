@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 use App\Notifications\ObligationRequestStatus as Notif;
-use App\User;
+use App\Models\EmpAccount as User;
 use App\Models\EmpRole as Role;
 use App\Models\DocumentLog as DocLog;
 use Kyslik\ColumnSortable\Sortable;
@@ -92,7 +92,7 @@ class ObligationRequestStatus extends Model
     }
 
     public function emppayee() {
-        return $this->hasOne('App\User', 'id', 'payee');
+        return $this->hasOne('App\Models\EmpAccount', 'id', 'payee');
     }
 
     public function bidpayee() {

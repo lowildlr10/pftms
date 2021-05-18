@@ -8,7 +8,7 @@ use App\Models\ListDemandPayableItem;
 use App\Models\ObligationRequestStatus;
 use App\Models\DisbursementVoucher;
 
-use App\User;
+use App\Models\EmpAccount as User;
 use App\Models\EmpGroup;
 use App\Models\EmpDivision;
 use App\Models\Signatory;

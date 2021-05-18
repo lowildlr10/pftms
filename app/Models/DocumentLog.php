@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\User;
+use App\Models\EmpAccount as User;
 use Webpatser\Uuid\Uuid;
 use Carbon\Carbon;
 use DB;

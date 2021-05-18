@@ -7,7 +7,7 @@ use App\PurchaseRequest;
 use App\Abstracts;
 use App\AbstractItem;
 
-use App\User;
+use App\Models\EmpAccount as User;
 use App\Models\EmpDivision;
 use App\Models\EmpUnit;
 use App\Models\EmpGroup;

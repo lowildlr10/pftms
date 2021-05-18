@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -12,7 +12,7 @@ use App\Models\EmpGroup as Group;
 use App\Models\EmpLog as Log;
 use Kyslik\ColumnSortable\Sortable;
 
-class User extends Authenticatable
+class EmpAccount extends Authenticatable
 {
     use SoftDeletes, Notifiable, Sortable;
 
@@ -321,7 +321,7 @@ class User extends Authenticatable
     }
 
     public function getEmployee($id) {
-        $userData = User::find($id);
+        $userData = EmpAccount::find($id);
 
         if ($userData) {
             $firstname = $userData->firstname;

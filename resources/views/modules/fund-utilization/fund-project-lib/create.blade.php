@@ -76,7 +76,7 @@
                             </th>
                             <th class="align-middle" width="31%">
                                 <b>
-                                    <span class="red-text">* </span> Allotted Budget
+                                    <span class="red-text">* </span> As Approved
                                 </b>
                             </th>
                             <th width="3%"></th>

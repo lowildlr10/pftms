@@ -8,7 +8,7 @@ use App\Models\SummaryLDDAPItem as SummaryItem;
 use App\Models\ListDemandPayable;
 use App\Models\ListDemandPayableItem;
 
-use App\User;
+use App\Models\EmpAccount as User;
 use App\Models\EmpGroup;
 use App\Models\EmpDivision;
 use App\Models\Signatory;

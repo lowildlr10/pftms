@@ -96,6 +96,7 @@ $(function() {
                 <td>
                     <div class="md-form form-sm my-0">
                         <input name="row_type[${newID}]" type="hidden" value="${type}">
+                        <input type="hidden" name="allotment_id[${newID}]" value="0">
                         <input type="text" placeholder=" Value..." name="allotment_name[${newID}]"
                             class="form-control required form-control-sm allotment-name py-1"
                             id="allotment-name-${newID}">
@@ -143,10 +144,11 @@ $(function() {
                 <td>
                     <div class="md-form form-sm my-0">
                         <input name="row_type[${newID}]" type="hidden" value="${type}">
+                        <input type="hidden" name="allotment_id[${newID}]" value="0">
                         <input type="hidden"name="allot_class[${newID}]">
                         <input type="hidden"name="allotted_budget[${newID}]">
                         <input type="text" placeholder="Header Value..." name="allotment_name[${newID}]"
-                            class="form-control required form-control-sm allotment-name py-1"
+                            class="form-control required form-control-sm allotment-name py-1 font-weight-bold"
                             id="allotment-name-${newID}">
                     </div>
                 </td>`,
@@ -173,6 +175,7 @@ $(function() {
                     <hr>
                     <div class="md-form form-sm my-0">
                         <input name="row_type[${newID}]" type="hidden" value="${type}">
+                        <input type="hidden" name="allotment_id[${newID}]" value="0">
                         <input type="hidden"name="allot_class[${newID}]">
                         <input type="hidden"name="allotted_budget[${newID}]">
                         <input type="hidden" name="allotment_name[${newID}]" id="allotment-name-${newID}">
@@ -204,14 +207,10 @@ $(function() {
             let rowClass = '.item-' + _row[1];
             let rowCount = $(rowClass).length;
 
-            if (rowCount > 1) {
-                $(row).fadeOut(300, function() {
-                    $(this).remove();
-                    $(this).totalBudgetIsValid();
-                });
-            } else {
-                alert('Cannot delete all row.');
-            }
+            $(row).fadeOut(300, function() {
+                $(this).remove();
+                $(this).totalBudgetIsValid();
+            });
 		}
     }
 

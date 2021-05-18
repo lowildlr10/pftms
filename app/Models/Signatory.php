@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
-use App\User;
+use App\Models\EmpAccount as User;
 
 class Signatory extends Model
 {
@@ -49,7 +49,7 @@ class Signatory extends Model
     }
 
     public function user() {
-        return $this->belongsTo('App\User', 'emp_id', 'id');
+        return $this->belongsTo('App\Models\EmpAccount', 'emp_id', 'id');
     }
 
     public function getSignatory($id) {

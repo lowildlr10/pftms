@@ -15,7 +15,7 @@ use App\Models\FundingAllotmentRealignment;
 use App\Models\MooeAccountTitle;
 use App\Models\PaperSize;
 use App\Models\Signatory;
-use App\User;
+use App\Models\EmpAccount as User;
 
 use Carbon\Carbon;
 use Auth;
@@ -327,6 +327,12 @@ class LineItemBudgetController extends Controller
         $projects = FundingProject::orderBy('project_title')->get();
         $allotmentClassifications = AllotmentClass::orderBy('class_name')->get();
 
+        $allotmentData = $this->groupAllotments($allotments, $remainingBudget);
+        $remainingBudget = $allotmentData->remaining_budget;
+        $groupedAllotments = $allotmentData->grouped_allotments;
+
+        $itemCounter = 1;
+
         $users = User::where('is_active', 'y')
                      ->orderBy('firstname')->get();
         $signatories = Signatory::addSelect([
@@ -339,9 +345,6 @@ class LineItemBudgetController extends Controller
             $sig->module = json_decode($sig->module);
         }
 
-        foreach ($allotmentClassifications as $item) {
-            $remainingBudget -= $item->allotted_budget;
-        }
         return view('modules.fund-utilization.fund-project-lib.update', compact(
             'id',
             'projects',
@@ -350,7 +353,9 @@ class LineItemBudgetController extends Controller
             'allotments',
             'remainingBudget',
             'users',
-            'signatories'
+            'signatories',
+            'groupedAllotments',
+            'itemCounter'
         ));
     }
 
@@ -367,11 +372,16 @@ class LineItemBudgetController extends Controller
         $submittedBy = $request->submitted_by;
         $approvedBy = $request->approved_by;
 
+        $rowTypes = $request->row_type;
         $allotmentIDs = $request->allotment_id;
         $allotmentNames = $request->allotment_name;
         $allotmentClasses = $request->allot_class;
         $allottedBudgets = $request->allotted_budget;
 
+        //echo '$rowTypes, $allotmentIDs, $allotmentNames, $allotmentClasses, $allottedBudgets';
+        //dd($rowTypes, $allotmentIDs, $allotmentNames, $allotmentClasses, $allottedBudgets);
+
+        $newAllotmentIDs = $allotmentIDs;
         $documentType = 'Line-Item Budgets';
         $routeName = 'fund-project-lib';
 
@@ -393,18 +403,43 @@ class LineItemBudgetController extends Controller
 
             if (count($allotmentIDs) > 0) {
                 $orderNo = 0;
+                $headerName = "";
 
                 foreach ($allotmentIDs as $ctr => $allotmentID) {
                     $orderNo += 1;
-                    $instanceAllotment = FundingAllotment::find($allotmentID);
-                    $instanceAllotment->allotment_class = $allotmentClasses[$ctr];
-                    $instanceAllotment->order_no = $orderNo;
-                    $instanceAllotment->allotment_name = $allotmentNames[$ctr];
-                    $instanceAllotment->allotment_cost = $allottedBudgets[$ctr];
-                    $instanceAllotment->save();
+
+                    if ($rowTypes[$ctr] == 'header') {
+                        $headerName = $allotmentNames[$ctr];
+                    } else if ($rowTypes[$ctr] == 'item') {
+                        $instanceAllotment = $allotmentID ? FundingAllotment::find($allotmentID) :
+                                            new FundingAllotment;
+
+                        if (!$allotmentID) {
+                            $instanceAllotment->project_id = $project;
+                            $instanceAllotment->budget_id = $id;
+                        }
+
+                        $instanceAllotment->allotment_class = $allotmentClasses[$ctr];
+                        $instanceAllotment->order_no = $orderNo;
+                        $instanceAllotment->allotment_name = empty($headerName) ? $allotmentNames[$ctr] :
+                                                            "$headerName::$allotmentNames[$ctr]";
+                        $instanceAllotment->allotment_cost = $allottedBudgets[$ctr];
+                        $instanceAllotment->save();
+
+                        if (!$allotmentID && is_int($ctr)) {
+                            $newAddedAllotment = DB::table('funding_allotments')
+                                                ->where([
+                                                    ['budget_id', $id],
+                                                    ['allotment_name', $instanceAllotment->allotment_name]
+                                                ])->first();
+                            $newAllotmentIDs[] = $newAddedAllotment->id;
+                        }
+                    } else if ($rowTypes[$ctr] == 'header-break') {
+                        $headerName = "";
+                    }
                 }
 
-                FundingAllotment::whereNotIn('id', $allotmentIDs)
+                FundingAllotment::whereNotIn('id', $newAllotmentIDs)
                                 ->where('budget_id', $id)
                                 ->delete();
             }
@@ -738,5 +773,25 @@ class LineItemBudgetController extends Controller
             Auth::user()->log($request, $msg);
             return redirect(url()->previous())->with('failed', $msg);
         }
+    }
+
+    private function groupAllotments($allotments, $remainingBudget) {
+        $groupedAllotments = [];
+
+        foreach ($allotments as $itmCtr => $item) {
+            if (count(explode('::', $item->allotment_name)) > 1) {
+                $keyAllotment = preg_replace("/\s+/", "-", explode('::', $item->allotment_name)[0]);
+                $groupedAllotments[$keyAllotment][] = $item;
+            } else {
+                $groupedAllotments[$itmCtr + 1] = $item;
+            }
+
+            $remainingBudget -= $item->allotment_cost;
+        }
+
+        return (object) [
+            'grouped_allotments' => $groupedAllotments,
+            'remaining_budget' => $remainingBudget
+        ];
     }
 }

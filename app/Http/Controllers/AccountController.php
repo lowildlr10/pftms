@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-use App\User;
+use App\Models\EmpAccount as User;
 use App\Models\EmpRole;
 use App\Models\EmpGroup;
 use App\Models\EmpDivision;

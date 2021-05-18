@@ -68,7 +68,7 @@
                             </th>
                             <th class="align-middle" width="16%">
                                 <b>
-                                    <span class="red-text">* </span> Proposed Budget
+                                    <span class="red-text">* </span> Proposed Realignment
                                 </b>
                             </th>
                             <th class="align-middle" width="26%">

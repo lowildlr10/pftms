@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\User;
+use App\Models\EmpAccount as User;
 use App\EmployeeLog;
 use App\DocumentLogHistory;
 use App\ListDueDemandAccPay;
@@ -215,7 +215,7 @@ class PaymentController extends Controller
 
                     foreach ($listCurrentCreditorName as $ctr => $creditorName) {
                         $itemID = "cy-$pKey-" . ($ctr + 1);
-                        $instanceLDDAPItem = 
+                        $instanceLDDAPItem =
 
                         DB::table('tbllddap_items')->insert([
                             'lddap_item_id' => $itemID,

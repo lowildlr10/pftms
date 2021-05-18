@@ -13,7 +13,7 @@ use App\Models\InspectionAcceptance;
 use App\Models\DisbursementVoucher;
 use App\Models\InventoryStock;
 
-use App\User;
+use App\Models\EmpAccount as User;
 use App\Models\FundingProject;
 use App\Models\ItemUnitIssue;
 use App\Models\Signatory;
