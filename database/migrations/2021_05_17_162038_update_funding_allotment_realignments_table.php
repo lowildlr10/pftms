@@ -25,6 +25,8 @@ class UpdateFundingAllotmentRealignmentsTable extends Migration
             $table->foreign('allotment_id')->references('id')->on('funding_allotments');
             $table->uuid('budget_realign_id');
             $table->foreign('budget_realign_id')->references('id')->on('funding_budget_realignments');
+            $table->uuid('allotment_class');
+            $table->foreign('allotment_class')->references('id')->on('allotment_classes');
             $table->unsignedInteger('order_no');
             $table->string('allotment_name');
             $table->double('realigned_allotment_cost', 50, 2)->default(0.00);

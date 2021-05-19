@@ -90,20 +90,20 @@
                         @if (count($groupedAllotments) > 0)
                             @foreach ($groupedAllotments as $ctr => $item)
                                 @if (is_int($ctr))
-                        <tr id="item-row-{{ strtolower($ctr) }}" class="item-row">
+                        <tr id="item-row-{{ $itemCounter }}" class="item-row">
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input type="hidden" name="allotment_id[{{  strtolower($ctr) }}]" value="{{ $item->id }}">
-                                    <input name="row_type[{{ strtolower($ctr) }}]" type="hidden" value="item">
-                                    <input type="text" placeholder=" Value..." name="allotment_name[{{ strtolower($ctr) }}]"
+                                    <input type="hidden" name="allotment_id[{{ $itemCounter }}]" value="{{ $item->id }}">
+                                    <input name="row_type[{{ $itemCounter }}]" type="hidden" value="item">
+                                    <input type="text" placeholder=" Value..." name="allotment_name[{{ $itemCounter }}]"
                                             class="form-control required form-control-sm allotment-name py-1"
-                                            id="allotment-name-{{ strtolower($ctr) }}" value="{{ $item->allotment_name }}">
+                                            id="allotment-name-{{ $itemCounter }}" value="{{ $item->allotment_name }}">
                                 </div>
                             </td>
                             <td>
                                 <div class="md-form my-0">
                                     <select class="mdb-select form-control-sm required allot-class-tokenizer"
-                                            name="allot_class[{{ strtolower($ctr) }}]">
+                                            name="allot_class[{{ $itemCounter }}]">
                                         @foreach ($allotmentClassifications as $class)
                                         <option {{ $class->id == $item->allotment_class ? 'selected' : '' }}
                                                 value="{{ $class->id }}">
@@ -115,16 +115,16 @@
                             </td>
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input type="number" placeholder=" Value..." name="allotted_budget[{{ strtolower($ctr) }}]"
+                                    <input type="number" placeholder=" Value..." name="allotted_budget[{{ $itemCounter }}]"
                                             class="form-control required form-control-sm allotted-budget py-1"
-                                            id="allotted-budget-{{ strtolower($ctr) }}" min="0"
+                                            id="allotted-budget-{{ $itemCounter }}" min="0"
                                             onkeyup="$(this).totalBudgetIsValid();"
                                             onchange="$(this).totalBudgetIsValid();"
                                             value="{{ $item->allotment_cost }}">
                                 </div>
                             </td>
                             <td class="align-middle">
-                                <a onclick="$(this).deleteRow('#item-row-{{ strtolower($ctr) }}');"
+                                <a onclick="$(this).deleteRow('#item-row-{{ $itemCounter }}');"
                                     class="btn btn-outline-red px-1 py-0">
                                     <i class="fas fa-minus-circle"></i>
                                 </a>
@@ -135,23 +135,24 @@
                                 </a>
                             </td>
                         </tr>
+                                    @php $itemCounter++ @endphp
                                 @else
-                        <tr id="header-row-{{ strtolower($ctr) }}" class="item-row">
+                        <tr id="header-row-{{ $itemCounter }}" class="item-row">
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input name="row_type[header-{{ strtolower($ctr) }}]" type="hidden" value="header">
-                                    <input type="hidden" name="allotment_id[header-{{ strtolower($ctr) }}]">
-                                    <input type="hidden"name="allot_class[header-{{ strtolower($ctr) }}]">
-                                    <input type="hidden"name="allotted_budget[header-{{ strtolower($ctr) }}]">
-                                    <input type="text" placeholder="Header Value..." name="allotment_name[header-{{ strtolower($ctr) }}]"
+                                    <input name="row_type[{{ $itemCounter }}]" type="hidden" value="header">
+                                    <input type="hidden" name="allotment_id[{{ $itemCounter }}]">
+                                    <input type="hidden"name="allot_class[{{ $itemCounter }}]">
+                                    <input type="hidden"name="allotted_budget[{{ $itemCounter }}]">
+                                    <input type="text" placeholder="Header Value..." name="allotment_name[{{ $itemCounter }}]"
                                            class="form-control required form-control-sm allotment-name py-1 font-weight-bold"
                                            value="{{ str_replace('-', ' ', $ctr) }}"
-                                           id="allotment-name-header-{{ strtolower($ctr) }}">
+                                           id="allotment-name-header-{{ $itemCounter }}">
                                 </div>
                             </td>
                             <td colspan="2"></td>
                             <td class="align-middle">
-                                <a onclick="$(this).deleteRow('#header-row-{{ strtolower($ctr) }}');"
+                                <a onclick="$(this).deleteRow('#header-row-{{ $itemCounter }}');"
                                 class="btn btn-outline-red px-1 py-0">
                                     <i class="fas fa-minus-circle"></i>
                                 </a>
@@ -162,25 +163,26 @@
                                 </a>
                             </td>
                         </tr>
+                                    @php $itemCounter++ @endphp
 
                                     @foreach ($item as $itmCtr => $itm)
-                        <tr id="item-row-{{ strtolower($ctr).($itmCtr + 1) }}" class="item-row">
+                        <tr id="item-row-{{ $itemCounter }}" class="item-row">
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input name="row_type[{{ strtolower($ctr).($itmCtr + 1) }}]" type="hidden" value="item">
-                                    <input type="hidden" name="allotment_id[{{ strtolower($ctr).($itmCtr + 1) }}]"
+                                    <input name="row_type[{{ $itemCounter }}]" type="hidden" value="item">
+                                    <input type="hidden" name="allotment_id[{{ $itemCounter }}]"
                                            value="{{ $itm->id }}">
                                     <input type="text" placeholder=" Value..."
-                                           name="allotment_name[{{ strtolower($ctr).($itmCtr + 1) }}]"
+                                           name="allotment_name[{{ $itemCounter }}]"
                                            class="form-control required form-control-sm allotment-name py-1"
-                                           id="allotment-name-{{ strtolower($ctr).($itmCtr + 1) }}"
+                                           id="allotment-name-{{ $itemCounter }}"
                                            value="{{ explode('::', $itm->allotment_name)[1] }}">
                                 </div>
                             </td>
                             <td>
                                 <div class="md-form my-0">
                                     <select class="mdb-select form-control-sm required allot-class-tokenizer"
-                                            name="allot_class[{{ strtolower($ctr).($itmCtr + 1) }}]">
+                                            name="allot_class[{{ $itemCounter }}]">
                                         @foreach ($allotmentClassifications as $class)
                                         <option {{ $class->id == $itm->allotment_class ? 'selected' : '' }}
                                                 value="{{ $class->id }}">
@@ -192,16 +194,16 @@
                             </td>
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input type="number" placeholder=" Value..." name="allotted_budget[{{ strtolower($ctr).($itmCtr + 1) }}]"
+                                    <input type="number" placeholder=" Value..." name="allotted_budget[{{ $itemCounter }}]"
                                             class="form-control required form-control-sm allotted-budget py-1"
-                                            id="allotted-budget-{{ strtolower($ctr).($itmCtr + 1) }}" min="0"
+                                            id="allotted-budget-{{ $itemCounter }}" min="0"
                                             onkeyup="$(this).totalBudgetIsValid();"
                                             onchange="$(this).totalBudgetIsValid();"
                                             value="{{ $itm->allotment_cost }}">
                                 </div>
                             </td>
                             <td class="align-middle">
-                                <a onclick="$(this).deleteRow('#item-row-{{ strtolower($ctr).($itmCtr + 1) }}');"
+                                <a onclick="$(this).deleteRow('#item-row-{{ $itemCounter }}');"
                                     class="btn btn-outline-red px-1 py-0">
                                     <i class="fas fa-minus-circle"></i>
                                 </a>
@@ -212,22 +214,23 @@
                                 </a>
                             </td>
                         </tr>
+                                        @php $itemCounter++ @endphp
                                     @endforeach
 
-                        <tr id="headerbreak-row-{{ strtolower($ctr) }}" class="item-row">
+                        <tr id="headerbreak-row-{{ $itemCounter }}" class="item-row">
                             <td colspan="3">
                                 <hr>
                                 <div class="md-form form-sm my-0">
-                                    <input name="row_type[headerbreak-{{ strtolower($ctr) }}]" type="hidden" value="headerbreak">
-                                    <input type="hidden" name="allotment_id[headerbreak-{{ strtolower($ctr) }}]">
-                                    <input type="hidden"name="allot_class[headerbreak-{{ strtolower($ctr) }}]">
-                                    <input type="hidden"name="allotted_budget[headerbreak-{{ strtolower($ctr) }}]">
-                                    <input type="hidden" name="allotment_name[headerbreak-{{ strtolower($ctr) }}]"
-                                           id="allotment-name-headerbreak-{{ strtolower($ctr) }}">
+                                    <input name="row_type[{{ $itemCounter }}]" type="hidden" value="headerbreak">
+                                    <input type="hidden" name="allotment_id[{{ $itemCounter }}]">
+                                    <input type="hidden"name="allot_class[{{ $itemCounter }}]">
+                                    <input type="hidden"name="allotted_budget[{{ $itemCounter }}]">
+                                    <input type="hidden" name="allotment_name[{{ $itemCounter }}]"
+                                           id="allotment-name-headerbreak-{{ $itemCounter }}">
                                 </div>
                             </td>
                             <td class="align-middle">
-                                <a onclick="$(this).deleteRow('#headerbreak-row-{{ strtolower($ctr) }}');"
+                                <a onclick="$(this).deleteRow('#headerbreak-row-{{ $itemCounter }}');"
                                 class="btn btn-outline-red px-1 py-0">
                                     <i class="fas fa-minus-circle"></i>
                                 </a>
@@ -238,6 +241,7 @@
                                 </a>
                             </td>
                         </tr>
+                                    @php $itemCounter++ @endphp
                                 @endif
                             @endforeach
                         @endif

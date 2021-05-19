@@ -80,22 +80,24 @@
                         </tr>
                     </thead>
                     <tbody class="sortable">
-                        @if (count($allotments))
-                            @foreach ($allotments as $ctr => $item)
-                        <tr id="item-row-{{ $ctr + 1 }}" class="item-row">
+                        @if (count($groupedAllotments) > 0)
+                            @foreach ($groupedAllotments as $ctr => $item)
+                                @if (is_int($ctr))
+                        <tr id="item-row-{{ $itemCounter }}" class="item-row">
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input type="hidden" name="allotment_id[{{ $ctr }}]" value="{{ $item->id }}">
-                                    <input type="hidden" name="allotment_realign_id[{{ $ctr }}]" value="{{ $item->r_allot_id }}">
-                                    <input type="text" placeholder=" Value..." name="allotment_name[{{ $ctr }}]"
+                                    <input type="hidden" name="allotment_id[{{ $itemCounter }}]" value="{{ $item->id }}">
+                                    <input type="hidden" name="allotment_realign_id[{{ $itemCounter }}]" value="{{ $item->r_allot_id }}">
+                                    <input name="row_type[{{ $itemCounter }}]" type="hidden" value="item">
+                                    <input type="text" placeholder=" Value..." name="allotment_name[{{ $itemCounter }}]"
                                             class="form-control required form-control-sm allotment-name py-1"
-                                            id="allotment-name-{{ $ctr + 1 }}" value="{{ $item->allotment_name }}">
+                                            id="allotment-name-{{ $itemCounter }}" value="{{ $item->allotment_name }}">
                                 </div>
                             </td>
                             <td>
                                 <div class="md-form my-0">
                                     <select class="mdb-select form-control-sm required allot-class-tokenizer"
-                                            name="allot_class[{{ $ctr }}]">
+                                            name="allot_class[{{ $itemCounter }}]">
                                         @foreach ($allotmentClassifications as $class)
                                         <option {{ $class->id == $item->allotment_class ? 'selected' : '' }}
                                                 value="{{ $class->id }}">
@@ -107,9 +109,9 @@
                             </td>
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input type="number" placeholder=" Value..." name="allotted_budget[{{ $ctr }}]"
+                                    <input type="number" placeholder=" Value..." name="allotted_budget[{{ $itemCounter }}]"
                                             class="form-control required form-control-sm allotted-budget py-1"
-                                            id="allotted-budget-{{ $ctr + 1 }}" min="0"
+                                            id="allotted-budget-{{ $itemCounter }}" min="0"
                                             onkeyup="$(this).totalBudgetIsValid();"
                                             onchange="$(this).totalBudgetIsValid();"
                                             value="{{ $item->allotment_cost }}">
@@ -117,13 +119,14 @@
                             </td>
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <textarea id="justification" class="md-textarea form-control"
-                                              name="justification[{{ $ctr }}]" rows="2"
+                                    <textarea id="justification-{{ $itemCounter }}"
+                                              class="md-textarea form-control"
+                                              name="justification[{{ $itemCounter }}]" rows="2"
                                               placeholder="Justification">{{ $item->justification }}</textarea>
                                 </div>
                             </td>
                             <td class="align-middle">
-                                <a onclick="$(this).deleteRow('#item-row-{{ $ctr + 1 }}');"
+                                <a onclick="$(this).deleteRow('#item-row-{{ $itemCounter }}');"
                                     class="btn btn-outline-red px-1 py-0">
                                     <i class="fas fa-minus-circle"></i>
                                 </a>
@@ -134,14 +137,150 @@
                                 </a>
                             </td>
                         </tr>
+                                    @php $itemCounter++ @endphp
+                                @else
+                        <tr id="header-row-{{ $itemCounter }}" class="item-row">
+                            <td>
+                                <div class="md-form form-sm my-0">
+                                    <input name="row_type[{{ $itemCounter }}]" type="hidden" value="header">
+                                    <input type="hidden" name="allotment_id[{{ $itemCounter }}]">
+                                    <input type="hidden" name="allotment_realign_id[{{ $itemCounter }}]">
+                                    <input type="hidden"name="allot_class[{{ $itemCounter }}]">
+                                    <input type="hidden"name="allotted_budget[{{ $itemCounter }}]">
+                                    <input type="hidden"name="justification[{{ $itemCounter }}]">
+                                    <input type="text" placeholder="Header Value..." name="allotment_name[{{ $itemCounter }}]"
+                                           class="form-control required form-control-sm allotment-name py-1 font-weight-bold"
+                                           value="{{ str_replace('-', ' ', $ctr) }}"
+                                           id="allotment-name-header-{{ $itemCounter }}">
+                                </div>
+                            </td>
+                            <td colspan="3"></td>
+                            <td class="align-middle">
+                                <a onclick="$(this).deleteRow('#header-row-{{ $itemCounter }}');"
+                                class="btn btn-outline-red px-1 py-0">
+                                    <i class="fas fa-minus-circle"></i>
+                                </a>
+                            </td>
+                            <td class="align-middle">
+                                <a href="#" class="grey-text">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </a>
+                            </td>
+                        </tr>
+                                    @php $itemCounter++ @endphp
+
+                                    @foreach ($item as $itmCtr => $itm)
+                        <tr id="item-row-{{ $itemCounter }}" class="item-row">
+                            <td>
+                                <div class="md-form form-sm my-0">
+                                    <input type="hidden" name="allotment_id[{{ $itemCounter }}]" value="{{ $itm->id }}">
+                                    <input type="hidden" name="allotment_realign_id[{{ $itemCounter }}]" value="{{ $itm->r_allot_id }}">
+                                    <input name="row_type[{{ $itemCounter }}]" type="hidden" value="item">
+                                    <input type="text" placeholder=" Value..." name="allotment_name[{{ $itemCounter }}]"
+                                            class="form-control required form-control-sm allotment-name py-1"
+                                            id="allotment-name-{{ $itemCounter }}"
+                                            value="{{ explode('::', $itm->allotment_name)[1] }}">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="md-form my-0">
+                                    <select class="mdb-select form-control-sm required allot-class-tokenizer"
+                                            name="allot_class[{{ $itemCounter }}]">
+                                        @foreach ($allotmentClassifications as $class)
+                                        <option {{ $class->id == $itm->allotment_class ? 'selected' : '' }}
+                                                value="{{ $class->id }}">
+                                            {{ $class->class_name }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="md-form form-sm my-0">
+                                    <input type="number" placeholder=" Value..." name="allotted_budget[{{ $itemCounter }}]"
+                                            class="form-control required form-control-sm allotted-budget py-1"
+                                            id="allotted-budget-{{ $itemCounter }}" min="0"
+                                            onkeyup="$(this).totalBudgetIsValid();"
+                                            onchange="$(this).totalBudgetIsValid();"
+                                            value="{{ $itm->allotment_cost }}">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="md-form form-sm my-0">
+                                    <textarea id="justification-{{ $itemCounter }}" class="md-textarea form-control"
+                                              name="justification[{{ $itemCounter }}]" rows="2"
+                                              placeholder="Justification">{{ $itm->justification }}</textarea>
+                                </div>
+                            </td>
+                            <td class="align-middle">
+                                <a onclick="$(this).deleteRow('#item-row-{{ $itemCounter }}');"
+                                    class="btn btn-outline-red px-1 py-0">
+                                    <i class="fas fa-minus-circle"></i>
+                                </a>
+                            </td>
+                            <td class="align-middle">
+                                <a href="#" class="grey-text">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </a>
+                            </td>
+                        </tr>
+                                    @php $itemCounter++ @endphp
+                                    @endforeach
+
+                        <tr id="headerbreak-row-{{ $itemCounter }}" class="item-row">
+                            <td colspan="4">
+                                <hr>
+                                <div class="md-form form-sm my-0">
+                                    <input name="row_type[{{ $itemCounter }}]" type="hidden" value="headerbreak">
+                                    <input type="hidden" name="allotment_id[{{ $itemCounter }}]">
+                                    <input type="hidden" name="allotment_realign_id[{{ $itemCounter }}]">
+                                    <input type="hidden"name="allot_class[{{ $itemCounter }}]">
+                                    <input type="hidden"name="allotted_budget[{{ $itemCounter }}]">
+                                    <input type="hidden"name="justification[{{ $itemCounter }}]">
+                                    <input type="hidden" name="allotment_name[{{ $itemCounter }}]"
+                                           id="allotment-name-headerbreak-{{ $itemCounter }}">
+                                </div>
+                            </td>
+                            <td class="align-middle">
+                                <a onclick="$(this).deleteRow('#headerbreak-row-{{ $itemCounter }}');"
+                                class="btn btn-outline-red px-1 py-0">
+                                    <i class="fas fa-minus-circle"></i>
+                                </a>
+                            </td>
+                            <td class="align-middle">
+                                <a href="#" class="grey-text">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </a>
+                            </td>
+                        </tr>
+                                    @php $itemCounter++ @endphp
+                                @endif
                             @endforeach
                         @endif
 
                         <tr class="exclude-sortable">
                             <td colspan="12">
+                                <a class="btn btn-outline-indigo btn-sm btn-block z-depth-0"
+                                   onclick="$(this).addRow('.item-row', 'header', true);">
+                                    + Insert Header
+                                </a>
+                            </td>
+                        </tr>
+
+                        <tr class="exclude-sortable">
+                            <td colspan="12">
                                 <a class="btn btn-outline-light-blue btn-sm btn-block z-depth-0"
-                                   onclick="$(this).addRow('.item-row');">
+                                   onclick="$(this).addRow('.item-row', 'item', true);">
                                     + Add Item
+                                </a>
+                            </td>
+                        </tr>
+
+                        <tr class="exclude-sortable">
+                            <td colspan="12">
+                                <a class="btn btn-outline-primary btn-sm btn-block z-depth-0"
+                                   onclick="$(this).addRow('.item-row', 'header-break', true);">
+                                    + Add Group Break
                                 </a>
                             </td>
                         </tr>

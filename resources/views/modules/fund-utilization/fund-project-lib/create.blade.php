@@ -83,7 +83,7 @@
                         </tr>
                     </thead>
                     <tbody class="sortable">
-                        <tr id="item-row-1" class="item-row"></tr>
+                        <tr id="item-row-0" class="item-row"></tr>
 
                         <tr class="exclude-sortable">
                             <td colspan="12">

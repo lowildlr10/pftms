@@ -84,19 +84,28 @@ $(function() {
         return true;
     }
 
-    $.fn.addRow = function(rowClass, type) {
-        let lastRow = $(rowClass).last();
+    $.fn.addRow = function(rowClass, type, isRealignment = false) {
+        const lastRow = $(rowClass).last();
         let lastRowID = (lastRow.length > 0) ? lastRow.attr('id') : type+'-row-0';
-        let _lastRowID = lastRowID.split('-');
-        let newID = parseInt(_lastRowID[2]) + 1;
         let rowOutput = "";
+        let newID = 1;
+
+        $(rowClass).each(function() {
+            const elemExplodedID = $(this).attr('id').split('-');
+            const elemIndexID = elemExplodedID[2];
+
+            if (parseInt(elemIndexID) >= newID) {
+                newID = parseInt(elemIndexID) + 1;
+            }
+        });
 
         if (type == 'item') {
             let allotmentName = `
                 <td>
                     <div class="md-form form-sm my-0">
                         <input name="row_type[${newID}]" type="hidden" value="${type}">
-                        <input type="hidden" name="allotment_id[${newID}]" value="0">
+                        <input type="hidden" name="allotment_id[${newID}]">
+                        <input type="hidden" name="allotment_realign_id[${newID}]">
                         <input type="text" placeholder=" Value..." name="allotment_name[${newID}]"
                             class="form-control required form-control-sm allotment-name py-1"
                             id="allotment-name-${newID}">
@@ -119,6 +128,14 @@ $(function() {
                             onchange="$(this).totalBudgetIsValid();">
                     </div>
                 </td>`,
+                justification = !isRealignment ? '' : `
+                <td>
+                    <div class="md-form form-sm my-0">
+                        <textarea id="justification" class="md-textarea form-control"
+                                  name="justification[${newID}]" rows="2"
+                                  placeholder="Justification"></textarea>
+                    </div>
+                </td>`,
                 deleteButton = `
                 <td class="align-middle">
                     <a onclick="$(this).deleteRow('#item-row-${newID}');"
@@ -135,7 +152,7 @@ $(function() {
 
             rowOutput = '<tr id="item-row-'+newID+'" class="item-row">'+
                         allotmentName + allotmentClassification + allotmentBudget +
-                        deleteButton + sortableButton + '</tr>';
+                        justification + deleteButton + sortableButton + '</tr>';
 
             $(rowOutput).insertAfter('#' + lastRowID);
             initializeSelect2();
@@ -144,7 +161,8 @@ $(function() {
                 <td>
                     <div class="md-form form-sm my-0">
                         <input name="row_type[${newID}]" type="hidden" value="${type}">
-                        <input type="hidden" name="allotment_id[${newID}]" value="0">
+                        <input type="hidden" name="allotment_id[${newID}]">
+                        <input type="hidden" name="allotment_realign_id[${newID}]">
                         <input type="hidden"name="allot_class[${newID}]">
                         <input type="hidden"name="allotted_budget[${newID}]">
                         <input type="text" placeholder="Header Value..." name="allotment_name[${newID}]"
@@ -152,6 +170,7 @@ $(function() {
                             id="allotment-name-${newID}">
                     </div>
                 </td>`,
+                additionalTD = !isRealignment ? '<td colspan="2"></td>' : '<td colspan="3"></td>',
                 deleteButton = `
                 <td class="align-middle">
                     <a onclick="$(this).deleteRow('#header-row-${newID}');"
@@ -166,16 +185,17 @@ $(function() {
                     </a>
                 </td>`;
             rowOutput = '<tr id="header-row-'+newID+'" class="item-row">'+ allotmentHeaderName +
-                        '<td colspan="2"></td>' + deleteButton + sortableButton + '</tr>';
+                        additionalTD + deleteButton + sortableButton + '</tr>';
 
             $(rowOutput).insertAfter('#' + lastRowID);
         } else if (type == 'header-break') {
              let allotmentHeaderName = `
-                <td colspan="3">
+                <td colspan="` + (!isRealignment ? 3 : 4) + `">
                     <hr>
                     <div class="md-form form-sm my-0">
                         <input name="row_type[${newID}]" type="hidden" value="${type}">
-                        <input type="hidden" name="allotment_id[${newID}]" value="0">
+                        <input type="hidden" name="allotment_id[${newID}]">
+                        <input type="hidden" name="allotment_realign_id[${newID}]">
                         <input type="hidden"name="allot_class[${newID}]">
                         <input type="hidden"name="allotted_budget[${newID}]">
                         <input type="hidden" name="allotment_name[${newID}]" id="allotment-name-${newID}">
@@ -194,7 +214,7 @@ $(function() {
                         <i class="fas fa-ellipsis-v"></i>
                     </a>
                 </td>`;
-            rowOutput = '<tr id="header-row-'+newID+'" class="item-row">'+ allotmentHeaderName +
+            rowOutput = '<tr id="headerbreak-row-'+newID+'" class="item-row">'+ allotmentHeaderName +
                         deleteButton + sortableButton + '</tr>';
 
             $(rowOutput).insertAfter('#' + lastRowID);
@@ -241,6 +261,7 @@ $(function() {
                         $('#approved-budget').val(project.project_cost)
                                              .siblings()
                                              .addClass('active');
+                        $('#remaining-budget').val(project.project_cost);
                     }
                 });
             });
