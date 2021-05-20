@@ -227,7 +227,7 @@
                             <td colspan="4">
                                 <hr>
                                 <div class="md-form form-sm my-0">
-                                    <input name="row_type[{{ $itemCounter }}]" type="hidden" value="headerbreak">
+                                    <input name="row_type[{{ $itemCounter }}]" type="hidden" value="header-break">
                                     <input type="hidden" name="allotment_id[{{ $itemCounter }}]">
                                     <input type="hidden"name="allot_class[{{ $itemCounter }}]">
                                     <input type="hidden"name="allotted_budget[{{ $itemCounter }}]">

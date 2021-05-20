@@ -46,7 +46,6 @@ class LineItemBudgetController extends Controller
                     ->orWhere('approved_budget', 'like', "%$keyword%")
                     ->orWhereHas('allotments', function($query) use ($keyword) {
                         $query->where('budget_id', 'like', "%$keyword%")
-                              ->orWhere('budget_id', "%$keyword%")
                               ->orWhere('allotment_name', "%$keyword%")
                               ->orWhere('allotment_cost', "%$keyword%");
                     });
@@ -219,7 +218,7 @@ class LineItemBudgetController extends Controller
                         $instanceAllotment->allotment_class = $allotmentClass;
                         $instanceAllotment->order_no = $orderNo;
                         $instanceAllotment->allotment_name = empty($headerName) ? $allotmentNames[$ctr] :
-                                                            "$headerName::$allotmentNames[$ctr]";
+                                                            "$headerName::".$allotmentNames[$ctr];
                         $instanceAllotment->allotment_cost = $allottedBudgets[$ctr];
                         $instanceAllotment->save();
                     } else if ($rowTypes[$ctr] == 'header-break') {
@@ -259,6 +258,9 @@ class LineItemBudgetController extends Controller
         $allotmentClasses = $request->allot_class;
         $allottedBudgets = $request->allotted_budget;
         $justifications = $request->justification;
+
+        //echo '$rowTypes, $allotmentIDs, $allotmentNames, $allotmentClasses, $allottedBudgets, $justifications';
+        //dd($rowTypes, $allotmentIDs, $allotmentNames, $allotmentClasses, $allottedBudgets, $justifications);
 
         $documentType = 'Line-Item Budget Realignment';
         $routeName = 'fund-project-lib';
@@ -308,12 +310,14 @@ class LineItemBudgetController extends Controller
                         $instanceRealignedAllot->order_no = $orderNo;
                         $instanceRealignedAllot->realigned_allotment_cost = $allottedBudgets[$ctr];
                         $instanceRealignedAllot->allotment_name = empty($headerName) ? $allotmentNames[$ctr] :
-                                                                  "$headerName::$allotmentNames[$ctr]";
+                                                                  "$headerName::".$allotmentNames[$ctr];
                         $instanceRealignedAllot->justification = $justifications[$ctr];
                         $instanceRealignedAllot->save();
                     } else if ($rowTypes[$ctr] == 'header-break') {
                         $headerName = "";
                     }
+
+                    echo "$headerName<br>";
                 }
             }
 
@@ -440,7 +444,7 @@ class LineItemBudgetController extends Controller
                         $instanceAllotment->allotment_class = $allotmentClasses[$ctr];
                         $instanceAllotment->order_no = $orderNo;
                         $instanceAllotment->allotment_name = empty($headerName) ? $allotmentNames[$ctr] :
-                                                            "$headerName::$allotmentNames[$ctr]";
+                                                            "$headerName::".$allotmentNames[$ctr];
                         $instanceAllotment->allotment_cost = $allottedBudgets[$ctr];
                         $instanceAllotment->save();
 
@@ -534,7 +538,7 @@ class LineItemBudgetController extends Controller
                         $instanceRealignedAllot->order_no = $orderNo;
                         $instanceRealignedAllot->realigned_allotment_cost = $allottedBudgets[$ctr];
                         $instanceRealignedAllot->allotment_name = empty($headerName) ? $allotmentNames[$ctr] :
-                                                                  "$headerName::$allotmentNames[$ctr]";
+                                                                  "$headerName::".$allotmentNames[$ctr];
                         $instanceRealignedAllot->justification = $justifications[$ctr];
                         $instanceRealignedAllot->save();
                     } else if ($rowTypes[$ctr] == 'header-break') {
@@ -774,14 +778,13 @@ class LineItemBudgetController extends Controller
             $budgetID = !$isRealignment ? $instanceBudget->id :
                         $instanceBudget->budget_id;
             $instanceBudget->date_approved = Carbon::now();
-            //$instanceBudget->approved_by = Auth::user()->id;
             $instanceBudget->save();
 
             //$instanceNotif->notifyApproveSummary($id, Auth::user()->id);
 
             $msg = "$documentType '$budgetID' successfully set to 'Approved'.";
             Auth::user()->log($request, $msg);
-            return redirect()->route($routeName, ['keyword' => $id])
+            return redirect()->route($routeName, ['keyword' => $budgetID])
                              ->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
