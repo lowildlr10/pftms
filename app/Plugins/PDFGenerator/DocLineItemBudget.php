@@ -7,14 +7,19 @@ class DocLineItemBudget extends PDF {
         $pageHeight = $this->h;
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
-        $serialNo = $data->liq->serial_no;
-        $dateLiquidation = $data->liq->date_liquidation;
-        $dateClaimant = $data->liq->date_claimant;
-        $dateSupervisor = $data->liq->date_supervisor;
-        $dateAccountant = $data->liq->date_accounting;
-        $claimant = $data->claimant;
-        $supervisor = $data->supervisor;
-        $accounting = $data->accounting;
+
+        $cy = $data->cy_year;
+        $title = $data->title;
+        $duration = $data->duration;
+        $implementingAgency = $data->implementing_agency;
+        $coimplementors = $data->coimplementors;
+        $monitoringOffices = $data->monitoring_offices;
+        $leader = $data->leader;
+        $totalCost = $data->total_cost;
+        $preparedBy = $data->submitted_by;
+        $approvedBy = $data->approved_by;
+        $preparedByPos = $data->submitted_by_pos;
+        $approvedByPos = $data->approved_by_pos;
 
         /* ------------------------------------- Start of Config ------------------------------------- */
 
@@ -25,6 +30,7 @@ class DocLineItemBudget extends PDF {
         $this->SetMargins(15, 15, 15);
         $this->SetHeaderMargin(10);
         $this->SetPrintHeader(false);
+        $this->SetPrintFooter(false);
 
         //Set auto page breaks
         $this->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
@@ -49,97 +55,73 @@ class DocLineItemBudget extends PDF {
         /* ------------------------------------- Start of Doc ------------------------------------- */
 
         //Title header
-        $this->Cell($pageWidth * 0.57, 5,'', 'TL', '', 'C');
-        $this->Cell($pageWidth * 0, 5, '', 'TLR');
+        $this->SetFont('helvetica', 'B', 9);
+        $this->Cell(0, 4, 'DEPARTMENT OF SCIENCE AND TECHNOLOGY', '', '', 'C');
         $this->Ln();
 
-        $this->SetFont('Times', 'B', 12);
-        $this->Cell($pageWidth * 0.57, 5, 'LIQUIDATION REPORT', 'L', '', 'C');
-        $this->SetFont('Times', '', 12);
-        $this->Cell($pageWidth * 0, 5, 'Serial No.: ' . $serialNo, 'LR');
+        $this->Cell(0, 4, 'Cordillera Administrative Region', '', '', 'C');
         $this->Ln();
 
-        $this->Cell($pageWidth * 0.57, 5, 'Period Covered: ' . $data->liq->period_covered, 'L', '', 'C');
-        $this->Cell($pageWidth * 0, 5, 'Date: ' . $dateLiquidation, 'LR');
+        $this->Cell(0, 4, 'Project Line-Item-Budget', '', '', 'C');
         $this->Ln();
 
-        $this->Cell($pageWidth * 0.57, 5, '', 'L', '', 'C');
-        $this->Cell($pageWidth * 0, 5, '', 'BLR');
+        $this->Cell(0, 4, "CY $cy", '', '', 'C');
+        $this->Ln(12);
+
+        $this->SetFont('helvetica', '', 9);
+        $this->Cell($pageWidth * 0.19, 5, 'Project Title', 0, 0, 'L');
+        $this->Cell($pageWidth * 0.01, 5, ':', 0, 0, 'C');
+        $this->MultiCell(0, 5, $title, 0, 'L');
+
+        $this->Cell($pageWidth * 0.19, 5, 'Current Duration', 0, 0, 'L');
+        $this->Cell($pageWidth * 0.01, 5, ':', 0, 0, 'C');
+        $this->Cell(0, 5, $duration, 0, 0, 'L');
         $this->Ln();
 
-        $this->SetFont('Times', 'B', 12);
-        $this->Cell($pageWidth * 0.57, 5, 'Entity Name : ' . $data->liq->entity_name, 'L', '');
-        $this->SetFont('Times', '', 12);
-        $this->Cell($pageWidth * 0, 5, 'Responsibility Center Code: ', 'LR');
+        $this->Cell($pageWidth * 0.19, 5, 'Implementing Agency', 0, 0, 'L');
+        $this->Cell($pageWidth * 0.01, 5, ':', 0, 0, 'C');
+        $this->Cell(0, 5, $implementingAgency, 0, 0, 'L');
         $this->Ln();
 
-        $this->SetFont('Times', 'B', 12);
-        $this->Cell($pageWidth * 0.57, 6, 'Fund Cluster :  ' . $data->liq->fund_cluster, 'BL', '');
-        $this->SetFont('Times', '', 12);
-        $this->Cell($pageWidth * 0, 6, $data->liq->responsibility_center, 'BLR', '', 'C');
+        $this->Cell($pageWidth * 0.19, 5, 'Co-Implementing Agency', 0, 0, 'L');
+        $this->Cell($pageWidth * 0.01, 5, ':', 0, 0, 'C');
+        $this->Cell(0, 5, $coimplementors, 0, 0, 'L');
         $this->Ln();
 
-        // Table title
-        $this->SetFont('Times', 'B', 11);
-        $this->Cell($pageWidth * 0.57, 10, 'PARTICULARS', 'BL', '', 'C');
-        $this->Cell($pageWidth * 0, 10, 'AMOUNT', 'BLR', '', 'C');
+        $this->Cell($pageWidth * 0.19, 5, 'Monitoring Office', 0, 0, 'L');
+        $this->Cell($pageWidth * 0.01, 5, ':', 0, 0, 'C');
+        $this->Cell(0, 5, $monitoringOffices, 0, 0, 'L');
         $this->Ln();
+
+        $this->Cell($pageWidth * 0.19, 5, 'Project Leader', 0, 0, 'L');
+        $this->Cell($pageWidth * 0.01, 5, ':', 0, 0, 'C');
+        $this->Cell(0, 5, $leader, 0, 0, 'L');
+        $this->Ln();
+
+        $this->Cell($pageWidth * 0.19, 5, 'Project Cost', 0, 0, 'L');
+        $this->Cell($pageWidth * 0.01, 5, ':', 0, 0, 'C');
+        $this->Cell(0, 4, $totalCost, 0, 1, 'L');
+        $this->Ln(5);
 
         // Table body
-        $this->SetFont('Times', '', 11);
         $this->htmlTable($data->table_data);
+        $this->Ln(10);
 
-        // Signatories row
-        $this->Cell($pageWidth * 0.03, 5, 'A', 'BL', '');
-        $this->Cell($pageWidth * 0.255, 5, 'Certified: Correctness of the', 'L', '');
-        $this->Cell($pageWidth * 0.03, 5, 'B', 'BL', '');
-        $this->Cell($pageWidth * 0.255, 5, 'Certified: Purpose of travel /', 'L', '');
-        $this->Cell($pageWidth * 0.03, 5, 'C', 'BL', '');
-        $this->Cell($pageWidth * 0, 5, 'Certified: Supporting documents', 'LR', '');
+        $this->Cell($pageWidth * 0.34, 4, '    Prepared By:', 0, 0, 'L');
+        $this->Cell($pageWidth * 0.34, 4, '    Approved By:', 0, 0, 'L');
+        $this->Cell(0, 4, 'Date:', 0, 1, 'L');
+        $this->Ln(5);
+
+        $this->SetFont('helvetica', 'B', 9);
+        $this->Cell($pageWidth * 0.34, 4, $preparedBy, 0, 0, 'C');
+        $this->Cell($pageWidth * 0.34, 4, $approvedBy, 0, 0, 'C');
+        $this->Cell(0, 4, '', 0, 0, 'C');
         $this->Ln();
 
-        $this->Cell($pageWidth * 0.03, 5, '', 'L', '');
-        $this->Cell($pageWidth * 0.255, 5, 'above data', '', '');
-        $this->Cell($pageWidth * 0.03, 5, '', 'L', '');
-        $this->Cell($pageWidth * 0.255, 5, 'cash advance duly accomplished', '', '');
-        $this->Cell($pageWidth * 0.03, 5, '', 'L', '');
-        $this->Cell($pageWidth * 0, 5, 'complete and proper', 'R', '');
-        $this->Ln();
-
-        $this->Cell($pageWidth * 0.285, 5, '', 'L');
-        $this->Cell($pageWidth * 0.285, 5, '', 'L');
-        $this->Cell($pageWidth * 0, 5, '', 'LR');
-        $this->Ln();
-
-        $this->Cell($pageWidth * 0.285, 5, $claimant, 'L', '', 'C');
-        $this->Cell($pageWidth * 0.285, 5, $supervisor, 'L', '', 'C');
-        $this->Cell($pageWidth * 0, 5, $accounting, 'LR', '', 'C');
-        $this->Ln();
-
-        $this->Cell($pageWidth * 0.285, 5, 'Signature over Printed Name', 'L', '', 'C');
-        $this->Cell($pageWidth * 0.285, 5, 'Signature over Printed Name', 'L', '', 'C');
-        $this->Cell($pageWidth * 0, 5, 'Signature over Printed Name', 'LR', '', 'C');
-        $this->Ln();
-
-        $this->Cell($pageWidth * 0.285, 5, 'Claimant', 'L', '', 'C');
-        $this->Cell($pageWidth * 0.285, 5, 'Immediate Supervisor', 'L', '', 'C');
-        $this->Cell($pageWidth * 0, 5, 'Head, Accounting Division Unit', 'LR', '', 'C');
-        $this->Ln();
-
-        $this->Cell($pageWidth * 0.285, 5, '', 'L');
-        $this->Cell($pageWidth * 0.285, 5, '', 'L');
-        $this->Cell($pageWidth * 0, 5, '', 'LR');
-        $this->Ln();
-
-        $this->Cell($pageWidth * 0.285, 5, '', 'L');
-        $this->Cell($pageWidth * 0.285, 5, '', 'L');
-        $this->Cell($pageWidth * 0, 5, 'JEV No.:' . $data->liq->jev_no, 'LR');
-        $this->Ln();
-
-        $this->Cell($pageWidth * 0.285, 5, 'Date: ' . $dateClaimant, 'BL');
-        $this->Cell($pageWidth * 0.285, 5, 'Date: ' . $dateSupervisor, 'BL');
-        $this->Cell($pageWidth * 0, 5, 'Date:' . $dateAccountant, 'BLR');
-        $this->Ln();
+        $this->SetFont('helvetica', '', 9);
+        $this->Cell($pageWidth * 0.34, 4, $preparedByPos, 0, 0, 'C');
+        $this->Cell($pageWidth * 0.34, 4, $approvedByPos, 0, 0, 'C');
+        $this->Cell(0, 4, '', 0, 0, 'C');
 
         /* ------------------------------------- End of Doc ------------------------------------- */
     }

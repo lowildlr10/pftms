@@ -117,6 +117,14 @@ $(function() {
                 $('#print-title').html('Generate Property Label Tag');
                 setPaperSize('A4');
                 break;
+            case 'fund_lib':
+                $('#print-title').html('Generate Line-Item-Budget');
+                setPaperSize('A4');
+                break;
+            case 'fund_lib_realignment':
+                $('#print-title').html('Generate Line-Item-Budget Realignment');
+                setPaperSize('A4');
+                break;
 
             default:
                 break;

@@ -462,9 +462,8 @@ class PrintController extends Controller
 
             case 'fund_lib':
                 $data = $this->getDataLIB($key);
-                //$data->doc_type = $documentType;
+                $data->doc_type = $documentType;
 
-                /*
                 if ($test == 'true') {
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
                     $msg = "Generated the Line Item Budgets '$key' document.";
@@ -478,17 +477,17 @@ class PrintController extends Controller
                         $pageUnit,
                         $previewToggle
                     );
-                }*/
+                }
                 break;
 
             case 'fund_lib_realignment':
-                $data = $this->getDataLIBRealignment($key);
+                $data = $this->getDataRealignmentLIB($key);
                 $data->doc_type = $documentType;
 
                 if ($test == 'true') {
                     $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
-                    $msg = "Generated the Line Item Budgets Realignment '$key' document.";
-                    Auth::user()->log($request, $msg);
+                    $msg = "Generated the Line Item Budgets '$key' document.";
+                    //Auth::user()->log($request, $msg);
                 } else {
                     $this->generateLIBRealignment(
                         $data,
@@ -656,6 +655,359 @@ class PrintController extends Controller
         return $officeName;
     }
 
+    private function getDataRealignmentLIB($budRealignID) {
+        $budgetRealignedData = DB::table('funding_budget_realignments')
+                                 ->where('id', $budRealignID)
+                                 ->orderBy('realignment_order', 'desc')
+                                 ->first();
+        $allotments = $budgetRealignedData ?
+                      DB::table('funding_allotment_realignments as r_allot')
+                        ->select('allot.id as id', 'r_allot.allotment_name as allotment_name',
+                                'r_allot.realigned_allotment_cost as allotment_cost',
+                                'r_allot.allotment_class as allotment_class', 'r_allot.coimplementers',
+                                'r_allot.id as r_allot_id', 'r_allot.justification',)
+                        ->leftJoin('funding_allotments as allot', 'allot.id', '=',
+                                   'r_allot.allotment_id')
+                        ->where('r_allot.budget_realign_id', $budgetRealignedData->id)
+                        ->orderBy('r_allot.order_no')
+                        ->get() :
+                      DB::table('funding_allotments')
+                        ->where('budget_id', $budgetRealignedData->budget_id)
+                        ->orderBy('order_no')
+                        ->get();
+
+        $realignOrder = $budgetRealignedData->realignment_order;
+
+        $projID = $budgetRealignedData->project_id;
+        $projData = FundingProject::find($projID);
+        $cyYearFrom = date_format(date_create($projData->date_from), 'Y');
+        $cyYearTo = date_format(date_create($projData->date_to), 'Y');
+        $currDateFrom = date_format(date_create($projData->date_from), 'F n, Y');
+        $currDateTo = date_format(date_create($projData->date_to), 'F n, Y');
+
+        $cyYear = $cyYearFrom == $cyYearTo ? $cyYearTo : "$cyYearFrom to $cyYearTo";
+        $projTitle = $projData->project_title;
+        $currDuration = "$currDateFrom - $currDateTo";
+        $implAgency = $this->getAgencyName($projData->implementing_agency);
+        $impBudget = $projData->implementing_project_cost;
+        $__coimplAgencies = unserialize($projData->comimplementing_agency_lgus);
+        $_coimplAgencies = [];
+
+        foreach ($__coimplAgencies as $agency) {
+            $_coimplAgencies[] = $this->getAgencyName($agency["comimplementing_agency_lgu"]);
+        }
+
+        $coimplAgencies = implode(',', $_coimplAgencies);
+        $__monitOffices = unserialize($projData->monitoring_offices);
+        $_monitOffices = [];
+
+        foreach ($__monitOffices as $monitOffice) {
+            $_monitOffices[] = $this->getMonitoringOfficeName($monitOffice);
+        }
+
+        $monitOffices = implode(',', $_monitOffices);
+        $projectLeader = $projData->project_leader;
+        $projectCost = $projData->project_cost;
+
+        $instanceSignatory = new Signatory;
+        $submittedBy = Auth::user()->getEmployee($budgetRealignedData->sig_submitted_by)->name;
+        $submittedByPos = Auth::user()->getEmployee($budgetRealignedData->sig_submitted_by)->position;
+        $approvedBy = $instanceSignatory->getSignatory($budgetRealignedData->sig_approved_by)->name;
+        $approvedByPos = $instanceSignatory->getSignatory($budgetRealignedData->sig_approved_by)->position;
+
+        $groupedAllotments = $this->groupAllotments($allotments);
+
+        $multiplier = 1;
+
+        $totals = [$impBudget];
+        $headerCount = 1;
+        $headerCountRoman = 'I';
+        $tableHeader = ['PARTICULARS', '', $implAgency];
+        $tableBody = [];
+
+        for ($orderNo = 1; $orderNo <= $realignOrder; $orderNo++) {
+            //$tableHeader[] = "$implAgency (Realignment $orderNo)";
+        }
+
+        foreach ($_coimplAgencies as $coimplementor) {
+            $tableHeader[] = $coimplementor;
+
+            for ($orderNo = 1; $orderNo <= $realignOrder; $orderNo++) {
+                //$tableHeader[] = "$coimplementor (Realignment $orderNo)";
+            }
+        }
+
+        foreach ($__coimplAgencies as $coimp) {
+            $totals[] = $coimp['coimplementing_project_cost'];
+        }
+
+        $tableHeaderCount = count($tableHeader);
+        $fontStyles = [];
+        $aligns = [];
+        $widths = [];
+        $colSpanKeys = [];
+
+        for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+            $fontStyles[] = "B";
+            $aligns[] = "C";
+
+            if ($tblHeadCtr == 0) {
+                $widths[] = 3;
+                $colSpanKeys[] = "0-1";
+            } else if ($tblHeadCtr == 1) {
+                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+            } else {
+                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                $colSpanKeys[] = "$tblHeadCtr";
+            }
+        }
+
+        $data = [
+            [
+                'col-span' => true,
+                'col-span-key' => $colSpanKeys,
+                'aligns' => $aligns,
+                'widths' => $widths,
+                'font-styles' => $fontStyles,
+                'type' => 'row-data',
+                'data' => [$tableHeader]
+            ]
+        ];
+
+        $grandTotal = 0;
+
+        foreach ($groupedAllotments as $className => $classItems) {
+            $subTotal = [0];
+            $row = [];
+
+            switch ($headerCount) {
+                case 1:
+                    $headerCountRoman = 'I';
+                    break;
+                case 2:
+                    $headerCountRoman = 'II';
+                    break;
+                case 3:
+                    $headerCountRoman = 'III';
+                    break;
+                case 4:
+                    $headerCountRoman = 'IV';
+                    break;
+                default:
+                    break;
+            }
+
+            $row[] = "$headerCountRoman.";
+            $row[] = str_replace('-', ' ', $className);
+
+            for ($rowCount = 0; $rowCount <= $tableHeaderCount - count($row); $rowCount++) {
+                $row[] = "";
+            }
+
+            $fontStyles = [];
+            $aligns = [];
+            $widths = [];
+            $colSpanKeys = [];
+
+            for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+                $fontStyles[] = "B";
+                $aligns[] = "L";
+
+                if ($tblHeadCtr == 0) {
+                    $widths[] = 3;
+                    $colSpanKeys[] = "0";
+                } else if ($tblHeadCtr == 1) {
+                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                    $colSpanKeys[] = "1";
+                } else if ($tblHeadCtr == 2) {
+                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                    $colSpanKeys[] = "2-".($tableHeaderCount - 1);
+                } else if ($tblHeadCtr == 3) {
+                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                } else {
+                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                }
+            }
+
+            $data[] = [
+                'col-span' => true,
+                'col-span-key' => $colSpanKeys,
+                'aligns' => $aligns,
+                'widths' => $widths,
+                'font-styles' => $fontStyles,
+                'type' => 'row-data',
+                'data' => [$row]
+            ];
+
+            foreach ($classItems as $ctr => $item) {
+                if (is_int($ctr)) {
+                    $allotCoimplementors = unserialize($item->coimplementers);
+                    $row = [''];
+                    $row[] = " $item->allotment_cost";
+                    $row[] = $item->allotment_cost ?
+                             number_format($item->allotment_cost, 2) :
+                             '-';
+
+                    foreach ($allotCoimplementors as $coimp) {
+                        $row[] = $coimp['coimplementor_budget'] ?
+                                 number_format($coimp['coimplementor_budget'], 2) :
+                                 '-';
+                    }
+
+                    $fontStyles = [];
+                    $aligns = [];
+                    $widths = [];
+                    $colSpanKeys = [];
+
+                    for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+                        $colSpanKeys[] = "$tblHeadCtr";
+
+                        if ($tblHeadCtr == 0) {
+                            $fontStyles[] = "B";
+                            $aligns[] = "L";
+                            $widths[] = 3;
+                        } else if ($tblHeadCtr == 2 || $tblHeadCtr == 3) {
+                            $fontStyles[] = "";
+                            $aligns[] = "R";
+                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+
+                        } else {
+                            $fontStyles[] = "B";
+                            $aligns[] = "L";
+                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                        }
+                    }
+
+                    $data[] = [
+                        'col-span' => true,
+                        'col-span-key' => $colSpanKeys,
+                        'aligns' => $aligns,
+                        'widths' => $widths,
+                        'font-styles' => $fontStyles,
+                        'type' => 'row-data',
+                        'data' => [$row]
+                    ];
+
+                    $row = [];
+                } else {
+                    $row = ['', ' '.str_replace('-', ' ', $ctr)];
+
+                    for ($rowCount = 0; $rowCount <= $tableHeaderCount - count($row); $rowCount++) {
+                        $row[] = "";
+                    }
+
+                    $fontStyles = [];
+                    $aligns = [];
+                    $widths = [];
+                    $colSpanKeys = [];
+
+                    for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+                        $colSpanKeys[] = "$tblHeadCtr";
+
+                        if ($tblHeadCtr == 0) {
+                            $fontStyles[] = "B";
+                            $aligns[] = "L";
+                            $widths[] = 3;
+                        } else if ($tblHeadCtr == 2 || $tblHeadCtr == 3) {
+                            $fontStyles[] = "";
+                            $aligns[] = "R";
+                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+
+                        } else {
+                            $fontStyles[] = "B";
+                            $aligns[] = "L";
+                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                        }
+                    }
+
+                    $data[] = [
+                        'col-span' => true,
+                        'col-span-key' => $colSpanKeys,
+                        'aligns' => $aligns,
+                        'widths' => $widths,
+                        'font-styles' => $fontStyles,
+                        'type' => 'row-data',
+                        'data' => [$row]
+                    ];
+
+                    $row = [];
+
+                    foreach ($item as $itm) {
+                        $allotCoimplementors = unserialize($itm->coimplementers);
+                        $row = [''];
+                        $row[] = '  '.explode('::', $itm->allotment_name)[1];
+                        $row[] = $itm->allotment_cost ?
+                                 number_format($itm->allotment_cost, 2) :
+                                 '-';
+
+                        foreach ($allotCoimplementors as $coimp) {
+                            $row[] = $coimp['coimplementor_budget'] ?
+                                     number_format($coimp['coimplementor_budget'], 2) :
+                                     '-';
+                        }
+
+                        $fontStyles = [];
+                        $aligns = [];
+                        $widths = [];
+                        $colSpanKeys = [];
+
+                        for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+                            $colSpanKeys[] = "$tblHeadCtr";
+
+                            if ($tblHeadCtr == 0) {
+                                $fontStyles[] = "B";
+                                $aligns[] = "L";
+                                $widths[] = 3;
+                            } else if ($tblHeadCtr == 1) {
+                                $fontStyles[] = "";
+                                $aligns[] = "L";
+                                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                            } else if ($tblHeadCtr == 2 || $tblHeadCtr == 3) {
+                                $fontStyles[] = "";
+                                $aligns[] = "R";
+                                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                            } else {
+                                $fontStyles[] = "B";
+                                $aligns[] = "L";
+                                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                            }
+                        }
+
+                        $data[] = [
+                            'col-span' => true,
+                            'col-span-key' => $colSpanKeys,
+                            'aligns' => $aligns,
+                            'widths' => $widths,
+                            'font-styles' => $fontStyles,
+                            'type' => 'row-data',
+                            'data' => [$row]
+                        ];
+
+                        $row = [];
+                    }
+                }
+            }
+
+            $headerCount++;
+        }
+
+        return (object)[
+            'table_data' => $data,
+            'cy_year' => $cyYear,
+            'title' => $projTitle,
+            'duration' => $currDuration,
+            'implementing_agency' => $implAgency,
+            'coimplementors' => $coimplAgencies,
+            'monitoring_offices' => $monitOffices,
+            'leader' => $projectLeader,
+            'total_cost' => $projectCost,
+            'submitted_by' => $submittedBy,
+            'submitted_by_pos' => $submittedByPos,
+            'approved_by' => $approvedBy,
+            'approved_by_pos' => $approvedByPos,
+        ];
+    }
+
     private function getDataLIB($budgetID) {
         $libData = DB::table('funding_budgets')
                      ->where('id', $budgetID)
@@ -676,6 +1028,7 @@ class PrintController extends Controller
         $projTitle = $projData->project_title;
         $currDuration = "$currDateFrom - $currDateTo";
         $implAgency = $this->getAgencyName($projData->implementing_agency);
+        $impBudget = $projData->implementing_project_cost;
         $__coimplAgencies = unserialize($projData->comimplementing_agency_lgus);
         $_coimplAgencies = [];
 
@@ -692,6 +1045,8 @@ class PrintController extends Controller
         }
 
         $monitOffices = implode(',', $_monitOffices);
+        $projectLeader = $projData->project_leader;
+        $projectCost = $projData->project_cost;
 
         $instanceSignatory = new Signatory;
         $submittedBy = Auth::user()->getEmployee($libData->sig_submitted_by)->name;
@@ -701,22 +1056,61 @@ class PrintController extends Controller
 
         $groupedAllotments = $this->groupAllotments($allotments);
 
-        /*
-        dd($cyYear, $projTitle, $currDuration, $implAgency, $coimplAgencies, $monitOffices,
-           $submittedBy, $submittedByPos, $approvedBy, $approvedByPos, $groupedAllotments);*/
+        $multiplier = 1;
 
-        $itemTableData = [];
-        $multiplier = 9 / 10;
-
+        $totals = [$impBudget];
         $headerCount = 1;
         $headerCountRoman = 'I';
+        $tableHeader = ['PARTICULARS', '', $implAgency];
+        $tableBody = [];
 
-        $itemTableData[] = [
-            'PARTICULARS',
-            'AS APPROVED',
+        foreach ($_coimplAgencies as $coimplementor) {
+            $tableHeader[] = $coimplementor;
+        }
+
+        foreach ($__coimplAgencies as $coimp) {
+            $totals[] = $coimp['coimplementing_project_cost'];
+        }
+
+        $tableHeaderCount = count($tableHeader);
+        $fontStyles = [];
+        $aligns = [];
+        $widths = [];
+        $colSpanKeys = [];
+
+        for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+            $fontStyles[] = "B";
+            $aligns[] = "C";
+
+            if ($tblHeadCtr == 0) {
+                $widths[] = 3;
+                $colSpanKeys[] = "0-1";
+            } else if ($tblHeadCtr == 1) {
+                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+            } else {
+                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                $colSpanKeys[] = "$tblHeadCtr";
+            }
+        }
+
+        $data = [
+            [
+                'col-span' => true,
+                'col-span-key' => $colSpanKeys,
+                'aligns' => $aligns,
+                'widths' => $widths,
+                'font-styles' => $fontStyles,
+                'type' => 'row-data',
+                'data' => [$tableHeader]
+            ]
         ];
 
+        $grandTotal = 0;
+
         foreach ($groupedAllotments as $className => $classItems) {
+            $subTotal = [0];
+            $row = [];
+
             switch ($headerCount) {
                 case 1:
                     $headerCountRoman = 'I';
@@ -734,158 +1128,215 @@ class PrintController extends Controller
                     break;
             }
 
-            $itemTableData[] = [
-                "$headerCountRoman. $className",
+            $row[] = "$headerCountRoman.";
+            $row[] = str_replace('-', ' ', $className);
 
+            for ($rowCount = 0; $rowCount <= $tableHeaderCount - count($row); $rowCount++) {
+                $row[] = "";
+            }
+
+            $fontStyles = [];
+            $aligns = [];
+            $widths = [];
+            $colSpanKeys = [];
+
+            for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+                $fontStyles[] = "B";
+                $aligns[] = "L";
+
+                if ($tblHeadCtr == 0) {
+                    $widths[] = 3;
+                    $colSpanKeys[] = "0";
+                } else if ($tblHeadCtr == 1) {
+                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                    $colSpanKeys[] = "1";
+                } else if ($tblHeadCtr == 2) {
+                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                    $colSpanKeys[] = "2-".($tableHeaderCount - 1);
+                } else if ($tblHeadCtr == 3) {
+                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                } else {
+                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                }
+            }
+
+            $data[] = [
+                'col-span' => true,
+                'col-span-key' => $colSpanKeys,
+                'aligns' => $aligns,
+                'widths' => $widths,
+                'font-styles' => $fontStyles,
+                'type' => 'row-data',
+                'data' => [$row]
             ];
 
             foreach ($classItems as $ctr => $item) {
                 if (is_int($ctr)) {
+                    $allotCoimplementors = unserialize($item->coimplementers);
+                    $row = [''];
+                    $row[] = " $item->allotment_name";
+                    $row[] = $item->allotment_cost ?
+                             number_format($item->allotment_cost, 2) :
+                             '-';
 
+                    foreach ($allotCoimplementors as $coimp) {
+                        $row[] = $coimp['coimplementor_budget'] ?
+                                 number_format($coimp['coimplementor_budget'], 2) :
+                                 '-';
+                    }
+
+                    $fontStyles = [];
+                    $aligns = [];
+                    $widths = [];
+                    $colSpanKeys = [];
+
+                    for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+                        $colSpanKeys[] = "$tblHeadCtr";
+
+                        if ($tblHeadCtr == 0) {
+                            $fontStyles[] = "B";
+                            $aligns[] = "L";
+                            $widths[] = 3;
+                        } else if ($tblHeadCtr == 2 || $tblHeadCtr == 3) {
+                            $fontStyles[] = "";
+                            $aligns[] = "R";
+                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+
+                        } else {
+                            $fontStyles[] = "B";
+                            $aligns[] = "L";
+                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                        }
+                    }
+
+                    $data[] = [
+                        'col-span' => true,
+                        'col-span-key' => $colSpanKeys,
+                        'aligns' => $aligns,
+                        'widths' => $widths,
+                        'font-styles' => $fontStyles,
+                        'type' => 'row-data',
+                        'data' => [$row]
+                    ];
+
+                    $row = [];
                 } else {
+                    $row = ['', ' '.str_replace('-', ' ', $ctr)];
 
+                    for ($rowCount = 0; $rowCount <= $tableHeaderCount - count($row); $rowCount++) {
+                        $row[] = "";
+                    }
+
+                    $fontStyles = [];
+                    $aligns = [];
+                    $widths = [];
+                    $colSpanKeys = [];
+
+                    for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+                        $colSpanKeys[] = "$tblHeadCtr";
+
+                        if ($tblHeadCtr == 0) {
+                            $fontStyles[] = "B";
+                            $aligns[] = "L";
+                            $widths[] = 3;
+                        } else if ($tblHeadCtr == 2 || $tblHeadCtr == 3) {
+                            $fontStyles[] = "";
+                            $aligns[] = "R";
+                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+
+                        } else {
+                            $fontStyles[] = "B";
+                            $aligns[] = "L";
+                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                        }
+                    }
+
+                    $data[] = [
+                        'col-span' => true,
+                        'col-span-key' => $colSpanKeys,
+                        'aligns' => $aligns,
+                        'widths' => $widths,
+                        'font-styles' => $fontStyles,
+                        'type' => 'row-data',
+                        'data' => [$row]
+                    ];
+
+                    $row = [];
+
+                    foreach ($item as $itm) {
+                        $allotCoimplementors = unserialize($itm->coimplementers);
+                        $row = [''];
+                        $row[] = '  '.explode('::', $itm->allotment_name)[1];
+                        $row[] = $itm->allotment_cost ?
+                                 number_format($itm->allotment_cost, 2) :
+                                 '-';
+
+                        foreach ($allotCoimplementors as $coimp) {
+                            $row[] = $coimp['coimplementor_budget'] ?
+                                     number_format($coimp['coimplementor_budget'], 2) :
+                                     '-';
+                        }
+
+                        $fontStyles = [];
+                        $aligns = [];
+                        $widths = [];
+                        $colSpanKeys = [];
+
+                        for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+                            $colSpanKeys[] = "$tblHeadCtr";
+
+                            if ($tblHeadCtr == 0) {
+                                $fontStyles[] = "B";
+                                $aligns[] = "L";
+                                $widths[] = 3;
+                            } else if ($tblHeadCtr == 1) {
+                                $fontStyles[] = "";
+                                $aligns[] = "L";
+                                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                            } else if ($tblHeadCtr == 2 || $tblHeadCtr == 3) {
+                                $fontStyles[] = "";
+                                $aligns[] = "R";
+                                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                            } else {
+                                $fontStyles[] = "B";
+                                $aligns[] = "L";
+                                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                            }
+                        }
+
+                        $data[] = [
+                            'col-span' => true,
+                            'col-span-key' => $colSpanKeys,
+                            'aligns' => $aligns,
+                            'widths' => $widths,
+                            'font-styles' => $fontStyles,
+                            'type' => 'row-data',
+                            'data' => [$row]
+                        ];
+
+                        $row = [];
+                    }
                 }
             }
 
             $headerCount++;
         }
 
-        dd($groupedAllotments);
-
-
-        /*
-        $summary = DB::table('summary_lddaps')
-                     ->where('id', $id)
-                     ->first();
-        $mdsGSB = MdsGsb::find($summary->mds_gsb_id);
-        $summaryItems = DB::table('summary_lddap_items')
-                          ->where('sliiae_id', $id)
-                          ->orderBy('item_no')
-                          ->get();
-
-        $itemTableData = [];
-        $allotmentPS = 0;
-        $allotmentMOOE = 0;
-        $allotmentCO = 0;
-        $allotmentFE = 0;
-        $multiplier = 9 / 10;
-
-        foreach ($summaryItems as $ctr => $item) {
-            $lddap = DB::table('list_demand_payables')
-                       ->where('id', $item->lddap_id)
-                       ->first();
-
-            if (strpos($item->allotment_ps_remarks, "\n") !== FALSE) {
-                $searchStr = ["\r\n", "\n", "\r"];
-                $item->allotment_ps_remarks = str_replace($searchStr, '<br>', $item->allotment_ps_remarks);
-            }
-
-            if (strpos($item->allotment_mooe_remarks, "\n") !== FALSE) {
-                $searchStr = ["\r\n", "\n", "\r"];
-                $item->allotment_mooe_remarks = str_replace($searchStr, '<br>', $item->allotment_mooe_remarks);
-            }
-
-            if (strpos($item->allotment_co_remarks, "\n") !== FALSE) {
-                $searchStr = ["\r\n", "\n", "\r"];
-                $item->allotment_co_remarks = str_replace($searchStr, '<br>', $item->allotment_co_remarks);
-            }
-
-            if (strpos($item->allotment_fe_remarks, "\n") !== FALSE) {
-                $searchStr = ["\r\n", "\n", "\r"];
-                $item->allotment_fe_remarks = str_replace($searchStr, '<br>', $item->allotment_fe_remarks);
-            }
-
-            $allotmentPS += $item->allotment_ps;
-            $allotmentMOOE += $item->allotment_mooe;
-            $allotmentCO += $item->allotment_co;
-            $allotmentFE += $item->allotment_fe;
-
-            $item->total = $item->total ? number_format($item->total, 2) : '-';
-            $item->allotment_ps = $item->allotment_ps ? number_format($item->allotment_ps, 2) : '-';
-            $item->allotment_mooe = $item->allotment_mooe ? number_format($item->allotment_mooe, 2) : '-';
-            $item->allotment_co = $item->allotment_co ? number_format($item->allotment_co, 2) : '-';
-            $item->allotment_fe = $item->allotment_fe ? number_format($item->allotment_fe, 2) : '-';
-
-            $itemTableData[] = [
-                ($ctr + 1) . '. ' . $lddap->lddap_ada_no,
-                $item->date_issue,
-                $item->total,
-                $item->allotment_ps,
-                $item->allotment_mooe,
-                $item->allotment_co,
-                $item->allotment_fe,
-                $item->allotment_ps_remarks,
-                $item->allotment_mooe_remarks,
-                $item->allotment_co_remarks,
-                $item->allotment_fe_remarks,
-            ];
-        }
-
-        if (count($itemTableData) < 15) {
-            $itemDataCount = count($itemTableData);
-
-            for ($i = $itemDataCount; $i <= 14; $i++) {
-                $itemTableData[] = ['', '', '', '', '', '', '', '', '', '', ''];
-            }
-        }
-
-        $totalAmount = number_format($summary->total_amount, 2);
-        $allotmentPS = $allotmentPS ? number_format($allotmentPS, 2) : '-';
-        $allotmentMOOE = $allotmentMOOE ? number_format($allotmentMOOE, 2) : '-';
-        $allotmentCO = $allotmentCO ? number_format($allotmentCO, 2) : '-';
-        $allotmentFE = $allotmentFE ? number_format($allotmentFE, 2) : '-';
-
-        $itemTableData[] = [
-            'Total', '',
-            $totalAmount,
-            $allotmentPS,
-            $allotmentMOOE,
-            $allotmentCO,
-            $allotmentFE,
-            '', '', '', ''
-        ];
-
-        $instanceSignatory = new Signatory;
-        $certCorrect = $instanceSignatory->getSignatory($summary->sig_cert_correct)->name;
-        $certCorrectPosition = $instanceSignatory->getSignatory($summary->sig_cert_correct)->summary_designation;
-        $approvedBy = $instanceSignatory->getSignatory($summary->sig_approved_by)->name;
-        $approvedByPosition = $instanceSignatory->getSignatory($summary->sig_approved_by)->summary_designation;
-        $deliveredBy = $instanceSignatory->getSignatory($summary->sig_delivered_by)->name;
-        $deliveredByPosition = $instanceSignatory->getSignatory($summary->sig_delivered_by)->summary_designation;
-
-        $data = [
-            [
-                'aligns' => ['C', 'R', 'R', 'R', 'R', 'R', 'R', 'L', 'L', 'L', 'L'],
-                'widths' => [
-                    20.3 * $multiplier,
-                    10 * $multiplier,
-                    10 * $multiplier,
-                    10 * $multiplier,
-                    10 * $multiplier,
-                    10 * $multiplier,
-                    10 * $multiplier,
-                    7.7 * $multiplier,
-                    7.7 * $multiplier,
-                    7.7 * $multiplier,
-                    7.7 * $multiplier,
-                ],
-                'font-styles' => ['', '', '', '', '', '', '', '', '', '', ''],
-                'type' => 'row-data',
-                'data' => $itemTableData
-            ]
-        ];
-
         return (object)[
-            'summary' => $summary,
-            'mds_account_no' => $mdsGSB->sub_account_no,
             'table_data' => $data,
-            'sig_cert_correct' => strtoupper($certCorrect),
-            'sig_cert_correct_position' => $certCorrectPosition,
-            'sig_approved_by' => strtoupper($approvedBy),
-            'sig_approved_by_position' => $approvedByPosition,
-            'sig_delivered_by' => strtoupper($deliveredBy),
-            'sig_delivered_by_position' => strtoupper($deliveredByPosition),
-        ];*/
+            'cy_year' => $cyYear,
+            'title' => $projTitle,
+            'duration' => $currDuration,
+            'implementing_agency' => $implAgency,
+            'coimplementors' => $coimplAgencies,
+            'monitoring_offices' => $monitOffices,
+            'leader' => $projectLeader,
+            'total_cost' => $projectCost,
+            'submitted_by' => $submittedBy,
+            'submitted_by_pos' => $submittedByPos,
+            'approved_by' => $approvedBy,
+            'approved_by_pos' => $approvedByPos,
+        ];
     }
 
     private function getDataPropertyLabel($invStockIssueID) {
@@ -3163,29 +3614,30 @@ class PrintController extends Controller
     private function generateLIB($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new DocInventoryCustodian('P', $pageUnit, $pageSize);
-        $docCode = "FM-FAS-PUR F16";
-        $docRev = "Revision 1";
-        $docRevDate = "02-28-18";
-        $docTitle = strtolower($data->inventory_no);
+        $pdf = new DocLineItemBudget('P', $pageUnit, $pageSize);
+        $pdf->setHeaderLR(false, false);
+        $docCode = "";
+        $docRev = "";
+        $docRevDate = "";
+        $docTitle = 'test';
         $docCreator = "DOST-CAR";
         $docAuthor = "DOST-CAR";
-        $docSubject = "Inventory Custodian Slip";
-        $docKeywords = "ICS, ics, inventory, custodian, slip, inventory custodian slip";
+        $docSubject = "Line-Item-Budget";
+        $docKeywords = "LIB, lib, Line, line, LINE, Item, item, ITEM, Budget, budget, BUDGET, Line-Item-Budget";
 
-        $poDate = "";
 
+        /*
         if (!empty($data->po->date_po)) {
             $poDate = new DateTime($data->po->date_po);
             $poDate = $poDate->format('F j, Y');
-        }
+        }*/
 
         //Set document information
         $this->setDocumentInfo($pdf, $docCode, $docRev, $docRevDate, $docTitle,
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        $pdf->printICS($data);
+        $pdf->printLIB($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);
@@ -3194,29 +3646,30 @@ class PrintController extends Controller
     private function generateLIBRealignment($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new DocInventoryCustodian('P', $pageUnit, $pageSize);
-        $docCode = "FM-FAS-PUR F16";
-        $docRev = "Revision 1";
-        $docRevDate = "02-28-18";
-        $docTitle = strtolower($data->inventory_no);
+        $pdf = new DocLineItemBudgetRealignment('P', $pageUnit, $pageSize);
+        $pdf->setHeaderLR(false, false);
+        $docCode = "";
+        $docRev = "";
+        $docRevDate = "";
+        $docTitle = 'test';
         $docCreator = "DOST-CAR";
         $docAuthor = "DOST-CAR";
-        $docSubject = "Inventory Custodian Slip";
-        $docKeywords = "ICS, ics, inventory, custodian, slip, inventory custodian slip";
+        $docSubject = "Line-Item-Budget";
+        $docKeywords = "LIB, lib, Line, line, LINE, Item, item, ITEM, Budget, budget, BUDGET, Line-Item-Budget";
 
-        $poDate = "";
 
+        /*
         if (!empty($data->po->date_po)) {
             $poDate = new DateTime($data->po->date_po);
             $poDate = $poDate->format('F j, Y');
-        }
+        }*/
 
         //Set document information
         $this->setDocumentInfo($pdf, $docCode, $docRev, $docRevDate, $docTitle,
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        $pdf->printICS($data);
+        $pdf->printRealignmentLIB($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);
