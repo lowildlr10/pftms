@@ -684,7 +684,14 @@ class PrintController extends Controller
         }
 
         $coimplAgencies = implode(',', $_coimplAgencies);
-        $monitOffice = $this->getMonitoringOfficeName($projData->monitoring_office);
+        $__monitOffices = unserialize($projData->monitoring_offices);
+        $_monitOffices = [];
+
+        foreach ($__monitOffices as $monitOffice) {
+            $_monitOffices[] = $this->getMonitoringOfficeName($monitOffice);
+        }
+
+        $monitOffices = implode(',', $_monitOffices);
 
         $instanceSignatory = new Signatory;
         $submittedBy = Auth::user()->getEmployee($libData->sig_submitted_by)->name;
@@ -694,9 +701,9 @@ class PrintController extends Controller
 
         $groupedAllotments = $this->groupAllotments($allotments);
 
-
-        dd($cyYear, $projTitle, $currDuration, $implAgency, $coimplAgencies, $monitOffice,
-           $submittedBy, $submittedByPos, $approvedBy, $approvedByPos, $groupedAllotments);
+        /*
+        dd($cyYear, $projTitle, $currDuration, $implAgency, $coimplAgencies, $monitOffices,
+           $submittedBy, $submittedByPos, $approvedBy, $approvedByPos, $groupedAllotments);*/
 
         $itemTableData = [];
         $multiplier = 9 / 10;

@@ -65,6 +65,16 @@
         </label>
     </div>
 
+    <div class="md-form">
+        <input type="number" id="implementing-project-cost" class="form-control required"
+               name="implementing_project_cost" value="0.00"
+               onchange="$(this).computeTotalProjectCost();"
+               onkeyup="$(this).computeTotalProjectCost();">
+        <label for="implementing-project-cost" class="active">
+            Project Cost (Implementing Agency/LGU) <span class="red-text">*</span>
+        </label>
+    </div>
+
     <div class="custom-control custom-checkbox">
         <input type="checkbox" class="custom-control-input" id="coimplementing-agency"
                name="with_coimplementing_agency">
@@ -85,7 +95,9 @@
 
                 <div class="md-form mt-3">
                     <input type="number" class="form-control coimplementing-project-cost"
-                           name="coimplementing_project_costs[]">
+                           name="coimplementing_project_costs[]"
+                           onchange="$(this).computeTotalProjectCost();"
+                           onkeyup="$(this).computeTotalProjectCost();">
                     <label for="coimplementing-project-cost" class="active">
                         Project Cost (Co-implementing Agency/LGU) <span class="red-text">*</span>
                     </label>
@@ -126,8 +138,8 @@
 
     <div class="md-form">
         <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                name="monitoring_office">
-            <option value="" disabled selected>Choose a Monitoring Office</option>
+                name="monitoring_office[]" multiple>
+            <option value="" disabled selected>Choose a Monitoring Offices</option>
 
             @if (count($monitoringOffices) > 0)
                 @foreach ($monitoringOffices as $office)
@@ -145,8 +157,8 @@
     <div class="md-form">
         <input type="number" id="project-cost" class="form-control required"
                name="project_cost" value="0.00">
-        <label for="project-title" class="active">
-            Project Cost <span class="red-text">*</span>
+        <label for="project-cost" class="active">
+            Total Project Cost <span class="red-text">*</span>
         </label>
     </div>
 

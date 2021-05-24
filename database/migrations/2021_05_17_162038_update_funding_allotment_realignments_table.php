@@ -30,6 +30,7 @@ class UpdateFundingAllotmentRealignmentsTable extends Migration
             $table->unsignedInteger('order_no');
             $table->string('allotment_name');
             $table->double('realigned_allotment_cost', 50, 2)->default(0.00);
+            $table->binary('coimplementers')->nullable();
             $table->text('justification')->nullable();
             $table->timestamps();
         });

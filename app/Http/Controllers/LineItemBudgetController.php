@@ -70,8 +70,9 @@ class LineItemBudgetController extends Controller
                                      ->select('allot.id as id', 'r_allot.allotment_name as allotment_name',
                                               'r_allot.realigned_allotment_cost as allotment_cost',
                                               'r_allot.allotment_class as allotment_class',
-                                              'r_allot.id as r_allot_id', 'r_allot.justification',
-                                              'r_allot.allotment_id as allotment_id', 'r_allot.order_no')
+                                              'r_allot.coimplementers', 'r_allot.id as r_allot_id',
+                                              'r_allot.justification', 'r_allot.allotment_id as allotment_id',
+                                              'r_allot.order_no')
                                     ->leftJoin('funding_allotments as allot', 'allot.id', '=',
                                                'r_allot.allotment_id')
                                      ->where('r_allot.budget_realign_id', $budgetRealignID)
@@ -79,6 +80,13 @@ class LineItemBudgetController extends Controller
                                      ->get();
 
                 foreach ($realignedAllots as $allotRealign) {
+                    $allotmentCost = $allotRealign->allotment_cost;
+                    $coimplementers = unserialize($allotRealign->coimplementers);
+
+                    foreach ($coimplementers as $coimplementer) {
+                        $allotmentCost += $coimplementer['coimplementor_budget'];
+                    }
+
                     $allotments[] = (object) [
                         'id' => $allotRealign->id,
                         'allotment_id' => $allotRealign->allotment_id,
@@ -86,7 +94,7 @@ class LineItemBudgetController extends Controller
                         'allotment_class' => $allotRealign->allotment_class,
                         'allotment_name' => $allotRealign->allotment_name,
                         'order_no' => $allotRealign->order_no,
-                        'allotment_cost' => $allotRealign->allotment_cost,
+                        'allotment_cost' => $allotmentCost,
                     ];
                 }
 
@@ -180,6 +188,14 @@ class LineItemBudgetController extends Controller
         $allotmentNames = $request->allotment_name;
         $allotmentClasses = $request->allot_class;
         $allottedBudgets = $request->allotted_budget;
+        $coimplementorIDs = $request->coimplementor_id;
+        $coimplementorBudgets = $request->coimplementor_budget;
+
+        /*
+        echo "rowTypes, allotmentNames, allotmentClasses, allottedBudgets,
+             coimplementors, coimplementorBudgets";
+        dd($rowTypes, $allotmentNames, $allotmentClasses, $allottedBudgets,
+           $coimplementors, $coimplementorBudgets);*/
 
         $documentType = 'Line-Item Budgets';
         $routeName = 'fund-project-lib';
@@ -203,6 +219,7 @@ class LineItemBudgetController extends Controller
             $lastID = $lastFundBudget->id;
 
             if (count($allotmentClasses) > 0) {
+                $coimplementers = [];
                 $orderNo = 0;
                 $headerName = "";
 
@@ -212,6 +229,13 @@ class LineItemBudgetController extends Controller
                     } else if ($rowTypes[$ctr] == 'item') {
                         $orderNo += 1;
 
+                        foreach ($coimplementorIDs[$ctr] as $ctrCoimp => $coimpID) {
+                            $coimplementers[] = [
+                                'id' => $coimpID,
+                                'coimplementor_budget' => $coimplementorBudgets[$ctr][$ctrCoimp]
+                            ];
+                        }
+
                         $instanceAllotment = new FundingAllotment;
                         $instanceAllotment->project_id = $project;
                         $instanceAllotment->budget_id = $lastID;
@@ -220,7 +244,10 @@ class LineItemBudgetController extends Controller
                         $instanceAllotment->allotment_name = empty($headerName) ? $allotmentNames[$ctr] :
                                                             "$headerName::".$allotmentNames[$ctr];
                         $instanceAllotment->allotment_cost = $allottedBudgets[$ctr];
+                        $instanceAllotment->coimplementers = serialize($coimplementers);
                         $instanceAllotment->save();
+
+                        $coimplementers = [];
                     } else if ($rowTypes[$ctr] == 'header-break') {
                         $headerName = "";
                     }
@@ -257,6 +284,8 @@ class LineItemBudgetController extends Controller
         $allotmentNames = $request->allotment_name;
         $allotmentClasses = $request->allot_class;
         $allottedBudgets = $request->allotted_budget;
+        $coimplementorIDs = $request->coimplementor_id;
+        $coimplementorBudgets = $request->coimplementor_budget;
         $justifications = $request->justification;
 
         //echo '$rowTypes, $allotmentIDs, $allotmentNames, $allotmentClasses, $allottedBudgets, $justifications';
@@ -292,6 +321,7 @@ class LineItemBudgetController extends Controller
                         ->first();
 
             if (count($allotmentIDs) > 0) {
+                $coimplementers = [];
                 $orderNo = 0;
                 $headerName = "";
 
@@ -301,6 +331,13 @@ class LineItemBudgetController extends Controller
                     } else if ($rowTypes[$ctr] == 'item') {
                         $orderNo += 1;
 
+                        foreach ($coimplementorIDs[$ctr] as $ctrCoimp => $coimpID) {
+                            $coimplementers[] = [
+                                'id' => $coimpID,
+                                'coimplementor_budget' => $coimplementorBudgets[$ctr][$ctrCoimp]
+                            ];
+                        }
+
                         $instanceRealignedAllot = new FundingAllotmentRealignment;
                         $instanceRealignedAllot->project_id = $projectID;
                         $instanceRealignedAllot->budget_id = $id;
@@ -309,15 +346,16 @@ class LineItemBudgetController extends Controller
                         $instanceRealignedAllot->allotment_class = $allotmentClasses[$ctr];
                         $instanceRealignedAllot->order_no = $orderNo;
                         $instanceRealignedAllot->realigned_allotment_cost = $allottedBudgets[$ctr];
+                        $instanceRealignedAllot->coimplementers = serialize($coimplementers);
                         $instanceRealignedAllot->allotment_name = empty($headerName) ? $allotmentNames[$ctr] :
                                                                   "$headerName::".$allotmentNames[$ctr];
                         $instanceRealignedAllot->justification = $justifications[$ctr];
                         $instanceRealignedAllot->save();
+
+                        $coimplementers = [];
                     } else if ($rowTypes[$ctr] == 'header-break') {
                         $headerName = "";
                     }
-
-                    echo "$headerName<br>";
                 }
             }
 
@@ -351,6 +389,10 @@ class LineItemBudgetController extends Controller
         $projects = FundingProject::orderBy('project_title')->get();
         $allotmentClassifications = AllotmentClass::orderBy('class_name')->get();
 
+        $project = FundingProject::find($budget->project_id);
+        $implementingAgency = $project->implementing_agency;
+        $coimplementors = unserialize($project->comimplementing_agency_lgus);
+
         $allotmentData = $this->groupAllotments($allotments, $remainingBudget);
         $remainingBudget = $allotmentData->remaining_budget;
         $groupedAllotments = $allotmentData->grouped_allotments;
@@ -377,7 +419,9 @@ class LineItemBudgetController extends Controller
             'users',
             'signatories',
             'groupedAllotments',
-            'itemCounter'
+            'itemCounter',
+            'implementingAgency',
+            'coimplementors'
         ));
     }
 
@@ -399,6 +443,8 @@ class LineItemBudgetController extends Controller
         $allotmentNames = $request->allotment_name;
         $allotmentClasses = $request->allot_class;
         $allottedBudgets = $request->allotted_budget;
+        $coimplementorIDs = $request->coimplementor_id;
+        $coimplementorBudgets = $request->coimplementor_budget;
 
         //echo '$rowTypes, $allotmentIDs, $allotmentNames, $allotmentClasses, $allottedBudgets';
         //dd($rowTypes, $allotmentIDs, $allotmentNames, $allotmentClasses, $allottedBudgets);
@@ -424,6 +470,7 @@ class LineItemBudgetController extends Controller
             $instanceFundingBudget->save();
 
             if (count($allotmentIDs) > 0) {
+                $coimplementers = [];
                 $orderNo = 0;
                 $headerName = "";
 
@@ -441,11 +488,19 @@ class LineItemBudgetController extends Controller
                             $instanceAllotment->budget_id = $id;
                         }
 
+                        foreach ($coimplementorIDs[$ctr] as $ctrCoimp => $coimpID) {
+                            $coimplementers[] = [
+                                'id' => $coimpID,
+                                'coimplementor_budget' => $coimplementorBudgets[$ctr][$ctrCoimp]
+                            ];
+                        }
+
                         $instanceAllotment->allotment_class = $allotmentClasses[$ctr];
                         $instanceAllotment->order_no = $orderNo;
                         $instanceAllotment->allotment_name = empty($headerName) ? $allotmentNames[$ctr] :
                                                             "$headerName::".$allotmentNames[$ctr];
                         $instanceAllotment->allotment_cost = $allottedBudgets[$ctr];
+                        $instanceAllotment->coimplementers = serialize($coimplementers);
                         $instanceAllotment->save();
 
                         if (!$allotmentID && is_int($ctr)) {
@@ -456,6 +511,8 @@ class LineItemBudgetController extends Controller
                                                 ])->first();
                             $newAllotmentIDs[] = $newAddedAllotment->id;
                         }
+
+                        $coimplementers = [];
                     } else if ($rowTypes[$ctr] == 'header-break') {
                         $headerName = "";
                     }
@@ -490,6 +547,8 @@ class LineItemBudgetController extends Controller
         $allotmentNames = $request->allotment_name;
         $allotmentClasses = $request->allot_class;
         $allottedBudgets = $request->allotted_budget;
+        $coimplementorIDs = $request->coimplementor_id;
+        $coimplementorBudgets = $request->coimplementor_budget;
         $justifications = $request->justification;
 
         //echo '$rowTypes, $allotmentIDs, $realignedAllotIDs, $allotmentNames, $allotmentClasses, $allottedBudgets, $justifications';
@@ -515,15 +574,16 @@ class LineItemBudgetController extends Controller
             $instanceBudgetRealigned->save();
 
             if (count($allotmentIDs) > 0) {
+                $coimplementers = [];
                 $orderNo = 0;
                 $headerName = "";
 
                 foreach ($allotmentIDs as $ctr => $allotmentID) {
-                    $orderNo += 1;
-
                     if ($rowTypes[$ctr] == 'header') {
                         $headerName = $allotmentNames[$ctr];
                     } else if ($rowTypes[$ctr] == 'item') {
+                        $orderNo += 1;
+
                         $instanceRealignedAllot = $allotmentID ? FundingAllotmentRealignment::find($realignedAllotIDs[$ctr]) :
                                                   new FundingAllotmentRealignment;
 
@@ -532,15 +592,25 @@ class LineItemBudgetController extends Controller
                             $instanceRealignedAllot->budget_id = $id;
                         }
 
+                        foreach ($coimplementorIDs[$ctr] as $ctrCoimp => $coimpID) {
+                            $coimplementers[] = [
+                                'id' => $coimpID,
+                                'coimplementor_budget' => $coimplementorBudgets[$ctr][$ctrCoimp]
+                            ];
+                        }
+
                         $instanceRealignedAllot->allotment_id = $allotmentID ? $allotmentID : NULL;
                         $instanceRealignedAllot->budget_realign_id = $realignedBudgetID;
                         $instanceRealignedAllot->allotment_class = $allotmentClasses[$ctr];
                         $instanceRealignedAllot->order_no = $orderNo;
                         $instanceRealignedAllot->realigned_allotment_cost = $allottedBudgets[$ctr];
+                        $instanceRealignedAllot->coimplementers = serialize($coimplementers);
                         $instanceRealignedAllot->allotment_name = empty($headerName) ? $allotmentNames[$ctr] :
                                                                   "$headerName::".$allotmentNames[$ctr];
                         $instanceRealignedAllot->justification = $justifications[$ctr];
                         $instanceRealignedAllot->save();
+
+                        $coimplementers = [];
                     } else if ($rowTypes[$ctr] == 'header-break') {
                         $headerName = "";
                     }
@@ -574,8 +644,8 @@ class LineItemBudgetController extends Controller
                       DB::table('funding_allotment_realignments as r_allot')
                         ->select('allot.id as id', 'r_allot.allotment_name as allotment_name',
                                 'r_allot.realigned_allotment_cost as allotment_cost',
-                                'r_allot.allotment_class as allotment_class',
-                                'r_allot.id as r_allot_id', 'r_allot.justification')
+                                'r_allot.allotment_class as allotment_class', 'r_allot.coimplementers',
+                                'r_allot.id as r_allot_id', 'r_allot.justification',)
                         ->leftJoin('funding_allotments as allot', 'allot.id', '=',
                                    'r_allot.allotment_id')
                         ->where('r_allot.budget_realign_id', $budgetRealignedData->id)
@@ -591,6 +661,10 @@ class LineItemBudgetController extends Controller
 
         $dateRealignment = $budgetRealignedData ? $budgetRealignedData->date_realignment : NULL;
         $approvedBudget = round($approvedBudget, 2);
+
+        $project = FundingProject::find($budgetData->project_id);
+        $implementingAgency = $project->implementing_agency;
+        $coimplementors = unserialize($project->comimplementing_agency_lgus);
 
         if ($type == 'create') {
             $viewFile = 'modules.fund-utilization.fund-project-lib.create-realignment';
@@ -621,7 +695,9 @@ class LineItemBudgetController extends Controller
             'signatories',
             'budgetData',
             'groupedAllotments',
-            'itemCounter'
+            'itemCounter',
+            'implementingAgency',
+            'coimplementors'
         ));
     }
 

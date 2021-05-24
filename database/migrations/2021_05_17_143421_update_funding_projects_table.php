@@ -21,13 +21,14 @@ class UpdateFundingProjectsTable extends Migration
             $table->foreign('project_site')->nullable()->references('id')->on('municipalities');
             $table->uuid('implementing_agency')->nullable()->after('project_site');
             $table->foreign('implementing_agency')->references('id')->on('agency_lgus');
-            $table->binary('comimplementing_agency_lgus')->nullable()->after('implementing_agency');
+            $table->double('implementing_project_cost', 50, 2)->default(0.00)->after('implementing_agency');
+            $table->binary('comimplementing_agency_lgus')->nullable()->after('implementing_project_cost');
             $table->binary('proponent_units')->nullable()->after('comimplementing_agency_lgus');
             $table->date('date_from')->nullable()->after('proponent_units');
             $table->date('date_to')->nullable()->after('date_from');
             $table->double('project_cost', 50, 2)->default(0.00)->after('date_to');
             $table->string('project_leader')->nullable()->after('project_cost');
-            $table->binary('monitoring_office')->after('project_leader');
+            $table->binary('monitoring_offices')->after('project_leader');
         });
     }
 
@@ -44,16 +45,17 @@ class UpdateFundingProjectsTable extends Migration
             $table->dropForeign('funding_projects_implementing_agency_foreign');
 
             $table->renameColumn('project_title', 'project_name');
-            $table->dropColumn('industry_sector');
-            $table->dropColumn('project_site');
-            $table->dropColumn('implementing_agency');
-            $table->dropColumn('comimplementing_agency_lgus');
-            $table->dropColumn('proponent_units');
-            $table->dropColumn('project_cost');
-            $table->dropColumn('date_from');
-            $table->dropColumn('date_to');
-            $table->dropColumn('project_leader');
-            $table->dropColumn('monitoring_office');
+            $table->dropIfExists('industry_sector');
+            $table->dropIfExists('project_site');
+            $table->dropIfExists('implementing_agency');
+            $table->dropIfExists('implementing_project_cost');
+            $table->dropIfExists('comimplementing_agency_lgus');
+            $table->dropIfExists('proponent_units');
+            $table->dropIfExists('date_from');
+            $table->dropIfExists('date_to');
+            $table->dropIfExists('project_cost');
+            $table->dropIfExists('project_leader');
+            $table->dropIfExists('monitoring_offices');
         });
     }
 }

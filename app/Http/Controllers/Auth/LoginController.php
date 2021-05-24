@@ -7,7 +7,7 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use App\User;
+use App\Models\EmpAccount;
 
 class LoginController extends Controller
 {
@@ -81,7 +81,7 @@ class LoginController extends Controller
      */
     protected function attemptLogin(Request $request)
     {
-        $user = new User;
+        $user = new EmpAccount;
         $username = $request->{$this->username()};
         $clientIP = $request->getClientIp();
         $isAuthenticated = $this->guard()->attempt(

@@ -65,6 +65,16 @@ $(function() {
         });
 	}
 
+    $.fn.computeTotalProjectCost = function() {
+        let totalProjectCost = 0;
+
+        totalProjectCost += parseFloat($('#implementing-project-cost').val());
+        $('.coimplementing-project-cost').each(function() {
+            totalProjectCost += parseFloat($(this).val());
+        });
+        $('#project-cost').val(totalProjectCost);
+    }
+
     $.fn.addRow = function(rowClass) {
         let lastRow = $(rowClass).last();
         let lastRowID = (lastRow.length > 0) ? lastRow.attr('id') : 'coimplementing-form-group-0';
@@ -79,7 +89,9 @@ $(function() {
             projectCost = `
             <div class="md-form mt-3">
                 <input type="number" class="form-control required coimplementing-project-cost"
-                       name="coimplementing_project_costs[]">
+                       name="coimplementing_project_costs[]"
+                       onkeyup="$(this).computeTotalProjectCost();"
+                       onchange="$(this).computeTotalProjectCost();">
                 <label for="coimplementing-project-cost" class="active">
                     Project Cost (Co-implementing Agency/LGU) <span class="red-text">*</span>
                 </label>

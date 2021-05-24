@@ -1,7 +1,7 @@
-<form id="form-store" class="wow animated fadeIn d-flex justify-content-center" method="POST"
+<form id="form-store" class="wow animated fadeIn" method="POST"
       action="{{ route('fund-project-lib-store') }}">
     @csrf
-    <div class="card w-responsive">
+    <div class="card">
         <div class="card-body">
             <h4>Project</h4>
             <hr>
@@ -64,25 +64,24 @@
                 <table class="table table-sm table-hover table-bordered">
                     <thead class="text-center">
                         <tr>
-                            <th class="align-middle" width="33%">
+                            <th class="align-middle" width="300px">
                                 <b>
                                     <span class="red-text">* </span> Allotment Name
                                 </b>
                             </th>
-                            <th class="align-middle" width="33%">
+                            <th class="align-middle" width="150px">
                                 <b>
                                     <span class="red-text">* </span> Allotment Class
                                 </b>
                             </th>
-                            <th class="align-middle" width="31%">
-                                <b>
-                                    <span class="red-text">* </span> As Approved
-                                </b>
+                            <th id="implementor" class="align-middle" width="250px">
+                                <b id="implementor-name">-</b>
                             </th>
-                            <th width="3%"></th>
+                            <th class="align-middle" width="5px"></th>
+                            <th width="1px"></th>
                         </tr>
                     </thead>
-                    <tbody class="sortable">
+                    <tbody id="item-row-container" class="sortable" style="display: none;">
                         <tr id="item-row-0" class="item-row"></tr>
 
                         <tr class="exclude-sortable">
@@ -167,10 +166,29 @@
 
 <script type="text/javascript">
     @foreach ($projects as $project)
+        coimplementors = [];
+
+        @if ($project->comimplementing_agency_lgus)
+            @foreach (unserialize($project->comimplementing_agency_lgus) as $coimplement)
+            coimplementors.push({
+                'id': `{!! $coimplement['comimplementing_agency_lgu'] !!}`,
+                'coimplementor_name': `{!! \App\Models\AgencyLGU::find($coimplement['comimplementing_agency_lgu'])->agency_name !!}`,
+                'coimplementor_budget': {!! $coimplement['coimplementing_project_cost'] !!}
+
+            });
+            @endforeach
+        @endif
+
         projects.push({
             'id': `{!! $project->id !!}`,
             'project_title': `{!! $project->project_title !!}`,
-            'project_cost':  {!! $project->project_cost !!},
+            'project_cost':  `{!! $project->project_cost !!}`,
+            'implementor_id': `{!! $project->implementing_agency !!}`,
+            'implementor_name': `{!! $project->implementing_agency ?
+                \App\Models\AgencyLGU::find($project->implementing_agency)->agency_name :
+                "" !!}`,
+            'implementor_budget': {!! $project->implementing_project_cost !!},
+            'coimplementors': coimplementors,
         });
     @endforeach
 </script>

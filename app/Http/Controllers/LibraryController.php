@@ -623,12 +623,14 @@ class LibraryController extends Controller
         $industrySector = $projectData->industry_sector;
         $projectSite = $projectData->project_site;
         $implementingAgency = $projectData->implementing_agency;
+        $implementingBudget = $projectData->implementing_project_cost;
         $comimplementingAgencyLGUs = unserialize($projectData->comimplementing_agency_lgus);
         $proponentUnits = unserialize($projectData->proponent_units);
         $dateFrom = $projectData->date_from;
         $dateTo = $projectData->date_to;
         $projectCost = $projectData->project_cost;
-        $monitoringOffice  = $projectData->monitoring_office ;
+        $monitoringOffice  = $projectData->monitoring_offices ?
+                             unserialize($projectData->monitoring_offices) : [];
         $projectTitle = $projectData->project_title;
 
         $coimplementingCount = $comimplementingAgencyLGUs ? count($comimplementingAgencyLGUs) : 0;
@@ -646,6 +648,7 @@ class LibraryController extends Controller
             'industrySector',
             'projectSite',
             'implementingAgency',
+            'implementingBudget',
             'comimplementingAgencyLGUs',
             'proponentUnits',
             'dateFrom',
@@ -663,6 +666,7 @@ class LibraryController extends Controller
         $industrySector = $request->industry_sector;
         $projectSite = $request->project_site;
         $implementingAgency = $request->implementing_agency;
+        $implementingBudget = $request->implementing_project_cost;
         $withCoimplementingAgency = $request->with_coimplementing_agency;
         $projectCost = $request->project_cost;
         $dateFrom = $request->date_from;
@@ -690,12 +694,13 @@ class LibraryController extends Controller
                 $instanceProject->industry_sector = $industrySector;
                 $instanceProject->project_site = $projectSite;
                 $instanceProject->implementing_agency = $implementingAgency;
+                $instanceProject->implementing_project_cost = $implementingBudget;
                 $instanceProject->comimplementing_agency_lgus = serialize($coimplementingAgencies);
                 $instanceProject->proponent_units = serialize($proponentUnits);
                 $instanceProject->date_from = $dateFrom;
                 $instanceProject->date_to = $dateTo;
                 $instanceProject->project_cost = $projectCost;
-                $instanceProject->monitoring_office = $monitoringOffice;
+                $instanceProject->monitoring_offices = serialize($monitoringOffice);
                 $instanceProject->save();
 
                 $msg = "Project '$projectTitle' successfully created.";
@@ -715,6 +720,7 @@ class LibraryController extends Controller
         $industrySector = $request->industry_sector;
         $projectSite = $request->project_site;
         $implementingAgency = $request->implementing_agency;
+        $implementingBudget = $request->implementing_project_cost;
         $withCoimplementingAgency = $request->with_coimplementing_agency;
         $projectCost = $request->project_cost;
         $dateFrom = $request->date_from;
@@ -741,12 +747,13 @@ class LibraryController extends Controller
             $instanceProject->industry_sector = $industrySector;
             $instanceProject->project_site = $projectSite;
             $instanceProject->implementing_agency = $implementingAgency;
+            $instanceProject->implementing_project_cost = $implementingBudget;
             $instanceProject->comimplementing_agency_lgus = serialize($coimplementingAgencies);
             $instanceProject->proponent_units = serialize($proponentUnits);
             $instanceProject->date_from = $dateFrom;
             $instanceProject->date_to = $dateTo;
             $instanceProject->project_cost = $projectCost;
-            $instanceProject->monitoring_office = $monitoringOffice;
+            $instanceProject->monitoring_offices = serialize($monitoringOffice);
             $instanceProject->save();
 
             $msg = "Project '$projectTitle' successfully updated.";

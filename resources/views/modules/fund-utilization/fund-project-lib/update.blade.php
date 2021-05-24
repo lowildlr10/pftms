@@ -1,7 +1,7 @@
-<form id="form-update" class="wow animated fadeIn d-flex justify-content-center" method="POST"
+<form id="form-update" class="wow animated fadeIn" method="POST"
       action="{{ route('fund-project-lib-update', ['id' => $id]) }}">
     @csrf
-    <div class="card w-responsive">
+    <div class="card">
         <div class="card-body">
             <h4>Project</h4>
             <hr>
@@ -9,7 +9,7 @@
                 <div class="col-md-6">
                     <div class="md-form form-sm">
                         <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                                name="project">
+                                name="project" id="project">
                             <option value="" disabled selected>Choose a project</option>
 
                             @if (count($projects) > 0)
@@ -68,25 +68,39 @@
                 <table class="table table-sm table-hover table-bordered">
                     <thead class="text-center">
                         <tr>
-                            <th class="align-middle" width="33%">
+                            <th class="align-middle" width="300px">
                                 <b>
                                     <span class="red-text">* </span> Allotment Name
                                 </b>
                             </th>
-                            <th class="align-middle" width="33%">
+                            <th class="align-middle" width="150px">
                                 <b>
                                     <span class="red-text">* </span> Allotment Class
                                 </b>
                             </th>
-                            <th class="align-middle" width="31%">
+                            <th class="align-middle" width="250px">
                                 <b>
-                                    <span class="red-text">* </span> As Approved
+                                    <span class="red-text">* </span>
+                                    {{ \App\Models\AgencyLGU::find($implementingAgency)->agency_name }}
                                 </b>
                             </th>
-                            <th width="3%"></th>
+
+                            @foreach ($coimplementors as $coimpHeadCtr => $coimplementor)
+                            <th id="coimplementor-{{ $coimpHeadCtr }}}" class="align-middle coimplementor" width="250px">
+                                <b id="coimplementor-name-{{ $coimpHeadCtr }}}">
+                                    <span class="red-text">* </span>
+                                    {{ \App\Models\AgencyLGU::find($coimplementor['comimplementing_agency_lgu'])->agency_name }}
+                                </b>
+                                <input id="coimplementor-id-{{ $coimpHeadCtr }}}" type="hidden"
+                                       value="{{ $coimplementor['comimplementing_agency_lgu'] }}">
+                            </th>
+                            @endforeach
+
+                            <th class="align-middle" width="5px"></th>
+                            <th width="1px"></th>
                         </tr>
                     </thead>
-                    <tbody class="sortable">
+                    <tbody id="item-row-container" class="sortable">
                         @if (count($groupedAllotments) > 0)
                             @foreach ($groupedAllotments as $ctr => $item)
                                 @if (is_int($ctr))
@@ -123,6 +137,23 @@
                                             value="{{ $item->allotment_cost }}">
                                 </div>
                             </td>
+
+                            @foreach (unserialize($item->coimplementers) as $coimpCtr => $coimplementor)
+                            <td>
+                                <div class="md-form form-sm my-0">
+                                    <input type="hidden" name="coimplementor_id[{{ $itemCounter }}][{{ $coimpCtr }}}]"
+                                           value="{{ $coimplementor['id'] }}}">
+                                    <input type="number" placeholder=" Value..."
+                                        name="coimplementor_budget[{{ $itemCounter }}][{{ $coimpCtr }}}]"
+                                        class="form-control required form-control-sm coimplementor-budget allotted-budget py-1"
+                                        id="coimplementor-budget-{{ $itemCounter }}-{{ $coimpCtr }}}" min="0"
+                                        value="{{ $coimplementor['coimplementor_budget'] }}"
+                                        onkeyup="$(this).totalBudgetIsValid();"
+                                        onchange="$(this).totalBudgetIsValid();">
+                                </div>
+                            </td>
+                            @endforeach
+
                             <td class="align-middle">
                                 <a onclick="$(this).deleteRow('#item-row-{{ $itemCounter }}');"
                                     class="btn btn-outline-red px-1 py-0">
@@ -148,9 +179,14 @@
                                            class="form-control required form-control-sm allotment-name py-1 font-weight-bold"
                                            value="{{ str_replace('-', ' ', $ctr) }}"
                                            id="allotment-name-header-{{ $itemCounter }}">
+
+                                    @foreach ($coimplementors as $coimpCtr => $coimplementor)
+                                    <input type="hidden" name="coimplementor_id[{{ $itemCounter }}}][{{ $coimpCtr }}]">
+                                    <input type="hidden" name="coimplementor_budget[{{ $itemCounter }}}][{{ $coimpCtr }}]">
+                                    @endforeach
                                 </div>
                             </td>
-                            <td colspan="2"></td>
+                            <td colspan="{{ count($coimplementors) + 2 }}"></td>
                             <td class="align-middle">
                                 <a onclick="$(this).deleteRow('#header-row-{{ $itemCounter }}');"
                                 class="btn btn-outline-red px-1 py-0">
@@ -202,6 +238,23 @@
                                             value="{{ $itm->allotment_cost }}">
                                 </div>
                             </td>
+
+                            @foreach (unserialize($itm->coimplementers) as $coimpCtr => $coimplementor)
+                            <td>
+                                <div class="md-form form-sm my-0">
+                                    <input type="hidden" name="coimplementor_id[{{ $itemCounter }}][{{ $coimpCtr }}}]"
+                                           value="{{ $coimplementor['id'] }}}">
+                                    <input type="number" placeholder=" Value..."
+                                        name="coimplementor_budget[{{ $itemCounter }}][{{ $coimpCtr }}}]"
+                                        class="form-control required form-control-sm coimplementor-budget allotted-budget py-1"
+                                        id="coimplementor-budget-{{ $itemCounter }}-{{ $coimpCtr }}}" min="0"
+                                        value="{{ $coimplementor['coimplementor_budget'] }}"
+                                        onkeyup="$(this).totalBudgetIsValid();"
+                                        onchange="$(this).totalBudgetIsValid();">
+                                </div>
+                            </td>
+                            @endforeach
+
                             <td class="align-middle">
                                 <a onclick="$(this).deleteRow('#item-row-{{ $itemCounter }}');"
                                     class="btn btn-outline-red px-1 py-0">
@@ -218,7 +271,7 @@
                                     @endforeach
 
                         <tr id="headerbreak-row-{{ $itemCounter }}" class="item-row">
-                            <td colspan="3">
+                            <td colspan="{{ count($coimplementors) + 3 }}">
                                 <hr>
                                 <div class="md-form form-sm my-0">
                                     <input name="row_type[{{ $itemCounter }}]" type="hidden" value="headerbreak">
@@ -227,6 +280,11 @@
                                     <input type="hidden"name="allotted_budget[{{ $itemCounter }}]">
                                     <input type="hidden" name="allotment_name[{{ $itemCounter }}]"
                                            id="allotment-name-headerbreak-{{ $itemCounter }}">
+
+                                    @foreach ($coimplementors as $coimpCtr => $coimplementor)
+                                    <input type="hidden" name="coimplementor_id[{{ $itemCounter }}}][{{ $coimpCtr }}]">
+                                    <input type="hidden" name="coimplementor_budget[{{ $itemCounter }}}][{{ $coimpCtr }}]">
+                                    @endforeach
                                 </div>
                             </td>
                             <td class="align-middle">
@@ -325,3 +383,32 @@
         </div>
     </div>
 </form>
+
+<script>
+    @foreach ($projects as $project)
+        coimplementors = [];
+
+        @if ($project->comimplementing_agency_lgus)
+            @foreach (unserialize($project->comimplementing_agency_lgus) as $coimplement)
+            coimplementors.push({
+                'id': `{!! $coimplement['comimplementing_agency_lgu'] !!}`,
+                'coimplementor_name': `{!! \App\Models\AgencyLGU::find($coimplement['comimplementing_agency_lgu'])->agency_name !!}`,
+                'coimplementor_budget': {!! $coimplement['coimplementing_project_cost'] !!}
+
+            });
+            @endforeach
+        @endif
+
+        projects.push({
+            'id': `{!! $project->id !!}`,
+            'project_title': `{!! $project->project_title !!}`,
+            'project_cost':  `{!! $project->project_cost !!}`,
+            'implementor_id': `{!! $project->implementing_agency !!}`,
+            'implementor_name': `{!! $project->implementing_agency ?
+                \App\Models\AgencyLGU::find($project->implementing_agency)->agency_name :
+                "" !!}`,
+            'implementor_budget': {!! $project->implementing_project_cost !!},
+            'coimplementors': coimplementors,
+        });
+    @endforeach
+</script>

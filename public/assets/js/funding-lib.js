@@ -60,6 +60,36 @@ $(function() {
         $('.sortable').disableSelection();
     }
 
+    function initializeProjectInput() {
+        $('#project').on("change", function() {
+            const projID = $(this).val();
+
+            $.each(projects, function(projCtr, project) {
+                if (project.id == projID) {
+                    const coimplementorsElem = project.coimplementors.length > 0 ?
+                                            project.coimplementors.map((coimplementor, index) => {
+                                                return `<th id="coimplementor-${index}" class="align-middle coimplementor" width="250px">
+                                                    <b id="coimplementor-name-${index}">
+                                                    <span class="red-text">* </span>${coimplementor.coimplementor_name}
+                                                    </b>
+                                                    <input id="coimplementor-id-${index}" type="hidden" value="${coimplementor.id}">
+                                                </th>`
+                                            }) : [];
+                    $('.coimplementor').remove();
+                    $('#implementor').after(coimplementorsElem);
+                    $('.item-row').remove();
+                    $('#item-row-container').fadeIn(300).first().before(`<tr id="item-row-0" class="item-row"></tr>`);
+                    $('#approved-budget').val(project.project_cost)
+                                         .siblings()
+                                         .addClass('active');
+                    $('#remaining-budget').val(project.project_cost);
+                    $('#implementor-name').html(`<span class="red-text">* </span>${project.implementor_name}`);
+                    return false;
+                }
+            });
+        });
+    }
+
     $.fn.totalBudgetIsValid = () => {
         let totalBudget = filterNaN($('#approved-budget').val()),
             totalAllotted = 0;
@@ -86,9 +116,20 @@ $(function() {
 
     $.fn.addRow = function(rowClass, type, isRealignment = false) {
         const lastRow = $(rowClass).last();
+        const countCoimplementors = $('.coimplementor').length;
+        let headerCoimps = [];
         let lastRowID = (lastRow.length > 0) ? lastRow.attr('id') : type+'-row-0';
         let rowOutput = "";
         let newID = 1;
+
+        if (countCoimplementors > 0) {
+            $('.coimplementor').each(function(index, elem) {
+                const coimpID = $(`#coimplementor-id-${index}`).val();
+                headerCoimps.push({
+                    'id': coimpID
+                });
+            });
+        }
 
         $(rowClass).each(function() {
             const elemExplodedID = $(this).attr('id').split('-');
@@ -128,6 +169,18 @@ $(function() {
                             onchange="$(this).totalBudgetIsValid();">
                     </div>
                 </td>`,
+                coimplementorBudget = headerCoimps.length > 0 ? headerCoimps.map((headerCoimp, index) => {
+                    return `<td>
+                        <div class="md-form form-sm my-0">
+                            <input type="hidden" name="coimplementor_id[${newID}][${index}]" value="${headerCoimp.id}">
+                            <input type="number" placeholder=" Value..." name="coimplementor_budget[${newID}][${index}]"
+                                class="form-control required form-control-sm coimplementor-budget allotted-budget py-1"
+                                id="coimplementor-budget-${newID}-${index}" min="0"
+                                onkeyup="$(this).totalBudgetIsValid();"
+                                onchange="$(this).totalBudgetIsValid();">
+                        </div>
+                    </td>`
+                }) : '';
                 justification = !isRealignment ? '' : `
                 <td>
                     <div class="md-form form-sm my-0">
@@ -144,14 +197,14 @@ $(function() {
                     </a>
                 </td>`,
                 sortableButton = `
-                <td class="align-middle">
+                <td class="align-middle" style="width: 1px;">
                     <a href="#" class="grey-text">
                         <i class="fas fa-ellipsis-v"></i>
                     </a>
                 </td>`;
 
             rowOutput = '<tr id="item-row-'+newID+'" class="item-row">'+
-                        allotmentName + allotmentClassification + allotmentBudget +
+                        allotmentName + allotmentClassification + allotmentBudget + coimplementorBudget +
                         justification + deleteButton + sortableButton + '</tr>';
 
             $(rowOutput).insertAfter('#' + lastRowID);
@@ -167,10 +220,15 @@ $(function() {
                         <input type="hidden"name="allotted_budget[${newID}]">
                         <input type="text" placeholder="Header Value..." name="allotment_name[${newID}]"
                             class="form-control required form-control-sm allotment-name py-1 font-weight-bold"
-                            id="allotment-name-${newID}">
-                    </div>
+                            id="allotment-name-${newID}">` +
+                        (headerCoimps.length > 0 ? headerCoimps.map((headerCoimp, index) => {
+                            return `<input type="hidden" name="coimplementor_id[${newID}][${index}]">
+                            <input type="hidden" name="coimplementor_budget[${newID}][${index}]">`
+                        }) : '') +
+                    `</div>
                 </td>`,
-                additionalTD = !isRealignment ? '<td colspan="2"></td>' : '<td colspan="3"></td>',
+                additionalTD = !isRealignment ? `<td colspan="${countCoimplementors + 2}"></td>` :
+                               `<td colspan="${countCoimplementors + 3}"></td>`,
                 deleteButton = `
                 <td class="align-middle">
                     <a onclick="$(this).deleteRow('#header-row-${newID}');"
@@ -179,7 +237,7 @@ $(function() {
                     </a>
                 </td>`,
                 sortableButton = `
-                <td class="align-middle">
+                <td class="align-middle" style="width: 1px;">
                     <a href="#" class="grey-text">
                         <i class="fas fa-ellipsis-v"></i>
                     </a>
@@ -190,7 +248,7 @@ $(function() {
             $(rowOutput).insertAfter('#' + lastRowID);
         } else if (type == 'header-break') {
              let allotmentHeaderName = `
-                <td colspan="` + (!isRealignment ? 3 : 4) + `">
+                <td colspan="` + ((!isRealignment ? 3 : 4) + countCoimplementors) + `">
                     <hr>
                     <div class="md-form form-sm my-0">
                         <input name="row_type[${newID}]" type="hidden" value="${type}">
@@ -198,8 +256,12 @@ $(function() {
                         <input type="hidden" name="allotment_realign_id[${newID}]">
                         <input type="hidden"name="allot_class[${newID}]">
                         <input type="hidden"name="allotted_budget[${newID}]">
-                        <input type="hidden" name="allotment_name[${newID}]" id="allotment-name-${newID}">
-                    </div>
+                        <input type="hidden" name="allotment_name[${newID}]" id="allotment-name-${newID}">` +
+                        (headerCoimps.length > 0 ? headerCoimps.map((headerCoimp, index) => {
+                            return `<input type="hidden" name="coimplementor_id[${newID}][${index}]">
+                            <input type="hidden" name="coimplementor_budget[${newID}][${index}]">`
+                        }) : '') +
+                    `</div>
                 </td>`,
                 deleteButton = `
                 <td class="align-middle">
@@ -209,7 +271,7 @@ $(function() {
                     </a>
                 </td>`,
                 sortableButton = `
-                <td class="align-middle">
+                <td class="align-middle" style="width: 1px;">
                     <a href="#" class="grey-text">
                         <i class="fas fa-ellipsis-v"></i>
                     </a>
@@ -253,18 +315,7 @@ $(function() {
         $('#modal-body-create').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
-            $('#project').on("change", function() {
-                const projID = $(this).val();
-
-                $.each(projects, function(projCtr, project) {
-                    if (project.id == projID) {
-                        $('#approved-budget').val(project.project_cost)
-                                             .siblings()
-                                             .addClass('active');
-                        $('#remaining-budget').val(project.project_cost);
-                    }
-                });
-            });
+            initializeProjectInput();
             $(this).slideToggle(500);
             initializeSelect2();
             initializeSortable();
@@ -307,6 +358,7 @@ $(function() {
         $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
+            initializeProjectInput();
             $(this).slideToggle(500);
             initializeSelect2();
             initializeSortable();

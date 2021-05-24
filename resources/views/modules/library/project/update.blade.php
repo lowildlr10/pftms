@@ -67,6 +67,16 @@
         </label>
     </div>
 
+    <div class="md-form">
+        <input type="number" id="implementing-project-cost" class="form-control required"
+               name="implementing_project_cost" value="{{ $implementingBudget }}"
+               onkeyup="$(this).computeTotalProjectCost();"
+               onchange="$(this).computeTotalProjectCost();">
+        <label for="implementing-project-cost" class="active">
+            Project Cost (Implementing Agency/LGU) <span class="red-text">*</span>
+        </label>
+    </div>
+
     <div class="custom-control custom-checkbox">
         <input type="checkbox" class="custom-control-input" id="coimplementing-agency"
                name="with_coimplementing_agency" {{ $coimplementingCount > 0 ? 'checked' : '' }}>
@@ -99,7 +109,9 @@
                 <div class="md-form mt-3">
                     <input type="number" class="form-control coimplementing-project-cost"
                            name="coimplementing_project_costs[]"
-                           value="{{ $coimplementor['coimplementing_project_cost'] }}">
+                           value="{{ $coimplementor['coimplementing_project_cost'] }}"
+                           onkeyup="$(this).computeTotalProjectCost();"
+                           onchange="$(this).computeTotalProjectCost();">
                     <label for="coimplementing-project-cost" class="active">
                         Project Cost (Co-implementing Agency/LGU) <span class="red-text">*</span>
                     </label>
@@ -163,12 +175,12 @@
 
     <div class="md-form">
         <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                name="monitoring_office">
+                name="monitoring_office[]" multiple>
             <option value="" disabled selected>Choose a Monitoring Office</option>
 
             @if (count($monitoringOffices) > 0)
                 @foreach ($monitoringOffices as $office)
-            <option value="{{ $office->id }}" {{ $office->id == $monitoringOffice ? 'selected' : '' }}>
+            <option value="{{ $office->id }}" {{ in_array($office->id, $monitoringOffice) ? 'selected' : '' }}>
                 {!! $office->office_name !!}
             </option>
                 @endforeach
@@ -183,7 +195,7 @@
         <input type="number" id="project-cost" class="form-control required"
                name="project_cost" value="{{ $projectCost }}">
         <label for="project-title" class="active">
-            Project Cost <span class="red-text">*</span>
+            Total Project Cost <span class="red-text">*</span>
         </label>
     </div>
 
