@@ -12,15 +12,23 @@ class AllotmentClassSeeder extends Seeder
      */
     public function run() {
         $classes = [
-            'Personnel Services (PS)',
-            'Maintenance and other Operating Expenses (MOOE)',
-            'Financial Expenses (FinEx)',
-            'Capital Outlay (CO)',
+            'Personnel Services',
+            'Maintenance and other Operating Expenses',
+            'Financial Expenses',
+            'Capital Outlay',
+        ];
+
+        $classCodes = [
+            'PS',
+            'MOOE',
+            'FinEx',
+            'CO',
         ];
 
         foreach ($classes as $ctr => $class) {
             try {
                 $instanceAllotmentClass = new AllotmentClass;
+                $instanceAllotmentClass->code = $classCodes[$ctr];
                 $instanceAllotmentClass->class_name = $class;
                 $instanceAllotmentClass->order_no = $ctr + 1;
                 $instanceAllotmentClass->save();

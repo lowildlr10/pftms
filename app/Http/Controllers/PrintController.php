@@ -28,6 +28,10 @@ use App\Models\Supplier;
 use App\Models\ItemUnitIssue;
 use App\Models\EmpDivision;
 use App\Models\MdsGsb;
+use App\Models\AgencyLGU;
+use App\Models\MonitoringOffice;
+use App\Models\AllotmentClass;
+use App\Models\FundingProject;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -616,36 +620,130 @@ class PrintController extends Controller
         return $groupNumbers;
     }
 
+    private function groupAllotments($allotments) {
+        $groupedAllotments = [];
+        $allotClassData = DB::table('allotment_classes')
+                            ->orderBy('order_no')
+                            ->get();
+
+        foreach ($allotments as $itmCtr => $item) {
+            foreach ($allotClassData as $class) {
+                if ($class->id == $item->allotment_class ) {
+                    $keyClass = preg_replace("/\s+/", "-", $class->class_name);
+
+                    if (count(explode('::', $item->allotment_name)) > 1) {
+                        $keyAllotment = preg_replace("/\s+/", "-", explode('::', $item->allotment_name)[0]);
+                        $groupedAllotments[$keyClass][$keyAllotment][] = $item;
+                    } else {
+                        $groupedAllotments[$keyClass][$itmCtr + 1] = $item;
+                    }
+                }
+            }
+        }
+
+        return $groupedAllotments;
+    }
+
+    private function getAgencyName($id) {
+        $agencyData = AgencyLGU::find($id);
+        $agencyName = $agencyData->agency_name;
+        return $agencyName;
+    }
+
+    private function getMonitoringOfficeName($id) {
+        $officeData = MonitoringOffice::find($id);
+        $officeName = $officeData->office_name;
+        return $officeName;
+    }
+
     private function getDataLIB($budgetID) {
-        $periorCovered = "";
-        $projectTitle = "";
-        $proponent = "";
-        $cooperatingAgencies = "";
+        $libData = DB::table('funding_budgets')
+                     ->where('id', $budgetID)
+                     ->first();
+        $allotments = DB::table('funding_allotments')
+                        ->where('budget_id', $budgetID)
+                        ->orderBy('order_no')
+                        ->get();
+
+        $projID = $libData->project_id;
+        $projData = FundingProject::find($projID);
+        $cyYearFrom = date_format(date_create($projData->date_from), 'Y');
+        $cyYearTo = date_format(date_create($projData->date_to), 'Y');
+        $currDateFrom = date_format(date_create($projData->date_from), 'F n, Y');
+        $currDateTo = date_format(date_create($projData->date_to), 'F n, Y');
+
+        $cyYear = $cyYearFrom == $cyYearTo ? $cyYearTo : "$cyYearFrom to $cyYearTo";
+        $projTitle = $projData->project_title;
+        $currDuration = "$currDateFrom - $currDateTo";
+        $implAgency = $this->getAgencyName($projData->implementing_agency);
+        $__coimplAgencies = unserialize($projData->comimplementing_agency_lgus);
+        $_coimplAgencies = [];
+
+        foreach ($__coimplAgencies as $agency) {
+            $_coimplAgencies[] = $this->getAgencyName($agency["comimplementing_agency_lgu"]);
+        }
+
+        $coimplAgencies = implode(',', $_coimplAgencies);
+        $monitOffice = $this->getMonitoringOfficeName($projData->monitoring_office);
+
+        $instanceSignatory = new Signatory;
+        $submittedBy = Auth::user()->getEmployee($libData->sig_submitted_by)->name;
+        $submittedByPos = Auth::user()->getEmployee($libData->sig_submitted_by)->position;
+        $approvedBy = $instanceSignatory->getSignatory($libData->sig_approved_by)->name;
+        $approvedByPos = $instanceSignatory->getSignatory($libData->sig_approved_by)->position;
+
+        $groupedAllotments = $this->groupAllotments($allotments);
 
 
-
-        $preparedBy = "";
-        $recommendedBy = "";
-        $certifieFundsAvailable = "";
-        $approvedBy = "";
-        $dateApproved = "";
-
-        $lib = DB::table('funding_budgets')
-                 ->where('id', $budgetID)
-                 ->first();
-        $libAllotments = DB::table('funding_allotments')
-                           ->where('budget_id', $budgetID)
-                           ->orderBy('order_no')
-                           ->get();
+        dd($cyYear, $projTitle, $currDuration, $implAgency, $coimplAgencies, $monitOffice,
+           $submittedBy, $submittedByPos, $approvedBy, $approvedByPos, $groupedAllotments);
 
         $itemTableData = [];
         $multiplier = 9 / 10;
 
-        foreach ($libAllotments as $allotment) {
-            if ($allotment->allotted_budget) {
-                dd($allotment);
+        $headerCount = 1;
+        $headerCountRoman = 'I';
+
+        $itemTableData[] = [
+            'PARTICULARS',
+            'AS APPROVED',
+        ];
+
+        foreach ($groupedAllotments as $className => $classItems) {
+            switch ($headerCount) {
+                case 1:
+                    $headerCountRoman = 'I';
+                    break;
+                case 2:
+                    $headerCountRoman = 'II';
+                    break;
+                case 3:
+                    $headerCountRoman = 'III';
+                    break;
+                case 4:
+                    $headerCountRoman = 'IV';
+                    break;
+                default:
+                    break;
             }
+
+            $itemTableData[] = [
+                "$headerCountRoman. $className",
+
+            ];
+
+            foreach ($classItems as $ctr => $item) {
+                if (is_int($ctr)) {
+
+                } else {
+
+                }
+            }
+
+            $headerCount++;
         }
+
+        dd($groupedAllotments);
 
 
         /*
