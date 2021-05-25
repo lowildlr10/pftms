@@ -1024,7 +1024,7 @@ class PrintController extends Controller
         $currDateFrom = date_format(date_create($projData->date_from), 'F n, Y');
         $currDateTo = date_format(date_create($projData->date_to), 'F n, Y');
 
-        $cyYear = $cyYearFrom == $cyYearTo ? $cyYearTo : "$cyYearFrom to $cyYearTo";
+        $cyYear = $cyYearFrom == $cyYearTo ? $cyYearTo : "$cyYearFrom - $cyYearTo";
         $projTitle = $projData->project_title;
         $currDuration = "$currDateFrom - $currDateTo";
         $implAgency = $this->getAgencyName($projData->implementing_agency);
@@ -1105,11 +1105,19 @@ class PrintController extends Controller
             ]
         ];
 
-        $grandTotal = 0;
+        $grandTotal = ['', 'GRAND TOTAL', 0];
+
+        foreach ($__coimplAgencies as $coimp) {
+            $grandTotal[] = 0;
+        }
 
         foreach ($groupedAllotments as $className => $classItems) {
-            $subTotal = [0];
+            $subTotal = ['', 'Sub-Total', 0];
             $row = [];
+
+            foreach ($__coimplAgencies as $coimp) {
+                $subTotal[] = 0;
+            }
 
             switch ($headerCount) {
                 case 1:
@@ -1179,10 +1187,14 @@ class PrintController extends Controller
                              number_format($item->allotment_cost, 2) :
                              '-';
 
-                    foreach ($allotCoimplementors as $coimp) {
+                    $subTotal[2] += $item->allotment_cost;
+
+                    foreach ($allotCoimplementors as $coimpCtr => $coimp) {
                         $row[] = $coimp['coimplementor_budget'] ?
                                  number_format($coimp['coimplementor_budget'], 2) :
                                  '-';
+                        $subTotal[$coimpCtr + 3] += $coimp['coimplementor_budget'];
+                        $grandTotal[$coimpCtr + 3] += $coimp['coimplementor_budget'];
                     }
 
                     $fontStyles = [];
@@ -1270,11 +1282,14 @@ class PrintController extends Controller
                         $row[] = $itm->allotment_cost ?
                                  number_format($itm->allotment_cost, 2) :
                                  '-';
+                        $subTotal[2] += $itm->allotment_cost;
 
-                        foreach ($allotCoimplementors as $coimp) {
+                        foreach ($allotCoimplementors as $coimpCtr => $coimp) {
                             $row[] = $coimp['coimplementor_budget'] ?
                                      number_format($coimp['coimplementor_budget'], 2) :
                                      '-';
+                            $subTotal[$coimpCtr + 3] += $coimp['coimplementor_budget'];
+                            $grandTotal[$coimpCtr + 3] += $coimp['coimplementor_budget'];
                         }
 
                         $fontStyles = [];
@@ -1319,8 +1334,83 @@ class PrintController extends Controller
                 }
             }
 
+            $fontStyles = [];
+            $aligns = [];
+            $widths = [];
+            $colSpanKeys = [];
+
+            for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+                $colSpanKeys[] = "$tblHeadCtr";
+
+                if ($tblHeadCtr == 0) {
+                    $fontStyles[] = "BI";
+                    $aligns[] = "R";
+                    $widths[] = 3;
+                } else {
+                    $fontStyles[] = "BI";
+                    $aligns[] = "R";
+                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                }
+            }
+
+            for ($subTotalIndex = 2; $subTotalIndex < count($subTotal); $subTotalIndex++) {
+                $subTotal[$subTotalIndex] = $subTotal[$subTotalIndex] ?
+                                            number_format($subTotal[$subTotalIndex], 2) :
+                                            '-';
+            }
+
+            $data[] = [
+                'col-span' => true,
+                'col-span-key' => $colSpanKeys,
+                'aligns' => $aligns,
+                'widths' => $widths,
+                'font-styles' => $fontStyles,
+                'type' => 'row-data',
+                'data' => [$subTotal]
+            ];
+
+            $subTotal = [];
             $headerCount++;
         }
+
+        $fontStyles = [];
+        $aligns = [];
+        $widths = [];
+        $colSpanKeys = [];
+
+        for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+            $colSpanKeys[] = "$tblHeadCtr";
+
+            if ($tblHeadCtr == 0) {
+                $fontStyles[] = "B";
+                $aligns[] = "C";
+                $widths[] = 3;
+            } else if ($tblHeadCtr == 1) {
+                $fontStyles[] = "B";
+                $aligns[] = "C";
+                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+            } else {
+                $fontStyles[] = "B";
+                $aligns[] = "R";
+                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+            }
+        }
+
+        for ($grandTotalIndex = 2; $grandTotalIndex < count($grandTotal); $grandTotalIndex++) {
+            $grandTotal[$grandTotalIndex] = $grandTotal[$grandTotalIndex] ?
+                                            number_format($grandTotal[$grandTotalIndex], 2) :
+                                            '-';
+        }
+
+        $data[] = [
+            'col-span' => true,
+            'col-span-key' => $colSpanKeys,
+            'aligns' => $aligns,
+            'widths' => $widths,
+            'font-styles' => $fontStyles,
+            'type' => 'row-data',
+            'data' => [$grandTotal]
+        ];
 
         return (object)[
             'table_data' => $data,
