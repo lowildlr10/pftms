@@ -655,28 +655,46 @@ class PrintController extends Controller
         return $officeName;
     }
 
+    function convertToOrdinal($number) {
+        $suffix = [
+            'th',
+            'st',
+            'nd',
+            'rd',
+            'th',
+            'th',
+            'th',
+            'th',
+            'th',
+            'th'
+        ];
+
+        if ((($number % 100) >= 11) && (($number % 100) <= 13)) {
+            return $number. 'th';
+        } else {
+            return $number. $suffix[$number % 10];
+        }
+    }
+
     private function getDataRealignmentLIB($budRealignID) {
         $budgetRealignedData = DB::table('funding_budget_realignments')
                                  ->where('id', $budRealignID)
                                  ->orderBy('realignment_order', 'desc')
                                  ->first();
-        $allotments = $budgetRealignedData ?
-                      DB::table('funding_allotment_realignments as r_allot')
-                        ->select('allot.id as id', 'r_allot.allotment_name as allotment_name',
-                                'r_allot.realigned_allotment_cost as allotment_cost',
-                                'r_allot.allotment_class as allotment_class', 'r_allot.coimplementers',
-                                'r_allot.id as r_allot_id', 'r_allot.justification',)
-                        ->leftJoin('funding_allotments as allot', 'allot.id', '=',
-                                   'r_allot.allotment_id')
-                        ->where('r_allot.budget_realign_id', $budgetRealignedData->id)
-                        ->orderBy('r_allot.order_no')
-                        ->get() :
-                      DB::table('funding_allotments')
-                        ->where('budget_id', $budgetRealignedData->budget_id)
+        $budgetID = $budgetRealignedData->budget_id;
+        $realignOrder = $budgetRealignedData->realignment_order;
+
+        $budgetRealigns = DB::table('funding_budgets as bud')
+                            ->join('funding_budget_realignments as r_bud',
+                                'r_bud.budget_id', '=', 'bud.id')
+                            ->where([
+                                ['bud.id', $budgetID],
+                                ['r_bud.realignment_order', '<=', $realignOrder]
+                            ])->orderBy('r_bud.realignment_order')->get();
+        $allotments = DB::table('funding_allotments as allot')
+                        ->where('budget_id', $budgetID)
                         ->orderBy('order_no')
                         ->get();
-
-        $realignOrder = $budgetRealignedData->realignment_order;
 
         $projID = $budgetRealignedData->project_id;
         $projData = FundingProject::find($projID);
@@ -685,7 +703,7 @@ class PrintController extends Controller
         $currDateFrom = date_format(date_create($projData->date_from), 'F n, Y');
         $currDateTo = date_format(date_create($projData->date_to), 'F n, Y');
 
-        $cyYear = $cyYearFrom == $cyYearTo ? $cyYearTo : "$cyYearFrom to $cyYearTo";
+        $cyYear = $cyYearFrom == $cyYearTo ? $cyYearTo : "$cyYearFrom - $cyYearTo";
         $projTitle = $projData->project_title;
         $currDuration = "$currDateFrom - $currDateTo";
         $implAgency = $this->getAgencyName($projData->implementing_agency);
@@ -719,27 +737,25 @@ class PrintController extends Controller
 
         $multiplier = 1;
 
-        $totals = [$impBudget];
         $headerCount = 1;
         $headerCountRoman = 'I';
         $tableHeader = ['PARTICULARS', '', $implAgency];
-        $tableBody = [];
 
         for ($orderNo = 1; $orderNo <= $realignOrder; $orderNo++) {
-            //$tableHeader[] = "$implAgency (Realignment $orderNo)";
+            $ordinalOrderNo = $this->convertToOrdinal($orderNo);
+            $tableHeader[] = "$implAgency<br>($ordinalOrderNo Realignment)";
         }
 
         foreach ($_coimplAgencies as $coimplementor) {
             $tableHeader[] = $coimplementor;
 
             for ($orderNo = 1; $orderNo <= $realignOrder; $orderNo++) {
-                //$tableHeader[] = "$coimplementor (Realignment $orderNo)";
+                $ordinalOrderNo = $this->convertToOrdinal($orderNo);
+                $tableHeader[] = "$coimplementor<br>($ordinalOrderNo Realignment)";
             }
         }
 
-        foreach ($__coimplAgencies as $coimp) {
-            $totals[] = $coimp['coimplementing_project_cost'];
-        }
+        $tableHeader[] = "JUSTIFICATION";
 
         $tableHeaderCount = count($tableHeader);
         $fontStyles = [];
@@ -774,11 +790,187 @@ class PrintController extends Controller
             ]
         ];
 
-        $grandTotal = 0;
+        $grandTotal = ['', 'GRAND TOTAL', 0];
+
+        for ($grandTotalCtr = 3; $grandTotalCtr < $tableHeaderCount; $grandTotalCtr++) {
+            $grandTotal[] = 0;
+        }
 
         foreach ($groupedAllotments as $className => $classItems) {
-            $subTotal = [0];
+            $subTotal = ['', 'Sub-Total', 0];
             $row = [];
+
+            for ($subTotalCtr = 3; $subTotalCtr < $tableHeaderCount; $subTotalCtr++) {
+                $subTotal[] = 0;
+            }
+
+            switch ($headerCount) {
+                case 1:
+                    $headerCountRoman = 'I';
+                    break;
+                case 2:
+                    $headerCountRoman = 'II';
+                    break;
+                case 3:
+                    $headerCountRoman = 'III';
+                    break;
+                case 4:
+                    $headerCountRoman = 'IV';
+                    break;
+                default:
+                    break;
+            }
+
+            $row[] = "$headerCountRoman.";
+            $row[] = str_replace('-', ' ', $className);
+
+            for ($rowCount = 0; $rowCount <= $tableHeaderCount - count($row); $rowCount++) {
+                $row[] = "";
+            }
+
+            $fontStyles = [];
+            $aligns = [];
+            $widths = [];
+            $colSpanKeys = [];
+
+            for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+                $fontStyles[] = "B";
+
+                if ($tblHeadCtr == 0) {
+                    $aligns[] = "C";
+                    $widths[] = 3;
+                    $colSpanKeys[] = "0";
+                } else if ($tblHeadCtr == 1) {
+                    $aligns[] = "L";
+                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                    $colSpanKeys[] = "1";
+                } else if ($tblHeadCtr == 2) {
+                    $aligns[] = "L";
+                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                    $colSpanKeys[] = "2-".($tableHeaderCount - 1);
+                } else if ($tblHeadCtr == 3) {
+                    $aligns[] = "L";
+                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                } else {
+                    $aligns[] = "L";
+                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                }
+            }
+
+            $data[] = [
+                'col-span' => true,
+                'col-span-key' => $colSpanKeys,
+                'aligns' => $aligns,
+                'widths' => $widths,
+                'font-styles' => $fontStyles,
+                'type' => 'row-data',
+                'data' => [$row]
+            ];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            $fontStyles = [];
+            $aligns = [];
+            $widths = [];
+            $colSpanKeys = [];
+
+            for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+                $colSpanKeys[] = "$tblHeadCtr";
+
+                if ($tblHeadCtr == 0) {
+                    $fontStyles[] = "BI";
+                    $aligns[] = "R";
+                    $widths[] = 3;
+                } else {
+                    $fontStyles[] = "BI";
+                    $aligns[] = "R";
+                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                }
+            }
+
+            for ($subTotalIndex = 2; $subTotalIndex < count($subTotal); $subTotalIndex++) {
+                $subTotal[$subTotalIndex] = $subTotal[$subTotalIndex] ?
+                                            number_format($subTotal[$subTotalIndex], 2) :
+                                            '-';
+            }
+
+            $data[] = [
+                'col-span' => true,
+                'col-span-key' => $colSpanKeys,
+                'aligns' => $aligns,
+                'widths' => $widths,
+                'font-styles' => $fontStyles,
+                'type' => 'row-data',
+                'data' => [$subTotal]
+            ];
+
+            $subTotal = [];
+            $headerCount++;
+        }
+
+        $fontStyles = [];
+        $aligns = [];
+        $widths = [];
+        $colSpanKeys = [];
+
+        for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+            $colSpanKeys[] = "$tblHeadCtr";
+
+            if ($tblHeadCtr == 0) {
+                $fontStyles[] = "B";
+                $aligns[] = "C";
+                $widths[] = 3;
+            } else if ($tblHeadCtr == 1) {
+                $fontStyles[] = "B";
+                $aligns[] = "C";
+                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+            } else {
+                $fontStyles[] = "B";
+                $aligns[] = "R";
+                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+            }
+        }
+
+        for ($grandTotalIndex = 2; $grandTotalIndex < count($grandTotal); $grandTotalIndex++) {
+            $grandTotal[$grandTotalIndex] = $grandTotal[$grandTotalIndex] ?
+                                            number_format($grandTotal[$grandTotalIndex], 2) :
+                                            '-';
+        }
+
+        $data[] = [
+            'col-span' => true,
+            'col-span-key' => $colSpanKeys,
+            'aligns' => $aligns,
+            'widths' => $widths,
+            'font-styles' => $fontStyles,
+            'type' => 'row-data',
+            'data' => [$grandTotal]
+        ];
+
+        /*
+        foreach ($groupedAllotments as $className => $classItems) {
+            $subTotal = ['', 'Sub-Total', 0];
+            $row = [];
+
+            for ($subTotalCtr = 3; $subTotalCtr < $tableHeaderCount; $subTotalCtr++) {
+                $subTotal[] = 0;
+            }
 
             switch ($headerCount) {
                 case 1:
@@ -843,7 +1035,7 @@ class PrintController extends Controller
                 if (is_int($ctr)) {
                     $allotCoimplementors = unserialize($item->coimplementers);
                     $row = [''];
-                    $row[] = " $item->allotment_cost";
+                    $row[] = " $item->allotment_name";
                     $row[] = $item->allotment_cost ?
                              number_format($item->allotment_cost, 2) :
                              '-';
@@ -988,10 +1180,47 @@ class PrintController extends Controller
                 }
             }
 
+            $fontStyles = [];
+            $aligns = [];
+            $widths = [];
+            $colSpanKeys = [];
+
+            for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+                $colSpanKeys[] = "$tblHeadCtr";
+
+                if ($tblHeadCtr == 0) {
+                    $fontStyles[] = "BI";
+                    $aligns[] = "R";
+                    $widths[] = 3;
+                } else {
+                    $fontStyles[] = "BI";
+                    $aligns[] = "R";
+                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                }
+            }
+
+            for ($subTotalIndex = 2; $subTotalIndex < count($subTotal); $subTotalIndex++) {
+                $subTotal[$subTotalIndex] = $subTotal[$subTotalIndex] ?
+                                            number_format($subTotal[$subTotalIndex], 2) :
+                                            '-';
+            }
+
+            $data[] = [
+                'col-span' => true,
+                'col-span-key' => $colSpanKeys,
+                'aligns' => $aligns,
+                'widths' => $widths,
+                'font-styles' => $fontStyles,
+                'type' => 'row-data',
+                'data' => [$subTotal]
+            ];
+
+            $subTotal = [];
             $headerCount++;
-        }
+        }*/
 
         return (object)[
+            'header_count' => $tableHeaderCount,
             'table_data' => $data,
             'cy_year' => $cyYear,
             'title' => $projTitle,
@@ -1058,18 +1287,12 @@ class PrintController extends Controller
 
         $multiplier = 1;
 
-        $totals = [$impBudget];
         $headerCount = 1;
         $headerCountRoman = 'I';
         $tableHeader = ['PARTICULARS', '', $implAgency];
-        $tableBody = [];
 
         foreach ($_coimplAgencies as $coimplementor) {
             $tableHeader[] = $coimplementor;
-        }
-
-        foreach ($__coimplAgencies as $coimp) {
-            $totals[] = $coimp['coimplementing_project_cost'];
         }
 
         $tableHeaderCount = count($tableHeader);
@@ -1150,20 +1373,24 @@ class PrintController extends Controller
 
             for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
                 $fontStyles[] = "B";
-                $aligns[] = "L";
 
                 if ($tblHeadCtr == 0) {
+                    $aligns[] = "C";
                     $widths[] = 3;
                     $colSpanKeys[] = "0";
                 } else if ($tblHeadCtr == 1) {
+                    $aligns[] = "L";
                     $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
                     $colSpanKeys[] = "1";
                 } else if ($tblHeadCtr == 2) {
+                    $aligns[] = "L";
                     $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
                     $colSpanKeys[] = "2-".($tableHeaderCount - 1);
                 } else if ($tblHeadCtr == 3) {
+                    $aligns[] = "L";
                     $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
                 } else {
+                    $aligns[] = "L";
                     $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
                 }
             }
@@ -1413,6 +1640,7 @@ class PrintController extends Controller
         ];
 
         return (object)[
+            'header_count' => $tableHeaderCount,
             'table_data' => $data,
             'cy_year' => $cyYear,
             'title' => $projTitle,
@@ -1426,6 +1654,7 @@ class PrintController extends Controller
             'submitted_by_pos' => $submittedByPos,
             'approved_by' => $approvedBy,
             'approved_by_pos' => $approvedByPos,
+            'budget_id' => $budgetID,
         ];
     }
 
@@ -3459,6 +3688,8 @@ class PrintController extends Controller
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new DocDisbursementVoucher('P', $pageUnit, $pageSize);
         $pdf->setHeaderLR(false, true);
+        $pdf->setFontScale($fontScale);
+
         $docCode = ($data->dv->module_class == 3) ? 'FM-FAS-BUD F12': 'FM-FAS-ACCTG F01';
         $docRev = ($data->dv->module_class == 3) ? 'Revision 1': 'Revision 0';
         $docRevDate = ($data->dv->module_class == 3) ? '02-28-18': '08-31-17';
@@ -3488,6 +3719,8 @@ class PrintController extends Controller
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new DocLiquidationReport('P', $pageUnit, $pageSize);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "";
         $docRev = "";
         $docRevDate = "";
@@ -3546,6 +3779,8 @@ class PrintController extends Controller
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new DocListDueDemandable('P', $pageUnit, $pageSize);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "";
         $docRev = "";
         $docRevDate = "";
@@ -3576,6 +3811,8 @@ class PrintController extends Controller
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new DocSummaryListDueDemandable('P', $pageUnit, $pageSize);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "";
         $docRev = "";
         $docRevDate = "";
@@ -3602,6 +3839,8 @@ class PrintController extends Controller
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new DocPropertyAcknowledgement('P', $pageUnit, $pageSize);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "FM-FAS-PUR F10";
         $docRev = "Revision 1";
         $docRevDate = "02-28-18";
@@ -3626,6 +3865,8 @@ class PrintController extends Controller
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new DocRequisitionIssueSlip('P', $pageUnit, $pageSize);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "FM-FAS-PUR F11";
         $docRev = "Revision 1";
         $docRevDate = "02-28-18";
@@ -3650,6 +3891,8 @@ class PrintController extends Controller
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new DocInventoryCustodian('P', $pageUnit, $pageSize);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "FM-FAS-PUR F16";
         $docRev = "Revision 1";
         $docRevDate = "02-28-18";
@@ -3681,6 +3924,8 @@ class PrintController extends Controller
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new DocPropertyLabel('L', $pageUnit, $pageSize);
         $pdf->setHeaderLR(false, false);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "";
         $docRev = "";
         $docRevDate = "";
@@ -3704,23 +3949,21 @@ class PrintController extends Controller
     private function generateLIB($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new DocLineItemBudget('P', $pageUnit, $pageSize);
+        $pdf = new DocLineItemBudget(
+            $data->header_count > 7 ? 'L' : 'P',
+            $pageUnit, $pageSize
+        );
         $pdf->setHeaderLR(false, false);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "";
         $docRev = "";
         $docRevDate = "";
-        $docTitle = 'test';
+        $docTitle = 'lib_cy_'.str_replace(' - ', '_', $data->cy_year);
         $docCreator = "DOST-CAR";
         $docAuthor = "DOST-CAR";
         $docSubject = "Line-Item-Budget";
         $docKeywords = "LIB, lib, Line, line, LINE, Item, item, ITEM, Budget, budget, BUDGET, Line-Item-Budget";
-
-
-        /*
-        if (!empty($data->po->date_po)) {
-            $poDate = new DateTime($data->po->date_po);
-            $poDate = $poDate->format('F j, Y');
-        }*/
 
         //Set document information
         $this->setDocumentInfo($pdf, $docCode, $docRev, $docRevDate, $docTitle,
@@ -3736,23 +3979,21 @@ class PrintController extends Controller
     private function generateLIBRealignment($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
-        $pdf = new DocLineItemBudgetRealignment('P', $pageUnit, $pageSize);
+        $pdf = new DocLineItemBudgetRealignment(
+            $data->header_count > 9 ? 'L' : 'P',
+            $pageUnit, $pageSize
+        );
         $pdf->setHeaderLR(false, false);
+        $pdf->setFontScale($fontScale);
+
         $docCode = "";
         $docRev = "";
         $docRevDate = "";
-        $docTitle = 'test';
+        $docTitle = 'lib_realignment_cy_'.str_replace(' - ', '_', $data->cy_year);
         $docCreator = "DOST-CAR";
         $docAuthor = "DOST-CAR";
         $docSubject = "Line-Item-Budget";
         $docKeywords = "LIB, lib, Line, line, LINE, Item, item, ITEM, Budget, budget, BUDGET, Line-Item-Budget";
-
-
-        /*
-        if (!empty($data->po->date_po)) {
-            $poDate = new DateTime($data->po->date_po);
-            $poDate = $poDate->format('F j, Y');
-        }*/
 
         //Set document information
         $this->setDocumentInfo($pdf, $docCode, $docRev, $docRevDate, $docTitle,
