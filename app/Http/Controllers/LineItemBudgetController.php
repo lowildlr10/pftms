@@ -116,11 +116,25 @@ class LineItemBudgetController extends Controller
             $budget->current_realigned_budget = isset($realignments[$countRealignments - 1]) ?
                                                 $realignments[$countRealignments - 1] :
                                                 FundingBudget::find($budget->id);
-            $budget->current_realigned_allotments = isset($realignments[$countRealignments - 1]) ?
-                                                    $realignments[$countRealignments - 1]->realigned_allotments :
-                                                    FundingAllotment::where('budget_id', $budget->id)
-                                                                    ->orderBy('order_no')
-                                                                    ->get();
+
+            if (isset($realignments[$countRealignments - 1])) {
+                $budget->current_realigned_allotments = $realignments[$countRealignments - 1]->realigned_allotments;
+            } else {
+                $fundAllotments = FundingAllotment::where('budget_id', $budget->id)
+                                                  ->orderBy('order_no')
+                                                  ->get();
+
+                foreach ($fundAllotments as $allot) {
+                    $coimplementers = unserialize($allot->coimplementers);
+
+                    foreach ($coimplementers as $coimplementer) {
+                        $allot->allotment_cost += $coimplementer['coimplementor_budget'];
+                    }
+                }
+
+                $budget->current_realigned_allotments = $fundAllotments;
+            }
+
         }
 
         return view('modules.fund-utilization.fund-project-lib.index', [
@@ -518,6 +532,7 @@ class LineItemBudgetController extends Controller
                     }
                 }
 
+                $newAllotmentIDs = array_filter($newAllotmentIDs);
                 FundingAllotment::whereNotIn('id', $newAllotmentIDs)
                                 ->where('budget_id', $id)
                                 ->delete();
@@ -551,9 +566,12 @@ class LineItemBudgetController extends Controller
         $coimplementorBudgets = $request->coimplementor_budget;
         $justifications = $request->justification;
 
-        //echo '$rowTypes, $allotmentIDs, $realignedAllotIDs, $allotmentNames, $allotmentClasses, $allottedBudgets, $justifications';
-        //dd($rowTypes, $allotmentIDs, $realignedAllotIDs, $allotmentNames, $allotmentClasses, $allottedBudgets, $justifications);
+        /*echo '$rowTypes, $allotmentIDs, $realignedAllotIDs, $allotmentNames,
+              $allotmentClasses, $allottedBudgets, $justifications';
+        dd($rowTypes, $allotmentIDs, $realignedAllotIDs, $allotmentNames,
+           $allotmentClasses, $allottedBudgets, $justifications);*/
 
+        $newRealignAllotIDs = $realignedAllotIDs;
         $documentType = 'Line-Item Budget Realignment';
         $routeName = 'fund-project-lib';
 
@@ -584,10 +602,11 @@ class LineItemBudgetController extends Controller
                     } else if ($rowTypes[$ctr] == 'item') {
                         $orderNo += 1;
 
-                        $instanceRealignedAllot = $allotmentID ? FundingAllotmentRealignment::find($realignedAllotIDs[$ctr]) :
+                        $instanceRealignedAllot = $realignedAllotIDs[$ctr] ?
+                                                  FundingAllotmentRealignment::find($realignedAllotIDs[$ctr]) :
                                                   new FundingAllotmentRealignment;
 
-                        if (!$allotmentID) {
+                        if (!$realignedAllotIDs[$ctr]) {
                             $instanceRealignedAllot->project_id = $projectID;
                             $instanceRealignedAllot->budget_id = $id;
                         }
@@ -610,11 +629,25 @@ class LineItemBudgetController extends Controller
                         $instanceRealignedAllot->justification = $justifications[$ctr];
                         $instanceRealignedAllot->save();
 
+                        if (!$realignedAllotIDs[$ctr] && is_int($ctr)) {
+                            $newAddedAllotment = DB::table('funding_allotment_realignments')
+                                                   ->where([
+                                                    ['budget_realign_id', $realignedBudgetID],
+                                                    ['allotment_name', $instanceRealignedAllot->allotment_name]
+                                                ])->first();
+                            $newRealignAllotIDs[] = $newAddedAllotment->id;
+                        }
+
                         $coimplementers = [];
                     } else if ($rowTypes[$ctr] == 'header-break') {
                         $headerName = "";
                     }
                 }
+
+                $newRealignAllotIDs = array_filter($newRealignAllotIDs);
+                $test = FundingAllotmentRealignment::whereNotIn('id', $newRealignAllotIDs)
+                                ->where('budget_realign_id', $realignedBudgetID)
+                                ->delete();
             }
 
             $msg = "$documentType successfully updated.";

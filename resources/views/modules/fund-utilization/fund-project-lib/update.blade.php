@@ -141,10 +141,10 @@
                             @foreach (unserialize($item->coimplementers) as $coimpCtr => $coimplementor)
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input type="hidden" name="coimplementor_id[{{ $itemCounter }}][{{ $coimpCtr }}}]"
+                                    <input type="hidden" name="coimplementor_id[{{ $itemCounter }}][{{ $coimpCtr }}]"
                                            value="{{ $coimplementor['id'] }}}">
                                     <input type="number" placeholder=" Value..."
-                                        name="coimplementor_budget[{{ $itemCounter }}][{{ $coimpCtr }}}]"
+                                        name="coimplementor_budget[{{ $itemCounter }}][{{ $coimpCtr }}]"
                                         class="form-control required form-control-sm coimplementor-budget allotted-budget py-1"
                                         id="coimplementor-budget-{{ $itemCounter }}-{{ $coimpCtr }}}" min="0"
                                         value="{{ $coimplementor['coimplementor_budget'] }}"
@@ -181,8 +181,8 @@
                                            id="allotment-name-header-{{ $itemCounter }}">
 
                                     @foreach ($coimplementors as $coimpCtr => $coimplementor)
-                                    <input type="hidden" name="coimplementor_id[{{ $itemCounter }}}][{{ $coimpCtr }}]">
-                                    <input type="hidden" name="coimplementor_budget[{{ $itemCounter }}}][{{ $coimpCtr }}]">
+                                    <input type="hidden" name="coimplementor_id[{{ $itemCounter }}][{{ $coimpCtr }}]">
+                                    <input type="hidden" name="coimplementor_budget[{{ $itemCounter }}][{{ $coimpCtr }}]">
                                     @endforeach
                                 </div>
                             </td>
@@ -242,10 +242,10 @@
                             @foreach (unserialize($itm->coimplementers) as $coimpCtr => $coimplementor)
                             <td>
                                 <div class="md-form form-sm my-0">
-                                    <input type="hidden" name="coimplementor_id[{{ $itemCounter }}][{{ $coimpCtr }}}]"
+                                    <input type="hidden" name="coimplementor_id[{{ $itemCounter }}][{{ $coimpCtr }}]"
                                            value="{{ $coimplementor['id'] }}}">
                                     <input type="number" placeholder=" Value..."
-                                        name="coimplementor_budget[{{ $itemCounter }}][{{ $coimpCtr }}}]"
+                                        name="coimplementor_budget[{{ $itemCounter }}][{{ $coimpCtr }}]"
                                         class="form-control required form-control-sm coimplementor-budget allotted-budget py-1"
                                         id="coimplementor-budget-{{ $itemCounter }}-{{ $coimpCtr }}}" min="0"
                                         value="{{ $coimplementor['coimplementor_budget'] }}"
@@ -274,16 +274,16 @@
                             <td colspan="{{ count($coimplementors) + 3 }}">
                                 <hr>
                                 <div class="md-form form-sm my-0">
-                                    <input name="row_type[{{ $itemCounter }}]" type="hidden" value="headerbreak">
+                                    <input name="row_type[{{ $itemCounter }}]" type="hidden" value="header-break">
                                     <input type="hidden" name="allotment_id[{{ $itemCounter }}]">
                                     <input type="hidden"name="allot_class[{{ $itemCounter }}]">
                                     <input type="hidden"name="allotted_budget[{{ $itemCounter }}]">
                                     <input type="hidden" name="allotment_name[{{ $itemCounter }}]"
-                                           id="allotment-name-headerbreak-{{ $itemCounter }}">
+                                           id="allotment-name-{{ $itemCounter }}">
 
                                     @foreach ($coimplementors as $coimpCtr => $coimplementor)
-                                    <input type="hidden" name="coimplementor_id[{{ $itemCounter }}}][{{ $coimpCtr }}]">
-                                    <input type="hidden" name="coimplementor_budget[{{ $itemCounter }}}][{{ $coimpCtr }}]">
+                                    <input type="hidden" name="coimplementor_id[{{ $itemCounter }}][{{ $coimpCtr }}]">
+                                    <input type="hidden" name="coimplementor_budget[{{ $itemCounter }}][{{ $coimpCtr }}]">
                                     @endforeach
                                 </div>
                             </td>

@@ -619,25 +619,66 @@ class PrintController extends Controller
         return $groupNumbers;
     }
 
-    private function groupAllotments($allotments) {
+    private function groupAllotments($allotments, $isRealignment = false, $currRealignData = NULL) {
         $groupedAllotments = [];
         $allotClassData = DB::table('allotment_classes')
                             ->orderBy('order_no')
                             ->get();
 
-        foreach ($allotments as $itmCtr => $item) {
-            foreach ($allotClassData as $class) {
-                if ($class->id == $item->allotment_class ) {
-                    $keyClass = preg_replace("/\s+/", "-", $class->class_name);
+        if (!$isRealignment) {
+            foreach ($allotments as $itmCtr => $item) {
 
-                    if (count(explode('::', $item->allotment_name)) > 1) {
-                        $keyAllotment = preg_replace("/\s+/", "-", explode('::', $item->allotment_name)[0]);
-                        $groupedAllotments[$keyClass][$keyAllotment][] = $item;
-                    } else {
-                        $groupedAllotments[$keyClass][$itmCtr + 1] = $item;
+                foreach ($allotClassData as $class) {
+                    if ($class->id == $item->allotment_class ) {
+                        $keyClass = preg_replace("/\s+/", "-", $class->class_name);
+
+                        if (count(explode('::', $item->allotment_name)) > 1) {
+                            $keyAllotment = preg_replace(
+                                "/\s+/", "-", explode('::', $item->allotment_name)[0]
+                            );
+                            $groupedAllotments[$keyClass][$keyAllotment][] = $item;
+                        } else {
+                            $groupedAllotments[$keyClass][$itmCtr + 1] = $item;
+                        }
                     }
                 }
             }
+        } else {
+            $realignOrder = $currRealignData->realignment_order;
+            $budgetID = $currRealignData->budget_id;
+            $currRealignID = $currRealignData->id;
+
+            /*
+            $selects = [
+                'allot.allotment_name as allotment_name',
+                'allot.allotment_cost as allotment_cost',
+                'allot.coimplementers as coimplementers',
+            ];
+
+            for ($realignOrderCtr = 1; $realignOrderCtr <= $realignOrder; $realignOrderCtr++) {
+                $selects[] = "r_allot_$realignOrderCtr.allotment_name as r_allot_name_$realignOrderCtr";
+                $selects[] = "r_allot_$realignOrderCtr.realigned_allotment_cost as r_allot_cost_$realignOrderCtr";
+                $selects[] = "r_allot_$realignOrderCtr.coimplementers as r_allot_coimplementers_$realignOrderCtr";
+            }
+
+            $realignmentData = DB::table("funding_allotment_realignments as r_allot_$realignOrder")
+                                 ->select($selects)
+                                 ->leftJoin('funding_allotments as allot', 'allot.id', '=',
+                                        "r_allot_$realignOrder.allotment_id");
+
+            for ($realignOrderCtr = 1; $realignOrderCtr < $realignOrder; $realignOrderCtr++) {
+                $realignmentData = $realignmentData->leftJoin(
+                    "funding_allotment_realignments as r_allot_$realignOrderCtr",
+                    "r_allot_$realignOrderCtr.allotment_id", '=', 'allot.id');
+            }
+
+            $realignmentData = $realignmentData->orderBy("r_allot_$realignOrder.order_no")
+                                               ->get();*/
+
+            for ($realignOrderCtr = 1; $realignOrderCtr <= $realignOrder; $realignOrderCtr++) {
+                $
+            }
+            dd($realignmentData);
         }
 
         return $groupedAllotments;
@@ -733,7 +774,7 @@ class PrintController extends Controller
         $approvedBy = $instanceSignatory->getSignatory($budgetRealignedData->sig_approved_by)->name;
         $approvedByPos = $instanceSignatory->getSignatory($budgetRealignedData->sig_approved_by)->position;
 
-        $groupedAllotments = $this->groupAllotments($allotments);
+        $groupedAllotments = $this->groupAllotments($allotments, true, $budgetRealignedData);
 
         $multiplier = 1;
 
@@ -874,7 +915,7 @@ class PrintController extends Controller
 
 
 
-
+            dd($groupedAllotments);
 
 
 
@@ -948,9 +989,13 @@ class PrintController extends Controller
         }
 
         for ($grandTotalIndex = 2; $grandTotalIndex < count($grandTotal); $grandTotalIndex++) {
-            $grandTotal[$grandTotalIndex] = $grandTotal[$grandTotalIndex] ?
-                                            number_format($grandTotal[$grandTotalIndex], 2) :
-                                            '-';
+            if ($grandTotalIndex == count($grandTotal) - 1) {
+                $grandTotal[$grandTotalIndex] = "";
+            } else {
+                $grandTotal[$grandTotalIndex] = $grandTotal[$grandTotalIndex] ?
+                                                number_format($grandTotal[$grandTotalIndex], 2) :
+                                                '-';
+            }
         }
 
         $data[] = [
