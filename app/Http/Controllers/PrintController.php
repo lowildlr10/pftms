@@ -625,60 +625,86 @@ class PrintController extends Controller
                             ->orderBy('order_no')
                             ->get();
 
-        if (!$isRealignment) {
-            foreach ($allotments as $itmCtr => $item) {
-
-                foreach ($allotClassData as $class) {
-                    if ($class->id == $item->allotment_class ) {
-                        $keyClass = preg_replace("/\s+/", "-", $class->class_name);
-
-                        if (count(explode('::', $item->allotment_name)) > 1) {
-                            $keyAllotment = preg_replace(
-                                "/\s+/", "-", explode('::', $item->allotment_name)[0]
-                            );
-                            $groupedAllotments[$keyClass][$keyAllotment][] = $item;
-                        } else {
-                            $groupedAllotments[$keyClass][$itmCtr + 1] = $item;
-                        }
-                    }
-                }
-            }
-        } else {
+        if ($isRealignment) {
             $realignOrder = $currRealignData->realignment_order;
             $budgetID = $currRealignData->budget_id;
             $currRealignID = $currRealignData->id;
 
-            /*
-            $selects = [
-                'allot.allotment_name as allotment_name',
-                'allot.allotment_cost as allotment_cost',
-                'allot.coimplementers as coimplementers',
-            ];
+            $currRealignAllotments = DB::table('funding_allotment_realignments')
+                                       ->where('budget_realign_id', $currRealignID)
+                                       ->orderBy('order_no')
+                                       ->get();
+            $realignAllotments = [];
 
-            for ($realignOrderCtr = 1; $realignOrderCtr <= $realignOrder; $realignOrderCtr++) {
-                $selects[] = "r_allot_$realignOrderCtr.allotment_name as r_allot_name_$realignOrderCtr";
-                $selects[] = "r_allot_$realignOrderCtr.realigned_allotment_cost as r_allot_cost_$realignOrderCtr";
-                $selects[] = "r_allot_$realignOrderCtr.coimplementers as r_allot_coimplementers_$realignOrderCtr";
+            foreach ($currRealignAllotments as $realignDat) {
+                $realignAllotments[] = (object) [
+                    'allotment_class' => $realignDat->allotment_class,
+                    'allotment_name' => $realignDat->allotment_name,
+                    'allotment_cost' => $realignDat->realigned_allotment_cost,
+                    'coimplementers' => unserialize($realignDat->coimplementers),
+                    'justification' => $realignDat->justification,
+                ];
             }
 
-            $realignmentData = DB::table("funding_allotment_realignments as r_allot_$realignOrder")
-                                 ->select($selects)
-                                 ->leftJoin('funding_allotments as allot', 'allot.id', '=',
-                                        "r_allot_$realignOrder.allotment_id");
+            for ($realignOrderCtr = 0; $realignOrderCtr < $realignOrder; $realignOrderCtr++) {
+                foreach ($realignAllotments as $currRealignCtr => $currRealign) {
+                    if ($realignOrderCtr == 0) {
+                        foreach ($allotments as $allotCtr => $allot) {
+                            if ($currRealign->allotment_name == $allot->allotment_name) {
+                                $currRealign->original_allotment = [
+                                    'allotment_name' => $allot->allotment_name,
+                                    'allotment_cost' => $allot->allotment_cost,
+                                    'coimplementers' => unserialize($allot->coimplementers),
+                                ];
 
-            for ($realignOrderCtr = 1; $realignOrderCtr < $realignOrder; $realignOrderCtr++) {
-                $realignmentData = $realignmentData->leftJoin(
-                    "funding_allotment_realignments as r_allot_$realignOrderCtr",
-                    "r_allot_$realignOrderCtr.allotment_id", '=', 'allot.id');
+                                break;
+                            }
+                        }
+                    } else {
+                        $budgetRealignData = DB::table('funding_budget_realignments')
+                                            ->where([
+                                                ['budget_id', $budgetID],
+                                                ['realignment_order', $realignOrderCtr]
+                                                ])->first();
+                        $realignID = $budgetRealignData->id;
+                        $realignAllotmentData = DB::table('funding_allotment_realignments')
+                                                ->where('budget_realign_id', $realignID)
+                                                ->orderBy('order_no')
+                                                ->get();
+
+                        foreach ($realignAllotmentData as $rAllotCtr => $rAllot) {
+                            if ($currRealign->allotment_name == $rAllot->allotment_name) {
+                                $currRealign->realigned_allotments[] = [
+                                    'allotment_name' => $rAllot->allotment_name,
+                                    'allotment_cost' => $rAllot->realigned_allotment_cost,
+                                    'coimplementers' => unserialize($rAllot->coimplementers),
+                                ];
+
+                                break;
+                            }
+                        }
+                    }
+                }
             }
 
-            $realignmentData = $realignmentData->orderBy("r_allot_$realignOrder.order_no")
-                                               ->get();*/
+            $allotments = $realignAllotments;
+        }
 
-            for ($realignOrderCtr = 1; $realignOrderCtr <= $realignOrder; $realignOrderCtr++) {
-                $
+        foreach ($allotments as $itmCtr => $item) {
+            foreach ($allotClassData as $class) {
+                if ($class->id == $item->allotment_class ) {
+                    $keyClass = preg_replace("/\s+/", "-", $class->class_name);
+
+                    if (count(explode('::', $item->allotment_name)) > 1) {
+                        $keyAllotment = preg_replace(
+                            "/\s+/", "-", explode('::', $item->allotment_name)[0]
+                        );
+                        $groupedAllotments[$keyClass][$keyAllotment][] = $item;
+                    } else {
+                        $groupedAllotments[$keyClass][$itmCtr + 1] = $item;
+                    }
+                }
             }
-            dd($realignmentData);
         }
 
         return $groupedAllotments;
@@ -913,10 +939,62 @@ class PrintController extends Controller
 
 
 
+            foreach ($classItems as $ctr => $item) {
+                if (is_int($ctr)) {
+                    $allotCoimplementors = $item->coimplementers;
+                    dd($allotCoimplementors);
 
+                    $row = [''];
+                    $row[] = " $item->allotment_name";
+                    $row[] = $item->allotment_cost ?
+                             number_format($item->allotment_cost, 2) :
+                             '-';
 
-            dd($groupedAllotments);
+                    foreach ($allotCoimplementors as $coimp) {
+                        $row[] = $coimp['coimplementor_budget'] ?
+                                 number_format($coimp['coimplementor_budget'], 2) :
+                                 '-';
+                    }
 
+                    $fontStyles = [];
+                    $aligns = [];
+                    $widths = [];
+                    $colSpanKeys = [];
+
+                    for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+                        $colSpanKeys[] = "$tblHeadCtr";
+
+                        if ($tblHeadCtr == 0) {
+                            $fontStyles[] = "B";
+                            $aligns[] = "L";
+                            $widths[] = 3;
+                        } else if ($tblHeadCtr == 2 || $tblHeadCtr == 3) {
+                            $fontStyles[] = "";
+                            $aligns[] = "R";
+                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+
+                        } else {
+                            $fontStyles[] = "B";
+                            $aligns[] = "L";
+                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                        }
+                    }
+
+                    $data[] = [
+                        'col-span' => true,
+                        'col-span-key' => $colSpanKeys,
+                        'aligns' => $aligns,
+                        'widths' => $widths,
+                        'font-styles' => $fontStyles,
+                        'type' => 'row-data',
+                        'data' => [$row]
+                    ];
+
+                    $row = [];
+                } else {
+
+                }
+            }
 
 
 

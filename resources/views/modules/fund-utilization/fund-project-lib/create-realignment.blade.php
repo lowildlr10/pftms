@@ -74,13 +74,13 @@
                             </th>
 
                             @foreach ($coimplementors as $coimpHeadCtr => $coimplementor)
-                            <th id="coimplementor-{{ $coimpHeadCtr }}}" class="align-middle coimplementor" width="250px">
-                                <b id="coimplementor-name-{{ $coimpHeadCtr }}}">
+                            <th id="coimplementor-{{ $coimpHeadCtr }}" class="align-middle coimplementor" width="250px">
+                                <b id="coimplementor-name-{{ $coimpHeadCtr }}">
                                     <span class="red-text">* </span>
                                     {{ \App\Models\AgencyLGU::find($coimplementor['comimplementing_agency_lgu'])->agency_name }}
                                     <br>(Realignment)
                                 </b>
-                                <input id="coimplementor-id-{{ $coimpHeadCtr }}}" type="hidden"
+                                <input id="coimplementor-id-{{ $coimpHeadCtr }}" type="hidden"
                                        value="{{ $coimplementor['comimplementing_agency_lgu'] }}">
                             </th>
                             @endforeach
@@ -136,11 +136,11 @@
                             <td>
                                 <div class="md-form form-sm my-0">
                                     <input type="hidden" name="coimplementor_id[{{ $itemCounter }}][{{ $coimpCtr }}]"
-                                           value="{{ $coimplementor['id'] }}}">
+                                           value="{{ $coimplementor['id'] }}">
                                     <input type="number" placeholder=" Value..."
                                         name="coimplementor_budget[{{ $itemCounter }}][{{ $coimpCtr }}]"
                                         class="form-control required form-control-sm coimplementor-budget allotted-budget py-1"
-                                        id="coimplementor-budget-{{ $itemCounter }}-{{ $coimpCtr }}}" min="0"
+                                        id="coimplementor-budget-{{ $itemCounter }}-{{ $coimpCtr }}" min="0"
                                         value="{{ $coimplementor['coimplementor_budget'] }}"
                                         onkeyup="$(this).totalBudgetIsValid();"
                                         onchange="$(this).totalBudgetIsValid();">
@@ -243,7 +243,7 @@
                             <td>
                                 <div class="md-form form-sm my-0">
                                     <input type="hidden" name="coimplementor_id[{{ $itemCounter }}][{{ $coimpCtr }}]"
-                                           value="{{ $coimplementor['id'] }}}">
+                                           value="{{ $coimplementor['id'] }}">
                                     <input type="number" placeholder=" Value..."
                                         name="coimplementor_budget[{{ $itemCounter }}][{{ $coimpCtr }}]"
                                         class="form-control required form-control-sm coimplementor-budget allotted-budget py-1"
