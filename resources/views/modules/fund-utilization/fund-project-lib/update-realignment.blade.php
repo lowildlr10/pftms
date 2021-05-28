@@ -1,7 +1,7 @@
-<form id="form-update" class="wow animated fadeIn d-flex justify-content-center" method="POST"
+<form id="form-update" class="wow animated fadeIn" method="POST"
       action="{{ route('fund-project-lib-update-realignment', ['id' => $id]) }}">
     @csrf
-    <div class="card w-responsive">
+    <div class="card">
         <div class="card-body">
             <h4>Realignment Date</h4>
             <hr>

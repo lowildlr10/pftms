@@ -24,11 +24,15 @@ class UpdateFundingAllotmentsTable extends Migration
             $table->uuid('allotment_class');
             $table->foreign('allotment_class')->references('id')->on('allotment_classes');
             $table->unsignedInteger('order_no');
-            $table->string('allotment_name');
+            $table->text('allotment_name');
             $table->double('allotment_cost', 50, 2)->default(0.00);
             $table->binary('coimplementers')->nullable();
             $table->timestamps();
         });
+
+        DB::statement(
+            'ALTER TABLE `funding_allotments` CHANGE `coimplementers` `coimplementers` LONGBLOB NOT NULL;'
+        );
     }
 
     /**

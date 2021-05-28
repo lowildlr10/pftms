@@ -7,7 +7,7 @@ class DocLineItemBudget extends PDF {
         $pageHeight = $this->h;
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
-        $originalFontSize = 8;
+        $originalFontSize = $data->header_count > 8 ? 8 : 9;
 
         $cy = $data->cy_year;
         $title = $data->title;
@@ -70,47 +70,47 @@ class DocLineItemBudget extends PDF {
         $this->Ln(9);
 
         $this->SetFont('helvetica', 'B', $originalFontSize + ($fontScale * $originalFontSize));
-        $this->Cell($data->header_count > 7 ? $pageWidth * 0.15 :
-                    $pageWidth * 0.24, 5, 'Project Title', 0, 0, 'L');
+        $this->Cell($data->header_count > 8 ? $pageWidth * 0.15 :
+                    $pageWidth * 0.26, 5, 'Project Title', 0, 0, 'L');
         $this->Cell($pageWidth * 0.01, 5, ':', 0, 0, 'C');
         $this->SetFont('helvetica', '', $originalFontSize + ($fontScale * $originalFontSize));
         $this->MultiCell(0, 5, $title, 0, 'L');
 
         $this->SetFont('helvetica', 'B', $originalFontSize + ($fontScale * $originalFontSize));
-        $this->Cell($data->header_count > 7 ? $pageWidth * 0.15 :
-                    $pageWidth * 0.24, 5, 'Period Covered', 0, 0, 'L');
+        $this->Cell($data->header_count > 8 ? $pageWidth * 0.15 :
+                    $pageWidth * 0.26, 5, 'Period Covered', 0, 0, 'L');
         $this->Cell($pageWidth * 0.01, 5, ':', 0, 0, 'C');
         $this->SetFont('helvetica', '', $originalFontSize + ($fontScale * $originalFontSize));
         $this->Cell(0, 5, $duration, 0, 0, 'L');
         $this->Ln();
 
         $this->SetFont('helvetica', 'B', $originalFontSize + ($fontScale * $originalFontSize));
-        $this->Cell($data->header_count > 7 ? $pageWidth * 0.15 :
-                    $pageWidth * 0.24, 5, 'Implementing Agency/Office', 0, 0, 'L');
+        $this->Cell($data->header_count > 8 ? $pageWidth * 0.15 :
+                    $pageWidth * 0.26, 5, 'Implementing Agency/Office', 0, 0, 'L');
         $this->Cell($pageWidth * 0.01, 5, ':', 0, 0, 'C');
         $this->SetFont('helvetica', '', $originalFontSize + ($fontScale * $originalFontSize));
         $this->Cell(0, 5, $implementingAgency, 0, 0, 'L');
         $this->Ln();
 
         $this->SetFont('helvetica', 'B', $originalFontSize + ($fontScale * $originalFontSize));
-        $this->Cell($data->header_count > 7 ? $pageWidth * 0.15 :
-                    $pageWidth * 0.24, 5, 'Co-Implementing Agencies/Offices', 0, 0, 'L');
+        $this->Cell($data->header_count > 8 ? $pageWidth * 0.15 :
+                    $pageWidth * 0.26, 5, 'Co-Implementing Agencies/Offices', 0, 0, 'L');
         $this->Cell($pageWidth * 0.01, 5, ':', 0, 0, 'C');
         $this->SetFont('helvetica', '', $originalFontSize + ($fontScale * $originalFontSize));
         $this->Cell(0, 5, $coimplementors, 0, 0, 'L');
         $this->Ln();
 
         $this->SetFont('helvetica', 'B', $originalFontSize + ($fontScale * $originalFontSize));
-        $this->Cell($data->header_count > 7 ? $pageWidth * 0.15 :
-                    $pageWidth * 0.24, 5, 'Project Leader', 0, 0, 'L');
+        $this->Cell($data->header_count > 8 ? $pageWidth * 0.15 :
+                    $pageWidth * 0.26, 5, 'Project Leader', 0, 0, 'L');
         $this->Cell($pageWidth * 0.01, 5, ':', 0, 0, 'C');
         $this->SetFont('helvetica', '', $originalFontSize + ($fontScale * $originalFontSize));
         $this->Cell(0, 5, $leader, 0, 0, 'L');
         $this->Ln();
 
         $this->SetFont('helvetica', 'B', $originalFontSize + ($fontScale * $originalFontSize));
-        $this->Cell($data->header_count > 7 ? $pageWidth * 0.15 :
-                    $pageWidth * 0.24, 5, 'Monitoring Agencies/Offices', 0, 0, 'L');
+        $this->Cell($data->header_count > 8 ? $pageWidth * 0.15 :
+                    $pageWidth * 0.26, 5, 'Monitoring Agencies/Offices', 0, 0, 'L');
         $this->Cell($pageWidth * 0.01, 5, ':', 0, 0, 'C');
         $this->SetFont('helvetica', '', $originalFontSize + ($fontScale * $originalFontSize));
         $this->Cell(0, 5, $monitoringOffices, 0, 1, 'L');
