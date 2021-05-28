@@ -806,7 +806,7 @@ class PrintController extends Controller
 
         $headerCount = 1;
         $headerCountRoman = 'I';
-        $tableHeader = ['PARTICULARS', '', $implAgency];
+        $tableHeader = ['PARTICULARS', $implAgency];
 
         for ($orderNo = 1; $orderNo <= $realignOrder; $orderNo++) {
             $ordinalOrderNo = $this->convertToOrdinal($orderNo);
@@ -824,6 +824,7 @@ class PrintController extends Controller
 
         $tableHeader[] = "JUSTIFICATION";
 
+        $coimplementerCount = count($_coimplAgencies);
         $tableHeaderCount = count($tableHeader);
         $fontStyles = [];
         $aligns = [];
@@ -834,21 +835,11 @@ class PrintController extends Controller
             $fontStyles[] = "B";
             $aligns[] = "C";
 
-            if ($tblHeadCtr == 0) {
-                $widths[] = 3;
-                $colSpanKeys[] = "0-1";
-            } else if ($tblHeadCtr == 1) {
-                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-            } else {
-                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                $colSpanKeys[] = "$tblHeadCtr";
-            }
+            $widths[] = $multiplier * (100 / $tableHeaderCount);
         }
 
         $data = [
             [
-                'col-span' => true,
-                'col-span-key' => $colSpanKeys,
                 'aligns' => $aligns,
                 'widths' => $widths,
                 'font-styles' => $fontStyles,
@@ -857,19 +848,23 @@ class PrintController extends Controller
             ]
         ];
 
-        $grandTotal = ['', 'GRAND TOTAL', 0];
+        $grandTotal = ['GRAND TOTAL', 0];
 
-        for ($grandTotalCtr = 3; $grandTotalCtr < $tableHeaderCount; $grandTotalCtr++) {
+        for ($grandTotalCtr = 1; $grandTotalCtr < $tableHeaderCount - 2; $grandTotalCtr++) {
             $grandTotal[] = 0;
         }
 
+        $grandTotal[] = '';
+
         foreach ($groupedAllotments as $className => $classItems) {
-            $subTotal = ['', 'Sub-Total', 0];
+            $subTotal = ['Sub-Total', 0];
             $row = [];
 
-            for ($subTotalCtr = 3; $subTotalCtr < $tableHeaderCount; $subTotalCtr++) {
+            for ($subTotalCtr = 1; $subTotalCtr < $tableHeaderCount - 2; $subTotalCtr++) {
                 $subTotal[] = 0;
             }
+
+            $subTotal[] = '';
 
             switch ($headerCount) {
                 case 1:
@@ -888,10 +883,9 @@ class PrintController extends Controller
                     break;
             }
 
-            $row[] = "$headerCountRoman.";
-            $row[] = str_replace('-', ' ', $className);
+            $row[] = "$headerCountRoman. ".str_replace('-', ' ', $className);
 
-            for ($rowCount = 0; $rowCount <= $tableHeaderCount - count($row); $rowCount++) {
+            for ($rowCount = 0; $rowCount < $tableHeaderCount - 1; $rowCount++) {
                 $row[] = "";
             }
 
@@ -904,23 +898,16 @@ class PrintController extends Controller
                 $fontStyles[] = "B";
 
                 if ($tblHeadCtr == 0) {
-                    $aligns[] = "C";
-                    $widths[] = 3;
+                    $aligns[] = "L";
+                    $widths[] = $multiplier * (100 / $tableHeaderCount);
                     $colSpanKeys[] = "0";
                 } else if ($tblHeadCtr == 1) {
                     $aligns[] = "L";
-                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                    $colSpanKeys[] = "1";
-                } else if ($tblHeadCtr == 2) {
-                    $aligns[] = "L";
-                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                    $colSpanKeys[] = "2-".($tableHeaderCount - 1);
-                } else if ($tblHeadCtr == 3) {
-                    $aligns[] = "L";
-                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                    $widths[] = $multiplier * (100 / $tableHeaderCount);
+                    $colSpanKeys[] = "1-".($tableHeaderCount - 1);
                 } else {
                     $aligns[] = "L";
-                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                    $widths[] = $multiplier * (100 / $tableHeaderCount);
                 }
             }
 
@@ -934,27 +921,72 @@ class PrintController extends Controller
                 'data' => [$row]
             ];
 
-
-
-
-
-
             foreach ($classItems as $ctr => $item) {
                 if (is_int($ctr)) {
                     $allotCoimplementors = $item->coimplementers;
-                    dd($allotCoimplementors);
 
-                    $row = [''];
+                    $row = [];
                     $row[] = " $item->allotment_name";
-                    $row[] = $item->allotment_cost ?
-                             number_format($item->allotment_cost, 2) :
-                             '-';
 
-                    foreach ($allotCoimplementors as $coimp) {
-                        $row[] = $coimp['coimplementor_budget'] ?
-                                 number_format($coimp['coimplementor_budget'], 2) :
-                                 '-';
+                    if (isset($item->original_allotment)) {
+                        $row[] = $item->original_allotment['allotment_cost'] ?
+                                 number_format($item->original_allotment['allotment_cost'], 2) : '-';
+                        $subTotal[count($row) - 1] += $item->original_allotment['allotment_cost'];
+                        $grandTotal[count($row) - 1] += $item->original_allotment['allotment_cost'];
+                    } else {
+                        $row[] = '-';
                     }
+
+                    if (isset($item->realigned_allotments) && count($item->realigned_allotments) > 0) {
+                        foreach ($item->realigned_allotments as $realignCtr => $rItem) {
+                            $row[] = $rItem['allotment_cost'] ?
+                                     number_format($rItem['allotment_cost'], 2) : '-';
+                            $subTotal[count($row) - 1] += $rItem['allotment_cost'];
+                            $grandTotal[count($row) - 1] += $rItem['allotment_cost'];
+                        }
+                    } else {
+                        for ($realignCtr = 1; $realignCtr < $realignOrder; $realignCtr++) {
+                            $row[] = '-';
+                        }
+                    }
+
+                    $row[] = $item->allotment_cost ? number_format($item->allotment_cost, 2) : '-';
+
+                    for ($coimpCtr = 0; $coimpCtr <= $coimplementerCount; $coimpCtr++) {
+                        if ($coimpCtr == 0) {
+                            if (isset($item->original_allotment) && count($item->original_allotment) > 0) {
+                                $row[] = $item->original_allotment['coimplementers'][$coimpCtr]['coimplementor_budget'] ?
+                                    number_format($item->original_allotment['coimplementers'][$coimpCtr]['coimplementor_budget'], 2) :
+                                    '-';
+                                $subTotal[count($row) - 1] += $item->original_allotment['coimplementers'][$coimpCtr]['coimplementor_budget'];
+                                $grandTotal[count($row) - 1] += $item->original_allotment['coimplementers'][$coimpCtr]['coimplementor_budget'];
+                            } else {
+                                $row[] = '-';
+                            }
+                        } else {
+                            if (isset($item->realigned_allotments) && count($item->realigned_allotments) > 0) {
+                                foreach ($item->realigned_allotments as $rItem) {
+                                    $row[] = $rItem['coimplementers'][$coimpCtr - 1]['coimplementor_budget'] ?
+                                            number_format($rItem['coimplementers'][$coimpCtr - 1]['coimplementor_budget'], 2) :
+                                            '-';
+                                    $subTotal[count($row) - 1] += $rItem['coimplementers'][$coimpCtr - 1]['coimplementor_budget'];
+                                    $grandTotal[count($row) - 1] += $rItem['coimplementers'][$coimpCtr - 1]['coimplementor_budget'];
+                                }
+                            } else {
+                                for ($realignCtr = 1; $realignCtr < $realignOrder; $realignCtr++) {
+                                    $row[] = '-';
+                                }
+                            }
+
+                            $row[] = $item->coimplementers[$coimpCtr - 1]['coimplementor_budget'] ?
+                                     number_format($item->coimplementers[$coimpCtr - 1]['coimplementor_budget'], 2) :
+                                     '-';
+                            $subTotal[count($row) - 1] += $item->coimplementers[$coimpCtr - 1]['coimplementor_budget'];
+                            $grandTotal[count($row) - 1] += $item->coimplementers[$coimpCtr - 1]['coimplementor_budget'];
+                        }
+                    }
+
+                    $row[] = $item->justification;
 
                     $fontStyles = [];
                     $aligns = [];
@@ -965,24 +997,18 @@ class PrintController extends Controller
                         $colSpanKeys[] = "$tblHeadCtr";
 
                         if ($tblHeadCtr == 0) {
-                            $fontStyles[] = "B";
                             $aligns[] = "L";
-                            $widths[] = 3;
-                        } else if ($tblHeadCtr == 2 || $tblHeadCtr == 3) {
-                            $fontStyles[] = "";
-                            $aligns[] = "R";
-                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                            $fontStyles[] = "B";
+                            $widths[] = $multiplier * (100 / $tableHeaderCount);
 
                         } else {
-                            $fontStyles[] = "B";
-                            $aligns[] = "L";
-                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                            $aligns[] = "R";
+                            $fontStyles[] = "";
+                            $widths[] = $multiplier * (100 / $tableHeaderCount);
                         }
                     }
 
                     $data[] = [
-                        'col-span' => true,
-                        'col-span-key' => $colSpanKeys,
                         'aligns' => $aligns,
                         'widths' => $widths,
                         'font-styles' => $fontStyles,
@@ -992,17 +1018,139 @@ class PrintController extends Controller
 
                     $row = [];
                 } else {
+                    $row = [' '.str_replace('-', ' ', $ctr)];
 
+                    for ($rowCount = 1; $rowCount < $tableHeaderCount; $rowCount++) {
+                        $row[] = '';
+                    }
+
+                    $fontStyles = [];
+                    $aligns = [];
+                    $widths = [];
+                    $colSpanKeys = [];
+
+                    for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+                        $colSpanKeys[] = "$tblHeadCtr";
+
+                        if ($tblHeadCtr == 1 || $tblHeadCtr == 2) {
+                            $fontStyles[] = "";
+                            $aligns[] = "R";
+                            $widths[] = $multiplier * (100 / $tableHeaderCount);
+
+                        } else {
+                            $fontStyles[] = "B";
+                            $aligns[] = "L";
+                            $widths[] = $multiplier * (100 / $tableHeaderCount);
+                        }
+                    }
+
+                    $data[] = [
+                        'aligns' => $aligns,
+                        'widths' => $widths,
+                        'font-styles' => $fontStyles,
+                        'type' => 'row-data',
+                        'data' => [$row]
+                    ];
+
+                    $row = [];
+
+                    foreach ($item as $itm) {
+                        $allotCoimplementors = $itm->coimplementers;
+
+                        $row = [];
+                        $row[] = '  '.explode('::', $itm->allotment_name)[1];
+
+                        if (isset($itm->original_allotment)) {
+                            $row[] = $itm->original_allotment['allotment_cost'] ?
+                                    number_format($itm->original_allotment['allotment_cost'], 2) : '-';
+                            $subTotal[count($row) - 1] += $itm->original_allotment['allotment_cost'];
+                            $grandTotal[count($row) - 1] += $itm->original_allotment['allotment_cost'];
+                        } else {
+                            $row[] = '-';
+                        }
+
+                        if (isset($itm->realigned_allotments) && count($itm->realigned_allotments) > 0) {
+                            foreach ($itm->realigned_allotments as $realignCtr => $rItem) {
+                                $row[] = $rItem['allotment_cost'] ?
+                                        number_format($rItem['allotment_cost'], 2) : '-';
+                                $subTotal[count($row) - 1] += $rItem['allotment_cost'];
+                                $grandTotal[count($row) - 1] += $rItem['allotment_cost'];
+                            }
+                        } else {
+                            for ($realignCtr = 1; $realignCtr < $realignOrder; $realignCtr++) {
+                                $row[] = '-';
+                            }
+                        }
+
+                        $row[] = $itm->allotment_cost ? number_format($itm->allotment_cost, 2) : '-';
+
+                        for ($coimpCtr = 0; $coimpCtr <= $coimplementerCount; $coimpCtr++) {
+                            if ($coimpCtr == 0) {
+                                if (isset($itm->original_allotment) && count($itm->original_allotment) > 0) {
+                                    $row[] = $itm->original_allotment['coimplementers'][$coimpCtr]['coimplementor_budget'] ?
+                                        number_format($itm->original_allotment['coimplementers'][$coimpCtr]['coimplementor_budget'], 2) :
+                                        '-';
+                                    $subTotal[count($row) - 1] += $itm->original_allotment['coimplementers'][$coimpCtr]['coimplementor_budget'];
+                                    $grandTotal[count($row) - 1] += $itm->original_allotment['coimplementers'][$coimpCtr]['coimplementor_budget'];
+                                } else {
+                                    $row[] = '-';
+                                }
+                            } else {
+                                if (isset($itm->realigned_allotments) && count($itm->realigned_allotments) > 0) {
+                                    foreach ($itm->realigned_allotments as $rItem) {
+                                        $row[] = $rItem['coimplementers'][$coimpCtr - 1]['coimplementor_budget'] ?
+                                                number_format($rItem['coimplementers'][$coimpCtr - 1]['coimplementor_budget'], 2) :
+                                                '-';
+                                        $subTotal[count($row) - 1] += $rItem['coimplementers'][$coimpCtr - 1]['coimplementor_budget'];
+                                        $grandTotal[count($row) - 1] += $rItem['coimplementers'][$coimpCtr - 1]['coimplementor_budget'];
+                                    }
+                                } else {
+                                    for ($realignCtr = 1; $realignCtr < $realignOrder; $realignCtr++) {
+                                        $row[] = '-';
+                                    }
+                                }
+
+                                $row[] = $itm->coimplementers[$coimpCtr - 1]['coimplementor_budget'] ?
+                                        number_format($itm->coimplementers[$coimpCtr - 1]['coimplementor_budget'], 2) :
+                                        '-';
+                                $subTotal[count($row) - 1] += $itm->coimplementers[$coimpCtr - 1]['coimplementor_budget'];
+                                $grandTotal[count($row) - 1] += $itm->coimplementers[$coimpCtr - 1]['coimplementor_budget'];
+                            }
+                        }
+
+                        $row[] = $itm->justification;
+
+                        $fontStyles = [];
+                        $aligns = [];
+                        $widths = [];
+                        $colSpanKeys = [];
+
+                        for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
+                            $colSpanKeys[] = "$tblHeadCtr";
+
+                            if ($tblHeadCtr == 0) {
+                                $fontStyles[] = "";
+                                $aligns[] = "L";
+                                $widths[] = $multiplier * (100 / $tableHeaderCount);
+                            } else {
+                                $fontStyles[] = "";
+                                $aligns[] = "R";
+                                $widths[] = $multiplier * (100 / $tableHeaderCount);
+                            }
+                        }
+
+                        $data[] = [
+                            'aligns' => $aligns,
+                            'widths' => $widths,
+                            'font-styles' => $fontStyles,
+                            'type' => 'row-data',
+                            'data' => [$row]
+                        ];
+
+                        $row = [];
+                    }
                 }
             }
-
-
-
-
-
-
-
-
 
             $fontStyles = [];
             $aligns = [];
@@ -1010,28 +1158,18 @@ class PrintController extends Controller
             $colSpanKeys = [];
 
             for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
-                $colSpanKeys[] = "$tblHeadCtr";
-
-                if ($tblHeadCtr == 0) {
-                    $fontStyles[] = "BI";
-                    $aligns[] = "R";
-                    $widths[] = 3;
-                } else {
-                    $fontStyles[] = "BI";
-                    $aligns[] = "R";
-                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                }
+                $fontStyles[] = "BI";
+                $aligns[] = "R";
+                $widths[] = $multiplier * (100 / $tableHeaderCount);
             }
 
-            for ($subTotalIndex = 2; $subTotalIndex < count($subTotal); $subTotalIndex++) {
+            for ($subTotalIndex = 1; $subTotalIndex < count($subTotal) - 1; $subTotalIndex++) {
                 $subTotal[$subTotalIndex] = $subTotal[$subTotalIndex] ?
                                             number_format($subTotal[$subTotalIndex], 2) :
                                             '-';
             }
 
             $data[] = [
-                'col-span' => true,
-                'col-span-key' => $colSpanKeys,
                 'aligns' => $aligns,
                 'widths' => $widths,
                 'font-styles' => $fontStyles,
@@ -1054,19 +1192,15 @@ class PrintController extends Controller
             if ($tblHeadCtr == 0) {
                 $fontStyles[] = "B";
                 $aligns[] = "C";
-                $widths[] = 3;
-            } else if ($tblHeadCtr == 1) {
-                $fontStyles[] = "B";
-                $aligns[] = "C";
-                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                $widths[] = $multiplier * (100 / $tableHeaderCount);
             } else {
                 $fontStyles[] = "B";
                 $aligns[] = "R";
-                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                $widths[] = $multiplier * (100 / $tableHeaderCount);
             }
         }
 
-        for ($grandTotalIndex = 2; $grandTotalIndex < count($grandTotal); $grandTotalIndex++) {
+        for ($grandTotalIndex = 1; $grandTotalIndex < count($grandTotal) - 1; $grandTotalIndex++) {
             if ($grandTotalIndex == count($grandTotal) - 1) {
                 $grandTotal[$grandTotalIndex] = "";
             } else {
@@ -1085,262 +1219,6 @@ class PrintController extends Controller
             'type' => 'row-data',
             'data' => [$grandTotal]
         ];
-
-        /*
-        foreach ($groupedAllotments as $className => $classItems) {
-            $subTotal = ['', 'Sub-Total', 0];
-            $row = [];
-
-            for ($subTotalCtr = 3; $subTotalCtr < $tableHeaderCount; $subTotalCtr++) {
-                $subTotal[] = 0;
-            }
-
-            switch ($headerCount) {
-                case 1:
-                    $headerCountRoman = 'I';
-                    break;
-                case 2:
-                    $headerCountRoman = 'II';
-                    break;
-                case 3:
-                    $headerCountRoman = 'III';
-                    break;
-                case 4:
-                    $headerCountRoman = 'IV';
-                    break;
-                default:
-                    break;
-            }
-
-            $row[] = "$headerCountRoman.";
-            $row[] = str_replace('-', ' ', $className);
-
-            for ($rowCount = 0; $rowCount <= $tableHeaderCount - count($row); $rowCount++) {
-                $row[] = "";
-            }
-
-            $fontStyles = [];
-            $aligns = [];
-            $widths = [];
-            $colSpanKeys = [];
-
-            for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
-                $fontStyles[] = "B";
-                $aligns[] = "L";
-
-                if ($tblHeadCtr == 0) {
-                    $widths[] = 3;
-                    $colSpanKeys[] = "0";
-                } else if ($tblHeadCtr == 1) {
-                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                    $colSpanKeys[] = "1";
-                } else if ($tblHeadCtr == 2) {
-                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                    $colSpanKeys[] = "2-".($tableHeaderCount - 1);
-                } else if ($tblHeadCtr == 3) {
-                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                } else {
-                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                }
-            }
-
-            $data[] = [
-                'col-span' => true,
-                'col-span-key' => $colSpanKeys,
-                'aligns' => $aligns,
-                'widths' => $widths,
-                'font-styles' => $fontStyles,
-                'type' => 'row-data',
-                'data' => [$row]
-            ];
-
-            foreach ($classItems as $ctr => $item) {
-                if (is_int($ctr)) {
-                    $allotCoimplementors = unserialize($item->coimplementers);
-                    $row = [''];
-                    $row[] = " $item->allotment_name";
-                    $row[] = $item->allotment_cost ?
-                             number_format($item->allotment_cost, 2) :
-                             '-';
-
-                    foreach ($allotCoimplementors as $coimp) {
-                        $row[] = $coimp['coimplementor_budget'] ?
-                                 number_format($coimp['coimplementor_budget'], 2) :
-                                 '-';
-                    }
-
-                    $fontStyles = [];
-                    $aligns = [];
-                    $widths = [];
-                    $colSpanKeys = [];
-
-                    for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
-                        $colSpanKeys[] = "$tblHeadCtr";
-
-                        if ($tblHeadCtr == 0) {
-                            $fontStyles[] = "B";
-                            $aligns[] = "L";
-                            $widths[] = 3;
-                        } else if ($tblHeadCtr == 2 || $tblHeadCtr == 3) {
-                            $fontStyles[] = "";
-                            $aligns[] = "R";
-                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-
-                        } else {
-                            $fontStyles[] = "B";
-                            $aligns[] = "L";
-                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                        }
-                    }
-
-                    $data[] = [
-                        'col-span' => true,
-                        'col-span-key' => $colSpanKeys,
-                        'aligns' => $aligns,
-                        'widths' => $widths,
-                        'font-styles' => $fontStyles,
-                        'type' => 'row-data',
-                        'data' => [$row]
-                    ];
-
-                    $row = [];
-                } else {
-                    $row = ['', ' '.str_replace('-', ' ', $ctr)];
-
-                    for ($rowCount = 0; $rowCount <= $tableHeaderCount - count($row); $rowCount++) {
-                        $row[] = "";
-                    }
-
-                    $fontStyles = [];
-                    $aligns = [];
-                    $widths = [];
-                    $colSpanKeys = [];
-
-                    for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
-                        $colSpanKeys[] = "$tblHeadCtr";
-
-                        if ($tblHeadCtr == 0) {
-                            $fontStyles[] = "B";
-                            $aligns[] = "L";
-                            $widths[] = 3;
-                        } else if ($tblHeadCtr == 2 || $tblHeadCtr == 3) {
-                            $fontStyles[] = "";
-                            $aligns[] = "R";
-                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-
-                        } else {
-                            $fontStyles[] = "B";
-                            $aligns[] = "L";
-                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                        }
-                    }
-
-                    $data[] = [
-                        'col-span' => true,
-                        'col-span-key' => $colSpanKeys,
-                        'aligns' => $aligns,
-                        'widths' => $widths,
-                        'font-styles' => $fontStyles,
-                        'type' => 'row-data',
-                        'data' => [$row]
-                    ];
-
-                    $row = [];
-
-                    foreach ($item as $itm) {
-                        $allotCoimplementors = unserialize($itm->coimplementers);
-                        $row = [''];
-                        $row[] = '  '.explode('::', $itm->allotment_name)[1];
-                        $row[] = $itm->allotment_cost ?
-                                 number_format($itm->allotment_cost, 2) :
-                                 '-';
-
-                        foreach ($allotCoimplementors as $coimp) {
-                            $row[] = $coimp['coimplementor_budget'] ?
-                                     number_format($coimp['coimplementor_budget'], 2) :
-                                     '-';
-                        }
-
-                        $fontStyles = [];
-                        $aligns = [];
-                        $widths = [];
-                        $colSpanKeys = [];
-
-                        for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
-                            $colSpanKeys[] = "$tblHeadCtr";
-
-                            if ($tblHeadCtr == 0) {
-                                $fontStyles[] = "B";
-                                $aligns[] = "L";
-                                $widths[] = 3;
-                            } else if ($tblHeadCtr == 1) {
-                                $fontStyles[] = "";
-                                $aligns[] = "L";
-                                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                            } else if ($tblHeadCtr == 2 || $tblHeadCtr == 3) {
-                                $fontStyles[] = "";
-                                $aligns[] = "R";
-                                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                            } else {
-                                $fontStyles[] = "B";
-                                $aligns[] = "L";
-                                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                            }
-                        }
-
-                        $data[] = [
-                            'col-span' => true,
-                            'col-span-key' => $colSpanKeys,
-                            'aligns' => $aligns,
-                            'widths' => $widths,
-                            'font-styles' => $fontStyles,
-                            'type' => 'row-data',
-                            'data' => [$row]
-                        ];
-
-                        $row = [];
-                    }
-                }
-            }
-
-            $fontStyles = [];
-            $aligns = [];
-            $widths = [];
-            $colSpanKeys = [];
-
-            for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
-                $colSpanKeys[] = "$tblHeadCtr";
-
-                if ($tblHeadCtr == 0) {
-                    $fontStyles[] = "BI";
-                    $aligns[] = "R";
-                    $widths[] = 3;
-                } else {
-                    $fontStyles[] = "BI";
-                    $aligns[] = "R";
-                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                }
-            }
-
-            for ($subTotalIndex = 2; $subTotalIndex < count($subTotal); $subTotalIndex++) {
-                $subTotal[$subTotalIndex] = $subTotal[$subTotalIndex] ?
-                                            number_format($subTotal[$subTotalIndex], 2) :
-                                            '-';
-            }
-
-            $data[] = [
-                'col-span' => true,
-                'col-span-key' => $colSpanKeys,
-                'aligns' => $aligns,
-                'widths' => $widths,
-                'font-styles' => $fontStyles,
-                'type' => 'row-data',
-                'data' => [$subTotal]
-            ];
-
-            $subTotal = [];
-            $headerCount++;
-        }*/
 
         return (object)[
             'header_count' => $tableHeaderCount,
@@ -1412,7 +1290,7 @@ class PrintController extends Controller
 
         $headerCount = 1;
         $headerCountRoman = 'I';
-        $tableHeader = ['PARTICULARS', '', $implAgency];
+        $tableHeader = ['PARTICULARS', $implAgency];
 
         foreach ($_coimplAgencies as $coimplementor) {
             $tableHeader[] = $coimplementor;
@@ -1422,27 +1300,16 @@ class PrintController extends Controller
         $fontStyles = [];
         $aligns = [];
         $widths = [];
-        $colSpanKeys = [];
 
         for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
             $fontStyles[] = "B";
             $aligns[] = "C";
 
-            if ($tblHeadCtr == 0) {
-                $widths[] = 3;
-                $colSpanKeys[] = "0-1";
-            } else if ($tblHeadCtr == 1) {
-                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-            } else {
-                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                $colSpanKeys[] = "$tblHeadCtr";
-            }
+            $widths[] = $multiplier * (100 / $tableHeaderCount);
         }
 
         $data = [
             [
-                'col-span' => true,
-                'col-span-key' => $colSpanKeys,
                 'aligns' => $aligns,
                 'widths' => $widths,
                 'font-styles' => $fontStyles,
@@ -1451,17 +1318,17 @@ class PrintController extends Controller
             ]
         ];
 
-        $grandTotal = ['', 'GRAND TOTAL', 0];
+        $grandTotal = ['GRAND TOTAL', 0];
 
-        foreach ($__coimplAgencies as $coimp) {
+        for ($grandTotalCtr = 2; $grandTotalCtr < $tableHeaderCount; $grandTotalCtr++) {
             $grandTotal[] = 0;
         }
 
         foreach ($groupedAllotments as $className => $classItems) {
-            $subTotal = ['', 'Sub-Total', 0];
+            $subTotal = ['Sub-Total', 0];
             $row = [];
 
-            foreach ($__coimplAgencies as $coimp) {
+            for ($subTotalCtr = 2; $subTotalCtr < $tableHeaderCount; $subTotalCtr++) {
                 $subTotal[] = 0;
             }
 
@@ -1482,10 +1349,9 @@ class PrintController extends Controller
                     break;
             }
 
-            $row[] = "$headerCountRoman.";
-            $row[] = str_replace('-', ' ', $className);
+            $row[] = "$headerCountRoman.".str_replace('-', ' ', $className);
 
-            for ($rowCount = 0; $rowCount <= $tableHeaderCount - count($row); $rowCount++) {
+            for ($rowCount = 0; $rowCount < $tableHeaderCount - 1; $rowCount++) {
                 $row[] = "";
             }
 
@@ -1498,23 +1364,16 @@ class PrintController extends Controller
                 $fontStyles[] = "B";
 
                 if ($tblHeadCtr == 0) {
-                    $aligns[] = "C";
-                    $widths[] = 3;
+                    $aligns[] = "L";
+                    $widths[] = $multiplier * (100 / $tableHeaderCount);
                     $colSpanKeys[] = "0";
                 } else if ($tblHeadCtr == 1) {
                     $aligns[] = "L";
-                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                    $colSpanKeys[] = "1";
-                } else if ($tblHeadCtr == 2) {
-                    $aligns[] = "L";
-                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                    $colSpanKeys[] = "2-".($tableHeaderCount - 1);
-                } else if ($tblHeadCtr == 3) {
-                    $aligns[] = "L";
-                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                    $widths[] = $multiplier * (100 / $tableHeaderCount);
+                    $colSpanKeys[] = "1-".($tableHeaderCount - 1);
                 } else {
                     $aligns[] = "L";
-                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                    $widths[] = $multiplier * (100 / $tableHeaderCount);
                 }
             }
 
@@ -1531,20 +1390,22 @@ class PrintController extends Controller
             foreach ($classItems as $ctr => $item) {
                 if (is_int($ctr)) {
                     $allotCoimplementors = unserialize($item->coimplementers);
-                    $row = [''];
+
+                    $row = [];
                     $row[] = " $item->allotment_name";
                     $row[] = $item->allotment_cost ?
                              number_format($item->allotment_cost, 2) :
                              '-';
 
-                    $subTotal[2] += $item->allotment_cost;
+                    $subTotal[count($row) - 1] += $item->allotment_cost;
+                    $grandTotal[count($row) - 1] += $item->allotment_cost;
 
                     foreach ($allotCoimplementors as $coimpCtr => $coimp) {
                         $row[] = $coimp['coimplementor_budget'] ?
                                  number_format($coimp['coimplementor_budget'], 2) :
                                  '-';
-                        $subTotal[$coimpCtr + 3] += $coimp['coimplementor_budget'];
-                        $grandTotal[$coimpCtr + 3] += $coimp['coimplementor_budget'];
+                        $subTotal[count($row) - 1] += $coimp['coimplementor_budget'];
+                        $grandTotal[count($row) - 1] += $coimp['coimplementor_budget'];
                     }
 
                     $fontStyles = [];
@@ -1558,16 +1419,15 @@ class PrintController extends Controller
                         if ($tblHeadCtr == 0) {
                             $fontStyles[] = "B";
                             $aligns[] = "L";
-                            $widths[] = 3;
-                        } else if ($tblHeadCtr == 2 || $tblHeadCtr == 3) {
+                            $widths[] = $multiplier * (100 / $tableHeaderCount);
+                        } else if ($tblHeadCtr == 1 || $tblHeadCtr == 1) {
                             $fontStyles[] = "";
                             $aligns[] = "R";
-                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-
+                            $widths[] = $multiplier * (100 / $tableHeaderCount);
                         } else {
-                            $fontStyles[] = "B";
-                            $aligns[] = "L";
-                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                            $fontStyles[] = "";
+                            $aligns[] = "R";
+                            $widths[] = $multiplier * (100 / $tableHeaderCount);
                         }
                     }
 
@@ -1583,9 +1443,9 @@ class PrintController extends Controller
 
                     $row = [];
                 } else {
-                    $row = ['', ' '.str_replace('-', ' ', $ctr)];
+                    $row = [' '.str_replace('-', ' ', $ctr)];
 
-                    for ($rowCount = 0; $rowCount <= $tableHeaderCount - count($row); $rowCount++) {
+                    for ($rowCount = 0; $rowCount < $tableHeaderCount - 1; $rowCount++) {
                         $row[] = "";
                     }
 
@@ -1597,19 +1457,14 @@ class PrintController extends Controller
                     for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
                         $colSpanKeys[] = "$tblHeadCtr";
 
-                        if ($tblHeadCtr == 0) {
-                            $fontStyles[] = "B";
-                            $aligns[] = "L";
-                            $widths[] = 3;
-                        } else if ($tblHeadCtr == 2 || $tblHeadCtr == 3) {
+                        if ($tblHeadCtr == 1 || $tblHeadCtr == 2) {
                             $fontStyles[] = "";
-                            $aligns[] = "R";
-                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-
+                            $aligns[] = "L";
+                            $widths[] = $multiplier * (100 / $tableHeaderCount);
                         } else {
                             $fontStyles[] = "B";
                             $aligns[] = "L";
-                            $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                            $widths[] = $multiplier * (100 / $tableHeaderCount);
                         }
                     }
 
@@ -1627,19 +1482,21 @@ class PrintController extends Controller
 
                     foreach ($item as $itm) {
                         $allotCoimplementors = unserialize($itm->coimplementers);
-                        $row = [''];
+
+                        $row = [];
                         $row[] = '  '.explode('::', $itm->allotment_name)[1];
                         $row[] = $itm->allotment_cost ?
                                  number_format($itm->allotment_cost, 2) :
                                  '-';
-                        $subTotal[2] += $itm->allotment_cost;
+                        $subTotal[count($row) - 1] += $itm->allotment_cost;
+                        $grandTotal[count($row) - 1] += $itm->allotment_cost;
 
                         foreach ($allotCoimplementors as $coimpCtr => $coimp) {
                             $row[] = $coimp['coimplementor_budget'] ?
                                      number_format($coimp['coimplementor_budget'], 2) :
                                      '-';
-                            $subTotal[$coimpCtr + 3] += $coimp['coimplementor_budget'];
-                            $grandTotal[$coimpCtr + 3] += $coimp['coimplementor_budget'];
+                            $subTotal[count($row) - 1] += $coimp['coimplementor_budget'];
+                            $grandTotal[count($row) - 1] += $coimp['coimplementor_budget'];
                         }
 
                         $fontStyles = [];
@@ -1651,21 +1508,17 @@ class PrintController extends Controller
                             $colSpanKeys[] = "$tblHeadCtr";
 
                             if ($tblHeadCtr == 0) {
-                                $fontStyles[] = "B";
-                                $aligns[] = "L";
-                                $widths[] = 3;
-                            } else if ($tblHeadCtr == 1) {
                                 $fontStyles[] = "";
                                 $aligns[] = "L";
-                                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                            } else if ($tblHeadCtr == 2 || $tblHeadCtr == 3) {
+                                $widths[] = $multiplier * (100 / $tableHeaderCount);
+                            } else if ($tblHeadCtr == 1 || $tblHeadCtr == 2) {
                                 $fontStyles[] = "";
                                 $aligns[] = "R";
-                                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                                $widths[] = $multiplier * (100 / $tableHeaderCount);
                             } else {
-                                $fontStyles[] = "B";
-                                $aligns[] = "L";
-                                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                                $fontStyles[] = "";
+                                $aligns[] = "R";
+                                $widths[] = $multiplier * (100 / $tableHeaderCount);
                             }
                         }
 
@@ -1692,18 +1545,12 @@ class PrintController extends Controller
             for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
                 $colSpanKeys[] = "$tblHeadCtr";
 
-                if ($tblHeadCtr == 0) {
-                    $fontStyles[] = "BI";
-                    $aligns[] = "R";
-                    $widths[] = 3;
-                } else {
-                    $fontStyles[] = "BI";
-                    $aligns[] = "R";
-                    $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
-                }
+                $fontStyles[] = "BI";
+                $aligns[] = "R";
+                $widths[] = $multiplier * (100 / $tableHeaderCount);
             }
 
-            for ($subTotalIndex = 2; $subTotalIndex < count($subTotal); $subTotalIndex++) {
+            for ($subTotalIndex = 1; $subTotalIndex < count($subTotal); $subTotalIndex++) {
                 $subTotal[$subTotalIndex] = $subTotal[$subTotalIndex] ?
                                             number_format($subTotal[$subTotalIndex], 2) :
                                             '-';
@@ -1734,19 +1581,15 @@ class PrintController extends Controller
             if ($tblHeadCtr == 0) {
                 $fontStyles[] = "B";
                 $aligns[] = "C";
-                $widths[] = 3;
-            } else if ($tblHeadCtr == 1) {
-                $fontStyles[] = "B";
-                $aligns[] = "C";
-                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                $widths[] = $multiplier * (100 / $tableHeaderCount);
             } else {
                 $fontStyles[] = "B";
                 $aligns[] = "R";
-                $widths[] = $multiplier * (97 / ($tableHeaderCount - 1));
+                $widths[] = $multiplier * (100 / $tableHeaderCount);
             }
         }
 
-        for ($grandTotalIndex = 2; $grandTotalIndex < count($grandTotal); $grandTotalIndex++) {
+        for ($grandTotalIndex = 1; $grandTotalIndex < count($grandTotal); $grandTotalIndex++) {
             $grandTotal[$grandTotalIndex] = $grandTotal[$grandTotalIndex] ?
                                             number_format($grandTotal[$grandTotalIndex], 2) :
                                             '-';
@@ -4073,7 +3916,7 @@ class PrintController extends Controller
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new DocLineItemBudget(
-            $data->header_count > 7 ? 'L' : 'P',
+            $data->header_count > 8 ? 'L' : 'P',
             $pageUnit, $pageSize
         );
         $pdf->setHeaderLR(false, false);
@@ -4103,7 +3946,7 @@ class PrintController extends Controller
         //Initiated variables
         $pageSize = [$pageWidth, $pageHeight];
         $pdf = new DocLineItemBudgetRealignment(
-            $data->header_count > 9 ? 'L' : 'P',
+            $data->header_count > 8 ? 'L' : 'P',
             $pageUnit, $pageSize
         );
         $pdf->setHeaderLR(false, false);
