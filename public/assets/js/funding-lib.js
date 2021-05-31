@@ -391,7 +391,7 @@ $(function() {
     $.fn.update = function() {
         const withError = inputValidation(false);
 
-		if (!withError) {
+		if ($(this).totalBudgetIsValid() && !withError) {
 			$('#form-update').submit();
 		}
     }
