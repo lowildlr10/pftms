@@ -634,60 +634,75 @@ class PrintController extends Controller
                                        ->where('budget_realign_id', $currRealignID)
                                        ->orderBy('order_no')
                                        ->get();
-            $realignAllotments = [];
 
-            foreach ($currRealignAllotments as $realignDat) {
-                $realignAllotments[] = (object) [
-                    'allotment_class' => $realignDat->allotment_class,
-                    'allotment_name' => $realignDat->allotment_name,
-                    'allotment_cost' => $realignDat->realigned_allotment_cost,
-                    'coimplementers' => unserialize($realignDat->coimplementers),
-                    'justification' => $realignDat->justification,
+            $_allotments = [];
+
+            foreach ($currRealignAllotments as $realignAllotCtr =>  $realignAllot) {
+                $cpCoimplementers = unserialize($realignAllot->coimplementers);
+
+                foreach ($cpCoimplementers as $cpCoimplementer) {
+                    $cpCoimplementer['coimplementor_budget'] = 0;
+                }
+
+                $_allotments[$realignAllotCtr] = (object) [
+                    'allotment_class' => $realignAllot->allotment_class,
+                    'allotment_name' => $realignAllot->allotment_name,
+                    "realignment_$realignOrder" => (object) [
+                        'allotment_cost' => $realignAllot->realigned_allotment_cost,
+                        'coimplementers' => unserialize($realignAllot->coimplementers),
+                    ],
+                    'justification' => $realignAllot->justification,
                 ];
-            }
 
-            for ($realignOrderCtr = 0; $realignOrderCtr < $realignOrder; $realignOrderCtr++) {
-                foreach ($realignAllotments as $currRealignCtr => $currRealign) {
-                    if ($realignOrderCtr == 0) {
-                        foreach ($allotments as $allotCtr => $allot) {
-                            if ($currRealign->allotment_name == $allot->allotment_name) {
-                                $currRealign->original_allotment = [
-                                    'allotment_name' => $allot->allotment_name,
-                                    'allotment_cost' => $allot->allotment_cost,
-                                    'coimplementers' => unserialize($allot->coimplementers),
-                                ];
+                if ($realignAllot->allotment_id) {
+                    $allotmentData = DB::table('funding_allotments')
+                                       ->where('id', $realignAllot->allotment_id)
+                                       ->first();
+                    $_allotments[$realignAllotCtr]->allotment_cost = $allotmentData->allotment_cost;
+                    $_allotments[$realignAllotCtr]->coimplementers = unserialize($allotmentData->coimplementers);
+                } else {
+                    $_allotments[$realignAllotCtr]->allotment_cost = 0;
+                    $_allotments[$realignAllotCtr]->coimplementers = $cpCoimplementers;
+                }
 
-                                break;
-                            }
+                for ($realignOrderCtr = 1; $realignOrderCtr < $realignOrder; $realignOrderCtr++) {
+                    $realignIndex = "realignment_$realignOrderCtr";
+
+                    $budgetRealignData = DB::table('funding_budget_realignments')
+                                        ->where([
+                                            ['budget_id', $budgetID],
+                                            ['realignment_order', $realignOrderCtr]
+                                        ])->first();
+                    $realignID = $budgetRealignData->id;
+                    $realignAllotmentData = DB::table('funding_allotment_realignments')
+                                            ->where('budget_realign_id', $realignID)
+                                            ->orderBy('order_no')
+                                            ->get();
+                    $hasRealignAllot = false;
+
+                    foreach ($realignAllotmentData as $rAllotCtr => $rAllot) {
+                        if (strtolower(trim($realignAllot->allotment_name)) == strtolower(trim($rAllot->allotment_name)) ||
+                            $realignAllot->allotment_id == $rAllot->allotment_id) {
+                            $_allotments[$realignAllotCtr]->{$realignIndex} = (object) [
+                                'allotment_cost' => $rAllot->realigned_allotment_cost,
+                                'coimplementers' => unserialize($rAllot->coimplementers),
+                            ];
+
+                            $hasRealignAllot = true;
+                            break;
                         }
-                    } else {
-                        $budgetRealignData = DB::table('funding_budget_realignments')
-                                            ->where([
-                                                ['budget_id', $budgetID],
-                                                ['realignment_order', $realignOrderCtr]
-                                                ])->first();
-                        $realignID = $budgetRealignData->id;
-                        $realignAllotmentData = DB::table('funding_allotment_realignments')
-                                                ->where('budget_realign_id', $realignID)
-                                                ->orderBy('order_no')
-                                                ->get();
+                    }
 
-                        foreach ($realignAllotmentData as $rAllotCtr => $rAllot) {
-                            if ($currRealign->allotment_name == $rAllot->allotment_name) {
-                                $currRealign->realigned_allotments[] = [
-                                    'allotment_name' => $rAllot->allotment_name,
-                                    'allotment_cost' => $rAllot->realigned_allotment_cost,
-                                    'coimplementers' => unserialize($rAllot->coimplementers),
-                                ];
-
-                                break;
-                            }
-                        }
+                    if (!$hasRealignAllot) {
+                        $_allotments[$realignAllotCtr]->{$realignIndex} = (object) [
+                            'allotment_cost' => 0,
+                            'coimplementers' => $cpCoimplementers,
+                        ];
                     }
                 }
             }
 
-            $allotments = $realignAllotments;
+            $allotments = $_allotments;
         }
 
         foreach ($allotments as $itmCtr => $item) {
@@ -826,6 +841,10 @@ class PrintController extends Controller
 
         $coimplementerCount = count($_coimplAgencies);
         $tableHeaderCount = count($tableHeader);
+        $firstColWidth = $tableHeaderCount > 7 ? $multiplier * 15 :
+                         $multiplier * (100 / $tableHeaderCount);
+        $otherColWidth = $tableHeaderCount > 7 ? $multiplier * (85 / ($tableHeaderCount - 1)) :
+                         $multiplier * (100 / $tableHeaderCount);
         $fontStyles = [];
         $aligns = [];
         $widths = [];
@@ -835,7 +854,11 @@ class PrintController extends Controller
             $fontStyles[] = "B";
             $aligns[] = "C";
 
-            $widths[] = $multiplier * (100 / $tableHeaderCount);
+            if ($tblHeadCtr == 0) {
+                $widths[] = $firstColWidth;
+            } else {
+                $widths[] = $otherColWidth;
+            }
         }
 
         $data = [
@@ -899,15 +922,15 @@ class PrintController extends Controller
 
                 if ($tblHeadCtr == 0) {
                     $aligns[] = "L";
-                    $widths[] = $multiplier * (100 / $tableHeaderCount);
+                    $widths[] = $firstColWidth;
                     $colSpanKeys[] = "0";
                 } else if ($tblHeadCtr == 1) {
                     $aligns[] = "L";
-                    $widths[] = $multiplier * (100 / $tableHeaderCount);
+                    $widths[] = $otherColWidth;
                     $colSpanKeys[] = "1-".($tableHeaderCount - 1);
                 } else {
                     $aligns[] = "L";
-                    $widths[] = $multiplier * (100 / $tableHeaderCount);
+                    $widths[] = $otherColWidth;
                 }
             }
 
@@ -928,61 +951,37 @@ class PrintController extends Controller
                     $row = [];
                     $row[] = " $item->allotment_name";
 
-                    if (isset($item->original_allotment)) {
-                        $row[] = $item->original_allotment['allotment_cost'] ?
-                                 number_format($item->original_allotment['allotment_cost'], 2) : '-';
-                        $subTotal[count($row) - 1] += $item->original_allotment['allotment_cost'];
-                        $grandTotal[count($row) - 1] += $item->original_allotment['allotment_cost'];
-                    } else {
-                        $row[] = '-';
-                    }
-
-                    if (isset($item->realigned_allotments) && count($item->realigned_allotments) > 0) {
-                        foreach ($item->realigned_allotments as $realignCtr => $rItem) {
-                            $row[] = $rItem['allotment_cost'] ?
-                                     number_format($rItem['allotment_cost'], 2) : '-';
-                            $subTotal[count($row) - 1] += $rItem['allotment_cost'];
-                            $grandTotal[count($row) - 1] += $rItem['allotment_cost'];
-                        }
-                    } else {
-                        for ($realignCtr = 1; $realignCtr < $realignOrder; $realignCtr++) {
-                            $row[] = '-';
-                        }
-                    }
-
                     $row[] = $item->allotment_cost ? number_format($item->allotment_cost, 2) : '-';
+                    $subTotal[count($row) - 1] += $item->allotment_cost;
+                    $grandTotal[count($row) - 1] += $item->allotment_cost;
 
-                    for ($coimpCtr = 0; $coimpCtr <= $coimplementerCount; $coimpCtr++) {
-                        if ($coimpCtr == 0) {
-                            if (isset($item->original_allotment) && count($item->original_allotment) > 0) {
-                                $row[] = $item->original_allotment['coimplementers'][$coimpCtr]['coimplementor_budget'] ?
-                                    number_format($item->original_allotment['coimplementers'][$coimpCtr]['coimplementor_budget'], 2) :
-                                    '-';
-                                $subTotal[count($row) - 1] += $item->original_allotment['coimplementers'][$coimpCtr]['coimplementor_budget'];
-                                $grandTotal[count($row) - 1] += $item->original_allotment['coimplementers'][$coimpCtr]['coimplementor_budget'];
-                            } else {
-                                $row[] = '-';
-                            }
-                        } else {
-                            if (isset($item->realigned_allotments) && count($item->realigned_allotments) > 0) {
-                                foreach ($item->realigned_allotments as $rItem) {
-                                    $row[] = $rItem['coimplementers'][$coimpCtr - 1]['coimplementor_budget'] ?
-                                            number_format($rItem['coimplementers'][$coimpCtr - 1]['coimplementor_budget'], 2) :
-                                            '-';
-                                    $subTotal[count($row) - 1] += $rItem['coimplementers'][$coimpCtr - 1]['coimplementor_budget'];
-                                    $grandTotal[count($row) - 1] += $rItem['coimplementers'][$coimpCtr - 1]['coimplementor_budget'];
-                                }
-                            } else {
-                                for ($realignCtr = 1; $realignCtr < $realignOrder; $realignCtr++) {
-                                    $row[] = '-';
-                                }
-                            }
+                    for ($realignOrderCtr = 1; $realignOrderCtr <= $realignOrder; $realignOrderCtr++) {
+                        $realignIndex = "realignment_$realignOrderCtr";
 
-                            $row[] = $item->coimplementers[$coimpCtr - 1]['coimplementor_budget'] ?
-                                     number_format($item->coimplementers[$coimpCtr - 1]['coimplementor_budget'], 2) :
-                                     '-';
-                            $subTotal[count($row) - 1] += $item->coimplementers[$coimpCtr - 1]['coimplementor_budget'];
-                            $grandTotal[count($row) - 1] += $item->coimplementers[$coimpCtr - 1]['coimplementor_budget'];
+                        $row[] = $item->{$realignIndex}->allotment_cost ?
+                                 number_format($item->{$realignIndex}->allotment_cost, 2) :
+                                 '-';
+                        $subTotal[count($row) - 1] += $item->{$realignIndex}->allotment_cost;
+                        $grandTotal[count($row) - 1] += $item->{$realignIndex}->allotment_cost;
+                    }
+
+                    foreach ($item->coimplementers as $coimpCtr => $coimplementer) {
+                        $row[] = $coimplementer['coimplementor_budget'] ?
+                                 number_format($coimplementer['coimplementor_budget'], 2) :
+                                 '-';
+                        $subTotal[count($row) - 1] += $coimplementer['coimplementor_budget'];
+                        $grandTotal[count($row) - 1] += $coimplementer['coimplementor_budget'];
+
+                        for ($realignOrderCtr = 1; $realignOrderCtr <= $realignOrder; $realignOrderCtr++) {
+                            $realignIndex = "realignment_$realignOrderCtr";
+
+                            $row[] = $item->{$realignIndex}->coimplementers[$coimpCtr]['coimplementor_budget'] ?
+                                 number_format($item->{$realignIndex}->coimplementers[$coimpCtr]['coimplementor_budget'], 2) :
+                                 '-';
+                            $subTotal[count($row) - 1] +=
+                                $item->{$realignIndex}->coimplementers[$coimpCtr]['coimplementor_budget'];
+                            $grandTotal[count($row) - 1] +=
+                                $item->{$realignIndex}->coimplementers[$coimpCtr]['coimplementor_budget'];
                         }
                     }
 
@@ -999,12 +998,12 @@ class PrintController extends Controller
                         if ($tblHeadCtr == 0) {
                             $aligns[] = "L";
                             $fontStyles[] = "B";
-                            $widths[] = $multiplier * (100 / $tableHeaderCount);
+                            $widths[] = $firstColWidth;
 
                         } else {
                             $aligns[] = "R";
                             $fontStyles[] = "";
-                            $widths[] = $multiplier * (100 / $tableHeaderCount);
+                            $widths[] = $otherColWidth;
                         }
                     }
 
@@ -1027,20 +1026,21 @@ class PrintController extends Controller
                     $fontStyles = [];
                     $aligns = [];
                     $widths = [];
-                    $colSpanKeys = [];
 
                     for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
-                        $colSpanKeys[] = "$tblHeadCtr";
-
-                        if ($tblHeadCtr == 1 || $tblHeadCtr == 2) {
+                        if ($tblHeadCtr == 0) {
+                            $fontStyles[] = "B";
+                            $aligns[] = "L";
+                            $widths[] = $firstColWidth;
+                        } else if ($tblHeadCtr == 1 || $tblHeadCtr == 2) {
                             $fontStyles[] = "";
                             $aligns[] = "R";
-                            $widths[] = $multiplier * (100 / $tableHeaderCount);
+                            $widths[] = $otherColWidth;
 
                         } else {
                             $fontStyles[] = "B";
                             $aligns[] = "L";
-                            $widths[] = $multiplier * (100 / $tableHeaderCount);
+                            $widths[] = $otherColWidth;
                         }
                     }
 
@@ -1058,63 +1058,39 @@ class PrintController extends Controller
                         $allotCoimplementors = $itm->coimplementers;
 
                         $row = [];
-                        $row[] = '  '.explode('::', $itm->allotment_name)[1];
-
-                        if (isset($itm->original_allotment)) {
-                            $row[] = $itm->original_allotment['allotment_cost'] ?
-                                    number_format($itm->original_allotment['allotment_cost'], 2) : '-';
-                            $subTotal[count($row) - 1] += $itm->original_allotment['allotment_cost'];
-                            $grandTotal[count($row) - 1] += $itm->original_allotment['allotment_cost'];
-                        } else {
-                            $row[] = '-';
-                        }
-
-                        if (isset($itm->realigned_allotments) && count($itm->realigned_allotments) > 0) {
-                            foreach ($itm->realigned_allotments as $realignCtr => $rItem) {
-                                $row[] = $rItem['allotment_cost'] ?
-                                        number_format($rItem['allotment_cost'], 2) : '-';
-                                $subTotal[count($row) - 1] += $rItem['allotment_cost'];
-                                $grandTotal[count($row) - 1] += $rItem['allotment_cost'];
-                            }
-                        } else {
-                            for ($realignCtr = 1; $realignCtr < $realignOrder; $realignCtr++) {
-                                $row[] = '-';
-                            }
-                        }
+                        $row[] = " $itm->allotment_name";
 
                         $row[] = $itm->allotment_cost ? number_format($itm->allotment_cost, 2) : '-';
+                        $subTotal[count($row) - 1] += $itm->allotment_cost;
+                        $grandTotal[count($row) - 1] += $itm->allotment_cost;
 
-                        for ($coimpCtr = 0; $coimpCtr <= $coimplementerCount; $coimpCtr++) {
-                            if ($coimpCtr == 0) {
-                                if (isset($itm->original_allotment) && count($itm->original_allotment) > 0) {
-                                    $row[] = $itm->original_allotment['coimplementers'][$coimpCtr]['coimplementor_budget'] ?
-                                        number_format($itm->original_allotment['coimplementers'][$coimpCtr]['coimplementor_budget'], 2) :
-                                        '-';
-                                    $subTotal[count($row) - 1] += $itm->original_allotment['coimplementers'][$coimpCtr]['coimplementor_budget'];
-                                    $grandTotal[count($row) - 1] += $itm->original_allotment['coimplementers'][$coimpCtr]['coimplementor_budget'];
-                                } else {
-                                    $row[] = '-';
-                                }
-                            } else {
-                                if (isset($itm->realigned_allotments) && count($itm->realigned_allotments) > 0) {
-                                    foreach ($itm->realigned_allotments as $rItem) {
-                                        $row[] = $rItem['coimplementers'][$coimpCtr - 1]['coimplementor_budget'] ?
-                                                number_format($rItem['coimplementers'][$coimpCtr - 1]['coimplementor_budget'], 2) :
-                                                '-';
-                                        $subTotal[count($row) - 1] += $rItem['coimplementers'][$coimpCtr - 1]['coimplementor_budget'];
-                                        $grandTotal[count($row) - 1] += $rItem['coimplementers'][$coimpCtr - 1]['coimplementor_budget'];
-                                    }
-                                } else {
-                                    for ($realignCtr = 1; $realignCtr < $realignOrder; $realignCtr++) {
-                                        $row[] = '-';
-                                    }
-                                }
+                        for ($realignOrderCtr = 1; $realignOrderCtr <= $realignOrder; $realignOrderCtr++) {
+                            $realignIndex = "realignment_$realignOrderCtr";
 
-                                $row[] = $itm->coimplementers[$coimpCtr - 1]['coimplementor_budget'] ?
-                                        number_format($itm->coimplementers[$coimpCtr - 1]['coimplementor_budget'], 2) :
-                                        '-';
-                                $subTotal[count($row) - 1] += $itm->coimplementers[$coimpCtr - 1]['coimplementor_budget'];
-                                $grandTotal[count($row) - 1] += $itm->coimplementers[$coimpCtr - 1]['coimplementor_budget'];
+                            $row[] = $itm->{$realignIndex}->allotment_cost ?
+                                    number_format($itm->{$realignIndex}->allotment_cost, 2) :
+                                    '-';
+                            $subTotal[count($row) - 1] += $itm->{$realignIndex}->allotment_cost;
+                            $grandTotal[count($row) - 1] += $itm->{$realignIndex}->allotment_cost;
+                        }
+
+                        foreach ($itm->coimplementers as $coimpCtr => $coimplementer) {
+                            $row[] = $coimplementer['coimplementor_budget'] ?
+                                    number_format($coimplementer['coimplementor_budget'], 2) :
+                                    '-';
+                            $subTotal[count($row) - 1] += $coimplementer['coimplementor_budget'];
+                            $grandTotal[count($row) - 1] += $coimplementer['coimplementor_budget'];
+
+                            for ($realignOrderCtr = 1; $realignOrderCtr <= $realignOrder; $realignOrderCtr++) {
+                                $realignIndex = "realignment_$realignOrderCtr";
+
+                                $row[] = $itm->{$realignIndex}->coimplementers[$coimpCtr]['coimplementor_budget'] ?
+                                    number_format($itm->{$realignIndex}->coimplementers[$coimpCtr]['coimplementor_budget'], 2) :
+                                    '-';
+                                $subTotal[count($row) - 1] +=
+                                    $itm->{$realignIndex}->coimplementers[$coimpCtr]['coimplementor_budget'];
+                                $grandTotal[count($row) - 1] +=
+                                    $itm->{$realignIndex}->coimplementers[$coimpCtr]['coimplementor_budget'];
                             }
                         }
 
@@ -1131,11 +1107,11 @@ class PrintController extends Controller
                             if ($tblHeadCtr == 0) {
                                 $fontStyles[] = "";
                                 $aligns[] = "L";
-                                $widths[] = $multiplier * (100 / $tableHeaderCount);
+                                $widths[] = $firstColWidth;
                             } else {
                                 $fontStyles[] = "";
                                 $aligns[] = "R";
-                                $widths[] = $multiplier * (100 / $tableHeaderCount);
+                                $widths[] = $otherColWidth;
                             }
                         }
 
@@ -1160,7 +1136,12 @@ class PrintController extends Controller
             for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
                 $fontStyles[] = "BI";
                 $aligns[] = "R";
-                $widths[] = $multiplier * (100 / $tableHeaderCount);
+
+                if ($tblHeadCtr == 0) {
+                    $widths[] = $firstColWidth;
+                } else {
+                    $widths[] = $otherColWidth;
+                }
             }
 
             for ($subTotalIndex = 1; $subTotalIndex < count($subTotal) - 1; $subTotalIndex++) {
@@ -1192,11 +1173,11 @@ class PrintController extends Controller
             if ($tblHeadCtr == 0) {
                 $fontStyles[] = "B";
                 $aligns[] = "C";
-                $widths[] = $multiplier * (100 / $tableHeaderCount);
+                $widths[] = $firstColWidth;
             } else {
                 $fontStyles[] = "B";
                 $aligns[] = "R";
-                $widths[] = $multiplier * (100 / $tableHeaderCount);
+                $widths[] = $otherColWidth;
             }
         }
 
@@ -1297,6 +1278,10 @@ class PrintController extends Controller
         }
 
         $tableHeaderCount = count($tableHeader);
+        $firstColWidth = $tableHeaderCount > 7 ? $multiplier * 15 :
+                         $multiplier * (100 / $tableHeaderCount);
+        $otherColWidth = $tableHeaderCount > 7 ? $multiplier * (85 / ($tableHeaderCount - 1)) :
+                         $multiplier * (100 / $tableHeaderCount);
         $fontStyles = [];
         $aligns = [];
         $widths = [];
@@ -1305,7 +1290,11 @@ class PrintController extends Controller
             $fontStyles[] = "B";
             $aligns[] = "C";
 
-            $widths[] = $multiplier * (100 / $tableHeaderCount);
+            if ($tblHeadCtr == 0) {
+                $widths[] = $firstColWidth;
+            } else {
+                $widths[] = $otherColWidth;
+            }
         }
 
         $data = [
@@ -1365,15 +1354,15 @@ class PrintController extends Controller
 
                 if ($tblHeadCtr == 0) {
                     $aligns[] = "L";
-                    $widths[] = $multiplier * (100 / $tableHeaderCount);
+                    $widths[] = $firstColWidth;
                     $colSpanKeys[] = "0";
                 } else if ($tblHeadCtr == 1) {
                     $aligns[] = "L";
-                    $widths[] = $multiplier * (100 / $tableHeaderCount);
+                    $widths[] = $otherColWidth;
                     $colSpanKeys[] = "1-".($tableHeaderCount - 1);
                 } else {
                     $aligns[] = "L";
-                    $widths[] = $multiplier * (100 / $tableHeaderCount);
+                    $widths[] = $otherColWidth;
                 }
             }
 
@@ -1419,15 +1408,15 @@ class PrintController extends Controller
                         if ($tblHeadCtr == 0) {
                             $fontStyles[] = "B";
                             $aligns[] = "L";
-                            $widths[] = $multiplier * (100 / $tableHeaderCount);
+                            $widths[] = $firstColWidth;
                         } else if ($tblHeadCtr == 1 || $tblHeadCtr == 1) {
                             $fontStyles[] = "";
                             $aligns[] = "R";
-                            $widths[] = $multiplier * (100 / $tableHeaderCount);
+                            $widths[] = $otherColWidth;
                         } else {
                             $fontStyles[] = "";
                             $aligns[] = "R";
-                            $widths[] = $multiplier * (100 / $tableHeaderCount);
+                            $widths[] = $otherColWidth;
                         }
                     }
 
@@ -1457,14 +1446,18 @@ class PrintController extends Controller
                     for ($tblHeadCtr = 0; $tblHeadCtr < $tableHeaderCount; $tblHeadCtr++) {
                         $colSpanKeys[] = "$tblHeadCtr";
 
-                        if ($tblHeadCtr == 1 || $tblHeadCtr == 2) {
+                        if ($tblHeadCtr == 0) {
                             $fontStyles[] = "";
                             $aligns[] = "L";
-                            $widths[] = $multiplier * (100 / $tableHeaderCount);
+                            $widths[] = $firstColWidth;
+                        } else if ($tblHeadCtr == 1 || $tblHeadCtr == 2) {
+                            $fontStyles[] = "";
+                            $aligns[] = "L";
+                            $widths[] = $otherColWidth;
                         } else {
                             $fontStyles[] = "B";
                             $aligns[] = "L";
-                            $widths[] = $multiplier * (100 / $tableHeaderCount);
+                            $widths[] = $otherColWidth;
                         }
                     }
 
@@ -1510,15 +1503,15 @@ class PrintController extends Controller
                             if ($tblHeadCtr == 0) {
                                 $fontStyles[] = "";
                                 $aligns[] = "L";
-                                $widths[] = $multiplier * (100 / $tableHeaderCount);
+                                $widths[] = $firstColWidth;
                             } else if ($tblHeadCtr == 1 || $tblHeadCtr == 2) {
                                 $fontStyles[] = "";
                                 $aligns[] = "R";
-                                $widths[] = $multiplier * (100 / $tableHeaderCount);
+                                $widths[] = $otherColWidth;
                             } else {
                                 $fontStyles[] = "";
                                 $aligns[] = "R";
-                                $widths[] = $multiplier * (100 / $tableHeaderCount);
+                                $widths[] = $otherColWidth;
                             }
                         }
 
@@ -1547,7 +1540,12 @@ class PrintController extends Controller
 
                 $fontStyles[] = "BI";
                 $aligns[] = "R";
-                $widths[] = $multiplier * (100 / $tableHeaderCount);
+
+                if ($tblHeadCtr == 0) {
+                    $widths[] = $firstColWidth;
+                } else {
+                    $widths[] = $otherColWidth;
+                }
             }
 
             for ($subTotalIndex = 1; $subTotalIndex < count($subTotal); $subTotalIndex++) {
@@ -1581,11 +1579,11 @@ class PrintController extends Controller
             if ($tblHeadCtr == 0) {
                 $fontStyles[] = "B";
                 $aligns[] = "C";
-                $widths[] = $multiplier * (100 / $tableHeaderCount);
+                $widths[] = $firstColWidth;
             } else {
                 $fontStyles[] = "B";
                 $aligns[] = "R";
-                $widths[] = $multiplier * (100 / $tableHeaderCount);
+                $widths[] = $otherColWidth;
             }
         }
 

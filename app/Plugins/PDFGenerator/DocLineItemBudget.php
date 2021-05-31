@@ -7,7 +7,7 @@ class DocLineItemBudget extends PDF {
         $pageHeight = $this->h;
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
-        $originalFontSize = $data->header_count > 8 ? 8 : 9;
+        $originalFontSize = $data->header_count > 7 ? 8 : 9;
 
         $cy = $data->cy_year;
         $title = $data->title;
