@@ -642,6 +642,7 @@ class LibraryController extends Controller
         $monitoringOffice  = $projectData->monitoring_offices ?
                              unserialize($projectData->monitoring_offices) : [];
         $projectTitle = $projectData->project_title;
+        $projectLeader = $projectData->project_leader;
 
         $coimplementingCount = $comimplementingAgencyLGUs ? count($comimplementingAgencyLGUs) : 0;
         $propenentCount = $proponentUnits ? count($proponentUnits) : 0;
@@ -666,6 +667,7 @@ class LibraryController extends Controller
             'projectCost',
             'monitoringOffice',
             'projectTitle',
+            'projectLeader',
             'coimplementingCount',
             'propenentCount'
         ));
@@ -679,6 +681,7 @@ class LibraryController extends Controller
         $implementingBudget = $request->implementing_project_cost;
         $withCoimplementingAgency = $request->with_coimplementing_agency;
         $projectCost = $request->project_cost;
+        $projectLeader = $request->project_leader;
         $dateFrom = $request->date_from;
         $dateTo = $request->date_to;
         $monitoringOffice = $request->monitoring_office;
@@ -710,6 +713,7 @@ class LibraryController extends Controller
                 $instanceProject->date_from = $dateFrom;
                 $instanceProject->date_to = $dateTo;
                 $instanceProject->project_cost = $projectCost;
+                $instanceProject->project_leader = $projectLeader;
                 $instanceProject->monitoring_offices = serialize($monitoringOffice);
                 $instanceProject->save();
 
@@ -733,6 +737,7 @@ class LibraryController extends Controller
         $implementingBudget = $request->implementing_project_cost;
         $withCoimplementingAgency = $request->with_coimplementing_agency;
         $projectCost = $request->project_cost;
+        $projectLeader = $request->project_leader;
         $dateFrom = $request->date_from;
         $dateTo = $request->date_to;
         $monitoringOffice = $request->monitoring_office;
@@ -763,6 +768,7 @@ class LibraryController extends Controller
             $instanceProject->date_from = $dateFrom;
             $instanceProject->date_to = $dateTo;
             $instanceProject->project_cost = $projectCost;
+            $instanceProject->project_leader = $projectLeader;
             $instanceProject->monitoring_offices = serialize($monitoringOffice);
             $instanceProject->save();
 

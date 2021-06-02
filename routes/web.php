@@ -1054,82 +1054,82 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     // Fund Utilization Module
     Route::any('fund-utilization/project-lib', [
         'uses' => 'LineItemBudgetController@index',
-        'module' => 'pay_summary',
+        'module' => 'fund_lib',
         'access' => 'is_allowed'
     ])->name('fund-project-lib');
     Route::get('fund-utilization/project-lib/show-print/{id}', [
         'uses' => 'LineItemBudgetController@showPrint',
-        'module' => 'pay_summary',
-        'access' => 'update'
+        'module' => 'fund_lib',
+        'access' => 'is_allowed'
     ])->name('fund-project-lib-show-print');
     Route::get('fund-utilization/project-lib/show-create', [
         'uses' => 'LineItemBudgetController@showCreate',
-        'module' => 'pay_summary',
+        'module' => 'fund_lib',
         'access' => 'create'
     ])->name('fund-project-lib-show-create');
     Route::get('fund-utilization/project-lib/show-create-realignment/{id}/{type}', [
         'uses' => 'LineItemBudgetController@showCreateEditRealignment',
-        'module' => 'pay_summary',
+        'module' => 'fund_librealign',
         'access' => 'create'
     ])->name('fund-project-lib-show-create-realignment');
     Route::post('fund-utilization/project-lib/store-realignment/{id}', [
         'uses' => 'LineItemBudgetController@storeRealignment',
-        'module' => 'pay_summary',
+        'module' => 'fund_librealign',
         'access' => 'create'
     ])->name('fund-project-lib-store-realignment');
     Route::post('fund-utilization/project-lib/store', [
         'uses' => 'LineItemBudgetController@store',
-        'module' => 'pay_summary',
+        'module' => 'fund_lib',
         'access' => 'create'
     ])->name('fund-project-lib-store');
     Route::get('fund-utilization/project-lib/show-edit/{id}', [
         'uses' => 'LineItemBudgetController@showEdit',
-        'module' => 'pay_summary',
+        'module' => 'fund_lib',
         'access' => 'update'
     ])->name('fund-project-lib-show-edit');
     Route::get('fund-utilization/project-lib/show-edit-realignment/{id}/{type}', [
         'uses' => 'LineItemBudgetController@showCreateEditRealignment',
-        'module' => 'pay_summary',
+        'module' => 'fund_librealign',
         'access' => 'update'
     ])->name('fund-project-lib-show-edit-realignment');
     Route::post('fund-utilization/project-lib/update/{id}', [
         'uses' => 'LineItemBudgetController@update',
-        'module' => 'pay_summary',
+        'module' => 'fund_lib',
         'access' => 'update'
     ])->name('fund-project-lib-update');
     Route::post('fund-utilization/project-lib/update-realignment/{id}', [
         'uses' => 'LineItemBudgetController@updateRealignment',
-        'module' => 'pay_summary',
+        'module' => 'fund_librealign',
         'access' => 'create'
     ])->name('fund-project-lib-update-realignment');
     Route::post('fund-utilization/project-lib/delete/{id}', [
         'uses' => 'LineItemBudgetController@delete',
-        'module' => 'pay_summary',
+        'module' => 'fund_lib',
         'access' => 'delete'
     ])->name('fund-project-lib-delete');
     Route::post('fund-utilization/project-lib/destroy-realignment/{id}', [
         'uses' => 'LineItemBudgetController@destroyRealignment',
-        'module' => 'pay_summary',
+        'module' => 'fund_librealign',
         'access' => 'delete'
     ])->name('fund-project-lib-destroy-realignment');
     Route::post('fund-utilization/project-lib/get-allot-class', [
         'uses' => 'LineItemBudgetController@getListAllotmentClass',
-        'module' => 'pay_summary',
+        'module' => 'fund_lib',
         'access' => 'is_allowed'
     ]);
     Route::post('fund-utilization/project-lib/get-account-title', [
         'uses' => 'LineItemBudgetController@getListAccountTitle',
-        'module' => 'pay_summary',
+        'module' => 'fund_lib',
         'access' => 'is_allowed'
     ]);
     Route::post('fund-utilization/project-lib/approve/{id}/{isRealignment}', [
         'uses' => 'LineItemBudgetController@approve',
-        'module' => 'pay_summary',
+        'module' => 'fund_lib',
         'access' => 'is_allowed'
     ])->name('fund-project-lib-approve');
     Route::post('fund-utilization/project-lib/disapprove/{id}/{isRealignment}', [
         'uses' => 'LineItemBudgetController@disapprove',
-        'module' => 'pay_summary',
+        'module' => 'fund_lib',
         'access' => 'is_allowed'
     ])->name('fund-project-lib-disapprove');
 

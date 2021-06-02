@@ -199,6 +199,14 @@
         </label>
     </div>
 
+    <div class="md-form">
+        <input type="text" id="project-leader" class="form-control"
+               name="project_leader" value="{{ $projectLeader }}">
+        <label for="project-leader" class="{{ $projectLeader ? 'active' : '' }}">
+            Project Leader
+        </label>
+    </div>
+
     <br>
 
     <h5>Project Duration</h5>

@@ -15,6 +15,8 @@ $(function() {
         '#proc_dv',
         '#pay_lddap',
         '#pay_summary',
+        '#fund_lib',
+        '#fund_librealign',
         '#inv_stocks',
         '#track_pr_rfq',
         '#track_rfq_abs',

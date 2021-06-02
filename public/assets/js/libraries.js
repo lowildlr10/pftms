@@ -32,7 +32,7 @@ $(function() {
 	function toggleSignatoryInputs() {
 		var cBoxIDs = ['#p-req', '#abs', '#po-jo', '#ors', '#iar',
                        '#dv', '#ris', '#par', '#ics', '#liquidation',
-                       '#lddap'];
+                       '#lddap', '#summary', '#lib', '#librealign'];
 
 		/*
 		var cBoxNames = ['p_req', 'abs', 'po_jo', 'ors', 'iar',
