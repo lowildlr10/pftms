@@ -379,9 +379,9 @@
 
                             @if (count($signatories) > 0)
                                 @foreach ($signatories as $sig)
-                                    @if (isset($sig->module->summary->delivered_by) && $sig->module->summary->delivered_by)
-                            <option value="{{ $sig->id }}" {{ $sig->id == $budgetData->sig_approved_by ? 'selected' : '' }}>
-                                {!! $sig->name !!} [{!! $sig->module->summary->designation !!}]
+                                    @if (isset($sig->module->librealign->approved_by) && $sig->module->librealign->approved_by)
+                            <option value="{{ $sig->id }}" {{ $sig->id == $budgetRealignedData->sig_approved_by ? 'selected' : '' }}>
+                                {!! $sig->name !!} [{!! $sig->module->librealign->designation !!}]
                             </option>
                                     @endif
                                 @endforeach

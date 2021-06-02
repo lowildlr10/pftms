@@ -17,6 +17,8 @@ $(function() {
         '#lr',
         '#lddap',
         '#summary',
+        '#lib',
+        '#librealign',
     ];
 
     function convertAccessToJson() {

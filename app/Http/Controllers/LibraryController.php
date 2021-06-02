@@ -82,6 +82,10 @@ class LibraryController extends Controller
             'summary_approved_by' => 'Approved By',
             'summary_delivered_by' => 'Delivered By',
             'summary_received_by' => 'Received By',
+        'lib' => 'Line Item Budget',
+            'lib_approved_by' => 'Approved By',
+        'librealign' => 'Line Item Budget Realignment',
+            'librealign_approved_by' => 'Approved By',
     ];
     protected $modules = [
         'pr' => [
@@ -144,6 +148,12 @@ class LibraryController extends Controller
             'summary_approved_by' => 'approved_by',
             'summary_delivered_by' => 'delivered_by',
             'summary_received_by' => 'received_by',
+        ],
+        'lib' => [
+            'lib_approved_by' => 'approved_by',
+        ],
+        'librealign' => [
+            'librealign_approved_by' => 'approved_by',
         ],
     ];
 

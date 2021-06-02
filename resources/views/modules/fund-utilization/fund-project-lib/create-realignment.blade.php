@@ -374,9 +374,9 @@
 
                             @if (count($signatories) > 0)
                                 @foreach ($signatories as $sig)
-                                    @if (isset($sig->module->summary->delivered_by) && $sig->module->summary->delivered_by)
+                                    @if (isset($sig->module->librealign->approved_by) && $sig->module->librealign->approved_by)
                             <option value="{{ $sig->id }}">
-                                {!! $sig->name !!} [{!! $sig->module->summary->designation !!}]
+                                {!! $sig->name !!} [{!! $sig->module->librealign->designation !!}]
                             </option>
                                     @endif
                                 @endforeach

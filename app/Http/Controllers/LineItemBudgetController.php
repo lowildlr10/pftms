@@ -727,6 +727,7 @@ class LineItemBudgetController extends Controller
             'users',
             'signatories',
             'budgetData',
+            'budgetRealignedData',
             'groupedAllotments',
             'itemCounter',
             'implementingAgency',
