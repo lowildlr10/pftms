@@ -564,8 +564,10 @@ class AccountController extends Controller
         if ($type != 'profile') {
             $roles = EmpRole::orderBy('role')->get();
             $groups = EmpGroup::orderBy('group_name')->get();
+            $units = EmpUnit::orderBy('unit_name')->get();
             $viewDir = 'modules.library.account.create';
             $flashData['roles'] = $roles;
+            $flashData['units'] = $units;
             $flashData['groups'] = $groups;
 
             return (object) [
@@ -630,9 +632,13 @@ class AccountController extends Controller
             $viewDir = 'modules.library.account.update';
             $role = !empty($userData->roles) ? unserialize($userData->roles) : [];
             $group = !empty($userData->groups) ? unserialize($userData->groups) : [];
+            $units = EmpUnit::orderBy('unit_name')->get();
+            $unit = $userData->unit;
             $isActive = $userData->is_active;
             $flashData['roles'] = $roles;
             $flashData['groups'] = $groups;
+            $flashData['units'] = $units;
+            $flashData['unit'] = $unit;
             $flashData['role'] = $role;
             $flashData['group'] = $group;
             $flashData['isActive'] = $isActive;
@@ -680,6 +686,7 @@ class AccountController extends Controller
         if ($type != 'profile') {
             $roles = $request->roles ? serialize($request->roles) : NULL;
             $groups = $request->groups ? serialize($request->groups) : NULL;
+            $unit = $request->unit;
             $isActive = $request->is_active;
         }
 
@@ -705,6 +712,7 @@ class AccountController extends Controller
             if ($type != 'profile') {
                 $instanceEmpAccount->roles = $roles;
                 $instanceEmpAccount->groups = $groups;
+                $instanceEmpAccount->unit = $unit;
                 $instanceEmpAccount->is_active = $isActive;
             }
 
@@ -773,6 +781,7 @@ class AccountController extends Controller
             $id = $_id;
             $roles = $request->roles ? serialize($request->roles) : NULL;
             $groups = $request->groups ? serialize($request->groups) : NULL;
+            $unit = $request->unit;
             $isActive = $request->is_active;
         }
 
@@ -799,6 +808,7 @@ class AccountController extends Controller
             if ($type != 'profile') {
                 $instanceEmpAccount->roles = $roles;
                 $instanceEmpAccount->groups = $groups;
+                $instanceEmpAccount->unit = $unit;
                 $instanceEmpAccount->is_active = $isActive;
             }
 

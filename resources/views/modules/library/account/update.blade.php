@@ -302,6 +302,26 @@
 
                     <div class="col-md-12">
                         <div class="md-form">
+                            <select class="mdb-select md-form" searchable="Search here.."
+                                    name="unit">
+                                <option value="" disabled selected>Choose a unit</option>
+
+                                @if (!empty($units))
+                                    @foreach ($units as $uni)
+                                <option value="{{ $uni->id }}" {{ $uni->id == $unit ? 'selected': '' }}>
+                                    {{ $uni->unit_name }}
+                                </option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <label class="mdb-main-label">
+                                Unit
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="md-form">
                             <select class="mdb-select md-form required" searchable="Search here.."
                                     name="emp_type">
                                 <option value="" disabled selected>Choose an employment type *</option>

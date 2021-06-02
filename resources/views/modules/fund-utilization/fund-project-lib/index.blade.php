@@ -37,10 +37,13 @@
                                 narrower py-2 px-2 mb-1 d-flex justify-content-between
                                 align-items-center">
                         <div>
+                            @if ($isAllowedCreate)
                             <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
                                     onclick="$(this).showCreate('{{ route('fund-project-lib-show-create') }}');">
                                 <i class="fas fa-pencil-alt"></i> Create
                             </button>
+                            @endif
+
                             <a type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
                                     href="{{ route('project') }}">
                                 Go to Projects <i class="fas fa-arrow-right"></i>
@@ -69,8 +72,8 @@
                                 <!--Table head-->
                                 <thead class="mdb-color darken-3 white-text hidden-xs">
                                     <tr>
-                                        <th class="th-md text-center" width="3%">#</th>
                                         <th class="th-md" width="3%"></th>
+                                        <th class="th-md text-center" width="3%"></th>
                                         <th class="th-md" width="50%">
                                             <b>
                                                 @sortablelink('project.project_title', 'Project Name', [], ['class' => 'white-text'])
@@ -101,7 +104,6 @@
                                     @if (count($list) > 0)
                                         @foreach ($list as $listCtr => $fund)
                                     <tr class="hidden-xs">
-                                        <td></td>
                                         <td align="center">
                                             @if (!$fund->date_approved && !$fund->date_disapproved)
                                             <i class="fas fa-spinner fa-lg faa-spin fa-pulse material-tooltip-main"
@@ -114,6 +116,7 @@
                                                data-toggle="tooltip" data-placement="right" title="Approved"></i>
                                             @endif
                                         </td>
+                                        <td></td>
                                         <td>{{ $fund->project->project_title }}</td>
                                         <td>{{ date_format(date_create($fund->date_from), "F j, Y") }}</td>
                                         <td>{{ date_format(date_create($fund->date_to), "F j, Y") }}</td>
@@ -225,13 +228,20 @@
                                     <i class="fas fa-print blue-text"></i> Print LIB
                                 </button>
 
-                                @if (!$fund->date_approved)
+                                @if ($isAllowedUpdate)
+                                    @if (!$fund->date_approved)
                                     <button type="button" class="btn btn-outline-mdb-color
                                             btn-sm px-2 waves-effect waves-light"
                                             onclick="$(this).showEdit('{{ route('fund-project-lib-show-edit',
                                                     ['id' => $fund->id]) }}');">
                                         <i class="fas fa-edit orange-text"></i> Edit
                                     </button>
+                                    @else
+                                    <button type="button" class="btn btn-outline-mdb-color
+                                            btn-sm px-2 waves-effect waves-light" disabled>
+                                        <i class="fas fa-edit orange-text"></i> Edit
+                                    </button>
+                                    @endif
                                 @else
                                     <button type="button" class="btn btn-outline-mdb-color
                                             btn-sm px-2 waves-effect waves-light" disabled>
@@ -239,7 +249,8 @@
                                     </button>
                                 @endif
 
-                                @if (!$fund->date_approved)
+                                @if ($isAllowedDelete)
+                                    @if (!$fund->date_approved)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showDelete('{{ route('fund-project-lib-delete',
@@ -247,6 +258,12 @@
                                                                     `{{ $fund->project->project_title.' LIB' }}`);">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
+                                    @else
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light" disabled>
+                                    <i class="fas fa-trash-alt red-text"></i> Delete
+                                </button>
+                                    @endif
                                 @else
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light" disabled>
@@ -258,7 +275,7 @@
                     </div>
                     <div class="card-body">
                         <p>
-                            <b>Project Name: </b> {{ $fund->project->project_title }}<br>
+                            <b>Project Title: </b> {{ $fund->project->project_title }}<br>
                             <b>Approved Budget: </b> &#8369; {{ number_format($fund->approved_budget, 2) }}<br>
                             <b>Realignments: </b>
 
@@ -282,6 +299,7 @@
                                     @if ((!$realignment->date_approved && !$realignment->date_disapproved) ||
                                          ($realignment->date_disapproved && !$realignment->date_approved))
                             <br>
+                                        @if ($isAllowedUpdateRealignLIB)
                             <button type="button" class="btn btn-link btn-md ml-1 my-0 p-1
                                     waves-effect waves-light"
                                     onclick="$(this).showEditRealignment(
@@ -293,6 +311,9 @@
                                     Edit (R{{ $fund->count_realignments }}) ]
                                 </b>
                             </button>
+                                        @endif
+
+                                        @if ($isAllowedDeleteRealignLIB)
                             <button type="button" class="btn btn-link btn-md ml-0 my-0 p-1
                                     waves-effect waves-light"
                                     onclick="$(this).showDelete(
@@ -304,6 +325,7 @@
                                     Discard (R{{$fund->count_realignments}}) ]
                                 </b>
                             </button>
+                                        @endif
                                     @endif
                             <br>
                                 @endforeach
@@ -312,7 +334,7 @@
                             @endif
                         </p>
 
-                        @if ($fund->date_approved)
+                        @if ($fund->date_approved && $isAllowedCreateRealignLIB)
                             @if ($fund->count_realignments > 0)
                                 @if ($fund->current_realigned_budget->date_approved &&
                                      !$fund->current_realigned_budget->date_disapproved)
@@ -347,16 +369,27 @@
                         @if (count($fund->current_realigned_allotments) > 0)
                             @foreach ($fund->current_realigned_allotments as $cntr => $item)
                         <i class="fas fa-caret-right"></i>
-
-                            @if (strlen($item->allotment_name) > 60)
+                                @if (strlen($item->allotment_name) > 60)
                         <span class="font-weight-bold">
-                            {{ $cntr + 1 }}.| {{ substr($item->allotment_name, 0, 60) }}...<br>
+                            {{ $cntr + 1 }}.|&nbsp;
+                                    @if (count(explode('::', $item->allotment_name)) >= 2)
+                            {{ substr(explode('::', $item->allotment_name)[1], 0, 60) }}...
+                                    @else
+                            {{ substr($item->allotment_name, 0, 60) }}...
+                                    @endif
+                            <br>
                         </span>
-                            @else
+                                @else
                         <span class="font-weight-bold">
-                            {{ $cntr + 1 }}.| {{ $item->allotment_name }}<br>
+                            {{ $cntr + 1 }}.|&nbsp;
+                                    @if (count(explode('::', $item->allotment_name)) >= 2)
+                            {{ explode('::', $item->allotment_name)[1] }}
+                                    @else
+                            {{ $item->allotment_name }}
+                                    @endif
+                            <br>
                         </span>
-                            @endif
+                                @endif
 
                         <span class="text-center w-100 p-4">
                             @if ($fund->current_realigned_budget->date_approved)
@@ -384,6 +417,8 @@
                     </li>
 
                     @if (!$fund->date_disapproved && !$fund->date_approved)
+
+                        @if ($isAllowedApprove)
                     <!-- Approve Button Section -->
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-md btn-block btn-rounded"
@@ -397,7 +432,9 @@
                             <i class="fas fa-thumbs-up"></i> Approve LIB
                         </button>
                     </li>
+                        @endif
 
+                        @if ($isAllowedDisapprove)
                     <!-- Disapprove Button Section -->
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-black waves-effect btn-md btn-block btn-rounded"
@@ -411,12 +448,15 @@
                             <i class="fas fa-thumbs-down"></i> Disapprove LIB
                         </button>
                     </li>
+                        @endif
                     @endif
 
                     @if ($fund->date_approved)
                         @if ($fund->count_realignments > 0)
                             @if (!$fund->current_realigned_budget->date_approved &&
                                  !$fund->current_realigned_budget->date_disapproved)
+
+                                @if ($isAllowedApproveRealignLIB)
                     <!-- Approve Button Section -->
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-md btn-block btn-rounded"
@@ -430,7 +470,9 @@
                             <i class="fas fa-thumbs-up"></i> Approve Realignment
                         </button>
                     </li>
+                                @endif
 
+                                @if ($isAllowedDisapproveRealignLIB)
                     <!-- Disapprove Button Section -->
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-black waves-effect btn-md btn-block btn-rounded"
@@ -444,6 +486,7 @@
                             <i class="fas fa-thumbs-down"></i> Disapprove Realignment
                         </button>
                     </li>
+                                @endif
                             @else
                     <li class="list-group-item justify-content-between text-center">
                         No more available actions.

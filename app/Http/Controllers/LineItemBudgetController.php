@@ -25,14 +25,30 @@ class LineItemBudgetController extends Controller
 {
     public function index(Request $request) {
         $keyword = trim($request->keyword);
+        $userID = Auth::user()->id;
+        $userUnit = Auth::user()->unit;
+
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
 
         // Get module access
-        $module = 'fund_project';
-        $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
-        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
-        $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
-        //$isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
-        $isAllowedDestroy = true;
+        $module = 'fund_lib';
+        $isAllowedCreateLIB = Auth::user()->getModuleAccess($module, 'create');
+        $isAllowedUpdateLIB = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedDeleteLIB = Auth::user()->getModuleAccess($module, 'delete');
+        $isAllowedDestroyLIB = Auth::user()->getModuleAccess($module, 'destroy');
+        $isAllowedApproveLIB = Auth::user()->getModuleAccess($module, 'approve');
+        $isAllowedDisapproveLIB = Auth::user()->getModuleAccess($module, 'disapprove');
+
+        $module = 'fund_librealign';
+        $isAllowedCreateRealignLIB = Auth::user()->getModuleAccess($module, 'create');
+        $isAllowedUpdateRealignLIB = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedDeleteRealignLIB = Auth::user()->getModuleAccess($module, 'delete');
+        $isAllowedDestroyRealignLIB = Auth::user()->getModuleAccess($module, 'destroy');
+        $isAllowedApproveRealignLIB = Auth::user()->getModuleAccess($module, 'approve');
+        $isAllowedDisapproveRealignLIB = Auth::user()->getModuleAccess($module, 'disapprove');
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
@@ -49,6 +65,15 @@ class LineItemBudgetController extends Controller
                               ->orWhere('allotment_name', "%$keyword%")
                               ->orWhere('allotment_cost', "%$keyword%");
                     });
+            });
+        }
+
+        if ($roleHasOrdinary && !$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
+            $fundBudget = $fundBudget->whereHas('project', function($query) use ($userUnit) {
+                $query->where('proponent_units', 'like', "%$userUnit%");
+            })->orWhere(function($qry) use ($userID) {
+                $qry->where('created_by', $userID)
+                    ->orWhere('sig_submitted_by', $userID);
             });
         }
 
@@ -141,10 +166,18 @@ class LineItemBudgetController extends Controller
             'list' => $fundBudget,
             'keyword' => $keyword,
             'paperSizes' => $paperSizes,
-            'isAllowedCreate' => $isAllowedCreate,
-            'isAllowedUpdate' => $isAllowedUpdate,
-            'isAllowedDelete' => $isAllowedDelete,
-            'isAllowedDestroy' => $isAllowedDestroy,
+            'isAllowedCreate' => $isAllowedCreateLIB,
+            'isAllowedUpdate' => $isAllowedUpdateLIB,
+            'isAllowedDelete' => $isAllowedDeleteLIB,
+            'isAllowedDestroy' => $isAllowedDestroyLIB,
+            'isAllowedApprove' => $isAllowedApproveLIB,
+            'isAllowedDisapprove' => $isAllowedDisapproveLIB,
+            'isAllowedCreateRealignLIB' => $isAllowedCreateRealignLIB,
+            'isAllowedUpdateRealignLIB' => $isAllowedUpdateRealignLIB,
+            'isAllowedDeleteRealignLIB' => $isAllowedDeleteRealignLIB,
+            'isAllowedDestroyRealignLIB' => $isAllowedDestroyRealignLIB,
+            'isAllowedApproveRealignLIB' => $isAllowedApproveRealignLIB,
+            'isAllowedDisapproveRealignLIB' => $isAllowedDisapproveRealignLIB,
         ]);
     }
 
