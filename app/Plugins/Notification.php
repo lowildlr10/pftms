@@ -17,7 +17,7 @@ use App\Models\InventoryStock;
 use App\Models\ListDemandPayable;
 use App\Models\SummaryLDDAP;
 
-use App\User;
+use App\Models\EmpAccount as User;
 use Auth;
 
 class Notification {
