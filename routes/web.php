@@ -1135,6 +1135,14 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
 
     /*===================== REPORTS ROUTES =====================*/
 
+    // Budget Ledge Module
+    // Accounting Ledge Module
+    // Line-Item Budget Module
+    Route::any('reports/project-lib', [
+        'uses' => 'LineItemBudgetController@indexReport',
+        'module' => 'fund_lib',
+        'access' => 'is_allowed'
+    ])->name('report-project-lib');
 
 
     /*===================== SYSTEM LIBRARIES ROUTES =====================*/

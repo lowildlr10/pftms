@@ -18,6 +18,7 @@ $(function() {
         '#fund_lib',
         '#fund_librealign',
         '#inv_stocks',
+        '#report_lib',
         '#track_pr_rfq',
         '#track_rfq_abs',
         '#track_abs_po',

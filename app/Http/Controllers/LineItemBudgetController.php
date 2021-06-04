@@ -25,13 +25,6 @@ class LineItemBudgetController extends Controller
 {
     public function index(Request $request) {
         $keyword = trim($request->keyword);
-        $userID = Auth::user()->id;
-        $userUnit = Auth::user()->unit;
-
-        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $roleHasBudget = Auth::user()->hasBudgetRole();
-        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
-        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
 
         // Get module access
         $module = 'fund_lib';
@@ -52,6 +45,49 @@ class LineItemBudgetController extends Controller
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
+        $fundBudget = $this->getIndexData($request);
+
+        return view('modules.fund-utilization.fund-project-lib.index', [
+            'list' => $fundBudget,
+            'keyword' => $keyword,
+            'paperSizes' => $paperSizes,
+            'isAllowedCreate' => $isAllowedCreateLIB,
+            'isAllowedUpdate' => $isAllowedUpdateLIB,
+            'isAllowedDelete' => $isAllowedDeleteLIB,
+            'isAllowedDestroy' => $isAllowedDestroyLIB,
+            'isAllowedApprove' => $isAllowedApproveLIB,
+            'isAllowedDisapprove' => $isAllowedDisapproveLIB,
+            'isAllowedCreateRealignLIB' => $isAllowedCreateRealignLIB,
+            'isAllowedUpdateRealignLIB' => $isAllowedUpdateRealignLIB,
+            'isAllowedDeleteRealignLIB' => $isAllowedDeleteRealignLIB,
+            'isAllowedDestroyRealignLIB' => $isAllowedDestroyRealignLIB,
+            'isAllowedApproveRealignLIB' => $isAllowedApproveRealignLIB,
+            'isAllowedDisapproveRealignLIB' => $isAllowedDisapproveRealignLIB,
+        ]);
+    }
+
+    public function indexReport(Request $request) {
+        $keyword = trim($request->keyword);
+        $paperSizes = PaperSize::orderBy('paper_type')->get();
+        $fundBudget = $this->getIndexData($request);
+
+        return view('modules.report.project-lib.index', [
+            'list' => $fundBudget,
+            'keyword' => $keyword,
+            'paperSizes' => $paperSizes,
+        ]);
+    }
+
+    private function getIndexData($request) {
+        $keyword = trim($request->keyword);
+        $userID = Auth::user()->id;
+        $userUnit = Auth::user()->unit;
+
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+
         $fundBudget = FundingBudget::has('project');
 
         if (!empty($keyword)) {
@@ -159,26 +195,9 @@ class LineItemBudgetController extends Controller
 
                 $budget->current_realigned_allotments = $fundAllotments;
             }
-
         }
 
-        return view('modules.fund-utilization.fund-project-lib.index', [
-            'list' => $fundBudget,
-            'keyword' => $keyword,
-            'paperSizes' => $paperSizes,
-            'isAllowedCreate' => $isAllowedCreateLIB,
-            'isAllowedUpdate' => $isAllowedUpdateLIB,
-            'isAllowedDelete' => $isAllowedDeleteLIB,
-            'isAllowedDestroy' => $isAllowedDestroyLIB,
-            'isAllowedApprove' => $isAllowedApproveLIB,
-            'isAllowedDisapprove' => $isAllowedDisapproveLIB,
-            'isAllowedCreateRealignLIB' => $isAllowedCreateRealignLIB,
-            'isAllowedUpdateRealignLIB' => $isAllowedUpdateRealignLIB,
-            'isAllowedDeleteRealignLIB' => $isAllowedDeleteRealignLIB,
-            'isAllowedDestroyRealignLIB' => $isAllowedDestroyRealignLIB,
-            'isAllowedApproveRealignLIB' => $isAllowedApproveRealignLIB,
-            'isAllowedDisapproveRealignLIB' => $isAllowedDisapproveRealignLIB,
-        ]);
+        return $fundBudget;
     }
 
     public function showPrint($id) {

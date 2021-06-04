@@ -231,7 +231,7 @@
                                 <a href="#" class="waves-effect">Accounting Ledger</a>
                             </li>
                             <li>
-                                <a href="#" class="waves-effect">Line-Item Budget</a>
+                                <a href="{{ route('report-project-lib') }}" class="waves-effect">Line-Item Budget</a>
                             </li>
                         </ul>
                     </div>
