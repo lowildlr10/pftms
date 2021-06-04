@@ -1140,7 +1140,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     // Line-Item Budget Module
     Route::any('reports/project-lib', [
         'uses' => 'LineItemBudgetController@indexReport',
-        'module' => 'fund_lib',
+        'module' => 'report_lib',
         'access' => 'is_allowed'
     ])->name('report-project-lib');
 
