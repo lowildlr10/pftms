@@ -242,8 +242,8 @@
 
                                     @if ($realignment->date_approved)
                             <br>
-                            <button type="button" class="btn btn-outline-mdb-color
-                                    btn-sm px-2 waves-effect waves-light"
+                            <button type="button" class="btn btn-outline-mdb-color btn-sm btn-block 
+                                    px-2 my-2 waves-effect waves-light"
                                     onclick="$(this).showPrint('{{ $realignment->id }}', 'fund_lib_realignment');">
                                 <i class="fas fa-print blue-text"></i> Print LIB Realignment {!! $ctrRealign + 1 !!}
                             </button>

@@ -295,11 +295,13 @@ class LineItemBudgetController extends Controller
                     } else if ($rowTypes[$ctr] == 'item') {
                         $orderNo += 1;
 
-                        foreach ($coimplementorIDs[$ctr] as $ctrCoimp => $coimpID) {
-                            $coimplementers[] = [
-                                'id' => $coimpID,
-                                'coimplementor_budget' => $coimplementorBudgets[$ctr][$ctrCoimp]
-                            ];
+                        if ($coimplementorIDs[$ctr]) {
+                            foreach ($coimplementorIDs[$ctr] as $ctrCoimp => $coimpID) {
+                                $coimplementers[] = [
+                                    'id' => $coimpID,
+                                    'coimplementor_budget' => $coimplementorBudgets[$ctr][$ctrCoimp]
+                                ];
+                            }
                         }
 
                         $instanceAllotment = new FundingAllotment;
@@ -397,11 +399,13 @@ class LineItemBudgetController extends Controller
                     } else if ($rowTypes[$ctr] == 'item') {
                         $orderNo += 1;
 
-                        foreach ($coimplementorIDs[$ctr] as $ctrCoimp => $coimpID) {
-                            $coimplementers[] = [
-                                'id' => $coimpID,
-                                'coimplementor_budget' => $coimplementorBudgets[$ctr][$ctrCoimp]
-                            ];
+                        if ($coimplementorIDs[$ctr]) {
+                            foreach ($coimplementorIDs[$ctr] as $ctrCoimp => $coimpID) {
+                                $coimplementers[] = [
+                                    'id' => $coimpID,
+                                    'coimplementor_budget' => $coimplementorBudgets[$ctr][$ctrCoimp]
+                                ];
+                            }
                         }
 
                         $instanceRealignedAllot = new FundingAllotmentRealignment;
@@ -554,11 +558,13 @@ class LineItemBudgetController extends Controller
                             $instanceAllotment->budget_id = $id;
                         }
 
-                        foreach ($coimplementorIDs[$ctr] as $ctrCoimp => $coimpID) {
-                            $coimplementers[] = [
-                                'id' => $coimpID,
-                                'coimplementor_budget' => $coimplementorBudgets[$ctr][$ctrCoimp]
-                            ];
+                        if ($coimplementorIDs[$ctr]) {
+                            foreach ($coimplementorIDs[$ctr] as $ctrCoimp => $coimpID) {
+                                $coimplementers[] = [
+                                    'id' => $coimpID,
+                                    'coimplementor_budget' => $coimplementorBudgets[$ctr][$ctrCoimp]
+                                ];
+                            }
                         }
 
                         $instanceAllotment->allotment_class = $allotmentClasses[$ctr];
@@ -663,11 +669,13 @@ class LineItemBudgetController extends Controller
                             $instanceRealignedAllot->budget_id = $id;
                         }
 
-                        foreach ($coimplementorIDs[$ctr] as $ctrCoimp => $coimpID) {
-                            $coimplementers[] = [
-                                'id' => $coimpID,
-                                'coimplementor_budget' => $coimplementorBudgets[$ctr][$ctrCoimp]
-                            ];
+                        if ($coimplementorIDs[$ctr]) {
+                            foreach ($coimplementorIDs[$ctr] as $ctrCoimp => $coimpID) {
+                                $coimplementers[] = [
+                                    'id' => $coimpID,
+                                    'coimplementor_budget' => $coimplementorBudgets[$ctr][$ctrCoimp]
+                                ];
+                            }
                         }
 
                         $instanceRealignedAllot->allotment_id = $allotmentID ? $allotmentID : NULL;
