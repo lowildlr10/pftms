@@ -18,6 +18,8 @@ $(function() {
         '#fund_lib',
         '#fund_librealign',
         '#inv_stocks',
+        '#report_bud_ledger',
+        '#report_acc_ledger',
         '#report_lib',
         '#track_pr_rfq',
         '#track_rfq_abs',

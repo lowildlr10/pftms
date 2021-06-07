@@ -29,6 +29,7 @@ class UpdateFundingProjectsTable extends Migration
             $table->double('project_cost', 50, 2)->default(0.00)->after('date_to');
             $table->string('project_leader')->nullable()->after('project_cost');
             $table->binary('monitoring_offices')->after('project_leader');
+            $table->binary('access_groups')->nullable()->after('monitoring_offices');
         });
     }
 
@@ -56,6 +57,7 @@ class UpdateFundingProjectsTable extends Migration
             $table->dropIfExists('project_cost');
             $table->dropIfExists('project_leader');
             $table->dropIfExists('monitoring_offices');
+            $table->dropIfExists('access_groups');
         });
     }
 }

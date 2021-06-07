@@ -226,4 +226,25 @@
             To <span class="red-text">*</span>
         </label>
     </div><br>
+
+    <h5>Others</h5>
+    <hr>
+    <div class="md-form">
+        <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                name="access_group[]" multiple>
+            <option value="" disabled selected>Choose the groups that can access</option>
+            <option value="">-- None --</option>
+
+            @if (count($empGroups) > 0)
+                @foreach ($empGroups as $group)
+            <option value="{{ $group->id }}"  {{ in_array($group->id, $accessGroup) ? 'selected' : '' }}>
+                {!! $group->group_name !!}
+            </option>
+                @endforeach
+            @endif
+        </select>
+        <label class="mdb-main-label">
+            Access Groups
+        </label>
+    </div><br>
 </form>

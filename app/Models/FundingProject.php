@@ -33,8 +33,10 @@ class FundingProject extends Model
         'date_from',
         'date_to',
         'project_cost',
+        'project_leader',
         'project_title',
-        'monitoring_office',
+        'monitoring_offices',
+        'access_groups',
     ];
 
     /**
@@ -63,7 +65,6 @@ class FundingProject extends Model
     ];
 
     public function budget() {
-        return $this->hasOne('App\Models\FundingBudget', 'project_id', 'id')
-                    ->where('is_active', 'y');
+        return $this->hasOne('App\Models\FundingBudget', 'project_id', 'id');
     }
 }

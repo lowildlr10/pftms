@@ -610,6 +610,7 @@ class LibraryController extends Controller
         $industries = IndustrySector::orderBy('sector_name')->get();
         $municipalities = Municipality::orderBy('municipality_name')->get();
         $empUnits = EmpUnit::orderBy('unit_name')->get();
+        $empGroups = EmpGroup::orderBy('group_name')->get();
         $agencies = AgencyLGU::orderBy('agency_name')->get();
         $monitoringOffices = MonitoringOffice::orderBy('office_name')->get();
 
@@ -619,6 +620,7 @@ class LibraryController extends Controller
             'empUnits',
             'agencies',
             'monitoringOffices',
+            'empGroups',
         ));
     }
 
@@ -629,6 +631,7 @@ class LibraryController extends Controller
         $empUnits = EmpUnit::orderBy('unit_name')->get();
         $agencies = AgencyLGU::orderBy('agency_name')->get();
         $monitoringOffices = MonitoringOffice::orderBy('office_name')->get();
+        $empGroups = EmpGroup::orderBy('group_name')->get();
 
         $industrySector = $projectData->industry_sector;
         $projectSite = $projectData->project_site;
@@ -641,6 +644,8 @@ class LibraryController extends Controller
         $projectCost = $projectData->project_cost;
         $monitoringOffice  = $projectData->monitoring_offices ?
                              unserialize($projectData->monitoring_offices) : [];
+        $accessGroup  = $projectData->access_groups ?
+                        unserialize($projectData->access_groups) : [];
         $projectTitle = $projectData->project_title;
         $projectLeader = $projectData->project_leader;
 
@@ -656,6 +661,7 @@ class LibraryController extends Controller
             'empUnits',
             'agencies',
             'monitoringOffices',
+            'empGroups',
             'industrySector',
             'projectSite',
             'implementingAgency',
@@ -666,6 +672,7 @@ class LibraryController extends Controller
             'dateTo',
             'projectCost',
             'monitoringOffice',
+            'accessGroup',
             'projectTitle',
             'projectLeader',
             'coimplementingCount',
@@ -685,6 +692,7 @@ class LibraryController extends Controller
         $dateFrom = $request->date_from;
         $dateTo = $request->date_to;
         $monitoringOffice = $request->monitoring_office;
+        $accessGroup = $request->access_group;
 
         $comimplementingAgencyLGUs = $request->comimplementing_agency_lgus;
         $coimplementingProjectCosts = $request->coimplementing_project_costs;
@@ -715,6 +723,7 @@ class LibraryController extends Controller
                 $instanceProject->project_cost = $projectCost;
                 $instanceProject->project_leader = $projectLeader;
                 $instanceProject->monitoring_offices = serialize($monitoringOffice);
+                $instanceProject->access_groups = serialize($accessGroup);
                 $instanceProject->save();
 
                 $msg = "Project '$projectTitle' successfully created.";
@@ -741,6 +750,7 @@ class LibraryController extends Controller
         $dateFrom = $request->date_from;
         $dateTo = $request->date_to;
         $monitoringOffice = $request->monitoring_office;
+        $accessGroup = $request->access_group;
 
         $comimplementingAgencyLGUs = $request->comimplementing_agency_lgus;
         $coimplementingProjectCosts = $request->coimplementing_project_costs;
@@ -770,6 +780,7 @@ class LibraryController extends Controller
             $instanceProject->project_cost = $projectCost;
             $instanceProject->project_leader = $projectLeader;
             $instanceProject->monitoring_offices = serialize($monitoringOffice);
+            $instanceProject->access_groups = serialize($accessGroup);
             $instanceProject->save();
 
             $msg = "Project '$projectTitle' successfully updated.";

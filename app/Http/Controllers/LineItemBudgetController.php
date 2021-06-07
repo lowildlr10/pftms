@@ -82,13 +82,14 @@ class LineItemBudgetController extends Controller
         $keyword = trim($request->keyword);
         $userID = Auth::user()->id;
         $userUnit = Auth::user()->unit;
+        $userGroups = Auth::user()->groups ? unserialize(Auth::user()->groups) : [];
 
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $roleHasBudget = Auth::user()->hasBudgetRole();
         $roleHasAdministrator = Auth::user()->hasAdministratorRole();
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
 
-        $fundBudget = FundingBudget::has('project');
+        $fundBudget = new FundingBudget;
 
         if (!empty($keyword)) {
             $fundBudget = $fundBudget->where(function($qry) use ($keyword) {
@@ -104,12 +105,25 @@ class LineItemBudgetController extends Controller
             });
         }
 
-        if ($roleHasOrdinary && !$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
-            $fundBudget = $fundBudget->whereHas('project', function($query) use ($userUnit) {
-                $query->where('proponent_units', 'like', "%$userUnit%");
-            })->orWhere(function($qry) use ($userID) {
+        if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
+            $projectIDs = [];
+            $fundProject = DB::table('funding_projects')->get();
+
+            foreach ($fundProject as $project) {
+                $accessGroups = $project->access_groups ? unserialize($project->access_groups) :
+                                [];
+
+                foreach ($accessGroups as $accessGrp) {
+                    if (in_array($accessGrp, $userGroups)) {
+                        $projectIDs[] = $project->id;
+                    }
+                }
+            }
+
+            $fundBudget = $fundBudget->where(function($qry) use ($userID, $projectIDs) {
                 $qry->where('created_by', $userID)
-                    ->orWhere('sig_submitted_by', $userID);
+                    ->orWhere('sig_submitted_by', $userID)
+                    ->orWhereIn('project_id', $projectIDs);
             });
         }
 
@@ -216,10 +230,27 @@ class LineItemBudgetController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showCreate() {
-        $projects = FundingProject::orderBy('project_title')->get();
+        $userUnit = Auth::user()->unit;
+        $userGroups = Auth::user()->groups ? unserialize(Auth::user()->groups) : [];
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+
         $allotmentClassifications = AllotmentClass::orderBy('class_name')->get();
         $users = User::where('is_active', 'y')
-                     ->orderBy('firstname')->get();
+                     ->orderBy('firstname');
+
+        $projects = FundingProject::doesntHave('budget')
+                                  ->orderBy('project_title')
+                                  ->get();
+
+        if ($roleHasBudget || $roleHasAdministrator || $roleHasDeveloper) {
+            $users = $users->get();
+        } else {
+            $users = $users->where('id', Auth::user()->id)->get();
+        }
+
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -448,6 +479,13 @@ class LineItemBudgetController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showEdit($id) {
+        $userUnit = Auth::user()->unit;
+        $userGroups = Auth::user()->groups ? unserialize(Auth::user()->groups) : [];
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+
         $itemCounter = 1;
 
         $budget = FundingBudget::find($id);
@@ -456,10 +494,15 @@ class LineItemBudgetController extends Controller
         $allotments = FundingAllotment::where('budget_id', $budgetID)
                                       ->orderBy('order_no')
                                       ->get();
-        $projects = FundingProject::orderBy('project_title')->get();
         $allotmentClassifications = AllotmentClass::orderBy('class_name')->get();
 
         $project = FundingProject::find($budget->project_id);
+        $projectID = $project->id;
+        $projects = FundingProject::doesntHave('budget')
+                                  ->orWhere('id', $projectID)
+                                  ->orderBy('project_title')
+                                  ->get();
+
         $implementingAgency = $project->implementing_agency;
         $coimplementors = unserialize($project->comimplementing_agency_lgus);
 
