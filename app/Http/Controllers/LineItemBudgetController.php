@@ -81,8 +81,6 @@ class LineItemBudgetController extends Controller
     private function getIndexData($request) {
         $keyword = trim($request->keyword);
         $userID = Auth::user()->id;
-        $userUnit = Auth::user()->unit;
-        $userGroups = Auth::user()->groups ? unserialize(Auth::user()->groups) : [];
 
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $roleHasBudget = Auth::user()->hasBudgetRole();
@@ -106,19 +104,7 @@ class LineItemBudgetController extends Controller
         }
 
         if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
-            $projectIDs = [];
-            $fundProject = DB::table('funding_projects')->get();
-
-            foreach ($fundProject as $project) {
-                $accessGroups = $project->access_groups ? unserialize($project->access_groups) :
-                                [];
-
-                foreach ($accessGroups as $accessGrp) {
-                    if (in_array($accessGrp, $userGroups)) {
-                        $projectIDs[] = $project->id;
-                    }
-                }
-            }
+            $projectIDs = $this->getAccessibleProjects();
 
             $fundBudget = $fundBudget->where(function($qry) use ($userID, $projectIDs) {
                 $qry->where('created_by', $userID)
@@ -242,14 +228,17 @@ class LineItemBudgetController extends Controller
                      ->orderBy('firstname');
 
         $projects = FundingProject::doesntHave('budget')
-                                  ->orderBy('project_title')
-                                  ->get();
+                                  ->orderBy('project_title');
 
         if ($roleHasBudget || $roleHasAdministrator || $roleHasDeveloper) {
             $users = $users->get();
         } else {
+            $projectIDs = $this->getAccessibleProjects();
+            $projects = $projects->whereIn('id', $projectIDs);
             $users = $users->where('id', Auth::user()->id)->get();
         }
+
+        $projects = $projects->get();
 
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
@@ -498,10 +487,17 @@ class LineItemBudgetController extends Controller
 
         $project = FundingProject::find($budget->project_id);
         $projectID = $project->id;
-        $projects = FundingProject::doesntHave('budget')
-                                  ->orWhere('id', $projectID)
-                                  ->orderBy('project_title')
-                                  ->get();
+        $projects = FundingProject::whereDoesntHave('budget', function($qry) use ($projectID) {
+            $qry->where('project_id', '<>', $projectID);
+        })->orderBy('project_title');
+
+        if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
+            $projectIDs = $this->getAccessibleProjects();
+            $projectIDs[] = $projectID;
+            $projects = $projects->whereIn('id', $projectIDs);
+        }
+
+        $projects = $projects->get();
 
         $implementingAgency = $project->implementing_agency;
         $coimplementors = unserialize($project->comimplementing_agency_lgus);
@@ -1050,5 +1046,33 @@ class LineItemBudgetController extends Controller
             'grouped_allotments' => $groupedAllotments,
             'remaining_budget' => $remainingBudget
         ];
+    }
+
+    private function getAccessibleProjects() {
+        $projectIDs = [];
+        $userUnit = Auth::user()->unit;
+        $userGroups = Auth::user()->groups ? unserialize(Auth::user()->groups) : [];
+        $fundProject = DB::table('funding_projects')->get();
+
+        foreach ($fundProject as $project) {
+            $units = $project->proponent_units ? unserialize($project->proponent_units) :
+                     [];
+            $accessGroups = $project->access_groups ? unserialize($project->access_groups) :
+                            [];
+
+            foreach ($accessGroups as $accessGrp) {
+                if (in_array($accessGrp, $userGroups)) {
+                    $projectIDs[] = $project->id;
+                }
+            }
+
+            foreach ($units as $unit) {
+                if ($unit == $userUnit) {
+                    $projectIDs[] = $project->id;
+                }
+            }
+        }
+
+        return $projectIDs;
     }
 }
