@@ -705,9 +705,9 @@ class PrintController extends Controller
             $allotments = $_allotments;
         }
 
-        foreach ($allotments as $itmCtr => $item) {
-            foreach ($allotClassData as $class) {
-                if ($class->id == $item->allotment_class ) {
+        foreach ($allotClassData as $class) {
+            foreach ($allotments as $itmCtr => $item) {
+                if ($class->id == $item->allotment_class) {
                     $keyClass = preg_replace("/\s+/", "-", $class->class_name);
 
                     if (count(explode('::', $item->allotment_name)) > 1) {

@@ -14,7 +14,7 @@
             <div class="card-body">
                 <h5 class="card-title white-text">
                     <strong>
-                    <i class="far fa-copy"></i> Reports: Project Line-Item Budget
+                        <i class="fas fa-hand-holding-usd"></i> Project Line-Items Budget
                     </strong>
                 </h5>
                 <hr class="white hidden-xs">
@@ -23,8 +23,8 @@
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
                     <li>
-                        <a href="{{ route('report-project-lib') }}" class="waves-effect waves-light white-text">
-                            Reports: Project Line-Item Budget
+                        <a href="{{ route('fund-project-lib') }}" class="waves-effect waves-light white-text">
+                            Project Line-Items Budget
                         </a>
                     </li>
                 </ul>
@@ -36,7 +36,19 @@
                     <div class="gradient-card-header unique-color
                                 narrower py-2 px-2 mb-1 d-flex justify-content-between
                                 align-items-center">
-                        <div></div>
+                        <div>
+                            @if ($isAllowedCreate)
+                            <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
+                                    onclick="$(this).showCreate('{{ route('fund-project-lib-show-create') }}');">
+                                <i class="fas fa-pencil-alt"></i> Create
+                            </button>
+                            @endif
+
+                            <a type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
+                                    href="{{ route('project') }}">
+                                Go to Projects <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
                         <div>
                             <button class="btn btn-outline-white btn-rounded btn-sm px-2"
                                     data-target="#top-fluid-modal" data-toggle="modal"
@@ -44,7 +56,7 @@
                                 <i class="fas fa-search"></i> {{ !empty($keyword) ? (strlen($keyword) > 15) ?
                                 'Search: '.substr($keyword, 0, 15).'...' : 'Search: '.$keyword : '' }}
                             </button>
-                            <a href="{{ route('report-project-lib') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
+                            <a href="{{ route('fund-project-lib') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
                             </a>
                         </div>
@@ -211,9 +223,53 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $fund->id }}', 'fund_lib');">
+                                        onclick="$(this).showPrintList('{{ route('fund-project-lib-show-print',
+                                                                        ['id' => $fund->id]) }}');">
                                     <i class="fas fa-print blue-text"></i> Print LIB
                                 </button>
+
+                                @if ($isAllowedUpdate)
+                                    @if (!$fund->date_approved)
+                                    <button type="button" class="btn btn-outline-mdb-color
+                                            btn-sm px-2 waves-effect waves-light"
+                                            onclick="$(this).showEdit('{{ route('fund-project-lib-show-edit',
+                                                    ['id' => $fund->id]) }}');">
+                                        <i class="fas fa-edit orange-text"></i> Edit
+                                    </button>
+                                    @else
+                                    <button type="button" class="btn btn-outline-mdb-color
+                                            btn-sm px-2 waves-effect waves-light" disabled>
+                                        <i class="fas fa-edit orange-text"></i> Edit
+                                    </button>
+                                    @endif
+                                @else
+                                    <button type="button" class="btn btn-outline-mdb-color
+                                            btn-sm px-2 waves-effect waves-light" disabled>
+                                        <i class="fas fa-edit orange-text"></i> Edit
+                                    </button>
+                                @endif
+
+                                @if ($isAllowedDelete)
+                                    @if (!$fund->date_approved)
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light"
+                                        onclick="$(this).showDelete('{{ route('fund-project-lib-delete',
+                                                                        ['id' => $fund->id]) }}',
+                                                                    `{{ $fund->project->project_title.' LIB' }}`);">
+                                    <i class="fas fa-trash-alt red-text"></i> Delete
+                                </button>
+                                    @else
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light" disabled>
+                                    <i class="fas fa-trash-alt red-text"></i> Delete
+                                </button>
+                                    @endif
+                                @else
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light" disabled>
+                                    <i class="fas fa-trash-alt red-text"></i> Delete
+                                </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -240,13 +296,36 @@
                                data-toggle="tooltip" data-placement="right" title="Pending"></i>
                                     @endif
 
-                                    @if ($realignment->date_approved)
+                                    @if ((!$realignment->date_approved && !$realignment->date_disapproved) ||
+                                         ($realignment->date_disapproved && !$realignment->date_approved))
                             <br>
-                            <button type="button" class="btn btn-outline-mdb-color btn-sm btn-block 
-                                    px-2 my-2 waves-effect waves-light"
-                                    onclick="$(this).showPrint('{{ $realignment->id }}', 'fund_lib_realignment');">
-                                <i class="fas fa-print blue-text"></i> Print LIB Realignment {!! $ctrRealign + 1 !!}
+                                        @if ($isAllowedUpdateRealignLIB)
+                            <button type="button" class="btn btn-link btn-md ml-1 my-0 p-1
+                                    waves-effect waves-light"
+                                    onclick="$(this).showEditRealignment(
+                                        '{{ route('fund-project-lib-show-edit-realignment',
+                                        ['id' => $fund->id,
+                                        'type' => 'update']) }}');">
+                                <b>
+                                    [ <i class="far fa-edit deep-orange-text"></i>
+                                    Edit (R{{ $fund->count_realignments }}) ]
+                                </b>
                             </button>
+                                        @endif
+
+                                        @if ($isAllowedDeleteRealignLIB)
+                            <button type="button" class="btn btn-link btn-md ml-0 my-0 p-1
+                                    waves-effect waves-light"
+                                    onclick="$(this).showDelete(
+                                        '{{ route('fund-project-lib-destroy-realignment',
+                                        ['id' => $fund->current_realigned_budget->id]) }}',
+                                        `{{ $fund->project->project_title.' LIB Realignments' }}`);">
+                                <b>
+                                    [ <i class="far fa-trash-alt red-text"></i>
+                                    Discard (R{{$fund->count_realignments}}) ]
+                                </b>
+                            </button>
+                                        @endif
                                     @endif
                             <br>
                                 @endforeach
@@ -254,6 +333,31 @@
                             <span class="red-text">None</span>
                             @endif
                         </p>
+
+                        @if ($fund->date_approved && $isAllowedCreateRealignLIB)
+                            @if ($fund->count_realignments > 0)
+                                @if ($fund->current_realigned_budget->date_approved &&
+                                     !$fund->current_realigned_budget->date_disapproved)
+                        <button type="button" class="btn btn-sm btn-dark-green btn-rounded
+                                btn-block waves-effect mb-2"
+                                onclick="$(this).showCreateRealignment(
+                                    '{{ route('fund-project-lib-show-create-realignment',
+                                    ['id' => $fund->id,
+                                     'type' => 'create']) }}');">
+                                <i class="fas fa-pencil-alt"></i> Request/Create Realignment
+                        </button>
+                                @endif
+                            @else
+                        <button type="button" class="btn btn-sm btn-dark-green btn-rounded
+                                btn-block waves-effect mb-2"
+                                onclick="$(this).showCreateRealignment(
+                                    '{{ route('fund-project-lib-show-create-realignment',
+                                    ['id' => $fund->id,
+                                     'type' => 'create']) }}');">
+                                <i class="fas fa-pencil-alt"></i> Request/Create Realignment
+                        </button>
+                            @endif
+                        @endif
                     </div>
                 </div>
                 <hr>
@@ -261,7 +365,7 @@
                     <li class="list-group-item justify-content-between">
                         <h6><b><i class="fas fa-list-ol"></i> Allotments</b></h6>
                     </li>
-                    <li class="list-group-item justify-content-between overflow-auto" style="height: 300px;">
+                    <li class="list-group-item justify-content-between overflow-auto" style="height: 200px;">
                         @if (count($fund->current_realigned_allotments) > 0)
                             @foreach ($fund->current_realigned_allotments as $cntr => $item)
                         <i class="fas fa-caret-right"></i>
@@ -306,6 +410,95 @@
                         @endif
                     </li>
                 </ul>
+                <hr>
+                <ul class="btn-menu-3 list-group z-depth-0">
+                    <li class="list-action-header list-group-item justify-content-between">
+                        <h5><b><i class="fas fa-pen-nib"></i> Actions</b></h5>
+                    </li>
+
+                    @if (!$fund->date_disapproved && !$fund->date_approved)
+
+                        @if ($isAllowedApprove)
+                    <!-- Approve Button Section -->
+                    <li class="list-group-item justify-content-between">
+                        <button type="button" class="btn btn-outline-green waves-effect btn-md btn-block btn-rounded"
+                                onclick="$(this).showApprove(
+                                    '{{ route('fund-project-lib-approve', [
+                                            'id' => $fund->id,
+                                            'isRealignment' => 0
+                                        ]) }}',
+                                    '{{ $fund->id }}'
+                                );">
+                            <i class="fas fa-thumbs-up"></i> Approve LIB
+                        </button>
+                    </li>
+                        @endif
+
+                        @if ($isAllowedDisapprove)
+                    <!-- Disapprove Button Section -->
+                    <li class="list-group-item justify-content-between">
+                        <button type="button" class="btn btn-outline-black waves-effect btn-md btn-block btn-rounded"
+                                onclick="$(this).showDisapprove(
+                                    '{{ route('fund-project-lib-disapprove', [
+                                            'id' => $fund->id,
+                                            'isRealignment' => 0
+                                        ]) }}',
+                                    '{{ $fund->id }}'
+                                );">
+                            <i class="fas fa-thumbs-down"></i> Disapprove LIB
+                        </button>
+                    </li>
+                        @endif
+                    @endif
+
+                    @if ($fund->date_approved)
+                        @if ($fund->count_realignments > 0)
+                            @if (!$fund->current_realigned_budget->date_approved &&
+                                 !$fund->current_realigned_budget->date_disapproved)
+
+                                @if ($isAllowedApproveRealignLIB)
+                    <!-- Approve Button Section -->
+                    <li class="list-group-item justify-content-between">
+                        <button type="button" class="btn btn-outline-green waves-effect btn-md btn-block btn-rounded"
+                                onclick="$(this).showApprove(
+                                    '{{ route('fund-project-lib-approve', [
+                                            'id' => $fund->current_realigned_budget->id,
+                                            'isRealignment' => 1
+                                        ]) }}',
+                                    '{{ $fund->id }}'
+                                );">
+                            <i class="fas fa-thumbs-up"></i> Approve Realignment
+                        </button>
+                    </li>
+                                @endif
+
+                                @if ($isAllowedDisapproveRealignLIB)
+                    <!-- Disapprove Button Section -->
+                    <li class="list-group-item justify-content-between">
+                        <button type="button" class="btn btn-outline-black waves-effect btn-md btn-block btn-rounded"
+                                onclick="$(this).showDisapprove(
+                                    '{{ route('fund-project-lib-disapprove', [
+                                            'id' => $fund->current_realigned_budget->id,
+                                            'isRealignment' => 1
+                                        ]) }}',
+                                    '{{ $fund->id }}'
+                                );">
+                            <i class="fas fa-thumbs-down"></i> Disapprove Realignment
+                        </button>
+                    </li>
+                                @endif
+                            @else
+                    <li class="list-group-item justify-content-between text-center">
+                        No more available actions.
+                    </li>
+                            @endif
+                        @else
+                    <li class="list-group-item justify-content-between text-center">
+                        No more available actions.
+                    </li>
+                        @endif
+                    @endif
+                </ul>
             </div>
             <!--Footer-->
             <div class="modal-footer justify-content-end rgba-stylish-b p-1">
@@ -321,7 +514,13 @@
 @endif
 
 @include('modals.search-post')
+@include('modals.show')
+@include('modals.create')
+@include('modals.edit')
+@include('modals.delete-destroy')
 @include('modals.print')
+@include('modals.approve')
+@include('modals.disapprove')
 
 @endsection
 
@@ -335,6 +534,7 @@
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/funding-lib.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/attachment.js') }}"></script>
 <script>
     // Tooltips Initialization
     $(function () {
@@ -346,5 +546,28 @@
         });
     });
 </script>
+
+@if (!empty(session("success")))
+    @include('modals.alert')
+    <script type="text/javascript">
+        $(function() {
+            $('#modal-success').modal();
+        });
+    </script>
+@elseif (!empty(session("warning")))
+    @include('modals.alert')
+    <script type="text/javascript">
+        $(function() {
+            $('#modal-warning').modal();
+        });
+    </script>
+@elseif (!empty(session("failed")))
+    @include('modals.alert')
+    <script type="text/javascript">
+        $(function() {
+            $('#modal-failed').modal();
+        });
+    </script>
+@endif
 
 @endsection
