@@ -161,6 +161,16 @@
                                     Project Line-Item Budgets
                                 </a>
                             </li>
+                            <li>
+                                <a href="{{ route('fund-project-lib') }}" class="waves-effect">
+                                    Budget Ledger
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('fund-project-lib') }}" class="waves-effect">
+                                    Accounting Ledger
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </li>
@@ -231,7 +241,7 @@
                                 <a href="#" class="waves-effect">Accounting Ledger</a>
                             </li>
                             <li>
-                                <a href="{{ route('report-project-lib') }}" class="waves-effect">Line-Item Budget</a>
+                                <a href="{{ route('report-project-lib') }}" class="waves-effect">Line-Item Budget & Realignment</a>
                             </li>
                         </ul>
                     </div>

@@ -39,7 +39,7 @@
                     <div class="md-form form-sm">
                         <input type="date" id="date-liquidation" name="date_liquidation"
                             class="form-control required">
-                        <label for="date-liquidation" class="active mt-3">
+                        <label for="date-liquidation" class="active">
                             <span class="red-text">* </span>
                             <strong>Date</strong>
                         </label>
@@ -225,7 +225,7 @@
                     <div class="md-form my-0">
                         <input type="date" id="date-claimant" name="date_claimant"
                             class="form-control">
-                        <label for="date-claimant" class="active mt-3">
+                        <label for="date-claimant" class="active">
                             Date:
                         </label>
                     </div>
@@ -255,7 +255,7 @@
                     <div class="md-form my-0">
                         <input type="date" id="date-supervisor" name="date_supervisor"
                                class="form-control">
-                        <label for="date-supervisor" class="active mt-3">
+                        <label for="date-supervisor" class="active">
                             Date:
                         </label>
                     </div>
@@ -292,7 +292,7 @@
                     <div class="md-form my-0">
                         <input type="date" id="date-accounting" name="date_accounting"
                             class="form-control">
-                        <label for="date-accounting" class="active mt-3">
+                        <label for="date-accounting" class="active">
                             Date:
                         </label>
                     </div>

@@ -6,6 +6,27 @@
         <div class="card-body py-1">
             <div class="row">
                 <div class="col-md-8 border border-bottom-0 border-dark">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="md-form">
+                                <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                                        name="funding_source">
+                                    <option value="" disabled selected>Choose a funding/charging</option>
+                                    
+                                    @if (count($projects) > 0)
+                                        @foreach ($projects as $fund)
+                                    <option value="{{ $fund->id }}" {{ $fund->id == $project ? 'selected' : '' }}>
+                                        {!! $fund->project_title !!}
+                                    </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <label class="mdb-main-label">
+                                    Funding/Charging Soruce <span class="red-text">*</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                     <div class="md-form row">
                         <div class="col-md-3"></div>
                         <div class="col-md-6 text-center">
@@ -65,7 +86,7 @@
                     <div class="md-form form-sm">
                         <input type="date" id="date-ors-burs" name="date_ors_burs"
                                class="form-control required" value="{{ $dateORS }}">
-                        <label for="date-ors-burs" class="active mt-3">
+                        <label for="date-ors-burs" class="active">
                             <strong>Date <span class="red-text">*</span></strong>
                         </label>
                     </div>
@@ -228,7 +249,7 @@
                     <div class="md-form">
                         <input type="date" id="date-certified-1" name="date_certified_1"
                                class="form-control" value="{{ $dateCertified1 }}">
-                        <label for="date-certified-1" class="active mt-3">
+                        <label for="date-certified-1" class="active">
                             Date:
                         </label>
                     </div>
@@ -263,7 +284,7 @@
                     <div class="md-form">
                         <input type="date" id="date-certified-2" name="date_certified_2"
                                class="form-control" value="{{ $dateCertified2 }}">
-                        <label for="date-certified-2" class="active mt-3">
+                        <label for="date-certified-2" class="active">
                             Date:
                         </label>
                     </div>

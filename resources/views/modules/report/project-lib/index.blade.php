@@ -14,7 +14,7 @@
             <div class="card-body">
                 <h5 class="card-title white-text">
                     <strong>
-                    <i class="far fa-copy"></i> Reports: Project Line-Item Budget
+                    <i class="far fa-copy"></i> Reports: Project Line-Item Budget & Realignment
                     </strong>
                 </h5>
                 <hr class="white hidden-xs">
@@ -24,7 +24,7 @@
                     </li>
                     <li>
                         <a href="{{ route('report-project-lib') }}" class="waves-effect waves-light white-text">
-                            Reports: Project Line-Item Budget
+                            Reports: Project Line-Item Budget & Realignment
                         </a>
                     </li>
                 </ul>

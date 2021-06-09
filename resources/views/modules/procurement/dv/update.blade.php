@@ -6,6 +6,27 @@
         <div class="card-body py-1">
             <div class="row">
                 <div class="col-md-9 border border-bottom-0 border-dark">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="md-form">
+                                <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                                        name="funding_source">
+                                    <option value="" disabled selected>Choose a funding/charging</option>
+                                    
+                                    @if (count($projects) > 0)
+                                        @foreach ($projects as $fund)
+                                    <option value="{{ $fund->id }}" {{ $fund->id == $project ? 'selected' : '' }}>
+                                        {!! $fund->project_title !!}
+                                    </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <label class="mdb-main-label">
+                                    Funding/Charging Soruce <span class="red-text">*</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                     <div class="md-form row">
                         <div class="col-md-3"></div>
                         <div class="col-md-6 text-center">
@@ -27,7 +48,7 @@
                     <div class="md-form form-sm">
                         <input type="date" id="date-dv" name="date_dv"
                                class="form-control required" value="{{ $dvDate }}">
-                        <label for="date-dv" class="py-3 active">
+                        <label for="date-dv" class="active">
                             <strong>Date <span class="red-text">*</span></strong>
                         </label>
                     </div>
@@ -284,7 +305,7 @@
                     <div class="md-form my-0">
                         <input type="date" id="date-accounting" name="date_accounting"
                                class="form-control" value="{{ $dateAccounting }}">
-                        <label for="date-accounting mt-3" class="active mt-3">
+                        <label for="date-accounting mt-3" class="active">
                             Date:
                         </label>
                     </div>
@@ -310,7 +331,7 @@
                     <div class="md-form my-0">
                         <input type="date" id="date-agency-head" name="date_agency_head"
                                class="form-control" value="{{ $dateAgencyHead }}">
-                        <label for="date-agency-head" class="active mt-3">
+                        <label for="date-agency-head" class="active">
                             Date:
                         </label>
                     </div>

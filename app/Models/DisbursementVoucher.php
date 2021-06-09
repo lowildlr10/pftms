@@ -55,7 +55,8 @@ class DisbursementVoucher extends Model
         'other_documents',
         'module_class',
         'for_payment',
-        'disbursed_by'
+        'disbursed_by',
+        'funding_source',
     ];
 
     /**

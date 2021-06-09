@@ -54,7 +54,8 @@ class ObligationRequestStatus extends Model
         'date_certified_2',
         'date_received',
         'date_released',
-        'module_class'
+        'module_class',
+        'funding_source',
     ];
 
 

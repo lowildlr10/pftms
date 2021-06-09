@@ -20,6 +20,7 @@ use App\Models\PaperSize;
 use App\Models\Supplier;
 use App\Models\Signatory;
 use App\Models\ItemUnitIssue;
+use App\Models\FundingProject;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -248,6 +249,8 @@ class ObligationRequestStatusController extends Controller
                 $instanceORS = ObligationRequestStatus::withTrashed()
                                                       ->where('po_no', $poNo)
                                                       ->first();
+                $prData = PurchaseRequest::find($prID);
+                $project = $prData->funding_source;
 
                 if (!$instanceORS) {
                     $instanceORS = new ObligationRequestStatus;
@@ -259,6 +262,7 @@ class ObligationRequestStatusController extends Controller
                     $instanceORS->payee = $instancePO->awarded_to;
                     $instanceORS->amount = $instancePO->grand_total;
                     $instanceORS->module_class = 3;
+                    $instanceORS->funding_source = $project;
                     $instanceORS->save();
                 } else {
                     $instanceDocLog->logDocument($instanceORS->id, Auth::user()->id, NULL, '-');
@@ -317,6 +321,7 @@ class ObligationRequestStatusController extends Controller
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
+        $projects = FundingProject::orderBy('project_title')->get();
         $payees = $roleHasOrdinary ?
                 User::where('id', Auth::user()->id)
                     ->orderBy('firstname')
@@ -335,7 +340,7 @@ class ObligationRequestStatusController extends Controller
         }
 
         return view('modules.voucher.ors-burs.create', compact(
-            'signatories', 'payees'
+            'signatories', 'payees', 'projects'
         ));
     }
 
@@ -358,6 +363,7 @@ class ObligationRequestStatusController extends Controller
         $particulars = $request->particulars;
         $mfoPAP = $request->mfo_pap;
         $uacsObjectCode = $request->uacs_object_code;
+        $project = $request->funding_source;
         $amount = $request->amount;
         $sigCertified1 = !empty($request->sig_certified_1) ? $request->sig_certified_1: NULL;
         $sigCertified2 = !empty($request->sig_certified_2) ? $request->sig_certified_2: NULL;
@@ -384,6 +390,7 @@ class ObligationRequestStatusController extends Controller
             $instanceORS->sig_certified_2 = $sigCertified2;
             $instanceORS->date_certified_1 = $dateCertified1;
             $instanceORS->date_certified_2 = $dateCertified2;
+            $instanceORS->funding_source = $project;
             $instanceORS->amount = $amount;
             $instanceORS->module_class = 2;
             $instanceORS->save();
@@ -430,6 +437,8 @@ class ObligationRequestStatusController extends Controller
         $dateCertified1 = $orsData->date_certified_1;
         $dateCertified2 = $orsData->date_certified_2;
         $transactionType = $orsData->transaction_type;
+        $project = $orsData->funding_source;
+        $projects = FundingProject::orderBy('project_title')->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -455,7 +464,7 @@ class ObligationRequestStatusController extends Controller
             'uacsObjectCode', 'uacsObjectCode', 'amount',
             'sigCertified1', 'sigCertified2', 'dateCertified1',
             'dateCertified2', 'signatories', 'payees', 'isObligated',
-            'transactionType'
+            'transactionType', 'projects', 'project'
         ));
     }
 
@@ -478,6 +487,7 @@ class ObligationRequestStatusController extends Controller
         $particulars = $request->particulars;
         $mfoPAP = $request->mfo_pap;
         $uacsObjectCode = $request->uacs_object_code;
+        $project = $request->funding_source;
         $amount = $request->amount;
         $sigCertified1 = !empty($request->sig_certified_1) ? $request->sig_certified_1: NULL;
         $sigCertified2 = !empty($request->sig_certified_2) ? $request->sig_certified_2: NULL;
@@ -509,6 +519,7 @@ class ObligationRequestStatusController extends Controller
             $instanceORS->sig_certified_2 = $sigCertified2;
             $instanceORS->date_certified_1 = $dateCertified1;
             $instanceORS->date_certified_2 = $dateCertified2;
+            $instanceORS->funding_source = $project;
             $instanceORS->amount = $amount;
             $instanceORS->save();
 

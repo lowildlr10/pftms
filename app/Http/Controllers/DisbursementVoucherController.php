@@ -22,6 +22,7 @@ use App\Models\PaperSize;
 use App\Models\Supplier;
 use App\Models\Signatory;
 use App\Models\ItemUnitIssue;
+use App\Models\FundingProject;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -293,11 +294,13 @@ class DisbursementVoucherController extends Controller
         $address = $orsData->address;
         $sigCert1 = $orsData->sig_certified_1;
         $transactionType = $orsData->transaction_type;
+        $project = $orsData->funding_source;
         $amount = $orsData->amount;
 
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
+        $projects = FundingProject::orderBy('project_title')->get();
         $payees = $roleHasOrdinary ?
                 User::where('id', Auth::user()->id)
                     ->orderBy('firstname')
@@ -319,7 +322,8 @@ class DisbursementVoucherController extends Controller
         return view('modules.voucher.dv.create', compact(
             'signatories', 'payees', 'payee', 'empID',
             'serialNo', 'address', 'amount', 'orsList',
-            'orsID', 'transactionType', 'sigCert1'
+            'orsID', 'transactionType', 'sigCert1',
+            'project', 'projects'
         ));
     }
 
@@ -343,6 +347,7 @@ class DisbursementVoucherController extends Controller
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
+        $projects = FundingProject::orderBy('project_title')->get();
         $payees = $roleHasOrdinary ?
                 User::where('id', Auth::user()->id)
                     ->orderBy('firstname')
@@ -364,7 +369,8 @@ class DisbursementVoucherController extends Controller
         return view('modules.voucher.dv.create', compact(
             'signatories', 'payees', 'payee', 'empID',
             'serialNo', 'address', 'amount', 'orsList',
-            'orsID', 'transactionType', 'sigCert1'
+            'orsID', 'transactionType', 'sigCert1', 
+            'projects',
         ));
     }
 
@@ -387,6 +393,7 @@ class DisbursementVoucherController extends Controller
         $particulars = $request->particulars;
         $responsibilityCenter = $request->responsibility_center;
         $mfoPAP = $request->mfo_pap;
+        $project = $request->funding_source;
         $amount = $request->amount;
         $sigCertified = $request->sig_certified;
         $sigAccounting = $request->sig_accounting;
@@ -441,6 +448,7 @@ class DisbursementVoucherController extends Controller
             $instanceDV->sig_agency_head = $sigAgencyHead;
             $instanceDV->date_agency_head = $dateAgencyHead;
             $instanceDV->module_class = 2;
+            $instanceDV->funding_source = $project;
             $instanceDV->save();
 
             $documentType = 'Disbursement Voucher';
@@ -500,6 +508,8 @@ class DisbursementVoucherController extends Controller
         $serialNo = $dvData->procors['serial_no'];
         $payee = $dvData->payee;
         $address = !empty($dvData->address) ? $dvData->address : $dvData->procors['address'];
+        $project = $dvData->funding_source;
+        $projects = FundingProject::orderBy('project_title')->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -530,7 +540,8 @@ class DisbursementVoucherController extends Controller
             'jevNo', 'receiptPrintedName', 'dateJev', 'signature',
             'orNo', 'otherDocuments', 'signatories', 'signatories',
             'serialNo', 'address', 'dvDate', 'payees', 'particulars',
-            'payee', 'transactionType', 'orsList', 'orsID'
+            'payee', 'transactionType', 'orsList', 'orsID', 'projects',
+            'project',
         ));
     }
 
@@ -552,6 +563,7 @@ class DisbursementVoucherController extends Controller
         $particulars = $request->particulars;
         $responsibilityCenter = $request->responsibility_center;
         $mfoPAP = $request->mfo_pap;
+        $project = $request->funding_source;
         $amount = $request->amount;
         $sigCertified = $request->sig_certified;
         $sigAccounting = $request->sig_accounting;
@@ -609,6 +621,7 @@ class DisbursementVoucherController extends Controller
             $instanceDV->date_accounting = $dateAccounting;
             $instanceDV->sig_agency_head = $sigAgencyHead;
             $instanceDV->date_agency_head = $dateAgencyHead;
+            $instanceDV->funding_source = $project;
             $instanceDV->save();
 
             $documentType = 'Disbursement Voucher';

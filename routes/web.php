@@ -1133,6 +1133,15 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'is_allowed'
     ])->name('fund-project-lib-disapprove');
 
+    // Budget Ledger Module
+    Route::any('fund-utilization/ledger/budget', [
+        'uses' => 'LineItemBudgetController@index',
+        'module' => 'fund_lib',
+        'access' => 'is_allowed'
+    ])->name('fund-project-lib');
+
+    // Accounting Ledger Module
+
     /*===================== REPORTS ROUTES =====================*/
 
     // Budget Ledge Module

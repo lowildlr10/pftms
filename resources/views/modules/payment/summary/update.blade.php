@@ -82,7 +82,7 @@
                         <input type="date" id="sliiae-date" name="sliiae_date"
                                class="form-control form-control-sm required"
                                value="{{ $sliiaeDate }}">
-                        <label for="sliiae-date" class="active mt-3">
+                        <label for="sliiae-date" class="active">
                             <span class="red-text">* </span>
                             <b>Date</b>
                         </label>
