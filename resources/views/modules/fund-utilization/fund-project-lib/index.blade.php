@@ -39,7 +39,7 @@
                         <div>
                             @if ($isAllowedCreate)
                             <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
-                                    onclick="$(this).showCreate('{{ route('fund-project-lib-show-create') }}');">
+                                    onclick="$(this).showCreate(`{{ route('fund-project-lib-show-create') }}`);">
                                 <i class="fas fa-pencil-alt"></i> Create
                             </button>
                             @endif
@@ -223,8 +223,8 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrintList('{{ route('fund-project-lib-show-print',
-                                                                        ['id' => $fund->id]) }}');">
+                                        onclick="$(this).showPrintList(`{{ route('fund-project-lib-show-print',
+                                                                        ['id' => $fund->id]) }}`);">
                                     <i class="fas fa-print blue-text"></i> Print LIB
                                 </button>
 
@@ -232,8 +232,8 @@
                                     @if (!$fund->date_approved)
                                     <button type="button" class="btn btn-outline-mdb-color
                                             btn-sm px-2 waves-effect waves-light"
-                                            onclick="$(this).showEdit('{{ route('fund-project-lib-show-edit',
-                                                    ['id' => $fund->id]) }}');">
+                                            onclick="$(this).showEdit(`{{ route('fund-project-lib-show-edit',
+                                                    ['id' => $fund->id]) }}`);">
                                         <i class="fas fa-edit orange-text"></i> Edit
                                     </button>
                                     @else
@@ -253,8 +253,8 @@
                                     @if (!$fund->date_approved)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showDelete('{{ route('fund-project-lib-delete',
-                                                                        ['id' => $fund->id]) }}',
+                                        onclick="$(this).showDelete(`{{ route('fund-project-lib-delete',
+                                                                        ['id' => $fund->id]) }}`,
                                                                     `{{ $fund->project->project_title.' LIB' }}`);">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
@@ -303,9 +303,9 @@
                             <button type="button" class="btn btn-link btn-md ml-1 my-0 p-1
                                     waves-effect waves-light"
                                     onclick="$(this).showEditRealignment(
-                                        '{{ route('fund-project-lib-show-edit-realignment',
+                                        `{{ route('fund-project-lib-show-edit-realignment',
                                         ['id' => $fund->id,
-                                        'type' => 'update']) }}');">
+                                        'type' => 'update']) }}`);">
                                 <b>
                                     [ <i class="far fa-edit deep-orange-text"></i>
                                     Edit (R{{ $fund->count_realignments }}) ]
@@ -341,9 +341,9 @@
                         <button type="button" class="btn btn-sm btn-dark-green btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showCreateRealignment(
-                                    '{{ route('fund-project-lib-show-create-realignment',
+                                    `{{ route('fund-project-lib-show-create-realignment',
                                     ['id' => $fund->id,
-                                     'type' => 'create']) }}');">
+                                     'type' => 'create']) }}`);">
                                 <i class="fas fa-pencil-alt"></i> Request/Create Realignment
                         </button>
                                 @endif
@@ -351,9 +351,9 @@
                         <button type="button" class="btn btn-sm btn-dark-green btn-rounded
                                 btn-block waves-effect mb-2"
                                 onclick="$(this).showCreateRealignment(
-                                    '{{ route('fund-project-lib-show-create-realignment',
+                                    `{{ route('fund-project-lib-show-create-realignment',
                                     ['id' => $fund->id,
-                                     'type' => 'create']) }}');">
+                                     'type' => 'create']) }}`);">
                                 <i class="fas fa-pencil-alt"></i> Request/Create Realignment
                         </button>
                             @endif
@@ -423,10 +423,10 @@
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-md btn-block btn-rounded"
                                 onclick="$(this).showApprove(
-                                    '{{ route('fund-project-lib-approve', [
+                                    `{{ route('fund-project-lib-approve', [
                                             'id' => $fund->id,
                                             'isRealignment' => 0
-                                        ]) }}',
+                                        ]) }}`,
                                     '{{ $fund->id }}'
                                 );">
                             <i class="fas fa-thumbs-up"></i> Approve LIB
@@ -439,10 +439,10 @@
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-black waves-effect btn-md btn-block btn-rounded"
                                 onclick="$(this).showDisapprove(
-                                    '{{ route('fund-project-lib-disapprove', [
+                                    `{{ route('fund-project-lib-disapprove', [
                                             'id' => $fund->id,
                                             'isRealignment' => 0
-                                        ]) }}',
+                                        ]) }}`,
                                     '{{ $fund->id }}'
                                 );">
                             <i class="fas fa-thumbs-down"></i> Disapprove LIB
@@ -461,10 +461,10 @@
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-green waves-effect btn-md btn-block btn-rounded"
                                 onclick="$(this).showApprove(
-                                    '{{ route('fund-project-lib-approve', [
+                                    `{{ route('fund-project-lib-approve', [
                                             'id' => $fund->current_realigned_budget->id,
                                             'isRealignment' => 1
-                                        ]) }}',
+                                        ]) }}`,
                                     '{{ $fund->id }}'
                                 );">
                             <i class="fas fa-thumbs-up"></i> Approve Realignment
@@ -477,10 +477,10 @@
                     <li class="list-group-item justify-content-between">
                         <button type="button" class="btn btn-outline-black waves-effect btn-md btn-block btn-rounded"
                                 onclick="$(this).showDisapprove(
-                                    '{{ route('fund-project-lib-disapprove', [
+                                    `{{ route('fund-project-lib-disapprove', [
                                             'id' => $fund->current_realigned_budget->id,
                                             'isRealignment' => 1
-                                        ]) }}',
+                                        ]) }}`,
                                     '{{ $fund->id }}'
                                 );">
                             <i class="fas fa-thumbs-down"></i> Disapprove Realignment

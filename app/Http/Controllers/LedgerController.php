@@ -25,7 +25,7 @@ class LedgerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function indexBudget(Request $request) {
+    public function indexObligation(Request $request) {
         $keyword = trim($request->keyword);
 
         // Get module access
@@ -39,7 +39,7 @@ class LedgerController extends Controller
         $paperSizes = PaperSize::orderBy('paper_type')->get();
         $fundProject = $this->getIndexData($request, 'budget');
 
-        return view('modules.fund-utilization.budget-ledger.index', [
+        return view('modules.report.obligation-ledger.index', [
             'list' => $fundProject,
             'keyword' => $keyword,
             'paperSizes' => $paperSizes,
@@ -50,7 +50,7 @@ class LedgerController extends Controller
         ]);
     }
 
-    public function indexAccounting(Request $request) {
+    public function indexDisbursement(Request $request) {
         $keyword = trim($request->keyword);
 
         // Get module access
@@ -63,8 +63,8 @@ class LedgerController extends Controller
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
         $fundProject = $this->getIndexData($request, 'accounting');
-        
-        return view('modules.fund-utilization.accounting-ledger.index', [
+
+        return view('modules.report.disbursement-ledger.index', [
             'list' => $fundProject,
             'keyword' => $keyword,
             'paperSizes' => $paperSizes,
@@ -84,7 +84,7 @@ class LedgerController extends Controller
         $roleHasAdministrator = Auth::user()->hasAdministratorRole();
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
 
-        $fundProject = new FundingProject;
+        $fundProject = FundingProject::has('budget');
 
         if (!empty($keyword)) {
             $fundProject = $fundProject->where(function($qry) use ($keyword) {
@@ -109,17 +109,17 @@ class LedgerController extends Controller
             $fundProject = $fundProject->where(function($qry) use ($type) {
                 $qry->whereHas('ledger', function($query) use ($type) {
                     $query->where('ledger_for', 'like', "%$keyword%");
-                })
-            }
+                });
+            });
         }
 
         if ($type == 'budget') {
-            
+
         } else {
-            
+
         }
 
-        $fundProject = $fundProject->sortable(['created_at' => 'desc'])
+        $fundProject = $fundProject->sortable(['project_title' => 'desc'])
                                    ->paginate(15);
 
         return $fundProject;
