@@ -187,7 +187,8 @@ class PDF extends TCPDF {
 
         $tidy = tidy_parse_string($html);
         $html = $tidy->html();
-        $html = trim(str_replace("\r\n", '', $html));
+        $html = trim(str_replace("\r", '', $html));
+        $html = trim(str_replace("\n", '', $html));
 
         $this->writeHTML($html, false, false, false, false);
     }
