@@ -1133,24 +1133,47 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'is_allowed'
     ])->name('fund-project-lib-disapprove');
 
-    // Budget Ledger Module
-    Route::any('fund-utilization/ledger/budget', [
-        'uses' => 'LedgerController@indexBudget',
-        'module' => 'fund_lib',
-        'access' => 'is_allowed'
-    ])->name('fund-budget-ledger');
-
-    // Accounting Ledger Module
-    Route::any('fund-utilization/ledger/accounting', [
-        'uses' => 'LedgerController@indexAccounting',
-        'module' => 'fund_lib',
-        'access' => 'is_allowed'
-    ])->name('fund-accounting-ledger');
-
     /*===================== REPORTS ROUTES =====================*/
 
-    // Budget Ledge Module
-    // Accounting Ledge Module
+    // Obligation Ledger Module
+    Route::any('report-utilization/ledger/obligation', [
+        'uses' => 'LedgerController@indexObligation',
+        'module' => 'fund_lib',
+        'access' => 'is_allowed'
+    ])->name('report-obligation-ledger');
+    Route::get('report-utilization/ledger/obligation/show-create', [
+        'uses' => 'LedgerController@indexObligation',
+        'module' => 'fund_lib',
+        'access' => 'is_allowed'
+    ])->name('report-obligation-ledger-show-create');
+    Route::post('report-utilization/ledger/obligation/store', [
+        'uses' => 'LedgerController@indexObligation',
+        'module' => 'fund_lib',
+        'access' => 'is_allowed'
+    ])->name('report-obligation-ledger-store');
+    Route::get('report-utilization/ledger/obligation/show-edit/{id}', [
+        'uses' => 'LedgerController@indexObligation',
+        'module' => 'fund_lib',
+        'access' => 'is_allowed'
+    ])->name('report-obligation-ledger-show-edit');
+    Route::post('report-utilization/ledger/obligation/update/{id}', [
+        'uses' => 'LedgerController@indexObligation',
+        'module' => 'fund_lib',
+        'access' => 'is_allowed'
+    ])->name('report-obligation-ledger-update');
+    Route::post('report-utilization/ledger/obligation/delete/{id}', [
+        'uses' => 'LedgerController@indexObligation',
+        'module' => 'fund_lib',
+        'access' => 'is_allowed'
+    ])->name('report-obligation-ledger-delete');
+
+    // Disbursement Ledger Module
+    Route::any('report-utilization/ledger/disbursement', [
+        'uses' => 'LedgerController@indexDisbursement',
+        'module' => 'fund_lib',
+        'access' => 'is_allowed'
+    ])->name('report-disbursement-ledger');
+
     // Line-Item Budget Module
     Route::any('reports/project-lib', [
         'uses' => 'LineItemBudgetController@indexReport',

@@ -161,16 +161,6 @@
                                     Project Line-Item Budgets
                                 </a>
                             </li>
-                            <li>
-                                <a href="#" class="waves-effect">
-                                    Budget Ledger
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" class="waves-effect">
-                                    Accounting Ledger
-                                </a>
-                            </li>
                         </ul>
                     </div>
                 </li>
@@ -235,10 +225,10 @@
                                 <a href="#" class="waves-effect">PCPPE</a>
                             </li>
                             <li>
-                                <a href="#" class="waves-effect">Budget Ledger</a>
+                                <a href="{{ route('report-obligation-ledger') }}" class="waves-effect">Obligation Ledgers</a>
                             </li>
                             <li>
-                                <a href="#" class="waves-effect">Accounting Ledger</a>
+                                <a href="{{ route('report-disbursement-ledger') }}" class="waves-effect">Disbursement Ledgers</a>
                             </li>
                             <li>
                                 <a href="{{ route('report-project-lib') }}" class="waves-effect">Line-Item Budget & Realignment</a>

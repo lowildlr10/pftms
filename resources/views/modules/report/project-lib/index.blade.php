@@ -14,7 +14,7 @@
             <div class="card-body">
                 <h5 class="card-title white-text">
                     <strong>
-                    <i class="far fa-copy"></i> Reports: Project Line-Item Budget & Realignment
+                        <i class="far fa-copy"></i> Reports: Project Line-Item Budget & Realignment
                     </strong>
                 </h5>
                 <hr class="white hidden-xs">
@@ -242,7 +242,7 @@
 
                                     @if ($realignment->date_approved)
                             <br>
-                            <button type="button" class="btn btn-outline-mdb-color btn-sm btn-block 
+                            <button type="button" class="btn btn-outline-mdb-color btn-sm btn-block
                                     px-2 my-2 waves-effect waves-light"
                                     onclick="$(this).showPrint('{{ $realignment->id }}', 'fund_lib_realignment');">
                                 <i class="fas fa-print blue-text"></i> Print LIB Realignment {!! $ctrRealign + 1 !!}

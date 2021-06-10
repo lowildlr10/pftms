@@ -21,7 +21,7 @@
                              height="85" alt="dost logo"><br>
                         <p>Procurement & Financial Transaction Management System</p>
                     </h2>
-                    <p align="center">v2.0.0</p>
+                    <p align="center">v3.0.0</p>
                     <hr class="hr-light">
                     <p align="center">
                         <strong>Developed by DOST - CAR MIS Unit</strong><br>
