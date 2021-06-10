@@ -866,7 +866,7 @@ class PrintController extends Controller
                 'aligns' => $aligns,
                 'widths' => $widths,
                 'font-styles' => $fontStyles,
-                'type' => 'row-data',
+                'type' => 'row-title',
                 'data' => [$tableHeader]
             ]
         ];
@@ -1302,7 +1302,7 @@ class PrintController extends Controller
                 'aligns' => $aligns,
                 'widths' => $widths,
                 'font-styles' => $fontStyles,
-                'type' => 'row-data',
+                'type' => 'row-title',
                 'data' => [$tableHeader]
             ]
         ];
@@ -3201,6 +3201,11 @@ class PrintController extends Controller
         $canvassedBy = Auth::user()->getEmployee($instanceRFQ->canvassed_by);
         $groupNumbers = $this->getItemGroup($prID);
 
+        $headers = [
+            'ITEM NO.', 'QTY', 'UNIT', 'ARTICLES/PARTICULARS',
+            'Approved Budget for the Contract (unit)', 'UNIT PRICE'
+        ];
+
         foreach ($groupNumbers as $groupNo) {
             $tableData = [];
             $prItems = DB::table('purchase_request_items as item')
@@ -3231,9 +3236,8 @@ class PrintController extends Controller
                                  $multiplier * 7.62, $multiplier * 49.3,
                                  $multiplier * 13.2, $multiplier * 8.9],
                     'font-styles' => ['', '', '', '', '', ''],
-                    'type' => 'row-data',
-                    'data' => [['ITEM NO.', 'QTY', 'UNIT', 'ARTICLES/PARTICULARS',
-                                'Approved Budget for the Contract (unit)', 'UNIT PRICE']]
+                    'type' => 'row-title',
+                    'data' => [$headers]
                 ], [
                     'aligns' => ['C','C','C','L','R','R'],
                     'widths' => [$multiplier * 7.14, $multiplier * 6.19,
@@ -3277,6 +3281,11 @@ class PrintController extends Controller
         $approvedBy = $instanceSignatory->getSignatory($instancePR->approved_by);
         $recommendedBy = $instanceSignatory->getSignatory($instancePR->recommended_by);
 
+        $headers = [
+            'Stock/Property No.', 'Unit', 'Item Description',
+            'Quantity', 'Unit Cost', 'Total Cost'
+        ];
+
         foreach ($prItems as $item) {
             if (strpos($item->item_description, "\n") !== FALSE) {
                 $searchStr = ["\r\n", "\n", "\r"];
@@ -3292,8 +3301,15 @@ class PrintController extends Controller
             $total += $item->est_total_cost;
         }
 
+        $footers = [
+            ['', '', '', '', '', ''],
+            ['', '', '', '', 'Total', number_format($total, 2)]
+        ];
+
         $multiplier = 100 / 91.52;
+        //$multiplier = 1;
         $total = number_format($total, 2);
+
         $data = [
             [
                 'aligns' => ['C', 'C', 'C', 'C', 'C', 'C'],
@@ -3302,25 +3318,23 @@ class PrintController extends Controller
                              $multiplier * 15.65, $multiplier * 15.65],
                 'font-styles' => ['B', 'B', 'B', 'B', 'B', 'B'],
                 'type' => 'row-title',
-                'data' => [['Stock/Property No.', 'Unit', 'Item Description',
-                            'Quantity', 'Unit Cost', 'Total Cost']]],
-            [
+                'data' => [$headers],
+            ], [
                 'aligns' => ['C', 'C', 'L', 'C', 'R', 'R'],
                 'widths' => [$multiplier * 13.8, $multiplier * 8.85,
                              $multiplier * 28.05, $multiplier * 9.52,
                              $multiplier * 15.65, $multiplier * 15.65],
                 'font-styles' => ['', '', '', '', '', ''],
                 'type' => 'row-data',
-                'data' => $tableData],
-            [
+                'data' => $tableData
+            ], [
                 'aligns' => ['C', 'C', 'C', 'C', 'L', 'R'],
                 'widths' => [$multiplier * 13.8, $multiplier * 8.85,
                              $multiplier * 28.05, $multiplier * 9.52,
                              $multiplier * 15.65, $multiplier * 15.65],
                 'font-styles' => ['', '', '', '', 'B', 'B'],
                 'type' => 'other',
-                'data' => [['', '', '', '', '', ''],
-                           ['', '', '', '', 'Total', $total]]
+                'data' => $footers
             ]
         ];
 

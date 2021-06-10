@@ -104,11 +104,12 @@ class DocPurchaseOrder extends PDF {
         $this->MultiCell('43', '7', 'Mode of Procurement:', 0, 'L');
         $this->SetXY($_x + $pageWidth * 0.752, $_yTemp);
         $this->SetFont('Times', 'B', 11 + ($fontScale * 11));
-        $this->MultiCell(0, '7', $data->po->mode_name, 0, 'L');
+        $this->MultiCell(0, '7', $data->po->mode_name, 'R', 'L');
+        $_yTemp = $this->GetY();
 
         $this->Line($_x1, $_y1, $x2_1, $_yTemp);
-        $this->Line($x1_2 - 0.06, $_y2 - 5, $x2_2 - 0.06, $_yTemp + 7);
-        $this->Line($x1_3 - 0.06, $_y2 - 5, $x2_3 - 0.06, $_yTemp + 7);
+        $this->Line($x1_2 - 0.06, $_y2 - 5, $x2_2 - 0.06, $_yTemp);
+        $this->Line($x1_3 - 0.06, $_y2 - 5, $x2_3 - 0.06, $_yTemp);
 
         $this->SetFont('Times', '', 11 + ($fontScale * 11));
         $this->Cell(0, '7', "Gentlemen:", "RLT");

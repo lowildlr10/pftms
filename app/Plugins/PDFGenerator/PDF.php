@@ -179,10 +179,15 @@ class PDF extends TCPDF {
 
         $html .= '</table>
         <style>
+            body {margin: 0 !important}
             table {border-collapse:collapse; padding: 2px;}
-            th,td {border: 1px solid #000;}
+            th,td {border: 1px solid #000; }
             tr>th {font-weight: bold; text-align: center; vertical-align: middle;}
         </style>';
+
+        $tidy = tidy_parse_string($html);
+        $html = $tidy->html();
+        $html = trim(str_replace("\r\n", '', $html));
 
         $this->writeHTML($html, false, false, false, false);
     }

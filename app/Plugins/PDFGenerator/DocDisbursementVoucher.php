@@ -24,7 +24,7 @@ class DocDisbursementVoucher extends PDF {
 
         //Set auto page breaks
         //$this->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-        $this->SetAutoPageBreak(TRUE, 10);
+        $this->SetAutoPageBreak(TRUE, 15);
 
         //Set image scale factor
         $this->setImageScale(PDF_IMAGE_SCALE_RATIO);
@@ -49,7 +49,7 @@ class DocDisbursementVoucher extends PDF {
         $xCoor = $this->GetX();
         $yCoor = $this->GetY();
 
-        $this->Cell($pageWidth * 0.74762, 1, '', "TL", 0, 'C');
+        $this->Cell($pageWidth * 0.71, 1, '', "TL", 0, 'C');
         $this->Cell(0, 1, '', 'TR');
         $this->Ln();
 
@@ -65,33 +65,33 @@ class DocDisbursementVoucher extends PDF {
         $img = file_get_contents(url('images/logo/dostlogo.png'), false,
                                 stream_context_create($arrContextOptions));
 
-        $this->Image('@' . $img, $xCoor + 16, $yCoor, 16, 0, 'PNG');
+        $this->Image('@' . $img, $xCoor + 14, $yCoor, 14, 0, 'PNG');
         $this->SetFont('Times', 'B', 10);
-        $this->Cell($pageWidth * 0.74762, 5, 'Republic of the Philippines', 'L', '', 'C');
+        $this->Cell($pageWidth * 0.71, 5, 'Republic of the Philippines', 'L', '', 'C');
         $this->Cell($pageWidth * 0, 5, '', 'R');
         $this->Ln();
 
-        $this->Cell($pageWidth * 0.74762, 5, 'DEPARTMENT OF SCIENCE AND TECHNOLOGY', 'L', '', 'C');
+        $this->Cell($pageWidth * 0.71, 5, 'DEPARTMENT OF SCIENCE AND TECHNOLOGY', 'L', '', 'C');
         $this->Cell($pageWidth * 0, 5, '', 'R');
         $this->Ln();
 
-        $this->Cell($pageWidth * 0.74762, 3, 'Cordillera Administrative Region', 'L', '', 'C');
+        $this->Cell($pageWidth * 0.71, 3, 'Cordillera Administrative Region', 'L', '', 'C');
         $this->Cell($pageWidth * 0, 3, '', 'R');
         $this->Ln();
 
-        $this->Cell($pageWidth * 0.74762, 4, '', 'BL', '', 'C');
+        $this->Cell($pageWidth * 0.71, 4, '', 'BL', '', 'C');
         $this->Cell($pageWidth * 0, 4, '', 'BR');
         $this->Ln();
 
-        $this->Cell($pageWidth * 0.74762, 5,'', 'L', '', 'C');
+        $this->Cell($pageWidth * 0.71, 5,'', 'L', '', 'C');
         $this->Cell($pageWidth * 0, 5, "Fund Cluster : 01", 'LR');
         $this->Ln();
 
-        $this->Cell($pageWidth * 0.74762, 5, "DISBURSEMENT VOUCHER", 'L', '', 'C');
+        $this->Cell($pageWidth * 0.71, 5, "DISBURSEMENT VOUCHER", 'L', '', 'C');
         $this->Cell($pageWidth * 0, 5, "Date : " . $dvDate, 'LR');
         $this->Ln();
 
-        $this->Cell($pageWidth * 0.74762, 5, '', 'BL', '', 'C');
+        $this->Cell($pageWidth * 0.71, 5, '', 'BL', '', 'C');
         $this->Cell($pageWidth * 0, 5, "DV No. : " . $data->dv->dv_no, 'BLR');
         $this->Ln();
 
@@ -301,7 +301,7 @@ class DocDisbursementVoucher extends PDF {
         $this->Cell($pageWidth * 0.3619, 5, $data->dv->date_accounting, 'BLR', '', 'C');
         $this->Cell($pageWidth * 0.10476, 5, "Date", 'BLR', '', 'C');
         $this->Cell(0, 5, '', 'BLR', $data->dv->date_agency_head, 'C');
-        $this->Ln(0);
+        $this->Ln();
 
         //Section E
         $this->SetFont('Times', 'B', 10 + ($fontScale * 10));

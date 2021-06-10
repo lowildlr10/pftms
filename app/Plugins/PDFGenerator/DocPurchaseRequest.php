@@ -58,14 +58,15 @@ class DocPurchaseRequest extends PDF {
         $this->Cell(0, '6', "Date: " . $data->pr->date_pr, "TLR", "", "L");
         $this->Ln();
 
-        $this->Cell($pageWidth * 0.224, '7', $data->pr->office, "BLR", "", "C");
-        $this->Cell($pageWidth * 0.3712, '7', "Responsibility Center Code : 19 001 03000 14", "B", "", "L");
-        $this->Cell(0, '7', "", "BLR", "", "L");
+        $this->Cell($pageWidth * 0.224, 7, $data->pr->office, "BLR", "", "C");
+        $this->Cell($pageWidth * 0.3712, 7, "Responsibility Center Code : 19 001 03000 14", "B", "", "L");
+        $this->Cell(0, 7, '', 'BLR', 0, 'L');
         $this->Ln();
 
         //Table data
         $this->SetFont('Times', '', 10 + ($fontScale * 10));
         $this->htmlTable($data->table_data);
+        $this->Ln();
 
         //Table footer
         $this->MultiCell(0, 5, 'Purpose: ' . $data->pr->purpose, 'BLR', 'L');
@@ -73,7 +74,6 @@ class DocPurchaseRequest extends PDF {
         if ($data->pr->funding['source_name']) {
             $this->MultiCell(0, 5, 'Charged to: ' . $data->pr->funding['source_name'], 'BLR', 'L');
         }
-
 
         $this->Cell($pageWidth * 0.138, 5, "", "TLR", "", "L");
         $this->Cell($pageWidth * 0.362, 5, "Requested by: ", "TLR", "", "L");
