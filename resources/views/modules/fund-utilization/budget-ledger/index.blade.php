@@ -91,7 +91,7 @@
                                         </th>
                                         <th class="th-md" width="15%">
                                             <b>
-                                                @sortablelink('approved_budget', 'Current Budget', [], ['class' => 'white-text'])
+                                                @sortablelink('approved_budget', 'Approved Budget', [], ['class' => 'white-text'])
                                             </b>
                                         </th>
                                         <th class="th-md" width="3%"></th>

@@ -162,12 +162,12 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('fund-project-lib') }}" class="waves-effect">
+                                <a href="{{ route('fund-budget-ledger') }}" class="waves-effect">
                                     Budget Ledger
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('fund-project-lib') }}" class="waves-effect">
+                                <a href="{{ route('fund-accounting-ledger') }}" class="waves-effect">
                                     Accounting Ledger
                                 </a>
                             </li>

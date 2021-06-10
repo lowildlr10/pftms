@@ -1135,12 +1135,17 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
 
     // Budget Ledger Module
     Route::any('fund-utilization/ledger/budget', [
-        'uses' => 'LineItemBudgetController@index',
+        'uses' => 'LedgerController@indexBudget',
         'module' => 'fund_lib',
         'access' => 'is_allowed'
-    ])->name('fund-project-lib');
+    ])->name('fund-budget-ledger');
 
     // Accounting Ledger Module
+    Route::any('fund-utilization/ledger/accounting', [
+        'uses' => 'LedgerController@indexAccounting',
+        'module' => 'fund_lib',
+        'access' => 'is_allowed'
+    ])->name('fund-accounting-ledger');
 
     /*===================== REPORTS ROUTES =====================*/
 

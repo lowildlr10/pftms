@@ -4,6 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use App\Models\FundingProject;
+use App\Models\FundingBudget;
+use App\Models\FundingAllotment;
+use App\Models\FundingLedger;
+use App\Models\FundingLedgerItem;
+use App\Models\FundingBudgetRealignment;
+use App\Models\FundingAllotmentRealignment;
+use App\Models\PaperSize;
+use App\Models\EmpAccount as User;
+
+use Carbon\Carbon;
+use Auth;
+use DB;
+
 class LedgerController extends Controller
 {
     /**
@@ -11,9 +25,104 @@ class LedgerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        //
+    public function indexBudget(Request $request) {
+        $keyword = trim($request->keyword);
+
+        // Get module access
+        $module = 'fund_lib';
+        $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
+        $isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
+
+        // Main data
+        $paperSizes = PaperSize::orderBy('paper_type')->get();
+        $fundProject = $this->getIndexData($request, 'budget');
+
+        return view('modules.fund-utilization.budget-ledger.index', [
+            'list' => $fundProject,
+            'keyword' => $keyword,
+            'paperSizes' => $paperSizes,
+            'isAllowedCreate' => $isAllowedCreate,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedDelete' => $isAllowedDelete,
+            'isAllowedDestroy' => $isAllowedDestroy,
+        ]);
+    }
+
+    public function indexAccounting(Request $request) {
+        $keyword = trim($request->keyword);
+
+        // Get module access
+        $module = 'fund_lib';
+        $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
+        $isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
+
+        // Main data
+        $paperSizes = PaperSize::orderBy('paper_type')->get();
+        $fundProject = $this->getIndexData($request, 'accounting');
+        
+        return view('modules.fund-utilization.accounting-ledger.index', [
+            'list' => $fundProject,
+            'keyword' => $keyword,
+            'paperSizes' => $paperSizes,
+            'isAllowedCreate' => $isAllowedCreate,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedDelete' => $isAllowedDelete,
+            'isAllowedDestroy' => $isAllowedDestroy,
+        ]);
+    }
+
+    private function getIndexData($request, $type) {
+        $keyword = trim($request->keyword);
+        $userID = Auth::user()->id;
+
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+
+        $fundProject = new FundingProject;
+
+        if (!empty($keyword)) {
+            $fundProject = $fundProject->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('project_title', 'like', "%$keyword%")
+                    ->orWhere('project_leader', 'like', "%$keyword%")
+                    ->orWhere('date_from', 'like', "%$keyword%")
+                    ->orWhere('date_to', 'like', "%$keyword%")
+                    ->orWhere('project_cost', 'like', "%$keyword%")
+                    ->orWhereHas('allotments', function($query) use ($keyword) {
+                        $query->where('budget_id', 'like', "%$keyword%")
+                              ->orWhere('allotment_name', "%$keyword%")
+                              ->orWhere('allotment_cost', "%$keyword%");
+                    })->orWhereHas('site', function($query) use ($keyword) {
+                        $query->where('id', 'like', "%$keyword%")
+                              ->orWhere('municipality_name', 'like', "%$keyword%");
+                    });
+            });
+        }
+
+        if ($type == 'budget' && $type == 'accounting') {
+            $fundProject = $fundProject->where(function($qry) use ($type) {
+                $qry->whereHas('ledger', function($query) use ($type) {
+                    $query->where('ledger_for', 'like', "%$keyword%");
+                })
+            }
+        }
+
+        if ($type == 'budget') {
+            
+        } else {
+            
+        }
+
+        $fundProject = $fundProject->sortable(['created_at' => 'desc'])
+                                   ->paginate(15);
+
+        return $fundProject;
     }
 
     /**
@@ -21,8 +130,7 @@ class LedgerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
+    public function create() {
         //
     }
 
@@ -32,8 +140,7 @@ class LedgerController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
+    public function store(Request $request) {
         //
     }
 
@@ -43,8 +150,7 @@ class LedgerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
+    public function show($id) {
         //
     }
 
@@ -54,8 +160,7 @@ class LedgerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
-    {
+    public function edit($id) {
         //
     }
 
@@ -66,8 +171,7 @@ class LedgerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, $id) {
         //
     }
 
@@ -77,8 +181,7 @@ class LedgerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
+    public function destroy($id) {
         //
     }
 }

@@ -64,7 +64,31 @@ class FundingProject extends Model
         'project_title',
     ];
 
+    public function ledger() {
+        return $this->hasOne('App\Models\FundingLedger', 'project_id', 'id');
+    }
+
     public function budget() {
         return $this->hasOne('App\Models\FundingBudget', 'project_id', 'id');
+    }
+
+    public function budgetrealigns() {
+        return $this->hasMany('App\FundingAllotmentRealignment', 'project_id', 'id');
+    }
+
+    public function allotments() {
+        return $this->hasMany('App\FundingAllotment', 'project_id', 'id');
+    }
+
+    public function allotrealigns() {
+        return $this->hasMany('App\FundingAllotmentRealignment', 'project_id', 'id');
+    }
+
+    public function site() {
+        return $this->hasOne('App\Models\Municipality', 'project_site', 'id');
+    }
+
+    public function implementing() {
+        return $this->hasOne('App\Models\AgencyLGU', 'implementing_agency', 'id');
     }
 }
