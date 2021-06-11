@@ -783,6 +783,17 @@ class PurchaseRequestController extends Controller
             $instancePR->recommended_by = $recommendedBy;
             $instancePR->office = $office;
 
+            DB::table('obligation_request_status')
+              ->where('pr_id', $id)
+              ->update([
+                  'funding_source' => $projectID
+              ]);
+            DB::table('disbursement_vouchers')
+              ->where('pr_id', $id)
+              ->update([
+                  'funding_source' => $projectID
+              ]);
+
             $prNo = $instancePR->pr_no;
 
             // Update pr items

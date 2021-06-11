@@ -1136,43 +1136,68 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     /*===================== REPORTS ROUTES =====================*/
 
     // Obligation Ledger Module
-    Route::any('report-utilization/ledger/obligation', [
+    Route::any('report/ledger/obligation', [
         'uses' => 'LedgerController@indexObligation',
-        'module' => 'fund_lib',
+        'module' => 'report_orsledger',
         'access' => 'is_allowed'
     ])->name('report-obligation-ledger');
-    Route::get('report-utilization/ledger/obligation/show-create', [
-        'uses' => 'LedgerController@indexObligation',
-        'module' => 'fund_lib',
-        'access' => 'is_allowed'
+    Route::get('report/ledger/obligation/show-create/{type}/{project_id}', [
+        'uses' => 'LedgerController@showCreate',
+        'module' => 'report_orsledger',
+        'access' => 'create'
     ])->name('report-obligation-ledger-show-create');
-    Route::post('report-utilization/ledger/obligation/store', [
-        'uses' => 'LedgerController@indexObligation',
-        'module' => 'fund_lib',
-        'access' => 'is_allowed'
+    Route::post('report/ledger/obligation/store', [
+        'uses' => 'LedgerController@store',
+        'module' => 'report_orsledger',
+        'access' => 'create'
     ])->name('report-obligation-ledger-store');
-    Route::get('report-utilization/ledger/obligation/show-edit/{id}', [
-        'uses' => 'LedgerController@indexObligation',
-        'module' => 'fund_lib',
-        'access' => 'is_allowed'
+    Route::get('report/ledger/obligation/show-edit/{id}', [
+        'uses' => 'LedgerController@showEdit',
+        'module' => 'report_orsledger',
+        'access' => 'update'
     ])->name('report-obligation-ledger-show-edit');
-    Route::post('report-utilization/ledger/obligation/update/{id}', [
+    Route::post('report/ledger/obligation/update/{id}', [
         'uses' => 'LedgerController@indexObligation',
-        'module' => 'fund_lib',
-        'access' => 'is_allowed'
+        'module' => 'report_orsledger',
+        'access' => 'update'
     ])->name('report-obligation-ledger-update');
-    Route::post('report-utilization/ledger/obligation/delete/{id}', [
+    Route::post('report/ledger/obligation/delete/{id}', [
         'uses' => 'LedgerController@indexObligation',
-        'module' => 'fund_lib',
-        'access' => 'is_allowed'
+        'module' => 'report_orsledger',
+        'access' => 'delete'
     ])->name('report-obligation-ledger-delete');
 
     // Disbursement Ledger Module
-    Route::any('report-utilization/ledger/disbursement', [
+    Route::any('report/ledger/disbursement', [
         'uses' => 'LedgerController@indexDisbursement',
-        'module' => 'fund_lib',
+        'module' => 'report_dvledger',
         'access' => 'is_allowed'
     ])->name('report-disbursement-ledger');
+    Route::get('report/ledger/disbursement/show-create/{type}/{project_id}', [
+        'uses' => 'LedgerController@showCreate',
+        'module' => 'report_orsledger',
+        'access' => 'create'
+    ])->name('report-disbursement-ledger-show-create');
+    Route::post('report/ledger/disbursement/store/{type}', [
+        'uses' => 'LedgerController@store',
+        'module' => 'report_orsledger',
+        'access' => 'create'
+    ])->name('report-disbursement-ledger-store');
+    Route::get('report/ledger/disbursement/show-edit/{id}', [
+        'uses' => 'LedgerController@showEdit',
+        'module' => 'report_orsledger',
+        'access' => 'update'
+    ])->name('report-disbursement-ledger-show-edit');
+    Route::post('report/ledger/disbursement/update/{id}', [
+        'uses' => 'LedgerController@update',
+        'module' => 'report_orsledger',
+        'access' => 'update'
+    ])->name('report-disbursement-ledger-update');
+    Route::post('report/ledger/disbursement/delete/{id}', [
+        'uses' => 'LedgerController@delete',
+        'module' => 'report_orsledger',
+        'access' => 'delete'
+    ])->name('report-disbursement-ledger-delete');
 
     // Line-Item Budget Module
     Route::any('reports/project-lib', [

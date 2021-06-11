@@ -39,7 +39,8 @@
                         <div>
                             @if ($isAllowedCreate)
                             <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
-                                    onclick="$(this).showCreate(`{{ route('report-obligation-ledger-show-create') }}`);">
+                                    onclick="$(this).showCreate(`{{ route('report-obligation-ledger-show-create',
+                                                                ['type' => 'disbursement']) }}`);">
                                 <i class="fas fa-pencil-alt"></i> Create
                             </button>
                             @endif
@@ -253,7 +254,7 @@
 
 <script type="text/javascript" src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
-<script type="text/javascript" src="{{ asset('assets/js/funding-lib.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/funding-ledger.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/attachment.js') }}"></script>
 <script>

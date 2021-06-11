@@ -11,6 +11,7 @@ use App\Models\FundingLedger;
 use App\Models\FundingLedgerItem;
 use App\Models\FundingBudgetRealignment;
 use App\Models\FundingAllotmentRealignment;
+use App\Models\AllotmentClass;
 use App\Models\PaperSize;
 use App\Models\EmpAccount as User;
 
@@ -29,7 +30,7 @@ class LedgerController extends Controller
         $keyword = trim($request->keyword);
 
         // Get module access
-        $module = 'fund_lib';
+        $module = 'report_orsledger';
         $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
         $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
         $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
@@ -37,7 +38,7 @@ class LedgerController extends Controller
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
-        $fundProject = $this->getIndexData($request, 'budget');
+        $fundProject = $this->getIndexData($request, 'obligation');
 
         return view('modules.report.obligation-ledger.index', [
             'list' => $fundProject,
@@ -54,7 +55,7 @@ class LedgerController extends Controller
         $keyword = trim($request->keyword);
 
         // Get module access
-        $module = 'fund_lib';
+        $module = 'report_dvledger';
         $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
         $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
         $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
@@ -62,7 +63,7 @@ class LedgerController extends Controller
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
-        $fundProject = $this->getIndexData($request, 'accounting');
+        $fundProject = $this->getIndexData($request, 'disbursement');
 
         return view('modules.report.disbursement-ledger.index', [
             'list' => $fundProject,
@@ -105,22 +106,14 @@ class LedgerController extends Controller
             });
         }
 
-        if ($type == 'budget' && $type == 'accounting') {
-            $fundProject = $fundProject->where(function($qry) use ($type) {
-                $qry->whereHas('ledger', function($query) use ($type) {
-                    $query->where('ledger_for', 'like', "%$keyword%");
-                });
-            });
-        }
-
-        if ($type == 'budget') {
-
-        } else {
-
-        }
-
         $fundProject = $fundProject->sortable(['project_title' => 'desc'])
                                    ->paginate(15);
+
+        foreach ($fundProject as $project) {
+            $ledgerDat = FundingLedger::where('project_id', $project->id)->first();
+            $project->has_ledger = $ledgerDat ? true : false;
+            $project->ledger_id = $ledgerDat ? $ledgerDat->id : NULL;
+        }
 
         return $fundProject;
     }
@@ -130,8 +123,30 @@ class LedgerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create() {
-        //
+    public function showCreate($type, $projectID) {
+        $allotmentClasses = AllotmentClass::orderBy('order_no')->get();
+        $libData = FundingBudget::where('project_id', $projectID)->first();
+        $libRealignments = FundingBudgetRealignment::orderBy('realignment_order')
+                                                   ->where('project_id', $projectID)
+                                                   ->get();
+        $lastBudgetData = $libRealignments->count() > 0 ?
+                          $libRealignments->last() :
+                          ($libData ? $libData : NULL);
+        $lastBudgetID = $lastBudgetData->id;
+
+        foreach ($allotmentClasses as $class) {
+            # code...
+        }
+
+        if ($type == 'obligation') {
+            $viewFile = 'modules.report.obligation-ledger.create';
+        } else {
+            $viewFile = 'modules.report.disbursement-ledger.create';
+        }
+
+        return view($viewFile, compact(
+            'hasLIB',
+        ));
     }
 
     /**
@@ -145,22 +160,12 @@ class LedgerController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id) {
-        //
-    }
-
-    /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id) {
+    public function showEdit($id) {
         //
     }
 
