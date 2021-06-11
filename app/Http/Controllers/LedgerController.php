@@ -132,7 +132,9 @@ class LedgerController extends Controller
         $lastBudgetData = $libRealignments->count() > 0 ?
                           $libRealignments->last() :
                           ($libData ? $libData : NULL);
-        $lastBudgetID = $lastBudgetData->id;
+        $lastBudgetID = $lastBudgetData ? $lastBudgetData->id : NULL;
+        $hasLIB = $lastBudgetID ? true : false;
+
 
         foreach ($allotmentClasses as $class) {
             # code...
