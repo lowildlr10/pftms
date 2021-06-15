@@ -126,17 +126,35 @@ class LedgerController extends Controller
     public function showCreate($type, $projectID) {
         $allotmentClasses = AllotmentClass::orderBy('order_no')->get();
         $libData = FundingBudget::where('project_id', $projectID)->first();
+        $libID = $libData->id;
+        $allotments = FundingAllotment::where('budget_id', $libID)->get();
         $libRealignments = FundingBudgetRealignment::orderBy('realignment_order')
                                                    ->where('project_id', $projectID)
+                                                   ->whereNotNull('date_approved')
                                                    ->get();
         $lastBudgetData = $libRealignments->count() > 0 ?
                           $libRealignments->last() :
                           ($libData ? $libData : NULL);
-        $lastBudgetID = $lastBudgetData ? $lastBudgetData->id : NULL;
-        $hasLIB = $lastBudgetID ? true : false;
 
+        $approvedBudgets = [
+            (object) [
+                'label' => 'Approved Budget',
+                'total' => $libData->approved_budget
+            ]
+        ];
+        $groupedAllotments = $this->groupAllotments(
+            $allotments, $lastBudgetData ? true : false, $lastBudgetData
+        );
+        $ledgerItems = $groupedAllotments->grouped_allotments;
+        $classItemCounts = $groupedAllotments->class_item_counts;
 
-        foreach ($allotmentClasses as $class) {
+        foreach ($libRealignments as $realignCtr => $libRealign) {
+            $approvedBudgets[] = (object) [
+                'label' => $this->convertToOrdinal($realignCtr + 1) . ' Re-alignment',
+                'total' => $libRealign->approved_realigned_budget];
+        }
+
+        foreach ($allotmentClasses as $allotClass) {
             # code...
         }
 
@@ -147,7 +165,7 @@ class LedgerController extends Controller
         }
 
         return view($viewFile, compact(
-            'hasLIB',
+            'ledgerItems', 'classItemCounts', 'approvedBudgets'
         ));
     }
 
@@ -190,5 +208,141 @@ class LedgerController extends Controller
      */
     public function destroy($id) {
         //
+    }
+
+    private function groupAllotments($allotments, $isRealignment = false, $currRealignData = NULL) {
+        $groupedAllotments = [];
+        $classItemCounts = [];
+        $allotClassData = DB::table('allotment_classes')
+                            ->orderBy('order_no')
+                            ->get();
+
+        if ($isRealignment) {
+            $realignOrder = $currRealignData->realignment_order;
+            $budgetID = $currRealignData->budget_id;
+            $currRealignID = $currRealignData->id;
+
+            $currRealignAllotments = DB::table('funding_allotment_realignments')
+                                       ->where('budget_realign_id', $currRealignID)
+                                       ->orderBy('order_no')
+                                       ->get();
+
+            $_allotments = [];
+
+            foreach ($currRealignAllotments as $realignAllotCtr =>  $realignAllot) {
+                $coimplementers = unserialize($realignAllot->coimplementers);
+
+                $_allotments[$realignAllotCtr] = (object) [
+                    'allotment_class' => $realignAllot->allotment_class,
+                    'allotment_name' => $realignAllot->allotment_name,
+                    "realignment_$realignOrder" => (object) [
+                        'allotment_cost' => $realignAllot->realigned_allotment_cost,
+                    ],
+                ];
+
+                if ($realignAllot->allotment_id) {
+                    $allotmentData = DB::table('funding_allotments')
+                                       ->where('id', $realignAllot->allotment_id)
+                                       ->first();
+                    $_allotments[$realignAllotCtr]->allotment_cost = $allotmentData->allotment_cost;
+                } else {
+                    $_allotments[$realignAllotCtr]->allotment_cost = 0;
+                }
+
+                foreach ($coimplementers as $coimp) {
+                    $_allotments[$realignAllotCtr]->allotment_cost += $coimp['coimplementor_budget'];
+                }
+
+                for ($realignOrderCtr = 1; $realignOrderCtr < $realignOrder; $realignOrderCtr++) {
+                    $realignIndex = "realignment_$realignOrderCtr";
+
+                    $budgetRealignData = DB::table('funding_budget_realignments')
+                                        ->where([
+                                            ['budget_id', $budgetID],
+                                            ['realignment_order', $realignOrderCtr],
+                                        ])->first();
+                    $realignID = $budgetRealignData->id;
+                    $realignAllotmentData = DB::table('funding_allotment_realignments')
+                                            ->where('budget_realign_id', $realignID)
+                                            ->orderBy('order_no')
+                                            ->get();
+                    $hasRealignAllot = false;
+
+                    foreach ($realignAllotmentData as $rAllotCtr => $rAllot) {
+                        if (strtolower(trim($realignAllot->allotment_name)) == strtolower(trim($rAllot->allotment_name)) ||
+                            $realignAllot->allotment_id == $rAllot->allotment_id) {
+                            $coimplementers = unserialize($rAllot->coimplementers);
+
+                            $_allotments[$realignAllotCtr]->{$realignIndex} = (object) [
+                                'allotment_cost' => $rAllot->realigned_allotment_cost,
+                            ];
+
+                            foreach ($coimplementers as $coimp) {
+                                $_allotments[$realignAllotCtr]->{$realignIndex}->allotment_cost += $coimp['coimplementor_budget'];
+                            }
+
+                            $hasRealignAllot = true;
+                            break;
+                        }
+                    }
+
+                    if (!$hasRealignAllot) {
+                        $_allotments[$realignAllotCtr]->{$realignIndex} = (object) [
+                            'allotment_cost' => 0,
+                            'coimplementers' => $cpCoimplementers,
+                        ];
+                    }
+                }
+            }
+
+            $allotments = $_allotments;
+        }
+
+        foreach ($allotClassData as $class) {
+            //$keyClass = preg_replace("/\s+/", "-", $class->class_name);
+            $keyClass = preg_replace("/\s+/", "-", $class->code);
+            $classItemCounts[$keyClass] = 0;
+
+            foreach ($allotments as $itmCtr => $item) {
+                if ($class->id == $item->allotment_class) {
+                    if (count(explode('::', $item->allotment_name)) > 1) {
+                        $keyAllotment = preg_replace(
+                            "/\s+/", "-", explode('::', $item->allotment_name)[0]
+                        );
+                        $groupedAllotments[$keyClass][$keyAllotment][] = $item;
+                        $classItemCounts[$keyClass]++;
+                    } else {
+                        $groupedAllotments[$keyClass][$itmCtr + 1] = $item;
+                        $classItemCounts[$keyClass]++;
+                    }
+                }
+            }
+        }
+
+        return (object) [
+            'grouped_allotments' => $groupedAllotments,
+            'class_item_counts' => $classItemCounts
+        ];
+    }
+
+    function convertToOrdinal($number) {
+        $suffix = [
+            'th',
+            'st',
+            'nd',
+            'rd',
+            'th',
+            'th',
+            'th',
+            'th',
+            'th',
+            'th'
+        ];
+
+        if ((($number % 100) >= 11) && (($number % 100) <= 13)) {
+            return $number. 'th';
+        } else {
+            return $number. $suffix[$number % 10];
+        }
     }
 }

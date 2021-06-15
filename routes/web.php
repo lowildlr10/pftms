@@ -1175,27 +1175,27 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     ])->name('report-disbursement-ledger');
     Route::get('report/ledger/disbursement/show-create/{type}/{project_id}', [
         'uses' => 'LedgerController@showCreate',
-        'module' => 'report_orsledger',
+        'module' => 'report_dvledger',
         'access' => 'create'
     ])->name('report-disbursement-ledger-show-create');
     Route::post('report/ledger/disbursement/store/{type}', [
         'uses' => 'LedgerController@store',
-        'module' => 'report_orsledger',
+        'module' => 'report_dvledger',
         'access' => 'create'
     ])->name('report-disbursement-ledger-store');
     Route::get('report/ledger/disbursement/show-edit/{id}', [
         'uses' => 'LedgerController@showEdit',
-        'module' => 'report_orsledger',
+        'module' => 'report_dvledger',
         'access' => 'update'
     ])->name('report-disbursement-ledger-show-edit');
     Route::post('report/ledger/disbursement/update/{id}', [
         'uses' => 'LedgerController@update',
-        'module' => 'report_orsledger',
+        'module' => 'report_dvledger',
         'access' => 'update'
     ])->name('report-disbursement-ledger-update');
     Route::post('report/ledger/disbursement/delete/{id}', [
         'uses' => 'LedgerController@delete',
-        'module' => 'report_orsledger',
+        'module' => 'report_dvledger',
         'access' => 'delete'
     ])->name('report-disbursement-ledger-delete');
 

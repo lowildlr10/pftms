@@ -1058,7 +1058,7 @@ class PrintController extends Controller
                         $allotCoimplementors = $itm->coimplementers;
 
                         $row = [];
-                        $row[] = " $itm->allotment_name";
+                        $row[] = '  '.explode('::', $itm->allotment_name)[1];
 
                         $row[] = $itm->allotment_cost ? number_format($itm->allotment_cost, 2) : '-';
                         $subTotal[count($row) - 1] += $itm->allotment_cost;
