@@ -53,7 +53,7 @@
                                     </small>
                                 </th>
 
-                                @foreach ($ledgerItems as $grpClassItems)
+                                @foreach ($allotments as $grpClassItems)
                                     @foreach ($grpClassItems as $ctr => $item)
                                         @if (is_int($ctr))
                                 <th class="align-top" width="250px">
@@ -61,6 +61,7 @@
                                         <span class="red-text">* </span> {{ $item->allotment_name }}
                                     </small>
                                 </th>
+                                            @php $allotmentCounter++; @endphp
                                         @else
                                             @foreach ($item as $itm)
                                 <th class="align-top" width="250px">
@@ -68,6 +69,7 @@
                                         <span class="red-text">* </span> {{ explode('::', $itm->allotment_name)[1] }}
                                     </small>
                                 </th>
+                                                @php $allotmentCounter++; @endphp
                                             @endforeach
                                         @endif
                                     @endforeach
@@ -88,51 +90,96 @@
                                     {{ number_format($approvedBud->total, 2) }}
                                 </td>
 
-                                @foreach ($ledgerItems as $grpClassItems)
+                                @foreach ($allotments as $grpClassItems)
                                     @foreach ($grpClassItems as $ctr => $item)
                                         @if ($approvedCtr == 0)
-                                            @if (is_int($ctr))
+                                            @if ($isRealignment)
+                                                @if (is_int($ctr))
                                 <td align="center" class="red-text font-weight-bold">
                                     <div class="md-form form-sm my-0">
-                                        <input type="number" placeholder=" Value..."
-                                                class="form-control required form-control-sm py-1"
-                                                value="{{ $item->allotment_cost }}">
+                                        {{ $item->allotment_cost ?
+                                           number_format($item->allotment_cost, 2) : '-' }}
                                     </div>
                                 </td>
+                                                @else
+                                                    @foreach ($item as $itm)
+                                <td align="center" class="red-text font-weight-bold">
+                                    <div class="md-form form-sm my-0">
+                                        {{ $itm->allotment_cost ?
+                                           number_format($itm->allotment_cost, 2) : '-' }}
+                                    </div>
+                                </td>
+                                                    @endforeach
+                                                @endif
                                             @else
-                                                @foreach ($item as $itm)
+                                                @if (is_int($ctr))
                                 <td align="center" class="red-text font-weight-bold">
                                     <div class="md-form form-sm my-0">
                                         <input type="number" placeholder=" Value..."
-                                                class="form-control required form-control-sm py-1"
-                                                value="{{ $itm->allotment_cost }}">
+                                               class="form-control required form-control-sm py-1
+                                                      red-text text-center font-weight-bold"
+                                               value="{{ $item->allotment_cost }}" readonly>
                                     </div>
                                 </td>
-                                                @endforeach
+                                                @else
+                                                    @foreach ($item as $itm)
+                                <td align="center" class="red-text font-weight-bold">
+                                    <div class="md-form form-sm my-0">
+                                        <input type="number" placeholder=" Value..."
+                                               class="form-control required form-control-sm py-1
+                                                      red-text text-center font-weight-bold"
+                                               value="{{ $itm->allotment_cost }}" readonly>
+                                    </div>
+                                </td>
+                                                    @endforeach
+                                                @endif
                                             @endif
                                         @else
                                             @php $realignOrderKey = "realignment_$approvedCtr"; @endphp
-                                {{--
-                                            @if (is_int($ctr))
+
+                                            @if ($approvedCtr == (count($approvedBudgets) - 1))
+                                                @if (is_int($ctr))
                                 <td align="center" class="red-text font-weight-bold">
                                     <div class="md-form form-sm my-0">
                                         <input type="number" placeholder=" Value..."
-                                                class="form-control required form-control-sm py-1"
-                                                value="{{ $item->{$realignOrderKey}->allotment_cost }}">
+                                               class="form-control required form-control-sm py-1
+                                                      red-text text-center font-weight-bold"
+                                               value="{{ $item->{$realignOrderKey}->allotment_cost }}"
+                                               readonly>
                                     </div>
                                 </td>
+                                                @else
+                                                    @foreach ($item as $itm)
+                                <td align="center" class="red-text font-weight-bold">
+                                    <div class="md-form form-sm my-0">
+                                        <input type="number" placeholder=" Value..."
+                                               class="form-control required form-control-sm py-1
+                                                      red-text text-center font-weight-bold"
+                                               value="{{ $itm->{$realignOrderKey}->allotment_cost }}"
+                                               readonly>
+                                    </div>
+                                </td>
+                                                    @endforeach
+                                                @endif
                                             @else
-                                                @foreach ($item as $itm)
+                                                @if (is_int($ctr))
                                 <td align="center" class="red-text font-weight-bold">
                                     <div class="md-form form-sm my-0">
-                                        <input type="number" placeholder=" Value..."
-                                                class="form-control required form-control-sm py-1"
-                                                value="{{ $itm->{$realignOrderKey}->allotment_cost }}">
+                                        {{ $item->{$realignOrderKey}->allotment_cost ?
+                                           number_format($item->{$realignOrderKey}->allotment_cost, 2) : '-' }}
                                     </div>
                                 </td>
-                                                @endforeach
+                                                @else
+                                                    @foreach ($item as $itm)
+                                <td align="center" class="red-text font-weight-bold">
+                                    <div class="md-form form-sm my-0">
+                                        {{ $itm->{$realignOrderKey}->allotment_cost ?
+                                           number_format($itm->{$realignOrderKey}->allotment_cost, 2) : '-' }}
+                                    </div>
+                                </td>
+                                                    @endforeach
+                                                @endif
                                             @endif
-                                --}}
                                         @endif
                                     @endforeach
                                 @endforeach
@@ -140,10 +187,91 @@
                                 <td colspan="2"></td>
                             </tr>
                             @endforeach
+
+                            <tr><td class="py-3 grey" colspan="{{ $allotmentCounter + 7 }}"></td></tr>
                         </tbody>
 
                         <tbody id="item-row-container" class="sortable">
+                            @if (count($obligations) > 0)
+                                @foreach ($obligations as $itemCounter => $ors)
+                            <tr id="item-row-{{ $itemCounter }}" class="item-row">
+                                <td>
+                                    <div class="md-form form-sm my-0">
+                                        <input type="date" name="allotted_budget[{{ $itemCounter }}]"
+                                               class="form-control required form-control-sm date-ors-burs py-1"
+                                               value="{{ $ors->date_ors_burs }}">
+                                    </div>
+                                </td>
+                                <td>
+                                    {{ $ors->payee }}
+                                </td>
+                                <td>
+                                    <div class="md-form form-sm my-0">
+                                        <textarea name="particulars[]" placeholder=" Value..."
+                                                  class="md-textarea required form-control-sm w-100 py-1"
+                                                  placeholder="Value..."
+                                        >{{ $ors->particulars }}</textarea>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="md-form form-sm my-0">
+                                        <input type="text" name="obr_no[{{ $itemCounter }}]"
+                                               class="form-control required form-control-sm date-ors-burs py-1"
+                                               value="{{ $ors->serial_no }}"
+                                               placeholder="Value...">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="md-form form-sm my-0">
+                                        <input type="text" name="amount[{{ $itemCounter }}]"
+                                               class="form-control required form-control-sm date-ors-burs py-1"
+                                               value="{{ $ors->amount }}"
+                                               placeholder="Value...">
+                                    </div>
+                                </td>
 
+                                    @foreach ($allotments as $grpClassItems)
+                                        @foreach ($grpClassItems as $allotCtr => $item)
+                                            @if (is_int($allotCtr))
+                                <td>
+                                    <div class="md-form form-sm my-0">
+                                        <input type="text" name="allotment[{{ $itemCounter }}][{{ $allotCtr }}]"
+                                               class="form-control required form-control-sm date-ors-burs py-1"
+                                               placeholder="Value...">
+                                    </div>
+                                </td>
+                                            @else
+                                                @foreach ($item as $itm)
+                                <td>
+                                    <div class="md-form form-sm my-0">
+                                        <input type="text" name="allotment[{{ $itemCounter }}][{{ $allotCtr }}]"
+                                               class="form-control required form-control-sm date-ors-burs py-1"
+                                               placeholder="Value...">
+                                    </div>
+                                </td>
+                                                @endforeach
+                                            @endif
+                                        @endforeach
+                                    @endforeach
+
+                                <td class="align-middle">
+                                    <a onclick="$(this).deleteRow('#item-row-{{ $itemCounter }}');"
+                                        class="btn btn-outline-red px-1 py-0">
+                                        <i class="fas fa-minus-circle"></i>
+                                    </a>
+                                </td>
+                                <td class="align-middle">
+                                    <a href="#" class="grey-text">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </a>
+                                </td>
+                            </tr>
+
+                                    @php $itemCounter++ @endphp
+
+                                @endforeach
+                            @else
+                            @endif
                         </tbody>
                     </table>
                 </div>

@@ -11,6 +11,7 @@ use App\Models\FundingLedger;
 use App\Models\FundingLedgerItem;
 use App\Models\FundingBudgetRealignment;
 use App\Models\FundingAllotmentRealignment;
+use App\Models\ObligationRequestStatus;
 use App\Models\AllotmentClass;
 use App\Models\PaperSize;
 use App\Models\EmpAccount as User;
@@ -124,10 +125,16 @@ class LedgerController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showCreate($type, $projectID) {
+        $itemCounter = 0;
+        $allotmentCounter = 0;
         $allotmentClasses = AllotmentClass::orderBy('order_no')->get();
-        $libData = FundingBudget::where('project_id', $projectID)->first();
+        $libData = FundingBudget::where('project_id', $projectID)
+                                ->whereNotNull('date_approved')
+                                ->first();
         $libID = $libData->id;
-        $allotments = FundingAllotment::where('budget_id', $libID)->get();
+        $allotments = FundingAllotment::where('budget_id', $libID)
+                                      ->orderBy('order_no')
+                                      ->get();
         $libRealignments = FundingBudgetRealignment::orderBy('realignment_order')
                                                    ->where('project_id', $projectID)
                                                    ->whereNotNull('date_approved')
@@ -135,6 +142,7 @@ class LedgerController extends Controller
         $lastBudgetData = $libRealignments->count() > 0 ?
                           $libRealignments->last() :
                           ($libData ? $libData : NULL);
+        $isRealignment = $libRealignments->count() > 0 ? true : false;
 
         $approvedBudgets = [
             (object) [
@@ -143,9 +151,9 @@ class LedgerController extends Controller
             ]
         ];
         $groupedAllotments = $this->groupAllotments(
-            $allotments, $lastBudgetData ? true : false, $lastBudgetData
+            $allotments, $isRealignment, $lastBudgetData
         );
-        $ledgerItems = $groupedAllotments->grouped_allotments;
+        $allotments = $groupedAllotments->grouped_allotments;
         $classItemCounts = $groupedAllotments->class_item_counts;
 
         foreach ($libRealignments as $realignCtr => $libRealign) {
@@ -154,9 +162,10 @@ class LedgerController extends Controller
                 'total' => $libRealign->approved_realigned_budget];
         }
 
-        foreach ($allotmentClasses as $allotClass) {
-            # code...
-        }
+        $obligations = ObligationRequestStatus::where('funding_source', $projectID)
+                                      ->whereNotNull('date_obligated')
+                                      ->orderBy('date_ors_burs')
+                                      ->get();
 
         if ($type == 'obligation') {
             $viewFile = 'modules.report.obligation-ledger.create';
@@ -165,7 +174,8 @@ class LedgerController extends Controller
         }
 
         return view($viewFile, compact(
-            'ledgerItems', 'classItemCounts', 'approvedBudgets'
+            'allotments', 'classItemCounts', 'approvedBudgets', 'isRealignment',
+            'obligations', 'itemCounter', 'allotmentCounter'
         ));
     }
 
@@ -229,9 +239,7 @@ class LedgerController extends Controller
 
             $_allotments = [];
 
-            foreach ($currRealignAllotments as $realignAllotCtr =>  $realignAllot) {
-                $coimplementers = unserialize($realignAllot->coimplementers);
-
+            foreach ($currRealignAllotments as $realignAllotCtr => $realignAllot) {
                 $_allotments[$realignAllotCtr] = (object) [
                     'allotment_class' => $realignAllot->allotment_class,
                     'allotment_name' => $realignAllot->allotment_name,
@@ -245,15 +253,16 @@ class LedgerController extends Controller
                                        ->where('id', $realignAllot->allotment_id)
                                        ->first();
                     $_allotments[$realignAllotCtr]->allotment_cost = $allotmentData->allotment_cost;
+                    $allotCoimplementers = unserialize($allotmentData->coimplementers);
+
+                    foreach ($allotCoimplementers as $coimp) {
+                        $_allotments[$realignAllotCtr]->allotment_cost += $coimp['coimplementor_budget'];
+                    }
                 } else {
                     $_allotments[$realignAllotCtr]->allotment_cost = 0;
                 }
 
-                foreach ($coimplementers as $coimp) {
-                    $_allotments[$realignAllotCtr]->allotment_cost += $coimp['coimplementor_budget'];
-                }
-
-                for ($realignOrderCtr = 1; $realignOrderCtr < $realignOrder; $realignOrderCtr++) {
+                for ($realignOrderCtr = 1; $realignOrderCtr <= $realignOrder; $realignOrderCtr++) {
                     $realignIndex = "realignment_$realignOrderCtr";
 
                     $budgetRealignData = DB::table('funding_budget_realignments')
@@ -305,6 +314,14 @@ class LedgerController extends Controller
 
             foreach ($allotments as $itmCtr => $item) {
                 if ($class->id == $item->allotment_class) {
+                    if (!$isRealignment) {
+                        $coimplementers = unserialize($item->coimplementers);
+
+                        foreach ($coimplementers as $coimp) {
+                            $item->allotment_cost += $coimp['coimplementor_budget'];
+                        }
+                    }
+
                     if (count(explode('::', $item->allotment_name)) > 1) {
                         $keyAllotment = preg_replace(
                             "/\s+/", "-", explode('::', $item->allotment_name)[0]
@@ -318,6 +335,8 @@ class LedgerController extends Controller
                 }
             }
         }
+
+
 
         return (object) [
             'grouped_allotments' => $groupedAllotments,
