@@ -13,14 +13,14 @@ $(function() {
     }
 
     function initializeSelect2() {
-        $('.allot-class-tokenizer').select2({
+        $('.payee-tokenizer').select2({
             tokenSeparators: [','],
             placeholder: "Value...",
             width: '100%',
             maximumSelectionSize: 4,
             allowClear: true,
             ajax: {
-                url: `${baseURL}/fund-utilization/project-lib/get-allot-class`,
+                url: `${baseURL}/report/ledger/obligation/get-payee`,
                 type: "post",
                 dataType: 'json',
                 delay: 250,
@@ -34,11 +34,11 @@ $(function() {
                     return {
                         results: $.map(data, function(item) {
                             let jsonData = {};
-                            jsonData['class_name'] = item.class_name;
+                            jsonData['name'] = item.name;
                             allotClassData[item.id] = jsonData;
 
                             return {
-                                text: `${item.class_name}`,
+                                text: `${item.name}`,
                                 id: item.id
                             }
                         }),
@@ -60,33 +60,47 @@ $(function() {
         $('.sortable').disableSelection();
     }
 
-    function initializeProjectInput() {
-        $('#project').on("change", function() {
-            const projID = $(this).val();
+    $.fn.computeTotalRemaining = function() {
+        let totalRemaining = $('#current-total-budget').val();
 
-            $.each(projects, function(projCtr, project) {
-                if (project.id == projID) {
-                    const coimplementorsElem = project.coimplementors.length > 0 ?
-                                            project.coimplementors.map((coimplementor, index) => {
-                                                return `<th id="coimplementor-${index}" class="align-middle coimplementor" width="250px">
-                                                    <b id="coimplementor-name-${index}">
-                                                    <span class="red-text">* </span>${coimplementor.coimplementor_name}
-                                                    </b>
-                                                    <input id="coimplementor-id-${index}" type="hidden" value="${coimplementor.id}">
-                                                </th>`
-                                            }) : [];
-                    $('.coimplementor').remove();
-                    $('#implementor').after(coimplementorsElem);
-                    $('.item-row').remove();
-                    $('#item-row-container').fadeIn(300).first().before(`<tr id="item-row-0" class="item-row"></tr>`);
-                    $('#approved-budget').val(project.project_cost)
-                                         .siblings()
-                                         .addClass('active');
-                    $('#remaining-budget').val(project.project_cost);
-                    $('#implementor-name').html(`<span class="red-text">* </span>${project.implementor_name}`);
-                    return false;
-                }
+        $('.amount').each(function() {
+            const amount = parseFloat($(this).val());
+            totalRemaining -= amount;
+        });
+
+        $('#total-remaining').val(totalRemaining.toFixed(2));
+    }
+
+    $.fn.computeAllotmentRemaining = function() {
+        const allotmentCount = parseInt($('#allotment-count').val());
+
+        for (let allotCtr = 1; allotCtr <= allotmentCount; allotCtr++) {
+            let allotRemaining = $(`#allotment-cost-${allotCtr}`).val();
+
+            $(`.allotment-${allotCtr}`).each(function() {
+                const remaining = $(this).val();
+                allotRemaining -= remaining;
             });
+
+            $(`#remaining-${allotCtr}`).val(allotRemaining.toFixed(2))
+        }
+    }
+
+    function initializeLedgerInput() {
+        const allotmentCount = parseInt($('#allotment-count').val());
+
+        $(this).computeTotalRemaining();
+        $(this).computeAllotmentRemaining();
+
+        for (let allotCtr = 1; allotCtr <= allotmentCount; allotCtr++) {
+            $(`.allotment-${allotCtr}`).each(function() {
+                const allotName = $(`#allot-name-${allotCtr}`).text();
+                $(this).attr('title', `Column: ${allotName}`);
+            });
+        }
+
+        $('.material-tooltip-main').tooltip({
+            template: template
         });
     }
 
@@ -301,7 +315,7 @@ $(function() {
         $('#modal-body-create').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
-            initializeProjectInput();
+            initializeLedgerInput();
             $(this).slideToggle(500);
             initializeSelect2();
             initializeSortable();
@@ -327,7 +341,7 @@ $(function() {
         $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
-            initializeProjectInput();
+            initializeLedgerInput();
             $(this).slideToggle(500);
             initializeSelect2();
             initializeSortable();

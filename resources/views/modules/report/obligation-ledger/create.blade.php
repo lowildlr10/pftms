@@ -42,7 +42,7 @@
                                         <span class="red-text">* </span> Particulars
                                     </small>
                                 </th>
-                                <th class="align-top" width="150px">
+                                <th class="align-top" width="200px">
                                     <small class="font-weight-bold">
                                         <span class="red-text">* </span> ObR No
                                     </small>
@@ -56,16 +56,16 @@
                                 @foreach ($allotments as $grpClassItems)
                                     @foreach ($grpClassItems as $ctr => $item)
                                         @if (is_int($ctr))
-                                <th class="align-top" width="250px">
-                                    <small class="font-weight-bold">
+                                <th class="align-top" width="180px">
+                                    <small class="font-weight-bold" id="allot-name-{{ $allotmentCounter + 1 }}">
                                         <span class="red-text">* </span> {{ $item->allotment_name }}
                                     </small>
                                 </th>
                                             @php $allotmentCounter++; @endphp
                                         @else
                                             @foreach ($item as $itm)
-                                <th class="align-top" width="250px">
-                                    <small class="font-weight-bold">
+                                <th class="align-top" width="180px">
+                                    <small class="font-weight-bold" id="allot-name-{{ $allotmentCounter + 1 }}">
                                         <span class="red-text">* </span> {{ explode('::', $itm->allotment_name)[1] }}
                                     </small>
                                 </th>
@@ -82,11 +82,16 @@
 
                         <tbody>
                             @foreach ($approvedBudgets as $approvedCtr => $approvedBud)
+                                @php $allotmentCounter = 0; @endphp
                             <tr>
                                 <td align="right" colspan="4" class="red-text font-weight-bold">
                                     {{ $approvedBud->label }}
                                 </td>
                                 <td align="center" class="red-text font-weight-bold">
+                                    @if ($approvedCtr == count($approvedBudgets) - 1)
+                                    <input type="hidden" id="current-total-budget" value="{{ $approvedBud->total }}">
+                                    @endif
+
                                     {{ number_format($approvedBud->total, 2) }}
                                 </td>
 
@@ -115,22 +120,30 @@
                                                 @if (is_int($ctr))
                                 <td align="center" class="red-text font-weight-bold">
                                     <div class="md-form form-sm my-0">
-                                        <input type="number" placeholder=" Value..."
-                                               class="form-control required form-control-sm py-1
-                                                      red-text text-center font-weight-bold"
-                                               value="{{ $item->allotment_cost }}" readonly>
+                                        <input type="hidden" id="allotment-id-{{ $allotmentCounter + 1 }}"
+                                               name="allotment_id_{{ $allotmentCounter + 1 }}"
+                                               value="{{ $item->allotment_id }}">
+                                        <input type="hidden" id="allotment-cost-{{ $allotmentCounter + 1 }}"
+                                               value="{{ $item->allotment_cost }}">
+                                        {{ $item->allotment_cost ?
+                                           number_format($item->allotment_cost, 2) : '-' }}
                                     </div>
                                 </td>
+                                                    @php $allotmentCounter++; @endphp
                                                 @else
                                                     @foreach ($item as $itm)
                                 <td align="center" class="red-text font-weight-bold">
                                     <div class="md-form form-sm my-0">
-                                        <input type="number" placeholder=" Value..."
-                                               class="form-control required form-control-sm py-1
-                                                      red-text text-center font-weight-bold"
-                                               value="{{ $itm->allotment_cost }}" readonly>
+                                        <input type="hidden" id="allotment-id-{{ $allotmentCounter + 1 }}"
+                                               name="allotment_id_{{ $allotmentCounter + 1 }}"
+                                               value="{{ $itm->allotment_id }}">
+                                        <input type="hidden" id="allotment-cost-{{ $allotmentCounter + 1 }}"
+                                               value="{{ $itm->allotment_cost }}">
+                                        {{ $itm->allotment_cost ?
+                                           number_format($itm->allotment_cost, 2) : '-' }}
                                     </div>
                                 </td>
+                                                        @php $allotmentCounter++; @endphp
                                                     @endforeach
                                                 @endif
                                             @endif
@@ -141,24 +154,36 @@
                                                 @if (is_int($ctr))
                                 <td align="center" class="red-text font-weight-bold">
                                     <div class="md-form form-sm my-0">
-                                        <input type="number" placeholder=" Value..."
-                                               class="form-control required form-control-sm py-1
-                                                      red-text text-center font-weight-bold"
-                                               value="{{ $item->{$realignOrderKey}->allotment_cost }}"
-                                               readonly>
+                                        <input type="hidden" id="allotment-id-{{ $allotmentCounter + 1 }}"
+                                               name="allotment_id_{{ $allotmentCounter + 1 }}"
+                                               value="{{ $item->{$realignOrderKey}->allotment_id }}">
+                                        <input type="hidden" id="allot-realign-id-{{ $allotmentCounter + 1 }}"
+                                               name="allot_realign_id_{{ $allotmentCounter + 1 }}"
+                                               value="{{ $item->{$realignOrderKey}->allotment_realign_id }}">
+                                        <input type="hidden" id="allotment-cost-{{ $allotmentCounter + 1 }}"
+                                               value="{{ $item->{$realignOrderKey}->allotment_cost }}">
+                                        {{ $item->{$realignOrderKey}->allotment_cost ?
+                                           number_format($item->{$realignOrderKey}->allotment_cost, 2) : '-' }}
                                     </div>
                                 </td>
+                                                    @php $allotmentCounter++; @endphp
                                                 @else
                                                     @foreach ($item as $itm)
                                 <td align="center" class="red-text font-weight-bold">
                                     <div class="md-form form-sm my-0">
-                                        <input type="number" placeholder=" Value..."
-                                               class="form-control required form-control-sm py-1
-                                                      red-text text-center font-weight-bold"
-                                               value="{{ $itm->{$realignOrderKey}->allotment_cost }}"
-                                               readonly>
+                                        <input type="hidden" id="allotment-id-{{ $allotmentCounter + 1 }}"
+                                               name="allotment_id_{{ $allotmentCounter + 1 }}"
+                                               value="{{ $itm->{$realignOrderKey}->allotment_id }}">
+                                        <input type="hidden" id="allot-realign-id-{{ $allotmentCounter + 1 }}"
+                                               name="allot_realign_id_{{ $allotmentCounter + 1 }}"
+                                               value="{{ $itm->{$realignOrderKey}->allotment_realign_id }}">
+                                        <input type="hidden" id="allotment-cost-{{ $allotmentCounter + 1 }}"
+                                               value="{{ $itm->{$realignOrderKey}->allotment_cost }}">
+                                        {{ $itm->{$realignOrderKey}->allotment_cost ?
+                                           number_format($itm->{$realignOrderKey}->allotment_cost, 2) : '-' }}
                                     </div>
                                 </td>
+                                                        @php $allotmentCounter++; @endphp
                                                     @endforeach
                                                 @endif
                                             @else
@@ -194,6 +219,7 @@
                         <tbody id="item-row-container" class="sortable">
                             @if (count($obligations) > 0)
                                 @foreach ($obligations as $itemCounter => $ors)
+                                    @php $allotmentCounter = 0; @endphp
                             <tr id="item-row-{{ $itemCounter }}" class="item-row">
                                 <td>
                                     <div class="md-form form-sm my-0">
@@ -203,11 +229,19 @@
                                     </div>
                                 </td>
                                 <td>
-                                    {{ $ors->payee }}
+                                    <select class="mdb-select form-control-sm required payee-tokenizer"
+                                            name="payee[{{ $itemCounter }}]">
+                                        @foreach ($payees as $pay)
+                                        <option {{ $pay->id == $ors->payee ? 'selected' : '' }}
+                                                value="{{ $pay->id }}">
+                                            {{ $pay->name }}
+                                        </option>
+                                        @endforeach
+                                    </select>
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea name="particulars[]" placeholder=" Value..."
+                                        <textarea name="particulars[{{ $itemCounter }}]" placeholder=" Value..."
                                                   class="md-textarea required form-control-sm w-100 py-1"
                                                   placeholder="Value..."
                                         >{{ $ors->particulars }}</textarea>
@@ -215,50 +249,71 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="text" name="obr_no[{{ $itemCounter }}]"
+                                        <input type="hidden" name="ors_id[{{ $itemCounter }}]" value="{{ $ors->id }}">
+                                        <input type="text" name="obs_no[{{ $itemCounter }}]"
                                                class="form-control required form-control-sm date-ors-burs py-1"
                                                value="{{ $ors->serial_no }}"
                                                placeholder="Value...">
                                     </div>
                                 </td>
-                                <td>
+                                <td class="material-tooltip-main" data-toggle="tooltip" title="Particulars: {{ $ors->particulars }}">
                                     <div class="md-form form-sm my-0">
-                                        <input type="text" name="amount[{{ $itemCounter }}]"
-                                               class="form-control required form-control-sm date-ors-burs py-1"
+                                        <input type="number" name="amount[{{ $itemCounter }}]"
+                                               class="form-control required form-control-sm date-ors-burs py-1 text-center
+                                                      material-tooltip-main amount"
+                                               data-toggle="tooltip" data-placement="left"
+                                               title="Column: Total"
                                                value="{{ $ors->amount }}"
+                                               onkeyup="$(this).computeTotalRemaining();"
+                                               onchange="$(this).computeTotalRemaining();"
                                                placeholder="Value...">
                                     </div>
                                 </td>
-
                                     @foreach ($allotments as $grpClassItems)
                                         @foreach ($grpClassItems as $allotCtr => $item)
                                             @if (is_int($allotCtr))
-                                <td>
+                                <td class="material-tooltip-main" data-toggle="tooltip" title="Particulars: {{ $ors->particulars }}">
                                     <div class="md-form form-sm my-0">
-                                        <input type="text" name="allotment[{{ $itemCounter }}][{{ $allotCtr }}]"
-                                               class="form-control required form-control-sm date-ors-burs py-1"
-                                               placeholder="Value...">
+                                        <input type="number" name="allotment[{{ $itemCounter }}][{{ $allotmentCounter }}]"
+                                               class="form-control required form-control-sm date-ors-burs py-1 text-center
+                                                      material-tooltip-main allotment-{{ $allotmentCounter + 1 }}"
+                                               data-toggle="tooltip" data-placement="left"
+                                               title="Column: "
+                                               id="allot-remain-{{ $itemCounter }}-{{ $allotmentCounter + 1 }}"
+                                               onkeyup="$(this).computeAllotmentRemaining();"
+                                               onchange="$(this).computeAllotmentRemaining();"
+                                               placeholder="Value..." value="0">
                                     </div>
                                 </td>
+                                                @php $allotmentCounter++; @endphp
                                             @else
                                                 @foreach ($item as $itm)
-                                <td>
+                                <td class="material-tooltip-main" data-toggle="tooltip" title="Particulars: {{ $ors->particulars }}">
                                     <div class="md-form form-sm my-0">
-                                        <input type="text" name="allotment[{{ $itemCounter }}][{{ $allotCtr }}]"
-                                               class="form-control required form-control-sm date-ors-burs py-1"
-                                               placeholder="Value...">
+                                        <input type="number" name="allotment[{{ $itemCounter }}][{{ $allotmentCounter }}]"
+                                               class="form-control required form-control-sm date-ors-burs py-1 text-center
+                                                      material-tooltip-main allotment-{{ $allotmentCounter + 1 }}"
+                                               data-toggle="tooltip" data-placement="left"
+                                               title="Column: "
+                                               id="allot-remain-{{ $itemCounter }}-{{ $allotmentCounter + 1 }}"
+                                               onkeyup="$(this).computeAllotmentRemaining();"
+                                               onchange="$(this).computeAllotmentRemaining();"
+                                               placeholder="Value..." value="0">
                                     </div>
                                 </td>
+                                                    @php $allotmentCounter++; @endphp
                                                 @endforeach
                                             @endif
                                         @endforeach
                                     @endforeach
 
                                 <td class="align-middle">
+                                    {{--
                                     <a onclick="$(this).deleteRow('#item-row-{{ $itemCounter }}');"
                                         class="btn btn-outline-red px-1 py-0">
                                         <i class="fas fa-minus-circle"></i>
                                     </a>
+                                    --}}
                                 </td>
                                 <td class="align-middle">
                                     <a href="#" class="grey-text">
@@ -268,14 +323,47 @@
                             </tr>
 
                                     @php $itemCounter++ @endphp
-
                                 @endforeach
                             @else
+                            <tr>
+                                <td id="item-row-empty" class="py-3 red-text pl-4" colspan="{{ $allotmentCounter + 7 }}">
+                                    <h5>
+                                        <i class="fas fa-times-circle"></i> <em>No voucher is obligated nor created.</em>
+                                    </h5>
+                                </td>
+                                <tr id="item-row-0" class="item-row">
+                                    <td colspan="{{ $allotmentCounter + 7 }}"></td>
+                                </tr>
+                            </tr>
                             @endif
                         </tbody>
+
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="font-weight-bold red-text text-center">
+                                    Available Allotment
+                                </td>
+                                <td class="font-weight-bold red-text">
+                                    <input type="number" id="total-remaining" class="text-center"
+                                           value="0.00" readonly>
+                                </td>
+
+                                @for ($allotCtr = 1; $allotCtr <= $allotmentCounter; $allotCtr++)
+                                <td class="font-weight-bold red-text">
+                                    <input type="number" id="remaining-{{ $allotCtr }}" class="text-center"
+                                           value="0.00" readonly>
+                                </td>
+                                @endfor
+
+                                <td colspan="2"></td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
         </div>
     </div>
+
+    <input type="hidden" name="allotment_count" id="allotment-count" value="{{ $allotmentCounter }}">
+    <input type="hidden" name="is_realignment" id="is-realignment" value="{{ $isRealignment ? 'y' : 'n' }}">
 </form>

@@ -1166,6 +1166,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_orsledger',
         'access' => 'delete'
     ])->name('report-obligation-ledger-delete');
+    Route::post('report/ledger/obligation/get-payee', [
+        'uses' => 'LedgerController@getPayees',
+        'module' => 'report_orsledger',
+        'access' => 'is_allowed'
+    ]);
 
     // Disbursement Ledger Module
     Route::any('report/ledger/disbursement', [

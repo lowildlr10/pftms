@@ -15,6 +15,7 @@ use App\Models\ObligationRequestStatus;
 use App\Models\AllotmentClass;
 use App\Models\PaperSize;
 use App\Models\EmpAccount as User;
+use App\Models\Supplier;
 
 use Carbon\Carbon;
 use Auth;
@@ -124,7 +125,7 @@ class LedgerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function showCreate($type, $projectID) {
+    public function showCreate(Request $request, $type, $projectID) {
         $itemCounter = 0;
         $allotmentCounter = 0;
         $allotmentClasses = AllotmentClass::orderBy('order_no')->get();
@@ -162,10 +163,15 @@ class LedgerController extends Controller
                 'total' => $libRealign->approved_realigned_budget];
         }
 
-        $obligations = ObligationRequestStatus::where('funding_source', $projectID)
+        $obligations = ObligationRequestStatus::where([['funding_source', $projectID]])
                                       ->whereNotNull('date_obligated')
                                       ->orderBy('date_ors_burs')
                                       ->get();
+        $payees = json_decode($this->getPayees($request)->content(), true);
+
+        foreach ($payees as $payCtr => $pay) {
+            $payees[$payCtr] = (object) $pay;
+        }
 
         if ($type == 'obligation') {
             $viewFile = 'modules.report.obligation-ledger.create';
@@ -175,7 +181,7 @@ class LedgerController extends Controller
 
         return view($viewFile, compact(
             'allotments', 'classItemCounts', 'approvedBudgets', 'isRealignment',
-            'obligations', 'itemCounter', 'allotmentCounter'
+            'obligations', 'itemCounter', 'allotmentCounter', 'payees'
         ));
     }
 
@@ -186,7 +192,7 @@ class LedgerController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request) {
-        //
+        dd($request);
     }
 
     /**
@@ -218,6 +224,61 @@ class LedgerController extends Controller
      */
     public function destroy($id) {
         //
+    }
+
+    public function getPayees(Request $request) {
+        $keyword = trim($request->search);
+
+        $payees = [];
+        $empPayees = User::select('id', 'firstname', 'lastname');
+        $supplierPayees = Supplier::select('id', 'company_name');
+
+        if ($keyword) {
+            $empPayees = $empPayees->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('firstname', 'like', "%$keyword%")
+                    ->orWhere('lastname', 'like', "%$keyword%");
+                $keywords = explode('/\s+/', $keyword);
+
+                if (count($keywords) > 0) {
+                    foreach ($keywords as $tag) {
+                        $qry->orWhere('firstname', 'like', "%$tag%")
+                            ->orWhere('lastname', 'like', "%$tag%");
+                    }
+                }
+            });
+
+            $supplierPayees = $supplierPayees->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('company_name', 'like', "%$keyword%");
+                $keywords = explode('/\s+/', $keyword);
+
+                if (count($keywords) > 0) {
+                    foreach ($keywords as $tag) {
+                        $qry->orWhere('company_name', 'like', "%$tag%");
+                    }
+                }
+            });
+        }
+
+        $empPayees = $empPayees->orderBy('firstname')->get();
+        $supplierPayees = $supplierPayees->orderBy('company_name')->get();
+
+        foreach ($empPayees as $emp) {
+            $payees[] = (object) [
+                'id' => $emp->id,
+                'name' => $emp->firstname.' '.$emp->lastname
+            ];
+        }
+
+        foreach ($supplierPayees as $bid) {
+            $payees[] = (object) [
+                'id' => $bid->id,
+                'name' => $bid->company_name
+            ];
+        }
+
+        return response()->json($payees);
     }
 
     private function groupAllotments($allotments, $isRealignment = false, $currRealignData = NULL) {
@@ -252,6 +313,7 @@ class LedgerController extends Controller
                     $allotmentData = DB::table('funding_allotments')
                                        ->where('id', $realignAllot->allotment_id)
                                        ->first();
+                    $_allotments[$realignAllotCtr]->allotment_id = $allotmentData->id;
                     $_allotments[$realignAllotCtr]->allotment_cost = $allotmentData->allotment_cost;
                     $allotCoimplementers = unserialize($allotmentData->coimplementers);
 
@@ -259,6 +321,7 @@ class LedgerController extends Controller
                         $_allotments[$realignAllotCtr]->allotment_cost += $coimp['coimplementor_budget'];
                     }
                 } else {
+                    $_allotments[$realignAllotCtr]->allotment_id = NULL;
                     $_allotments[$realignAllotCtr]->allotment_cost = 0;
                 }
 
@@ -283,6 +346,8 @@ class LedgerController extends Controller
                             $coimplementers = unserialize($rAllot->coimplementers);
 
                             $_allotments[$realignAllotCtr]->{$realignIndex} = (object) [
+                                'allotment_id' => $rAllot->allotment_id,
+                                'allotment_realign_id' => $rAllot->id,
                                 'allotment_cost' => $rAllot->realigned_allotment_cost,
                             ];
 
@@ -297,8 +362,9 @@ class LedgerController extends Controller
 
                     if (!$hasRealignAllot) {
                         $_allotments[$realignAllotCtr]->{$realignIndex} = (object) [
+                            'allotment_id' => NULL,
+                            'allotment_realign_id' => NULL,
                             'allotment_cost' => 0,
-                            'coimplementers' => $cpCoimplementers,
                         ];
                     }
                 }
@@ -344,7 +410,7 @@ class LedgerController extends Controller
         ];
     }
 
-    function convertToOrdinal($number) {
+    private function convertToOrdinal($number) {
         $suffix = [
             'th',
             'st',
