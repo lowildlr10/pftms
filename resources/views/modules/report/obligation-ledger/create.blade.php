@@ -121,7 +121,7 @@
                                 <td align="center" class="red-text font-weight-bold">
                                     <div class="md-form form-sm my-0">
                                         <input type="hidden" id="allotment-id-{{ $allotmentCounter + 1 }}"
-                                               name="allotment_id_{{ $allotmentCounter + 1 }}"
+                                               name="allotment_id[{{ $allotmentCounter + 1 }}]"
                                                value="{{ $item->allotment_id }}">
                                         <input type="hidden" id="allotment-cost-{{ $allotmentCounter + 1 }}"
                                                value="{{ $item->allotment_cost }}">
@@ -135,7 +135,7 @@
                                 <td align="center" class="red-text font-weight-bold">
                                     <div class="md-form form-sm my-0">
                                         <input type="hidden" id="allotment-id-{{ $allotmentCounter + 1 }}"
-                                               name="allotment_id_{{ $allotmentCounter + 1 }}"
+                                               name="allotment_id[{{ $allotmentCounter + 1 }}]"
                                                value="{{ $itm->allotment_id }}">
                                         <input type="hidden" id="allotment-cost-{{ $allotmentCounter + 1 }}"
                                                value="{{ $itm->allotment_cost }}">
@@ -155,10 +155,10 @@
                                 <td align="center" class="red-text font-weight-bold">
                                     <div class="md-form form-sm my-0">
                                         <input type="hidden" id="allotment-id-{{ $allotmentCounter + 1 }}"
-                                               name="allotment_id_{{ $allotmentCounter + 1 }}"
+                                               name="allotment_id[{{ $allotmentCounter + 1 }}]"
                                                value="{{ $item->{$realignOrderKey}->allotment_id }}">
                                         <input type="hidden" id="allot-realign-id-{{ $allotmentCounter + 1 }}"
-                                               name="allot_realign_id_{{ $allotmentCounter + 1 }}"
+                                               name="allot_realign_id[{{ $allotmentCounter + 1 }}]"
                                                value="{{ $item->{$realignOrderKey}->allotment_realign_id }}">
                                         <input type="hidden" id="allotment-cost-{{ $allotmentCounter + 1 }}"
                                                value="{{ $item->{$realignOrderKey}->allotment_cost }}">
@@ -172,10 +172,10 @@
                                 <td align="center" class="red-text font-weight-bold">
                                     <div class="md-form form-sm my-0">
                                         <input type="hidden" id="allotment-id-{{ $allotmentCounter + 1 }}"
-                                               name="allotment_id_{{ $allotmentCounter + 1 }}"
+                                               name="allotment_id[{{ $allotmentCounter + 1 }}]"
                                                value="{{ $itm->{$realignOrderKey}->allotment_id }}">
                                         <input type="hidden" id="allot-realign-id-{{ $allotmentCounter + 1 }}"
-                                               name="allot_realign_id_{{ $allotmentCounter + 1 }}"
+                                               name="allot_realign_id[{{ $allotmentCounter + 1 }}]"
                                                value="{{ $itm->{$realignOrderKey}->allotment_realign_id }}">
                                         <input type="hidden" id="allotment-cost-{{ $allotmentCounter + 1 }}"
                                                value="{{ $itm->{$realignOrderKey}->allotment_cost }}">
@@ -223,7 +223,7 @@
                             <tr id="item-row-{{ $itemCounter }}" class="item-row">
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="date" name="allotted_budget[{{ $itemCounter }}]"
+                                        <input type="date" name="date_ors_burs[{{ $itemCounter }}]"
                                                class="form-control required form-control-sm date-ors-burs py-1"
                                                value="{{ $ors->date_ors_burs }}">
                                     </div>
@@ -250,7 +250,7 @@
                                 <td>
                                     <div class="md-form form-sm my-0">
                                         <input type="hidden" name="ors_id[{{ $itemCounter }}]" value="{{ $ors->id }}">
-                                        <input type="text" name="obs_no[{{ $itemCounter }}]"
+                                        <input type="text" name="ors_no[{{ $itemCounter }}]"
                                                class="form-control required form-control-sm date-ors-burs py-1"
                                                value="{{ $ors->serial_no }}"
                                                placeholder="Value...">
