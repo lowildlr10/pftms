@@ -23,17 +23,22 @@ class Update2FundingLedgerItemsTable extends Migration
             $table->foreign('budget_id')->references('id')->on('funding_allotments');
             $table->uuid('ledger_id');
             $table->foreign('ledger_id')->references('id')->on('funding_ledgers');
-            $table->uuid('ors_id');
+            $table->uuid('ors_id')->nullable();
             $table->foreign('ors_id')->references('id')->on('obligation_request_status');
+            $table->uuid('dv_id')->nullable();
+            $table->foreign('dv_id')->references('id')->on('disbursement_vouchers');
             $table->unsignedInteger('order_no');
             $table->date('date_ors_dv');
             $table->uuid('payee');
             $table->text('paticulars');
-            $table->string('ors_no');
+            $table->string('ors_no')->nullable();
+            $table->binary('mooe_account')->nullable();
             $table->double('total', 50, 2)->default(0.00);
             $table->double('prior_year', 50, 2)->default(0.00);
             $table->double('continuing', 50, 2)->default(0.00);
             $table->double('current', 50, 2)->default(0.00);
+            $table->uuid('unit')->nullable();
+            $table->foreign('unit')->references('id')->on('emp_units');
         });
     }
 

@@ -181,11 +181,28 @@
                     <div class="p-2 border-bottom border-dark">
                         <strong>UACS Object Code</strong>
                     </div>
+                    <div class="md-form px-2">
+                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                                name="uacs_object_code[]" multiple>
+                            <option value="" disabled selected>Choose the MOOE account titles</option>
+                            <option value="">-- None --</option>
+
+                            @if (count($mooeTitles) > 0)
+                                @foreach ($mooeTitles as $mooe)
+                            <option value="{{ $mooe->id }}">
+                                {!! $mooe->uacs_code !!} : {!! $mooe->account_title !!}
+                            </option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                    {{--
                     <div class="form-group p-0 m-0">
                         <textarea class="md-textarea form-control border border-0 rounded-0"
                                   id="uacs-object-code" name="uacs_object_code" rows="8"
                                   placeholder="Write UACS Object Code here..."></textarea>
                     </div>
+                    --}}
                 </div>
                 <div class="col-md-2 border border-left-0 border-bottom-0 border-dark px-0 text-center">
                     <div class="p-2 border-bottom border-dark">

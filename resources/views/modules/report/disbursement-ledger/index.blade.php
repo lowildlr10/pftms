@@ -23,7 +23,7 @@
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
                     <li>
-                        <a href="{{ route('report-obligation-ledger') }}" class="waves-effect waves-light white-text">
+                        <a href="{{ route('report-disbursement-ledger') }}" class="waves-effect waves-light white-text">
                             Disbursement Ledgers
                         </a>
                     </li>
@@ -37,14 +37,6 @@
                                 narrower py-2 px-2 mb-1 d-flex justify-content-between
                                 align-items-center">
                         <div>
-                            @if ($isAllowedCreate)
-                            <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
-                                    onclick="$(this).showCreate(`{{ route('report-obligation-ledger-show-create',
-                                                                ['type' => 'disbursement']) }}`);">
-                                <i class="fas fa-pencil-alt"></i> Create
-                            </button>
-                            @endif
-
                             <a type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
                                     href="{{ route('project') }}">
                                 Go to Projects <i class="fas fa-arrow-right"></i>
@@ -57,7 +49,7 @@
                                 <i class="fas fa-search"></i> {{ !empty($keyword) ? (strlen($keyword) > 15) ?
                                 'Search: '.substr($keyword, 0, 15).'...' : 'Search: '.$keyword : '' }}
                             </button>
-                            <a href="{{ route('report-obligation-ledger') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
+                            <a href="{{ route('report-disbursement-ledger') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
                             </a>
                         </div>
@@ -189,26 +181,64 @@
                     <div class="gradient-card-header rgba-white-light p-0">
                         <div class="p-0">
                             <div class="btn-group btn-menu-1 p-0">
-                            <button type="button" class="btn btn-outline-mdb-color
+                                <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showPrint('{{ $fund->id }}', 'proc_pr');">
                                     <i class="fas fa-print blue-text"></i> Print Ledger
                                 </button>
 
+                                @if (!$fund->has_ledger)
+                                    @if ($isAllowedCreate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showEdit(`{{ route('report-obligation-ledger-show-edit',
-                                                ['id' => $fund->id]) }}`);">
+                                        onclick="$(this).showCreate(`{{ route('report-disbursement-ledger-show-create',
+                                        [
+                                            'project_id' => $fund->id,
+                                            'for' => 'disbursement',
+                                            'type' => $fund->project_type ? $fund->project_type : 'saa',
+                                        ]) }}`);">
+                                    <i class="fas fa-pencil-alt green-text"></i> Create
+                                </button>
+                                    @else
+                                    @endif
+                                @else
+                                    @if ($isAllowedEdit)
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light"
+                                        onclick="$(this).showEdit(`{{ route('report-disbursement-ledger-show-edit',
+                                        [
+                                            'project_id' => $fund->id,
+                                            'for' => 'disbursement',
+                                            'type' => $fund->project_type ? $fund->project_type : 'saa',
+                                        ]) }}`);">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
+                                    @else
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light" disabled>
+                                    <i class="fas fa-edit orange-text"></i> Edit
+                                </button>
+                                    @endif
+                                @endif
 
+                                @if ($isAllowedDelete)
+                                    @if ($fund->has_ledger)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showDelete(`{{ route('report-obligation-ledger-delete',
-                                                                        ['id' => $fund->id]) }}`,
+                                        onclick="$(this).showDelete(`{{ route('report-disbursement-ledger-delete',
+                                                                        ['id' => $fund->ledger_id]) }}`,
                                                                     `{{ $fund->project_title.' LIB' }}`);">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
+                                    @endif
+                                @else
+                                    @if ($fund->has_ledger)
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light" disabled>
+                                    <i class="fas fa-trash-alt red-text"></i> Delete
+                                </button>
+                                    @endif
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -222,7 +252,7 @@
                         <hr>
 
                         <a class="btn btn-sm btn-mdb-color btn-rounded btn-block waves-effect mb-2"
-                           href="{{ route('fund-project-lib', ['keyword' => $fund->id]) }}">
+                           href="{{ route('fund-project-lib', ['keyword' => $fund->budget['id']]) }}">
                                 <i class="fas fa-eye"></i> View LIB and Realignments
                         </a>
                     </div>

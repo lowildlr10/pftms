@@ -28,6 +28,7 @@ class FundingProject extends Model
         'industry_sector',
         'project_site',
         'implementing_agency',
+        'implementing_project_cost',
         'comimplementing_agency_lgus',
         'proponent_units',
         'date_from',
@@ -37,6 +38,7 @@ class FundingProject extends Model
         'project_title',
         'monitoring_offices',
         'access_groups',
+        'project_type',
     ];
 
     /**

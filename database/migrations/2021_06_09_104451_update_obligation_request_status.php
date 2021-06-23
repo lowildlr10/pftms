@@ -16,7 +16,12 @@ class UpdateObligationRequestStatus extends Migration
         Schema::table('obligation_request_status', function (Blueprint $table) {
             $table->uuid('funding_source')->nullable()->after('module_class');
             $table->foreign('funding_source')->references('id')->on('funding_projects');
+            //$table->binary('uacs_object_code')->nullable()->change();
         });
+
+        DB::statement(
+            'ALTER TABLE `obligation_request_status` CHANGE `uacs_object_code` `uacs_object_code` BLOB NULL;'
+        );
     }
 
     /**
@@ -29,6 +34,11 @@ class UpdateObligationRequestStatus extends Migration
         Schema::table('obligation_request_status', function (Blueprint $table) {
             $table->dropForeign('obligation_request_status_funding_source_foreign');
             $table->dropColumn('funding_source');
+            //$table->string('uacs_object_code')->nullable()->change();
         });
+
+        DB::statement(
+            'ALTER TABLE `obligation_request_status` CHANGE `uacs_object_code` `uacs_object_code` VARCHAR(191) NULL;'
+        );
     }
 }

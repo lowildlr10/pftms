@@ -313,6 +313,8 @@ class InspectionAcceptanceController extends Controller
             $iarNo = $instanceIAR->iar_no;
             $inspectedBy = $instanceIAR->sig_inspection;
 
+            $orsDat = ObligationRequestStatus::find($instanceIAR->ors_id);
+            $uacsObjectCode = $orsDat->uacs_object_code;
             $instanceDV = DisbursementVoucher::withTrashed()
                                              ->where('ors_id', $instanceIAR->ors_id)
                                              ->first();
@@ -326,6 +328,7 @@ class InspectionAcceptanceController extends Controller
                 $instanceDV->sig_certified = $instanceIAR->ors->sig_certified_1;
                 $instanceDV->sig_accounting = $instanceIAR->po['sig_funds_available'];
                 $instanceDV->sig_agency_head = $instanceIAR->po['sig_approval'];
+                $instanceDV->uacs_object_code = $uacsObjectCode;
                 $instanceDV->amount = $instanceIAR->ors->amount;
                 $instanceDV->module_class = 3;
                 $instanceDV->save();
@@ -333,6 +336,7 @@ class InspectionAcceptanceController extends Controller
                 $instanceDocLog->logDocument($instanceDV->id, Auth::user()->id, NULL, '-');
                 $instanceDV->date_disbursed = NULL;
                 $instanceDV->disbursed_by = NULL;
+                $instanceDV->uacs_object_code = $uacsObjectCode;
                 $instanceDV->save();
                 DisbursementVoucher::withTrashed()
                                    ->where('ors_id', $instanceIAR->ors_id)

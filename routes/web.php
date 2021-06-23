@@ -1141,12 +1141,12 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_orsledger',
         'access' => 'is_allowed'
     ])->name('report-obligation-ledger');
-    Route::get('report/ledger/obligation/show-create/{type}/{project_id}', [
+    Route::get('report/ledger/obligation/show-create/{project_id}/{for}/{type}', [
         'uses' => 'LedgerController@showCreate',
         'module' => 'report_orsledger',
         'access' => 'create'
     ])->name('report-obligation-ledger-show-create');
-    Route::post('report/ledger/obligation/store', [
+    Route::post('report/ledger/obligation/store/{project_id}/{for}/{type}', [
         'uses' => 'LedgerController@store',
         'module' => 'report_orsledger',
         'access' => 'create'
@@ -1171,6 +1171,16 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_orsledger',
         'access' => 'is_allowed'
     ]);
+    Route::post('report/ledger/obligation/get-unit', [
+        'uses' => 'LedgerController@getUnits',
+        'module' => 'report_orsledger',
+        'access' => 'is_allowed'
+    ]);
+    Route::post('report/ledger/obligation/get-mooe-title', [
+        'uses' => 'LedgerController@getMooeTitles',
+        'module' => 'report_orsledger',
+        'access' => 'is_allowed'
+    ]);
 
     // Disbursement Ledger Module
     Route::any('report/ledger/disbursement', [
@@ -1178,12 +1188,12 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_dvledger',
         'access' => 'is_allowed'
     ])->name('report-disbursement-ledger');
-    Route::get('report/ledger/disbursement/show-create/{type}/{project_id}', [
+    Route::get('report/ledger/disbursement/show-create/{project_id}/{for}/{type}', [
         'uses' => 'LedgerController@showCreate',
         'module' => 'report_dvledger',
         'access' => 'create'
     ])->name('report-disbursement-ledger-show-create');
-    Route::post('report/ledger/disbursement/store/{type}', [
+    Route::post('report/ledger/disbursement/store/{project_id}/{for}/{type}', [
         'uses' => 'LedgerController@store',
         'module' => 'report_dvledger',
         'access' => 'create'
@@ -1203,6 +1213,21 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_dvledger',
         'access' => 'delete'
     ])->name('report-disbursement-ledger-delete');
+    Route::post('report/ledger/disbursement/get-payee', [
+        'uses' => 'LedgerController@getPayees',
+        'module' => 'report_dvledger',
+        'access' => 'is_allowed'
+    ]);
+    Route::post('report/ledger/disbursement/get-unit', [
+        'uses' => 'LedgerController@getUnits',
+        'module' => 'report_dvledger',
+        'access' => 'is_allowed'
+    ]);
+    Route::post('report/ledger/disbursement/get-mooe-title', [
+        'uses' => 'LedgerController@getMooeTitles',
+        'module' => 'report_dvledger',
+        'access' => 'is_allowed'
+    ]);
 
     // Line-Item Budget Module
     Route::any('reports/project-lib', [

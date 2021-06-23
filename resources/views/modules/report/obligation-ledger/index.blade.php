@@ -193,8 +193,9 @@
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showCreate(`{{ route('report-obligation-ledger-show-create',
                                         [
-                                            'type' => 'obligation',
-                                            'project_id' => $fund->id
+                                            'project_id' => $fund->id,
+                                            'for' => 'obligation',
+                                            'type' => 'saa',
                                         ]) }}`);">
                                     <i class="fas fa-pencil-alt green-text"></i> Create
                                 </button>
@@ -205,7 +206,11 @@
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showEdit(`{{ route('report-obligation-ledger-show-edit',
-                                                ['id' => $fund->id]) }}`);">
+                                        [
+                                            'project_id' => $fund->id,
+                                            'for' => 'obligation',
+                                            'type' => 'saa',
+                                        ]) }}`);">
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
                                     @else
@@ -216,13 +221,24 @@
                                     @endif
                                 @endif
 
+                                @if ($isAllowedDelete)
+                                    @if ($fund->has_ledger)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showDelete(`{{ route('report-obligation-ledger-delete',
-                                                                        ['id' => $fund->id]) }}`,
+                                                                        ['id' => $fund->ledger_id]) }}`,
                                                                     `{{ $fund->project_title.' LIB' }}`);">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
+                                    @endif
+                                @else
+                                    @if ($fund->has_ledger)
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light" disabled>
+                                    <i class="fas fa-trash-alt red-text"></i> Delete
+                                </button>
+                                    @endif
+                                @endif
                             </div>
                         </div>
                     </div>

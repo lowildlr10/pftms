@@ -16,6 +16,7 @@ class Update2DisbursementVouchersTable extends Migration
         Schema::table('disbursement_vouchers', function (Blueprint $table) {
             $table->uuid('funding_source')->nullable()->after('for_payment_by');
             $table->foreign('funding_source')->references('id')->on('funding_projects');
+            $table->binary('uacs_object_code')->nullable()->after('date_agency_head');
         });
     }
 
@@ -29,6 +30,7 @@ class Update2DisbursementVouchersTable extends Migration
         Schema::table('disbursement_vouchers', function (Blueprint $table) {
             $table->dropForeign('disbursement_vouchers_funding_source_foreign');
             $table->dropColumn('funding_source');
+            $table->dropColumn('uacs_object_code');
         });
     }
 }

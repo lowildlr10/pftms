@@ -4,7 +4,9 @@ $(function() {
     const template = '<div class="tooltip md-tooltip">' +
                      '<div class="tooltip-arrow md-arrow"></div>' +
                      '<div class="tooltip-inner md-inner stylish-color"></div></div>';
-    let allotClassData = {};
+    let payeeData = {},
+        unitData = {},
+        mooeTitle = {};
 
     function filterNaN(inputVal) {
         let outputVal = isNaN(inputVal) ? 0 : inputVal;
@@ -12,7 +14,7 @@ $(function() {
         return outputVal;
     }
 
-    function initializeSelect2() {
+    function initializeSelect2(forType) {
         $('.payee-tokenizer').select2({
             tokenSeparators: [','],
             placeholder: "Value...",
@@ -20,7 +22,7 @@ $(function() {
             maximumSelectionSize: 4,
             allowClear: true,
             ajax: {
-                url: `${baseURL}/report/ledger/obligation/get-payee`,
+                url: `${baseURL}/report/ledger/${forType}/get-payee`,
                 type: "post",
                 dataType: 'json',
                 delay: 250,
@@ -35,10 +37,89 @@ $(function() {
                         results: $.map(data, function(item) {
                             let jsonData = {};
                             jsonData['name'] = item.name;
-                            allotClassData[item.id] = jsonData;
+                            payeeData[item.id] = jsonData;
 
                             return {
                                 text: `${item.name}`,
+                                id: item.id
+                            }
+                        }),
+                        pagination: {
+                            more: true
+                        }
+                    };
+                },
+                cache: true
+            },
+            //theme: "material"
+        });
+
+        $('.unit-tokenizer').select2({
+            tokenSeparators: [','],
+            placeholder: "Value...",
+            width: '100%',
+            maximumSelectionSize: 4,
+            allowClear: true,
+            ajax: {
+                url: `${baseURL}/report/ledger/${forType}/get-unit`,
+                type: "post",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        _token: CSRF_TOKEN,
+                        search: params.term
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: $.map(data, function(item) {
+                            let jsonData = {};
+                            jsonData['name'] = item.name;
+                            unitData[item.id] = jsonData;
+
+                            return {
+                                text: `${item.name}`,
+                                id: item.id
+                            }
+                        }),
+                        pagination: {
+                            more: true
+                        }
+                    };
+                },
+                cache: true
+            },
+            //theme: "material"
+        });
+
+        $('.mooe-title-tokenizer').select2({
+            tokenSeparators: [','],
+            placeholder: "Value...",
+            width: '100%',
+            maximumSelectionSize: 4,
+            allowClear: true,
+            ajax: {
+                url: `${baseURL}/report/ledger/${forType}/get-unit`,
+                type: "post",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        _token: CSRF_TOKEN,
+                        search: params.term
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: $.map(data, function(item) {
+                            let jsonData = {};
+                            jsonData['name'] = item.name;
+                            jsonData['uacs_code'] = item.uacs_code;
+                            mooeTitle[item.id] = jsonData;
+
+                            return {
+                                text: `${item.uacs_code} : ${item.name}`,
                                 id: item.id
                             }
                         }),
@@ -58,6 +139,39 @@ $(function() {
             items: '> tr:not(.exclude-sortable)'
         });
         $('.sortable').disableSelection();
+    }
+
+    $.fn.computeTotalPriorYear = function() {
+        let totalPriorYear = 0;
+
+        $('.prior-year').each(function() {
+            const priorYear = parseFloat($(this).val());
+            totalPriorYear += priorYear;
+        });
+
+        $('#total-prior-year').val(totalPriorYear.toFixed(2));
+    }
+
+    $.fn.computeTotalContinuing = function() {
+        let totalContinuing = 0;
+
+        $('.continuing').each(function() {
+            const continuing = parseFloat($(this).val());
+            totalContinuing += continuing;
+        });
+
+        $('#total-continuing').val(totalContinuing.toFixed(2));
+    }
+
+    $.fn.computeTotalCurrent = function() {
+        let totalCurrent = 0;
+
+        $('.current').each(function() {
+            const current = parseFloat($(this).val());
+            totalCurrent += current;
+        });
+
+        $('#total-current').val(totalCurrent.toFixed(2));
     }
 
     $.fn.computeTotalRemaining = function() {
@@ -89,8 +203,12 @@ $(function() {
     function initializeLedgerInput() {
         const allotmentCount = parseInt($('#allotment-count').val());
 
-        $(this).computeTotalRemaining();
-        $(this).computeAllotmentRemaining();
+        try {
+            $(this).computeTotalRemaining();
+            $(this).computeAllotmentRemaining();
+        } catch (error) {
+
+        }
 
         for (let allotCtr = 1; allotCtr <= allotmentCount; allotCtr++) {
             $(`.allotment-${allotCtr}`).each(function() {
@@ -313,11 +431,13 @@ $(function() {
     $.fn.showCreate = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-create').load(url, function() {
+            const forType = $('#for').val();
+
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
             initializeLedgerInput();
             $(this).slideToggle(500);
-            initializeSelect2();
+            initializeSelect2(forType);
             initializeSortable();
         });
         $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})

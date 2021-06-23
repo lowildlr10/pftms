@@ -12,10 +12,14 @@ use App\Models\FundingLedgerItem;
 use App\Models\FundingBudgetRealignment;
 use App\Models\FundingAllotmentRealignment;
 use App\Models\ObligationRequestStatus;
+use App\Models\DisbursementVoucher;
+use App\Models\PurchaseRequest;
 use App\Models\AllotmentClass;
 use App\Models\PaperSize;
 use App\Models\EmpAccount as User;
+use App\Models\EmpUnit;
 use App\Models\Supplier;
+use App\Models\MooeAccountTitle;
 
 use Carbon\Carbon;
 use Auth;
@@ -125,7 +129,7 @@ class LedgerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function showCreate(Request $request, $type, $projectID) {
+    public function showCreate(Request $request, $projectID, $for, $type) {
         $itemCounter = 0;
         $allotmentCounter = 0;
         $allotmentClasses = AllotmentClass::orderBy('order_no')->get();
@@ -145,43 +149,105 @@ class LedgerController extends Controller
                           ($libData ? $libData : NULL);
         $isRealignment = $libRealignments->count() > 0 ? true : false;
 
-        $approvedBudgets = [
-            (object) [
-                'label' => 'Approved Budget',
-                'total' => $libData->approved_budget
-            ]
-        ];
+
         $groupedAllotments = $this->groupAllotments(
             $allotments, $isRealignment, $lastBudgetData
         );
         $allotments = $groupedAllotments->grouped_allotments;
         $classItemCounts = $groupedAllotments->class_item_counts;
 
-        foreach ($libRealignments as $realignCtr => $libRealign) {
-            $approvedBudgets[] = (object) [
-                'label' => $this->convertToOrdinal($realignCtr + 1) . ' Re-alignment',
-                'total' => $libRealign->approved_realigned_budget];
+        $mooeTitles = json_decode($this->getMooeTitles($request)->content(), true);
+        $empUnits = json_decode($this->getUnits($request)->content(), true);
+        $payees = json_decode($this->getPayees($request)->content(), true);
+
+        foreach ($mooeTitles as $mooeCtr => $mooeTitle) {
+            $mooeTitles[$mooeCtr] = (object) $mooeTitle;
         }
 
-        $obligations = ObligationRequestStatus::where([['funding_source', $projectID]])
-                                      ->whereNotNull('date_obligated')
-                                      ->orderBy('date_ors_burs')
-                                      ->get();
-        $payees = json_decode($this->getPayees($request)->content(), true);
+        foreach ($empUnits as $unitCtr => $empUnt) {
+            $empUnits[$unitCtr] = (object) $empUnt;
+        }
 
         foreach ($payees as $payCtr => $pay) {
             $payees[$payCtr] = (object) $pay;
         }
 
-        if ($type == 'obligation') {
-            $viewFile = 'modules.report.obligation-ledger.create';
+        if ($for == 'obligation') {
+            $vouchers = ObligationRequestStatus::select('id', 'date_ors_burs', 'payee',
+                                                        'particulars', 'serial_no', 'amount')
+                                      ->where([['funding_source', $projectID]])
+                                      ->whereNotNull('date_obligated')
+                                      ->orderBy('date_ors_burs')
+                                      ->get();
+            $approvedBudgets = [
+                (object) [
+                    'label' => 'Approved Budget',
+                    'total' => $libData->approved_budget
+                ]
+            ];
+
+            foreach ($libRealignments as $realignCtr => $libRealign) {
+                $approvedBudgets[] = (object) [
+                    'label' => $this->convertToOrdinal($realignCtr + 1) . ' Re-alignment',
+                    'total' => $libRealign->approved_realigned_budget];
+            }
+
+            if ($type == 'saa') {
+                $viewFile = 'modules.report.obligation-ledger.create-saa';
+            }
         } else {
-            $viewFile = 'modules.report.disbursement-ledger.create';
+            $vouchers = DB::table('disbursement_vouchers as dv')
+                          ->select('dv.id', 'dv.date_dv', 'dv.payee', 'dv.particulars',
+                                   'ors.serial_no', 'dv.amount', 'dv.uacs_object_code',
+                                   'dv.module_class', 'dv.pr_id', 'ors.id as ors_id')
+                          ->leftJoin('obligation_request_status as ors',
+                                     'ors.id', '=', 'dv.ors_id')
+                          ->where([['dv.funding_source', $projectID]])
+                          ->whereNotNull('dv.date_disbursed')
+                          ->orderBy('dv.date_dv')
+                          ->get();
+            $approvedBudgets = [
+                (object) [
+                    'label' => 'LIB',
+                    'total' => $libData->approved_budget
+                ]
+            ];
+
+            foreach ($libRealignments as $realignCtr => $libRealign) {
+                $approvedBudgets[] = (object) [
+                    'label' => 'Realignment',
+                    'total' => $libRealign->approved_realigned_budget];
+            }
+
+            if ($type == 'saa') {
+                $viewFile = 'modules.report.disbursement-ledger.create-saa';
+            } else if ($type == 'mooe') {
+                foreach ($vouchers as $dv) {
+                    $dv->uacs_object_code = unserialize($dv->uacs_object_code);
+
+                    if ($dv->module_class == 3) {
+                        $prID = $dv->pr_id;
+                        $prDat = PurchaseRequest::find($prID);
+                        $userID = $prDat->requested_by;
+                        $userDat = User::find($userID);
+                        $dv->unit = $userDat->unit;
+                    } else {
+                        $userID = $dv->payee;
+                        $userDat = User::find($userID);
+                        $dv->unit = $userDat->unit;
+                    }
+                }
+
+                $viewFile = 'modules.report.disbursement-ledger.create-mooe';
+            } else if ($type == 'lgia') {
+                $viewFile = 'modules.report.disbursement-ledger.create-lgia';
+            }
         }
 
         return view($viewFile, compact(
             'allotments', 'classItemCounts', 'approvedBudgets', 'isRealignment',
-            'obligations', 'itemCounter', 'allotmentCounter', 'payees'
+            'vouchers', 'itemCounter', 'allotmentCounter', 'payees', 'projectID',
+            'empUnits', 'mooeTitles'
         ));
     }
 
@@ -191,7 +257,7 @@ class LedgerController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request) {
+    public function store(Request $request, $projectID, $for, $type) {
         dd($request);
     }
 
@@ -279,6 +345,74 @@ class LedgerController extends Controller
         }
 
         return response()->json($payees);
+    }
+
+    public function getUnits(Request $request) {
+        $keyword = trim($request->search);
+
+        $units = [];
+        $empUnits = EmpUnit::select('id', 'unit_name');
+
+        if ($keyword) {
+            $empUnits = $empUnits->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('unit_name', 'like', "%$keyword%");
+                $keywords = explode('/\s+/', $keyword);
+
+                if (count($keywords) > 0) {
+                    foreach ($keywords as $tag) {
+                        $qry->orWhere('unit_name', 'like', "%$tag%");
+                    }
+                }
+            });
+        }
+
+        $empUnits = $empUnits->orderBy('unit_name')->get();
+
+        foreach ($empUnits as $unit) {
+            $units[] = (object) [
+                'id' => $unit->id,
+                'name' => $unit->unit_name
+            ];
+        }
+
+        return response()->json($units);
+    }
+
+    public function getMooeTitles(Request $request) {
+        $keyword = trim($request->search);
+
+        $mooes = [];
+        $mooeTitles = MooeAccountTitle::select('id', 'uacs_code', 'account_title',
+                                               'order_no');
+
+        if ($keyword) {
+            $mooeTitles = $mooeTitles->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('uacs_code', 'like', "%$keyword%")
+                    ->orWhere('account_title', 'like', "%$keyword%");
+                $keywords = explode('/\s+/', $keyword);
+
+                if (count($keywords) > 0) {
+                    foreach ($keywords as $tag) {
+                        $qry->orWhere('uacs_code', 'like', "%$tag%")
+                            ->orWhere('account_title', 'like', "%$tag%");
+                    }
+                }
+            });
+        }
+
+        $mooeTitles = $mooeTitles->orderBy('order_no')->get();
+
+        foreach ($mooeTitles as $mooe) {
+            $mooes[] = (object) [
+                'id' => $mooe->id,
+                'name' => $mooe->account_title,
+                'uacs_code' => $mooe->uacs_code,
+            ];
+        }
+
+        return response()->json($mooes);
     }
 
     private function groupAllotments($allotments, $isRealignment = false, $currRealignData = NULL) {

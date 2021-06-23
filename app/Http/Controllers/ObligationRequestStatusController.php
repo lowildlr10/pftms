@@ -21,6 +21,7 @@ use App\Models\Supplier;
 use App\Models\Signatory;
 use App\Models\ItemUnitIssue;
 use App\Models\FundingProject;
+use App\Models\MooeAccountTitle;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -329,6 +330,7 @@ class ObligationRequestStatusController extends Controller
                 User::where('is_active', 'y')
                     ->whereIn('division', $empDivisionAccess)
                     ->orderBy('firstname')->get();
+        $mooeTitles = MooeAccountTitle::orderBy('order_no')->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -340,7 +342,7 @@ class ObligationRequestStatusController extends Controller
         }
 
         return view('modules.voucher.ors-burs.create', compact(
-            'signatories', 'payees', 'projects'
+            'signatories', 'payees', 'projects', 'mooeTitles'
         ));
     }
 
@@ -362,7 +364,7 @@ class ObligationRequestStatusController extends Controller
         $responsibilityCenter = $request->responsibility_center;
         $particulars = $request->particulars;
         $mfoPAP = $request->mfo_pap;
-        $uacsObjectCode = $request->uacs_object_code;
+        $uacsObjectCode = serialize($request->uacs_object_code);
         $project = $request->funding_source;
         $amount = $request->amount;
         $sigCertified1 = !empty($request->sig_certified_1) ? $request->sig_certified_1: NULL;
@@ -430,7 +432,9 @@ class ObligationRequestStatusController extends Controller
         $responsibilityCenter = $orsData->responsibility_center;
         $particulars = $orsData->particulars;
         $mfoPAP = $orsData->mfo_pap;
-        $uacsObjectCode = $orsData->uacs_object_code;
+        $uacsObjectCode = $orsData->uacs_object_code ?
+                          unserialize($orsData->uacs_object_code) :
+                          [];
         $amount = $orsData->amount;
         $sigCertified1 = $orsData->sig_certified_1;
         $sigCertified2 = $orsData->sig_certified_2;
@@ -439,6 +443,7 @@ class ObligationRequestStatusController extends Controller
         $transactionType = $orsData->transaction_type;
         $project = $orsData->funding_source;
         $projects = FundingProject::orderBy('project_title')->get();
+        $mooeTitles = MooeAccountTitle::orderBy('order_no')->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -464,7 +469,7 @@ class ObligationRequestStatusController extends Controller
             'uacsObjectCode', 'uacsObjectCode', 'amount',
             'sigCertified1', 'sigCertified2', 'dateCertified1',
             'dateCertified2', 'signatories', 'payees', 'isObligated',
-            'transactionType', 'projects', 'project'
+            'transactionType', 'projects', 'project', 'mooeTitles'
         ));
     }
 
@@ -486,7 +491,7 @@ class ObligationRequestStatusController extends Controller
         $responsibilityCenter = $request->responsibility_center;
         $particulars = $request->particulars;
         $mfoPAP = $request->mfo_pap;
-        $uacsObjectCode = $request->uacs_object_code;
+        $uacsObjectCode = serialize($request->uacs_object_code);
         $project = $request->funding_source;
         $amount = $request->amount;
         $sigCertified1 = !empty($request->sig_certified_1) ? $request->sig_certified_1: NULL;
@@ -522,6 +527,13 @@ class ObligationRequestStatusController extends Controller
             $instanceORS->funding_source = $project;
             $instanceORS->amount = $amount;
             $instanceORS->save();
+
+            $instanceDV = DisbursementVoucher::where('ors_id', $id)->first();
+
+            if ($instanceDV) {
+                $instanceDV->uacs_object_code = $uacsObjectCode;
+                $instanceDV->save();
+            }
 
             $documentType = $documentType == 'ors' ? 'Obligation Request & Status' :
                             'Budget Utilization Request & Status';

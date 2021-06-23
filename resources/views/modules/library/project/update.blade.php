@@ -246,5 +246,17 @@
         <label class="mdb-main-label">
             Access Groups
         </label>
+    </div>
+    <div class="md-form">
+        <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                name="project_type">
+            <option value="" disabled selected>Choose a project type</option>
+            <option value="saa" {{ $projectType == 'saa' ? 'selected' : '' }}>Special Project</option>
+            <option value="mooe" {{ $projectType == 'mooe' ? 'selected' : '' }}>MOOE</option>
+            <option value="lgia" {{ $projectType == 'lgia' ? 'selected' : '' }}>LGIA</option>
+        </select>
+        <label class="mdb-main-label">
+            Project Type <span class="red-text">*</span>
+        </label>
     </div><br>
 </form>

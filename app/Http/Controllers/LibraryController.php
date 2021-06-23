@@ -647,6 +647,7 @@ class LibraryController extends Controller
         $accessGroup  = $projectData->access_groups ?
                         unserialize($projectData->access_groups) : [];
         $projectTitle = $projectData->project_title;
+        $projectType = $projectData->project_type;
         $projectLeader = $projectData->project_leader;
 
         $coimplementingCount = $comimplementingAgencyLGUs ? count($comimplementingAgencyLGUs) : 0;
@@ -674,6 +675,7 @@ class LibraryController extends Controller
             'monitoringOffice',
             'accessGroup',
             'projectTitle',
+            'projectType',
             'projectLeader',
             'coimplementingCount',
             'propenentCount'
@@ -693,6 +695,7 @@ class LibraryController extends Controller
         $dateTo = $request->date_to;
         $monitoringOffice = $request->monitoring_office;
         $accessGroup = $request->access_group;
+        $projectType = $request->project_type;
 
         $comimplementingAgencyLGUs = $request->comimplementing_agency_lgus;
         $coimplementingProjectCosts = $request->coimplementing_project_costs;
@@ -724,6 +727,7 @@ class LibraryController extends Controller
                 $instanceProject->project_leader = $projectLeader;
                 $instanceProject->monitoring_offices = serialize($monitoringOffice);
                 $instanceProject->access_groups = serialize($accessGroup);
+                $instanceProject->project_type = $projectType;
                 $instanceProject->save();
 
                 $msg = "Project '$projectTitle' successfully created.";
@@ -751,6 +755,7 @@ class LibraryController extends Controller
         $dateTo = $request->date_to;
         $monitoringOffice = $request->monitoring_office;
         $accessGroup = $request->access_group;
+        $projectType = $request->project_type;
 
         $comimplementingAgencyLGUs = $request->comimplementing_agency_lgus;
         $coimplementingProjectCosts = $request->coimplementing_project_costs;
@@ -768,6 +773,7 @@ class LibraryController extends Controller
             }
 
             $instanceProject = FundingProject::find($id);
+            $oldProjectType = $instanceProject->project_type;
             $instanceProject->project_title = $projectTitle;
             $instanceProject->industry_sector = $industrySector;
             $instanceProject->project_site = $projectSite;
@@ -781,7 +787,20 @@ class LibraryController extends Controller
             $instanceProject->project_leader = $projectLeader;
             $instanceProject->monitoring_offices = serialize($monitoringOffice);
             $instanceProject->access_groups = serialize($accessGroup);
+            $instanceProject->project_type = $projectType;
             $instanceProject->save();
+
+            if ($oldProjectType != $projectType) {
+                DB::table('funding_ledger_allotments')
+                  ->where('project_id', $id)
+                  ->forceDelete();
+                DB::table('funding_ledger_items')
+                  ->where('project_id', $id)
+                  ->forceDelete();
+                DB::table('funding_ledgers')
+                  ->where('project_id', $id)
+                  ->forceDelete();
+            }
 
             $msg = "Project '$projectTitle' successfully updated.";
             return redirect(url()->previous())->with('success', $msg);

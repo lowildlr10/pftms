@@ -21,14 +21,18 @@ class FundingLedgerItem extends Model
      */
     protected $fillable = [
         'project_id',
+        'budget_id',
         'ledger_id',
-        'allotment_id',
         'ors_id',
+        'order_no',
         'date_ors_dv',
         'payee',
         'paticulars',
         'ors_no',
-        'total'
+        'total',
+        'prior_year',
+        'continuing',
+        'current',
     ];
 
     /**

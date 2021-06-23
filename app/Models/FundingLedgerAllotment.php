@@ -3,19 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 
-class FundingLedger extends Model
+class FundingLedgerAllotment extends Model
 {
-    use SoftDeletes;
-
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'funding_ledgers';
+    protected $table = 'funding_ledger_allotments';
 
      /**
      * The attributes that are mass assignable.
@@ -24,10 +21,20 @@ class FundingLedger extends Model
      */
     protected $fillable = [
         'project_id',
+        'ledger_id',
         'budget_id',
-        'ledger_for',
-        'ledger_type',
+        'ledger_item_id',
+        'allotment_id',
+        'realign_allotment_id',
+        'current_cost',
     ];
+
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
 
     /**
      * Indicates if the IDs are auto-incrementing.
@@ -45,17 +52,5 @@ class FundingLedger extends Model
 
     public static function generateUuid() {
         return Uuid::generate();
-    }
-
-    public function ledgerItems() {
-        return $this->hasMany('App\Models\FundingLedgerItem', 'id', 'ledger_id');
-    }
-
-    public function project() {
-        return $this->hasOne('App\Models\FundingProject', 'id', 'project_id');
-    }
-
-    public function allotments() {
-        return $this->hasMany('App\Models\FundingAllotment', 'id', 'allotment_id');
     }
 }

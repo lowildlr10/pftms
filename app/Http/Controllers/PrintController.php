@@ -11,7 +11,7 @@ use App\Models\AbstractQuotation;
 use App\Models\AbstractQuotationItem;
 use App\Models\PurchaseJobOrder;
 use App\Models\PurchaseJobOrderItem;
-use App\Models\ObligationRequestStatus;
+use App\Models\ObligationRequestStatus as OrsBurs;
 use App\Models\InspectionAcceptance;
 use App\Models\DisbursementVoucher;
 use App\Models\InventoryStock;
@@ -2504,9 +2504,7 @@ class PrintController extends Controller
         if ($type == 'procurement') {
 
             $dv = DB::table('disbursement_vouchers as dv')
-                    ->select('dv.id as dv_id', 'dv.*', 'ors.payee', 'ors.address', 'ors.amount',
-                             'ors.sig_certified_1', 'ors.po_no', 'ors.sig_certified_2', 'bid.company_name',
-                             'bid.vat_no as tin', 'ors.responsibility_center', 'ors.mfo_pap')
+                    ->select('dv.id as dv_id', 'dv.*', 'bid.company_name', 'bid.vat_no as tin')
                     ->join('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
                     ->join('suppliers as bid', 'bid.id', '=', 'ors.payee')
                     ->where('dv.id', $id)
@@ -2544,7 +2542,20 @@ class PrintController extends Controller
         $position1 = $instanceSignatory->getSignatory($dv->sig_certified)->dv_designation;
         $position2 = $instanceSignatory->getSignatory($dv->sig_accounting)->dv_designation;
         $position3 = $instanceSignatory->getSignatory($dv->sig_agency_head)->dv_designation;
+        $uacsObjects = [];
+        $uacsCodes = unserialize($dv->uacs_object_code);
 
+        foreach ($uacsCodes as $uacs) {
+            $mooeTitleDat = DB::table('mooe_account_titles')
+                              ->where('id', $uacs)
+                              ->first();
+
+            if ($mooeTitleDat) {
+                $uacsObjects[] = $mooeTitleDat->uacs_code;
+            }
+        }
+
+        $uacsObjects = implode(', ', $uacsObjects);
         $amount = number_format($dv->amount, 2);
 
         $tableData[] = [$dv->particulars,
@@ -2726,6 +2737,7 @@ class PrintController extends Controller
         $position2 = $instanceSignatory->getSignatory($ors->sig_certified_2)->ors_designation;
         $sDate1 = $ors->date_certified_1;
         $sDate2 = $ors->date_certified_2;
+        $uacsObjects = [];
 
         if ($ors->document_type == 'ors') {
             $statusOf[] = ['C.', 'STATUS OF OBLIGATION', '', '', '', '', '', ''];
@@ -2759,10 +2771,23 @@ class PrintController extends Controller
             $ors->mfo_pap = str_replace($searchStr, '<br>', $ors->mfo_pap);
         }
 
+        $uacsCodes = unserialize($ors->uacs_object_code);
+
+        foreach ($uacsCodes as $uacs) {
+            $mooeTitleDat = DB::table('mooe_account_titles')
+                              ->where('id', $uacs)
+                              ->first();
+
+            if ($mooeTitleDat) {
+                $uacsObjects[] = $mooeTitleDat->uacs_code;
+            }
+        }
+
+        $uacsObjects = implode(', ', $uacsObjects);
         $tableData[] = [$ors->responsibility_center,
                         $ors->particulars,
                         $ors->mfo_pap,
-                        $ors->uacs_object_code, $itemAmount];
+                        $uacsObjects, $itemAmount];
 
         for ($i = 1; $i <= 6 ; $i++) {
             $obligationValue = '';
