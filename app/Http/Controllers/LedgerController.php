@@ -364,19 +364,17 @@ class LedgerController extends Controller
                         $ledgerItemDat = FundingledgerItem::where('order_no', $orderNo)->first();
                         $ledgerItemID = $ledgerItemDat->id;
 
-                        foreach ($allotments as $allotTotals) {
-                            foreach ($allotTotals as $allotCtr => $total) {
-                                if ($total > 0) {
-                                    $instanceLedgerAllotments = new FundingLedgerAllotment;
-                                    $instanceLedgerAllotments->project_id = $projectID;
-                                    $instanceLedgerAllotments->budget_id = $budgetID;
-                                    $instanceLedgerAllotments->ledger_id = $ledgerID;
-                                    $instanceLedgerAllotments->ledger_item_id = $ledgerItemID;
-                                    $instanceLedgerAllotments->allotment_id = $allotmentIDs[$allotCtr];
-                                    $instanceLedgerAllotments->realign_allotment_id = $allotmentRealignIDs[$allotCtr];
-                                    $instanceLedgerAllotments->current_cost = $total;
-                                    $instanceLedgerAllotments->save();
-                                }
+                        foreach ($allotments[$orsCtr] as $allotCtr => $total) {
+                            if ($total > 0) {
+                                $instanceLedgerAllotments = new FundingLedgerAllotment;
+                                $instanceLedgerAllotments->project_id = $projectID;
+                                $instanceLedgerAllotments->budget_id = $budgetID;
+                                $instanceLedgerAllotments->ledger_id = $ledgerID;
+                                $instanceLedgerAllotments->ledger_item_id = $ledgerItemID;
+                                $instanceLedgerAllotments->allotment_id = $allotmentIDs[$allotCtr];
+                                $instanceLedgerAllotments->realign_allotment_id = $allotmentRealignIDs[$allotCtr];
+                                $instanceLedgerAllotments->current_cost = $total;
+                                $instanceLedgerAllotments->save();
                             }
                         }
 
@@ -403,19 +401,17 @@ class LedgerController extends Controller
                         $ledgerItemDat = FundingledgerItem::where('order_no', $orderNo)->first();
                         $ledgerItemID = $ledgerItemDat->id;
 
-                        foreach ($allotments as $allotTotals) {
-                            foreach ($allotTotals as $allotCtr => $total) {
-                                if ($total > 0) {
-                                    $instanceLedgerAllotments = new FundingLedgerAllotment;
-                                    $instanceLedgerAllotments->project_id = $projectID;
-                                    $instanceLedgerAllotments->budget_id = $budgetID;
-                                    $instanceLedgerAllotments->ledger_id = $ledgerID;
-                                    $instanceLedgerAllotments->ledger_item_id = $ledgerItemID;
-                                    $instanceLedgerAllotments->allotment_id = $allotmentIDs[$allotCtr];
-                                    $instanceLedgerAllotments->realign_allotment_id = $allotmentRealignIDs[$allotCtr];
-                                    $instanceLedgerAllotments->current_cost = $total;
-                                    $instanceLedgerAllotments->save();
-                                }
+                        foreach ($allotments[$dvCtr] as $allotCtr => $total) {
+                            if ($total > 0) {
+                                $instanceLedgerAllotments = new FundingLedgerAllotment;
+                                $instanceLedgerAllotments->project_id = $projectID;
+                                $instanceLedgerAllotments->budget_id = $budgetID;
+                                $instanceLedgerAllotments->ledger_id = $ledgerID;
+                                $instanceLedgerAllotments->ledger_item_id = $ledgerItemID;
+                                $instanceLedgerAllotments->allotment_id = $allotmentIDs[$allotCtr];
+                                $instanceLedgerAllotments->realign_allotment_id = $allotmentRealignIDs[$allotCtr];
+                                $instanceLedgerAllotments->current_cost = $total;
+                                $instanceLedgerAllotments->save();
                             }
                         }
 
@@ -481,8 +477,276 @@ class LedgerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function showEdit($id) {
-        //
+    public function showEdit(Request $request, $id, $for, $type) {
+        $itemCounter = 0;
+        $allotmentCounter = 0;
+
+        $ledgerDat = FundingLedger::find($id);
+        $projectID = $ledgerDat->project_id;
+        $projectDat = FundingProject::find($projectID);
+        $projectTitle = $projectDat->project_title;
+        $allotmentClasses = AllotmentClass::orderBy('order_no')->get();
+        $libData = FundingBudget::where('project_id', $projectID)
+                                ->whereNotNull('date_approved')
+                                ->first();
+        $libID = $libData->id;
+        $allotments = FundingAllotment::where('budget_id', $libID)
+                                      ->orderBy('order_no')
+                                      ->get();
+        $libRealignments = FundingBudgetRealignment::orderBy('realignment_order')
+                                                   ->where('project_id', $projectID)
+                                                   ->whereNotNull('date_approved')
+                                                   ->get();
+        $lastBudgetData = $libRealignments->count() > 0 ?
+                          $libRealignments->last() :
+                          ($libData ? $libData : NULL);
+        $isRealignment = $libRealignments->count() > 0 ? true : false;
+
+
+        $groupedAllotments = $this->groupAllotments(
+            $allotments, $isRealignment, $lastBudgetData
+        );
+        $allotments = $groupedAllotments->grouped_allotments;
+        $classItemCounts = $groupedAllotments->class_item_counts;
+
+        $mooeTitles = json_decode($this->getMooeTitles($request)->content(), true);
+        $empUnits = json_decode($this->getUnits($request)->content(), true);
+        $payees = json_decode($this->getPayees($request)->content(), true);
+
+        foreach ($mooeTitles as $mooeCtr => $mooeTitle) {
+            $mooeTitles[$mooeCtr] = (object) $mooeTitle;
+        }
+
+        foreach ($empUnits as $unitCtr => $empUnt) {
+            $empUnits[$unitCtr] = (object) $empUnt;
+        }
+
+        foreach ($payees as $payCtr => $pay) {
+            $payees[$payCtr] = (object) $pay;
+        }
+
+        if ($for == 'obligation') {
+            $vouchers = DB::table('obligation_request_status as ors')->select(
+                DB::raw("DATE_FORMAT(ors.date_obligated, '%Y-%m-%d') as date_obligated"),
+                'ors.id', 'ors.payee', 'ors.particulars', 'ors.serial_no', 'ors.amount',
+                'ledger.id as ledger_item_id', 'ledger.particulars as ledger_particulars'
+            )->leftJoin('funding_ledger_items as ledger', 'ledger.ors_id', '=', 'ors.id')
+             ->where('funding_source', $projectID)
+             ->whereNotNull('date_obligated')
+             ->orderBy('date_obligated')
+             ->get();
+            $approvedBudgets = [
+                (object) [
+                    'label' => 'Approved Budget',
+                    'total' => $libData->approved_budget
+                ]
+            ];
+
+            foreach ($libRealignments as $realignCtr => $libRealign) {
+                $approvedBudgets[] = (object) [
+                    'label' => $this->convertToOrdinal($realignCtr + 1) . ' Re-alignment',
+                    'total' => $libRealign->approved_realigned_budget];
+            }
+
+            if ($type == 'saa') {
+                foreach ($vouchers as $voucher) {
+                    if ($voucher->ledger_item_id) {
+                        $voucher->allotments = [];
+                        $ledgerAllotments = FundingLedgerAllotment::where(
+                            'ledger_item_id', $voucher->ledger_item_id
+                        )->get();
+
+                        foreach ($ledgerAllotments as $allot) {
+                            $voucher->allotments[] = (object) [
+                                'allotment_id' => $allot->allotment_id,
+                                'allotment_realign_id' => $allot->realign_allotment_id,
+                                'amount' => $allot->current_cost
+                            ];
+                        }
+                    } else {
+                        $voucher->allotments = [];
+                    }
+                }
+
+                dd($vouchers);
+
+                $viewFile = 'modules.report.obligation-ledger.update-saa';
+            }
+        } else {
+            /*
+            $vouchers = DB::table('disbursement_vouchers as dv')->select(
+                DB::raw("DATE_FORMAT(dv.date_disbursed, '%Y-%m-%d') as date_disbursed"),
+                'dv.id', 'dv.payee', 'dv.particulars', 'dv.amount', 'dv.uacs_object_code',
+                'dv.module_class', 'dv.pr_id', 'ors.serial_no','ors.id as ors_id'
+            )->leftJoin('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
+             ->where([['dv.funding_source', $projectID]])
+             ->whereNotNull('dv.date_disbursed')
+             ->orderBy('dv.date_disbursed')
+             ->get();
+            $approvedBudgets = [
+                (object) [
+                    'label' => 'LIB',
+                    'total' => $libData->approved_budget
+                ]
+            ];
+
+            foreach ($libRealignments as $realignCtr => $libRealign) {
+                $approvedBudgets[] = (object) [
+                    'label' => 'Realignment',
+                    'total' => $libRealign->approved_realigned_budget];
+            }
+
+            if ($type == 'saa') {
+                $viewFile = 'modules.report.disbursement-ledger.update-saa';
+            } else if ($type == 'mooe') {
+                foreach ($vouchers as $dv) {
+                    $dv->uacs_object_code = unserialize($dv->uacs_object_code);
+
+                    if ($dv->module_class == 3) {
+                        $prID = $dv->pr_id;
+                        $prDat = PurchaseRequest::find($prID);
+                        $userID = $prDat->requested_by;
+                        $userDat = User::find($userID);
+                        $dv->unit = $userDat->unit;
+                    } else {
+                        $userID = $dv->payee;
+                        $userDat = User::find($userID);
+                        $dv->unit = $userDat->unit;
+                    }
+                }
+
+                $viewFile = 'modules.report.disbursement-ledger.update-mooe';
+            } else if ($type == 'lgia') {
+                $viewFile = 'modules.report.disbursement-ledger.update-lgia';
+            }*/
+        }
+
+        return view($viewFile, compact(
+            'allotments', 'classItemCounts', 'approvedBudgets', 'isRealignment',
+            'vouchers', 'itemCounter', 'allotmentCounter', 'payees', 'id',
+            'empUnits', 'mooeTitles', 'projectTitle'
+        ));
+
+        /*
+        $projectDat = FundingProject::find($projectID);
+        $projectTitle = $projectDat->project_title;
+        $allotmentClasses = AllotmentClass::orderBy('order_no')->get();
+        $libData = FundingBudget::where('project_id', $projectID)
+                                ->whereNotNull('date_approved')
+                                ->first();
+        $libID = $libData->id;
+        $allotments = FundingAllotment::where('budget_id', $libID)
+                                      ->orderBy('order_no')
+                                      ->get();
+        $libRealignments = FundingBudgetRealignment::orderBy('realignment_order')
+                                                   ->where('project_id', $projectID)
+                                                   ->whereNotNull('date_approved')
+                                                   ->get();
+        $lastBudgetData = $libRealignments->count() > 0 ?
+                          $libRealignments->last() :
+                          ($libData ? $libData : NULL);
+        $isRealignment = $libRealignments->count() > 0 ? true : false;
+
+
+        $groupedAllotments = $this->groupAllotments(
+            $allotments, $isRealignment, $lastBudgetData
+        );
+        $allotments = $groupedAllotments->grouped_allotments;
+        $classItemCounts = $groupedAllotments->class_item_counts;
+
+        $mooeTitles = json_decode($this->getMooeTitles($request)->content(), true);
+        $empUnits = json_decode($this->getUnits($request)->content(), true);
+        $payees = json_decode($this->getPayees($request)->content(), true);
+
+        foreach ($mooeTitles as $mooeCtr => $mooeTitle) {
+            $mooeTitles[$mooeCtr] = (object) $mooeTitle;
+        }
+
+        foreach ($empUnits as $unitCtr => $empUnt) {
+            $empUnits[$unitCtr] = (object) $empUnt;
+        }
+
+        foreach ($payees as $payCtr => $pay) {
+            $payees[$payCtr] = (object) $pay;
+        }
+
+        if ($for == 'obligation') {
+            $vouchers = ObligationRequestStatus::select(
+                DB::raw("DATE_FORMAT(date_obligated, '%Y-%m-%d') as date_obligated"),
+                'id', 'payee', 'particulars', 'serial_no', 'amount'
+            )->where([['funding_source', $projectID]])
+             ->whereNotNull('date_obligated')
+             ->orderBy('date_obligated')
+             ->get();
+            $approvedBudgets = [
+                (object) [
+                    'label' => 'Approved Budget',
+                    'total' => $libData->approved_budget
+                ]
+            ];
+
+            foreach ($libRealignments as $realignCtr => $libRealign) {
+                $approvedBudgets[] = (object) [
+                    'label' => $this->convertToOrdinal($realignCtr + 1) . ' Re-alignment',
+                    'total' => $libRealign->approved_realigned_budget];
+            }
+
+            if ($type == 'saa') {
+                $viewFile = 'modules.report.obligation-ledger.update-saa';
+            }
+        } else {
+            $vouchers = DB::table('disbursement_vouchers as dv')->select(
+                DB::raw("DATE_FORMAT(dv.date_disbursed, '%Y-%m-%d') as date_disbursed"),
+                'dv.id', 'dv.payee', 'dv.particulars', 'dv.amount', 'dv.uacs_object_code',
+                'dv.module_class', 'dv.pr_id', 'ors.serial_no','ors.id as ors_id'
+            )->leftJoin('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
+             ->where([['dv.funding_source', $projectID]])
+             ->whereNotNull('dv.date_disbursed')
+             ->orderBy('dv.date_disbursed')
+             ->get();
+            $approvedBudgets = [
+                (object) [
+                    'label' => 'LIB',
+                    'total' => $libData->approved_budget
+                ]
+            ];
+
+            foreach ($libRealignments as $realignCtr => $libRealign) {
+                $approvedBudgets[] = (object) [
+                    'label' => 'Realignment',
+                    'total' => $libRealign->approved_realigned_budget];
+            }
+
+            if ($type == 'saa') {
+                $viewFile = 'modules.report.disbursement-ledger.update-saa';
+            } else if ($type == 'mooe') {
+                foreach ($vouchers as $dv) {
+                    $dv->uacs_object_code = unserialize($dv->uacs_object_code);
+
+                    if ($dv->module_class == 3) {
+                        $prID = $dv->pr_id;
+                        $prDat = PurchaseRequest::find($prID);
+                        $userID = $prDat->requested_by;
+                        $userDat = User::find($userID);
+                        $dv->unit = $userDat->unit;
+                    } else {
+                        $userID = $dv->payee;
+                        $userDat = User::find($userID);
+                        $dv->unit = $userDat->unit;
+                    }
+                }
+
+                $viewFile = 'modules.report.disbursement-ledger.update-mooe';
+            } else if ($type == 'lgia') {
+                $viewFile = 'modules.report.disbursement-ledger.update-lgia';
+            }
+        }
+
+        return view($viewFile, compact(
+            'allotments', 'classItemCounts', 'approvedBudgets', 'isRealignment',
+            'vouchers', 'itemCounter', 'allotmentCounter', 'payees', 'id',
+            'empUnits', 'mooeTitles', 'projectTitle'
+        ));*/
     }
 
     /**

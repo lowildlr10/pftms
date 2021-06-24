@@ -324,11 +324,13 @@ $(function() {
     $.fn.showEdit = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-edit').load(url, function() {
+            const forType = $('#for').val();
+
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
             initializeLedgerInput();
             $(this).slideToggle(500);
-            initializeSelect2();
+            initializeSelect2(forType);
             initializeSortable();
         });
         $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})

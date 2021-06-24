@@ -1151,12 +1151,12 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_orsledger',
         'access' => 'create'
     ])->name('report-obligation-ledger-store');
-    Route::get('report/ledger/obligation/show-edit/{id}', [
+    Route::get('report/ledger/obligation/show-edit/{id}/{for}/{type}', [
         'uses' => 'LedgerController@showEdit',
         'module' => 'report_orsledger',
         'access' => 'update'
     ])->name('report-obligation-ledger-show-edit');
-    Route::post('report/ledger/obligation/update/{id}', [
+    Route::post('report/ledger/obligation/update/{id}/{for}/{type}', [
         'uses' => 'LedgerController@indexObligation',
         'module' => 'report_orsledger',
         'access' => 'update'
@@ -1203,7 +1203,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_dvledger',
         'access' => 'update'
     ])->name('report-disbursement-ledger-show-edit');
-    Route::post('report/ledger/disbursement/update/{id}', [
+    Route::post('report/ledger/disbursement/update/{id}/{for}/{type}', [
         'uses' => 'LedgerController@update',
         'module' => 'report_dvledger',
         'access' => 'update'
