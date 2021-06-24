@@ -38,7 +38,7 @@ class UpdateObligationRequestStatus extends Migration
         });
 
         DB::statement(
-            'ALTER TABLE `obligation_request_status` CHANGE `uacs_object_code` `uacs_object_code` VARCHAR(191) NULL;'
+            'ALTER TABLE `obligation_request_status` CHANGE `uacs_object_code` `uacs_object_code` TEXT NULL;'
         );
     }
 }

@@ -8,6 +8,7 @@
     <div class="card">
         <div class="card-body">
             <h4>Obligation Ledger</h4>
+            <h6>{{ $projectTitle }}</h6>
             <hr>
             <div class="row">
                 <div class="col-md-12  px-0 table-responsive">
@@ -125,7 +126,7 @@
                                 <td align="center" class="red-text font-weight-bold">
                                     <div class="md-form form-sm my-0">
                                         <input type="hidden" id="allotment-id-{{ $allotmentCounter + 1 }}"
-                                               name="allotment_id[{{ $allotmentCounter + 1 }}]"
+                                               name="allotment_id[{{ $allotmentCounter }}]"
                                                value="{{ $item->allotment_id }}">
                                         <input type="hidden" id="allotment-cost-{{ $allotmentCounter + 1 }}"
                                                value="{{ $item->allotment_cost }}">
@@ -139,7 +140,7 @@
                                 <td align="center" class="red-text font-weight-bold">
                                     <div class="md-form form-sm my-0">
                                         <input type="hidden" id="allotment-id-{{ $allotmentCounter + 1 }}"
-                                               name="allotment_id[{{ $allotmentCounter + 1 }}]"
+                                               name="allotment_id[{{ $allotmentCounter }}]"
                                                value="{{ $itm->allotment_id }}">
                                         <input type="hidden" id="allotment-cost-{{ $allotmentCounter + 1 }}"
                                                value="{{ $itm->allotment_cost }}">
@@ -159,10 +160,10 @@
                                 <td align="center" class="red-text font-weight-bold">
                                     <div class="md-form form-sm my-0">
                                         <input type="hidden" id="allotment-id-{{ $allotmentCounter + 1 }}"
-                                               name="allotment_id[{{ $allotmentCounter + 1 }}]"
+                                               name="allotment_id[{{ $allotmentCounter }}]"
                                                value="{{ $item->{$realignOrderKey}->allotment_id }}">
                                         <input type="hidden" id="allot-realign-id-{{ $allotmentCounter + 1 }}"
-                                               name="allot_realign_id[{{ $allotmentCounter + 1 }}]"
+                                               name="allot_realign_id[{{ $allotmentCounter }}]"
                                                value="{{ $item->{$realignOrderKey}->allotment_realign_id }}">
                                         <input type="hidden" id="allotment-cost-{{ $allotmentCounter + 1 }}"
                                                value="{{ $item->{$realignOrderKey}->allotment_cost }}">
@@ -176,10 +177,10 @@
                                 <td align="center" class="red-text font-weight-bold">
                                     <div class="md-form form-sm my-0">
                                         <input type="hidden" id="allotment-id-{{ $allotmentCounter + 1 }}"
-                                               name="allotment_id[{{ $allotmentCounter + 1 }}]"
+                                               name="allotment_id[{{ $allotmentCounter }}]"
                                                value="{{ $itm->{$realignOrderKey}->allotment_id }}">
                                         <input type="hidden" id="allot-realign-id-{{ $allotmentCounter + 1 }}"
-                                               name="allot_realign_id[{{ $allotmentCounter + 1 }}]"
+                                               name="allot_realign_id[{{ $allotmentCounter }}]"
                                                value="{{ $itm->{$realignOrderKey}->allotment_realign_id }}">
                                         <input type="hidden" id="allotment-cost-{{ $allotmentCounter + 1 }}"
                                                value="{{ $itm->{$realignOrderKey}->allotment_cost }}">
@@ -229,7 +230,7 @@
                                     <div class="md-form form-sm my-0">
                                         <input type="date" name="date_ors_burs[{{ $itemCounter }}]"
                                                class="form-control required form-control-sm date-ors-burs py-1"
-                                               value="{{ $ors->date_ors_burs }}">
+                                               value="{{ $ors->date_obligated }}">
                                     </div>
                                 </td>
                                 <td>
@@ -245,7 +246,7 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea name="particulars[{{ $itemCounter }}]" placeholder=" Value..."
+                                        <textarea name="particular[{{ $itemCounter }}]" placeholder=" Value..."
                                                   class="md-textarea required form-control-sm w-100 py-1"
                                                   placeholder="Value..."
                                         >{{ $ors->particulars }}</textarea>
@@ -373,4 +374,5 @@
     <input type="hidden" name="allotment_count" id="allotment-count" value="{{ $allotmentCounter }}">
     <input type="hidden" name="is_realignment" id="is-realignment" value="{{ $isRealignment ? 'y' : 'n' }}">
     <input type="hidden" id="for" value="obligation">
+    <input type="hidden" id="type" value="saa">
 </form>

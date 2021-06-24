@@ -93,11 +93,7 @@ class LineItemBudgetController extends Controller
                     ->orWhere('date_from', 'like', "%$keyword%")
                     ->orWhere('date_to', 'like', "%$keyword%")
                     ->orWhere('approved_budget', 'like', "%$keyword%")
-                    ->orWhereHas('allotments', function($query) use ($keyword) {
-                        $query->where('budget_id', 'like', "%$keyword%")
-                              ->orWhere('allotment_name', "%$keyword%")
-                              ->orWhere('allotment_cost', "%$keyword%");
-                    });
+                    ->orWhere('project_id', 'like', "%$keyword%");
             });
         }
 

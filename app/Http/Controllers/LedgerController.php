@@ -9,6 +9,7 @@ use App\Models\FundingBudget;
 use App\Models\FundingAllotment;
 use App\Models\FundingLedger;
 use App\Models\FundingLedgerItem;
+use App\Models\FundingLedgerAllotment;
 use App\Models\FundingBudgetRealignment;
 use App\Models\FundingAllotmentRealignment;
 use App\Models\ObligationRequestStatus;
@@ -82,7 +83,7 @@ class LedgerController extends Controller
         ]);
     }
 
-    private function getIndexData($request, $type) {
+    private function getIndexData($request, $for) {
         $keyword = trim($request->keyword);
         $userID = Auth::user()->id;
 
@@ -116,9 +117,19 @@ class LedgerController extends Controller
                                    ->paginate(15);
 
         foreach ($fundProject as $project) {
-            $ledgerDat = FundingLedger::where('project_id', $project->id)->first();
+            $ledgerDat = FundingLedger::where([
+                ['project_id', $project->id], ['ledger_for', $for]
+            ])->first();
             $project->has_ledger = $ledgerDat ? true : false;
             $project->ledger_id = $ledgerDat ? $ledgerDat->id : NULL;
+
+            if ($project->project_type == 'saa') {
+                $project->project_type_name = 'Special Projects';
+            } else if ($project->project_type == 'mooe') {
+                $project->project_type_name = 'Maintenance and Other Operating Expenses';
+            } else {
+                $project->project_type_name = 'Local Grants-In-Aid';
+            }
         }
 
         return $fundProject;
@@ -132,6 +143,8 @@ class LedgerController extends Controller
     public function showCreate(Request $request, $projectID, $for, $type) {
         $itemCounter = 0;
         $allotmentCounter = 0;
+        $projectDat = FundingProject::find($projectID);
+        $projectTitle = $projectDat->project_title;
         $allotmentClasses = AllotmentClass::orderBy('order_no')->get();
         $libData = FundingBudget::where('project_id', $projectID)
                                 ->whereNotNull('date_approved')
@@ -173,12 +186,13 @@ class LedgerController extends Controller
         }
 
         if ($for == 'obligation') {
-            $vouchers = ObligationRequestStatus::select('id', 'date_ors_burs', 'payee',
-                                                        'particulars', 'serial_no', 'amount')
-                                      ->where([['funding_source', $projectID]])
-                                      ->whereNotNull('date_obligated')
-                                      ->orderBy('date_ors_burs')
-                                      ->get();
+            $vouchers = ObligationRequestStatus::select(
+                DB::raw("DATE_FORMAT(date_obligated, '%Y-%m-%d') as date_obligated"),
+                'id', 'payee', 'particulars', 'serial_no', 'amount'
+            )->where([['funding_source', $projectID]])
+             ->whereNotNull('date_obligated')
+             ->orderBy('date_obligated')
+             ->get();
             $approvedBudgets = [
                 (object) [
                     'label' => 'Approved Budget',
@@ -196,16 +210,15 @@ class LedgerController extends Controller
                 $viewFile = 'modules.report.obligation-ledger.create-saa';
             }
         } else {
-            $vouchers = DB::table('disbursement_vouchers as dv')
-                          ->select('dv.id', 'dv.date_dv', 'dv.payee', 'dv.particulars',
-                                   'ors.serial_no', 'dv.amount', 'dv.uacs_object_code',
-                                   'dv.module_class', 'dv.pr_id', 'ors.id as ors_id')
-                          ->leftJoin('obligation_request_status as ors',
-                                     'ors.id', '=', 'dv.ors_id')
-                          ->where([['dv.funding_source', $projectID]])
-                          ->whereNotNull('dv.date_disbursed')
-                          ->orderBy('dv.date_dv')
-                          ->get();
+            $vouchers = DB::table('disbursement_vouchers as dv')->select(
+                DB::raw("DATE_FORMAT(dv.date_disbursed, '%Y-%m-%d') as date_disbursed"),
+                'dv.id', 'dv.payee', 'dv.particulars', 'dv.amount', 'dv.uacs_object_code',
+                'dv.module_class', 'dv.pr_id', 'ors.serial_no','ors.id as ors_id'
+            )->leftJoin('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
+             ->where([['dv.funding_source', $projectID]])
+             ->whereNotNull('dv.date_disbursed')
+             ->orderBy('dv.date_disbursed')
+             ->get();
             $approvedBudgets = [
                 (object) [
                     'label' => 'LIB',
@@ -247,7 +260,7 @@ class LedgerController extends Controller
         return view($viewFile, compact(
             'allotments', 'classItemCounts', 'approvedBudgets', 'isRealignment',
             'vouchers', 'itemCounter', 'allotmentCounter', 'payees', 'projectID',
-            'empUnits', 'mooeTitles'
+            'empUnits', 'mooeTitles', 'projectTitle'
         ));
     }
 
@@ -258,7 +271,208 @@ class LedgerController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request, $projectID, $for, $type) {
-        dd($request);
+        if ($for == 'obligation') {
+            $documentType = 'Obligation Ledger';
+            $routeName = 'report-obligation-ledger';
+
+            if ($type == 'saa') {
+                $allotmentIDs = $request->allotment_id;
+                $allotmentRealignIDs = $request->allot_realign_id;
+                $dateORS = $request->date_ors_burs;
+                $payees = $request->payee;
+                $particulars = $request->particular;
+                $orsIDs = $request->ors_id;
+                $orsNos = $request->ors_no;
+                $totals = $request->amount;
+                $allotments = $request->allotment;
+            }
+        } else {
+            $documentType = 'Disbursement Ledger';
+            $routeName = 'report-disbursement-ledger';
+
+            if ($type == 'saa') {
+                $allotmentIDs = $request->allotment_id;
+                $allotmentRealignIDs = $request->allot_realign_id;
+                $dateDVs = $request->date_dv;
+                $orsIDs = $request->ors_id;
+                $dvIDs = $request->dv_id;
+                $orsNos = $request->ors_no;
+                $payees = $request->payee;
+                $particulars = $request->particular;
+                $allotments = $request->allotment;
+                $totals = $request->amount;
+            } else if ($type == 'mooe') {
+                $dateDVs = $request->date_dv;
+                $orsIDs = $request->ors_id;
+                $dvIDs = $request->dv_id;
+                $orsNos = $request->ors_no;
+                $payees = $request->payee;
+                $particulars = $request->particular;
+                $mooeObjectCodes = $request->uacs_object_code;
+                $priorYears = $request->prior_year;
+                $continuings = $request->continuing;
+                $currents = $request->current;
+                $units = $request->unit;
+            } else if ($type == 'lgia') {
+                $dateDVs = $request->date_dv;
+                $orsIDs = $request->ors_id;
+                $dvIDs = $request->dv_id;
+                $orsNos = $request->ors_no;
+                $payees = $request->payee;
+                $particulars = $request->particular;
+                $priorYears = $request->prior_year;
+                $continuings = $request->continuing;
+                $currents = $request->current;
+                $totals = $request->amount;
+            }
+        }
+
+
+
+        try {
+            $libDat = FundingBudget::where('project_id', $projectID)->first();
+            $budgetID = $libDat->id;
+
+            $instanceLedger = new FundingLedger;
+            $instanceLedger->project_id = $projectID;
+            $instanceLedger->budget_id = $budgetID;
+            $instanceLedger->ledger_for = $for;
+            $instanceLedger->ledger_type = $type;
+            $instanceLedger->save();
+
+            $ledgerDat = FundingLedger::where('project_id', $projectID)->first();
+            $ledgerID = $ledgerDat->id;
+
+            $orderNo = 1;
+
+            if ($for == 'obligation') {
+                foreach ($orsIDs as $orsCtr => $orsID) {
+                    if ($type == 'saa') {
+                        $instanceLedgerItem = new FundingledgerItem;
+                        $instanceLedgerItem->project_id = $projectID;
+                        $instanceLedgerItem->budget_id = $budgetID;
+                        $instanceLedgerItem->ledger_id = $ledgerID;
+                        $instanceLedgerItem->date_ors_dv = $dateORS[$orsCtr];
+                        $instanceLedgerItem->ors_id = $orsID;
+                        $instanceLedgerItem->ors_no = $orsNos[$orsCtr];
+                        $instanceLedgerItem->payee = $payees[$orsCtr];
+                        $instanceLedgerItem->particulars = $particulars[$orsCtr];
+                        $instanceLedgerItem->total = $totals[$orsCtr];
+                        $instanceLedgerItem->order_no = $orderNo;
+                        $instanceLedgerItem->save();
+
+                        $ledgerItemDat = FundingledgerItem::where('order_no', $orderNo)->first();
+                        $ledgerItemID = $ledgerItemDat->id;
+
+                        foreach ($allotments as $allotTotals) {
+                            foreach ($allotTotals as $allotCtr => $total) {
+                                if ($total > 0) {
+                                    $instanceLedgerAllotments = new FundingLedgerAllotment;
+                                    $instanceLedgerAllotments->project_id = $projectID;
+                                    $instanceLedgerAllotments->budget_id = $budgetID;
+                                    $instanceLedgerAllotments->ledger_id = $ledgerID;
+                                    $instanceLedgerAllotments->ledger_item_id = $ledgerItemID;
+                                    $instanceLedgerAllotments->allotment_id = $allotmentIDs[$allotCtr];
+                                    $instanceLedgerAllotments->realign_allotment_id = $allotmentRealignIDs[$allotCtr];
+                                    $instanceLedgerAllotments->current_cost = $total;
+                                    $instanceLedgerAllotments->save();
+                                }
+                            }
+                        }
+
+                        $orderNo++;
+                    }
+                }
+            } else {
+                foreach ($dvIDs as $dvCtr => $dvID) {
+                    if ($type == 'saa') {
+                        $instanceLedgerItem = new FundingledgerItem;
+                        $instanceLedgerItem->project_id = $projectID;
+                        $instanceLedgerItem->budget_id = $budgetID;
+                        $instanceLedgerItem->ledger_id = $ledgerID;
+                        $instanceLedgerItem->date_ors_dv = $dateDVs[$dvCtr];
+                        $instanceLedgerItem->ors_id = $orsIDs[$dvCtr];
+                        $instanceLedgerItem->dv_id = $dvID;
+                        $instanceLedgerItem->ors_no = $orsNos[$dvCtr];
+                        $instanceLedgerItem->payee = $payees[$dvCtr];
+                        $instanceLedgerItem->particulars = $particulars[$dvCtr];
+                        $instanceLedgerItem->total = $totals[$dvCtr];
+                        $instanceLedgerItem->order_no = $orderNo;
+                        $instanceLedgerItem->save();
+
+                        $ledgerItemDat = FundingledgerItem::where('order_no', $orderNo)->first();
+                        $ledgerItemID = $ledgerItemDat->id;
+
+                        foreach ($allotments as $allotTotals) {
+                            foreach ($allotTotals as $allotCtr => $total) {
+                                if ($total > 0) {
+                                    $instanceLedgerAllotments = new FundingLedgerAllotment;
+                                    $instanceLedgerAllotments->project_id = $projectID;
+                                    $instanceLedgerAllotments->budget_id = $budgetID;
+                                    $instanceLedgerAllotments->ledger_id = $ledgerID;
+                                    $instanceLedgerAllotments->ledger_item_id = $ledgerItemID;
+                                    $instanceLedgerAllotments->allotment_id = $allotmentIDs[$allotCtr];
+                                    $instanceLedgerAllotments->realign_allotment_id = $allotmentRealignIDs[$allotCtr];
+                                    $instanceLedgerAllotments->current_cost = $total;
+                                    $instanceLedgerAllotments->save();
+                                }
+                            }
+                        }
+
+                        $orderNo++;
+                    } else if ($type == 'mooe') {
+                        $instanceLedgerItem = new FundingledgerItem;
+                        $instanceLedgerItem->project_id = $projectID;
+                        $instanceLedgerItem->budget_id = $budgetID;
+                        $instanceLedgerItem->ledger_id = $ledgerID;
+                        $instanceLedgerItem->date_ors_dv = $dateDVs[$dvCtr];
+                        $instanceLedgerItem->ors_id = $orsIDs[$dvCtr];
+                        $instanceLedgerItem->dv_id = $dvID;
+                        $instanceLedgerItem->ors_no = $orsNos[$dvCtr];
+                        $instanceLedgerItem->payee = $payees[$dvCtr];
+                        $instanceLedgerItem->particulars = $particulars[$dvCtr];
+                        $instanceLedgerItem->mooe_account = serialize($mooeObjectCodes[$dvCtr]);
+                        $instanceLedgerItem->prior_year = $priorYears[$dvCtr];
+                        $instanceLedgerItem->continuing = $continuings[$dvCtr];
+                        $instanceLedgerItem->current = $currents[$dvCtr];
+                        $instanceLedgerItem->unit = $units[$dvCtr];
+                        $instanceLedgerItem->order_no = $orderNo;
+                        $instanceLedgerItem->save();
+
+                        $orderNo++;
+                    } else if ($type == 'lgia') {
+                        $instanceLedgerItem = new FundingledgerItem;
+                        $instanceLedgerItem->project_id = $projectID;
+                        $instanceLedgerItem->budget_id = $budgetID;
+                        $instanceLedgerItem->ledger_id = $ledgerID;
+                        $instanceLedgerItem->date_ors_dv = $dateDVs[$dvCtr];
+                        $instanceLedgerItem->ors_id = $orsIDs[$dvCtr];
+                        $instanceLedgerItem->dv_id = $dvID;
+                        $instanceLedgerItem->ors_no = $orsNos[$dvCtr];
+                        $instanceLedgerItem->payee = $payees[$dvCtr];
+                        $instanceLedgerItem->particulars = $particulars[$dvCtr];
+                        $instanceLedgerItem->prior_year = $priorYears[$dvCtr];
+                        $instanceLedgerItem->continuing = $continuings[$dvCtr];
+                        $instanceLedgerItem->current = $currents[$dvCtr];
+                        $instanceLedgerItem->total = $totals[$dvCtr];
+                        $instanceLedgerItem->order_no = $orderNo;
+                        $instanceLedgerItem->save();
+
+                        $orderNo++;
+                    }
+                }
+            }
+
+            $msg = "$documentType successfully updated.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName)
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())
+                                 ->with('failed', $msg);
+        }
     }
 
     /**

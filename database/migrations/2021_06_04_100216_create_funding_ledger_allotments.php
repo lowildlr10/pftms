@@ -20,7 +20,7 @@ class CreateFundingLedgerAllotments extends Migration
             $table->uuid('project_id');
             $table->foreign('project_id')->references('id')->on('funding_projects');
             $table->uuid('budget_id');
-            $table->foreign('budget_id')->references('id')->on('funding_allotments');
+            $table->foreign('budget_id')->references('id')->on('funding_budgets');
             $table->uuid('ledger_id');
             $table->foreign('ledger_id')->references('id')->on('funding_ledgers');
             $table->uuid('ledger_item_id');

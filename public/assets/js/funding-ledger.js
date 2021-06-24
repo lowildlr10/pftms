@@ -185,6 +185,17 @@ $(function() {
         $('#total-remaining').val(totalRemaining.toFixed(2));
     }
 
+    $.fn.computeTotalRemaining2 = function() {
+        let totalRemaining = 0;
+
+        $('.amount').each(function() {
+            const amount = parseFloat($(this).val());
+            totalRemaining += amount;
+        });
+
+        $('#total-remaining').val(totalRemaining.toFixed(2));
+    }
+
     $.fn.computeAllotmentRemaining = function() {
         const allotmentCount = parseInt($('#allotment-count').val());
 
@@ -202,18 +213,37 @@ $(function() {
 
     function initializeLedgerInput() {
         const allotmentCount = parseInt($('#allotment-count').val());
+        const forType = $('#for').val();
+        const ledgerType = $('#type').val();
 
         try {
-            $(this).computeTotalRemaining();
-            $(this).computeAllotmentRemaining();
-        } catch (error) {
-
-        }
+            if (forType == 'obligation') {
+                if (ledgerType == 'saa') {
+                    $(this).computeTotalRemaining();
+                    $(this).computeAllotmentRemaining();
+                }
+            } else {
+                if (ledgerType == 'saa') {
+                    $(this).computeTotalRemaining();
+                    $(this).computeAllotmentRemaining();
+                } else if (ledgerType == 'mooe') {
+                    $(this).computeTotalCurrent();
+                    $(this).computeTotalContinuing();
+                    $(this).computeTotalPriorYear();
+                } else if (ledgerType == 'lgia') {
+                    $(this).computeTotalRemaining2();
+                    $(this).computeTotalCurrent();
+                    $(this).computeTotalContinuing();
+                    $(this).computeTotalPriorYear();
+                }
+            }
+        } catch (error) { }
 
         for (let allotCtr = 1; allotCtr <= allotmentCount; allotCtr++) {
             $(`.allotment-${allotCtr}`).each(function() {
                 const allotName = $(`#allot-name-${allotCtr}`).text();
-                $(this).attr('title', `Column: ${allotName}`);
+                const allotCost = parseFloat($(`#allotment-cost-${allotCtr}`).val()).toFixed(2);
+                $(this).attr('title', `Column: ${allotName} (Amount: ${allotCost})`);
             });
         }
 
@@ -244,175 +274,6 @@ $(function() {
         $('#remaining-budget').removeClass('input-error-highlighter')
                               .tooltip('hide');
         return true;
-    }
-
-    $.fn.addRow = function(rowClass, type, isRealignment = false) {
-        const lastRow = $(rowClass).last();
-        const countCoimplementors = $('.coimplementor').length;
-        let headerCoimps = [];
-        let lastRowID = (lastRow.length > 0) ? lastRow.attr('id') : type+'-row-0';
-        let rowOutput = "";
-        let newID = 1;
-
-        if (countCoimplementors > 0) {
-            $('.coimplementor').each(function(index, elem) {
-                const coimpID = $(`#coimplementor-id-${index}`).val();
-                headerCoimps.push({
-                    'id': coimpID
-                });
-            });
-        }
-
-        $(rowClass).each(function() {
-            const elemExplodedID = $(this).attr('id').split('-');
-            const elemIndexID = elemExplodedID[2];
-
-            if (parseInt(elemIndexID) >= newID) {
-                newID = parseInt(elemIndexID) + 1;
-            }
-        });
-
-        if (type == 'item') {
-            let allotmentName = `
-                <td>
-                    <div class="md-form form-sm my-0">
-                        <input name="row_type[${newID}]" type="hidden" value="${type}">
-                        <input type="hidden" name="allotment_id[${newID}]">
-                        <input type="hidden" name="allotment_realign_id[${newID}]">
-                        <input type="text" placeholder=" Value..." name="allotment_name[${newID}]"
-                            class="form-control required form-control-sm allotment-name py-1"
-                            id="allotment-name-${newID}">
-                    </div>
-                </td>`,
-                allotmentClassification = `
-                <td>
-                    <div class="md-form my-0">
-                        <select class="mdb-select required allot-class-tokenizer"
-                                name="allot_class[${newID}]"></select>
-                    </div>
-                </td>`,
-                allotmentBudget = `
-                <td>
-                    <div class="md-form form-sm my-0">
-                        <input type="number" placeholder=" Value..." name="allotted_budget[${newID}]"
-                            class="form-control required form-control-sm allotted-budget py-1"
-                            id="allotted-budget-${newID}" min="0"
-                            onkeyup="$(this).totalBudgetIsValid();"
-                            onchange="$(this).totalBudgetIsValid();">
-                    </div>
-                </td>`,
-                coimplementorBudget = headerCoimps.length > 0 ? headerCoimps.map((headerCoimp, index) => {
-                    return `<td>
-                        <div class="md-form form-sm my-0">
-                            <input type="hidden" name="coimplementor_id[${newID}][${index}]" value="${headerCoimp.id}">
-                            <input type="number" placeholder=" Value..." name="coimplementor_budget[${newID}][${index}]"
-                                class="form-control required form-control-sm coimplementor-budget allotted-budget py-1"
-                                id="coimplementor-budget-${newID}-${index}" min="0"
-                                onkeyup="$(this).totalBudgetIsValid();"
-                                onchange="$(this).totalBudgetIsValid();">
-                        </div>
-                    </td>`
-                }) : '';
-                justification = !isRealignment ? '' : `
-                <td>
-                    <div class="md-form form-sm my-0">
-                        <textarea id="justification" class="md-textarea form-control"
-                                  name="justification[${newID}]" rows="2"
-                                  placeholder="Justification"></textarea>
-                    </div>
-                </td>`,
-                deleteButton = `
-                <td class="align-middle">
-                    <a onclick="$(this).deleteRow('#item-row-${newID}');"
-                    class="btn btn-outline-red px-1 py-0">
-                        <i class="fas fa-minus-circle"></i>
-                    </a>
-                </td>`,
-                sortableButton = `
-                <td class="align-middle" style="width: 1px;">
-                    <a href="#" class="grey-text">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </a>
-                </td>`;
-
-            rowOutput = '<tr id="item-row-'+newID+'" class="item-row">'+
-                        allotmentName + allotmentClassification + allotmentBudget + coimplementorBudget +
-                        justification + deleteButton + sortableButton + '</tr>';
-
-            $(rowOutput).insertAfter('#' + lastRowID);
-            initializeSelect2();
-        } else if (type == 'header') {
-            let allotmentHeaderName = `
-                <td>
-                    <div class="md-form form-sm my-0">
-                        <input name="row_type[${newID}]" type="hidden" value="${type}">
-                        <input type="hidden" name="allotment_id[${newID}]">
-                        <input type="hidden" name="allotment_realign_id[${newID}]">
-                        <input type="hidden"name="allot_class[${newID}]">
-                        <input type="hidden"name="allotted_budget[${newID}]">
-                        <input type="text" placeholder="Header Value..." name="allotment_name[${newID}]"
-                            class="form-control required form-control-sm allotment-name py-1 font-weight-bold"
-                            id="allotment-name-${newID}">` +
-                        (headerCoimps.length > 0 ? headerCoimps.map((headerCoimp, index) => {
-                            return `<input type="hidden" name="coimplementor_id[${newID}][${index}]">
-                            <input type="hidden" name="coimplementor_budget[${newID}][${index}]">`
-                        }) : '') +
-                    `</div>
-                </td>`,
-                additionalTD = !isRealignment ? `<td colspan="${countCoimplementors + 2}"></td>` :
-                               `<td colspan="${countCoimplementors + 3}"></td>`,
-                deleteButton = `
-                <td class="align-middle">
-                    <a onclick="$(this).deleteRow('#header-row-${newID}');"
-                    class="btn btn-outline-red px-1 py-0">
-                        <i class="fas fa-minus-circle"></i>
-                    </a>
-                </td>`,
-                sortableButton = `
-                <td class="align-middle" style="width: 1px;">
-                    <a href="#" class="grey-text">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </a>
-                </td>`;
-            rowOutput = '<tr id="header-row-'+newID+'" class="item-row">'+ allotmentHeaderName +
-                        additionalTD + deleteButton + sortableButton + '</tr>';
-
-            $(rowOutput).insertAfter('#' + lastRowID);
-        } else if (type == 'header-break') {
-             let allotmentHeaderName = `
-                <td colspan="` + ((!isRealignment ? 3 : 4) + countCoimplementors) + `">
-                    <hr>
-                    <div class="md-form form-sm my-0">
-                        <input name="row_type[${newID}]" type="hidden" value="${type}">
-                        <input type="hidden" name="allotment_id[${newID}]">
-                        <input type="hidden" name="allotment_realign_id[${newID}]">
-                        <input type="hidden"name="allot_class[${newID}]">
-                        <input type="hidden"name="allotted_budget[${newID}]">
-                        <input type="hidden" name="allotment_name[${newID}]" id="allotment-name-${newID}">` +
-                        (headerCoimps.length > 0 ? headerCoimps.map((headerCoimp, index) => {
-                            return `<input type="hidden" name="coimplementor_id[${newID}][${index}]">
-                            <input type="hidden" name="coimplementor_budget[${newID}][${index}]">`
-                        }) : '') +
-                    `</div>
-                </td>`,
-                deleteButton = `
-                <td class="align-middle">
-                    <a onclick="$(this).deleteRow('#headerbreak-row-${newID}');"
-                    class="btn btn-outline-red px-1 py-0">
-                        <i class="fas fa-minus-circle"></i>
-                    </a>
-                </td>`,
-                sortableButton = `
-                <td class="align-middle" style="width: 1px;">
-                    <a href="#" class="grey-text">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </a>
-                </td>`;
-            rowOutput = '<tr id="headerbreak-row-'+newID+'" class="item-row">'+ allotmentHeaderName +
-                        deleteButton + sortableButton + '</tr>';
-
-            $(rowOutput).insertAfter('#' + lastRowID);
-        }
     }
 
     $.fn.deleteRow = function(row) {
@@ -451,8 +312,12 @@ $(function() {
     $.fn.store = function() {
         const withError = inputValidation(false);
 
+
 		if ($(this).totalBudgetIsValid() && !withError) {
-			$('#form-store').submit();
+            $('#mdb-preloader').css('background', '#000000ab')
+                               .fadeIn(300, function() {
+                $('#form-store').submit();
+            });
         }
     }
 
@@ -478,7 +343,10 @@ $(function() {
         const withError = inputValidation(false);
 
 		if ($(this).totalBudgetIsValid() && !withError) {
-			$('#form-update').submit();
+            $('#mdb-preloader').css('background', '#000000ab')
+                               .fadeIn(300, function() {
+                $('#form-update').submit();
+            });
 		}
     }
 

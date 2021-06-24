@@ -7,7 +7,8 @@
     @csrf
     <div class="card">
         <div class="card-body">
-            <h4>Disbursement Ledger</h4>
+            <h4>Disbursement Ledger (LGIA)</h4>
+            <h6>{{ $projectTitle }}</h6>
             <hr>
             <div class="row">
                 <div class="col-md-12  px-0 table-responsive">
@@ -29,7 +30,7 @@
                                         <span class="red-text">* </span> Payee
                                     </small>
                                 </th>
-                                <th class="align-top" width="300px">
+                                <th class="align-top" width="350px">
                                     <small class="font-weight-bold">
                                         <span class="red-text">* </span> Particulars
                                     </small>
@@ -59,42 +60,15 @@
                             </tr>
                         </thead>
 
-                        <tbody>
-                            @foreach ($approvedBudgets as $approvedCtr => $approvedBud)
-                                @php $allotmentCounter = 0; @endphp
-                            <tr>
-                                <td align="right" class="red-text font-weight-bold">
-                                    {{ $approvedBud->label }}
-                                </td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td align="center" class="red-text font-weight-bold">
-                                    @if ($approvedCtr == count($approvedBudgets) - 1)
-                                    <input type="hidden" id="current-total-budget" value="{{ $approvedBud->total }}">
-                                    @endif
-
-                                    {{ number_format($approvedBud->total, 2) }}
-                                </td>
-                                <td colspan="2"></td>
-                            </tr>
-                            @endforeach
-
-                            <tr><td class="py-3 grey" colspan="10"></td></tr>
-                        </tbody>
-
                         <tbody id="item-row-container" class="sortable">
                             @if (count($vouchers) > 0)
                                 @foreach ($vouchers as $itemCounter => $dv)
                             <tr id="item-row-{{ $itemCounter }}" class="item-row">
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="date" name="date_ors_burs[{{ $itemCounter }}]"
+                                        <input type="date" name="date_dv[{{ $itemCounter }}]"
                                                class="form-control required form-control-sm date-dv py-1"
-                                               value="{{ $dv->date_dv }}">
+                                               value="{{ $dv->date_disbursed }}">
                                     </div>
                                 </td>
                                 <td>
@@ -120,7 +94,7 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea name="particulars[{{ $itemCounter }}]" placeholder=" Value..."
+                                        <textarea name="particular[{{ $itemCounter }}]" placeholder=" Value..."
                                                   class="md-textarea required form-control-sm w-100 py-1 particulars"
                                                   placeholder="Value..."
                                         >{{ $dv->particulars }}</textarea>
@@ -173,8 +147,8 @@
                                                data-toggle="tooltip" data-placement="left"
                                                title="Column: Total"
                                                value="{{ $dv->amount }}"
-                                               onkeyup="$(this).computeTotalRemaining();"
-                                               onchange="$(this).computeTotalRemaining();"
+                                               onkeyup="$(this).computeTotalRemaining2();"
+                                               onchange="$(this).computeTotalRemaining2();"
                                                placeholder="Value...">
                                     </div>
                                 </td>
@@ -214,15 +188,15 @@
                                     Available Allotment
                                 </td>
                                 <td class="font-weight-bold red-text">
-                                    <input type="number" id="prior-year" class="text-center"
+                                    <input type="number" id="total-prior-year" class="text-center"
                                            value="0.00" readonly>
                                 </td>
                                 <td class="font-weight-bold red-text">
-                                    <input type="number" id="continuing" class="text-center"
+                                    <input type="number" id="total-continuing" class="text-center"
                                            value="0.00" readonly>
                                 </td>
                                 <td class="font-weight-bold red-text">
-                                    <input type="number" id="current" class="text-center"
+                                    <input type="number" id="total-current" class="text-center"
                                            value="0.00" readonly>
                                 </td>
                                 <td class="font-weight-bold red-text">
@@ -241,4 +215,5 @@
 
     <input type="hidden" name="is_realignment" id="is-realignment" value="{{ $isRealignment ? 'y' : 'n' }}">
     <input type="hidden" id="for" value="disbursement">
+    <input type="hidden" id="type" value="lgia">
 </form>

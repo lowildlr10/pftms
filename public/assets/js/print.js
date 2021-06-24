@@ -125,6 +125,14 @@ $(function() {
                 $('#print-title').html('Generate Line-Item-Budget Realignment');
                 setPaperSize('Long');
                 break;
+            case 'report_obligation':
+                $('#print-title').html('Generate Obligation Ledger');
+                setPaperSize('Long');
+                break;
+            case 'report_disbursement':
+                $('#print-title').html('Generate Disbursement Ledger');
+                setPaperSize('Long');
+                break;
 
             default:
                 break;

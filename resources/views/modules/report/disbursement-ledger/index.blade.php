@@ -183,7 +183,7 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $fund->id }}', 'proc_pr');">
+                                        onclick="$(this).showPrint('{{ $fund->id }}', 'report_disbursement');">
                                     <i class="fas fa-print blue-text"></i> Print Ledger
                                 </button>
 
@@ -202,12 +202,12 @@
                                     @else
                                     @endif
                                 @else
-                                    @if ($isAllowedEdit)
+                                    @if ($isAllowedUpdate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showEdit(`{{ route('report-disbursement-ledger-show-edit',
                                         [
-                                            'project_id' => $fund->id,
+                                            'id' => $fund->ledger_id,
                                             'for' => 'disbursement',
                                             'type' => $fund->project_type ? $fund->project_type : 'saa',
                                         ]) }}`);">
@@ -247,6 +247,7 @@
                             <b>Project Title: </b> {{ $fund->project_title }}<br>
                             <b>Project Cost: </b> &#8369; {{ number_format($fund->project_cost, 2) }}<br>
                             <b>Project Leader: </b> {{ $fund->project_leader }}<br>
+                            <b>Ledger Type: </b> {{ $fund->project_type_name }}<br>
                         </p>
 
                         <hr>
@@ -257,6 +258,18 @@
                         </a>
                     </div>
                 </div>
+                <hr>
+                <ul class="btn-menu-3 list-group z-depth-1">
+                    <li class="list-action-header list-group-item justify-content-between">
+                        <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
+                    </li>
+                    <li class="list-group-item justify-content-between">
+                        <a onclick="$(this).redirectToDoc(`{{ route('fund-project-lib') }}`, '{{ $fund->id }}');"
+                           class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
+                            Go to LIB & Realignments <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                </ul>
             </div>
             <!--Footer-->
             <div class="modal-footer justify-content-end rgba-stylish-b p-1">

@@ -1198,7 +1198,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_dvledger',
         'access' => 'create'
     ])->name('report-disbursement-ledger-store');
-    Route::get('report/ledger/disbursement/show-edit/{id}', [
+    Route::get('report/ledger/disbursement/show-edit/{id}/{for}/{type}', [
         'uses' => 'LedgerController@showEdit',
         'module' => 'report_dvledger',
         'access' => 'update'
