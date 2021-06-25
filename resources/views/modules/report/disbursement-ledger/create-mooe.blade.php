@@ -90,10 +90,11 @@
                                     <select class="mdb-select form-control-sm required payee-tokenizer"
                                             name="payee[{{ $itemCounter }}]">
                                         @foreach ($payees as $pay)
-                                        <option {{ $pay->id == $dv->payee ? 'selected' : '' }}
-                                                value="{{ $pay->id }}">
+                                            @if ($pay->id == $dv->payee)
+                                        <option value="{{ $pay->id }}" selected>
                                             {{ $pay->name }}
                                         </option>
+                                            @endif
                                         @endforeach
                                     </select>
                                 </td>
@@ -160,11 +161,14 @@
                                 <td class="material-tooltip-main" data-toggle="tooltip" title="Particulars: {{ $dv->particulars }}">
                                     <select class="mdb-select form-control-sm required unit-tokenizer unit"
                                             name="unit[{{ $itemCounter }}]">
+                                        <option value="-">-- None --</option>
+
                                         @foreach ($empUnits as $empUnit)
-                                        <option {{ $empUnit->id == $dv->unit ? 'selected' : '' }}
-                                                value="{{ $empUnit->id }}">
+                                            @if ($empUnit->id == $dv->unit)
+                                        <option value="{{ $empUnit->id }}" selected>
                                             {{ $empUnit->name }}
                                         </option>
+                                            @endif
                                         @endforeach
                                     </select>
                                 </td>

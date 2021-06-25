@@ -58,7 +58,8 @@ class FundUtilization2Seeder extends Seeder
                 $orsID = $dvDat->ors_id;
                 $prDat = DB::table('purchase_requests')->where('id', $prID)->first();
                 $orsDat = DB::table('obligation_request_status')->where('id', $orsID)->first();
-                $uacsCodes = $orsDat->uacs_object_code;
+                $uacsCodes = $orsDat->uacs_object_code ? $orsDat->uacs_object_code :
+                             serialze([]);
                 $project = $prDat->funding_source;
 
                 DB::table('disbursement_vouchers')

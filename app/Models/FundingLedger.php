@@ -51,6 +51,10 @@ class FundingLedger extends Model
         return $this->hasMany('App\Models\FundingLedgerItem', 'id', 'ledger_id');
     }
 
+    public function ledgerAllotments() {
+        return $this->hasMany('App\Models\FundingLedgerAllotment', 'id', 'ledger_id');
+    }
+
     public function project() {
         return $this->hasOne('App\Models\FundingProject', 'id', 'project_id');
     }

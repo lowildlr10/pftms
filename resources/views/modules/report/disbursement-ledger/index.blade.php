@@ -181,11 +181,13 @@
                     <div class="gradient-card-header rgba-white-light p-0">
                         <div class="p-0">
                             <div class="btn-group btn-menu-1 p-0">
+                                @if ($fund->has_ledger)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showPrint('{{ $fund->id }}', 'report_disbursement');">
                                     <i class="fas fa-print blue-text"></i> Print Ledger
                                 </button>
+                                @endif
 
                                 @if (!$fund->has_ledger)
                                     @if ($isAllowedCreate)
@@ -226,8 +228,10 @@
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showDelete(`{{ route('report-disbursement-ledger-delete',
-                                                                        ['id' => $fund->ledger_id]) }}`,
-                                                                    `{{ $fund->project_title.' LIB' }}`);">
+                                        [
+                                            'id' => $fund->ledger_id,
+                                            'for' => 'disbursement',
+                                        ]) }}`, `{{ $fund->project_title.' (Disbursement Ledger)' }}`);">
                                     <i class="fas fa-trash-alt red-text"></i> Delete
                                 </button>
                                     @endif
@@ -252,10 +256,17 @@
 
                         <hr>
 
-                        <a class="btn btn-sm btn-mdb-color btn-rounded btn-block waves-effect mb-2"
-                           href="{{ route('fund-project-lib', ['keyword' => $fund->budget['id']]) }}">
-                                <i class="fas fa-eye"></i> View LIB and Realignments
-                        </a>
+                        @if ($fund->has_ledger)
+                        <button class="btn btn-sm btn-mdb-color btn-rounded btn-block waves-effect mb-2"
+                                onclick="$(this).showLedger(`{{ route('report-disbursement-ledger-show',
+                                [
+                                    'id' => $fund->ledger_id,
+                                    'for' => 'disbursement',
+                                    'type' => $fund->project_type ? $fund->project_type : 'saa',
+                                ]) }}`, `{{ $fund->project_title.' (Disbursement Ledger)' }}`);">
+                                <i class="fas fa-eye"></i> Show Disbursement Ledger
+                        </button>
+                        @endif
                     </div>
                 </div>
                 <hr>
@@ -285,7 +296,7 @@
 @endif
 
 @include('modals.search-post')
-@include('modals.show')
+@include('modals.show-full')
 @include('modals.create')
 @include('modals.edit')
 @include('modals.delete-destroy')

@@ -71,7 +71,12 @@ $(function() {
                         search: params.term
                     };
                 },
-                processResults: function(data) {
+                processResults: function(res) {
+                    const data = [
+                        {id: '-', name: '-- None --'},
+                        ...res
+                    ];
+
                     return {
                         results: $.map(data, function(item) {
                             let jsonData = {};
@@ -276,17 +281,20 @@ $(function() {
         return true;
     }
 
-    $.fn.deleteRow = function(row) {
-        if (confirm('Are you sure you want to delete this row?')) {
-            let _row = row.split('-');
-            let rowClass = '.item-' + _row[1];
-            let rowCount = $(rowClass).length;
-
-            $(row).fadeOut(300, function() {
-                $(this).remove();
-                $(this).totalBudgetIsValid();
-            });
-		}
+    $.fn.showLedger = function(url, title) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-show-full').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            initializeLedgerInput();
+            $(this).slideToggle(500);
+        });
+        $("#modal-lg-show-full").modal({keyboard: false, backdrop: 'static'})
+						     .on('shown.bs.modal', function() {
+            $('#show-full-title').html(title);
+		}).on('hidden.bs.modal', function() {
+		    $('#modal-body-show-full').html('').css('display', 'none');
+		});
     }
 
     $.fn.showCreate = function(url) {

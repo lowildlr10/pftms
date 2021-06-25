@@ -369,7 +369,7 @@ class DisbursementVoucherController extends Controller
         return view('modules.voucher.dv.create', compact(
             'signatories', 'payees', 'payee', 'empID',
             'serialNo', 'address', 'amount', 'orsList',
-            'orsID', 'transactionType', 'sigCert1', 
+            'orsID', 'transactionType', 'sigCert1',
             'projects',
         ));
     }
@@ -596,6 +596,7 @@ class DisbursementVoucherController extends Controller
         }
 
         try {
+            $orsDat = ObligationRequestStatus::find($orsID);
             $instanceDV = DisbursementVoucher::find($id);
             $moduleClass = $instanceDV->module_class;
 
@@ -622,6 +623,13 @@ class DisbursementVoucherController extends Controller
             $instanceDV->sig_agency_head = $sigAgencyHead;
             $instanceDV->date_agency_head = $dateAgencyHead;
             $instanceDV->funding_source = $project;
+
+            if ($orsDat) {
+                $instanceDV->uacs_object_code = $orsDat->uacs_object_code ?
+                                                $orsDat->uacs_object_code :
+                                                serialize([]);
+            }
+
             $instanceDV->save();
 
             $documentType = 'Disbursement Voucher';

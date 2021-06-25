@@ -250,10 +250,11 @@
                                     <select class="mdb-select form-control-sm required payee-tokenizer"
                                             name="payee[{{ $itemCounter }}]">
                                         @foreach ($payees as $pay)
-                                        <option {{ $pay->id == $dv->payee ? 'selected' : '' }}
-                                                value="{{ $pay->id }}">
+                                            @if ($pay->id == $dv->payee)
+                                        <option value="{{ $pay->id }}" selected>
                                             {{ $pay->name }}
                                         </option>
+                                            @endif
                                         @endforeach
                                     </select>
                                 </td>

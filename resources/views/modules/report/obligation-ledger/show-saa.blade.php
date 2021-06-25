@@ -1,10 +1,4 @@
-<form id="form-update" class="wow animated fadeIn" method="POST"
-      action="{{ route('report-obligation-ledger-update', [
-            'id' => $id,
-            'for' => 'obligation',
-            'type' => 'saa',
-        ]) }}">
-    @csrf
+<form class="wow animated fadeIn">
     <div class="card">
         <div class="card-body">
             <h4>Obligation Ledger</h4>
@@ -24,9 +18,6 @@
                                 </th>
                                     @endif
                                 @endforeach
-
-                                <th class="align-middle" width="5px"></th>
-                                <th width="1px"></th>
                             </tr>
                         </thead>
 
@@ -79,9 +70,6 @@
                                         @endif
                                     @endforeach
                                 @endforeach
-
-                                <th class="align-top" width="5px"></th>
-                                <th width="1px"></th>
                             </tr>
                         </thead>
 
@@ -213,113 +201,56 @@
                                         @endif
                                     @endforeach
                                 @endforeach
-
-                                <td colspan="2"></td>
                             </tr>
                             @endforeach
 
-                            <tr><td class="py-3 grey" colspan="{{ $allotmentCounter + 7 }}"></td></tr>
+                            <tr><td class="py-3 grey" colspan="{{ $allotmentCounter + 5 }}"></td></tr>
                         </tbody>
 
-                        <tbody id="item-row-container" class="sortable">
+                        <tbody id="item-row-container">
                             @php $allotmentAmount = 0; @endphp
 
                             @if (count($vouchers) > 0)
                                 @foreach ($vouchers as $itemCounter => $ors)
                                     @php $allotmentCounter = 0; @endphp
-                            <tr id="item-row-{{ $itemCounter }}" class="item-row">
-                                <td>
-                                    <div class="md-form form-sm my-0">
-                                        <input type="date" name="date_ors_burs[{{ $itemCounter }}]"
-                                               class="form-control required form-control-sm date-ors-burs py-1"
-                                               value="{{ $ors->date_obligated }}">
-                                    </div>
-
-                                    @if (empty($ors->ledger_item_id))
-                                    <span class="badge badge-success mt-0">New</span>
-                                    @endif
+                            <tr id="item-row-{{ $itemCounter }}">
+                                <td align="center">
+                                    {{ $ors->date_obligated }}
+                                </td>
+                                <td align="center">
+                                    @foreach ($payees as $pay)
+                                        @if ($pay->id == $ors->payee)
+                                    {{ $pay->name }}
+                                        @endif
+                                    @endforeach
                                 </td>
                                 <td>
-                                    <select class="mdb-select form-control-sm required payee-tokenizer"
-                                            name="payee[{{ $itemCounter }}]">
-                                        @foreach ($payees as $pay)
-                                            @if ($pay->id == $ors->payee)
-                                        <option value="{{ $pay->id }}" selected>
-                                            {{ $pay->name }}
-                                        </option>
-                                            @endif
-                                        @endforeach
-                                    </select>
+                                    {{ $ors->particulars }}
                                 </td>
-                                <td>
-                                    <div class="md-form form-sm my-0">
-                                        <textarea name="particular[{{ $itemCounter }}]" placeholder=" Value..."
-                                                  class="md-textarea required form-control-sm w-100 py-1"
-                                                  placeholder="Value..."
-                                        >{{ $ors->particulars }}</textarea>
-                                    </div>
+                                <td  align="center">
+                                    {{ $ors->serial_no ? $ors->serial_no : $ors->ors_no }}
                                 </td>
-                                <td>
-                                    <div class="md-form form-sm my-0">
-                                        <input type="hidden" name="ors_id[{{ $itemCounter }}]" value="{{ $ors->id }}">
-                                        <input type="hidden" name="ledger_item_id[{{ $itemCounter }}]" value="{{ $ors->ledger_item_id }}">
-                                        <input type="text" name="ors_no[{{ $itemCounter }}]"
-                                               class="form-control required form-control-sm date-ors-burs py-1"
-                                               value="{{ $ors->serial_no ? $ors->serial_no : $ors->ors_no }}"
-                                               placeholder="Value...">
-                                    </div>
-                                </td>
-                                <td class="material-tooltip-main" data-toggle="tooltip" title="Particulars: {{ $ors->particulars }}">
-                                    <div class="md-form form-sm my-0">
-                                        <input type="number" name="amount[{{ $itemCounter }}]"
-                                               class="form-control required form-control-sm date-ors-burs py-1 text-center
-                                                      material-tooltip-main amount"
-                                               data-toggle="tooltip" data-placement="left"
-                                               title="Column: Total"
-                                               value="{{ $ors->amount }}"
-                                               onkeyup="$(this).computeTotalRemaining();"
-                                               onchange="$(this).computeTotalRemaining();"
-                                               placeholder="Value...">
-                                    </div>
+                                <td align="center" class="material-tooltip-main" data-toggle="tooltip"
+                                    title="Particulars: {{ $ors->particulars }}">
+                                    {{ number_format($ors->amount, 2) }}
                                 </td>
 
                                     @foreach ($ors->allotments as $allotCtr => $item)
-                                <td class="material-tooltip-main" data-toggle="tooltip" title="Particulars: {{ $ors->particulars }}">
-                                    <div class="md-form form-sm my-0">
-                                        <input type="number" name="allotment[{{ $itemCounter }}][{{ $allotCtr }}]"
-                                               class="form-control required form-control-sm date-ors-burs py-1 text-center
-                                                      material-tooltip-main allotment-{{ $allotCtr + 1 }}"
-                                               data-toggle="tooltip" data-placement="left"
-                                               title="Column: "
-                                               id="allot-remain-{{ $itemCounter }}-{{ $allotCtr + 1 }}"
-                                               onkeyup="$(this).computeAllotmentRemaining();"
-                                               onchange="$(this).computeAllotmentRemaining();"
-                                               placeholder="Value..." value="{{ $item->amount }}">
-                                    </div>
+                                <td align="center">
+                                    <input type="hidden"
+                                           id="allot-remain-{{ $itemCounter }}-{{ $allotCtr + 1 }}"
+                                           value="{{ $item->amount }}">
+                                    {{ number_format($item->amount) }}
                                 </td>
                                         @php $allotmentCounter++; @endphp
                                     @endforeach
-
-                                <td class="align-middle">
-                                    {{--
-                                    <a onclick="$(this).deleteRow('#item-row-{{ $itemCounter }}');"
-                                        class="btn btn-outline-red px-1 py-0">
-                                        <i class="fas fa-minus-circle"></i>
-                                    </a>
-                                    --}}
-                                </td>
-                                <td class="align-middle">
-                                    <a href="#" class="grey-text">
-                                        <i class="fas fa-ellipsis-v"></i>
-                                    </a>
-                                </td>
                             </tr>
 
                                     @php $itemCounter++ @endphp
                                 @endforeach
                             @else
                             <tr>
-                                <td id="item-row-empty" class="py-3 red-text pl-4" colspan="{{ $allotmentCounter + 7 }}">
+                                <td id="item-row-empty" class="py-3 red-text pl-4" colspan="{{ $allotmentCounter + 5 }}">
                                     <h5>
                                         <i class="fas fa-times-circle"></i> <em>No voucher is obligated nor created.</em>
                                     </h5>
@@ -343,13 +274,11 @@
                                 </td>
 
                                 @for ($allotCtr = 1; $allotCtr <= $allotmentCounter; $allotCtr++)
-                                <td class="font-weight-bold red-text">
+                                <td align="center" class="font-weight-bold red-text">
                                     <input type="number" id="remaining-{{ $allotCtr }}" class="text-center"
                                            value="0.00" readonly>
                                 </td>
                                 @endfor
-
-                                <td colspan="2"></td>
                             </tr>
                         </tfoot>
                         @endif
