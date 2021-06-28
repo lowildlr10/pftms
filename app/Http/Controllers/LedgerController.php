@@ -185,16 +185,6 @@ class LedgerController extends Controller
         }
 
         if ($for == 'obligation') {
-            $vouchers = DB::table('obligation_request_status as ors')->select(
-                DB::raw("DATE_FORMAT(ors.date_obligated, '%Y-%m-%d') as date_obligated"),
-                'ors.id', 'ors.payee', 'ors.particulars', 'ors.serial_no', 'ors.amount',
-                'ledger.id as ledger_item_id', 'ledger.particulars as ledger_particulars',
-                'ledger.ors_no', 'ledger.id as ledger_id'
-            )->leftJoin('funding_ledger_items as ledger', 'ledger.ors_id', '=', 'ors.id')
-             ->where('funding_source', $projectID)
-             ->whereNotNull('date_obligated')
-             ->orderBy('date_obligated')
-             ->get();
             $approvedBudgets = [
                 (object) [
                     'label' => 'Approved Budget',
@@ -209,54 +199,9 @@ class LedgerController extends Controller
             }
 
             if ($type == 'saa') {
-                foreach ($vouchers as $voucher) {
-                    if ($voucher->ledger_item_id) {
-                        $voucher->allotments = [];
-                        $ledgerAllotments = FundingLedgerAllotment::where(
-                            'ledger_item_id', $voucher->ledger_item_id
-                        )->get();
-
-                        foreach ($allotmentHeaders as $allotHead) {
-                            $amount = 0;
-
-                            foreach ($ledgerAllotments as $allot) {
-                                if ($allot->allotment_id == $allotHead->allotment_id ||
-                                    $allot->realign_allotment_id == $allotHead->realign_allotment_id) {
-                                    $amount = $allot->current_cost;
-                                    break;
-                                }
-                            }
-
-                            $voucher->allotments[] = (object) [
-                                'amount' => $amount
-                            ];
-                        }
-                    } else {
-                        foreach ($allotmentHeaders as $headCtr => $allotHead) {
-                            $voucher->allotments[] = (object) [
-                                'amount' => 0
-                            ];
-                        }
-                    }
-                }
-
                 $viewFile = 'modules.report.obligation-ledger.show-saa';
             }
         } else {
-            $vouchers = DB::table('disbursement_vouchers as dv')->select(
-                DB::raw("DATE_FORMAT(dv.date_disbursed, '%Y-%m-%d') as date_disbursed"),
-                'dv.id', 'dv.payee', 'dv.particulars', 'dv.amount', 'dv.uacs_object_code',
-                'dv.module_class', 'dv.pr_id', 'ors.serial_no','ors.id as ors_id',
-                'ledger.id as ledger_item_id', 'ledger.particulars as ledger_particulars',
-                'ledger.ors_no', 'ledger.prior_year', 'ledger.continuing', 'ledger.current',
-                'ledger.total', 'ledger.mooe_account as mooe_account',
-                'ledger.unit as ledger_unit', 'ledger.id as ledger_id'
-            )->leftJoin('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
-             ->leftJoin('funding_ledger_items as ledger', 'ledger.dv_id', '=', 'dv.id')
-             ->where('dv.funding_source', $projectID)
-             ->whereNotNull('dv.date_disbursed')
-             ->orderBy('dv.date_disbursed')
-             ->get();
             $approvedBudgets = [
                 (object) [
                     'label' => 'LIB',
@@ -271,65 +216,22 @@ class LedgerController extends Controller
             }
 
             if ($type == 'saa') {
-                foreach ($vouchers as $voucher) {
-                    if ($voucher->ledger_item_id) {
-                        $voucher->allotments = [];
-                        $ledgerAllotments = FundingLedgerAllotment::where(
-                            'ledger_item_id', $voucher->ledger_item_id
-                        )->get();
-
-                        foreach ($allotmentHeaders as $allotHead) {
-                            $amount = 0;
-
-                            foreach ($ledgerAllotments as $allot) {
-                                if ($allot->allotment_id == $allotHead->allotment_id ||
-                                    $allot->realign_allotment_id == $allotHead->realign_allotment_id) {
-                                    $amount = $allot->current_cost;
-                                    break;
-                                }
-                            }
-
-                            $voucher->allotments[] = (object) [
-                                'amount' => $amount
-                            ];
-                        }
-                    } else {
-                        foreach ($allotmentHeaders as $headCtr => $allotHead) {
-                            $voucher->allotments[] = (object) [
-                                'amount' => 0
-                            ];
-                        }
-                    }
-                }
-
                 $viewFile = 'modules.report.disbursement-ledger.show-saa';
             } else if ($type == 'mooe') {
-                foreach ($vouchers as $dv) {
-                    $dv->uacs_object_code = unserialize($dv->uacs_object_code);
-                    $dv->mooe_account = $dv->mooe_account ? unserialize($dv->mooe_account) : [];
-
-                    if ($dv->module_class == 3) {
-                        $prID = $dv->pr_id;
-                        $prDat = PurchaseRequest::find($prID);
-                        $userID = $prDat->requested_by;
-                        $userDat = User::find($userID);
-                        $dv->unit = $userDat->unit;
-                    } else {
-                        $userID = $dv->payee;
-                        $userDat = User::find($userID);
-                        $dv->unit = $userDat->unit;
-                    }
-                }
-
                 $viewFile = 'modules.report.disbursement-ledger.show-mooe';
             } else if ($type == 'lgia') {
                 $viewFile = 'modules.report.disbursement-ledger.show-lgia';
             }
         }
 
+        $groupedVouchers = $this->groupVouchersByMonth(
+            $projectID, $for, $type, $allotmentHeaders,
+            $approvedBudgets[count($approvedBudgets) - 1]->total
+        );
+
         return view($viewFile, compact(
             'allotments', 'classItemCounts', 'approvedBudgets', 'isRealignment',
-            'vouchers', 'itemCounter', 'allotmentCounter', 'payees', 'id',
+            'groupedVouchers', 'itemCounter', 'allotmentCounter', 'payees', 'id',
             'empUnits', 'mooeTitles', 'projectTitle', 'allotmentHeaders'
         ));
     }
@@ -541,9 +443,16 @@ class LedgerController extends Controller
             } else {
                 $instanceLedger->restore();
                 $ledgerID = $instanceLedger->id;
+                $ledgerItems = DB::table('funding_ledger_items')
+                                 ->where('ledger_id', $ledgerID)
+                                 ->get();
 
-                $instanceLedger->ledgerItems()->delete();
-                $instanceLedger->ledgerAllotments()->delete();
+                foreach ($ledgerItems as $item) {
+                    FundingLedgerAllotment::where('ledger_item_id', $item->id)
+                                        ->delete();
+                    FundingLedgerItem::destroy($item->id);
+
+                }
             }
 
             $instanceLedger->project_id = $projectID;
@@ -960,8 +869,16 @@ class LedgerController extends Controller
 
         try {
             $instanceLedger = FundingLedger::find($id);
-            $instanceLedger->ledgerItems()->forceDelete();
-            $instanceLedger->ledgerAllotments()->forceDelete();
+            $ledgerItems = DB::table('funding_ledger_items')
+                             ->where('ledger_id', $id)
+                             ->get();
+
+            foreach ($ledgerItems as $item) {
+                FundingLedgerAllotment::where('ledger_item_id', $item->id)
+                                      ->delete();
+                FundingLedgerItem::destroy($item->id);
+
+            }
 
             $projectID = $instanceLedger->project_id;
             $budgetID = $instanceLedger->budget_id;
@@ -1148,15 +1065,22 @@ class LedgerController extends Controller
      */
     public function destroy($request, $id, $for) {
         try {
-            FundingLedgerAllotment::where('ledger_id', $id)
-                                  ->delete();
-            FundingLedgerItem::where('ledger_id', $id)
-                             ->delete();
+            $ledgerItems = DB::table('funding_ledger_items')
+                             ->where('ledger_id', $id)
+                             ->get();
+
+            foreach ($ledgerItems as $item) {
+                FundingLedgerAllotment::where('ledger_item_id', $item->id)
+                                      ->delete();
+                FundingLedgerItem::destroy($item->id);
+
+            }
 
             $instanceLedger = FundingLedger::find($id);
+            $instanceLedger->forceDelete();
+
             $documentType = $for == 'obligation' ? 'Obligation Ledger' :
                             'Disbursement';
-            $instanceLedger->forceDelete();
 
             $msg = "$documentType '$id' permanently deleted.";
             Auth::user()->log($request, $msg);
@@ -1410,14 +1334,16 @@ class LedgerController extends Controller
                         $allotmentHeaders[] = (object) [
                             'allotment_id' => $item->allotment_id,
                             'realign_allotment_id' => NULL,
-                            'allotment_name' => $item->allotment_name
+                            'allotment_name' => $item->allotment_name,
+                            'allotment_cost' => $item->allotment_cost,
                         ];
                     } else {
                         $realignKey = "realignment_$realignOrder";
                         $allotmentHeaders[] = (object) [
                             'allotment_id' => $item->{$realignKey}->allotment_id,
                             'realign_allotment_id' => $item->{$realignKey}->allotment_realign_id,
-                            'allotment_name' => $item->allotment_name
+                            'allotment_name' => $item->allotment_name,
+                            'allotment_cost' => $item->{$realignKey}->allotment_cost,
                         ];
                     }
 
@@ -1461,5 +1387,229 @@ class LedgerController extends Controller
         } else {
             return $number. $suffix[$number % 10];
         }
+    }
+
+    private function groupVouchersByMonth($projectID, $for, $type, $allotmentHeaders, $currentBudget) {
+        $groupedVouchers = [];
+        $monthDates = [];
+        $footerAllotments = [];
+        $remaining = $currentBudget;
+        $total = 0;
+
+        if ($for == 'obligation') {
+            $_vouchers = DB::table('obligation_request_status as ors')->select(
+                DB::raw("DATE_FORMAT(ors.date_obligated, '%Y-%m-%d') as date_obl_dis")
+            )->leftJoin('funding_ledger_items as ledger', 'ledger.ors_id', '=', 'ors.id')
+             ->where('funding_source', $projectID)
+             ->whereNotNull('date_obligated')
+             ->orderBy('date_obligated')
+             ->get();
+        } else {
+            $_vouchers = DB::table('disbursement_vouchers as dv')->select(
+                DB::raw("DATE_FORMAT(dv.date_disbursed, '%Y-%m-%d') as date_obl_dis"),
+                'ledger.unit as ledger_unit', 'ledger.id as ledger_id'
+            )->leftJoin('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
+             ->leftJoin('funding_ledger_items as ledger', 'ledger.dv_id', '=', 'dv.id')
+             ->where('dv.funding_source', $projectID)
+             ->whereNotNull('dv.date_disbursed')
+             ->orderBy('dv.date_disbursed')
+             ->get();
+        }
+
+        $_monthDates = [];
+
+        foreach ($allotmentHeaders as $allotHead) {
+            $footerAllotments[] = (object) [
+                'month_total' => 0,
+                'total' => 0,
+                'remaining' => $allotHead->allotment_cost,
+            ];
+        }
+
+        foreach ($_vouchers as $voucher) {
+            $monthDate = date("m-Y", strtotime($voucher->date_obl_dis));
+            $monthlabel = date("F", strtotime($voucher->date_obl_dis));
+
+            if (count($monthDates) > 0) {
+                $_monthDates[] = $monthDate;
+            } else if (count($monthDates) == 0) {
+                $_monthDates[] = $monthDate;
+            }
+        }
+
+        $fromMonthDate = explode('-', $_monthDates[0]);
+        $toMonthDate = explode('-', $_monthDates[count($_monthDates) - 1]);
+
+        for ($year = $fromMonthDate[1]; $year <= $toMonthDate[1]; $year++) {
+            $fromMonth = 1;
+            $toMonth = 12;
+
+            if ($year == $toMonthDate[1]) {
+                $toMonth = $toMonthDate[0];
+            }
+
+            if ($year == $fromMonthDate[1]) {
+                $fromMonth = $fromMonthDate[0];
+            }
+
+            for ($month = $fromMonth; $month <= $toMonth ; $month++) {
+                $monthDate = date("Y-m", strtotime("$year-$month-01"));
+                $monthlabel = date("F", strtotime("$year-$month-01"));
+
+                $monthDates[] = (object) [
+                    'year' => $year,
+                    'month_date' => $monthDate,
+                    'month_label' => $monthlabel
+                ];
+            }
+        }
+
+        foreach ($monthDates as $moCtr => $moDate) {
+            $year = $moDate->year;
+            $monthDate = $moDate->month_date;
+            $monthlabel = $moDate->month_label;
+            $groupedVouchers[$moCtr] = (object) [
+                'month_date' => $monthDate,
+                'month_label' => "$monthlabel $year",
+                'month_total' => 0,
+                'total' => $total,
+                'remaining' => $remaining,
+                'allotments' => $footerAllotments
+            ];
+
+            if ($for == 'obligation') {
+                $groupedVouchers[$moCtr]->vouchers = DB::table('obligation_request_status as ors')->select(
+                    DB::raw("DATE_FORMAT(ors.date_obligated, '%Y-%m-%d') as date_obligated"),
+                    'ors.id', 'ors.payee', 'ors.particulars', 'ors.serial_no', 'ors.amount',
+                    'ledger.id as ledger_item_id', 'ledger.particulars as ledger_particulars',
+                    'ledger.ors_no', 'ledger.id as ledger_id'
+                )->leftJoin('funding_ledger_items as ledger', 'ledger.ors_id', '=', 'ors.id')
+                 ->where([['funding_source', $projectID], ['date_obligated', 'like', "%$monthDate%"]])
+                 ->whereNotNull('date_obligated')
+                 ->orderBy('date_obligated')
+                 ->get();
+
+                 if ($type == 'saa') {
+                    foreach ($groupedVouchers[$moCtr]->vouchers as $voucher) {
+                        $total += $voucher->amount;
+                        $remaining -= $voucher->amount;
+
+                        $groupedVouchers[$moCtr]->month_total += $voucher->amount;
+                        $groupedVouchers[$moCtr]->total = $total;
+                        $groupedVouchers[$moCtr]->remaining = $remaining;
+
+                        if ($voucher->ledger_item_id) {
+                            $voucher->allotments = [];
+                            $ledgerAllotments = FundingLedgerAllotment::where(
+                                'ledger_item_id', $voucher->ledger_item_id
+                            )->get();
+
+                            foreach ($allotmentHeaders as $headCtr => $allotHead) {
+                                $amount = 0;
+
+                                foreach ($ledgerAllotments as $allot) {
+                                    if ($allot->allotment_id == $allotHead->allotment_id ||
+                                        $allot->realign_allotment_id == $allotHead->realign_allotment_id) {
+                                        $amount = $allot->current_cost;
+                                        break;
+                                    }
+                                }
+
+                                $footerAllotments[$headCtr]->month_total += $amount;
+                                $footerAllotments[$headCtr]->total += $amount;
+                                $footerAllotments[$headCtr]->remaining -= $amount;
+                                $voucher->allotments[] = (object) [
+                                    'amount' => $amount
+                                ];
+                            }
+
+                            $groupedVouchers[$moCtr]->allotments = $footerAllotments;
+                        } else {
+                            foreach ($allotmentHeaders as $headCtr => $allotHead) {
+                                $voucher->allotments[] = (object) [
+                                    'amount' => 0
+                                ];
+                            }
+                        }
+                    }
+                }
+            } else {
+                $groupedVouchers[$moCtr]->vouchers = DB::table('disbursement_vouchers as dv')->select(
+                    DB::raw("DATE_FORMAT(dv.date_disbursed, '%Y-%m-%d') as date_disbursed"),
+                    'dv.id', 'dv.payee', 'dv.particulars', 'dv.amount', 'dv.uacs_object_code',
+                    'dv.module_class', 'dv.pr_id', 'ors.serial_no','ors.id as ors_id',
+                    'ledger.id as ledger_item_id', 'ledger.particulars as ledger_particulars',
+                    'ledger.ors_no', 'ledger.prior_year', 'ledger.continuing', 'ledger.current',
+                    'ledger.total', 'ledger.mooe_account as mooe_account',
+                    'ledger.unit as ledger_unit', 'ledger.id as ledger_id'
+                )->leftJoin('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
+                 ->leftJoin('funding_ledger_items as ledger', 'ledger.dv_id', '=', 'dv.id')
+                 ->where([['dv.funding_source'], ['dv.date_disbursed', 'like', "%$monthDate%"]])
+                 ->whereNotNull('dv.date_disbursed')
+                 ->orderBy('dv.date_disbursed')
+                 ->get();
+
+                /*
+                if ($type == 'saa') {
+                    foreach ($groupedVouchers[$moCtr]->vouchers as $voucher) {
+                        $total += $voucher->amount;
+                        $groupedVouchers[$moCtr]->month_total += $voucher->amount;
+                        $groupedVouchers[$moCtr]->total += $total;
+
+                        if ($voucher->ledger_item_id) {
+                            $voucher->allotments = [];
+                            $ledgerAllotments = FundingLedgerAllotment::where(
+                                'ledger_item_id', $voucher->ledger_item_id
+                            )->get();
+
+                            foreach ($allotmentHeaders as $allotHead) {
+                                $amount = 0;
+
+                                foreach ($ledgerAllotments as $allot) {
+                                    if ($allot->allotment_id == $allotHead->allotment_id ||
+                                        $allot->realign_allotment_id == $allotHead->realign_allotment_id) {
+                                        $amount = $allot->current_cost;
+                                        break;
+                                    }
+                                }
+
+                                $voucher->allotments[] = (object) [
+                                    'amount' => $amount
+                                ];
+                            }
+                        } else {
+                            foreach ($allotmentHeaders as $headCtr => $allotHead) {
+                                $voucher->allotments[] = (object) [
+                                    'amount' => 0
+                                ];
+                            }
+                        }
+                    }
+                } else if ($type == 'mooe') {
+                    foreach ($groupedVouchers[$moCtr]->vouchers as $dv) {
+                        $total += $voucher->amount;
+                        $groupedVouchers[$moCtr]->month_total += $voucher->amount;
+                        $groupedVouchers[$moCtr]->total += $total;
+
+                        $dv->uacs_object_code = unserialize($dv->uacs_object_code);
+                        $dv->mooe_account = $dv->mooe_account ? unserialize($dv->mooe_account) : [];
+
+                        if ($dv->module_class == 3) {
+                            $prID = $dv->pr_id;
+                            $prDat = PurchaseRequest::find($prID);
+                            $userID = $prDat->requested_by;
+                            $userDat = User::find($userID);
+                            $dv->unit = $userDat->unit;
+                        } else {
+                            $userID = $dv->payee;
+                            $userDat = User::find($userID);
+                            $dv->unit = $userDat->unit;
+                        }
+                    }
+                }*/
+            }
+        }
+
+        return $groupedVouchers;
     }
 }

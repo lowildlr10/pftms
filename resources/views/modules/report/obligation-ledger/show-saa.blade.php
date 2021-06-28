@@ -210,19 +210,21 @@
                         <tbody id="item-row-container">
                             @php $allotmentAmount = 0; @endphp
 
-                            @if (count($vouchers) > 0)
-                                @foreach ($vouchers as $itemCounter => $ors)
-                                    @php $allotmentCounter = 0; @endphp
+                            @if (count($groupedVouchers) > 0)
+                                @foreach ($groupedVouchers as $groupedVoucher)
+                                    @if (count($groupedVoucher->vouchers))
+                                        @foreach ($groupedVoucher->vouchers as $ors)
+                                            @php $allotmentCounter = 0; @endphp
                             <tr id="item-row-{{ $itemCounter }}">
                                 <td align="center">
                                     {{ $ors->date_obligated }}
                                 </td>
                                 <td align="center">
-                                    @foreach ($payees as $pay)
-                                        @if ($pay->id == $ors->payee)
+                                            @foreach ($payees as $pay)
+                                                @if ($pay->id == $ors->payee)
                                     {{ $pay->name }}
-                                        @endif
-                                    @endforeach
+                                                @endif
+                                            @endforeach
                                 </td>
                                 <td>
                                     {{ $ors->particulars }}
@@ -234,19 +236,76 @@
                                     title="Particulars: {{ $ors->particulars }}">
                                     {{ number_format($ors->amount, 2) }}
                                 </td>
-
-                                    @foreach ($ors->allotments as $allotCtr => $item)
-                                <td align="center">
+                                            @foreach ($ors->allotments as $allotCtr => $item)
+                                <td align="center" class="material-tooltip-main" data-toggle="tooltip"
+                                    title="Particulars: {{ $ors->particulars }}">
                                     <input type="hidden"
                                            id="allot-remain-{{ $itemCounter }}-{{ $allotCtr + 1 }}"
                                            value="{{ $item->amount }}">
-                                    {{ number_format($item->amount) }}
+                                    <a class="btn btn-outline-indigo btn-block material-tooltip-main
+                                              allotment-{{ $allotCtr + 1 }}"
+                                        data-toggle="tooltip" data-placement="left"
+                                        title="Column: ">
+                                        {!! $item->amount ? number_format($item->amount) : '<b>-</b>' !!}
+                                    </a>
                                 </td>
-                                        @php $allotmentCounter++; @endphp
-                                    @endforeach
+                                                @php $allotmentCounter++; @endphp
+                                            @endforeach
                             </tr>
 
-                                    @php $itemCounter++ @endphp
+                                            @php $itemCounter++ @endphp
+                                        @endforeach
+                            <tr class="blue-grey lighten-4">
+                                <td colspan="4" class="font-weight-bold">
+                                    Obligations for the Month of {{ $groupedVoucher->month_label }}
+                                </td>
+                                <td align="center" class="font-weight-bold">
+                                    {{ number_format($groupedVoucher->month_total, 2) }}
+                                </td>
+
+                                @foreach ($groupedVoucher->allotments as $remainAllot)
+                                <td align="center" class="font-weight-bold">
+                                    {{ number_format($remainAllot->month_total, 2) }}
+                                </td>
+                                @endforeach
+                            </tr>
+                            <tr class="blue-grey lighten-4">
+                                <td colspan="4" class="font-weight-bold">
+                                    Total Obligations to date
+                                </td>
+                                <td align="center" class="font-weight-bold">
+                                    {{ number_format($groupedVoucher->total, 2) }}
+                                </td>
+
+                                @foreach ($groupedVoucher->allotments as $remainAllot)
+                                <td align="center" class="font-weight-bold">
+                                    {{ number_format($remainAllot->total, 2) }}
+                                </td>
+                                @endforeach
+                            </tr>
+                            <tr class="blue-grey lighten-4">
+                                <td colspan="4" class="font-weight-bold red-text">
+                                    Available Allotment
+                                </td>
+                                <td align="center" class="font-weight-bold red-text">
+                                    {{ number_format($groupedVoucher->remaining, 2) }}
+                                </td>
+
+                                @foreach ($groupedVoucher->allotments as $remainAllot)
+                                <td align="center" class="font-weight-bold">
+                                    {{ number_format($remainAllot->remaining, 2) }}
+                                </td>
+                                @endforeach
+                            </tr>
+                                    @else
+                            <tr>
+                                <td class="font-weight-bold red-text py-2" colspan="{{ $allotmentCounter + 7 }}">
+                                    <em>
+                                        No obligation for the month of {{ $groupedVoucher->month_label }}
+                                    </em>
+                                </td>
+                            </tr>
+                                    @endif
                                 @endforeach
                             @else
                             <tr>
@@ -261,27 +320,6 @@
                             </tr>
                             @endif
                         </tbody>
-
-                        @if (count($vouchers) > 0)
-                        <tfoot>
-                            <tr>
-                                <td colspan="4" class="font-weight-bold red-text text-center">
-                                    Available Allotment
-                                </td>
-                                <td class="font-weight-bold red-text">
-                                    <input type="number" id="total-remaining" class="text-center"
-                                           value="0.00" readonly>
-                                </td>
-
-                                @for ($allotCtr = 1; $allotCtr <= $allotmentCounter; $allotCtr++)
-                                <td align="center" class="font-weight-bold red-text">
-                                    <input type="number" id="remaining-{{ $allotCtr }}" class="text-center"
-                                           value="0.00" readonly>
-                                </td>
-                                @endfor
-                            </tr>
-                        </tfoot>
-                        @endif
                     </table>
                 </div>
             </div>
