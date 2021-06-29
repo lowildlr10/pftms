@@ -441,7 +441,10 @@ class LedgerController extends Controller
             if (!$instanceLedger) {
                 $instanceLedger = new FundingLedger;
             } else {
-                $instanceLedger->restore();
+                if ($instanceLedger->deleted_at) {
+                    $instanceLedger->restore();
+                }
+
                 $ledgerID = $instanceLedger->id;
                 $ledgerItems = DB::table('funding_ledger_items')
                                  ->where('ledger_id', $ledgerID)
@@ -461,10 +464,15 @@ class LedgerController extends Controller
             $instanceLedger->ledger_type = $type;
             $instanceLedger->save();
 
-            $ledgerDat = FundingLedger::where('project_id', $projectID)->first();
+            $ledgerDat = FundingLedger::where([
+                ['project_id', $projectID],
+                ['ledger_for', $for],
+                ['ledger_type', $type]
+            ])->first();
             $ledgerID = $ledgerDat->id;
 
             $orderNo = 1;
+
 
             if ($for == 'obligation') {
                 foreach ($orsIDs as $orsCtr => $orsID) {
@@ -685,7 +693,6 @@ class LedgerController extends Controller
                             $amount = 0;
 
                             foreach ($ledgerAllotments as $allot) {
-                                dd($allot, $allotHead);
                                 if ($allot->allotment_id == $allotHead->allotment_id ||
                                     $allot->realign_allotment_id == $allotHead->realign_allotment_id) {
                                     $amount = $allot->current_cost;
@@ -720,8 +727,8 @@ class LedgerController extends Controller
             )->leftJoin('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
              ->leftJoin('funding_ledger_items as ledger', 'ledger.dv_id', '=', 'dv.id')
              ->where('dv.funding_source', $projectID)
-             ->whereNotNull('dv.date_disbursed')
-             ->orderBy('dv.date_disbursed')
+             ->whereNotNull('date_disbursed')
+             ->orderBy('date_disbursed')
              ->get();
             $approvedBudgets = [
                 (object) [
@@ -819,6 +826,7 @@ class LedgerController extends Controller
                 $payees = $request->payee;
                 $particulars = $request->particular;
                 $orsIDs = $request->ors_id;
+                $ledgerItemIDs = $request->ledger_item_id;
                 $orsNos = $request->ors_no;
                 $totals = $request->amount;
                 $allotments = $request->allotment;
@@ -869,6 +877,12 @@ class LedgerController extends Controller
 
         try {
             $instanceLedger = FundingLedger::find($id);
+            $projectID = $instanceLedger->project_id;
+            $budgetID = $instanceLedger->budget_id;
+            $instanceLedger->ledger_for = $for;
+            $instanceLedger->ledger_type = $type;
+            $instanceLedger->save();
+
             $ledgerItems = DB::table('funding_ledger_items')
                              ->where('ledger_id', $id)
                              ->get();
@@ -880,12 +894,6 @@ class LedgerController extends Controller
 
             }
 
-            $projectID = $instanceLedger->project_id;
-            $budgetID = $instanceLedger->budget_id;
-            $instanceLedger->ledger_for = $for;
-            $instanceLedger->ledger_type = $type;
-            $instanceLedger->save();
-
             $orderNo = 1;
 
             if ($for == 'obligation') {
@@ -895,8 +903,8 @@ class LedgerController extends Controller
                         $instanceLedgerItem->project_id = $projectID;
                         $instanceLedgerItem->budget_id = $budgetID;
                         $instanceLedgerItem->ledger_id = $id;
-                        $instanceLedgerItem->date_ors_dv = $dateORS[$orsCtr];
                         $instanceLedgerItem->ors_id = $orsID;
+                        $instanceLedgerItem->date_ors_dv = $dateORS[$orsCtr];
                         $instanceLedgerItem->ors_no = $orsNos[$orsCtr];
                         $instanceLedgerItem->payee = $payees[$orsCtr];
                         $instanceLedgerItem->particulars = $particulars[$orsCtr];
@@ -909,7 +917,7 @@ class LedgerController extends Controller
                         $ledgerItemID = $ledgerItemDat->id;
 
                         foreach ($allotments[$orsCtr] as $allotCtr => $total) {
-                            if ($total > 0) {
+                            if ((double) $total > 0) {
                                 $instanceLedgerAllotments = new FundingLedgerAllotment;
                                 $instanceLedgerAllotments->project_id = $projectID;
                                 $instanceLedgerAllotments->budget_id = $budgetID;
@@ -947,7 +955,7 @@ class LedgerController extends Controller
                         $ledgerItemID = $ledgerItemDat->id;
 
                         foreach ($allotments[$dvCtr] as $allotCtr => $total) {
-                            if ($total > 0) {
+                            if ((double) $total > 0) {
                                 $instanceLedgerAllotments = new FundingLedgerAllotment;
                                 $instanceLedgerAllotments->project_id = $projectID;
                                 $instanceLedgerAllotments->budget_id = $budgetID;
@@ -1241,7 +1249,6 @@ class LedgerController extends Controller
                                        ->where('budget_realign_id', $currRealignID)
                                        ->orderBy('order_no')
                                        ->get();
-
             $_allotments = [];
 
             foreach ($currRealignAllotments as $realignAllotCtr => $realignAllot) {
@@ -1279,14 +1286,15 @@ class LedgerController extends Controller
                                         ])->first();
                     $realignID = $budgetRealignData->id;
                     $realignAllotmentData = DB::table('funding_allotment_realignments')
-                                            ->where('budget_realign_id', $realignID)
-                                            ->orderBy('order_no')
-                                            ->get();
+                                              ->where('budget_realign_id', $realignID)
+                                              ->orderBy('order_no')
+                                              ->get();
                     $hasRealignAllot = false;
 
                     foreach ($realignAllotmentData as $rAllotCtr => $rAllot) {
                         if (strtolower(trim($realignAllot->allotment_name)) == strtolower(trim($rAllot->allotment_name)) ||
-                            $realignAllot->allotment_id == $rAllot->allotment_id) {
+                            ($realignAllot->allotment_id == $rAllot->allotment_id &&
+                            !empty($realignAllot->allotment_id) && !empty($realignAllot->allotment_id))) {
                             $coimplementers = unserialize($rAllot->coimplementers);
 
                             $_allotments[$realignAllotCtr]->{$realignIndex} = (object) [
@@ -1318,7 +1326,6 @@ class LedgerController extends Controller
         }
 
         foreach ($allotClassData as $class) {
-            //$keyClass = preg_replace("/\s+/", "-", $class->class_name);
             $keyClass = preg_replace("/\s+/", "-", $class->code);
             $classItemCounts[$keyClass] = 0;
 
@@ -1392,8 +1399,10 @@ class LedgerController extends Controller
     private function groupVouchersByMonth($projectID, $for, $type, $allotmentHeaders, $currentBudget) {
         $groupedVouchers = [];
         $monthDates = [];
-        $footerAllotments = [];
+        $_monthDates = [];
+        $remainings = [];
         $remaining = $currentBudget;
+        $totals = [];
         $total = 0;
 
         if ($for == 'obligation') {
@@ -1411,19 +1420,14 @@ class LedgerController extends Controller
             )->leftJoin('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
              ->leftJoin('funding_ledger_items as ledger', 'ledger.dv_id', '=', 'dv.id')
              ->where('dv.funding_source', $projectID)
-             ->whereNotNull('dv.date_disbursed')
-             ->orderBy('dv.date_disbursed')
+             ->whereNotNull('date_disbursed')
+             ->orderBy('date_disbursed')
              ->get();
         }
 
-        $_monthDates = [];
-
         foreach ($allotmentHeaders as $allotHead) {
-            $footerAllotments[] = (object) [
-                'month_total' => 0,
-                'total' => 0,
-                'remaining' => $allotHead->allotment_cost,
-            ];
+            $totals[] = 0;
+            $remainings[] = $allotHead->allotment_cost;
         }
 
         foreach ($_vouchers as $voucher) {
@@ -1465,6 +1469,7 @@ class LedgerController extends Controller
         }
 
         foreach ($monthDates as $moCtr => $moDate) {
+            $monthTotals = [];
             $year = $moDate->year;
             $monthDate = $moDate->month_date;
             $monthlabel = $moDate->month_label;
@@ -1473,9 +1478,12 @@ class LedgerController extends Controller
                 'month_label' => "$monthlabel $year",
                 'month_total' => 0,
                 'total' => $total,
-                'remaining' => $remaining,
-                'allotments' => $footerAllotments
+                'remaining' => $remaining
             ];
+
+            foreach ($allotmentHeaders as $allotHead) {
+                $monthTotals[] = 0;
+            }
 
             if ($for == 'obligation') {
                 $groupedVouchers[$moCtr]->vouchers = DB::table('obligation_request_status as ors')->select(
@@ -1515,15 +1523,14 @@ class LedgerController extends Controller
                                     }
                                 }
 
-                                $footerAllotments[$headCtr]->month_total += $amount;
-                                $footerAllotments[$headCtr]->total += $amount;
-                                $footerAllotments[$headCtr]->remaining -= $amount;
+                                $monthTotals[$headCtr] += $amount;
+                                $totals[$headCtr] += $amount;
+                                $remainings[$headCtr] -= $amount;
+
                                 $voucher->allotments[] = (object) [
                                     'amount' => $amount
                                 ];
                             }
-
-                            $groupedVouchers[$moCtr]->allotments = $footerAllotments;
                         } else {
                             foreach ($allotmentHeaders as $headCtr => $allotHead) {
                                 $voucher->allotments[] = (object) [
@@ -1532,6 +1539,10 @@ class LedgerController extends Controller
                             }
                         }
                     }
+
+                    $groupedVouchers[$moCtr]->month_totals = $monthTotals;
+                    $groupedVouchers[$moCtr]->totals = $totals;
+                    $groupedVouchers[$moCtr]->remainings = $remainings;
                 }
             } else {
                 $groupedVouchers[$moCtr]->vouchers = DB::table('disbursement_vouchers as dv')->select(
@@ -1544,17 +1555,19 @@ class LedgerController extends Controller
                     'ledger.unit as ledger_unit', 'ledger.id as ledger_id'
                 )->leftJoin('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
                  ->leftJoin('funding_ledger_items as ledger', 'ledger.dv_id', '=', 'dv.id')
-                 ->where([['dv.funding_source'], ['dv.date_disbursed', 'like', "%$monthDate%"]])
-                 ->whereNotNull('dv.date_disbursed')
-                 ->orderBy('dv.date_disbursed')
+                 ->where([['dv.funding_source', $projectID], ['dv.date_disbursed', 'like', "%$monthDate%"]])
+                 ->whereNotNull('date_disbursed')
+                 ->orderBy('date_disbursed')
                  ->get();
 
-                /*
                 if ($type == 'saa') {
                     foreach ($groupedVouchers[$moCtr]->vouchers as $voucher) {
                         $total += $voucher->amount;
+                        $remaining -= $voucher->amount;
+
                         $groupedVouchers[$moCtr]->month_total += $voucher->amount;
-                        $groupedVouchers[$moCtr]->total += $total;
+                        $groupedVouchers[$moCtr]->total = $total;
+                        $groupedVouchers[$moCtr]->remaining = $remaining;
 
                         if ($voucher->ledger_item_id) {
                             $voucher->allotments = [];
@@ -1562,7 +1575,7 @@ class LedgerController extends Controller
                                 'ledger_item_id', $voucher->ledger_item_id
                             )->get();
 
-                            foreach ($allotmentHeaders as $allotHead) {
+                            foreach ($allotmentHeaders as $headCtr => $allotHead) {
                                 $amount = 0;
 
                                 foreach ($ledgerAllotments as $allot) {
@@ -1572,6 +1585,10 @@ class LedgerController extends Controller
                                         break;
                                     }
                                 }
+
+                                $monthTotals[$headCtr] += $amount;
+                                $totals[$headCtr] += $amount;
+                                $remainings[$headCtr] -= $amount;
 
                                 $voucher->allotments[] = (object) [
                                     'amount' => $amount
@@ -1585,7 +1602,12 @@ class LedgerController extends Controller
                             }
                         }
                     }
+
+                    $groupedVouchers[$moCtr]->month_totals = $monthTotals;
+                    $groupedVouchers[$moCtr]->totals = $totals;
+                    $groupedVouchers[$moCtr]->remainings = $remainings;
                 } else if ($type == 'mooe') {
+                    /*
                     foreach ($groupedVouchers[$moCtr]->vouchers as $dv) {
                         $total += $voucher->amount;
                         $groupedVouchers[$moCtr]->month_total += $voucher->amount;
@@ -1605,8 +1627,10 @@ class LedgerController extends Controller
                             $userDat = User::find($userID);
                             $dv->unit = $userDat->unit;
                         }
-                    }
-                }*/
+                    }*/
+                } else if ($type == 'lgia') {
+
+                }
             }
         }
 

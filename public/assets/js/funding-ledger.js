@@ -257,6 +257,132 @@ $(function() {
         });
     }
 
+    function storeLedgerItems(id, forType, ledgerType, formData) {
+        const storeDataURL = toggle == 'store' ?
+                             `${baseURL}/procurement/abstract/store-items/${abstractID}` :
+                             `${baseURL}/procurement/abstract/update-items/${abstractID}`;
+        $.ajax({
+		    url: storeDataURL,
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            //async: false,
+            data: formData,
+            //dataType: 'json',
+		    success: function(response) {
+                console.log(response);
+            },
+            fail: function(xhr, textStatus, errorThrown) {
+                console.log('fail');
+                ledgerType(id, forType, ledgerType, formData);
+		    },
+		    error: function(data) {
+                console.log('error');
+                ledgerType(id, forType, ledgerType, formData);
+		    }
+        });
+    }
+
+    function processData() {
+        const allotmentCount = parseInt($('#allotment-count').val()),
+              forType = $('#for').val(),
+              ledgerType = $('#type').val();
+
+        console.log(allotmentCount);
+        console.log(forType);
+        console.log(ledgerType);
+
+        /*
+        $("input[name=date_abstract]").val(dateAbstract);
+        $("input[name=mode_procurement]").val(modeProcurement);
+        $("input[name=sig_chairperson]").val(sigChairperson);
+        $("input[name=sig_vice_chairperson]").val(sigViceChairperson);
+        $("input[name=sig_first_member]").val(sigFirstPerson);
+        $("input[name=sig_second_member]").val(sigSecondPerson);
+        $("input[name=sig_third_member]").val(sigThirdPerson);
+        $("input[name=sig_end_user]").val(sigEndUser);
+
+        $('select.sel-bidder-count').each(function(grpKey, elemSelBidder) {
+            const bidderCount = parseInt($(elemSelBidder).val());
+
+            let selectedSuppliers = [];
+            const containerID = '#container_' + (grpKey + 1);
+
+            $(containerID).find('.sel-supplier').each(function() {
+                const selectedSupplier = $(this).val();
+                selectedSuppliers.push({'selected_supplier' : selectedSupplier});
+            });
+
+            $(containerID).find('tbody.table-data').each(function(tblIndex, tableBody) {
+                $(tableBody).find('tr').each(function(rowCtr, elemRow) {
+                    let jsonData = {},
+                        prItemID = "",
+                        abstractitemIDs = [],
+                        unitCosts = [],
+                        totalCosts = [],
+                        specifications = [],
+                        remarks = [],
+                        awardedTo = 0,
+                        documentType = "",
+                        awardedRemark = "",
+                        formData = new FormData();
+
+                    prItemID = $(elemRow).find('.item-id').val();
+                    jsonData['select_suppliers'] = JSON.stringify(selectedSuppliers);
+                    jsonData['bidder_count'] = bidderCount;
+                    jsonData['pr_item_id'] = prItemID;
+
+                    $(elemRow).find('.abstract-item-id').each(function() {
+                        const abstractitemID = $(this).val();
+                        abstractitemIDs.push({'abs_item_id' : abstractitemID});
+                    });
+
+                    jsonData['abstract_item_ids'] = JSON.stringify(abstractitemIDs);
+
+                    $(elemRow).find('.unit-cost').each(function() {
+                        const unitCost = parseFloat($(this).val()).toFixed(2);
+                        unitCosts.push({'unit_cost' : unitCost});
+                    });
+
+                    jsonData['unit_costs'] = JSON.stringify(unitCosts);
+
+                    $(elemRow).find('.total-cost').each(function() {
+                        const totalCost = parseFloat($(this).val()).toFixed(2);
+                        totalCosts.push({'total_cost' : totalCost});
+                    });
+
+                    jsonData['total_costs'] = JSON.stringify(totalCosts);
+
+                    $(elemRow).find('.specification').each(function() {
+                        const specification = $(this).val();
+                        specifications.push({'specification' : specification});
+                    });
+
+                    jsonData['specifications'] = JSON.stringify(specifications);
+
+                    $(elemRow).find('.remarks').each(function() {
+                        const remark = $(this).val();
+                        remarks.push({'remarks' : remark});
+                    });
+
+                    jsonData['remarks'] = JSON.stringify(remarks);
+
+                    awardedTo = $(elemRow).find('.awarded-to').val();
+                    documentType = $(elemRow).find('.document-type').val();
+                    awardedRemark = $(elemRow).find('.awarded-remarks').val();
+
+                    jsonData['awarded_to'] = awardedTo;
+                    jsonData['document_type'] = documentType;
+                    jsonData['awarded_remark'] = awardedRemark;
+
+                    formData.append('json_data', JSON.stringify(jsonData));
+
+                    storeAbstractItems(abstractID, toggle, formData);
+                });
+            });
+        });*/
+    }
+
     $.fn.totalBudgetIsValid = () => {
         let totalBudget = filterNaN($('#approved-budget').val()),
             totalAllotted = 0;
@@ -324,6 +450,11 @@ $(function() {
 		if ($(this).totalBudgetIsValid() && !withError) {
             $('#mdb-preloader').css('background', '#000000ab')
                                .fadeIn(300, function() {
+                /*
+                processData();
+                $(document).ajaxStop(function() {
+                    //$('#form-store').submit();
+                });*/
                 $('#form-store').submit();
             });
         }

@@ -222,8 +222,6 @@
                         </tbody>
 
                         <tbody id="item-row-container" class="sortable">
-                            @php $allotmentAmount = 0; @endphp
-
                             @if (count($vouchers) > 0)
                                 @foreach ($vouchers as $itemCounter => $ors)
                                     @php $allotmentCounter = 0; @endphp

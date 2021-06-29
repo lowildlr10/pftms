@@ -23,27 +23,27 @@
 
                         <thead class="text-center">
                             <tr>
-                                <th class="align-top" width="150px">
+                                <th class="align-top" width="100px">
                                     <small class="font-weight-bold">
                                         <span class="red-text">* </span> Date
                                     </small>
                                 </th>
-                                <th class="align-top" width="200px">
+                                <th class="align-top" width="130px">
                                     <small class="font-weight-bold">
                                         <span class="red-text">* </span> Payee
                                     </small>
                                 </th>
-                                <th class="align-top" width="300px">
+                                <th class="align-top" width="130px">
                                     <small class="font-weight-bold">
                                         <span class="red-text">* </span> Particulars
                                     </small>
                                 </th>
-                                <th class="align-top" width="200px">
+                                <th class="align-top" width="120px">
                                     <small class="font-weight-bold">
                                         <span class="red-text">* </span> ObR No
                                     </small>
                                 </th>
-                                <th class="align-top" width="180px">
+                                <th class="align-top" width="100px">
                                     <small class="font-weight-bold">
                                         <span class="red-text">* </span> Total
                                     </small>
@@ -52,7 +52,7 @@
                                 @foreach ($allotments as $grpClassItems)
                                     @foreach ($grpClassItems as $ctr => $item)
                                         @if (is_int($ctr))
-                                <th class="align-top" width="180px">
+                                <th class="align-top" width="100px">
                                     <small class="font-weight-bold" id="allot-name-{{ $allotmentCounter + 1 }}">
                                         <span class="red-text">* </span> {{ $item->allotment_name }}
                                     </small>
@@ -60,7 +60,7 @@
                                             @php $allotmentCounter++; @endphp
                                         @else
                                             @foreach ($item as $itm)
-                                <th class="align-top" width="180px">
+                                <th class="align-top" width="100px">
                                     <small class="font-weight-bold" id="allot-name-{{ $allotmentCounter + 1 }}">
                                         <span class="red-text">* </span> {{ explode('::', $itm->allotment_name)[1] }}
                                     </small>
@@ -242,11 +242,11 @@
                                     <input type="hidden"
                                            id="allot-remain-{{ $itemCounter }}-{{ $allotCtr + 1 }}"
                                            value="{{ $item->amount }}">
-                                    <a class="btn btn-outline-indigo btn-block material-tooltip-main
+                                    <a class="btn btn-outline-black btn-block material-tooltip-main
                                               allotment-{{ $allotCtr + 1 }}"
                                         data-toggle="tooltip" data-placement="left"
                                         title="Column: ">
-                                        {!! $item->amount ? number_format($item->amount) : '<b>-</b>' !!}
+                                        {!! $item->amount ? number_format($item->amount, 2) : '<b>-</b>' !!}
                                     </a>
                                 </td>
                                                 @php $allotmentCounter++; @endphp
@@ -263,9 +263,9 @@
                                     {{ number_format($groupedVoucher->month_total, 2) }}
                                 </td>
 
-                                @foreach ($groupedVoucher->allotments as $remainAllot)
+                                @foreach ($groupedVoucher->month_totals as $mTotal)
                                 <td align="center" class="font-weight-bold">
-                                    {{ number_format($remainAllot->month_total, 2) }}
+                                    {{ number_format($mTotal, 2) }}
                                 </td>
                                 @endforeach
                             </tr>
@@ -277,9 +277,9 @@
                                     {{ number_format($groupedVoucher->total, 2) }}
                                 </td>
 
-                                @foreach ($groupedVoucher->allotments as $remainAllot)
+                                @foreach ($groupedVoucher->totals as $total)
                                 <td align="center" class="font-weight-bold">
-                                    {{ number_format($remainAllot->total, 2) }}
+                                    {{ number_format($total, 2) }}
                                 </td>
                                 @endforeach
                             </tr>
@@ -291,15 +291,15 @@
                                     {{ number_format($groupedVoucher->remaining, 2) }}
                                 </td>
 
-                                @foreach ($groupedVoucher->allotments as $remainAllot)
+                                @foreach ($groupedVoucher->remainings as $rTotal)
                                 <td align="center" class="font-weight-bold">
-                                    {{ number_format($remainAllot->remaining, 2) }}
+                                    {{ number_format($rTotal, 2) }}
                                 </td>
                                 @endforeach
                             </tr>
                                     @else
                             <tr>
-                                <td class="font-weight-bold red-text py-2" colspan="{{ $allotmentCounter + 7 }}">
+                                <td class="font-weight-bold red-text py-2" colspan="{{ $allotmentCounter + 5 }}">
                                     <em>
                                         No obligation for the month of {{ $groupedVoucher->month_label }}
                                     </em>
@@ -315,7 +315,7 @@
                                     </h5>
                                 </td>
                                 <tr id="item-row-0" class="item-row">
-                                    <td colspan="{{ $allotmentCounter + 7 }}"></td>
+                                    <td colspan="{{ $allotmentCounter + 5 }}"></td>
                                 </tr>
                             </tr>
                             @endif

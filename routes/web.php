@@ -1156,6 +1156,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_orsledger',
         'access' => 'create'
     ])->name('report-obligation-ledger-store');
+    Route::post('report/ledger/obligation/store-items/{project_id}/{for}/{type}', [
+        'uses' => 'LedgerController@storeItems',
+        'module' => 'report_orsledger',
+        'access' => 'create'
+    ])->name('report-obligation-ledger-store-items');
     Route::get('report/ledger/obligation/show-edit/{id}/{for}/{type}', [
         'uses' => 'LedgerController@showEdit',
         'module' => 'report_orsledger',
@@ -1166,6 +1171,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_orsledger',
         'access' => 'update'
     ])->name('report-obligation-ledger-update');
+    Route::post('report/ledger/obligation/update-items/{id}/{for}/{type}', [
+        'uses' => 'LedgerController@updateItems',
+        'module' => 'report_orsledger',
+        'access' => 'update'
+    ])->name('report-obligation-ledger-update-items');
     Route::post('report/ledger/obligation/delete/{id}/{for}', [
         'uses' => 'LedgerController@indexObligation',
         'module' => 'report_orsledger',
@@ -1208,6 +1218,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_dvledger',
         'access' => 'create'
     ])->name('report-disbursement-ledger-store');
+    Route::post('report/ledger/disbursement/store-items/{project_id}/{for}/{type}', [
+        'uses' => 'LedgerController@storeItems',
+        'module' => 'report_dvledger',
+        'access' => 'create'
+    ])->name('report-obligation-ledger-store-items');
     Route::get('report/ledger/disbursement/show-edit/{id}/{for}/{type}', [
         'uses' => 'LedgerController@showEdit',
         'module' => 'report_dvledger',
@@ -1218,6 +1233,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_dvledger',
         'access' => 'update'
     ])->name('report-disbursement-ledger-update');
+    Route::post('report/ledger/disbursement/update-items/{id}/{for}/{type}', [
+        'uses' => 'LedgerController@updateItems',
+        'module' => 'report_dvledger',
+        'access' => 'update'
+    ])->name('report-disbursement-ledger-update-items');
     Route::post('report/ledger/disbursement/delete/{id}/{for}', [
         'uses' => 'LedgerController@delete',
         'module' => 'report_dvledger',
