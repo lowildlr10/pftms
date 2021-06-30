@@ -30,7 +30,12 @@ class Update2DisbursementVouchersTable extends Migration
         Schema::table('disbursement_vouchers', function (Blueprint $table) {
             $table->dropForeign('disbursement_vouchers_funding_source_foreign');
             $table->dropColumn('funding_source');
-            $table->dropColumn('uacs_object_code');
         });
+
+        if (Schema::hasColumn('disbursement_vouchers', 'uacs_object_code')) {
+            Schema::table('disbursement_vouchers', function (Blueprint $table) {
+                $table->dropColumn('uacs_object_code');
+            });
+        }
     }
 }

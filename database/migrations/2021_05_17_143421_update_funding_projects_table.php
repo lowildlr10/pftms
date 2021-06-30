@@ -46,18 +46,18 @@ class UpdateFundingProjectsTable extends Migration
             $table->dropForeign('funding_projects_implementing_agency_foreign');
 
             $table->renameColumn('project_title', 'project_name');
-            $table->dropIfExists('industry_sector');
-            $table->dropIfExists('project_site');
-            $table->dropIfExists('implementing_agency');
-            $table->dropIfExists('implementing_project_cost');
-            $table->dropIfExists('comimplementing_agency_lgus');
-            $table->dropIfExists('proponent_units');
-            $table->dropIfExists('date_from');
-            $table->dropIfExists('date_to');
-            $table->dropIfExists('project_cost');
-            $table->dropIfExists('project_leader');
-            $table->dropIfExists('monitoring_offices');
-            $table->dropIfExists('access_groups');
+            $table->dropColumn('industry_sector');
+            $table->dropColumn('project_site');
+            $table->dropColumn('implementing_agency');
+            $table->dropColumn('implementing_project_cost');
+            $table->dropColumn('comimplementing_agency_lgus');
+            $table->dropColumn('proponent_units');
+            $table->dropColumn('date_from');
+            $table->dropColumn('date_to');
+            $table->dropColumn('project_cost');
+            $table->dropColumn('project_leader');
+            $table->dropColumn('monitoring_offices');
+            $table->dropColumn('access_groups');
         });
     }
 }
