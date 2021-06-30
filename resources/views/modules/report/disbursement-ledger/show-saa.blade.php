@@ -6,7 +6,7 @@
             <hr>
             <div class="row">
                 <div class="col-md-12 px-0 table-responsive">
-                    <table class="table table-sm table-hover table-bordered" style="width: max-content;">
+                    <table id="table-ledger" class="table table-sm table-hover table-bordered" style="width: max-content;">
                         <thead class="text-center">
                             <tr>
                                 <th class="align-middle" colspan="5"></th>
@@ -25,22 +25,22 @@
                             <tr>
                                 <th class="align-top" width="100px">
                                     <small class="font-weight-bold">
-                                        <span class="red-text">* </span> Date
+                                        Date
                                     </small>
                                 </th>
                                 <th class="align-top" width="120px">
                                     <small class="font-weight-bold">
-                                        <span class="red-text">* </span> ORS No
+                                        ORS No
                                     </small>
                                 </th>
                                 <th class="align-top" width="130px">
                                     <small class="font-weight-bold">
-                                        <span class="red-text">* </span> Payee
+                                        Payee
                                     </small>
                                 </th>
                                 <th class="align-top" width="130px">
                                     <small class="font-weight-bold">
-                                        <span class="red-text">* </span> Particulars
+                                        Particulars
                                     </small>
                                 </th>
 
@@ -49,7 +49,7 @@
                                         @if (is_int($ctr))
                                 <th class="align-top" width="100px">
                                     <small class="font-weight-bold" id="allot-name-{{ $allotmentCounter + 1 }}">
-                                        <span class="red-text">* </span> {{ $item->allotment_name }}
+                                        {{ $item->allotment_name }}
                                     </small>
                                 </th>
                                             @php $allotmentCounter++; @endphp
@@ -57,7 +57,7 @@
                                             @foreach ($item as $itm)
                                 <th class="align-top" width="100px">
                                     <small class="font-weight-bold" id="allot-name-{{ $allotmentCounter + 1 }}">
-                                        <span class="red-text">* </span> {{ explode('::', $itm->allotment_name)[1] }}
+                                        {{ explode('::', $itm->allotment_name)[1] }}
                                     </small>
                                 </th>
                                                 @php $allotmentCounter++; @endphp
@@ -68,7 +68,7 @@
 
                                 <th class="align-top" width="100px">
                                     <small class="font-weight-bold">
-                                        <span class="red-text">* </span> Total
+                                        Total
                                     </small>
                                 </th>
                             </tr>
@@ -208,8 +208,6 @@
                                 </td>
                             </tr>
                             @endforeach
-
-                            <tr><td class="py-3 grey" colspan="{{ $allotmentCounter + 5 }}"></td></tr>
                         </tbody>
 
                         <tbody id="item-row-container" class="sortable">
@@ -244,12 +242,7 @@
                                     <input type="hidden"
                                            id="allot-remain-{{ $itemCounter }}-{{ $allotCtr + 1 }}"
                                            value="{{ $item->amount }}">
-                                    <a class="btn btn-outline-black btn-block material-tooltip-main
-                                              allotment-{{ $allotCtr + 1 }}"
-                                        data-toggle="tooltip" data-placement="left"
-                                        title="Column: ">
-                                        {!! $item->amount ? number_format($item->amount, 2) : '<b>-</b>' !!}
-                                    </a>
+                                    {!! $item->amount ? number_format($item->amount, 2) : '<b>-</b>' !!}
                                 </td>
                                                 @php $allotmentCounter++; @endphp
                                             @endforeach
@@ -279,7 +272,7 @@
                             </tr>
                             <tr class="blue-grey lighten-4">
                                 <td colspan="4" class="font-weight-bold">
-                                    Total Obligations to date
+                                    Total Disbursement to date
                                 </td>
 
                                 @foreach ($groupedVoucher->totals as $total)

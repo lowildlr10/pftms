@@ -8,6 +8,13 @@ $(function() {
         unitData = {},
         mooeTitle = {};
 
+    function s2ab(s) {
+        var buf = new ArrayBuffer(s.length);
+        var view = new Uint8Array(buf);
+        for (var i=0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+        return buf;
+    }
+
     function filterNaN(inputVal) {
         let outputVal = isNaN(inputVal) ? 0 : inputVal;
 
@@ -137,6 +144,17 @@ $(function() {
             },
             //theme: "material"
         });
+    }
+
+    $.fn.generateExcel = function() {
+        const forType = $('#for').val();
+        const ledgerType = $('#type').val();
+        const fileName = `${forType} ledger - ${ledgerType}.xlsx`;
+
+		wb = XLSX.utils.table_to_book(document.getElementById('table-ledger'), {sheet:ledgerType});
+    	wbout = XLSX.write(wb, {bookType:'xlsx', bookSST:true, type: 'binary'});
+
+    	saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), fileName);
     }
 
     function initializeSortable() {

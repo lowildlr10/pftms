@@ -182,11 +182,13 @@
                         <div class="p-0">
                             <div class="btn-group btn-menu-1 p-0">
                                 @if ($fund->has_ledger)
+                                {{--
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showPrint('{{ $fund->id }}', 'report_obligation');">
                                     <i class="fas fa-print blue-text"></i> Print Ledger
                                 </button>
+                                --}}
                                 @endif
 
                                 @if (!$fund->has_ledger)
@@ -311,6 +313,8 @@
 <script type="text/javascript" src="{{ asset('assets/js/funding-ledger.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/attachment.js') }}"></script>
+<script type="text/javascript" src="{{ asset('js/xlsx.full.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('js/FileSaver.min.js') }}"></script>
 <script>
     // Tooltips Initialization
     $(function () {

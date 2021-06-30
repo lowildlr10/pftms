@@ -26,6 +26,10 @@
 
             <!--Footer-->
             <div class="modal-footer rgba-stylish-strong p-1">
+                <button type="button" class="btn btn btn-dark-green btn-sm waves-effect"
+                        onclick="$(this).generateExcel();">
+                    <i class="fas fa-file-excel"></i> Download as Excel
+                </button>
                 <button type="button" class="btn btn btn-light btn-sm waves-effect" data-dismiss="modal">
                     <i class="far fa-window-close"></i> Close
                 </button>
