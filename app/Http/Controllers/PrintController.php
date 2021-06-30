@@ -682,7 +682,8 @@ class PrintController extends Controller
 
                     foreach ($realignAllotmentData as $rAllotCtr => $rAllot) {
                         if (strtolower(trim($realignAllot->allotment_name)) == strtolower(trim($rAllot->allotment_name)) ||
-                            $realignAllot->allotment_id == $rAllot->allotment_id) {
+                            ($realignAllot->allotment_id == $rAllot->allotment_id &&
+                            !empty($realignAllot->allotment_id) && !empty($realignAllot->allotment_id))) {
                             $_allotments[$realignAllotCtr]->{$realignIndex} = (object) [
                                 'allotment_cost' => $rAllot->realigned_allotment_cost,
                                 'coimplementers' => unserialize($rAllot->coimplementers),
