@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Seeder;
 use App\Models\AllotmentClass;
-use App\Models\MOOEClassification;
-use App\Models\MOOEAccountTitle;
+use App\Models\MooeClassification;
+use App\Models\MooeAccountTitle;
 
 class FundUtilizationSeeder extends Seeder
 {
@@ -16,8 +16,8 @@ class FundUtilizationSeeder extends Seeder
     {
 		DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         AllotmentClass::truncate();
-        MOOEClassification::truncate();
-        MOOEAccountTitle::truncate();
+        MooeClassification::truncate();
+        MooeAccountTitle::truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $this->call([
