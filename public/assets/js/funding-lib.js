@@ -78,7 +78,7 @@ $(function() {
                     $('.coimplementor').remove();
                     $('#implementor').after(coimplementorsElem);
                     $('.item-row').remove();
-                    $('#item-row-container').fadeIn(300).first().before(`<tr id="item-row-0" class="item-row"></tr>`);
+                    $('#item-row-container').fadeIn(300).first().prepend(`<tr id="item-row-0" class="item-row"></tr>`);
                     $('#approved-budget').val(project.project_cost)
                                          .siblings()
                                          .addClass('active');

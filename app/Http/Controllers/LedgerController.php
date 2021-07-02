@@ -695,10 +695,18 @@ class LedgerController extends Controller
                                 $amount = 0;
 
                                 foreach ($ledgerAllotments as $allot) {
-                                    if ($allot->allotment_id == $allotHead->allotment_id ||
-                                        $allot->realign_allotment_id == $allotHead->realign_allotment_id) {
-                                        $amount = $allot->current_cost;
-                                        break;
+                                    if ($allot->allotment_id == $allotHead->allotment_id) {
+                                        if (!empty($allot->allotment_id) && !empty($allotHead->allotment_id)) {
+                                            $amount = $allot->current_cost;
+                                            break;
+                                        }
+                                    }
+
+                                    if ($allot->realign_allotment_id == $allotHead->realign_allotment_id) {
+                                        if (!empty($allot->realign_allotment_id) && !empty($allotHead->realign_allotment_id)) {
+                                            $amount = $allot->current_cost;
+                                            break;
+                                        }
                                     }
                                 }
 
@@ -762,10 +770,18 @@ class LedgerController extends Controller
                                 $amount = 0;
 
                                 foreach ($ledgerAllotments as $allot) {
-                                    if ($allot->allotment_id == $allotHead->allotment_id ||
-                                        $allot->realign_allotment_id == $allotHead->realign_allotment_id) {
-                                        $amount = $allot->current_cost;
-                                        break;
+                                    if ($allot->allotment_id == $allotHead->allotment_id) {
+                                        if (!empty($allot->allotment_id) && !empty($allotHead->allotment_id)) {
+                                            $amount = $allot->current_cost;
+                                            break;
+                                        }
+                                    }
+
+                                    if ($allot->realign_allotment_id == $allotHead->realign_allotment_id) {
+                                        if (!empty($allot->realign_allotment_id) && !empty($allotHead->realign_allotment_id)) {
+                                            $amount = $allot->current_cost;
+                                            break;
+                                        }
                                     }
                                 }
 
@@ -933,7 +949,10 @@ class LedgerController extends Controller
                         $instanceLedgerItem->save();
 
                         $ledgerItemDat = DB::table('funding_ledger_items')
-                                           ->where('order_no', $orderNo)->first();
+                                           ->where([
+                                               ['order_no', $orderNo],
+                                               ['ledger_id', $id]
+                                            ])->first();
                         $ledgerItemID = $ledgerItemDat->id;
 
                         foreach ($allotments[$orsCtr] as $allotCtr => $total) {
@@ -971,7 +990,10 @@ class LedgerController extends Controller
                         $instanceLedgerItem->save();
 
                         $ledgerItemDat = DB::table('funding_ledger_items')
-                                           ->where('order_no', $orderNo)->first();
+                                           ->where([
+                                               ['order_no', $orderNo],
+                                               ['ledger_id', $id]
+                                            ])->first();
                         $ledgerItemID = $ledgerItemDat->id;
 
                         foreach ($allotments[$dvCtr] as $allotCtr => $total) {
@@ -1104,8 +1126,10 @@ class LedgerController extends Controller
 
             }
 
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
             $instanceLedger = FundingLedger::find($id);
             $instanceLedger->forceDelete();
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
             $documentType = $for == 'obligation' ? 'Obligation Ledger' :
                             'Disbursement';
@@ -1542,18 +1566,27 @@ class LedgerController extends Controller
 
                             if ($voucher->ledger_item_id) {
                                 $voucher->allotments = [];
-                                $ledgerAllotments = FundingLedgerAllotment::where(
-                                    'ledger_item_id', $voucher->ledger_item_id
-                                )->get();
+                                $ledgerAllotments = FundingLedgerAllotment::where([
+                                    ['ledger_id', $id],
+                                    ['ledger_item_id', $voucher->ledger_item_id]
+                                ])->get();
 
                                 foreach ($allotmentHeaders as $headCtr => $allotHead) {
                                     $amount = 0;
 
                                     foreach ($ledgerAllotments as $allot) {
-                                        if ($allot->allotment_id == $allotHead->allotment_id ||
-                                            $allot->realign_allotment_id == $allotHead->realign_allotment_id) {
-                                            $amount = $allot->current_cost;
-                                            break;
+                                        if ($allot->allotment_id == $allotHead->allotment_id) {
+                                            if (!empty($allot->allotment_id) && !empty($allotHead->allotment_id)) {
+                                                $amount = $allot->current_cost;
+                                                break;
+                                            }
+                                        }
+
+                                        if ($allot->realign_allotment_id == $allotHead->realign_allotment_id) {
+                                            if (!empty($allot->realign_allotment_id) && !empty($allotHead->realign_allotment_id)) {
+                                                $amount = $allot->current_cost;
+                                                break;
+                                            }
                                         }
                                     }
 
@@ -1614,18 +1647,27 @@ class LedgerController extends Controller
 
                             if ($voucher->ledger_item_id) {
                                 $voucher->allotments = [];
-                                $ledgerAllotments = FundingLedgerAllotment::where(
-                                    'ledger_item_id', $voucher->ledger_item_id
-                                )->get();
+                                $ledgerAllotments = FundingLedgerAllotment::where([
+                                    ['ledger_id', $id],
+                                    ['ledger_item_id', $voucher->ledger_item_id]
+                                ])->get();
 
                                 foreach ($allotmentHeaders as $headCtr => $allotHead) {
                                     $amount = 0;
 
                                     foreach ($ledgerAllotments as $allot) {
-                                        if ($allot->allotment_id == $allotHead->allotment_id ||
-                                            $allot->realign_allotment_id == $allotHead->realign_allotment_id) {
-                                            $amount = $allot->current_cost;
-                                            break;
+                                        if ($allot->allotment_id == $allotHead->allotment_id) {
+                                            if (!empty($allot->allotment_id) && !empty($allotHead->allotment_id)) {
+                                                $amount = $allot->current_cost;
+                                                break;
+                                            }
+                                        }
+
+                                        if ($allot->realign_allotment_id == $allotHead->realign_allotment_id) {
+                                            if (!empty($allot->realign_allotment_id) && !empty($allotHead->realign_allotment_id)) {
+                                                $amount = $allot->current_cost;
+                                                break;
+                                            }
                                         }
                                     }
 
