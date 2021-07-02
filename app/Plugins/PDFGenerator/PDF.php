@@ -185,7 +185,14 @@ class PDF extends TCPDF {
             tr>th {font-weight: bold; text-align: center; vertical-align: middle;}
         </style>';
 
-        $tidy = tidy_parse_string($html);
+        $tidyConfig = [
+            'output-html' => true,
+            'indent' => false,
+            'indent-attributes' => false,
+            'wrap' => 0,
+            'vertical-space' => false,
+        ];
+        $tidy = tidy_parse_string($html, $tidyConfig);
         $html = $tidy->html();
         $html = trim(str_replace("\r", '', $html));
         $html = trim(str_replace("\n", '', $html));

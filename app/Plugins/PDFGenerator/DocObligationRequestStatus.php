@@ -125,7 +125,7 @@ class DocObligationRequestStatus extends PDF {
 
         //Header data
         $this->SetFont('helvetica', '', 9 + ($fontScale * 9));
-        $this->htmlTable($data->header_data);
+        //$this->htmlTable($data->header_data);
 
         //Table data
         $this->htmlTable($data->table_data);
