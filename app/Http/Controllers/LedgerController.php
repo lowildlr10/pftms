@@ -396,7 +396,7 @@ class LedgerController extends Controller
                 $allotmentRealignIDs = $request->allot_realign_id;
                 $dateDVs = $request->date_dv;
                 $orsIDs = $request->ors_id;
-                $dvIDs = $request->dv_id ? unserialize($request->dv_id) : [];
+                $dvIDs = $request->dv_id ? $request->dv_id : [];
                 $orsNos = $request->ors_no;
                 $payees = $request->payee;
                 $particulars = $request->particular;
@@ -405,7 +405,7 @@ class LedgerController extends Controller
             } else if ($type == 'mooe') {
                 $dateDVs = $request->date_dv;
                 $orsIDs = $request->ors_id;
-                $dvIDs = $request->dv_id ? unserialize($request->dv_id) : [];
+                $dvIDs = $request->dv_id ? $request->dv_id : [];
                 $orsNos = $request->ors_no;
                 $payees = $request->payee;
                 $particulars = $request->particular;
@@ -417,7 +417,7 @@ class LedgerController extends Controller
             } else if ($type == 'lgia') {
                 $dateDVs = $request->date_dv;
                 $orsIDs = $request->ors_id;
-                $dvIDs = $request->dv_id ? unserialize($request->dv_id) : [];
+                $dvIDs = $request->dv_id ? $request->dv_id : [];
                 $orsNos = $request->ors_no;
                 $payees = $request->payee;
                 $particulars = $request->particular;
