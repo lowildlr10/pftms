@@ -79,7 +79,7 @@
                                 <td>
                                     <div class="md-form my-0 py-0">
                                         <textarea class="md-textarea form-control required" placeholder="Item description..."
-                                                  name="item_description[]" rows="1">{{ $item->item_description }}</textarea>
+                                                  name="item_description[]" rows="3">{{ $item->item_description }}</textarea>
                                     </div>
                                 <td>
                                     <div class="md-form">

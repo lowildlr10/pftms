@@ -7,7 +7,7 @@
             <div class="md-form">
                 <input type="date" id="date-canvass" class="form-control required"
                        name="date_canvass" value="{{ $rfqDate }}">
-                <label for="date-canvass">
+                <label for="date-canvass" class="active">
                     Date <span class="red-text">*</span>
                 </label>
             </div>
@@ -20,7 +20,7 @@
                 <table class="table z-depth-1 my-1" style="width: 100%;">
                     <thead class="mdb-color white-text">
                         <tr>
-                            <th width="3%">#</th>
+                            <th class="text-center" width="3%">#</th>
                             <th class="text-center" width="8%">
                                 Unit
                             </th>
@@ -46,7 +46,7 @@
                         @if (!empty($prItems))
                             @foreach ($prItems as $key => $item)
                         <tr>
-                            <td>{{ $key + 1 }}</td>
+                            <td align="center">{{ $key + 1 }}</td>
                             <td>
                                 <div class="md-form my-0 py-0">
                                     <select class="mdb-select crud-select md-form required" searchable="Search here.." disabled>
@@ -65,7 +65,7 @@
                             <td>
                                 <div class="md-form my-0 py-0">
                                     <textarea class="md-textarea form-control" placeholder="Item description..."
-                                            rows="1" readonly>{{ $item->item_description }}</textarea>
+                                            rows="3" readonly>{{ $item->item_description }}</textarea>
                                 </div>
                             </td>
                             <td>

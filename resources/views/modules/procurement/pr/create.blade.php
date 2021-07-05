@@ -24,7 +24,7 @@
             <div class="md-form">
                 <input type="date" id="date-pr" class="form-control required"
                        name="date_pr">
-                <label for="date-pr">
+                <label for="date-pr" class="active">
                     Date <span class="red-text">*</span>
                 </label>
             </div>
@@ -77,7 +77,7 @@
                                 <td>
                                     <div class="md-form my-0 py-0">
                                         <textarea class="md-textarea form-control required" placeholder="Item description..."
-                                                  name="item_description[]" rows="1"></textarea>
+                                                  name="item_description[]" rows="3"></textarea>
                                     </div>
                                 <td>
                                     <div class="md-form">

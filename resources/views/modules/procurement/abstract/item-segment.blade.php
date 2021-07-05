@@ -85,8 +85,9 @@
                 @for ($key = 0; $key < $bidderCount; $key++)
             <th width="320px">
                 <div class="form-group">
-                    <select class="browser-default custom-select sel-supplier required input-error-highlighter"
-                            onchange="$(this).setSupplierHeaderName('.bid-head-{{ $key }}',
+                    <select class="mdb-select md-form sel-supplier sel-supplier-{{ $groupKey }} required"
+                            id="sel-bidder-count-{{ $groupKey }}-{{ $key }}"
+                            onchange="$(this).setSupplierHeaderName($(this), '.bid-head-{{ $key }}',
                                                                     $(this).find(':selected').text());"
                             name="selected_supplier[{{ $groupKey }}][{{ $key }}]"
                             searchable="Search here..">
