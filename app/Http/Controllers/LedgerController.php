@@ -492,7 +492,7 @@ class LedgerController extends Controller
                         $ledgerItemDat = DB::table('funding_ledger_items')
                                            ->where([
                                                ['order_no', $orderNo],
-                                               ['ledger_id', $id]
+                                               ['ledger_id', $ledgerID]
                                             ])->first();
                         $ledgerItemID = $ledgerItemDat->id;
 
