@@ -284,12 +284,16 @@ class LineItemBudgetController extends Controller
             }
         }
 
-        foreach ($tempFundSrcs['with_dir'] as $proj) {
-            $projects[] = $proj;
+        if (isset($tempFundSrcs['with_dir'])) {
+            foreach ($tempFundSrcs['with_dir'] as $proj) {
+                $projects[] = $proj;
+            }
         }
 
-        foreach ($tempFundSrcs['no_dir'] as $proj) {
-            $projects[] = $proj;
+        if (isset($tempFundSrcs['no_dir'])) {
+            foreach ($tempFundSrcs['no_dir'] as $proj) {
+                $projects[] = $proj;
+            }
         }
 
         return view('modules.fund-utilization.fund-project-lib.create', compact(
@@ -529,17 +533,18 @@ class LineItemBudgetController extends Controller
 
         $project = FundingProject::find($budget->project_id);
         $projectID = $project->id;
-        $projects = FundingProject::whereDoesntHave('budget', function($qry) use ($projectID) {
+        $projects = [];
+        $_projects = FundingProject::whereDoesntHave('budget', function($qry) use ($projectID) {
             $qry->where('project_id', '<>', $projectID);
         })->orderBy('project_title');
 
         if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
             $projectIDs = $this->getAccessibleProjects();
             $projectIDs[] = $projectID;
-            $projects = $projects->whereIn('id', $projectIDs);
+            $_projects = $_projects->whereIn('id', $projectIDs);
         }
 
-        $projects = $projects->get();
+        $_projects = $_projects->get();
 
         $implementingAgency = $project->implementing_agency;
         $coimplementors = unserialize($project->comimplementing_agency_lgus);
@@ -558,6 +563,57 @@ class LineItemBudgetController extends Controller
 
         foreach ($signatories as $sig) {
             $sig->module = json_decode($sig->module);
+        }
+
+        $tempFundSrcs = [];
+
+        foreach ($_projects as $proj) {
+            $directory = $proj->directory ? implode(' &rarr; ', unserialize($proj->directory)) : NULL;
+            $projTitle = (strlen($proj->project_title) > 70 ?
+                         substr($proj->project_title, 0, 70).'...' :
+                         $proj->project_title);
+            $projTitle = strtoupper($projTitle);
+            $title = $directory ? "$directory &rarr; $projTitle" : $projTitle;
+            $coimpAgencies = $proj->comimplementing_agency_lgus;
+            $projectCost = $proj->project_cost;
+            $implementAgency = $proj->implementing_agency;
+            $implementProjCost = $proj->implementing_project_cost ;
+
+            if ($directory) {
+                $tempFundSrcs['with_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                    'comimplementing_agency_lgus' => $coimpAgencies,
+                    'project_cost' => $projectCost,
+                    'implementing_agency' => $implementAgency,
+                    'implementing_project_cost' => $implementProjCost,
+                ];
+            } else {
+                $tempFundSrcs['no_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                    'comimplementing_agency_lgus' => $coimpAgencies,
+                    'project_cost' => $projectCost,
+                    'implementing_agency' => $implementAgency,
+                    'implementing_project_cost' => $implementProjCost,
+                ];
+            }
+
+            if (isset($tempFundSrcs['with_dir'])) {
+                sort($tempFundSrcs['with_dir']);
+            }
+        }
+
+        if (isset($tempFundSrcs['with_dir'])) {
+            foreach ($tempFundSrcs['with_dir'] as $proj) {
+                $projects[] = $proj;
+            }
+        }
+
+        if (isset($tempFundSrcs['no_dir'])) {
+            foreach ($tempFundSrcs['no_dir'] as $proj) {
+                $projects[] = $proj;
+            }
         }
 
         return view('modules.fund-utilization.fund-project-lib.update', compact(

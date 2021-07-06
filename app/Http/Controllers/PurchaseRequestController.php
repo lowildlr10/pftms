@@ -565,12 +565,16 @@ class PurchaseRequestController extends Controller
             }
         }
 
-        foreach ($tempFundSrcs['with_dir'] as $proj) {
-            $fundingSources[] = $proj;
+        if (isset($tempFundSrcs['with_dir'])) {
+            foreach ($tempFundSrcs['with_dir'] as $proj) {
+                $fundingSources[] = $proj;
+            }
         }
 
-        foreach ($tempFundSrcs['no_dir'] as $proj) {
-            $fundingSources[] = $proj;
+        if (isset($tempFundSrcs['no_dir'])) {
+            foreach ($tempFundSrcs['no_dir'] as $proj) {
+                $fundingSources[] = $proj;
+            }
         }
 
         return view('modules.procurement.pr.create', [
@@ -671,18 +675,16 @@ class PurchaseRequestController extends Controller
             }
         }
 
-        foreach ($tempFundSrcs['with_dir'] as $proj) {
-            $fundingSources[] = (object) [
-                'id' => $proj->id,
-                'project_title' => $proj->project_title,
-            ];
+        if (isset($tempFundSrcs['with_dir'])) {
+            foreach ($tempFundSrcs['with_dir'] as $proj) {
+                $fundingSources[] = $proj;
+            }
         }
 
-        foreach ($tempFundSrcs['no_dir'] as $proj) {
-            $fundingSources[] = (object) [
-                'id' => $proj->id,
-                'project_title' => $proj->project_title,
-            ];
+        if (isset($tempFundSrcs['no_dir'])) {
+            foreach ($tempFundSrcs['no_dir'] as $proj) {
+                $fundingSources[] = $proj;
+            }
         }
 
         return view('modules.procurement.pr.update', [
