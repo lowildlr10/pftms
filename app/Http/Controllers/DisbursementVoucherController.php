@@ -347,12 +347,16 @@ class DisbursementVoucherController extends Controller
             }
         }
 
-        foreach ($tempFundSrcs['with_dir'] as $proj) {
-            $projects[] = $proj;
+        if (isset($tempFundSrcs['with_dir'])) {
+            foreach ($tempFundSrcs['with_dir'] as $proj) {
+                $projects[] = $proj;
+            }
         }
 
-        foreach ($tempFundSrcs['no_dir'] as $proj) {
-            $projects[] = $proj;
+        if (isset($tempFundSrcs['no_dir'])) {
+            foreach ($tempFundSrcs['no_dir'] as $proj) {
+                $projects[] = $proj;
+            }
         }
 
         return view('modules.voucher.dv.create', compact(
@@ -430,12 +434,16 @@ class DisbursementVoucherController extends Controller
             }
         }
 
-        foreach ($tempFundSrcs['with_dir'] as $proj) {
-            $projects[] = $proj;
+        if (isset($tempFundSrcs['with_dir'])) {
+            foreach ($tempFundSrcs['with_dir'] as $proj) {
+                $projects[] = $proj;
+            }
         }
 
-        foreach ($tempFundSrcs['no_dir'] as $proj) {
-            $projects[] = $proj;
+        if (isset($tempFundSrcs['no_dir'])) {
+            foreach ($tempFundSrcs['no_dir'] as $proj) {
+                $projects[] = $proj;
+            }
         }
 
         return view('modules.voucher.dv.create', compact(
@@ -630,12 +638,16 @@ class DisbursementVoucherController extends Controller
             }
         }
 
-        foreach ($tempFundSrcs['with_dir'] as $proj) {
-            $projects[] = $proj;
+        if (isset($tempFundSrcs['with_dir'])) {
+            foreach ($tempFundSrcs['with_dir'] as $proj) {
+                $projects[] = $proj;
+            }
         }
 
-        foreach ($tempFundSrcs['no_dir'] as $proj) {
-            $projects[] = $proj;
+        if (isset($tempFundSrcs['no_dir'])) {
+            foreach ($tempFundSrcs['no_dir'] as $proj) {
+                $projects[] = $proj;
+            }
         }
 
         return view($viewFile, compact(

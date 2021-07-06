@@ -369,12 +369,16 @@ class ObligationRequestStatusController extends Controller
             }
         }
 
-        foreach ($tempFundSrcs['with_dir'] as $proj) {
-            $projects[] = $proj;
+        if (isset($tempFundSrcs['with_dir'])) {
+            foreach ($tempFundSrcs['with_dir'] as $proj) {
+                $projects[] = $proj;
+            }
         }
 
-        foreach ($tempFundSrcs['no_dir'] as $proj) {
-            $projects[] = $proj;
+        if (isset($tempFundSrcs['no_dir'])) {
+            foreach ($tempFundSrcs['no_dir'] as $proj) {
+                $projects[] = $proj;
+            }
         }
 
         return view('modules.voucher.ors-burs.create', compact(
@@ -530,12 +534,16 @@ class ObligationRequestStatusController extends Controller
             }
         }
 
-        foreach ($tempFundSrcs['with_dir'] as $proj) {
-            $projects[] = $proj;
+        if (isset($tempFundSrcs['with_dir'])) {
+            foreach ($tempFundSrcs['with_dir'] as $proj) {
+                $projects[] = $proj;
+            }
         }
 
-        foreach ($tempFundSrcs['no_dir'] as $proj) {
-            $projects[] = $proj;
+        if (isset($tempFundSrcs['no_dir'])) {
+            foreach ($tempFundSrcs['no_dir'] as $proj) {
+                $projects[] = $proj;
+            }
         }
 
         return view($viewFile, compact(
