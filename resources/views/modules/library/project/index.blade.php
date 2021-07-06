@@ -66,56 +66,144 @@
                     <!--/Card image-->
 
                     <div class="px-2">
-                        <div class="table-wrapper table-responsive border rounded">
-
-                            <!--Table-->
-                            <table id="dtmaterial" class="table table-hover" cellspacing="0" width="100%">
-
-                                <!--Table head-->
-                                <thead class="mdb-color darken-3 white-text">
-                                    <tr>
-                                        <th class="th-md" width="3%"></th>
-                                        <th class="th-md" width="91%">
-                                            <strong>Project</strong>
-                                        </th>
-                                        <th class="th-md" width="3%"></th>
-                                        <th class="th-md" width="3%"></th>
-                                    </tr>
-                                </thead>
-                                <!--Table head-->
-
-                                <!--Table body-->
-                                <tbody>
-                                    @if (count($list) > 0)
-                                        @foreach ($list as $listCtr => $project)
-                                    <tr>
-                                        <td></td>
-                                        <td>{{ $project->project_title }}</td>
-                                        <td align="center">
-                                            <a class="btn-floating btn-sm btn-orange p-2 waves-effect material-tooltip-main mr-0"
-                                               onclick="$(this).showEdit('{{ route('project-show-edit',
-                                                                                   ['id' => $project->id]) }}');"
-                                               data-toggle="tooltip" data-placement="left" title="Edit">
-                                                <i class="fas fa-edit"></i>
+                        <ul class="nav nav-tabs mt-2" id="myTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="tree-tab" data-toggle="tab" href="#tree-view" role="tab">
+                                    Tree View
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="list-tab" data-toggle="tab" href="#list-view" role="tab">
+                                    List View
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content p-0">
+                            <div class="tab-pane fade show active" id="tree-view" role="tabpanel">
+                                <br>
+                                <div class="treeview-animated mx-4 my-4 mdb-color-text h5">
+                                    <ul class="treeview-animated-list mb-3">
+                                        @if (isset($directories['folder']) && count($directories['folder']) > 0)
+                                            @foreach ($directories['folder'] as $folder)
+                                        <li class="treeview-animated-items">
+                                            <a class="closed">
+                                                <i class="fas fa-angle-right"></i>
+                                                <span>
+                                                    <i class="fas fa-folder-open"></i> {{ $folder['name'] }}
+                                                </span>
                                             </a>
-                                        </td>
-                                        <td align="center">
-                                            <a class="btn-floating btn-sm btn-red p-2 waves-effect material-tooltip-main mr-0"
-                                               onclick="$(this).showDelete('{{ route('project-delete', ['id' => $project->id]) }}',
-                                                                           '{{ $project->project_title }}');"
-                                               data-toggle="tooltip" data-placement="left" title="Delete">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                        @endforeach
-                                    @endif
-                                </tbody>
-                                <!--Table body-->
+                                            <ul class="nested">
+                                                @if (count($folder['files']) > 0)
+                                                    @php $lastDir = '' @endphp
 
-                            </table>
-                            <!--Table-->
+                                                    @foreach ($folder['files'] as $file)
+                                                <li>
+                                                    <div class="treeview-animated-element">
+                                                        {!! $file->directory && $lastDir != $file->directory ?
+                                                        '<br><i class="fas fa-folder-open mdb-color-text"></i> '.$file->directory.' / <br><br>' : '' !!}
+                                                        @php $lastDir = $file->directory @endphp
+                                                        &rarr; <i class="fas fa-file-alt"></i> {{ $file->title }}
+                                                        <a href="#" class="btn btn-link btn-sm mdb-color-text px-0 py-1"
+                                                           onclick="$(this).showEdit('{{ route('project-show-edit',
+                                                                                     ['id' => $file->id]) }}');">
+                                                            <i class="fas fa-edit orange-text"></i> Edit
+                                                        </a>
+                                                        <a href="#" class="btn btn-link btn-sm mdb-color-text px-0 py-1"
+                                                           onclick="$(this).showDelete('{{ route('project-delete', ['id' => $file->id]) }}',
+                                                                                       '{{ $file->title }}');">
+                                                            <i class="fas fa-trash red-text"></i> Delete
+                                                        </a>
+                                                    </div>
+                                                </li>
+                                                    @endforeach
+                                                @endif
+                                                <br>
+                                            </ul>
+                                        </li>
+                                            @endforeach
+                                        @endif
 
+                                        @if (isset($directories['folder']) && count($directories['folder']) > 0 &&
+                                             isset($directories['file']) && count($directories['file']) > 0)
+                                        <hr>
+                                        @endif
+
+                                        @if (isset($directories['file']) && count($directories['file']) > 0)
+                                            @foreach ($directories['file'] as $file)
+                                        <li>
+                                            <div class="treeview-animated-element">
+                                                <i class="fas fa-file-alt"></i> {{ $file->title }}
+                                                <a class="btn btn-link btn-sm mdb-color-text px-0 py-1"
+                                                   onclick="$(this).showEdit('{{ route('project-show-edit',
+                                                                                 ['id' => $file->id]) }}');">
+                                                    <i class="fas fa-edit orange-text"></i> Edit
+                                                </a>
+                                                <a class="btn btn-link btn-sm mdb-color-text px-0 py-1"
+                                                   onclick="$(this).showDelete('{{ route('project-delete', ['id' => $file->id]) }}',
+                                                                               '{{ $file->title }}');">
+                                                    <i class="fas fa-trash red-text"></i> Delete
+                                                </a>
+                                            </div>
+                                        </li>
+                                            @endforeach
+                                        @endif
+                                    </ul>
+                                    <br>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="list-view" role="tabpanel">
+                                <div class="table-wrapper table-responsive border rounded">
+
+                                    <!--Table-->
+                                    <table id="dtmaterial" class="table table-hover" cellspacing="0" width="100%">
+
+                                        <!--Table head-->
+                                        <thead class="mdb-color darken-3 white-text">
+                                            <tr>
+                                                <th class="th-md" width="3%"></th>
+                                                <th class="th-md" width="91%">
+                                                    <strong>Project</strong>
+                                                </th>
+                                                <th class="th-md" width="3%"></th>
+                                                <th class="th-md" width="3%"></th>
+                                            </tr>
+                                        </thead>
+                                        <!--Table head-->
+
+                                        <!--Table body-->
+                                        <tbody>
+                                            @if (count($list) > 0)
+                                                @foreach ($list as $listCtr => $project)
+                                            <tr>
+                                                <td></td>
+                                                <td>{{ $project->project_title }}</td>
+                                                <td align="center">
+                                                    <a class="btn-floating btn-sm btn-orange p-2 waves-effect material-tooltip-main mr-0"
+                                                       onclick="$(this).showEdit('{{ route('project-show-edit',
+                                                                                           ['id' => $project->id]) }}');"
+                                                       data-toggle="tooltip" data-placement="left" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                </td>
+                                                <td align="center">
+                                                    <a class="btn-floating btn-sm btn-red p-2 waves-effect material-tooltip-main mr-0"
+                                                       onclick="$(this).showDelete('{{ route('project-delete', ['id' => $project->id]) }}',
+                                                                                   '{{ $project->project_title }}');"
+                                                       data-toggle="tooltip" data-placement="left" title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                                @endforeach
+                                            @endif
+                                        </tbody>
+                                        <!--Table body-->
+
+                                    </table>
+                                    <!--Table-->
+
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

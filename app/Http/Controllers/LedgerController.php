@@ -46,15 +46,18 @@ class LedgerController extends Controller
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
         $fundProject = $this->getIndexData($request, 'obligation');
+        $directories = $this->getProjectDirectory($request, 'obligation');
 
         return view('modules.report.obligation-ledger.index', [
             'list' => $fundProject,
+            'directories' => $directories,
             'keyword' => $keyword,
             'paperSizes' => $paperSizes,
             'isAllowedCreate' => $isAllowedCreate,
             'isAllowedUpdate' => $isAllowedUpdate,
             'isAllowedDelete' => $isAllowedDelete,
             'isAllowedDestroy' => $isAllowedDestroy,
+            'dirCtr' => 0,
         ]);
     }
 
@@ -71,15 +74,18 @@ class LedgerController extends Controller
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
         $fundProject = $this->getIndexData($request, 'disbursement');
+        $directories = $this->getProjectDirectory($request, 'disbursement');
 
         return view('modules.report.disbursement-ledger.index', [
             'list' => $fundProject,
+            'directories' => $directories,
             'keyword' => $keyword,
             'paperSizes' => $paperSizes,
             'isAllowedCreate' => $isAllowedCreate,
             'isAllowedUpdate' => $isAllowedUpdate,
             'isAllowedDelete' => $isAllowedDelete,
             'isAllowedDestroy' => $isAllowedDestroy,
+            'dirCtr' => 0,
         ]);
     }
 
@@ -133,6 +139,76 @@ class LedgerController extends Controller
         }
 
         return $fundProject;
+    }
+
+    private function getProjectDirectory($request, $for) {
+        $keyword = trim($request->keyword);
+        $directories = [];
+
+        $projectData = $this->getIndexData($request, $for);
+
+        foreach ($projectData as $proj) {
+            $_directories = $proj->directory ? unserialize($proj->directory) : [];
+            $projID = $proj->id;
+            $projTitle = (strlen($proj->project_title) > 30 ?
+                         substr($proj->project_title, 0, 30).'...' :
+                         $proj->project_title);
+
+            if (count($_directories) > 0) {
+                $dirs = $_directories;
+                array_shift($dirs);
+
+                $directory = count($dirs) > 0 ? implode(' / ', $dirs) : NULL;
+
+                if (!isset($directories['folder'])) {
+                    $directories['folder'][0]['name'] = $_directories[0];
+
+                    $directories['folder'][0]['files'][] = (object) [
+                        'id' => $projID,
+                        'directory' => $directory,
+                        'title' => $projTitle
+                    ];
+                } else {
+                    $hasExisting = false;
+
+                    foreach ($directories['folder'] as $dirKey => $dir) {
+                        if ($dir['name'] == $_directories[0]) {
+                            $hasExisting = true;
+
+                            $directories['folder'][$dirKey]['files'][] = (object) [
+                                'id' => $projID,
+                                'directory' => $directory,
+                                'title' => $projTitle
+                            ];
+
+                            sort($directories['folder'][$dirKey]['files']);
+                            break;
+                        }
+                    }
+
+                    if (!$hasExisting) {
+                        $newKey = count($directories['folder']);
+                        $directories['folder'][$newKey]['name'] = $_directories[0];
+                        $directories['folder'][$newKey]['files'][] = (object) [
+                            'id' => $projID,
+                            'directory' => $directory,
+                            'title' => $projTitle
+                        ];
+
+                        sort($directories['folder'][$newKey]['files']);
+                    }
+
+                    sort($directories['folder']);
+                }
+            } else {
+                $directories['file'][] = (object) [
+                    'id' => $projID,
+                    'title' => $projTitle
+                ];
+            }
+        }
+
+        return $directories;
     }
 
     public function showLedger(Request $request, $id, $for, $type) {

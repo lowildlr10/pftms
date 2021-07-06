@@ -300,7 +300,8 @@ class DisbursementVoucherController extends Controller
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
-        $projects = FundingProject::orderBy('project_title')->get();
+        $_projects = FundingProject::orderBy('project_title')->get();
+        $projects = [];
         $payees = $roleHasOrdinary ?
                 User::where('id', Auth::user()->id)
                     ->orderBy('firstname')
@@ -317,6 +318,41 @@ class DisbursementVoucherController extends Controller
 
         foreach ($signatories as $sig) {
             $sig->module = json_decode($sig->module);
+        }
+
+        $tempFundSrcs = [];
+
+        foreach ($_projects as $proj) {
+            $directory = $proj->directory ? implode(' &rarr; ', unserialize($proj->directory)) : NULL;
+            $projTitle = (strlen($proj->project_title) > 70 ?
+                         substr($proj->project_title, 0, 70).'...' :
+                         $proj->project_title);
+            $projTitle = strtoupper($projTitle);
+            $title = $directory ? "$directory &rarr; $projTitle" : $projTitle;
+
+            if ($directory) {
+                $tempFundSrcs['with_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                ];
+            } else {
+                $tempFundSrcs['no_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                ];
+            }
+
+            if (isset($tempFundSrcs['with_dir'])) {
+                sort($tempFundSrcs['with_dir']);
+            }
+        }
+
+        foreach ($tempFundSrcs['with_dir'] as $proj) {
+            $projects[] = $proj;
+        }
+
+        foreach ($tempFundSrcs['no_dir'] as $proj) {
+            $projects[] = $proj;
         }
 
         return view('modules.voucher.dv.create', compact(
@@ -347,7 +383,8 @@ class DisbursementVoucherController extends Controller
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
-        $projects = FundingProject::orderBy('project_title')->get();
+        $_projects = FundingProject::orderBy('project_title')->get();
+        $projects = [];
         $payees = $roleHasOrdinary ?
                 User::where('id', Auth::user()->id)
                     ->orderBy('firstname')
@@ -364,6 +401,41 @@ class DisbursementVoucherController extends Controller
 
         foreach ($signatories as $sig) {
             $sig->module = json_decode($sig->module);
+        }
+
+        $tempFundSrcs = [];
+
+        foreach ($_projects as $proj) {
+            $directory = $proj->directory ? implode(' &rarr; ', unserialize($proj->directory)) : NULL;
+            $projTitle = (strlen($proj->project_title) > 70 ?
+                         substr($proj->project_title, 0, 70).'...' :
+                         $proj->project_title);
+            $projTitle = strtoupper($projTitle);
+            $title = $directory ? "$directory &rarr; $projTitle" : $projTitle;
+
+            if ($directory) {
+                $tempFundSrcs['with_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                ];
+            } else {
+                $tempFundSrcs['no_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                ];
+            }
+
+            if (isset($tempFundSrcs['with_dir'])) {
+                sort($tempFundSrcs['with_dir']);
+            }
+        }
+
+        foreach ($tempFundSrcs['with_dir'] as $proj) {
+            $projects[] = $proj;
+        }
+
+        foreach ($tempFundSrcs['no_dir'] as $proj) {
+            $projects[] = $proj;
         }
 
         return view('modules.voucher.dv.create', compact(
@@ -509,7 +581,8 @@ class DisbursementVoucherController extends Controller
         $payee = $dvData->payee;
         $address = !empty($dvData->address) ? $dvData->address : $dvData->procors['address'];
         $project = $dvData->funding_source;
-        $projects = FundingProject::orderBy('project_title')->get();
+        $_projects = FundingProject::orderBy('project_title')->get();
+        $projects = [];
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -528,6 +601,41 @@ class DisbursementVoucherController extends Controller
 
         foreach ($signatories as $sig) {
             $sig->module = json_decode($sig->module);
+        }
+
+        $tempFundSrcs = [];
+
+        foreach ($_projects as $proj) {
+            $directory = $proj->directory ? implode(' &rarr; ', unserialize($proj->directory)) : NULL;
+            $projTitle = (strlen($proj->project_title) > 70 ?
+                         substr($proj->project_title, 0, 70).'...' :
+                         $proj->project_title);
+            $projTitle = strtoupper($projTitle);
+            $title = $directory ? "$directory &rarr; $projTitle" : $projTitle;
+
+            if ($directory) {
+                $tempFundSrcs['with_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                ];
+            } else {
+                $tempFundSrcs['no_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                ];
+            }
+
+            if (isset($tempFundSrcs['with_dir'])) {
+                sort($tempFundSrcs['with_dir']);
+            }
+        }
+
+        foreach ($tempFundSrcs['with_dir'] as $proj) {
+            $projects[] = $proj;
+        }
+
+        foreach ($tempFundSrcs['no_dir'] as $proj) {
+            $projects[] = $proj;
         }
 
         return view($viewFile, compact(

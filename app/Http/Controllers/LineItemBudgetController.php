@@ -221,18 +221,19 @@ class LineItemBudgetController extends Controller
         $users = User::where('is_active', 'y')
                      ->orderBy('firstname');
 
-        $projects = FundingProject::doesntHave('budget')
+        $projects = [];
+        $_projects = FundingProject::doesntHave('budget')
                                   ->orderBy('project_title');
 
         if ($roleHasBudget || $roleHasAdministrator || $roleHasDeveloper) {
             $users = $users->get();
         } else {
             $projectIDs = $this->getAccessibleProjects();
-            $projects = $projects->whereIn('id', $projectIDs);
+            $_projects = $_projects->whereIn('id', $projectIDs);
             $users = $users->where('id', Auth::user()->id)->get();
         }
 
-        $projects = $projects->get();
+        $_projects = $_projects->get();
 
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
@@ -242,6 +243,53 @@ class LineItemBudgetController extends Controller
 
         foreach ($signatories as $sig) {
             $sig->module = json_decode($sig->module);
+        }
+
+        $tempFundSrcs = [];
+
+        foreach ($_projects as $proj) {
+            $directory = $proj->directory ? implode(' &rarr; ', unserialize($proj->directory)) : NULL;
+            $projTitle = (strlen($proj->project_title) > 70 ?
+                         substr($proj->project_title, 0, 70).'...' :
+                         $proj->project_title);
+            $projTitle = strtoupper($projTitle);
+            $title = $directory ? "$directory &rarr; $projTitle" : $projTitle;
+            $coimpAgencies = $proj->comimplementing_agency_lgus;
+            $projectCost = $proj->project_cost;
+            $implementAgency = $proj->implementing_agency;
+            $implementProjCost = $proj->implementing_project_cost ;
+
+            if ($directory) {
+                $tempFundSrcs['with_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                    'comimplementing_agency_lgus' => $coimpAgencies,
+                    'project_cost' => $projectCost,
+                    'implementing_agency' => $implementAgency,
+                    'implementing_project_cost' => $implementProjCost,
+                ];
+            } else {
+                $tempFundSrcs['no_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                    'comimplementing_agency_lgus' => $coimpAgencies,
+                    'project_cost' => $projectCost,
+                    'implementing_agency' => $implementAgency,
+                    'implementing_project_cost' => $implementProjCost,
+                ];
+            }
+
+            if (isset($tempFundSrcs['with_dir'])) {
+                sort($tempFundSrcs['with_dir']);
+            }
+        }
+
+        foreach ($tempFundSrcs['with_dir'] as $proj) {
+            $projects[] = $proj;
+        }
+
+        foreach ($tempFundSrcs['no_dir'] as $proj) {
+            $projects[] = $proj;
         }
 
         return view('modules.fund-utilization.fund-project-lib.create', compact(

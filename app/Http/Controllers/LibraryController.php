@@ -599,20 +599,101 @@ class LibraryController extends Controller
     **/
     public function indexProject(Request $request) {
         $projectData = FundingProject::orderBy('project_title')
-                                    ->get();
+                                     ->get();
+        $directories = [];
+
+        foreach ($projectData as $proj) {
+            $_directories = $proj->directory ? unserialize($proj->directory) : [];
+            $projID = $proj->id;
+            $projTitle = (strlen($proj->project_title) > 30 ?
+                         substr($proj->project_title, 0, 30).'...' :
+                         $proj->project_title);
+
+            if (count($_directories) > 0) {
+                $dirs = $_directories;
+                array_shift($dirs);
+
+                $directory = count($dirs) > 0 ? implode(' / ', $dirs) : NULL;
+
+                if (!isset($directories['folder'])) {
+                    $directories['folder'][0]['name'] = $_directories[0];
+
+                    $directories['folder'][0]['files'][] = (object) [
+                        'id' => $projID,
+                        'directory' => $directory,
+                        'title' => $projTitle
+                    ];
+                } else {
+                    $hasExisting = false;
+
+                    foreach ($directories['folder'] as $dirKey => $dir) {
+                        if ($dir['name'] == $_directories[0]) {
+                            $hasExisting = true;
+
+                            $directories['folder'][$dirKey]['files'][] = (object) [
+                                'id' => $projID,
+                                'directory' => $directory,
+                                'title' => $projTitle
+                            ];
+
+                            sort($directories['folder'][$dirKey]['files']);
+                            break;
+                        }
+                    }
+
+                    if (!$hasExisting) {
+                        $newKey = count($directories['folder']);
+                        $directories['folder'][$newKey]['name'] = $_directories[0];
+                        $directories['folder'][$newKey]['files'][] = (object) [
+                            'id' => $projID,
+                            'directory' => $directory,
+                            'title' => $projTitle
+                        ];
+
+                        sort($directories['folder'][$newKey]['files']);
+                    }
+
+                    sort($directories['folder']);
+                }
+            } else {
+                $directories['file'][] = (object) [
+                    'id' => $projID,
+                    'title' => $projTitle
+                ];
+            }
+        }
 
         return view('modules.library.project.index', [
-            'list' => $projectData
+            'list' => $projectData,
+            'directories' => $directories
         ]);
     }
 
     public function showCreateProject() {
+        $projects = FundingProject::get();
         $industries = IndustrySector::orderBy('sector_name')->get();
         $municipalities = Municipality::orderBy('municipality_name')->get();
         $empUnits = EmpUnit::orderBy('unit_name')->get();
         $empGroups = EmpGroup::orderBy('group_name')->get();
         $agencies = AgencyLGU::orderBy('agency_name')->get();
         $monitoringOffices = MonitoringOffice::orderBy('office_name')->get();
+
+        $directories = [];
+
+        foreach ($projects as $proj) {
+            $_directories = $proj->directory ? unserialize($proj->directory) : [];
+
+            if (count($_directories) > 0) {
+                $dir = implode('/', $_directories);
+
+                $directories[] = (object) [
+                    'directory' => $dir,
+                    'items' => $_directories
+                ];
+            }
+        }
+
+        sort($directories);
 
         return view('modules.library.project.create', compact(
             'industries',
@@ -621,10 +702,12 @@ class LibraryController extends Controller
             'agencies',
             'monitoringOffices',
             'empGroups',
+            'directories'
         ));
     }
 
     public function showEditProject($id) {
+        $projects = DB::table('funding_projects')->get();
         $projectData = FundingProject::find($id);
         $industries = IndustrySector::orderBy('sector_name')->get();
         $municipalities = Municipality::orderBy('municipality_name')->get();
@@ -646,6 +729,8 @@ class LibraryController extends Controller
                              unserialize($projectData->monitoring_offices) : [];
         $accessGroup  = $projectData->access_groups ?
                         unserialize($projectData->access_groups) : [];
+        $directory = $projectData->directory ?
+                     implode('/', unserialize($projectData->directory)) : NULL;
         $projectTitle = $projectData->project_title;
         $projectType = $projectData->project_type;
         $projectLeader = $projectData->project_leader;
@@ -654,6 +739,22 @@ class LibraryController extends Controller
         $propenentCount = $proponentUnits ? count($proponentUnits) : 0;
         $comimplementingAgencyLGUs = $coimplementingCount > 0 ? $comimplementingAgencyLGUs : [];
         $proponentUnits = $propenentCount > 0 ? $proponentUnits : [];
+        $directories = [];
+
+        foreach ($projects as $proj) {
+            $_directories = $proj->directory ? unserialize($proj->directory) : [];
+
+            if (count($_directories) > 0) {
+                $dir = implode('/', $_directories);
+
+                $directories[] = (object) [
+                    'directory' => $dir,
+                    'items' => $_directories
+                ];
+            }
+        }
+
+        sort($directories);
 
         return view('modules.library.project.update', compact(
             'id',
@@ -678,11 +779,14 @@ class LibraryController extends Controller
             'projectType',
             'projectLeader',
             'coimplementingCount',
-            'propenentCount'
+            'propenentCount',
+            'directories',
+            'directory'
         ));
     }
 
     public function storeProject(Request $request) {
+        $directory = $request->directory ? serialize($request->directory) : serialize([]);
         $projectTitle = $request->project_title;
         $industrySector = $request->industry_sector;
         $projectSite = $request->project_site;
@@ -712,8 +816,31 @@ class LibraryController extends Controller
                 }
             }
 
+            $instanceProject = new FundingProject;
+            $instanceProject->directory = $directory;
+            $instanceProject->project_title = $projectTitle;
+            $instanceProject->industry_sector = $industrySector;
+            $instanceProject->project_site = $projectSite;
+            $instanceProject->implementing_agency = $implementingAgency;
+            $instanceProject->implementing_project_cost = $implementingBudget;
+            $instanceProject->comimplementing_agency_lgus = serialize($coimplementingAgencies);
+            $instanceProject->proponent_units = serialize($proponentUnits);
+            $instanceProject->date_from = $dateFrom;
+            $instanceProject->date_to = $dateTo;
+            $instanceProject->project_cost = $projectCost;
+            $instanceProject->project_leader = $projectLeader;
+            $instanceProject->monitoring_offices = serialize($monitoringOffice);
+            $instanceProject->access_groups = $accessGroup ? serialize($accessGroup) : serialize([]);
+            $instanceProject->project_type = $projectType;
+            $instanceProject->save();
+
+            $msg = "Project '$projectTitle' successfully created.";
+            return redirect(url()->previous())->with('success', $msg);
+
+            /*
             if (!$this->checkDuplication('FundingSource', $projectTitle)) {
                 $instanceProject = new FundingProject;
+                $instanceProject->directory = $directory;
                 $instanceProject->project_title = $projectTitle;
                 $instanceProject->industry_sector = $industrySector;
                 $instanceProject->project_site = $projectSite;
@@ -735,7 +862,7 @@ class LibraryController extends Controller
             } else {
                 $msg = "Project '$projectTitle' has a duplicate.";
                 return redirect(url()->previous())->with('warning', $msg);
-            }
+            }*/
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             return redirect(url()->previous())->with('failed', $msg);
@@ -786,7 +913,7 @@ class LibraryController extends Controller
             $instanceProject->project_cost = $projectCost;
             $instanceProject->project_leader = $projectLeader;
             $instanceProject->monitoring_offices = serialize($monitoringOffice);
-            $instanceProject->access_groups = serialize($accessGroup);
+            $instanceProject->access_groups = $accessGroup ? serialize($accessGroup) : serialize([]);
             $instanceProject->project_type = $projectType;
             $instanceProject->save();
 

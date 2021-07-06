@@ -322,7 +322,8 @@ class ObligationRequestStatusController extends Controller
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
-        $projects = FundingProject::orderBy('project_title')->get();
+        $_projects = FundingProject::orderBy('project_title')->get();
+        $projects = [];
         $payees = $roleHasOrdinary ?
                 User::where('id', Auth::user()->id)
                     ->orderBy('firstname')
@@ -339,6 +340,41 @@ class ObligationRequestStatusController extends Controller
 
         foreach ($signatories as $sig) {
             $sig->module = json_decode($sig->module);
+        }
+
+        $tempFundSrcs = [];
+
+        foreach ($_projects as $proj) {
+            $directory = $proj->directory ? implode(' &rarr; ', unserialize($proj->directory)) : NULL;
+            $projTitle = (strlen($proj->project_title) > 70 ?
+                         substr($proj->project_title, 0, 70).'...' :
+                         $proj->project_title);
+            $projTitle = strtoupper($projTitle);
+            $title = $directory ? "$directory &rarr; $projTitle" : $projTitle;
+
+            if ($directory) {
+                $tempFundSrcs['with_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                ];
+            } else {
+                $tempFundSrcs['no_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                ];
+            }
+
+            if (isset($tempFundSrcs['with_dir'])) {
+                sort($tempFundSrcs['with_dir']);
+            }
+        }
+
+        foreach ($tempFundSrcs['with_dir'] as $proj) {
+            $projects[] = $proj;
+        }
+
+        foreach ($tempFundSrcs['no_dir'] as $proj) {
+            $projects[] = $proj;
         }
 
         return view('modules.voucher.ors-burs.create', compact(
@@ -364,7 +400,7 @@ class ObligationRequestStatusController extends Controller
         $responsibilityCenter = $request->responsibility_center;
         $particulars = $request->particulars;
         $mfoPAP = $request->mfo_pap;
-        $uacsObjectCode = serialize($request->uacs_object_code);
+        $uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
         $project = $request->funding_source;
         $amount = $request->amount;
         $sigCertified1 = !empty($request->sig_certified_1) ? $request->sig_certified_1: NULL;
@@ -442,7 +478,8 @@ class ObligationRequestStatusController extends Controller
         $dateCertified2 = $orsData->date_certified_2;
         $transactionType = $orsData->transaction_type;
         $project = $orsData->funding_source;
-        $projects = FundingProject::orderBy('project_title')->get();
+        $_projects = FundingProject::orderBy('project_title')->get();
+        $projects = [];
         $mooeTitles = MooeAccountTitle::orderBy('order_no')->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
@@ -453,13 +490,52 @@ class ObligationRequestStatusController extends Controller
         if ($moduleClass == 3) {
             $viewFile = 'modules.procurement.ors-burs.update';
             $payees = Supplier::orderBy('company_name')->get();
+            $supplier = DB::table('suppliers')->where('id', $payee)->first();
+            $address = $address ? $address : $supplier->address;
         } else if ($moduleClass == 2) {
             $viewFile = 'modules.voucher.ors-burs.update';
             $payees = User::orderBy('firstname')->get();
+            $employee = DB::table('emp_accounts')->where('id', $payee)->first();
+            $address = $address ? $address : $employee->address;
         }
 
         foreach ($signatories as $sig) {
             $sig->module = json_decode($sig->module);
+        }
+
+        $tempFundSrcs = [];
+
+        foreach ($_projects as $proj) {
+            $directory = $proj->directory ? implode(' &rarr; ', unserialize($proj->directory)) : NULL;
+            $projTitle = (strlen($proj->project_title) > 70 ?
+                         substr($proj->project_title, 0, 70).'...' :
+                         $proj->project_title);
+            $projTitle = strtoupper($projTitle);
+            $title = $directory ? "$directory &rarr; $projTitle" : $projTitle;
+
+            if ($directory) {
+                $tempFundSrcs['with_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                ];
+            } else {
+                $tempFundSrcs['no_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                ];
+            }
+
+            if (isset($tempFundSrcs['with_dir'])) {
+                sort($tempFundSrcs['with_dir']);
+            }
+        }
+
+        foreach ($tempFundSrcs['with_dir'] as $proj) {
+            $projects[] = $proj;
+        }
+
+        foreach ($tempFundSrcs['no_dir'] as $proj) {
+            $projects[] = $proj;
         }
 
         return view($viewFile, compact(
@@ -491,7 +567,7 @@ class ObligationRequestStatusController extends Controller
         $responsibilityCenter = $request->responsibility_center;
         $particulars = $request->particulars;
         $mfoPAP = $request->mfo_pap;
-        $uacsObjectCode = serialize($request->uacs_object_code);
+        $uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
         $project = $request->funding_source;
         $amount = $request->amount;
         $sigCertified1 = !empty($request->sig_certified_1) ? $request->sig_certified_1: NULL;
