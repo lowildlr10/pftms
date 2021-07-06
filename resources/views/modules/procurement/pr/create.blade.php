@@ -24,7 +24,7 @@
             <div class="md-form">
                 <input type="date" id="date-pr" class="form-control required"
                        name="date_pr">
-                <label for="date-pr">
+                <label for="date-pr" class="active">
                     Date <span class="red-text">*</span>
                 </label>
             </div>

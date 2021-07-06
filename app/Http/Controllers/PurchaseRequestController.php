@@ -509,7 +509,8 @@ class PurchaseRequestController extends Controller
         $roleHasBudget = Auth::user()->hasBudgetRole();
         $roleHasAccountant = Auth::user()->hasAccountantRole();
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
-        $fundingSources = FundingProject::orderBy('project_title')->get();
+        $_fundingSources = FundingProject::orderBy('project_title')->get();
+        $fundingSources = [];
         $empDivisionAccess = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
                               [Auth::user()->division] :
                               Auth::user()->getDivisionAccess();
@@ -535,6 +536,41 @@ class PurchaseRequestController extends Controller
 
         foreach ($signatories as $sig) {
             $sig->module = json_decode($sig->module);
+        }
+
+        $tempFundSrcs = [];
+
+        foreach ($_fundingSources as $proj) {
+            $directory = $proj->directory ? implode(' &rarr; ', unserialize($proj->directory)) : NULL;
+            $projTitle = (strlen($proj->project_title) > 70 ?
+                         substr($proj->project_title, 0, 70).'...' :
+                         $proj->project_title);
+            $projTitle = strtoupper($projTitle);
+            $title = $directory ? "$directory &rarr; $projTitle" : $projTitle;
+
+            if ($directory) {
+                $tempFundSrcs['with_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                ];
+            } else {
+                $tempFundSrcs['no_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                ];
+            }
+
+            if (isset($tempFundSrcs['with_dir'])) {
+                sort($tempFundSrcs['with_dir']);
+            }
+        }
+
+        foreach ($tempFundSrcs['with_dir'] as $proj) {
+            $fundingSources[] = $proj;
+        }
+
+        foreach ($tempFundSrcs['no_dir'] as $proj) {
+            $fundingSources[] = $proj;
         }
 
         return view('modules.procurement.pr.create', [
@@ -574,7 +610,8 @@ class PurchaseRequestController extends Controller
         $roleHasBudget = Auth::user()->hasBudgetRole();
         $roleHasAccountant = Auth::user()->hasAccountantRole();
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
-        $fundingSources = FundingProject::orderBy('project_title')->get();
+        $_fundingSources = FundingProject::orderBy('project_title')->get();
+        $fundingSources = [];
 
         $empDivisionAccess = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
                               [Auth::user()->division] :
@@ -605,6 +642,47 @@ class PurchaseRequestController extends Controller
 
         foreach ($prItemData as $item) {
             $itemOriginalIDs[] = $item->id;
+        }
+
+        $tempFundSrcs = [];
+
+        foreach ($_fundingSources as $proj) {
+            $directory = $proj->directory ? implode(' &rarr; ', unserialize($proj->directory)) : NULL;
+            $projTitle = (strlen($proj->project_title) > 70 ?
+                         substr($proj->project_title, 0, 70).'...' :
+                         $proj->project_title);
+            $projTitle = strtoupper($projTitle);
+            $title = $directory ? "$directory &rarr; $projTitle" : $projTitle;
+
+            if ($directory) {
+                $tempFundSrcs['with_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                ];
+            } else {
+                $tempFundSrcs['no_dir'][] = (object) [
+                    'id' => $proj->id,
+                    'project_title' => $title,
+                ];
+            }
+
+            if (isset($tempFundSrcs['with_dir'])) {
+                sort($tempFundSrcs['with_dir']);
+            }
+        }
+
+        foreach ($tempFundSrcs['with_dir'] as $proj) {
+            $fundingSources[] = (object) [
+                'id' => $proj->id,
+                'project_title' => $proj->project_title,
+            ];
+        }
+
+        foreach ($tempFundSrcs['no_dir'] as $proj) {
+            $fundingSources[] = (object) [
+                'id' => $proj->id,
+                'project_title' => $proj->project_title,
+            ];
         }
 
         return view('modules.procurement.pr.update', [

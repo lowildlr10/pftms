@@ -9,9 +9,10 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="md-form">
-                                <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                                <select class="mdb-select crud-select md-form" searchable="Search here.."
                                         name="funding_source">
                                     <option value="" disabled selected>Choose a funding/charging</option>
+                                    <option value="">-- None --</option>
 
                                     @if (count($projects) > 0)
                                         @foreach ($projects as $fund)
@@ -188,7 +189,7 @@
                         <strong>UACS Object Code</strong>
                     </div>
                     <div class="md-form px-2">
-                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                        <select class="mdb-select crud-select md-form" searchable="Search here.."
                                 name="uacs_object_code[]" multiple>
                             <option value="" disabled selected>Choose the MOOE account titles</option>
                             <option value="">-- None --</option>

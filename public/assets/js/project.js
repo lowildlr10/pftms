@@ -7,6 +7,24 @@ $(function() {
     let agenciesData = {};
 
     function initializeSelect2() {
+        $('.directory-tokenizer').select2({
+            tags: true,
+            tokenSeparators: [',', '/'],
+            width: 'resolve',
+            placeholder: 'Insert here...',
+            multiple: true,
+            maximumSelectionLength: 5,
+            allowClear: true,
+            theme: "classic"
+        });
+        $('.directory-tokenizer').on("select2:select", function (evt) {
+            const element = evt.params.data.element;
+            const $element = $(element);
+
+            $element.detach();
+            $(this).append($element);
+            $(this).trigger("change");
+        });
         $('.agencies-tokenizer').select2({
             tokenSeparators: [','],
             placeholder: "Coimplementing Agency/LGU",
@@ -136,6 +154,7 @@ $(function() {
             $(this).slideToggle(500);
             $('.crud-select').materialSelect();
             toggleComimplementingMenu();
+            initializeSelect2();
         });
         $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
@@ -198,4 +217,7 @@ $(function() {
         template: template
     });
     $('.mdb-select-filter').materialSelect();
+    $('.treeview-animated').mdbTreeview();
+    $('.treeview-animated-element').addClass('white dark-grey-text');
+    $('.treeview-animated-items').find('.closed').addClass('h4');
 });

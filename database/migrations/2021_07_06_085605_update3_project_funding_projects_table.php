@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class Update2FundingProjectsTable extends Migration
+class Update3ProjectFundingProjectsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class Update2FundingProjectsTable extends Migration
     public function up()
     {
         Schema::table('funding_projects', function (Blueprint $table) {
-            $table->enum('project_type', ['saa', 'mooe', 'lgia', 'setup'])->after('project_title');
+            $table->binary('directory')->nullable()->after('id');
         });
     }
 
@@ -26,7 +26,7 @@ class Update2FundingProjectsTable extends Migration
     public function down()
     {
         Schema::table('funding_projects', function (Blueprint $table) {
-            $table->dropColumn('project_type');
+            $table->dropColumn('directory');
         });
     }
 }

@@ -114,7 +114,7 @@
                                             {{ $pr->pr_no }}
                                         </td>
                                         <td>{{ $pr->date_pr }}</td>
-                                        <td>{{ $pr->funding['project_name'] }}</td>
+                                        <td>{{ $pr->funding['project_title'] }}</td>
                                         <td>
                                             <i class="fas fa-caret-right"></i> {{
                                                 (strlen($pr->purpose) > 150) ?

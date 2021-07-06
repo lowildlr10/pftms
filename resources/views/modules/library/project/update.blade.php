@@ -3,6 +3,34 @@
 
     <h5>Project Details</h5>
     <hr>
+    <label for="directory" class="py-0 w-100"">
+        <div class="md-form py-0">
+            Directory
+            <select id="directory" class="form-control-sm directory-tokenizer"
+                    name="directory[]" style="width: 100%;" multiple>
+                @if (count($directories) > 0)
+                    @foreach ($directories as $dir)
+                        @php $hasExisting = false; @endphp
+                <option disabled>Directory: {{ $dir->directory }}</option>
+                        @if ($directory == $dir->directory && !$hasExisting)
+                            @foreach ($dir->items as $item)
+                <option value="{{ $item }}" selected>{{ $item }}</option>
+                            @endforeach
+
+                            @php $hasExisting = true; @endphp
+                        @else
+                            @foreach ($dir->items as $item)
+                <option value="{{ $item }}">{{ $item }}</option>
+                            @endforeach
+                        @endif
+                    @endforeach
+                @endif
+            </select>
+        </div>
+    </label>
+
+    <hr class="py-0">
+
     <div class="md-form">
         <input type="text" id="project-title" class="form-control required"
                name="project_title" value="{{ $projectTitle }}">
@@ -230,7 +258,7 @@
     <h5>Others</h5>
     <hr>
     <div class="md-form">
-        <select class="mdb-select crud-select md-form required" searchable="Search here.."
+        <select class="mdb-select crud-select md-form" searchable="Search here.."
                 name="access_group[]" multiple>
             <option value="" disabled selected>Choose the groups that can access</option>
             <option value="">-- None --</option>

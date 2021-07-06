@@ -22,7 +22,7 @@ class UpdateFundingLedgersTable extends Migration
             $table->uuid('budget_id');
             $table->foreign('budget_id')->references('id')->on('funding_budgets');
             $table->enum('ledger_for', ['obligation', 'disbursement']);
-            $table->enum('ledger_type', ['saa', 'mooe', 'lgia'])->default('saa');
+            $table->enum('ledger_type', ['saa', 'mooe', 'lgia', 'setup'])->default('saa');
             $table->softDeletes();
             $table->timestamps();
         });

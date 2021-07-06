@@ -57,96 +57,176 @@
                     <!--/Card image-->
 
                     <div class="px-2">
-                        <div class="table-wrapper table-responsive border rounded">
-
-                            <!--Table-->
-                            <table id="dtmaterial" class="table table-hover" cellspacing="0" width="100%">
-
-                                <!--Table head-->
-                                <thead class="mdb-color darken-3 white-text hidden-xs">
-                                    <tr>
-                                        <th class="th-md" width="3%"></th>
-                                        <th class="th-md text-center" width="3%"></th>
-                                        <th class="th-md" width="50%">
-                                            <b>
-                                                @sortablelink('project_title', 'Project Name', [], ['class' => 'white-text'])
-                                            </b>
-                                        </th>
-                                        <th class="th-md" width="13%">
-                                            <b>
-                                                @sortablelink('date_from', 'From', [], ['class' => 'white-text'])
-                                            </b>
-                                        </th>
-                                        <th class="th-md" width="13%">
-                                            <b>
-                                                @sortablelink('date_to', 'To', [], ['class' => 'white-text'])
-                                            </b>
-                                        </th>
-                                        <th class="th-md" width="15%">
-                                            <b>
-                                                @sortablelink('project_cost', 'Project Cost', [], ['class' => 'white-text'])
-                                            </b>
-                                        </th>
-                                        <th class="th-md" width="3%"></th>
-                                    </tr>
-                                </thead>
-                                <!--Table head-->
-
-                                <!--Table body-->
-                                <tbody>
-                                    @if (count($list) > 0)
-                                        @foreach ($list as $listCtr => $fund)
-                                    <tr class="hidden-xs">
-                                        <td align="center">
-                                            <i class="fas fa-paste fa-lg material-tooltip-main indigo-text"
-                                               data-toggle="tooltip" data-placement="right" title="Ledger"></i>
-                                        </td>
-                                        <td></td>
-                                        <td>{{ $fund->project_title }}</td>
-                                        <td>{{ date_format(date_create($fund->date_from), "F j, Y") }}</td>
-                                        <td>{{ date_format(date_create($fund->date_to), "F j, Y") }}</td>
-                                        <td>
-                                            &#8369; {{ number_format($fund->project_cost, 2) }}
-                                        </td>
-
-                                        <td align="center">
-                                            <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
-                                               data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal"
-                                               data-toggle="tooltip" data-placement="left" title="Open">
-                                                <i class="fas fa-folder-open"></i>
+                        <ul class="nav nav-tabs mt-2" id="myTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="tree-tab" data-toggle="tab" href="#tree-view" role="tab">
+                                    Tree View
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="list-tab" data-toggle="tab" href="#list-view" role="tab">
+                                    List View
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content p-0">
+                            <div class="tab-pane fade show active" id="tree-view" role="tabpanel">
+                                <br>
+                                <div class="treeview-animated mx-4 my-4 mdb-color-text h5">
+                                    <ul class="treeview-animated-list mb-3">
+                                        @if (isset($directories['folder']) && count($directories['folder']) > 0)
+                                            @foreach ($directories['folder'] as $folder)
+                                        <li class="treeview-animated-items">
+                                            <a class="closed">
+                                                <i class="fas fa-angle-right"></i>
+                                                <span>
+                                                    <i class="fas fa-folder-open"></i> {{ $folder['name'] }}
+                                                </span>
                                             </a>
-                                        </td>
-                                    </tr>
-                                    <tr class="d-none show-xs">
-                                        <td data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
-                                            <b>Project Title:</b> {{ $fund->project_title }}<br>
-                                            <small>
-                                                <b>Project Cost: </b>
-                                                &#8369; {!! number_format($fund->project_cost, 2) !!}
-                                            </small><br>
-                                            <small>
+                                            <ul class="nested">
+                                                @if (count($folder['files']) > 0)
+                                                    @php $lastDir = '' @endphp
 
-                                            </small>
-                                        </td>
-                                    </tr>
-                                        @endforeach
-                                    @else
-                                    <tr>
-                                        <td class="p-5" colspan="7" class="text-center py-5">
-                                            <h6 class="red-text text-center">
-                                                No available data.
-                                            </h6>
-                                        </td>
-                                    </tr>
-                                    @endif
-                                </tbody>
-                                <!--Table body-->
-                            </table>
-                            <!--Table-->
-                        </div>
+                                                    @foreach ($folder['files'] as $file)
+                                                <li>
+                                                    <div class="treeview-animated-element">
+                                                        {!! $file->directory && $lastDir != $file->directory ?
+                                                        '<br><i class="fas fa-folder-open mdb-color-text"></i> '.$file->directory.' / <br><br>' : '' !!}
+                                                        @php $lastDir = $file->directory @endphp
+                                                        &rarr; <i class="fas fa-file-alt"></i> {{ $file->title }}
+                                                        <a href="#" class="btn btn-link btn-sm mdb-color-text px-0 py-1"
+                                                           data-target="#right-modal-{{ $dirCtr + 1 }}" data-toggle="modal"
+                                                           data-toggle="tooltip" data-placement="left" title="Open">
+                                                            <i class="fas fa-folder-open"></i> Open
+                                                        </a>
+                                                    </div>
+                                                </li>
+                                                        @php $dirCtr++; @endphp
+                                                    @endforeach
+                                                @endif
+                                                <br>
+                                            </ul>
+                                        </li>
+                                            @endforeach
+                                        @endif
 
-                        <div class="mt-3">
-                            {!! $list->appends(\Request::except('page'))->render('pagination') !!}
+                                        @if (isset($directories['folder']) && count($directories['folder']) > 0 &&
+                                             isset($directories['file']) && count($directories['file']) > 0)
+                                        <hr>
+                                        @endif
+
+                                        @if (isset($directories['file']) && count($directories['file']) > 0)
+                                            @foreach ($directories['file'] as $file)
+                                        <li>
+                                            <div class="treeview-animated-element">
+                                                <i class="fas fa-file-alt"></i> {{ $file->title }}
+                                                <a class="btn btn-link btn-sm mdb-color-text px-0 py-1"
+                                                   data-target="#right-modal-{{ $dirCtr + 1 }}" data-toggle="modal"
+                                                   data-toggle="tooltip" data-placement="left" title="Open">
+                                                    <i class="fas fa-folder-open"></i> Open
+                                                </a>
+                                            </div>
+                                        </li>
+                                                @php $dirCtr++; @endphp
+                                            @endforeach
+                                        @endif
+                                    </ul>
+                                    <br>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="list-view" role="tabpanel">
+                                <div class="table-wrapper table-responsive border rounded">
+
+                                    <!--Table-->
+                                    <table id="dtmaterial" class="table table-hover" cellspacing="0" width="100%">
+
+                                        <!--Table head-->
+                                        <thead class="mdb-color darken-3 white-text hidden-xs">
+                                            <tr>
+                                                <th class="th-md" width="3%"></th>
+                                                <th class="th-md text-center" width="3%"></th>
+                                                <th class="th-md" width="50%">
+                                                    <b>
+                                                        @sortablelink('project_title', 'Project Name', [], ['class' => 'white-text'])
+                                                    </b>
+                                                </th>
+                                                <th class="th-md" width="13%">
+                                                    <b>
+                                                        @sortablelink('date_from', 'From', [], ['class' => 'white-text'])
+                                                    </b>
+                                                </th>
+                                                <th class="th-md" width="13%">
+                                                    <b>
+                                                        @sortablelink('date_to', 'To', [], ['class' => 'white-text'])
+                                                    </b>
+                                                </th>
+                                                <th class="th-md" width="15%">
+                                                    <b>
+                                                        @sortablelink('project_cost', 'Project Cost', [], ['class' => 'white-text'])
+                                                    </b>
+                                                </th>
+                                                <th class="th-md" width="3%"></th>
+                                            </tr>
+                                        </thead>
+                                        <!--Table head-->
+
+                                        <!--Table body-->
+                                        <tbody>
+                                            @if (count($list) > 0)
+                                                @foreach ($list as $listCtr => $fund)
+                                            <tr class="hidden-xs">
+                                                <td align="center">
+                                                    <i class="fas fa-paste fa-lg material-tooltip-main indigo-text"
+                                                    data-toggle="tooltip" data-placement="right" title="Ledger"></i>
+                                                </td>
+                                                <td></td>
+                                                <td>{{ $fund->project_title }}</td>
+                                                <td>{{ date_format(date_create($fund->date_from), "F j, Y") }}</td>
+                                                <td>{{ date_format(date_create($fund->date_to), "F j, Y") }}</td>
+                                                <td>
+                                                    &#8369; {{ number_format($fund->project_cost, 2) }}
+                                                </td>
+
+                                                <td align="center">
+                                                    <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
+                                                    data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal"
+                                                    data-toggle="tooltip" data-placement="left" title="Open">
+                                                        <i class="fas fa-folder-open"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <tr class="d-none show-xs">
+                                                <td data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
+                                                    <b>Project Title:</b> {{ $fund->project_title }}<br>
+                                                    <small>
+                                                        <b>Project Cost: </b>
+                                                        &#8369; {!! number_format($fund->project_cost, 2) !!}
+                                                    </small><br>
+                                                    <small>
+
+                                                    </small>
+                                                </td>
+                                            </tr>
+                                                @endforeach
+                                            @else
+                                            <tr>
+                                                <td class="p-5" colspan="7" class="text-center py-5">
+                                                    <h6 class="red-text text-center">
+                                                        No available data.
+                                                    </h6>
+                                                </td>
+                                            </tr>
+                                            @endif
+                                        </tbody>
+                                        <!--Table body-->
+                                    </table>
+                                    <!--Table-->
+                                </div>
+
+                                <div class="mt-3">
+                                    {!! $list->appends(\Request::except('page'))->render('pagination') !!}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

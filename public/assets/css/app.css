@@ -286,6 +286,10 @@ html, body, header, .view {
     background: transparent !important;
 }
 
+.treeview-animated .treeview-animated-list .treeview-animated-items .open {
+    background-color: #1c2a48;
+}
+
 /* Extra Small devices (landscape phones, atmost 575px) */
 @media (max-width: 575px) {
     body {
