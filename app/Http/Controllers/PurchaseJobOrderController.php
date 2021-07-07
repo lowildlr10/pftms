@@ -519,7 +519,7 @@ class PurchaseJobOrderController extends Controller
             } else {
                 $msg = "Document for $documentType '$poNo' should be generated first.";
                 Auth::user()->log($request, $msg);
-                return redirect()->route($routeName, ['keyword' => $id])
+                return redirect()->route('po-jo', ['keyword' => $id])
                                      ->with('warning', $msg);
             }
         } catch (\Throwable $th) {

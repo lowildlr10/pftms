@@ -3,7 +3,7 @@
         <div class="col-md-6">
             <div class="md-form">
                 <input type="date" id="date_abstract" class="form-control required">
-                <label for="date_abstract">
+                <label for="date_abstract" class="active">
                     Abstract Date <span class="red-text">*</span>
                 </label>
             </div>

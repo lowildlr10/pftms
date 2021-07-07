@@ -36,7 +36,7 @@
             <div class="md-form">
                 <input type="date" id="date-iar" class="form-control form-sm required required"
                        value="{{ $iarDate }}" name="date_iar">
-                <label for="date-iar" class="{{ !empty($iarDate) ? 'active' : '' }} mt-3">
+                <label for="date-iar" class="active">
                     Date <span class="red-text">*</span>
                 </label>
             </div>
@@ -78,7 +78,7 @@
             <div class="md-form">
                 <input type="date" id="date-invoice" class="form-control form-sm"
                        value="{{ $invoiceDate }}" name="date_invoice">
-                <label for="date-invoice" class="{{ !empty($invoiceDate) ? 'active' : '' }} mt-3">
+                <label for="date-invoice" class="active">
                     Date
                 </label>
             </div>
