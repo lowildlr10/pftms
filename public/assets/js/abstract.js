@@ -182,67 +182,43 @@ $(function() {
 
 		$('.header-group').each(function(keyGroup, elemGroup) {
 			const headerGroup = $(this);
-            let _selSupplierBidders = [];
 
 			headerGroup.find(`.sel-supplier-${keyGroup}`).each(function(index, elemSupplier) {
                 const bidID = `#sel-bidder-count-${ keyGroup }-${ index }`;
 				const selectedSupplier = $(bidID);
-				//let oldValue = '';
+				let oldValue = '';
 
-                if ($(bidID).hasClass('initialized')) {
-                    _selSupplierBidders.push(selectedSupplier.val());
+                selectedSupplier.on('select2:opening', function() {
+                    oldValue = selectedSupplier.val();
+                }).on('select2:select', function() {
+                    const supplierID = selectedSupplier.val();
+                    let selectHtmlValues = '<option value="" disabled selected>Choose an awardee</option>' +
+                                        '<option value="">-- No awardee --</option>',
+                        hasDuplicate = false;
 
-                    selectedSupplier.on('change', function() {
-                        const selectedSupplier = $(this).val();
+                    headerGroup.find('.sel-supplier').each(function(index2) {
+                        const _supplierID = $(this).val(),
+                            optSelected = $(this).find('option:selected').text();
 
-                        $.each(selSupplierBidders[keyGroup], function (budCtr, supplier) {
-                            if (selectedSupplier == supplier) {
+                        if (index != index2) {
+                            if (_supplierID == supplierID) {
+                                selectedSupplier.val(oldValue).trigger('change');
+                                hasDuplicate = true;
                                 alert('The selected suppliers must be unique.');
-                                $(this).val(selSupplierBidders[keyGroup][index]);
-
-                                return;
                             }
-                        });
+                        }
+
+                        selectHtmlValues += `<option value="${_supplierID}">${optSelected}</option>`;
                     });
 
-                    /*
-                    selectedSupplier.on('change', function() {
-                        oldValue = selectedSupplier.val();
-                        console.log(oldValue);
-                    }).change(function() {
-                        const supplierID = selectedSupplier.val();
-                        let selectHtmlValues = '<option value="" disabled selected>Choose an awardee</option>' +
-                                            '<option value="">-- No awardee --</option>',
-                            hasDuplicate = false;
-
-                        headerGroup.find('.sel-supplier').each(function(index2) {
-                            const _supplierID = $(this).val(),
-                                optSelected = $(this).find('option:selected').text();
-
-                            if (index != index2) {
-                                if (_supplierID == supplierID) {
-                                    selectedSupplier.val(oldValue);
-                                    hasDuplicate = true;
-                                    alert('The selected suppliers must be unique.');
-                                }
-                            }
-
-                            selectHtmlValues += `<option value="${_supplierID}">${optSelected}</option>`;
+                    if (!hasDuplicate) {
+                        headerGroup.closest('.table-segment-group').find('.awarded-to').each(function() {
+                            $(this).html(selectHtmlValues);
                         });
-
-                        if (!hasDuplicate) {
-                            headerGroup.closest('.table-segment-group').find('.awarded-to').each(function() {
-                                $(this).html(selectHtmlValues);
-                            });
-                        }
-                    });*/
-                }
-
-                selSupplierBidders[keyGroup] = _selSupplierBidders;
+                    }
+                });
 			});
 		});
-
-        console.log(selSupplierBidders);
     }
 
     function initInputs(id) {
@@ -268,11 +244,13 @@ $(function() {
                         checkSelectUniqueness();
 
                         $('.sel-supplier').each(function(bidCtr, bid) {
-                            const bidID = `#sel-bidder-count-${groupKey}-${bidCtr}`;
+                            const bidID = `sel-bidder-count-${groupKey}-${bidCtr}`;
 
-                            $(bidID).materialSelect('destroy');
-                            $(bidID).materialSelect();
-                            $(bidID).siblings('.select-dropdown').addClass("input-error-highlighter");
+                            //$(bidID).materialSelect('destroy');
+                            //$(bidID).materialSelect();
+                            $(`#${bidID}`).select2();
+                            $(`#select2-${bidID}-container`).addClass('input-error-highlighter');
+                            //$(bidID).siblings('.select-dropdown').addClass("input-error-highlighter");
                         });
                     });
 
@@ -336,6 +314,7 @@ $(function() {
             $(this).slideToggle(500);
 
             initInputs(id);
+            $('.sel-supplier').select2();
         });
         $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {

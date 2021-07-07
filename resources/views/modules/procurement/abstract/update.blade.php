@@ -156,8 +156,9 @@
                                                 @foreach ($abstract->suppliers as $key => $supplier)
                                             <th width="320px">
                                                 <div class="form-group">
-                                                    <select class="browser-default custom-select sel-supplier required"
-                                                            onchange="$(this).setSupplierHeaderName('.bid-head-{{ $key }}',
+                                                    <select class="mdb-select md-form sel-supplier sel-supplier-{{ $abstract->group_no }} required"
+                                                            id="sel-bidder-count-{{ $abstract->group_no }}-{{ $key }}"
+                                                            onchange="$(this).setSupplierHeaderName($(this), '.bid-head-{{ $key }}',
                                                                                                     $(this).find(':selected').text());"
                                                             name="selected_supplier[{{ $abstract->group_no }}][{{ $key }}]"
                                                             searchable="Search here..">
