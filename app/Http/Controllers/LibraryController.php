@@ -920,13 +920,13 @@ class LibraryController extends Controller
             if ($oldProjectType != $projectType) {
                 DB::table('funding_ledger_allotments')
                   ->where('project_id', $id)
-                  ->forceDelete();
+                  ->delete();
                 DB::table('funding_ledger_items')
                   ->where('project_id', $id)
-                  ->forceDelete();
+                  ->delete();
                 DB::table('funding_ledgers')
                   ->where('project_id', $id)
-                  ->forceDelete();
+                  ->delete();
             }
 
             $msg = "Project '$projectTitle' successfully updated.";

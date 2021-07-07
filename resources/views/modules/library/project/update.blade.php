@@ -282,6 +282,7 @@
             <option value="saa" {{ $projectType == 'saa' ? 'selected' : '' }}>Special Project</option>
             <option value="mooe" {{ $projectType == 'mooe' ? 'selected' : '' }}>MOOE</option>
             <option value="lgia" {{ $projectType == 'lgia' ? 'selected' : '' }}>LGIA</option>
+            <option value="setup" {{ $projectType == 'setup' ? 'selected' : '' }}>SETUP</option>
         </select>
         <label class="mdb-main-label">
             Project Type <span class="red-text">*</span>
