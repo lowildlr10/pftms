@@ -10,13 +10,13 @@
             </small>
             <select id="directory" class="form-control-sm directory-tokenizer"
                     name="directory[]" style="width: 100%;" multiple>
-                @if (count($directories['directory']) > 0)
+                @if (isset($directories['directory']) && count($directories['directory']) > 0)
                     @foreach ($directories['directory'] as $dirCtr => $dir)
                 <option disabled>Directory {{ $dirCtr + 1 }}: {{ $dir }}</option>
                     @endforeach
                 @endif
 
-                @if (count($directories['items']) > 0)
+                @if (isset($directories['items']) && count($directories['items']) > 0)
                     @foreach ($directories['items'] as $item)
                         @if ($directory && count(explode(' / ', $directory)))
                             @php $isEquals = false; @endphp
