@@ -25,6 +25,24 @@ $(function() {
             $(this).append($element);
             $(this).trigger("change");
         });
+        $('select[name="directory[]"]').on("select2:select change", function (evt) {
+            const selValues = $(this).val();
+            let directoryDisplay = '';
+
+            $.each(selValues, function(i, val) {
+                if (i == 0) {
+                    directoryDisplay += val;
+                } else {
+                    directoryDisplay += ` / ${val}`;
+                }
+            });
+
+            if (selValues.length > 0) {
+                $('#directory-view').html(`(${directoryDisplay})`);
+            } else {
+                $('#directory-view').html('(e.g. "MOOE / RO / DRRM")');
+            }
+        });
         $('.agencies-tokenizer').select2({
             tokenSeparators: [','],
             placeholder: "Coimplementing Agency/LGU",
