@@ -581,4 +581,8 @@ $(function() {
     $('.material-tooltip-main').tooltip({
         template: template
     });
+
+    $('.treeview-animated').mdbTreeview();
+    $('.treeview-animated-element').addClass('white dark-grey-text');
+    $('.treeview-animated-items').find('.closed').addClass('h4');
 });

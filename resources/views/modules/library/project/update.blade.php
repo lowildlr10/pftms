@@ -5,23 +5,31 @@
     <hr>
     <label for="directory" class="py-0 w-100"">
         <div class="md-form py-0">
-            Directory
+            <b>Directory</b> <small id="directory-view">
+                {{ $directory ? "($directory)" : '(e.g. "MOOE / RO / DRRM")' }}
+            </small>
             <select id="directory" class="form-control-sm directory-tokenizer"
                     name="directory[]" style="width: 100%;" multiple>
-                @if (count($directories) > 0)
-                    @foreach ($directories as $dir)
-                        @php $hasExisting = false; @endphp
-                <option disabled>Directory: {{ $dir->directory }}</option>
-                        @if ($directory == $dir->directory && !$hasExisting)
-                            @foreach ($dir->items as $item)
-                <option value="{{ $item }}" selected>{{ $item }}</option>
+                @if (count($directories['directory']) > 0)
+                    @foreach ($directories['directory'] as $dirCtr => $dir)
+                <option disabled>Directory {{ $dirCtr + 1 }}: {{ $dir }}</option>
+                    @endforeach
+                @endif
+
+                @if (count($directories['items']) > 0)
+                    @foreach ($directories['items'] as $item)
+                        @if ($directory && count(explode(' / ', $directory)))
+                            @php $isEquals = false; @endphp
+
+                            @foreach (explode(' / ', $directory) as $itm)
+                                @if ($itm == $item)
+                                    @php $isEquals = true; @endphp
+                                @endif
                             @endforeach
 
-                            @php $hasExisting = true; @endphp
+                <option value="{{ $item }}" {{ $isEquals ? 'selected' : '' }}>{{ $item }}</option>
                         @else
-                            @foreach ($dir->items as $item)
                 <option value="{{ $item }}">{{ $item }}</option>
-                            @endforeach
                         @endif
                     @endforeach
                 @endif
@@ -282,6 +290,7 @@
             <option value="saa" {{ $projectType == 'saa' ? 'selected' : '' }}>Special Project</option>
             <option value="mooe" {{ $projectType == 'mooe' ? 'selected' : '' }}>MOOE</option>
             <option value="lgia" {{ $projectType == 'lgia' ? 'selected' : '' }}>LGIA</option>
+            <option value="setup" {{ $projectType == 'setup' ? 'selected' : '' }}>SETUP</option>
         </select>
         <label class="mdb-main-label">
             Project Type <span class="red-text">*</span>

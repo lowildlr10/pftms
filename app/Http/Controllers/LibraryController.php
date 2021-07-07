@@ -684,16 +684,29 @@ class LibraryController extends Controller
             $_directories = $proj->directory ? unserialize($proj->directory) : [];
 
             if (count($_directories) > 0) {
-                $dir = implode('/', $_directories);
+                $dir = implode(' / ', $_directories);
 
-                $directories[] = (object) [
-                    'directory' => $dir,
-                    'items' => $_directories
-                ];
+                $directories['directory'][] = $dir;
+
+                foreach ($_directories as $dirItem) {
+                    if (!isset($directories['items'])) {
+                        $directories['items'][] = $dirItem;
+                    } else {
+                        if (!in_array($dirItem, $directories['items'])) {
+                            $directories['items'][] = $dirItem;
+                        }
+                    }
+                }
             }
         }
 
-        sort($directories);
+        if (isset($directories['directory'])) {
+            sort($directories['directory']);
+        }
+
+        if (isset($directories['items'])) {
+            sort($directories['items']);
+        }
 
         return view('modules.library.project.create', compact(
             'industries',
@@ -730,7 +743,7 @@ class LibraryController extends Controller
         $accessGroup  = $projectData->access_groups ?
                         unserialize($projectData->access_groups) : [];
         $directory = $projectData->directory ?
-                     implode('/', unserialize($projectData->directory)) : NULL;
+                     implode(' / ', unserialize($projectData->directory)) : NULL;
         $projectTitle = $projectData->project_title;
         $projectType = $projectData->project_type;
         $projectLeader = $projectData->project_leader;
@@ -745,16 +758,29 @@ class LibraryController extends Controller
             $_directories = $proj->directory ? unserialize($proj->directory) : [];
 
             if (count($_directories) > 0) {
-                $dir = implode('/', $_directories);
+                $dir = implode(' / ', $_directories);
 
-                $directories[] = (object) [
-                    'directory' => $dir,
-                    'items' => $_directories
-                ];
+                $directories['directory'][] = $dir;
+
+                foreach ($_directories as $dirItem) {
+                    if (!isset($directories['items'])) {
+                        $directories['items'][] = $dirItem;
+                    } else {
+                        if (!in_array($dirItem, $directories['items'])) {
+                            $directories['items'][] = $dirItem;
+                        }
+                    }
+                }
             }
         }
 
-        sort($directories);
+        if (isset($directories['directory'])) {
+            sort($directories['directory']);
+        }
+
+        if (isset($directories['items'])) {
+            //sort($directories['items']);
+        }
 
         return view('modules.library.project.update', compact(
             'id',
@@ -836,33 +862,6 @@ class LibraryController extends Controller
 
             $msg = "Project '$projectTitle' successfully created.";
             return redirect(url()->previous())->with('success', $msg);
-
-            /*
-            if (!$this->checkDuplication('FundingSource', $projectTitle)) {
-                $instanceProject = new FundingProject;
-                $instanceProject->directory = $directory;
-                $instanceProject->project_title = $projectTitle;
-                $instanceProject->industry_sector = $industrySector;
-                $instanceProject->project_site = $projectSite;
-                $instanceProject->implementing_agency = $implementingAgency;
-                $instanceProject->implementing_project_cost = $implementingBudget;
-                $instanceProject->comimplementing_agency_lgus = serialize($coimplementingAgencies);
-                $instanceProject->proponent_units = serialize($proponentUnits);
-                $instanceProject->date_from = $dateFrom;
-                $instanceProject->date_to = $dateTo;
-                $instanceProject->project_cost = $projectCost;
-                $instanceProject->project_leader = $projectLeader;
-                $instanceProject->monitoring_offices = serialize($monitoringOffice);
-                $instanceProject->access_groups = serialize($accessGroup);
-                $instanceProject->project_type = $projectType;
-                $instanceProject->save();
-
-                $msg = "Project '$projectTitle' successfully created.";
-                return redirect(url()->previous())->with('success', $msg);
-            } else {
-                $msg = "Project '$projectTitle' has a duplicate.";
-                return redirect(url()->previous())->with('warning', $msg);
-            }*/
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             return redirect(url()->previous())->with('failed', $msg);
@@ -870,6 +869,7 @@ class LibraryController extends Controller
     }
 
     public function updateProject(Request $request, $id) {
+        $directory = $request->directory ? serialize($request->directory) : serialize([]);
         $projectTitle = $request->project_title;
         $industrySector = $request->industry_sector;
         $projectSite = $request->project_site;
@@ -901,6 +901,7 @@ class LibraryController extends Controller
 
             $instanceProject = FundingProject::find($id);
             $oldProjectType = $instanceProject->project_type;
+            $instanceProject->directory = $directory;
             $instanceProject->project_title = $projectTitle;
             $instanceProject->industry_sector = $industrySector;
             $instanceProject->project_site = $projectSite;
@@ -920,13 +921,13 @@ class LibraryController extends Controller
             if ($oldProjectType != $projectType) {
                 DB::table('funding_ledger_allotments')
                   ->where('project_id', $id)
-                  ->forceDelete();
+                  ->delete();
                 DB::table('funding_ledger_items')
                   ->where('project_id', $id)
-                  ->forceDelete();
+                  ->delete();
                 DB::table('funding_ledgers')
                   ->where('project_id', $id)
-                  ->forceDelete();
+                  ->delete();
             }
 
             $msg = "Project '$projectTitle' successfully updated.";
