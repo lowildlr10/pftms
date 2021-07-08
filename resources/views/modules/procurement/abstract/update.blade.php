@@ -156,11 +156,11 @@
                                                 @foreach ($abstract->suppliers as $key => $supplier)
                                             <th width="320px">
                                                 <div class="form-group">
-                                                    <select class="mdb-select md-form sel-supplier sel-supplier-{{ $abstract->group_no }} required"
-                                                            id="sel-bidder-count-{{ $abstract->group_no }}-{{ $key }}"
+                                                    <select class="mdb-select md-form sel-supplier sel-supplier-{{ $grpCtr }} required"
+                                                            id="sel-bidder-count-{{ $grpCtr }}-{{ $key }}"
                                                             onchange="$(this).setSupplierHeaderName($(this), '.bid-head-{{ $key }}',
                                                                                                     $(this).find(':selected').text());"
-                                                            name="selected_supplier[{{ $abstract->group_no }}][{{ $key }}]"
+                                                            name="selected_supplier[{{ $grpCtr }}][{{ $key }}]"
                                                             searchable="Search here..">
                                                         <option value="" disabled selected>Choose a supplier</option>
                                                         @if (!empty($suppliers))

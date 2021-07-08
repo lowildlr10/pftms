@@ -249,6 +249,7 @@ $(function() {
                             //$(bidID).materialSelect('destroy');
                             //$(bidID).materialSelect();
                             $(`#${bidID}`).select2();
+                            console.log(bidID);
                             $(`#select2-${bidID}-container`).addClass('input-error-highlighter');
                             //$(bidID).siblings('.select-dropdown').addClass("input-error-highlighter");
                         });
