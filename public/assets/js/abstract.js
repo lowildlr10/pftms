@@ -283,6 +283,7 @@ $(function() {
             $(this).slideToggle(500);
 
             initInputs(id);
+            $('.sel-supplier').select2();
         });
         $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
