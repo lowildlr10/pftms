@@ -85,6 +85,7 @@ class LineItemBudgetController extends Controller
         $roleHasAdministrator = Auth::user()->hasAdministratorRole();
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
 
+        $projDat = new FundingProject;
         $fundBudget = new FundingBudget;
 
         if (!empty($keyword)) {
@@ -98,7 +99,7 @@ class LineItemBudgetController extends Controller
         }
 
         if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
-            $projectIDs = $this->getAccessibleProjects();
+            $projectIDs = $projDat->getAccessibleProjects();
 
             $fundBudget = $fundBudget->where(function($qry) use ($userID, $projectIDs) {
                 $qry->where('created_by', $userID)
@@ -222,13 +223,14 @@ class LineItemBudgetController extends Controller
                      ->orderBy('firstname');
 
         $projects = [];
+        $projDat = new FundingProject;
         $_projects = FundingProject::doesntHave('budget')
                                   ->orderBy('project_title');
 
         if ($roleHasBudget || $roleHasAdministrator || $roleHasDeveloper) {
             $users = $users->get();
         } else {
-            $projectIDs = $this->getAccessibleProjects();
+            $projectIDs = $projDat->getAccessibleProjects();
             $_projects = $_projects->whereIn('id', $projectIDs);
             $users = $users->where('id', Auth::user()->id)->get();
         }
@@ -531,6 +533,7 @@ class LineItemBudgetController extends Controller
                                       ->get();
         $allotmentClassifications = AllotmentClass::orderBy('class_name')->get();
 
+        $projDat = new FundingProject;
         $project = FundingProject::find($budget->project_id);
         $projectID = $project->id;
         $projects = [];
@@ -539,7 +542,7 @@ class LineItemBudgetController extends Controller
         })->orderBy('project_title');
 
         if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
-            $projectIDs = $this->getAccessibleProjects();
+            $projectIDs = $projDat->getAccessibleProjects();
             $projectIDs[] = $projectID;
             $_projects = $_projects->whereIn('id', $projectIDs);
         }
@@ -1144,33 +1147,5 @@ class LineItemBudgetController extends Controller
             'grouped_allotments' => $groupedAllotments,
             'remaining_budget' => $remainingBudget
         ];
-    }
-
-    private function getAccessibleProjects() {
-        $projectIDs = [];
-        $userUnit = Auth::user()->unit;
-        $userGroups = Auth::user()->groups ? unserialize(Auth::user()->groups) : [];
-        $fundProject = DB::table('funding_projects')->get();
-
-        foreach ($fundProject as $project) {
-            $units = $project->proponent_units ? unserialize($project->proponent_units) :
-                     [];
-            $accessGroups = $project->access_groups ? unserialize($project->access_groups) :
-                            [];
-
-            foreach ($accessGroups as $accessGrp) {
-                if (in_array($accessGrp, $userGroups)) {
-                    $projectIDs[] = $project->id;
-                }
-            }
-
-            foreach ($units as $unit) {
-                if ($unit == $userUnit) {
-                    $projectIDs[] = $project->id;
-                }
-            }
-        }
-
-        return $projectIDs;
     }
 }

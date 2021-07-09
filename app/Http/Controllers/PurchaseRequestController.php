@@ -508,9 +508,10 @@ class PurchaseRequestController extends Controller
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $roleHasBudget = Auth::user()->hasBudgetRole();
         $roleHasAccountant = Auth::user()->hasAccountantRole();
+        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
-        $_fundingSources = FundingProject::orderBy('project_title')->get();
-        $fundingSources = [];
         $empDivisionAccess = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
                               [Auth::user()->division] :
                               Auth::user()->getDivisionAccess();
@@ -538,7 +539,20 @@ class PurchaseRequestController extends Controller
             $sig->module = json_decode($sig->module);
         }
 
+        $projDat = new FundingProject;
+        $_fundingSources = FundingProject::orderBy('project_title');
+        $fundingSources = [];
         $tempFundSrcs = [];
+
+        if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
+            $projectIDs = $projDat->getAccessibleProjects();
+
+            $_fundingSources = $_fundingSources->where(function($qry) use ($projectIDs) {
+                $qry->whereIn('id', $projectIDs);
+            });
+        }
+
+        $_fundingSources = $_fundingSources->get();
 
         foreach ($_fundingSources as $proj) {
             $directory = $proj->directory ? implode(' &rarr; ', unserialize($proj->directory)) : NULL;
@@ -594,6 +608,12 @@ class PurchaseRequestController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showEdit($id) {
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
+        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+
         $itemOriginalIDs = [];
         $prData = PurchaseRequest::where('id', $id)->first();
         $prItemData = PurchaseRequestItem::where('pr_id', $id)
@@ -610,12 +630,7 @@ class PurchaseRequestController extends Controller
         $division = $prData->division;
         $approvedBy = $prData->approved_by;
         $recommendedBy = $prData->recommended_by;
-        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $roleHasBudget = Auth::user()->hasBudgetRole();
-        $roleHasAccountant = Auth::user()->hasAccountantRole();
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
-        $_fundingSources = FundingProject::orderBy('project_title')->get();
-        $fundingSources = [];
 
         $empDivisionAccess = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
                               [Auth::user()->division] :
@@ -648,7 +663,20 @@ class PurchaseRequestController extends Controller
             $itemOriginalIDs[] = $item->id;
         }
 
+        $projDat = new FundingProject;
+        $_fundingSources = FundingProject::orderBy('project_title');
+        $fundingSources = [];
         $tempFundSrcs = [];
+
+        if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
+            $projectIDs = $projDat->getAccessibleProjects();
+
+            $_fundingSources = $_fundingSources->where(function($qry) use ($projectIDs) {
+                $qry->whereIn('id', $projectIDs);
+            });
+        }
+
+        $_fundingSources = $_fundingSources->get();
 
         foreach ($_fundingSources as $proj) {
             $directory = $proj->directory ? implode(' &rarr; ', unserialize($proj->directory)) : NULL;
