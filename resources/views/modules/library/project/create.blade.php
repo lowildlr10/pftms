@@ -188,7 +188,7 @@
         <input type="text" id="project-leader" class="form-control"
                name="project_leader">
         <label for="project-leader">
-            Project Leader
+            Project Coordinator/Leader
         </label>
     </div>
 
@@ -212,7 +212,7 @@
         </label>
     </div><br>
 
-    <h5>Others</h5>
+    <h5>Project Team Members</h5>
     <hr>
     <div class="md-form">
         <select class="mdb-select crud-select md-form" searchable="Search here.."
@@ -229,20 +229,25 @@
             @endif
         </select>
         <label class="mdb-main-label">
-            Access Groups
+            Project Team Members
         </label>
     </div>
+
+    <br>
+
+    <h5>Type/Fund Source</h5>
+    <hr>
     <div class="md-form">
         <select class="mdb-select crud-select md-form required" searchable="Search here.."
                 name="project_type">
             <option value="" disabled selected>Choose a type</option>
             <option value="saa">Special Project</option>
-            <option value="mooe">MOOE</option>
+            <option value="mooe">Regular MOOE</option>
             <option value="lgia">LGIA</option>
             <option value="setup">SETUP</option>
         </select>
         <label class="mdb-main-label">
-            Type <span class="red-text">*</span>
+            Type/Fund Source <span class="red-text">*</span>
         </label>
     </div><br>
 </form>

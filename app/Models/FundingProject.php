@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 use Kyslik\ColumnSortable\Sortable;
+use Auth;
 
 class FundingProject extends Model
 {
@@ -92,5 +93,33 @@ class FundingProject extends Model
 
     public function implementing() {
         return $this->hasOne('App\Models\AgencyLGU', 'implementing_agency', 'id');
+    }
+
+    public function getAccessibleProjects() {
+        $projectIDs = [];
+        $userUnit = Auth::user()->unit;
+        $userGroups = Auth::user()->groups ? unserialize(Auth::user()->groups) : [];
+        $fundProject = $this->get();
+
+        foreach ($fundProject as $project) {
+            $units = $project->proponent_units ? unserialize($project->proponent_units) :
+                     [];
+            $accessGroups = $project->access_groups ? unserialize($project->access_groups) :
+                            [];
+
+            foreach ($accessGroups as $accessGrp) {
+                if (in_array($accessGrp, $userGroups)) {
+                    $projectIDs[] = $project->id;
+                }
+            }
+
+            foreach ($units as $unit) {
+                if ($unit == $userUnit) {
+                    $projectIDs[] = $project->id;
+                }
+            }
+        }
+
+        return $projectIDs;
     }
 }

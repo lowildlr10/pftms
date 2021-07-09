@@ -598,8 +598,24 @@ class LibraryController extends Controller
      *  Project Module
     **/
     public function indexProject(Request $request) {
-        $projectData = FundingProject::orderBy('project_title')
-                                     ->get();
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+
+        $projDat = new FundingProject;
+        $projectData = FundingProject::orderBy('project_title');
+
+        if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
+            $projectIDs = $projDat->getAccessibleProjects();
+
+            $projectData = $projectData->where(function($qry) use ($projectIDs) {
+                $qry->whereIn('id', $projectIDs);
+            });
+        }
+
+        $projectData = $projectData->get();
+
         $directories = [];
 
         foreach ($projectData as $proj) {

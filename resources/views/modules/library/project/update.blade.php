@@ -239,7 +239,7 @@
         <input type="text" id="project-leader" class="form-control"
                name="project_leader" value="{{ $projectLeader }}">
         <label for="project-leader" class="{{ $projectLeader ? 'active' : '' }}">
-            Project Leader
+            Project Coordinator/Leader
         </label>
     </div>
 
@@ -263,7 +263,7 @@
         </label>
     </div><br>
 
-    <h5>Others</h5>
+    <h5>Project Team Members</h5>
     <hr>
     <div class="md-form">
         <select class="mdb-select crud-select md-form" searchable="Search here.."
@@ -280,20 +280,25 @@
             @endif
         </select>
         <label class="mdb-main-label">
-            Access Groups
+            Project Team Members
         </label>
     </div>
+
+    <br>
+
+    <h5>Type/Fund Source</h5>
+    <hr>
     <div class="md-form">
         <select class="mdb-select crud-select md-form required" searchable="Search here.."
                 name="project_type">
             <option value="" disabled selected>Choose a project type</option>
             <option value="saa" {{ $projectType == 'saa' ? 'selected' : '' }}>Special Project</option>
-            <option value="mooe" {{ $projectType == 'mooe' ? 'selected' : '' }}>MOOE</option>
+            <option value="mooe" {{ $projectType == 'mooe' ? 'selected' : '' }}>Regular MOOE</option>
             <option value="lgia" {{ $projectType == 'lgia' ? 'selected' : '' }}>LGIA</option>
             <option value="setup" {{ $projectType == 'setup' ? 'selected' : '' }}>SETUP</option>
         </select>
         <label class="mdb-main-label">
-            Project Type <span class="red-text">*</span>
+            Type/Fund Source <span class="red-text">*</span>
         </label>
     </div><br>
 </form>

@@ -91,13 +91,13 @@ class LedgerController extends Controller
 
     private function getIndexData($request, $for) {
         $keyword = trim($request->keyword);
-        $userID = Auth::user()->id;
 
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $roleHasBudget = Auth::user()->hasBudgetRole();
         $roleHasAdministrator = Auth::user()->hasAdministratorRole();
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
 
+        $projDat = new FundingProject;
         $fundProject = FundingProject::whereHas('budget', function($query) {
             $query->whereNotNull('date_approved');
         });
@@ -118,6 +118,14 @@ class LedgerController extends Controller
                         $query->where('id', 'like', "%$keyword%")
                               ->orWhere('municipality_name', 'like', "%$keyword%");
                     });
+            });
+        }
+
+        if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
+            $projectIDs = $projDat->getAccessibleProjects();
+
+            $fundProject = $fundProject->where(function($qry) use ($projectIDs) {
+                $qry->whereIn('id', $projectIDs);
             });
         }
 
@@ -1851,5 +1859,33 @@ class LedgerController extends Controller
         }
 
         return $groupedVouchers;
+    }
+
+    private function getAccessibleProjects() {
+        $projectIDs = [];
+        $userUnit = Auth::user()->unit;
+        $userGroups = Auth::user()->groups ? unserialize(Auth::user()->groups) : [];
+        $fundProject = DB::table('funding_projects')->get();
+
+        foreach ($fundProject as $project) {
+            $units = $project->proponent_units ? unserialize($project->proponent_units) :
+                     [];
+            $accessGroups = $project->access_groups ? unserialize($project->access_groups) :
+                            [];
+
+            foreach ($accessGroups as $accessGrp) {
+                if (in_array($accessGrp, $userGroups)) {
+                    $projectIDs[] = $project->id;
+                }
+            }
+
+            foreach ($units as $unit) {
+                if ($unit == $userUnit) {
+                    $projectIDs[] = $project->id;
+                }
+            }
+        }
+
+        return $projectIDs;
     }
 }
