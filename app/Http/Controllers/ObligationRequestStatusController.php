@@ -320,10 +320,12 @@ class ObligationRequestStatusController extends Controller
      */
     public function showCreate() {
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
-        $_projects = FundingProject::orderBy('project_title')->get();
-        $projects = [];
         $payees = $roleHasOrdinary ?
                 User::where('id', Auth::user()->id)
                     ->orderBy('firstname')
@@ -342,7 +344,20 @@ class ObligationRequestStatusController extends Controller
             $sig->module = json_decode($sig->module);
         }
 
+        $projDat = new FundingProject;
+        $_projects = FundingProject::orderBy('project_title');
+        $projects = [];
         $tempFundSrcs = [];
+
+        if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
+            $projectIDs = $projDat->getAccessibleProjects();
+
+            $_projects = $_projects->where(function($qry) use ($projectIDs) {
+                $qry->whereIn('id', $projectIDs);
+            });
+        }
+
+        $_projects = $_projects->get();
 
         foreach ($_projects as $proj) {
             $directory = $proj->directory ? implode(' &rarr; ', unserialize($proj->directory)) : NULL;
@@ -459,6 +474,12 @@ class ObligationRequestStatusController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showEdit($id) {
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+        $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
+
         $orsData = ObligationRequestStatus::find($id);
         $isObligated = !empty($orsData->date_obligated) ? 1 : 0;
         $moduleClass = $orsData->module_class;
@@ -482,8 +503,6 @@ class ObligationRequestStatusController extends Controller
         $dateCertified2 = $orsData->date_certified_2;
         $transactionType = $orsData->transaction_type;
         $project = $orsData->funding_source;
-        $_projects = FundingProject::orderBy('project_title')->get();
-        $projects = [];
         $mooeTitles = MooeAccountTitle::orderBy('order_no')->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
@@ -507,7 +526,22 @@ class ObligationRequestStatusController extends Controller
             $sig->module = json_decode($sig->module);
         }
 
+        $projDat = new FundingProject;
+        $_projects = FundingProject::orderBy('project_title');
+        $projects = [];
         $tempFundSrcs = [];
+
+        if (($moduleClass == 3 && !$roleHasBudget && !$roleHasAdministrator &&
+            !$roleHasDeveloper && !$roleHasPropertySupply) || ($moduleClass == 2 &&
+            !$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper)) {
+            $projectIDs = $projDat->getAccessibleProjects();
+
+            $_projects = $_projects->where(function($qry) use ($projectIDs) {
+                $qry->whereIn('id', $projectIDs);
+            });
+        }
+
+        $_projects = $_projects->get();
 
         foreach ($_projects as $proj) {
             $directory = $proj->directory ? implode(' &rarr; ', unserialize($proj->directory)) : NULL;

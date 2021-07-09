@@ -286,6 +286,11 @@ class DisbursementVoucherController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showCreateFromORS($orsID) {
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+
         $orsList = ObligationRequestStatus::all();
         $orsData = ObligationRequestStatus::with('emppayee')->find($orsID);
         $empID = $orsData->emppayee['emp_id'];
@@ -297,11 +302,9 @@ class DisbursementVoucherController extends Controller
         $project = $orsData->funding_source;
         $amount = $orsData->amount;
 
-        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
-        $_projects = FundingProject::orderBy('project_title')->get();
-        $projects = [];
+
         $payees = $roleHasOrdinary ?
                 User::where('id', Auth::user()->id)
                     ->orderBy('firstname')
@@ -320,7 +323,20 @@ class DisbursementVoucherController extends Controller
             $sig->module = json_decode($sig->module);
         }
 
+        $projDat = new FundingProject;
+        $_projects = FundingProject::orderBy('project_title');
+        $projects = [];
         $tempFundSrcs = [];
+
+        if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
+            $projectIDs = $projDat->getAccessibleProjects();
+
+            $_projects = $_projects->where(function($qry) use ($projectIDs) {
+                $qry->whereIn('id', $projectIDs);
+            });
+        }
+
+        $_projects = $_projects->get();
 
         foreach ($_projects as $proj) {
             $directory = $proj->directory ? implode(' &rarr; ', unserialize($proj->directory)) : NULL;
@@ -374,6 +390,11 @@ class DisbursementVoucherController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showCreate() {
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+
         $orsList = ObligationRequestStatus::all();
         $empID = '';
         $payee = '';
@@ -384,11 +405,9 @@ class DisbursementVoucherController extends Controller
         $orsID = NULL;
         $amount = 0.00;
 
-        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
-        $_projects = FundingProject::orderBy('project_title')->get();
-        $projects = [];
+
         $payees = $roleHasOrdinary ?
                 User::where('id', Auth::user()->id)
                     ->orderBy('firstname')
@@ -407,7 +426,20 @@ class DisbursementVoucherController extends Controller
             $sig->module = json_decode($sig->module);
         }
 
+        $projDat = new FundingProject;
+        $_projects = FundingProject::orderBy('project_title');
+        $projects = [];
         $tempFundSrcs = [];
+
+        if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
+            $projectIDs = $projDat->getAccessibleProjects();
+
+            $_projects = $_projects->where(function($qry) use ($projectIDs) {
+                $qry->whereIn('id', $projectIDs);
+            });
+        }
+
+        $_projects = $_projects->get();
 
         foreach ($_projects as $proj) {
             $directory = $proj->directory ? implode(' &rarr; ', unserialize($proj->directory)) : NULL;
@@ -552,6 +584,12 @@ class DisbursementVoucherController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showEdit($id) {
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+        $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
+
         $orsList = ObligationRequestStatus::all();
         $dvData = DisbursementVoucher::with(['bidpayee', 'procors', 'emppayee'])->find($id);
         $moduleClass = $dvData->module_class;
@@ -589,8 +627,6 @@ class DisbursementVoucherController extends Controller
         $payee = $dvData->payee;
         $address = !empty($dvData->address) ? $dvData->address : $dvData->procors['address'];
         $project = $dvData->funding_source;
-        $_projects = FundingProject::orderBy('project_title')->get();
-        $projects = [];
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -611,7 +647,22 @@ class DisbursementVoucherController extends Controller
             $sig->module = json_decode($sig->module);
         }
 
+        $projDat = new FundingProject;
+        $_projects = FundingProject::orderBy('project_title');
+        $projects = [];
         $tempFundSrcs = [];
+
+        if (($moduleClass == 3 && !$roleHasBudget && !$roleHasAdministrator &&
+            !$roleHasDeveloper && !$roleHasPropertySupply) || ($moduleClass == 2 &&
+            !$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper)) {
+            $projectIDs = $projDat->getAccessibleProjects();
+
+            $_projects = $_projects->where(function($qry) use ($projectIDs) {
+                $qry->whereIn('id', $projectIDs);
+            });
+        }
+
+        $_projects = $_projects->get();
 
         foreach ($_projects as $proj) {
             $directory = $proj->directory ? implode(' &rarr; ', unserialize($proj->directory)) : NULL;
