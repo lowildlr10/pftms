@@ -2534,6 +2534,8 @@ class PrintController extends Controller
         if (strpos($dv->mfo_pap, "\n") !== FALSE) {
             $searchStr = ["\r\n", "\n", "\r"];
             $dv->mfo_pap = str_replace($searchStr, '<br>', $dv->mfo_pap);
+        } else {
+            $dv->mfo_pap = '<br><br><br><br>';
         }
 
         $instanceSignatory = new Signatory;
@@ -2544,7 +2546,7 @@ class PrintController extends Controller
         $position2 = $instanceSignatory->getSignatory($dv->sig_accounting)->dv_designation;
         $position3 = $instanceSignatory->getSignatory($dv->sig_agency_head)->dv_designation;
         $uacsObjects = [];
-        $uacsCodes = unserialize($dv->uacs_object_code);
+        $uacsCodes = $dv->uacs_object_code ? unserialize($dv->uacs_object_code) : [];
 
         foreach ($uacsCodes as $uacs) {
             $mooeTitleDat = DB::table('mooe_account_titles')
