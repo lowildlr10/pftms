@@ -2244,7 +2244,7 @@ class PrintController extends Controller
             $orsNos = [];
 
             foreach ($item->ors_no as $orsID) {
-                $orsData = ObligationRequestStatus::find($orsID);
+                $orsData = OrsBurs::find($orsID);
                 $orsNos[] = $orsData->serial_no;
             }
 
