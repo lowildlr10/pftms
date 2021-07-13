@@ -659,7 +659,7 @@ class LDDAPController extends Controller
             $instanceLDDAP->status = 'for_summary';
             $instanceLDDAP->date_for_summary = Carbon::now();
             $instanceLDDAP->for_summary_by = Auth::user()->id;
-            //$instanceLDDAP->save();
+            $instanceLDDAP->save();
 
             $instanceNotif->notifySummaryLDDAP($id);
 
