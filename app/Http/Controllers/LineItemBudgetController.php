@@ -671,6 +671,10 @@ class LineItemBudgetController extends Controller
             $dateFrom = $projectData->date_from;
             $dateTo = $projectData->date_to;
 
+            if ($instanceFundingBudget->date_disapproved) {
+                $instanceFundingBudget->date_disapproved = NULL;
+            }
+
             $instanceFundingBudget->project_id = $project;
             $instanceFundingBudget->date_from = $dateFrom;
             $instanceFundingBudget->date_to = $dateTo;
