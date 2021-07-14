@@ -475,11 +475,13 @@ class VoucherLogController extends Controller
             $invRangeCountList = [];
 
             foreach ($issuedStock as $stock) {
-                $issuedBy = $signatory->getSignatory($stock->invstockissue->sig_received_from ?
-                            $stock->invstockissue->sig_received_from :
-                            $stock->invstockissue->sig_issued_by)->name;
+                $invStockDat = InventoryStockIssue::find($stock->inv_stock_issue_id);
+
+                $issuedBy = $signatory->getSignatory($invStockDat->sig_received_from ?
+                            $invStockDat->sig_received_from :
+                            $invStockDat->sig_issued_by)->name;
                 $issuedTo = Auth::user()->getEmployee(
-                                $stock->invstockissue->sig_received_by
+                                $invStockDat->sig_received_by
                             )->name;
                 $issuedTo .= '<br><em><small class="grey-text">Item Barcode:<br>'.$stock->id.'</small></em>';
                 $dateIssued = $stock->date_issued;
