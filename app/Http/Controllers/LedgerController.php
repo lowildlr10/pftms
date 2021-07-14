@@ -1829,7 +1829,7 @@ class LedgerController extends Controller
                         }
 
                         $groupedVouchers[$moCtr]->vouchers = $vouchers;
-                    } else if ($type == 'lgia' && $type == 'setup') {
+                    } else if ($type == 'lgia' || $type == 'setup') {
                         foreach ($_vouchers as $voucher) {
                             if ($voucher->ledger_id == $id) {
                                 $totalPriorYear == $voucher->prior_year;
