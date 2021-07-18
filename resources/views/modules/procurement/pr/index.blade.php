@@ -196,20 +196,38 @@
 
         //Cancel and Un-cancel
         if ($roleHasBudget || $roleHasAccountant) {
-            if (Auth::user()->id == $pr->requestor['id']) {
-                $isVisibleUpdate = $isAllowedUpdate ? $isAllowedUpdate : false;
-                $isVisibleDelete = $isAllowedDelete ? $isAllowedDelete : false;
-                $isVisibleViewAttachment = true;
-                $isVisibleTrackPR = true;
-                $isVisibleCancel = $isAllowedCancel ? $isAllowedCancel : false;
-                $isVisibleUncancel = $isAllowedUncancel ? $isAllowedUncancel : false;
+            if (Auth::user()->emp_type == 'regular') {
+                if (Auth::user()->id == $pr->requestor['id']) {
+                    $isVisibleUpdate = $isAllowedUpdate ? $isAllowedUpdate : false;
+                    $isVisibleDelete = $isAllowedDelete ? $isAllowedDelete : false;
+                    $isVisibleViewAttachment = true;
+                    $isVisibleTrackPR = true;
+                    $isVisibleCancel = $isAllowedCancel ? $isAllowedCancel : false;
+                    $isVisibleUncancel = $isAllowedUncancel ? $isAllowedUncancel : false;
+                } else {
+                    $isVisibleUpdate = false;
+                    $isVisibleDelete = false;
+                    $isVisibleViewAttachment = false;
+                    $isVisibleTrackPR = false;
+                    $isVisibleCancel = false;
+                    //$isVisibleUncancel = false;
+                }
             } else {
-                $isVisibleUpdate = false;
-                $isVisibleDelete = false;
-                $isVisibleViewAttachment = false;
-                $isVisibleTrackPR = false;
-                $isVisibleCancel = false;
-                //$isVisibleUncancel = false;
+                if (in_array($pr->requestor['id'], $userIDs)) {
+                    $isVisibleUpdate = $isAllowedUpdate ? $isAllowedUpdate : false;
+                    $isVisibleDelete = $isAllowedDelete ? $isAllowedDelete : false;
+                    $isVisibleViewAttachment = true;
+                    $isVisibleTrackPR = true;
+                    $isVisibleCancel = $isAllowedCancel ? $isAllowedCancel : false;
+                    $isVisibleUncancel = $isAllowedUncancel ? $isAllowedUncancel : false;
+                } else {
+                    $isVisibleUpdate = false;
+                    $isVisibleDelete = false;
+                    $isVisibleViewAttachment = false;
+                    $isVisibleTrackPR = false;
+                    $isVisibleCancel = false;
+                    //$isVisibleUncancel = false;
+                }
             }
         }
         @endphp

@@ -73,6 +73,8 @@ class PurchaseRequestController extends Controller
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
+        $userIDs = Auth::user()->getGroupHeads();
+        $userIDs[] = Auth::user()->id;
 
         if ($roleHasOrdinary && Auth::user()->getDivisionAccess()) {
             $empDivisionAccess = Auth::user()->getDivisionAccess();
@@ -91,8 +93,6 @@ class PurchaseRequestController extends Controller
                 $roleHasBudget || $roleHasPropertySupply) {
             } else {
                 if (Auth::user()->emp_type == 'contractual') {
-                    $userIDs = Auth::user()->getGroupHeads();
-                    $userIDs[] = Auth::user()->id;
                     $prData = $prData->whereIn('requested_by', $userIDs);
                 } else {
                     $prData = $prData->where('requested_by', Auth::user()->id);
@@ -142,6 +142,7 @@ class PurchaseRequestController extends Controller
             'roleHasAccountant' => $roleHasAccountant,
             'roleHasPropertySupply' => $roleHasPropertySupply,
             'roleHasOrdinary' => $roleHasOrdinary,
+            'userIDs' => $userIDs,
         ]);
     }
 
@@ -520,16 +521,7 @@ class PurchaseRequestController extends Controller
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
         $userIDs = Auth::user()->getGroupHeads();
         $userIDs[] = Auth::user()->id;
-        $empDivisionAccess = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
-                              [Auth::user()->division] :
-                              Auth::user()->getDivisionAccess();
-        $divisions = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
-                    EmpDivision::where('id', Auth::user()->division)
-                               ->orderBy('division_name')
-                               ->get() :
-                    EmpDivision::whereIn('id', $empDivisionAccess)
-                               ->orderBy('division_name')
-                               ->get();
+        $empDivisionAccess = Auth::user()->getDivisionAccess();
 
         if (Auth::user()->emp_type == 'contractual') {
             $users = $roleHasOrdinary || $roleHasBudget || $roleHasAccountant ?
@@ -537,10 +529,22 @@ class PurchaseRequestController extends Controller
                         ->whereIn('id', $userIDs)
                         ->orderBy('firstname')->get() :
                     User::where('is_active', 'y')->orderBy('firstname')->get();
+            $divisions = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
+                    EmpDivision::whereIn('id', $empDivisionAccess)
+                               ->orderBy('division_name')
+                               ->get() :
+                    EmpDivision::orderBy('division_name')
+                               ->get();
         } else {
             $users = $roleHasOrdinary || $roleHasBudget || $roleHasAccountant ?
                     User::where('id', Auth::user()->id)->get() :
                     User::where('is_active', 'y')->orderBy('firstname')->get();
+            $divisions = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
+                    EmpDivision::where('id', Auth::user()->division)
+                               ->orderBy('division_name')
+                               ->get() :
+                    EmpDivision::orderBy('division_name')
+                               ->get();
         }
 
         $signatories = Signatory::addSelect([
@@ -646,19 +650,10 @@ class PurchaseRequestController extends Controller
         $recommendedBy = $prData->recommended_by;
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
 
-        $empDivisionAccess = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
-                              [Auth::user()->division] :
-                              Auth::user()->getDivisionAccess();
+        $empDivisionAccess = Auth::user()->getDivisionAccess();
         $userIDs = Auth::user()->getGroupHeads();
         $userIDs[] = Auth::user()->id;
         $userIDs[] = $requestedBy;
-        $divisions = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
-                    EmpDivision::where('id', Auth::user()->division)
-                               ->orderBy('division_name')
-                               ->get() :
-                    EmpDivision::whereIn('id', $empDivisionAccess)
-                               ->orderBy('division_name')
-                               ->get();
 
         if (Auth::user()->emp_type == 'contractual') {
             $users = $roleHasOrdinary || $roleHasBudget || $roleHasAccountant ?
@@ -666,10 +661,22 @@ class PurchaseRequestController extends Controller
                         ->whereIn('id', $userIDs)
                         ->orderBy('firstname')->get() :
                     User::where('is_active', 'y')->orderBy('firstname')->get();
+            $divisions = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
+                    EmpDivision::whereIn('id', $empDivisionAccess)
+                               ->orderBy('division_name')
+                               ->get() :
+                    EmpDivision::orderBy('division_name')
+                               ->get();
         } else {
             $users = $roleHasOrdinary || $roleHasBudget || $roleHasAccountant ?
                     User::where('id', Auth::user()->id)->get() :
                     User::where('is_active', 'y')->orderBy('firstname')->get();
+            $divisions = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
+                    EmpDivision::where('id', Auth::user()->division)
+                               ->orderBy('division_name')
+                               ->get() :
+                    EmpDivision::orderBy('division_name')
+                               ->get();
         }
 
         $signatories = Signatory::addSelect([
