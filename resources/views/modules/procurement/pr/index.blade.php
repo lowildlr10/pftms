@@ -195,7 +195,7 @@
         $isVisibleRFQ = $isAllowedRFQ;
 
         //Cancel and Un-cancel
-        if ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) {
+        if ($roleHasBudget || $roleHasAccountant) {
             if (Auth::user()->id == $pr->requestor['id']) {
                 $isVisibleUpdate = $isAllowedUpdate ? $isAllowedUpdate : false;
                 $isVisibleDelete = $isAllowedDelete ? $isAllowedDelete : false;

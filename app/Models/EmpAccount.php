@@ -363,6 +363,27 @@ class EmpAccount extends Authenticatable
         return $groups;
     }
 
+    public function getGroupHeads($userID = '') {
+        $groupHeads = [];
+
+        if (!empty($userID)) {
+            $userData = $this::find($userID);
+        } else {
+            $userData = $this;
+        }
+
+        $groups = unserialize($userData->groups);
+
+        if (count($groups) > 0) {
+            foreach ($groups as $group) {
+                $groupDat = Group::find($group);
+                $groupHeads[] = $groupDat->group_head;
+            }
+        }
+
+        return $groupHeads;
+    }
+
     public function log($request, $msg) {
         $empID = $this->id;
         $requestURI = $request->getRequestUri();

@@ -90,7 +90,13 @@ class PurchaseRequestController extends Controller
             if ($roleHasDeveloper || $roleHasAccountant ||
                 $roleHasBudget || $roleHasPropertySupply) {
             } else {
-                $prData = $prData->where('requested_by', Auth::user()->id);
+                if (Auth::user()->emp_type == 'contractual') {
+                    $userIDs = Auth::user()->getGroupHeads();
+                    $userIDs[] = Auth::user()->id;
+                    $prData = $prData->whereIn('requested_by', $userIDs);
+                } else {
+                    $prData = $prData->where('requested_by', Auth::user()->id);
+                }
             }
         }
 
@@ -512,6 +518,8 @@ class PurchaseRequestController extends Controller
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
 
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
+        $userIDs = Auth::user()->getGroupHeads();
+        $userIDs[] = Auth::user()->id;
         $empDivisionAccess = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
                               [Auth::user()->division] :
                               Auth::user()->getDivisionAccess();
@@ -522,13 +530,19 @@ class PurchaseRequestController extends Controller
                     EmpDivision::whereIn('id', $empDivisionAccess)
                                ->orderBy('division_name')
                                ->get();
-        $users = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
-                 User::where('id', Auth::user()->id)
-                     ->orderBy('firstname')
-                     ->get() :
-                 User::where('is_active', 'y')
-                     ->whereIn('division', $empDivisionAccess)
-                     ->orderBy('firstname')->get();
+
+        if (Auth::user()->emp_type == 'contractual') {
+            $users = $roleHasOrdinary || $roleHasBudget || $roleHasAccountant ?
+                    User::where('is_active', 'y')
+                        ->whereIn('id', $userIDs)
+                        ->orderBy('firstname')->get() :
+                    User::where('is_active', 'y')->orderBy('firstname')->get();
+        } else {
+            $users = $roleHasOrdinary || $roleHasBudget || $roleHasAccountant ?
+                    User::where('id', Auth::user()->id)->get() :
+                    User::where('is_active', 'y')->orderBy('firstname')->get();
+        }
+
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -635,6 +649,9 @@ class PurchaseRequestController extends Controller
         $empDivisionAccess = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
                               [Auth::user()->division] :
                               Auth::user()->getDivisionAccess();
+        $userIDs = Auth::user()->getGroupHeads();
+        $userIDs[] = Auth::user()->id;
+        $userIDs[] = $requestedBy;
         $divisions = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
                     EmpDivision::where('id', Auth::user()->division)
                                ->orderBy('division_name')
@@ -642,13 +659,19 @@ class PurchaseRequestController extends Controller
                     EmpDivision::whereIn('id', $empDivisionAccess)
                                ->orderBy('division_name')
                                ->get();
-        $users = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
-                 User::where('id', Auth::user()->id)
-                     ->orderBy('firstname')
-                     ->get() :
-                 User::where('is_active', 'y')
-                     ->whereIn('division', $empDivisionAccess)
-                     ->orderBy('firstname')->get();
+
+        if (Auth::user()->emp_type == 'contractual') {
+            $users = $roleHasOrdinary || $roleHasBudget || $roleHasAccountant ?
+                    User::where('is_active', 'y')
+                        ->whereIn('id', $userIDs)
+                        ->orderBy('firstname')->get() :
+                    User::where('is_active', 'y')->orderBy('firstname')->get();
+        } else {
+            $users = $roleHasOrdinary || $roleHasBudget || $roleHasAccountant ?
+                    User::where('id', Auth::user()->id)->get() :
+                    User::where('is_active', 'y')->orderBy('firstname')->get();
+        }
+
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
