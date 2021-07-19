@@ -971,7 +971,10 @@ class AccountController extends Controller
                               ->get();
 
         foreach ($empUnitData as $unit) {
-            $unit->division_name = $unit->_division ? $unit->_division->division_name : NULL;
+            $unit->division_name = $unit->_division ? $unit->_division->division_name : 'N/A';
+            $unit->unit_head_name = $unit->unithead ?
+                                    $unit->unithead->firstname.' '.$unit->unithead->lastname :
+                                    'N/A';
         }
 
         return view('modules.library.unit.index', [
@@ -982,8 +985,9 @@ class AccountController extends Controller
     public function showCreateUnit() {
         $divisions = EmpDivision::orderBy('division_name')
                                 ->get();
+        $users = User::where('is_active', 'y')->orderBy('firstname')->get();
         return view('modules.library.unit.create', compact(
-            'divisions'
+            'divisions', 'users'
         ));
     }
 
@@ -993,24 +997,25 @@ class AccountController extends Controller
         $unitName = $unitData->unit_name;
         $divisions = EmpDivision::orderBy('division_name')
                                 ->get();
+        $unitHead = $unitData->unit_head;
+        $users = User::where('is_active', 'y')->orderBy('firstname')->get();
 
-        return view('modules.library.unit.update', [
-            'id' => $id,
-            'division' => $division,
-            'unitName' => $unitName,
-            'divisions' => $divisions
-        ]);
+        return view('modules.library.unit.update', compact(
+            'id', 'division', 'unitName', 'divisions', 'unitHead', 'users'
+        ));
     }
 
     public function storeUnit(Request $request) {
         $division = $request->division;
         $unitName = $request->unit_name;
+        $unitHead = $request->unit_head;
 
         try {
             if (!$this->checkDuplication('EmpUnit', $unitName)) {
                 $instanceEmpUnit = new EmpUnit;
                 $instanceEmpUnit->division = $division;
                 $instanceEmpUnit->unit_name = $unitName;
+                $instanceEmpUnit->unit_head = $unitHead;
                 $instanceEmpUnit->save();
 
                 $msg = "Employee unit '$unitName' successfully created.";
@@ -1028,11 +1033,13 @@ class AccountController extends Controller
     public function updateUnit(Request $request, $id) {
         $division = $request->division;
         $unitName = $request->unit_name;
+        $unitHead = $request->unit_head;
 
         try {
             $instanceEmpUnit = EmpUnit::find($id);
             $instanceEmpUnit->division = $division;
             $instanceEmpUnit->unit_name = $unitName;
+            $instanceEmpUnit->unit_head = $unitHead;
             $instanceEmpUnit->save();
 
             $msg = "Employee unit '$unitName' successfully updated.";

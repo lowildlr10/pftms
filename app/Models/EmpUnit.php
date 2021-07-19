@@ -54,4 +54,8 @@ class EmpUnit extends Model
     public function _division() {
         return $this->hasOne('App\Models\EmpDivision', 'id', 'division');
     }
+
+    public function unithead() {
+        return $this->hasOne('App\Models\EmpAccount', 'id', 'unit_head');
+    }
 }

@@ -72,8 +72,11 @@
                                         <th class="th-md" width="18%">
                                             <strong>Division</strong>
                                         </th>
-                                        <th class="th-md" width="73%">
+                                        <th class="th-md" width="53%">
                                             <strong>Unit</strong>
+                                        </th>
+                                        <th class="th-md" width="20%">
+                                            <strong>Unit Head</strong>
                                         </th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
@@ -89,6 +92,7 @@
                                         <td></td>
                                         <td>{{ $unit->division_name }}</td>
                                         <td>{{ $unit->unit_name }}</td>
+                                        <td>{{ $unit->unit_head_name }}</td>
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-orange p-2 waves-effect material-tooltip-main mr-0"
                                                onclick="$(this).showEdit('{{ route('emp-unit-show-edit',
