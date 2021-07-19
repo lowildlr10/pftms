@@ -21,6 +21,7 @@ use App\Models\InventoryStockIssueItem;
 use App\Models\EmpAccount as User;
 use App\Models\EmpGroup;
 use App\Models\EmpDivision;
+use App\Models\EmpUnit;
 use App\Models\ItemUnitIssue;
 use App\Models\FundingProject;
 use App\Models\Signatory;
@@ -73,8 +74,13 @@ class PurchaseRequestController extends Controller
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
+        $empUnitDat = EmpUnit::has('unithead')->find(Auth::user()->unit);
         $userIDs = Auth::user()->getGroupHeads();
         $userIDs[] = Auth::user()->id;
+
+        if ($empUnitDat && $empUnitDat->unithead) {
+            $userIDs[] = $empUnitDat->unithead->id;
+        }
 
         if ($roleHasOrdinary && Auth::user()->getDivisionAccess()) {
             $empDivisionAccess = Auth::user()->getDivisionAccess();
@@ -519,9 +525,14 @@ class PurchaseRequestController extends Controller
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
 
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
+        $empUnitDat = EmpUnit::has('unithead')->find(Auth::user()->unit);
         $userIDs = Auth::user()->getGroupHeads();
         $userIDs[] = Auth::user()->id;
         $empDivisionAccess = Auth::user()->getDivisionAccess();
+
+        if ($empUnitDat && $empUnitDat->unithead) {
+            $userIDs[] = $empUnitDat->unithead->id;
+        }
 
         if (Auth::user()->emp_type == 'contractual') {
             $users = $roleHasOrdinary || $roleHasBudget || $roleHasAccountant ?
@@ -650,10 +661,15 @@ class PurchaseRequestController extends Controller
         $recommendedBy = $prData->recommended_by;
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
 
+        $empUnitDat = EmpUnit::has('unithead')->find(Auth::user()->unit);
         $empDivisionAccess = Auth::user()->getDivisionAccess();
         $userIDs = Auth::user()->getGroupHeads();
         $userIDs[] = Auth::user()->id;
         $userIDs[] = $requestedBy;
+
+        if ($empUnitDat && $empUnitDat->unithead) {
+            $userIDs[] = $empUnitDat->unithead->id;
+        }
 
         if (Auth::user()->emp_type == 'contractual') {
             $users = $roleHasOrdinary || $roleHasBudget || $roleHasAccountant ?
