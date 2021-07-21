@@ -1,7 +1,7 @@
 <form id="form-update" class="wow animated fadeIn d-flex justify-content-center" method="POST"
       action="{{ route('lddap-update', ['id' => $id]) }}">
     @csrf
-    <div class="card w-responsive">
+    <div class="card">
         <div class="card-body py-1">
             <div class="row">
                 <div class="col-md-12">
@@ -64,7 +64,7 @@
                     <div class="md-form form-sm">
                         <input type="date" id="lddap-date" name="lddap_date"
                                class="form-control required" value="{{ $lddap->date_lddap }}">
-                        <label for="lddap-date" class="mt-3 {{ !empty($lddap->date_lddap) ? 'active' : '' }}">
+                        <label for="lddap-date" class="{{ !empty($lddap->date_lddap) ? 'active' : '' }}">
                             <span class="red-text">* </span>
                             <strong>Date</strong>
                         </label>
@@ -201,9 +201,14 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea name="current_allot_class_uacs[]" placeholder=" Value..."
-                                                  class="md-textarea required form-control-sm w-100 py-1"
-                                                  >{{ $item->allot_class_uacs }}</textarea>
+                                        <select class="mdb-select required allot-class-tokenizer" multiple="multiple"
+                                                name="current_allot_class_uacs[{{ $ctrCurrent }}][]">
+                                            @if (count($item->mooe_title_data) > 0)
+                                                @foreach ($item->mooe_title_data as $mooe)
+                                            <option value="{{ $mooe->id }}" selected>{{ $mooe->mooe_title }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
                                     </div>
                                 </td>
                                 <td>
@@ -352,9 +357,14 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea name="prior_allot_class_uacs[]" placeholder=" Value..."
-                                                  class="md-textarea required form-control-sm w-100 py-1"
-                                                  >{{ $item->allot_class_uacs }}</textarea>
+                                        <select class="mdb-select required allot-class-tokenizer" multiple="multiple"
+                                                name="prior_allot_class_uacs[{{ $ctrPrior }}][]">
+                                            @if (count($item->mooe_title_data) > 0)
+                                                @foreach ($item->mooe_title_data as $mooe)
+                                            <option value="{{ $mooe->id }}" selected>{{ $mooe->mooe_title }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
                                     </div>
                                 </td>
                                 <td>

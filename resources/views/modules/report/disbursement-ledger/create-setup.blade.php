@@ -108,7 +108,7 @@
                                                       material-tooltip-main prior-year"
                                                data-toggle="tooltip" data-placement="left"
                                                title="Column: Prior Year"
-                                               value="0"
+                                               value="{{ $dv->prior_year }}"
                                                onkeyup="$(this).computeTotalPriorYear();"
                                                onchange="$(this).computeTotalPriorYear();"
                                                placeholder="Value...">
@@ -121,7 +121,7 @@
                                                       material-tooltip-main continuing"
                                                data-toggle="tooltip" data-placement="left"
                                                title="Column: Continuing"
-                                               value="0"
+                                               value="{{ $dv->continuing }}"
                                                onkeyup="$(this).computeTotalContinuing();"
                                                onchange="$(this).computeTotalContinuing();"
                                                placeholder="Value...">
@@ -134,7 +134,7 @@
                                                       material-tooltip-main current"
                                                data-toggle="tooltip" data-placement="left"
                                                title="Column: Current"
-                                               value="0"
+                                               value="{{ $dv->current }}"
                                                onkeyup="$(this).computeTotalCurrent();"
                                                onchange="$(this).computeTotalCurrent();"
                                                placeholder="Value...">

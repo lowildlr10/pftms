@@ -32,6 +32,7 @@ use App\Models\AgencyLGU;
 use App\Models\MonitoringOffice;
 use App\Models\AllotmentClass;
 use App\Models\FundingProject;
+use App\Models\MooeAccountTitle;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -2241,7 +2242,9 @@ class PrintController extends Controller
             }*/
 
             $item->ors_no = unserialize($item->ors_no);
+            $item->allot_class_uacs = unserialize($item->allot_class_uacs);
             $orsNos = [];
+            $mooeTitles = [];
 
             foreach ($item->ors_no as $orsID) {
                 $orsData = OrsBurs::find($orsID);
@@ -2250,10 +2253,18 @@ class PrintController extends Controller
 
             $orsNo = implode(', ', $orsNos);
 
+            foreach ($item->allot_class_uacs as $allotClass) {
+                $mooeAccountData = MooeAccountTitle::find($allotClass);
+                $mooeTitles[] = $mooeAccountData->uacs_code;
+            }
+
+            $mooeTitle = implode(', ', $mooeTitles);
+
+            /*
             if (strpos($item->allot_class_uacs, "\n") !== FALSE) {
                 $searchStr = ["\r\n", "\n", "\r"];
                 $item->allot_class_uacs = str_replace($searchStr, '<br>', $item->allot_class_uacs);
-            }
+            }*/
 
             if (strpos($item->remarks, "\n") !== FALSE) {
                 $searchStr = ["\r\n", "\n", "\r"];
@@ -2270,7 +2281,7 @@ class PrintController extends Controller
                 $item->net_amount = number_format($item->net_amount, 2);
 
                 $currentTableData[] = [$item->creditor_name, $item->creditor_acc_no,
-                                       $orsNo, $item->allot_class_uacs,
+                                       $orsNo, $mooeTitle,
                                        $item->gross_amount, $item->withold_tax,
                                        $item->net_amount, $item->remarks];
             } else if ($item->category == 'prior_year') {
@@ -2283,7 +2294,7 @@ class PrintController extends Controller
                 $item->net_amount = number_format($item->net_amount, 2);
 
                 $priorTableData[] = [$item->creditor_name, $item->creditor_acc_no,
-                                     $orsNo, $item->allot_class_uacs,
+                                     $orsNo, $mooeTitle,
                                      $item->gross_amount, $item->withold_tax,
                                      $item->net_amount, $item->remarks];
             }

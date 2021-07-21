@@ -379,7 +379,8 @@ class LedgerController extends Controller
         if ($for == 'obligation') {
             $vouchers = ObligationRequestStatus::select(
                 DB::raw("DATE_FORMAT(date_obligated, '%Y-%m-%d') as date_obligated"),
-                'id', 'payee', 'particulars', 'serial_no', 'amount'
+                'id', 'payee', 'particulars', 'serial_no', 'prior_year', 'continuing',
+                'current', 'amount'
             )->where([['funding_source', $projectID]])
              ->whereNotNull('date_obligated')
              ->orderBy('date_obligated')
@@ -404,7 +405,8 @@ class LedgerController extends Controller
             $vouchers = DB::table('disbursement_vouchers as dv')->select(
                 DB::raw("DATE_FORMAT(dv.date_disbursed, '%Y-%m-%d') as date_disbursed"),
                 'dv.id', 'dv.payee', 'dv.particulars', 'dv.amount', 'dv.uacs_object_code',
-                'dv.module_class', 'dv.pr_id', 'ors.serial_no','ors.id as ors_id'
+                'dv.module_class', 'dv.pr_id', 'ors.serial_no','ors.id as ors_id',
+                'dv.prior_year', 'dv.continuing', 'dv.current'
             )->leftJoin('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
              ->where([['dv.funding_source', $projectID]])
              ->whereNotNull('dv.date_disbursed')
@@ -761,7 +763,7 @@ class LedgerController extends Controller
             )->leftJoin('funding_ledger_items as ledger', 'ledger.ors_id', '=', 'ors.id')
              ->where('funding_source', $projectID)
              ->whereNotNull('date_obligated')
-             ->orderBy('date_obligated')
+             ->orderBy('ors.date_obligated')
              ->get();
             $approvedBudgets = [
                 (object) [
@@ -831,12 +833,13 @@ class LedgerController extends Controller
                 'ledger.id as ledger_item_id', 'ledger.particulars as ledger_particulars',
                 'ledger.ors_no', 'ledger.prior_year', 'ledger.continuing', 'ledger.current',
                 'ledger.total', 'ledger.mooe_account as mooe_account',
-                'ledger.unit as ledger_unit', 'ledger.ledger_id'
+                'ledger.unit as ledger_unit', 'ledger.ledger_id', 'dv.prior_year as dv_prior_year',
+                'dv.continuing as dv_continuing', 'dv.current as dv_current'
             )->leftJoin('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
              ->leftJoin('funding_ledger_items as ledger', 'ledger.dv_id', '=', 'dv.id')
              ->where('dv.funding_source', $projectID)
              ->whereNotNull('date_disbursed')
-             ->orderBy('date_disbursed')
+             ->orderBy('dv.date_disbursed')
              ->get();
             $approvedBudgets = [
                 (object) [
@@ -1654,7 +1657,7 @@ class LedgerController extends Controller
                         ['funding_source', $projectID],
                         ['date_obligated', 'like', "$monthDate%"]
                     ])->whereNotNull('date_obligated')
-                    ->orderBy('date_obligated')
+                    ->orderBy('ors.date_obligated')
                     ->get();
 
                     if ($type == 'saa') {
@@ -1735,7 +1738,7 @@ class LedgerController extends Controller
                         ['dv.funding_source', $projectID],
                         ['dv.date_disbursed', 'like', "$monthDate%"]
                     ])->whereNotNull('date_disbursed')
-                    ->orderBy('date_disbursed')
+                    ->orderBy('dv.date_disbursed')
                     ->get();
 
                     if ($type == 'saa') {

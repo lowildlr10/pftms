@@ -44,6 +44,41 @@ $(function() {
             //theme: "material"
         });
 
+        $(".allot-class-tokenizer").select2({
+            tokenSeparators: [','],
+            placeholder: "Value...",
+            width: '100%',
+            maximumSelectionSize: 4,
+            allowClear: true,
+            ajax: {
+                url: `${baseURL}/payment/lddap/get-mooe-title`,
+                type: "post",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        _token: CSRF_TOKEN,
+                        search: params.term
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: $.map(data, function(item) {
+                            return {
+                                text: `${item.uacs_code} : ${item.account_title}`,
+                                id: item.id
+                            }
+                        }),
+                        pagination: {
+                            more: true
+                        }
+                    };
+                },
+                cache: true
+            }
+            //theme: "material"
+        });
+
         $('.mds-gsb-tokenizer').select2({
             tokenSeparators: [','],
             placeholder: "For adding a new data, use '/' to separate MDS-GSB BRANCH and MDS SUB ACCOUNT NO.",
@@ -237,10 +272,9 @@ $(function() {
         let orsNo = `<td><div class="md-form my-0">
                     <select class="mdb-select required ors-tokenizer" multiple="multiple"
                     name="${_lastRowID[0]}_ors_no[${newID-1}][]"></select></div></td>`;
-        let allotClassUacs = `<td><div class="md-form form-sm my-0">
-                              <textarea name="${_lastRowID[0]}_allot_class_uacs[]" placeholder=" Value..."
-                              class="md-textarea required form-control-sm w-100 py-1"></textarea>
-                              </div></td>`;
+        let allotClassUacs = `<td><div class="md-form my-0">
+                            <select class="mdb-select required allot-class-tokenizer" multiple="multiple"
+                            name="${_lastRowID[0]}_allot_class_uacs[${newID-1}][]"></select></div></td>`;
         let grossAmmount = '<td><div class="md-form form-sm my-0">'+
                            '<input type="number" class="form-control required form-control-sm '+
                            _lastRowID[0]+'-gross-amount'+'" '+

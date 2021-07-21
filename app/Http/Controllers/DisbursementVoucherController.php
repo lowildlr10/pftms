@@ -300,6 +300,9 @@ class DisbursementVoucherController extends Controller
         $sigCert1 = $orsData->sig_certified_1;
         $transactionType = $orsData->transaction_type;
         $project = $orsData->funding_source;
+        $priorYear = $orsData->prior_year;
+        $continuing = $orsData->continuing;
+        $current = $orsData->current;
         $amount = $orsData->amount;
 
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
@@ -379,7 +382,8 @@ class DisbursementVoucherController extends Controller
             'signatories', 'payees', 'payee', 'empID',
             'serialNo', 'address', 'amount', 'orsList',
             'orsID', 'transactionType', 'sigCert1',
-            'project', 'projects'
+            'project', 'projects', 'priorYear', 'continuing',
+            'current'
         ));
     }
 
@@ -403,6 +407,9 @@ class DisbursementVoucherController extends Controller
         $sigCert1 = '';
         $transactionType = '';
         $orsID = NULL;
+        $priorYear = NULL;
+        $continuing = NULL;
+        $current = NULL;
         $amount = 0.00;
 
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
@@ -482,7 +489,8 @@ class DisbursementVoucherController extends Controller
             'signatories', 'payees', 'payee', 'empID',
             'serialNo', 'address', 'amount', 'orsList',
             'orsID', 'transactionType', 'sigCert1',
-            'projects',
+            'projects', 'priorYear', 'continuing',
+            'current'
         ));
     }
 
@@ -506,6 +514,9 @@ class DisbursementVoucherController extends Controller
         $responsibilityCenter = $request->responsibility_center;
         $mfoPAP = $request->mfo_pap;
         $project = $request->funding_source;
+        $priorYear = $request->prior_year ? $request->prior_year : 0.00;
+        $continuing = $request->continuing ? $request->continuing : 0.00;
+        $current = $request->current ? $request->current : 0.00;
         $amount = $request->amount;
         $sigCertified = $request->sig_certified;
         $sigAccounting = $request->sig_accounting;
@@ -553,6 +564,9 @@ class DisbursementVoucherController extends Controller
             $instanceDV->particulars = $particulars;
             $instanceDV->responsibility_center = $responsibilityCenter;
             $instanceDV->mfo_pap = $mfoPAP;
+            $instanceDV->prior_year = $priorYear;
+            $instanceDV->continuing = $continuing;
+            $instanceDV->current = $current;
             $instanceDV->amount = $amount;
             $instanceDV->sig_certified = $sigCertified;
             $instanceDV->sig_accounting = $sigAccounting;
@@ -607,6 +621,9 @@ class DisbursementVoucherController extends Controller
         $responsibilityCenter = $dvData->responsibility_center;
         $particulars = $dvData->particulars;
         $mfoPAP = $dvData->mfo_pap;
+        $priorYear = $dvData->prior_year;
+        $continuing = $dvData->continuing;
+        $current = $dvData->current;
         $amount = $dvData->amount;
         $sigCertified = $dvData->sig_certified;
         $sigAccounting = $dvData->sig_accounting;
@@ -712,7 +729,7 @@ class DisbursementVoucherController extends Controller
             'orNo', 'otherDocuments', 'signatories', 'signatories',
             'serialNo', 'address', 'dvDate', 'payees', 'particulars',
             'payee', 'transactionType', 'orsList', 'orsID', 'projects',
-            'project',
+            'project', 'priorYear', 'continuing', 'current'
         ));
     }
 
@@ -735,6 +752,9 @@ class DisbursementVoucherController extends Controller
         $responsibilityCenter = $request->responsibility_center;
         $mfoPAP = $request->mfo_pap;
         $project = $request->funding_source;
+        $priorYear = $request->prior_year ? $request->prior_year : 0.00;
+        $continuing = $request->continuing ? $request->continuing : 0.00;
+        $current = $request->current ? $request->current : 0.00;
         $amount = $request->amount;
         $sigCertified = $request->sig_certified;
         $sigAccounting = $request->sig_accounting;
@@ -788,6 +808,9 @@ class DisbursementVoucherController extends Controller
             $instanceDV->particulars = $particulars;
             $instanceDV->responsibility_center = $responsibilityCenter;
             $instanceDV->mfo_pap = $mfoPAP;
+            $instanceDV->prior_year = $priorYear;
+            $instanceDV->continuing = $continuing;
+            $instanceDV->current = $current;
             $instanceDV->amount = $amount;
             $instanceDV->sig_accounting = $sigAccounting;
             $instanceDV->date_accounting = $dateAccounting;

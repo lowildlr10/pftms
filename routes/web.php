@@ -996,6 +996,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'pay_lddap',
         'access' => 'is_allowed'
     ]);
+    Route::post('payment/lddap/get-mooe-title', [
+        'uses' => 'LDDAPController@getListTitleMOOE',
+        'module' => 'pay_lddap',
+        'access' => 'is_allowed'
+    ]);
 
     // Summary of LDDAP Module
     Route::any('payment/summary', [

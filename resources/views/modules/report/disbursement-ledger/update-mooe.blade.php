@@ -133,7 +133,7 @@
                                                       material-tooltip-main prior-year"
                                                data-toggle="tooltip" data-placement="left"
                                                title="Column: Prior Year"
-                                               value="{{ $dv->prior_year ? $dv->prior_year : 0 }}"
+                                               value="{{ $dv->prior_year ? $dv->prior_year : $dv->dv_prior_year }}"
                                                onkeyup="$(this).computeTotalPriorYear();"
                                                onchange="$(this).computeTotalPriorYear();"
                                                placeholder="Value...">
@@ -146,7 +146,7 @@
                                                       material-tooltip-main continuing"
                                                data-toggle="tooltip" data-placement="left"
                                                title="Column: Continuing"
-                                               value="{{ $dv->continuing ? $dv->continuing : 0 }}"
+                                               value="{{ $dv->continuing ? $dv->continuing : $dv->dv_continuing }}"
                                                onkeyup="$(this).computeTotalContinuing();"
                                                onchange="$(this).computeTotalContinuing();"
                                                placeholder="Value...">
@@ -159,7 +159,7 @@
                                                       material-tooltip-main current"
                                                data-toggle="tooltip" data-placement="left"
                                                title="Column: Current"
-                                               value="{{ $dv->current ? $dv->current : 0 }}"
+                                               value="{{ $dv->current ? $dv->current : $dv->dv_current }}"
                                                onkeyup="$(this).computeTotalCurrent();"
                                                onchange="$(this).computeTotalCurrent();"
                                                placeholder="Value...">

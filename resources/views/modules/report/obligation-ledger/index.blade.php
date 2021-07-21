@@ -95,7 +95,7 @@
                                                         @php $lastDir = $file->directory @endphp
                                                         &rarr; <i class="fas fa-file-alt"></i> {{ $file->title }}
                                                         <a href="#" class="btn btn-link btn-sm mdb-color-text px-0 py-1"
-                                                           data-target="#right-modal-{{ $dirCtr + 1 }}" data-toggle="modal"
+                                                           data-target="#right-modal-{{ $file->id }}" data-toggle="modal"
                                                            data-toggle="tooltip" data-placement="left" title="Open">
                                                             <i class="fas fa-folder-open"></i> Open
                                                         </a>
@@ -121,7 +121,7 @@
                                             <div class="treeview-animated-element">
                                                 <i class="fas fa-file-alt"></i> {{ $file->title }}
                                                 <a class="btn btn-link btn-sm mdb-color-text px-0 py-1"
-                                                   data-target="#right-modal-{{ $dirCtr + 1 }}" data-toggle="modal"
+                                                   data-target="#right-modal-{{ $file->id }}" data-toggle="modal"
                                                    data-toggle="tooltip" data-placement="left" title="Open">
                                                     <i class="fas fa-folder-open"></i> Open
                                                 </a>
@@ -189,14 +189,14 @@
 
                                                 <td align="center">
                                                     <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
-                                                    data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal"
+                                                    data-target="#right-modal-{{ $fund->id }}" data-toggle="modal"
                                                     data-toggle="tooltip" data-placement="left" title="Open">
                                                         <i class="fas fa-folder-open"></i>
                                                     </a>
                                                 </td>
                                             </tr>
                                             <tr class="d-none show-xs">
-                                                <td data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
+                                                <td data-target="#right-modal-{{ $fund->id }}" data-toggle="modal">
                                                     <b>Project Title:</b> {{ $fund->project_title }}<br>
                                                     <small>
                                                         <b>Project Cost: </b>
@@ -239,7 +239,7 @@
 
 @if (count($list) > 0)
     @foreach ($list as $listCtr => $fund)
-<div class="modal custom-rightmenu-modal fade right" id="right-modal-{{ $listCtr + 1 }}" tabindex="-1"
+<div class="modal custom-rightmenu-modal fade right" id="right-modal-{{ $fund->id }}" tabindex="-1"
      role="dialog">
     <div class="modal-dialog modal-full-height modal-righty" role="document">
         <!--Content-->

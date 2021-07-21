@@ -421,6 +421,9 @@ class ObligationRequestStatusController extends Controller
         $mfoPAP = $request->mfo_pap;
         $uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
         $project = $request->funding_source;
+        $priorYear = $request->prior_year ? $request->prior_year : 0.00;
+        $continuing = $request->continuing ? $request->continuing : 0.00;
+        $current = $request->current ? $request->current : 0.00;
         $amount = $request->amount;
         $sigCertified1 = !empty($request->sig_certified_1) ? $request->sig_certified_1: NULL;
         $sigCertified2 = !empty($request->sig_certified_2) ? $request->sig_certified_2: NULL;
@@ -448,6 +451,9 @@ class ObligationRequestStatusController extends Controller
             $instanceORS->date_certified_1 = $dateCertified1;
             $instanceORS->date_certified_2 = $dateCertified2;
             $instanceORS->funding_source = $project;
+            $instanceORS->prior_year = $priorYear;
+            $instanceORS->continuing = $continuing;
+            $instanceORS->current = $current;
             $instanceORS->amount = $amount;
             $instanceORS->module_class = 2;
             $instanceORS->save();
@@ -496,6 +502,9 @@ class ObligationRequestStatusController extends Controller
         $uacsObjectCode = $orsData->uacs_object_code ?
                           unserialize($orsData->uacs_object_code) :
                           [];
+        $priorYear = $orsData->prior_year;
+        $continuing = $orsData->continuing;
+        $current = $orsData->current;
         $amount = $orsData->amount;
         $sigCertified1 = $orsData->sig_certified_1;
         $sigCertified2 = $orsData->sig_certified_2;
@@ -584,7 +593,8 @@ class ObligationRequestStatusController extends Controller
             'id', 'documentType', 'serialNo', 'dateORS',
             'fundCluster', 'payee', 'office', 'address',
             'responsibilityCenter', 'particulars', 'mfoPAP',
-            'uacsObjectCode', 'uacsObjectCode', 'amount',
+            'uacsObjectCode', 'uacsObjectCode', 'priorYear',
+            'continuing', 'current', 'amount',
             'sigCertified1', 'sigCertified2', 'dateCertified1',
             'dateCertified2', 'signatories', 'payees', 'isObligated',
             'transactionType', 'projects', 'project', 'mooeTitles'
@@ -611,6 +621,9 @@ class ObligationRequestStatusController extends Controller
         $mfoPAP = $request->mfo_pap;
         $uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
         $project = $request->funding_source;
+        $priorYear = $request->prior_year ? $request->prior_year : 0.00;
+        $continuing = $request->continuing ? $request->continuing : 0.00;
+        $current = $request->current ? $request->current : 0.00;
         $amount = $request->amount;
         $sigCertified1 = !empty($request->sig_certified_1) ? $request->sig_certified_1: NULL;
         $sigCertified2 = !empty($request->sig_certified_2) ? $request->sig_certified_2: NULL;
@@ -643,6 +656,9 @@ class ObligationRequestStatusController extends Controller
             $instanceORS->date_certified_1 = $dateCertified1;
             $instanceORS->date_certified_2 = $dateCertified2;
             $instanceORS->funding_source = $project;
+            $instanceORS->prior_year = $priorYear;
+            $instanceORS->continuing = $continuing;
+            $instanceORS->current = $current;
             $instanceORS->amount = $amount;
             $instanceORS->save();
 
@@ -650,6 +666,9 @@ class ObligationRequestStatusController extends Controller
 
             if ($instanceDV) {
                 $instanceDV->uacs_object_code = $uacsObjectCode;
+                $instanceDV->prior_year = $priorYear;
+                $instanceDV->continuing = $continuing;
+                $instanceDV->current = $current;
                 $instanceDV->save();
             }
 

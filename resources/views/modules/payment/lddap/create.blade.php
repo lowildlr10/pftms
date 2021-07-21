@@ -1,7 +1,7 @@
 <form id="form-store" class="wow animated fadeIn d-flex justify-content-center" method="POST"
       action="{{ route('lddap-store') }}">
     @csrf
-    <div class="card w-responsive">
+    <div class="card">
         <div class="card-body py-1">
             <div class="row">
                 <div class="col-md-12">
@@ -54,7 +54,7 @@
                     </div>
                     <div class="md-form form-sm">
                         <input type="text" id="lddap-ada-no" name="lddap_ada_no"
-                               class="form-control required" value="01101101">
+                               class="form-control required" value="{{ $lddapNo }}">
                         <label for="lddap-ada-no" class="active">
                             <span class="red-text">* </span>
                             <strong>LDDAP-ADA No.</strong>
@@ -186,8 +186,8 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea name="current_allot_class_uacs[]" placeholder=" Value..."
-                                                  class="md-textarea required form-control-sm w-100 py-1"></textarea>
+                                        <select class="mdb-select required allot-class-tokenizer" multiple="multiple"
+                                                name="current_allot_class_uacs[0][]"></select>
                                     </div>
                                 </td>
                                 <td>

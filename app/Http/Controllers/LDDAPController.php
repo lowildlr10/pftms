@@ -16,6 +16,7 @@ use App\Models\DocumentLog as DocLog;
 use App\Models\PaperSize;
 use App\Models\Supplier;
 use App\Models\MdsGsb;
+use App\Models\MooeAccountTitle;
 use DB;
 use Auth;
 use Carbon\Carbon;
@@ -110,6 +111,12 @@ class LDDAPController extends Controller
         $dvList = DisbursementVoucher::whereNotNull('dv_no')
                                      ->orderBy('dv_no')
                                      ->get();
+        $lddapCtr = ListDemandPayable::where('created_at', 'like', '%'.date('Y').'%')
+                                     ->count() + 1;
+        $lddapCtr = str_pad($lddapCtr, 4, '0', STR_PAD_LEFT);
+        $month = date('m');
+        $year = date('Y');
+        $lddapNo = "01101101 $month $lddapCtr $year";
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -121,7 +128,7 @@ class LDDAPController extends Controller
         }
 
         return view('modules.payment.lddap.create', compact(
-            'dvList', 'signatories'
+            'dvList', 'signatories', 'lddapNo'
         ));
     }
 
@@ -232,7 +239,7 @@ class LDDAPController extends Controller
                         $instanceLDDAPItem->creditor_name = $creditorName;
                         $instanceLDDAPItem->creditor_acc_no = $listCurrentCreditorAccNo[$ctr];
                         $instanceLDDAPItem->ors_no = serialize($listCurrentOrsNo[$ctr]);
-                        $instanceLDDAPItem->allot_class_uacs = $listcurrentAllotClassUacs[$ctr];
+                        $instanceLDDAPItem->allot_class_uacs = serialize($listcurrentAllotClassUacs[$ctr]);
                         $instanceLDDAPItem->gross_amount = $listCurrentGrossAmount[$ctr];
                         $instanceLDDAPItem->withold_tax = $listCurrentWitholdTax[$ctr];
                         $instanceLDDAPItem->net_amount = $listCurrentNetAmount[$ctr];
@@ -255,7 +262,9 @@ class LDDAPController extends Controller
                         $instanceLDDAPItem->creditor_name = $creditorName;
                         $instanceLDDAPItem->creditor_acc_no = $listPriorCreditorAccNo[$ctr];
                         $instanceLDDAPItem->ors_no = serialize($listPriorOrsNo[$ctr]);
-                        $instanceLDDAPItem->allot_class_uacs = $listPriorAllotClassUacs[$ctr];
+                        $instanceLDDAPItem->allot_class_uacs = $listcurrentAllotClassUacs[$ctr] ?
+                                                               serialize($listcurrentAllotClassUacs[$ctr]) :
+                                                               serialize([]);
                         $instanceLDDAPItem->gross_amount = $listPriorGrossAmount[$ctr];
                         $instanceLDDAPItem->withold_tax = $listPriorWitholdTax[$ctr];
                         $instanceLDDAPItem->net_amount = $listPriorNetAmount[$ctr];
@@ -310,7 +319,9 @@ class LDDAPController extends Controller
 
         foreach ($currentItems as $curritem) {
             $curritem->ors_no = unserialize($curritem->ors_no);
+            $curritem->allot_class_uacs = unserialize($curritem->allot_class_uacs);
             $orsLists = [];
+            $mooeTitleLists = [];
 
             foreach ($curritem->ors_no as $orsNo) {
                 $orsData = ObligationRequestStatus::find($orsNo);
@@ -320,7 +331,16 @@ class LDDAPController extends Controller
                 ];
             }
 
+            foreach ($curritem->allot_class_uacs as $allotClass) {
+                $mooeAccountData = MooeAccountTitle::find($allotClass);
+                $mooeTitleLists[] = (object) [
+                    'id' => $mooeAccountData->id,
+                    'mooe_title' => $mooeAccountData->uacs_code.' : '.$mooeAccountData->account_title,
+                ];
+            }
+
             $curritem->ors_data = $orsLists;
+            $curritem->mooe_title_data = $mooeTitleLists;
         }
 
         $priorItems = ListDemandPayableItem::where([
@@ -329,7 +349,9 @@ class LDDAPController extends Controller
 
         foreach ($priorItems as $priorItem) {
             $priorItem->ors_no = unserialize($priorItem->ors_no);
+            $priorItem->allot_class_uacs = unserialize($priorItem->allot_class_uacs);
             $orsLists = [];
+            $mooeTitleLists = [];
 
             foreach ($priorItem->ors_no as $orsNo) {
                 $orsData = ObligationRequestStatus::find($orsNo);
@@ -339,7 +361,16 @@ class LDDAPController extends Controller
                 ];
             }
 
+            foreach ($priorItem->allot_class_uacs as $allotClass) {
+                $mooeAccountData = MooeAccountTitle::find($allotClass);
+                $mooeTitleLists[] = (object) [
+                    'id' => $mooeAccountData->id,
+                    'mooe_title' => $mooeAccountData->uacs_code.' : '.$mooeAccountData->account_title,
+                ];
+            }
+
             $priorItem->ors_data = $orsLists;
+            $priorItem->mooe_title_data = $mooeTitleLists;
         }
 
         $dvList = DisbursementVoucher::whereNotNull('dv_no')
@@ -477,7 +508,7 @@ class LDDAPController extends Controller
                         $instanceLDDAPItem->creditor_name = $creditorName;
                         $instanceLDDAPItem->creditor_acc_no = $listCurrentCreditorAccNo[$ctr];
                         $instanceLDDAPItem->ors_no = serialize($listCurrentOrsNo[$ctr]);
-                        $instanceLDDAPItem->allot_class_uacs = $listcurrentAllotClassUacs[$ctr];
+                        $instanceLDDAPItem->allot_class_uacs = serialize($listcurrentAllotClassUacs[$ctr]);
                         $instanceLDDAPItem->gross_amount = $listCurrentGrossAmount[$ctr];
                         $instanceLDDAPItem->withold_tax = $listCurrentWitholdTax[$ctr];
                         $instanceLDDAPItem->net_amount = $listCurrentNetAmount[$ctr];
@@ -500,7 +531,7 @@ class LDDAPController extends Controller
                         $instanceLDDAPItem->creditor_name = $creditorName;
                         $instanceLDDAPItem->creditor_acc_no = $listPriorCreditorAccNo[$ctr];
                         $instanceLDDAPItem->ors_no = serialize($listPriorOrsNo[$ctr]);
-                        $instanceLDDAPItem->allot_class_uacs = $listPriorAllotClassUacs[$ctr];
+                        $instanceLDDAPItem->allot_class_uacs = serialize($listPriorAllotClassUacs[$ctr]);
                         $instanceLDDAPItem->gross_amount = $listPriorGrossAmount[$ctr];
                         $instanceLDDAPItem->withold_tax = $listPriorWitholdTax[$ctr];
                         $instanceLDDAPItem->net_amount = $listPriorNetAmount[$ctr];
@@ -716,6 +747,30 @@ class LDDAPController extends Controller
         })->get();
 
         return response()->json($orsData);
+    }
+
+    public function getListTitleMOOE(Request $request) {
+        $keyword = trim($request->search);
+        $mooeTitleData = MooeAccountTitle::select('id', 'account_title', 'uacs_code');
+
+        if ($keyword) {
+            $mooeTitleData = $mooeTitleData->where(function($qry) use ($keyword) {
+                $qry->where('account_title', 'like', "%$keyword%")
+                    ->orWhere('uacs_code', 'like', "%$keyword%");
+                $keywords = explode('/\s+/', $keyword);
+
+                if (count($keywords) > 0) {
+                    foreach ($keywords as $tag) {
+                        $qry->orWhere('account_title', 'like', "%$tag%")
+                            ->orWhere('uacs_code', 'like', "%$tag%");
+                    }
+                }
+            });
+        }
+
+        $mooeTitleData = $mooeTitleData->get();
+
+        return response()->json($mooeTitleData);
     }
 
     private function setRelatedDVDisbursed($id) {

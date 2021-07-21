@@ -315,6 +315,9 @@ class InspectionAcceptanceController extends Controller
 
             $orsDat = ObligationRequestStatus::find($instanceIAR->ors_id);
             $uacsObjectCode = $orsDat->uacs_object_code;
+            $priorYear = $orsDat->prior_year;
+            $continuing = $orsDat->continuing;
+            $current = $orsDat->current;
             $instanceDV = DisbursementVoucher::withTrashed()
                                              ->where('ors_id', $instanceIAR->ors_id)
                                              ->first();
@@ -337,6 +340,9 @@ class InspectionAcceptanceController extends Controller
                 $instanceDV->date_disbursed = NULL;
                 $instanceDV->disbursed_by = NULL;
                 $instanceDV->uacs_object_code = $uacsObjectCode;
+                $instanceDV->prior_year = $orsDat->prior_year;
+                $instanceDV->continuing = $orsDat->continuing;
+                $instanceDV->current = $orsDat->current;
                 $instanceDV->save();
                 DisbursementVoucher::withTrashed()
                                    ->where('ors_id', $instanceIAR->ors_id)

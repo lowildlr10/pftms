@@ -168,7 +168,7 @@
                     </div>
                 </div>
                 <div class="col-md-10 border border-left-0 border-bottom-0 border-dark">
-                    <div class="md-form form-sm my-0">
+                    <div class="md-form form-sm">
                         <textarea class="md-textarea form-control" rows="2" placeholder="Write address here..."
                                   readonly>{{ $address }}</textarea>
                     </div>
@@ -212,8 +212,26 @@
                         <strong>AMOUNT <span class="red-text">*</span></strong>
                     </div>
                     <div class="md-form px-3">
-                        <input type="number" id="amount" name="amount" class="form-control required"
-                               value="{{ $amount }}">
+                        <input type="number" id="amount" name="amount" placeholder="Total Amount..."
+                               class="form-control required" value="{{ $amount }}">
+                        <label for="amount" class="active px-3">
+                            Total Amount <span class="red-text">*</span>
+                        </label>
+                    </div>
+                    <div class="md-form px-3">
+                        <input type="number" id="prior_year" name="prior_year" placeholder="Prior year (Optional)..."
+                               class="form-control" value="{{ $priorYear }}">
+                        <label for="prior_year" class="active px-3">Prior Year</label>
+                    </div>
+                    <div class="md-form px-3">
+                        <input type="number" id="continuing" name="continuing" placeholder="Continuing (Optional)..."
+                               class="form-control" value="{{ $continuing }}">
+                        <label for="continuing" class="active px-3">Continuing</label>
+                    </div>
+                    <div class="md-form px-3">
+                        <input type="number" id="current" name="current" placeholder="Current (Optional)..."
+                               class="form-control" value="{{ $current }}">
+                        <label for="current" class="active px-3">Current</label>
                     </div>
                 </div>
             </div>
