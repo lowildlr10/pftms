@@ -30,10 +30,7 @@ class SummaryLDDAPItem extends Model
         'allotment_mooe',
         'allotment_co',
         'allotment_fe',
-        'allotment_ps_remarks',
-        'allotment_mooe_remarks',
-        'allotment_co_remarks',
-        'allotment_fe_remarks',
+        'allotment_remarks',
     ];
 
     /**

@@ -72,7 +72,7 @@
                     </div>
                     <div class="md-form form-sm">
                         <input type="text" id="sliiae-no" name="sliiae_no"
-                               class="form-control form-control-sm required" value="{{ date('Y-m-') }}">
+                               class="form-control form-control-sm required" value="{{ $sliiaeNo }}">
                         <label for="sliiae-no" class="active">
                             <span class="red-text">* </span>
                             <b>SLIIAE No.</b>
@@ -105,7 +105,7 @@
                             <textarea id="bank-name" rows="1" name="bank_name"
                                       class="md-textarea form-control form-control-sm required"
                             >Land Bank of the Philippines&#13;&#10;La Trinidad Branch</textarea>
-                            <label for="bank-name" class="active my-2">
+                            <label for="bank-name" class="active">
                                 <span class="red-text">* </span>
                                 <b>Name of Bank</b>
                             </label>
@@ -116,7 +116,7 @@
                             <textarea id="bank-address" rows="1" name="bank_address"
                                       class="md-textarea form-control form-control-sm required"
                                 >Km.5, La Trinidad, Benguet</textarea>
-                            <label for="bank-address" class="active my-2">
+                            <label for="bank-address" class="active">
                                 <span class="red-text">* </span>
                                 <b>Address of Bank</b>
                             </label>
@@ -141,19 +141,19 @@
                                 <th colspan="5" class="align-middle" width="45%">
                                     <b>Amount</b>
                                 </th>
-                                <th colspan="4" class="align-middle" width="30%">
+                                <th class="align-middle" width="19%">
                                     <b>For GSB Use Only</b>
                                 </th>
                                 <th rowspan="3" width="3%"></th>
                             </tr>
                             <tr>
-                                <th rowspan="2" class="align-middle" width="9%">
+                                <th rowspan="2" class="align-middle" width="12%">
                                     Total
                                 </th>
-                                <th colspan="4" class="align-middle" width="36%">
+                                <th colspan="4" class="align-middle" width="48%">
                                     Allotment/Object Class
                                 </th>
-                                <th rowspan="2" colspan="4" class="align-middle" width="34%">
+                                <th rowspan="2" class="align-middle" width="19%">
                                     Remarks
                                 </th>
                             </tr>
@@ -234,25 +234,7 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea name="allotment_ps_remarks[]" placeholder=" Value..."
-                                                  class="md-textarea form-control-sm w-100 py-1"></textarea>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="md-form form-sm my-0">
-                                        <textarea name="allotment_mooe_remarks[]" placeholder=" Value..."
-                                                  class="md-textarea form-control-sm w-100 py-1"></textarea>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="md-form form-sm my-0">
-                                        <textarea name="allotment_co_remarks[]" placeholder=" Value..."
-                                                  class="md-textarea form-control-sm w-100 py-1"></textarea>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="md-form form-sm my-0">
-                                        <textarea name="allotment_fe_remarks[]" placeholder=" Value..."
+                                        <textarea name="allotment_remarks[]" placeholder=" Value..."
                                                   class="md-textarea form-control-sm w-100 py-1"></textarea>
                                     </div>
                                 </td>
@@ -265,7 +247,7 @@
                             </tr>
 
                             <tr>
-                                <td colspan="12">
+                                <td colspan="9">
                                     <a class="btn btn-outline-light-blue btn-sm btn-block z-depth-0"
                                        onclick="$(this).addRow('.item-row');">
                                         + Add Item
@@ -306,9 +288,6 @@
                                                id="total-fe" value="0.00" readonly>
                                     </div>
                                 </td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
                                 <td></td>
                                 <td></td>
                             </tr>

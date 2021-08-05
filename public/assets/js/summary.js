@@ -196,20 +196,8 @@ $(function() {
                 onkeyup="$(this).computeAll()"
                 onchange="$(this).computeAll()">
                 </div></td>`;
-        let psRemarks = `<td><div class="md-form form-sm my-0">
-                       <textarea name="allotment_ps_remarks[]" placeholder=" Value..."
-                       class="md-textarea form-control-sm w-100 py-1"></textarea>
-                       </div></td>`;
-        let mooeRemarks = `<td><div class="md-form form-sm my-0">
-                       <textarea name="allotment_mooe_remarks[]" placeholder=" Value..."
-                       class="md-textarea form-control-sm w-100 py-1"></textarea>
-                       </div></td>`;
-        let coRemarks = `<td><div class="md-form form-sm my-0">
-                       <textarea name="allotment_co_remarks[]" placeholder=" Value..."
-                       class="md-textarea form-control-sm w-100 py-1"></textarea>
-                       </div></td>`;
-        let feRemarks = `<td><div class="md-form form-sm my-0">
-                       <textarea name="allotment_fe_remarks[]" placeholder=" Value..."
+        let remarks = `<td><div class="md-form form-sm my-0">
+                       <textarea name="allotment_remarks[]" placeholder=" Value..."
                        class="md-textarea form-control-sm w-100 py-1"></textarea>
                        </div></td>`;
         let deleteButton = '<td><a onclick="'+
@@ -218,8 +206,7 @@ $(function() {
                            '<i class="fas fa-minus-circle"></i></a></td>';
 
         let rowOutput = '<tr id="'+_lastRowID[0]+'-row-'+newID+'" class="'+_lastRowID[0]+'-row">'+
-                        lddapNo + dateIssue + total + ps + mooe + co + fe +
-                        psRemarks + mooeRemarks + coRemarks + feRemarks +
+                        lddapNo + dateIssue + total + ps + mooe + co + fe + remarks +
                         deleteButton + '</tr>';
 
         $(rowOutput).insertAfter('#' + lastRowID);

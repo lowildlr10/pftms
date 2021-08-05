@@ -2089,24 +2089,9 @@ class PrintController extends Controller
                        ->where('id', $item->lddap_id)
                        ->first();
 
-            if (strpos($item->allotment_ps_remarks, "\n") !== FALSE) {
+            if (strpos($item->allotment_remarks, "\n") !== FALSE) {
                 $searchStr = ["\r\n", "\n", "\r"];
                 $item->allotment_ps_remarks = str_replace($searchStr, '<br>', $item->allotment_ps_remarks);
-            }
-
-            if (strpos($item->allotment_mooe_remarks, "\n") !== FALSE) {
-                $searchStr = ["\r\n", "\n", "\r"];
-                $item->allotment_mooe_remarks = str_replace($searchStr, '<br>', $item->allotment_mooe_remarks);
-            }
-
-            if (strpos($item->allotment_co_remarks, "\n") !== FALSE) {
-                $searchStr = ["\r\n", "\n", "\r"];
-                $item->allotment_co_remarks = str_replace($searchStr, '<br>', $item->allotment_co_remarks);
-            }
-
-            if (strpos($item->allotment_fe_remarks, "\n") !== FALSE) {
-                $searchStr = ["\r\n", "\n", "\r"];
-                $item->allotment_fe_remarks = str_replace($searchStr, '<br>', $item->allotment_fe_remarks);
             }
 
             $allotmentPS += $item->allotment_ps;
@@ -2114,11 +2099,11 @@ class PrintController extends Controller
             $allotmentCO += $item->allotment_co;
             $allotmentFE += $item->allotment_fe;
 
-            $item->total = $item->total ? number_format($item->total, 2) : '-';
-            $item->allotment_ps = $item->allotment_ps ? number_format($item->allotment_ps, 2) : '-';
-            $item->allotment_mooe = $item->allotment_mooe ? number_format($item->allotment_mooe, 2) : '-';
-            $item->allotment_co = $item->allotment_co ? number_format($item->allotment_co, 2) : '-';
-            $item->allotment_fe = $item->allotment_fe ? number_format($item->allotment_fe, 2) : '-';
+            $item->total = $item->total ? number_format($item->total, 2) : '';
+            $item->allotment_ps = $item->allotment_ps ? number_format($item->allotment_ps, 2) : '';
+            $item->allotment_mooe = $item->allotment_mooe ? number_format($item->allotment_mooe, 2) : '';
+            $item->allotment_co = $item->allotment_co ? number_format($item->allotment_co, 2) : '';
+            $item->allotment_fe = $item->allotment_fe ? number_format($item->allotment_fe, 2) : '';
 
             $itemTableData[] = [
                 ($ctr + 1) . '. ' . $lddap->lddap_ada_no,
@@ -2128,10 +2113,7 @@ class PrintController extends Controller
                 $item->allotment_mooe,
                 $item->allotment_co,
                 $item->allotment_fe,
-                $item->allotment_ps_remarks,
-                $item->allotment_mooe_remarks,
-                $item->allotment_co_remarks,
-                $item->allotment_fe_remarks,
+                $item->allotment_remarks,
             ];
         }
 
@@ -2139,15 +2121,15 @@ class PrintController extends Controller
             $itemDataCount = count($itemTableData);
 
             for ($i = $itemDataCount; $i <= 14; $i++) {
-                $itemTableData[] = ['', '', '', '', '', '', '', '', '', '', ''];
+                $itemTableData[] = ['', '', '', '', '', '', '', ''];
             }
         }
 
         $totalAmount = number_format($summary->total_amount, 2);
-        $allotmentPS = $allotmentPS ? number_format($allotmentPS, 2) : '-';
-        $allotmentMOOE = $allotmentMOOE ? number_format($allotmentMOOE, 2) : '-';
-        $allotmentCO = $allotmentCO ? number_format($allotmentCO, 2) : '-';
-        $allotmentFE = $allotmentFE ? number_format($allotmentFE, 2) : '-';
+        $allotmentPS = $allotmentPS ? number_format($allotmentPS, 2) : '';
+        $allotmentMOOE = $allotmentMOOE ? number_format($allotmentMOOE, 2) : '';
+        $allotmentCO = $allotmentCO ? number_format($allotmentCO, 2) : '';
+        $allotmentFE = $allotmentFE ? number_format($allotmentFE, 2) : '';
 
         $itemTableData[] = [
             'Total', '',
@@ -2156,7 +2138,7 @@ class PrintController extends Controller
             $allotmentMOOE,
             $allotmentCO,
             $allotmentFE,
-            '', '', '', ''
+            '',
         ];
 
         $instanceSignatory = new Signatory;
@@ -2178,10 +2160,7 @@ class PrintController extends Controller
                     10 * $multiplier,
                     10 * $multiplier,
                     10 * $multiplier,
-                    7.7 * $multiplier,
-                    7.7 * $multiplier,
-                    7.7 * $multiplier,
-                    7.7 * $multiplier,
+                    30.8 * $multiplier,
                 ],
                 'font-styles' => ['', '', '', '', '', '', '', '', '', '', ''],
                 'type' => 'row-data',

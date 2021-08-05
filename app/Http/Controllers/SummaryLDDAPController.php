@@ -88,6 +88,12 @@ class SummaryLDDAPController extends Controller
      */
     public function showCreate() {
         $mdsGSBs = MdsGsb::all();
+        $summaryCtr = Summary::where('created_at', 'like', '%'.date('Y').'%')
+                             ->count() + 1;
+        $summaryCtr = str_pad($summaryCtr, 4, '0', STR_PAD_LEFT);
+        $month = date('m');
+        $year = date('Y');
+        $sliiaeNo = "$year-$month-$summaryCtr";
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -99,7 +105,7 @@ class SummaryLDDAPController extends Controller
         }
 
         return view('modules.payment.summary.create', compact(
-            'mdsGSBs', 'signatories'
+            'mdsGSBs', 'signatories', 'sliiaeNo'
         ));
     }
 
@@ -133,10 +139,7 @@ class SummaryLDDAPController extends Controller
         $allotmentMOOEs = $request->allotment_mooe;
         $allotmentCOs = $request->allotment_co;
         $allotmentFEs = $request->allotment_fe;
-        $allotmentPSRemarks = $request->allotment_ps_remarks;
-        $allotmentMOOERemarks = $request->allotment_mooe_remarks;
-        $allotmentCORemarks = $request->allotment_co_remarks;
-        $allotmentFERemarks = $request->allotment_fe_remarks;
+        $allotmentRemarks = $request->allotment_remarks;
 
         $countLDDAP = count($lddapIDs);
         $documentType = 'Summary of LDDAP-ADAs Issued and Invalidated ADA Entries';
@@ -179,10 +182,7 @@ class SummaryLDDAPController extends Controller
                         $instanceSummaryItem->allotment_mooe = $allotmentMOOEs[$ctr];
                         $instanceSummaryItem->allotment_co = $allotmentCOs[$ctr];
                         $instanceSummaryItem->allotment_fe = $allotmentFEs[$ctr];
-                        $instanceSummaryItem->allotment_ps_remarks = $allotmentPSRemarks[$ctr];
-                        $instanceSummaryItem->allotment_mooe_remarks = $allotmentMOOERemarks[$ctr];
-                        $instanceSummaryItem->allotment_co_remarks = $allotmentCORemarks[$ctr];
-                        $instanceSummaryItem->allotment_fe_remarks = $allotmentFERemarks[$ctr];
+                        $instanceSummaryItem->allotment_remarks = $allotmentRemarks[$ctr];
                         $instanceSummaryItem->save();
                     }
                 }
@@ -293,10 +293,7 @@ class SummaryLDDAPController extends Controller
         $allotmentMOOEs = $request->allotment_mooe;
         $allotmentCOs = $request->allotment_co;
         $allotmentFEs = $request->allotment_fe;
-        $allotmentPSRemarks = $request->allotment_ps_remarks;
-        $allotmentMOOERemarks = $request->allotment_mooe_remarks;
-        $allotmentCORemarks = $request->allotment_co_remarks;
-        $allotmentFERemarks = $request->allotment_fe_remarks;
+        $allotmentRemarks = $request->allotment_remarks;
 
         $countLDDAP = count($lddapIDs);
         $documentType = 'Summary of LDDAP-ADAs Issued and Invalidated ADA Entries';
@@ -340,10 +337,7 @@ class SummaryLDDAPController extends Controller
                         $instanceSummaryItem->allotment_mooe = $allotmentMOOEs[$ctr];
                         $instanceSummaryItem->allotment_co = $allotmentCOs[$ctr];
                         $instanceSummaryItem->allotment_fe = $allotmentFEs[$ctr];
-                        $instanceSummaryItem->allotment_ps_remarks = $allotmentPSRemarks[$ctr];
-                        $instanceSummaryItem->allotment_mooe_remarks = $allotmentMOOERemarks[$ctr];
-                        $instanceSummaryItem->allotment_co_remarks = $allotmentCORemarks[$ctr];
-                        $instanceSummaryItem->allotment_fe_remarks = $allotmentFERemarks[$ctr];
+                        $instanceSummaryItem->allotment_remarks = $allotmentRemarks[$ctr];
                         $instanceSummaryItem->save();
                     }
                 }
