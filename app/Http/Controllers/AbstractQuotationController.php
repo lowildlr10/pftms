@@ -470,6 +470,12 @@ class AbstractQuotationController extends Controller
                         $this->processPOItemData($prID, $prIDItem, $awardedTo, $poCount, $documentType);
                     }
                 }
+            } else if ($poCount == 0 && $instancePR->status >= 6) {
+                $poNo = $prNo.'-'.$this->poLetters[0];
+
+                if ($instancePRItem->awarded_to) {
+                    $this->processPOItemData($prID, $prIDItem, $awardedTo, $poCount, $documentType);
+                }
             }
 
             $instancePRItem->awarded_to = $awardedTo ? $awardedTo : NULL;
