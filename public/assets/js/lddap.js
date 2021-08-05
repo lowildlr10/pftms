@@ -139,6 +139,8 @@ $(function() {
         $('#total-net-amount').val(parseFloat(grandTotalNet, 2).toFixed(2));
 
         $('#total-amount').val(parseFloat(grandTotalNet, 2).toFixed(2));
+        $('#total-amount-words').val(toWordsconvert(parseFloat(grandTotalNet).toFixed(2)));
+        $('#total-amount-words').siblings('label').addClass('active');
     }
 
     $.fn.computeGrossTotal = function(type) {

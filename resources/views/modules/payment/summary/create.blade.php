@@ -182,14 +182,14 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="date" placeholder=" Value..." name="date_issue[]"
+                                        <input type="date" name="date_issue[]"
                                                class="form-control required form-control-sm date-issue"
                                                id="date-issue-0">
                                     </div>
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="number" placeholder=" Value..." name="total[]"
+                                        <input type="number" name="total[]"
                                                class="form-control required form-control-sm total"
                                                id="total-0" min="0"
                                                onkeyup="$(this).computeAll()"
@@ -198,7 +198,7 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="number" placeholder=" Value..." name="allotment_ps[]"
+                                        <input type="number" name="allotment_ps[]"
                                                class="form-control required form-control-sm allotment-ps"
                                                id="allotment-ps-0" min="0"
                                                onkeyup="$(this).computeAll()"
@@ -207,7 +207,7 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="number" placeholder=" Value..." name="allotment_mooe[]"
+                                        <input type="number" name="allotment_mooe[]"
                                                class="form-control required form-control-sm allotment-mooe"
                                                id="allotment-mooe-0" min="0"
                                                onkeyup="$(this).computeAll()"
@@ -216,7 +216,7 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="number" placeholder=" Value..." name="allotment_co[]"
+                                        <input type="number" name="allotment_co[]"
                                                class="form-control required form-control-sm allotment-co"
                                                id="allotment-co-0" min="0"
                                                onkeyup="$(this).computeAll()"
@@ -225,7 +225,7 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="number" placeholder=" Value..." name="allotment_fe[]"
+                                        <input type="number" name="allotment_fe[]"
                                                class="form-control required form-control-sm allotment-fe"
                                                id="allotment-fe-0" min="0"
                                                onkeyup="$(this).computeAll()"
@@ -234,7 +234,7 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea name="allotment_remarks[]" placeholder=" Value..."
+                                        <textarea name="allotment_remarks[]"
                                                   class="md-textarea form-control-sm w-100 py-1"></textarea>
                                     </div>
                                 </td>

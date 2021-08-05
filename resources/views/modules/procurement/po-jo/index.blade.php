@@ -673,6 +673,7 @@
 
 @section('custom-js')
 
+<script type="text/javascript" src="{{ asset('assets/js/amount-words-converter.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script src="{{ asset('assets/js/po-jo.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>

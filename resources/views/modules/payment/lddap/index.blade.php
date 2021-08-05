@@ -352,6 +352,7 @@
 
 @section('custom-js')
 
+<script type="text/javascript" src="{{ asset('assets/js/amount-words-converter.js') }}"></script>
 <script type="text/javascript" src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/lddap.js') }}"></script>

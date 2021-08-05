@@ -197,7 +197,7 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="date" placeholder=" Value..." name="date_issue[]"
+                                        <input type="date" name="date_issue[]"
                                                class="form-control required form-control-sm date-issue"
                                                value="{{ $item->date_issue }}"
                                                id="date-issue-{{ $ctr }}">
@@ -205,7 +205,7 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="number" placeholder=" Value..." name="total[]"
+                                        <input type="number" name="total[]"
                                                class="form-control required form-control-sm total"
                                                value="{{ $item->total }}"
                                                id="total-{{ $ctr }}" min="0"
@@ -215,7 +215,7 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="number" placeholder=" Value..." name="allotment_ps[]"
+                                        <input type="number" name="allotment_ps[]"
                                                class="form-control required form-control-sm allotment-ps"
                                                id="allotment-ps-{{ $ctr }}" min="0" max="{{ $totalAmount }}"
                                                value="{{ $item->allotment_ps }}"
@@ -225,7 +225,7 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="number" placeholder=" Value..." name="allotment_mooe[]"
+                                        <input type="number" name="allotment_mooe[]"
                                                class="form-control required form-control-sm allotment-mooe"
                                                id="allotment-mooe-{{ $ctr }}" min="0" max="{{ $totalAmount }}"
                                                value="{{ $item->allotment_mooe }}"
@@ -235,7 +235,7 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="number" placeholder=" Value..." name="allotment_co[]"
+                                        <input type="number" name="allotment_co[]"
                                                class="form-control required form-control-sm allotment-co"
                                                id="allotment-co-{{ $ctr }}" min="0" max="{{ $totalAmount }}"
                                                value="{{ $item->allotment_co }}"
@@ -245,7 +245,7 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <input type="number" placeholder=" Value..." name="allotment_fe[]"
+                                        <input type="number" name="allotment_fe[]"
                                                class="form-control required form-control-sm allotment-fe"
                                                id="allotment-fe-{{ $ctr }}" min="0" max="{{ $totalAmount }}"
                                                value="{{ $item->allotment_fe }}"
@@ -255,7 +255,7 @@
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea name="allotment_remarks[]" placeholder=" Value..."
+                                        <textarea name="allotment_remarks[]"
                                                   class="md-textarea form-control-sm w-100 py-1"
                                                   >{{ $item->allotment_remarks }}</textarea>
                                     </div>

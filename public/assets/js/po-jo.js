@@ -3,6 +3,15 @@ $(function() {
                      '<div class="tooltip-arrow md-arrow"></div>' +
                      '<div class="tooltip-inner md-inner stylish-color"></div></div>';
 
+    function initializeInputs() {
+        $('#mdb-preloader').fadeOut(300);
+        $('.crud-select').materialSelect();
+        $('#grand-total').keyup(function() {
+            $('#amount-words').val(toWordsconvert($(this).val()));
+            $('#amount-words').siblings('label').addClass('active');
+        });
+    }
+
 	$.fn.computeCost = function(cnt, obj, t = 1) {
 		let grandTotal = 0,
 		    objId,
@@ -24,6 +33,8 @@ $(function() {
 			totalCost = $('#unit_cost' + cnt).val() * $('#quantity' + cnt).val()
 
 			$('#total_cost' + cnt).val(totalCost.toFixed(2));
+            $('#amount-words').val(toWordsconvert(parseFloat(totalCost).toFixed(2)));
+            $('#amount-words').siblings('label').addClass('active');
 		}
 
 		$(".total-cost").each(function() {
@@ -43,9 +54,8 @@ $(function() {
 	$.fn.showItem = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-show').load(url, function() {
-            $('#mdb-preloader').fadeOut(300);
-            $('.crud-select').materialSelect();
             $(this).slideToggle(500);
+            initializeInputs();
         });
         $("#modal-show").modal({keyboard: false, backdrop: 'static'})
 						.on('shown.bs.modal', function() {
@@ -58,9 +68,8 @@ $(function() {
     $.fn.showCreate = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-create').load(url, function() {
-            $('#mdb-preloader').fadeOut(300);
-            $('.crud-select').materialSelect();
             $(this).slideToggle(500);
+            initializeInputs();
         });
         $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
@@ -81,9 +90,8 @@ $(function() {
     $.fn.showEdit = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-edit').load(url, function() {
-            $('#mdb-preloader').fadeOut(300);
-            $('.crud-select').materialSelect();
             $(this).slideToggle(500);
+            initializeInputs();
         });
         $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {
@@ -121,9 +129,8 @@ $(function() {
     $.fn.showIssue = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-issue').load(url, function() {
-            $('#mdb-preloader').fadeOut(300);
-            $('.crud-select').materialSelect();
             $(this).slideToggle(500);
+            initializeInputs();
         });
         $("#modal-issue").modal({keyboard: false, backdrop: 'static'})
 						 .on('shown.bs.modal', function() {

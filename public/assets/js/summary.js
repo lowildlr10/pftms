@@ -145,6 +145,11 @@ $(function() {
             computeGrandTotal();
             initializeMaxValue();
         });
+
+        $('#total-amount').keyup(function() {
+            $('#total-amount-words').val(toWordsconvert($(this).val()));
+            $('#total-amount-words').siblings('label').addClass('active');
+        });
     }
 
     $.fn.addRow = function(rowClass) {
@@ -251,6 +256,8 @@ $(function() {
         $('#total').val(parseFloat(grandTotal).toFixed(2));
         $('#total-amount').next('label').addClass('active');
         $('#total-amount').val(parseFloat(grandTotal).toFixed(2));
+        $('#total-amount-words').val(toWordsconvert(parseFloat(grandTotal).toFixed(2)));
+        $('#total-amount-words').siblings('label').addClass('active');
     }
 
     function computeAllotment() {
