@@ -448,7 +448,9 @@ class AbstractQuotationController extends Controller
             }
 
             $instancePRItem = PurchaseRequestItem::find($prIDItem);
-            $poCount = PurchaseJobOrder::where('pr_id', $prID)->count();
+            $poCount = PurchaseJobOrder::where('pr_id', $prID)
+                                       ->withTrashed()
+                                       ->count();
 
             if ($poCount > 0 && $instancePR->status >= 6) {
                 $instancePOItem = PurchaseJobOrderItem::with('po')

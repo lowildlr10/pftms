@@ -161,14 +161,14 @@
                                             <input class="quantity" type="hidden" value="{{ $item->quantity }}">
                                             <input type="number" class="form-control form-control-sm unit-cost required"
                                                 id="unit_cost-{{ $groupKey }}-{{ $listCtr }}-{{ $key }}" min="0">
-                                            <label for="unit_cost-{{ $groupKey }}-{{ $listCtr }}-{{ $key }}">
+                                            <label for="unit_cost-{{ $groupKey }}-{{ $listCtr }}-{{ $key }}" class="active">
                                                 Unit Cost <span class="red-text">*</span>
                                             </label>
                                         </div>
                                         <div class="md-form form-sm">
                                             <input type="number" class="form-control form-control-sm total-cost required"
                                                 id="total_cost-{{ $groupKey }}-{{ $listCtr }}-{{ $key }}" min="0" >
-                                            <label for="total_cost-{{ $groupKey }}-{{ $listCtr }}-{{ $key }}">
+                                            <label for="total_cost-{{ $groupKey }}-{{ $listCtr }}-{{ $key }}" class="active">
                                                 Total Cost <span class="red-text">*</span>
                                             </label>
                                         </div>
@@ -176,7 +176,7 @@
                                             <textarea class="md-textarea form-control form-control-sm specification"
                                                     id="specification-{{ $groupKey }}-{{ $listCtr }}-{{ $key }}"
                                                     style="resize: none;" rows="3"></textarea>
-                                            <label for="specification-{{ $groupKey }}-{{ $listCtr }}-{{ $key }}">
+                                            <label for="specification-{{ $groupKey }}-{{ $listCtr }}-{{ $key }}" class="active">
                                                 Specifications
                                             </label>
                                         </div>
@@ -184,7 +184,7 @@
                                             <textarea class="md-textarea form-control form-control-sm remarks"
                                                     id="remarks-{{ $groupKey }}-{{ $listCtr }}-{{ $key }}"
                                                     style="resize: none;" rows="3"></textarea>
-                                            <label for="remarks-{{ $groupKey }}-{{ $listCtr }}-{{ $key }}">
+                                            <label for="remarks-{{ $groupKey }}-{{ $listCtr }}-{{ $key }}" class="active">
                                                 Remarks
                                             </label>
                                         </div>
@@ -229,7 +229,7 @@
                                             <textarea class="md-textarea form-control form-control-sm awarded-remarks"
                                                     id="awarded_remarks-{{ $groupKey }}-{{ $listCtr }}"
                                                     style="resize: none;" rows="3"></textarea>
-                                            <label for="awarded_remarks-{{ $groupKey }}-{{ $listCtr }}">
+                                            <label for="awarded_remarks-{{ $groupKey }}-{{ $listCtr }}" class="active">
                                                 Remarks
                                             </label>
                                         </div>

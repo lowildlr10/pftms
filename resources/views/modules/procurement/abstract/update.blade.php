@@ -235,7 +235,7 @@
                                                                                    id="unit_cost-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $absItemCtr }}" min="0"
                                                                                    value="{{ $absItem->unit_cost }}">
                                                                             <label for="unit_cost-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $absItemCtr }}"
-                                                                                   class="{{ !empty($absItem->unit_cost) ? 'active' : '' }}">
+                                                                                   class="active">
                                                                                 Unit Cost <span class="red-text">*</span>
                                                                             </label>
                                                                         </div>
@@ -244,7 +244,7 @@
                                                                                    id="total_cost-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $absItemCtr }}" min="0"
                                                                                    value="{{ $absItem->total_cost }}">
                                                                             <label for="total_cost-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $absItemCtr }}"
-                                                                                   class="{{ !empty($absItem->total_cost) ? 'active' : '' }}">
+                                                                                   class="active">
                                                                                 Total Cost <span class="red-text">*</span>
                                                                             </label>
                                                                         </div>
@@ -253,7 +253,7 @@
                                                                                     id="specification-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $absItemCtr }}"
                                                                                     style="resize: none;" rows="3">{{ $absItem->specification }}</textarea>
                                                                             <label for="specification-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $absItemCtr }}"
-                                                                                   class="{{ !empty($absItem->specification) ? 'active' : '' }}">
+                                                                                   class="active">
                                                                                 Specifications
                                                                             </label>
                                                                         </div>
@@ -262,7 +262,7 @@
                                                                                     id="remarks-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $absItemCtr }}"
                                                                                     style="resize: none;" rows="3">{{ $absItem->remarks }}</textarea>
                                                                             <label for="remarks-{{ $abstract->group_no }}-{{ $listCtr }}-{{ $absItemCtr }}"
-                                                                                   class="{{ !empty($absItem->remarks) ? 'active' : '' }}">
+                                                                                   class="active">
                                                                                 Remarks
                                                                             </label>
                                                                         </div>
@@ -307,7 +307,7 @@
                                                                                     id="awarded_remarks-{{ $abstract->group_no }}-{{ $listCtr }}"
                                                                                     style="resize: none;" rows="3">{{ $item->awarded_remarks }}</textarea>
                                                                             <label for="awarded_remarks-{{ $abstract->group_no }}-{{ $listCtr }}"
-                                                                                   class="{{ !empty($item->awarded_remarks) ? 'active' : '' }}">
+                                                                                   class="active">
                                                                                 Remarks
                                                                             </label>
                                                                         </div>
