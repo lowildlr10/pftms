@@ -5,6 +5,24 @@
     <div class="row">
         <div class="col-md-12">
             <div class="md-form">
+                <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                        name="type" id="type">
+                    <option value="" disabled selected>Choose a type</option>
+
+                    @if (count($serialNos) > 0)
+                        @foreach ($serialNos as $serial)
+                    <option value="{{ $serial->type }}-{{ $serial->serial_no }}">
+                        {!! strtoupper($serial->type) !!}
+                    </option>
+                        @endforeach
+                    @endif
+                </select>
+                <label class="mdb-main-label">
+                    Type <span class="red-text">*</span>
+                </label>
+            </div>
+
+            <div class="md-form">
                 <input type="text" id="serial_no" class="form-control required"
                        name="serial_no" value="{{ $serialNo }}">
                 <label for="serial_no" class="{{ !empty($serialNo) ? 'active' : '' }}">

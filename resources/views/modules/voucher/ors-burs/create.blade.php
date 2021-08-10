@@ -23,7 +23,7 @@
                                     @endif
                                 </select>
                                 <label class="mdb-main-label">
-                                    Funding/Charging Soruce <span class="red-text">*</span>
+                                    Funding/Charging Source <span class="red-text">*</span>
                                 </label>
                             </div>
                         </div>

@@ -1111,7 +1111,7 @@ class DisbursementVoucherController extends Controller
     public function showPayment($id) {
         $instanceDV = DisbursementVoucher::find($id);
         $moduleClass = $instanceDV->module_class;
-        $dvNo = $instanceDV->dv_no;
+        $dvNo = $instanceDV->dv_no ? $instanceDV->dv_no : date('Ym');
 
         if ($moduleClass == 3) {
             $viewFile = 'modules.procurement.dv.payment';

@@ -372,7 +372,7 @@ class EmpAccount extends Authenticatable
             $userData = $this;
         }
 
-        $groups = unserialize($userData->groups);
+        $groups = $userData->groups ? unserialize($userData->groups) : [];
 
         if (count($groups) > 0) {
             foreach ($groups as $group) {

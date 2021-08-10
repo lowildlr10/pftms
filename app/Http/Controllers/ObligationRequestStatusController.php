@@ -984,6 +984,16 @@ class ObligationRequestStatusController extends Controller
     public function showObligate($id) {
         $instanceORS = ObligationRequestStatus::find($id);
         $moduleClass = $instanceORS->module_class;
+        $serialNos = [
+            (object) [
+                'type' => 'current',
+                'serial_no' => '01 101101 '.date('Y m').' '
+            ],
+            (object) [
+                'type' => 'continuing',
+                'serial_no' => '02 101101 '.date('Y m').' '
+            ],
+        ];
         $serialNo = $instanceORS->serial_no;
 
         if ($moduleClass == 3) {
@@ -994,7 +1004,8 @@ class ObligationRequestStatusController extends Controller
 
         return view($viewFile, [
             'id' => $id,
-            'serialNo' => $serialNo
+            'serialNo' => $serialNo,
+            'serialNos' => $serialNos,
         ]);
     }
 

@@ -233,6 +233,10 @@ $(function() {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-obligate').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $('#type').change(function() {
+                $('#serial_no').val($(this).val().split('-')[1]).siblings('label').addClass('active');
+            });
             $(this).slideToggle(500);
         });
         $("#modal-obligate").modal({keyboard: false, backdrop: 'static'})
