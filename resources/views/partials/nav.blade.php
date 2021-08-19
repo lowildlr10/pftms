@@ -225,13 +225,18 @@
                                 <a href="#" class="waves-effect">PCPPE</a>
                             </li>
                             <li>
+                                <a href="{{ route('report-project-lib') }}" class="waves-effect">Line-Item Budget & Realignment</a>
+                            </li>
+                            <li>
                                 <a href="{{ route('report-obligation-ledger') }}" class="waves-effect">Obligation Ledgers</a>
                             </li>
                             <li>
                                 <a href="{{ route('report-disbursement-ledger') }}" class="waves-effect">Disbursement Ledgers</a>
                             </li>
                             <li>
-                                <a href="{{ route('report-project-lib') }}" class="waves-effect">Line-Item Budget & Realignment</a>
+                                <a href="{{ route('report-raod') }}" class="waves-effect">
+                                    Registry of Allotments, Obligations <br>and Disbursement
+                                </a>
                             </li>
                         </ul>
                     </div>

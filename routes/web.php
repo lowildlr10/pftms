@@ -1264,6 +1264,69 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'is_allowed'
     ]);
 
+    // Registry of Allotments, Obligations and Disbursements Module
+    Route::any('report/registry-allot-obli-disb', [
+        'uses' => 'RegAllotmentController@index',
+        'module' => 'report_dvledger',
+        'access' => 'is_allowed'
+    ])->name('report-raod');
+    /*
+    Route::get('report/ledger/disbursement/show/{id}/{for}/{type}', [
+        'uses' => 'LedgerController@showLedger',
+        'module' => 'report_dvledger',
+        'access' => 'is_allowed'
+    ])->name('report-disbursement-ledger-show');
+    Route::get('report/ledger/disbursement/show-create/{project_id}/{for}/{type}', [
+        'uses' => 'LedgerController@showCreate',
+        'module' => 'report_dvledger',
+        'access' => 'create'
+    ])->name('report-disbursement-ledger-show-create');
+    Route::post('report/ledger/disbursement/store/{project_id}/{for}/{type}', [
+        'uses' => 'LedgerController@store',
+        'module' => 'report_dvledger',
+        'access' => 'create'
+    ])->name('report-disbursement-ledger-store');
+    Route::post('report/ledger/disbursement/store-items/{project_id}/{for}/{type}', [
+        'uses' => 'LedgerController@storeItems',
+        'module' => 'report_dvledger',
+        'access' => 'create'
+    ])->name('report-obligation-ledger-store-items');
+    Route::get('report/ledger/disbursement/show-edit/{id}/{for}/{type}', [
+        'uses' => 'LedgerController@showEdit',
+        'module' => 'report_dvledger',
+        'access' => 'update'
+    ])->name('report-disbursement-ledger-show-edit');
+    Route::post('report/ledger/disbursement/update/{id}/{for}/{type}', [
+        'uses' => 'LedgerController@update',
+        'module' => 'report_dvledger',
+        'access' => 'update'
+    ])->name('report-disbursement-ledger-update');
+    Route::post('report/ledger/disbursement/update-items/{id}/{for}/{type}', [
+        'uses' => 'LedgerController@updateItems',
+        'module' => 'report_dvledger',
+        'access' => 'update'
+    ])->name('report-disbursement-ledger-update-items');
+    Route::post('report/ledger/disbursement/delete/{id}/{for}', [
+        'uses' => 'LedgerController@delete',
+        'module' => 'report_dvledger',
+        'access' => 'delete'
+    ])->name('report-disbursement-ledger-delete');
+    Route::post('report/ledger/disbursement/get-payee', [
+        'uses' => 'LedgerController@getPayees',
+        'module' => 'report_dvledger',
+        'access' => 'is_allowed'
+    ]);
+    Route::post('report/ledger/disbursement/get-unit', [
+        'uses' => 'LedgerController@getUnits',
+        'module' => 'report_dvledger',
+        'access' => 'is_allowed'
+    ]);
+    Route::post('report/ledger/disbursement/get-mooe-title', [
+        'uses' => 'LedgerController@getMooeTitles',
+        'module' => 'report_dvledger',
+        'access' => 'is_allowed'
+    ]);*/
+
     // Line-Item Budget Module
     Route::any('reports/project-lib', [
         'uses' => 'LineItemBudgetController@indexReport',
