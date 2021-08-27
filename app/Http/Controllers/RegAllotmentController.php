@@ -47,21 +47,20 @@ class RegAllotmentController extends Controller
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
-        //$fundProject = $this->getIndexData($request, 'disbursement');
+        $fundRAOD = $this->getIndexData($request);
 
         return view('modules.report.registry-allotment.index', [
-            //'list' => $fundProject,
+            'list' => $fundRAOD,
             'keyword' => $keyword,
             'paperSizes' => $paperSizes,
-            //'isAllowedCreate' => $isAllowedCreate,
-            //'isAllowedUpdate' => $isAllowedUpdate,
-            //'isAllowedDelete' => $isAllowedDelete,
-            //'isAllowedDestroy' => $isAllowedDestroy,
-            //'dirCtr' => 0,
+            'isAllowedCreate' => $isAllowedCreate,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedDelete' => $isAllowedDelete,
+            'isAllowedDestroy' => $isAllowedDestroy,
         ]);
     }
 
-    private function getIndexData($request, $for) {
+    private function getIndexData($request) {
         $keyword = trim($request->keyword);
 
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
@@ -69,60 +68,24 @@ class RegAllotmentController extends Controller
         $roleHasAdministrator = Auth::user()->hasAdministratorRole();
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
 
-        $projDat = new FundingProject;
-        $fundProject = FundingProject::whereHas('budget', function($query) {
-            $query->whereNotNull('date_approved');
-        });
+        $fundRAOD = new RegAllotment;
 
         if (!empty($keyword)) {
-            $fundProject = $fundProject->where(function($qry) use ($keyword) {
+            $fundRAOD = $fundRAOD->where(function($qry) use ($keyword) {
                 $qry->where('id', 'like', "%$keyword%")
-                    ->orWhere('project_title', 'like', "%$keyword%")
-                    ->orWhere('project_leader', 'like', "%$keyword%")
-                    ->orWhere('date_from', 'like', "%$keyword%")
-                    ->orWhere('date_to', 'like', "%$keyword%")
-                    ->orWhere('project_cost', 'like', "%$keyword%")
-                    ->orWhereHas('allotments', function($query) use ($keyword) {
-                        $query->where('budget_id', 'like', "%$keyword%")
-                              ->orWhere('allotment_name', "%$keyword%")
-                              ->orWhere('allotment_cost', "%$keyword%");
-                    })->orWhereHas('site', function($query) use ($keyword) {
-                        $query->where('id', 'like', "%$keyword%")
-                              ->orWhere('municipality_name', 'like', "%$keyword%");
-                    });
+                    ->orWhere('period_ending', 'like', "%$keyword%")
+                    ->orWhere('entity_name', 'like', "%$keyword%")
+                    ->orWhere('fund_cluster', 'like', "%$keyword%")
+                    ->orWhere('legal_basis', 'like', "%$keyword%")
+                    ->orWhere('mfo_pap', 'like', "%$keyword%")
+                    ->orWhere('sheet_no', 'like', "%$keyword%");
             });
         }
 
-        if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
-            $projectIDs = $projDat->getAccessibleProjects();
+        $fundRAOD = $fundRAOD->sortable(['period_ending' => 'desc'])
+                             ->paginate(15);
 
-            $fundProject = $fundProject->where(function($qry) use ($projectIDs) {
-                $qry->whereIn('id', $projectIDs);
-            });
-        }
-
-        $fundProject = $fundProject->sortable(['project_title' => 'desc'])
-                                   ->paginate(15);
-
-        foreach ($fundProject as $project) {
-            $ledgerDat = FundingLedger::where([
-                ['project_id', $project->id], ['ledger_for', $for]
-            ])->first();
-            $project->has_ledger = $ledgerDat ? true : false;
-            $project->ledger_id = $ledgerDat ? $ledgerDat->id : NULL;
-
-            if ($project->project_type == 'saa') {
-                $project->project_type_name = 'Special Projects';
-            } else if ($project->project_type == 'mooe') {
-                $project->project_type_name = 'Maintenance and Other Operating Expenses';
-            } else if ($project->project_type == 'lgia') {
-                $project->project_type_name = 'Local Grants-In-Aid';
-            } else if ($project->project_type == 'setup') {
-                $project->project_type_name = 'Small Enterprise Technology Upgrading Program';
-            }
-        }
-
-        return $fundProject;
+        return $fundRAOD;
     }
 
     /**
@@ -130,9 +93,8 @@ class RegAllotmentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
-        //
+    public function showCreate() {
+        return view('modules.report.registry-allotment.create');
     }
 
     /**
@@ -141,9 +103,9 @@ class RegAllotmentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        //
+    public function store(Request $request) {
+        $periodEnding = $request->period_ending;
+
     }
 
     /**
@@ -152,8 +114,7 @@ class RegAllotmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
+    public function show($id) {
         //
     }
 
@@ -163,8 +124,7 @@ class RegAllotmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
-    {
+    public function showEdit($id) {
         //
     }
 
@@ -175,8 +135,7 @@ class RegAllotmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, $id) {
         //
     }
 
@@ -186,8 +145,120 @@ class RegAllotmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
+    public function destroy($id) {
         //
+    }
+
+    public function getVouchers(Request $request) {
+        $periodEnding = $request->period_ending;
+        $employees = User::orderBy('firstname')->get();
+        $suppliers = Supplier::orderBy('company_name')->get();
+        $uacsObjects = MooeAccountTitle::orderBy('uacs_code')->get();
+        $vouchers = DB::table('obligation_request_status as ors')
+                      ->select(
+                          'ors.id as ors_id', 'dv.id as dv_id', 'ors.serial_no as serial_no',
+                          'ors.date_obligated as date_obligated', 'ors.payee as payee',
+                          'ors.uacs_object_code as uacs_object', 'ors.amount as obligation',
+                          'ors.continuing as continuing', 'ors.current as current',
+                          'ors.particulars', 'dv.amount as disbursement'
+                      )->leftJoin('disbursement_vouchers as dv', 'dv.ors_id', '=', 'ors.id')
+                      ->where('ors.date_obligated', 'like', "%$periodEnding%")
+                      ->orderBy('ors.date_obligated')
+                      ->get();
+
+        return view('modules.report.registry-allotment.vouchers-list', compact(
+            'employees', 'suppliers', 'vouchers', 'uacsObjects'
+        ));
+    }
+
+    public function getPayees(Request $request) {
+        $keyword = trim($request->search);
+
+        $payees = [];
+        $empPayees = User::select('id', 'firstname', 'lastname');
+        $supplierPayees = Supplier::select('id', 'company_name');
+
+        if ($keyword) {
+            $empPayees = $empPayees->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('firstname', 'like', "%$keyword%")
+                    ->orWhere('lastname', 'like', "%$keyword%");
+                $keywords = explode('/\s+/', $keyword);
+
+                if (count($keywords) > 0) {
+                    foreach ($keywords as $tag) {
+                        $qry->orWhere('firstname', 'like', "%$tag%")
+                            ->orWhere('lastname', 'like', "%$tag%");
+                    }
+                }
+            });
+
+            $supplierPayees = $supplierPayees->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('company_name', 'like', "%$keyword%");
+                $keywords = explode('/\s+/', $keyword);
+
+                if (count($keywords) > 0) {
+                    foreach ($keywords as $tag) {
+                        $qry->orWhere('company_name', 'like', "%$tag%");
+                    }
+                }
+            });
+        }
+
+        $empPayees = $empPayees->orderBy('firstname')->get();
+        $supplierPayees = $supplierPayees->orderBy('company_name')->get();
+
+        foreach ($empPayees as $emp) {
+            $payees[] = (object) [
+                'id' => $emp->id,
+                'name' => $emp->firstname.' '.$emp->lastname
+            ];
+        }
+
+        foreach ($supplierPayees as $bid) {
+            $payees[] = (object) [
+                'id' => $bid->id,
+                'name' => $bid->company_name
+            ];
+        }
+
+        return response()->json($payees);
+    }
+
+    public function getUacsObject(Request $request) {
+        $keyword = trim($request->search);
+
+        $mooes = [];
+        $mooeTitles = MooeAccountTitle::select('id', 'uacs_code', 'account_title',
+                                               'order_no');
+
+        if ($keyword) {
+            $mooeTitles = $mooeTitles->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('uacs_code', 'like', "%$keyword%")
+                    ->orWhere('account_title', 'like', "%$keyword%");
+                $keywords = explode('/\s+/', $keyword);
+
+                if (count($keywords) > 0) {
+                    foreach ($keywords as $tag) {
+                        $qry->orWhere('uacs_code', 'like', "%$tag%")
+                            ->orWhere('account_title', 'like', "%$tag%");
+                    }
+                }
+            });
+        }
+
+        $mooeTitles = $mooeTitles->orderBy('order_no')->get();
+
+        foreach ($mooeTitles as $mooe) {
+            $mooes[] = (object) [
+                'id' => $mooe->id,
+                'name' => $mooe->account_title,
+                'uacs_code' => $mooe->uacs_code,
+            ];
+        }
+
+        return response()->json($mooes);
     }
 }

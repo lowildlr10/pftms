@@ -86,7 +86,7 @@
                 <li class="sidebar-dropdown">
                     <a href="#">
                         <i class="fas fa-money-bill-wave-alt"></i>
-                        <span class="menu-text">Cash Adv., Reim., & Liqui...</span>
+                        <span class="menu-text">Cash Advance, Reimburese-<br>ment, & Liquidation</span>
                     </a>
                     <div class="sidebar-submenu">
                         <ul>

@@ -1270,6 +1270,41 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_dvledger',
         'access' => 'is_allowed'
     ])->name('report-raod');
+    Route::get('report/registry-allot-obli-disb/show-create', [
+        'uses' => 'RegAllotmentController@showCreate',
+        'module' => 'report_dvledger',
+        'access' => 'create'
+    ])->name('report-raod-show-create');
+    Route::post('report/registry-allot-obli-disb/store', [
+        'uses' => 'RegAllotmentController@store',
+        'module' => 'report_dvledger',
+        'access' => 'create'
+    ])->name('report-raod-store');
+    Route::get('report/registry-allot-obli-disb/show-edit', [
+        'uses' => 'RegAllotmentController@showEdit',
+        'module' => 'report_dvledger',
+        'access' => 'update'
+    ])->name('report-raod-show-edit');
+    Route::post('report/registry-allot-obli-disb/update', [
+        'uses' => 'RegAllotmentController@update',
+        'module' => 'report_dvledger',
+        'access' => 'update'
+    ])->name('report-raod-update');
+    Route::post('report/registry-allot-obli-disb/get-vouchers', [
+        'uses' => 'RegAllotmentController@getVouchers',
+        'module' => 'report_dvledger',
+        'access' => 'is_allowed'
+    ]);
+    Route::post('report/registry-allot-obli-disb/get-payee', [
+        'uses' => 'RegAllotmentController@getPayees',
+        'module' => 'report_dvledger',
+        'access' => 'is_allowed'
+    ]);
+    Route::post('report/registry-allot-obli-disb/get-uacs-object', [
+        'uses' => 'RegAllotmentController@getUacsObject',
+        'module' => 'report_dvledger',
+        'access' => 'is_allowed'
+    ]);
     /*
     Route::get('report/ledger/disbursement/show/{id}/{for}/{type}', [
         'uses' => 'LedgerController@showLedger',
