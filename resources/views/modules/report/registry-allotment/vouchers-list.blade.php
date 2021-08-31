@@ -86,10 +86,14 @@
     @if (count($vouchers) > 0)
     <tbody id="item-row-container" class="sortable">
         @foreach ($vouchers as $itemCtr => $item)
-        <tr>
+        <tr class="item-row">
             <td>
                 <div class="md-form form-sm my-0">
-                    <input type="date" name="date_received[]"
+                    @php
+                        $_dateReceived = strtotime($item->log_date_received);
+                        $dateReceived = date('Y-m-d', $_dateReceived);
+                    @endphp
+                    <input type="date" name="date_received[]" value="{{ $dateReceived }}"
                            class="form-control required form-control-sm date-received text-center">
                 </div>
             </td>
@@ -186,13 +190,13 @@
             <td>
                 <div class="md-form form-sm my-0">
                     <input type="number" placeholder="..." name="not_due_demandable[]"
-                           class="form-control required form-control-sm not_due_demandable">
+                           class="form-control required form-control-sm not-due-demandable">
                 </div>
             </td>
-            <td>
-
-                <!-- Delete Button -->
-
+            <td class="align-middle">
+                <a href="#" class="grey-text">
+                    <i class="fas fa-ellipsis-v"></i>
+                </a>
             </td>
         </tr>
         @endforeach

@@ -94,7 +94,7 @@
                                                data-toggle="tooltip" data-placement="right" title="Pending"></i>
                                         </td>
                                         <td></td>
-                                        <td>{{ $fund->period_ending }}</td>
+                                        <td>{{ $fund->period_ending_month }}</td>
                                         <td>{{ $fund->sheet_no }}</td>
 
                                         <td align="center">
@@ -140,8 +140,6 @@
 </div>
 
 <!-- Modals -->
-
-{{--
 @if (count($list) > 0)
     @foreach ($list as $listCtr => $fund)
 <div class="modal custom-rightmenu-modal fade right" id="right-modal-{{ $listCtr + 1 }}" tabindex="-1"
@@ -153,7 +151,7 @@
             <div class="modal-header stylish-color-dark white-text">
                 <h6>
                     <i class="fas fa-hand-holding-usd"></i>
-                    <b>Line-Item Budget Details</b>
+                    <b>Registry Details</b>
                 </h6>
                 <button type="button" class="close white-text" data-dismiss="modal"
                         aria-label="Close">
@@ -166,103 +164,57 @@
                     <div class="gradient-card-header rgba-white-light p-0">
                         <div class="p-0">
                             <div class="btn-group btn-menu-1 p-0">
+                                @if ($isAllowedUpdate)
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light"
+                                        onclick="$(this).showEdit(`{{ route('report-raod-show-edit',
+                                        [
+                                            'id' => $fund->id
+                                        ]) }}`);">
+                                    <i class="fas fa-edit orange-text"></i> Edit
+                                </button>
+                                @else
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light" disabled>
+                                    <i class="fas fa-edit orange-text"></i> Edit
+                                </button>
+                                @endif
+
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showPrint('{{ $fund->id }}', 'fund_lib');">
-                                    <i class="fas fa-print blue-text"></i> Print LIB
+                                    <i class="fas fa-print blue-text"></i> Print RAOD
                                 </button>
+
+                                @if ($isAllowedDelete)
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light"
+                                        onclick="$(this).showDelete(`{{ route('report-raod-delete',
+                                        [
+                                            'id' => $fund->id,
+                                        ]) }}`);">
+                                    <i class="fas fa-trash-alt red-text"></i> Delete
+                                </button>
+                                @else
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light" disabled>
+                                    <i class="fas fa-trash-alt red-text"></i> Delete
+                                </button>
+                                @endif
                             </div>
                         </div>
                     </div>
                     <div class="card-body">
                         <p>
-                            <b>Project Title: </b> {{ $fund->project->project_title }}<br>
-                            <b>Approved Budget: </b> &#8369; {{ number_format($fund->approved_budget, 2) }}<br>
-                            <b>Realignments: </b>
-
-                            @if ($fund->count_realignments > 0)
-                            <br>
-                                @foreach($fund->realignments as $ctrRealign => $realignment)
-                            <b>&nbsp;&nbsp;R{!! $ctrRealign + 1 !!} = </b>
-                            &#8369; {!! number_format($realignment->realigned_budget, 2) !!}
-
-                                    @if ($realignment->date_approved)
-                            <i class="fas fa-check-circle green-text material-tooltip-main"
-                               data-toggle="tooltip" data-placement="left" title="Approved"></i>
-                                    @elseif ($realignment->date_disapproved)
-                            <i class="fas fa-thumbs-down material-tooltip-main"
-                               data-toggle="tooltip" data-placement="right" title="Disapproved"></i>
-                                    @else
-                            <i class="fas fa-spinner faa-spin fa-pulse material-tooltip-main"
-                               data-toggle="tooltip" data-placement="right" title="Pending"></i>
-                                    @endif
-
-                                    @if ($realignment->date_approved)
-                            <br>
-                            <button type="button" class="btn btn-outline-mdb-color btn-sm btn-block
-                                    px-2 my-2 waves-effect waves-light"
-                                    onclick="$(this).showPrint('{{ $realignment->id }}', 'fund_lib_realignment');">
-                                <i class="fas fa-print blue-text"></i> Print LIB Realignment {!! $ctrRealign + 1 !!}
-                            </button>
-                                    @endif
-                            <br>
-                                @endforeach
-                            @else
-                            <span class="red-text">None</span>
-                            @endif
+                            <b>For the Period Ending: </b> {{ $fund->period_ending_month }}<br>
+                            <b>Entity Name: </b> {{ $fund->entity_name }}<br>
+                            <b>Fund Cluster: </b> {{ $fund->fund_cluster }}<br>
+                            <b>Legal Basis: </b> {{ $fund->legal_basis }}<br>
+                            <b>MFO/PAP: </b> {{ $fund->mfo_pap }}<br>
+                            <b>Sheet No.: </b> {{ $fund->sheet_no }}
                         </p>
                     </div>
                 </div>
-                <hr>
-                <ul class="list-group z-depth-1">
-                    <li class="list-group-item justify-content-between">
-                        <h6><b><i class="fas fa-list-ol"></i> Allotments</b></h6>
-                    </li>
-                    <li class="list-group-item justify-content-between overflow-auto" style="height: 300px;">
-                        @if (count($fund->current_realigned_allotments) > 0)
-                            @foreach ($fund->current_realigned_allotments as $cntr => $item)
-                        <i class="fas fa-caret-right"></i>
-                                @if (strlen($item->allotment_name) > 60)
-                        <span class="font-weight-bold">
-                            {{ $cntr + 1 }}.|&nbsp;
-                                    @if (count(explode('::', $item->allotment_name)) >= 2)
-                            {{ substr(explode('::', $item->allotment_name)[1], 0, 60) }}...
-                                    @else
-                            {{ substr($item->allotment_name, 0, 60) }}...
-                                    @endif
-                            <br>
-                        </span>
-                                @else
-                        <span class="font-weight-bold">
-                            {{ $cntr + 1 }}.|&nbsp;
-                                    @if (count(explode('::', $item->allotment_name)) >= 2)
-                            {{ explode('::', $item->allotment_name)[1] }}
-                                    @else
-                            {{ $item->allotment_name }}
-                                    @endif
-                            <br>
-                        </span>
-                                @endif
-
-                        <span class="text-center w-100 p-4">
-                            @if ($fund->current_realigned_budget->date_approved)
-                            <i class="fas fa-check-circle green-text material-tooltip-main"
-                               data-toggle="tooltip" data-placement="left" title="Approved"></i>
-                            @elseif ($fund->current_realigned_budget->date_disapproved)
-                            <i class="fas fa-thumbs-down material-tooltip-main"
-                               data-toggle="tooltip" data-placement="right" title="Disapproved"></i>
-                            @else
-                            <i class="fas fa-spinner faa-spin fa-pulse material-tooltip-main"
-                               data-toggle="tooltip" data-placement="right" title="Pending"></i>
-                            @endif
-
-                            &nbsp;&nbsp;<em>&#8369; {{ number_format($item->allotment_cost, 2) }}</em>
-                        </span>
-                        <hr class="my-1">
-                            @endforeach
-                        @endif
-                    </li>
-                </ul>
             </div>
             <!--Footer-->
             <div class="modal-footer justify-content-end rgba-stylish-b p-1">
@@ -276,7 +228,6 @@
 </div>
     @endforeach
 @endif
---}}
 
 @include('modals.search-post')
 @include('modals.show')
@@ -308,5 +259,28 @@
         });
     });
 </script>
+
+@if (!empty(session("success")))
+    @include('modals.alert')
+    <script type="text/javascript">
+        $(function() {
+            $('#modal-success').modal();
+        });
+    </script>
+@elseif (!empty(session("warning")))
+    @include('modals.alert')
+    <script type="text/javascript">
+        $(function() {
+            $('#modal-warning').modal();
+        });
+    </script>
+@elseif (!empty(session("failed")))
+    @include('modals.alert')
+    <script type="text/javascript">
+        $(function() {
+            $('#modal-failed').modal();
+        });
+    </script>
+@endif
 
 @endsection

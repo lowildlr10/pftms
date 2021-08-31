@@ -69,9 +69,9 @@
             <div class="row">
                 <div class="col-md-5">
                     <div class="md-form form-sm">
-                        <input type="text" id="department" name="department"
+                        <input type="text" id="legal-basis" name="legal_basis"
                                class="form-control required" value="RA 11518">
-                        <label for="department" class="active">
+                        <label for="legal-basis" class="active">
                             <span class="red-text">* </span>
                             <strong>Legal Basis</strong>
                         </label>
@@ -172,4 +172,6 @@
             </div>
         </div>
     </div>
+
+    <input type="hidden" id="toggle" value="store">
 </form>

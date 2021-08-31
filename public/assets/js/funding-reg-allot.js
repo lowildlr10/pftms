@@ -113,6 +113,117 @@ $(function() {
         });
     }
 
+    function storeUpdateItems(toggle, regID, formData) {
+        const uri = toggle == 'store' ?
+             `${baseURL}/report/registry-allot-obli-disb/store-items/${regID}` :
+             `${baseURL}/report/registry-allot-obli-disb/update-items/${regID}`;
+
+        $.ajax({
+		    url: uri,
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            //async: false,
+            data: formData,
+            //dataType: 'json',
+		    success: function(response) {
+                console.log(response);
+            },
+            fail: function(xhr, textStatus, errorThrown) {
+                console.log('fail');
+                storeUpdateItems(toggle, regID, formData);
+		    },
+		    error: function(data) {
+                console.log('error');
+                storeUpdateItems(toggle, regID, formData);
+		    }
+        });
+    }
+
+    function initStoreUpdateItems(toggle, regID) {
+        $('.item-row').each(function(index, elem) {
+            const orderNo = index + 1;
+                  dateReceived = $(elem).find('.date-received').val();
+                  dateObligated = $(elem).find('.date-obligated').val();
+                  dateReleased = $(elem).find('.date-released').val();
+                  payee = $(elem).find('.payee').val();
+                  particulars = $(elem).find('.particulars').val();
+                  serialNumber = $(elem).find('.serial-number').val();
+                  uacsObjectCode = $(elem).find('.uacs-object').val();
+                  allotments = $(elem).find('.allotments').val();
+                  obligations = $(elem).find('.obligations').val();
+                  unobligatedAllot = $(elem).find('.unobligated').val();
+                  disbursement = $(elem).find('.disbursements').val();
+                  dueDemandable = $(elem).find('.due-demandable').val();
+                  notDueDemandable = $(elem).find('.not-due-demandable').val();
+
+            let formData = new FormData();
+            formData.append('reg_allotment_id', regID);
+            formData.append('order_no', orderNo);
+            formData.append('date_received', dateReceived);
+            formData.append('date_obligated', dateObligated);
+            formData.append('date_released', dateReleased);
+            formData.append('payee', payee);
+            formData.append('particulars', particulars);
+            formData.append('serial_number', serialNumber);
+            formData.append('uacs_object_code', uacsObjectCode);
+            formData.append('allotments', allotments);
+            formData.append('obligations', obligations);
+            formData.append('unobligated_allot', unobligatedAllot);
+            formData.append('disbursement', disbursement);
+            formData.append('due_demandable', dueDemandable);
+            formData.append('not_due_demandable', notDueDemandable);
+            formData.append('_token', CSRF_TOKEN);
+            storeUpdateItems(toggle, regID, formData);
+        });
+
+        $(document).ajaxStop(function() {
+            location.replace(`${baseURL}/report/registry-allot-obli-disb?keyword=${regID}&status=success`);
+        });
+    }
+
+    function storeUpdateReg(toggle, formData) {
+        let regID = $('reg-id').val();
+        const uri = toggle == 'store' ?
+                    `${baseURL}/report/registry-allot-obli-disb/store` :
+                    `${baseURL}/report/registry-allot-obli-disb/update/${regID}`;
+        $.ajax({
+		    url: uri,
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            //async: false,
+            data: formData,
+            //dataType: 'json',
+		    success: function(response) {
+                regID = response;
+                initStoreUpdateItems(toggle, regID);
+            },
+            fail: function(xhr, textStatus, errorThrown) {
+                console.log('fail');
+                storeUpdateReg(regID, toggle, formData);
+		    },
+		    error: function(data) {
+                console.log('error');
+                storeUpdateReg(regID, toggle, formData);
+		    }
+        });
+    }
+
+    function initStoreUpdate() {
+        const toggle = $('#toggle').val();
+        let formData = new FormData();
+
+        formData.append('period_ending', $('#period-ending').val());
+        formData.append('entity_name', $('#entity-name').val());
+        formData.append('mfo_pap', $('#mfo-pap').val());
+        formData.append('fund_cluster', $('#fund-cluster').val());
+        formData.append('sheet_no', $('#sheet-no').val());
+        formData.append('legal_basis', $('#legal-basis').val());
+        formData.append('_token', CSRF_TOKEN);
+        storeUpdateReg(toggle, formData);
+    }
+
     $.fn.showCreate = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-create').load(url, function() {
@@ -134,9 +245,12 @@ $(function() {
     $.fn.store = function() {
         const withError = inputValidation(false);
 
-		if (!withError) {
-			$('#form-store').submit();
-        }
+        if (!withError) {
+			$('#mdb-preloader').css('background', '#000000ab')
+                               .fadeIn(300, function() {
+                initStoreUpdate();
+            });
+		}
     }
 
     $.fn.showEdit = function(url) {
@@ -160,14 +274,17 @@ $(function() {
     $.fn.update = function() {
         const withError = inputValidation(false);
 
-		if ($(this).totalBudgetIsValid() && !withError) {
-			$('#form-update').submit();
+		if (!withError) {
+			$('#mdb-preloader').css('background', '#000000ab')
+                               .fadeIn(300, function() {
+                initStoreUpdate();
+            });
 		}
     }
 
-    $.fn.showDelete = function(url, name) {
-		$('#modal-body-delete').html(`Are you sure you want to delete this ${name} `+
-                                     `Source of Funds / Project?`);
+    $.fn.showDelete = function(url) {
+		$('#modal-body-delete').html(`Are you sure you want to delete this `+
+                                     `Registry of Allotments, Obligations and Disbursement?`);
         $("#modal-delete").modal({keyboard: false, backdrop: 'static'})
 						  .on('shown.bs.modal', function() {
             $('#delete-title').html('Delete Source of Funds / Project');

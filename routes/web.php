@@ -1280,16 +1280,31 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_dvledger',
         'access' => 'create'
     ])->name('report-raod-store');
-    Route::get('report/registry-allot-obli-disb/show-edit', [
+    Route::post('report/registry-allot-obli-disb/store-items/{regID}', [
+        'uses' => 'RegAllotmentController@storeItems',
+        'module' => 'report_dvledger',
+        'access' => 'create'
+    ])->name('report-raod-store-items');
+    Route::get('report/registry-allot-obli-disb/show-edit/{id}', [
         'uses' => 'RegAllotmentController@showEdit',
         'module' => 'report_dvledger',
         'access' => 'update'
     ])->name('report-raod-show-edit');
-    Route::post('report/registry-allot-obli-disb/update', [
+    Route::post('report/registry-allot-obli-disb/update/{id}', [
         'uses' => 'RegAllotmentController@update',
         'module' => 'report_dvledger',
         'access' => 'update'
     ])->name('report-raod-update');
+    Route::post('report/registry-allot-obli-disb/update-items/{regID}', [
+        'uses' => 'RegAllotmentController@updateItems',
+        'module' => 'report_dvledger',
+        'access' => 'create'
+    ])->name('report-raod-update-items');
+    Route::post('report/registry-allot-obli-disb/delete/{id}', [
+        'uses' => 'RegAllotmentController@delete',
+        'module' => 'report_dvledger',
+        'access' => 'delete'
+    ])->name('report-raod-delete');
     Route::post('report/registry-allot-obli-disb/get-vouchers', [
         'uses' => 'RegAllotmentController@getVouchers',
         'module' => 'report_dvledger',
