@@ -103,6 +103,7 @@ class RegAllotmentController extends Controller
             $_periodEnding = strtotime($raod->period_ending);
             $periodEnding = date('F Y', $_periodEnding);
             $raod->period_ending_month = $periodEnding;
+            $raod->voucher_count = RegAllotmentItem::where('reg_allotment_id', $raod->id)->count();
         }
 
         return $fundRAOD;
@@ -148,7 +149,7 @@ class RegAllotmentController extends Controller
             'particulars' => $request->particulars,
             'serial_number' => $request->serial_number,
             'uacs_object_code' => $request->uacs_object_code ?
-                                  serialize($request->uacs_object_code) :
+                                  serialize(explode(',', $request->uacs_object_code)) :
                                   serialize([]),
             'allotments' => $request->allotments,
             'obligations' => $request->obligations,
@@ -177,6 +178,9 @@ class RegAllotmentController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showEdit($id) {
+        $employees = User::orderBy('firstname')->get();
+        $suppliers = Supplier::orderBy('company_name')->get();
+        $uacsObjects = MooeAccountTitle::orderBy('uacs_code')->get();
         $regDat = RegAllotment::find($id);
         $periodEnding = $regDat->period_ending;
         $entityName = $regDat->entity_name;
@@ -184,14 +188,52 @@ class RegAllotmentController extends Controller
         $legalBasis = $regDat->legal_basis;
         $mfoPAP = $regDat->mfo_pap;
         $sheetNo = $regDat->sheet_no;
-        $regItems = DB::table('funding_reg_allotment_items as reg')
-                      ->leftJoin()
-                      ->where('reg.reg_allotment_id', $id)
+        $regItems = DB::table('obligation_request_status as ors')
+                      ->select(
+                            'reg.id',
+                            'reg.date_received',
+                            'reg.date_obligated',
+                            'reg.date_released',
+                            'reg.payee',
+                            'reg.particulars',
+                            'reg.serial_number',
+                            'reg.uacs_object_code',
+                            'reg.allotments',
+                            'reg.obligations',
+                            'reg.unobligated_allot',
+                            'reg.disbursement',
+                            'reg.due_demandable',
+                            'reg.not_due_demandable',
+                            'ors.id as ors_id',
+                            'ors.serial_no as ors_serial_no',
+                            'ors.date_obligated as ors_date_obligated',
+                            'ors.payee as ors_payee',
+                            'ors.particulars as ors_particulars',
+                            'ors.serial_no as ors_serial_number',
+                            'ors.uacs_object_code as ors_uacs_object_code',
+                            'ors.amount as ors_amount',
+                            'dv.amount as dv_amount'
+                        )->leftJoin('funding_reg_allotment_items as reg',
+                                 'reg.serial_number', '=', 'ors.serial_no')
+                      ->leftJoin('disbursement_vouchers as dv', 'dv.ors_id', '=', 'ors.id')
+                      ->where('ors.date_obligated', 'like', "%$periodEnding%")
                       ->orderBy('reg.order_no')
                       ->get();
+
+        foreach ($regItems as $reg) {
+            if (!$reg->id) {
+                $logs = DB::table('document_logs')
+                        ->where([['doc_id', $reg->ors_id], ['action', 'received']])
+                        ->orderBy('created_at', 'desc')
+                        ->first();
+                $reg->date_received = $logs->created_at;
+            }
+        }
+
         return view('modules.report.registry-allotment.update', compact(
-            'periodEnding', 'entityName', 'fundCluster',
-            'legalBasis', 'mfoPAP', 'sheetNo', 'regItems'
+            'id', 'periodEnding', 'entityName', 'fundCluster',
+            'legalBasis', 'mfoPAP', 'sheetNo', 'regItems',
+            'employees', 'suppliers', 'uacsObjects'
         ));
     }
 
@@ -211,6 +253,14 @@ class RegAllotmentController extends Controller
         $instanceRegAllot->mfo_pap = $request->mfo_pap;
         $instanceRegAllot->sheet_no = $request->sheet_no;
         $instanceRegAllot->save();
+
+        $raodItems = DB::table('funding_reg_allotment_items')
+                       ->where('reg_allotment_id', $id)
+                       ->get();
+
+        foreach ($raodItems as $item) {
+            RegAllotmentItem::destroy($item->id);
+        }
 
         return $id;
     }
@@ -261,7 +311,7 @@ class RegAllotmentController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($request, $id) {
-
+        try {
             $raodItems = DB::table('funding_reg_allotment_items')
                              ->where('reg_allotment_id', $id)
                              ->get();
@@ -281,7 +331,7 @@ class RegAllotmentController extends Controller
                 'msg' => $msg,
                 'alert_type' => 'success',
                 'id' => $id
-            ];try {
+            ];
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);

@@ -116,7 +116,7 @@ $(function() {
     function storeUpdateItems(toggle, regID, formData) {
         const uri = toggle == 'store' ?
              `${baseURL}/report/registry-allot-obli-disb/store-items/${regID}` :
-             `${baseURL}/report/registry-allot-obli-disb/update-items/${regID}`;
+             `${baseURL}/report/registry-allot-obli-disb/store-items/${regID}`;
 
         $.ajax({
 		    url: uri,
@@ -183,7 +183,7 @@ $(function() {
     }
 
     function storeUpdateReg(toggle, formData) {
-        let regID = $('reg-id').val();
+        let regID = $('#reg-id').val();
         const uri = toggle == 'store' ?
                     `${baseURL}/report/registry-allot-obli-disb/store` :
                     `${baseURL}/report/registry-allot-obli-disb/update/${regID}`;
@@ -279,10 +279,10 @@ $(function() {
         $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
-            initializeProjectInput();
-            $(this).slideToggle(500);
             initializeSelect2();
-            initializeSortable();
+            $(this).slideToggle(500);
+            $('.datepicker').datepicker();
+            initializeInputs()
         });
         $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {

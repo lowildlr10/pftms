@@ -164,6 +164,12 @@
                     <div class="gradient-card-header rgba-white-light p-0">
                         <div class="p-0">
                             <div class="btn-group btn-menu-1 p-0">
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light"
+                                        onclick="$(this).showPrint('{{ $fund->id }}', 'fund_lib');">
+                                    <i class="fas fa-print blue-text"></i> Print RAOD
+                                </button>
+
                                 @if ($isAllowedUpdate)
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
@@ -179,12 +185,6 @@
                                     <i class="fas fa-edit orange-text"></i> Edit
                                 </button>
                                 @endif
-
-                                <button type="button" class="btn btn-outline-mdb-color
-                                        btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $fund->id }}', 'fund_lib');">
-                                    <i class="fas fa-print blue-text"></i> Print RAOD
-                                </button>
 
                                 @if ($isAllowedDelete)
                                 <button type="button" class="btn btn-outline-mdb-color
@@ -211,7 +211,9 @@
                             <b>Fund Cluster: </b> {{ $fund->fund_cluster }}<br>
                             <b>Legal Basis: </b> {{ $fund->legal_basis }}<br>
                             <b>MFO/PAP: </b> {{ $fund->mfo_pap }}<br>
-                            <b>Sheet No.: </b> {{ $fund->sheet_no }}
+                            <b>Sheet No.: </b> {{ $fund->sheet_no }}<br>
+                            <hr>
+                            <b>Registered Voucher: </b> {{ $fund->voucher_count }}
                         </p>
                     </div>
                 </div>

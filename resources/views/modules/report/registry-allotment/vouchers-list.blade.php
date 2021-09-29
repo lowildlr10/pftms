@@ -125,7 +125,7 @@
                         @endforeach
                         @foreach ($suppliers as $bid)
                             @if ($bid->id == $item->payee)
-                        <option value="{{$emp->id}}" selected>{{$bid->company_name}}</option>
+                        <option value="{{$bid->id}}" selected>{{$bid->company_name}}</option>
                                 @php break @endphp
                             @endif
                         @endforeach
@@ -183,7 +183,8 @@
             </td>
             <td>
                 <div class="md-form form-sm my-0">
-                    <input type="number" placeholder="..." name="disbursements[]" value="{{ $item->disbursement }}"
+                    <input type="number" placeholder="..." name="disbursements[]"
+                           value="{{ $item->disbursement ? $item->disbursement : 0 }}"
                            class="form-control required form-control-sm disbursements" id="disbursement-{{ $itemCtr }}">
                 </div>
             </td>
@@ -223,4 +224,3 @@
     </tbody>
     @endif
 </table>
-

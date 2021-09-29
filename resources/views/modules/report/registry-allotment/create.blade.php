@@ -48,7 +48,7 @@
                 <div class="col-md-5">
                     <div class="md-form form-sm">
                         <input type="text" id="fund-cluster" name="fund_cluster"
-                               class="form-control required" value="3/A.III.c.1/A.III.c.2/A.III.b.1">
+                               class="form-control required" value="01-101-101/01-101-102">
                         <label for="fund-cluster" class="active">
                             <span class="red-text">* </span>
                             <strong>Fund Cluster</strong>
