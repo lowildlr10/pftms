@@ -224,6 +224,27 @@ $(function() {
         storeUpdateReg(toggle, formData);
     }
 
+    $.fn.solveUnobligated = function(ctr) {
+        const allotment = $(`#allotment-${ctr}`).val();
+        const obligation = $(`#obligation-${ctr}`).val();
+        const unobligated = allotment - obligation;
+        $(`#unobligated-${ctr}`).val(unobligated);
+    }
+
+    $.fn.solveDueDemandable = function(ctr) {
+        const obligation = $(`#obligation-${ctr}`).val() ?
+                            $(`#obligation-${ctr}`).val() : 0;
+        $(`#due-demandable-${ctr}`).val(obligation);
+        $(`#not-due-demandable-${ctr}`).val(0);
+    }
+
+    $.fn.solveNotYetDueDemandable = function(ctr) {
+        const obligation = $(`#obligation-${ctr}`).val() ?
+                            $(`#obligation-${ctr}`).val() : 0;
+        $(`#due-demandable-${ctr}`).val(0);
+        $(`#not-due-demandable-${ctr}`).val(obligation);
+    }
+
     $.fn.showCreate = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-create').load(url, function() {

@@ -159,38 +159,48 @@
             </td>
             <td>
                 <div class="md-form form-sm my-0">
-                    <input type="number" placeholder="..." name="allotments[]"
-                           class="form-control required form-control-sm allotments">
+                    <input type="number" placeholder="..." name="allotments[]" id="allotment-{{ $itemCtr }}"
+                           class="form-control required form-control-sm allotments"
+                           onkeyup="$(this).solveUnobligated('{{ $itemCtr }}')"
+                           onchange="$(this).solveUnobligated('{{ $itemCtr }}')">
                 </div>
             </td>
             <td>
                 <div class="md-form form-sm my-0">
                     <input type="number" placeholder="..." name="obligations[]" value="{{ $item->obligation }}"
-                           class="form-control required form-control-sm obligations">
+                           class="form-control required form-control-sm obligations" id="obligation-{{ $itemCtr }}"
+                           onkeyup="$(this).solveUnobligated('{{ $itemCtr }}')"
+                           onchange="$(this).solveUnobligated('{{ $itemCtr }}')">
                 </div>
             </td>
             <td>
                 <div class="md-form form-sm my-0">
-                    <input type="number" placeholder="..." name="unobligated[]"
-                           class="form-control required form-control-sm unobligated">
+                    <input type="number" placeholder="..." name="unobligated[]" id="unobligated-{{ $itemCtr }}"
+                           class="form-control required form-control-sm unobligated"
+                           onkeyup="$(this).solveUnobligated('{{ $itemCtr }}')"
+                           onchange="$(this).solveUnobligated('{{ $itemCtr }}')">
                 </div>
             </td>
             <td>
                 <div class="md-form form-sm my-0">
                     <input type="number" placeholder="..." name="disbursements[]" value="{{ $item->disbursement }}"
-                           class="form-control required form-control-sm disbursements">
+                           class="form-control required form-control-sm disbursements" id="disbursement-{{ $itemCtr }}">
                 </div>
             </td>
             <td>
                 <div class="md-form form-sm my-0">
                     <input type="number" placeholder="..." name="due_demandable[]"
-                           class="form-control required form-control-sm due-demandable">
+                           class="form-control required form-control-sm due-demandable"
+                           id="due-demandable-{{ $itemCtr }}"
+                           onclick="$(this).solveDueDemandable('{{ $itemCtr }}')">
                 </div>
             </td>
             <td>
                 <div class="md-form form-sm my-0">
                     <input type="number" placeholder="..." name="not_due_demandable[]"
-                           class="form-control required form-control-sm not-due-demandable">
+                           class="form-control required form-control-sm not-due-demandable"
+                           id="not-due-demandable-{{ $itemCtr }}"
+                           onclick="$(this).solveNotYetDueDemandable('{{ $itemCtr }}')">
                 </div>
             </td>
             <td class="align-middle">
