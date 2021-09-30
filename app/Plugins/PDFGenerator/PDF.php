@@ -12,7 +12,10 @@ class PDF extends TCPDF {
     public $docRev;
     public $docRevDate;
     public $fontScale = 0;
+    public $headerFontSize = 9;
+    public $footerFontSize = 9;
     public $customPageNo = null;
+    public $onlyPageNo = false;
 
     /*
     //Set the array of column alignments
@@ -65,6 +68,10 @@ class PDF extends TCPDF {
 
     public function setCustomPageNo($customPageNo) {
         $this->customPageNo = $customPageNo;
+    }
+
+    public function setIsPageNoOnly($bool) {
+        $this->onlyPageNo = $bool;
     }
 
     private function htmlFontStyle($key) {
@@ -288,18 +295,20 @@ class PDF extends TCPDF {
         // Go to 1.5 cm from bottom
         $this->SetY(-15);
         // Select helvetica italic 8
-        $this->SetFont('helvetica', '', 10);
+        $this->SetFont('helvetica', '', $this->footerFontSize + ($this->fontScale * $this->footerFontSize));
         // Print current and total page numbers
 
         //$this->Cell(0,10,'Page '.$this->pageNo().'/{nb}',0,0,'C');
 
-        $this->Cell(0, 4, 'This document shall be deemed uncontrolled unless labelled "CONTROLLED"', 0, 0, 'C');
-        $this->ln();
+        if (!$this->onlyPageNo) {
+            $this->Cell(0, 4, 'This document shall be deemed uncontrolled unless labelled "CONTROLLED"', 0, 0, 'C');
+            $this->ln();
 
-        $this->Cell($this->w - ($this->w * 0.51), 4, 'User should verify latest', 0, 0, 'R');
-        $this->SetFont('helvetica', 'B', 10);
-        $this->Cell(0, 4, ' revision.', 0, 0, 'L');
-        $this->ln();
+            $this->Cell($this->w - ($this->w * 0.51), 4, 'User should verify latest', 0, 0, 'R');
+            $this->SetFont('helvetica', 'B', $this->footerFontSize + ($this->fontScale * $this->footerFontSize));
+            $this->Cell(0, 4, ' revision.', 0, 0, 'L');
+            $this->ln();
+        }
 
         $this->SetFont('helvetica', 'I', 7);
 

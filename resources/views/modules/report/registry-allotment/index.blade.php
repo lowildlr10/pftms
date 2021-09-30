@@ -166,7 +166,7 @@
                             <div class="btn-group btn-menu-1 p-0">
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
-                                        onclick="$(this).showPrint('{{ $fund->id }}', 'fund_lib');">
+                                        onclick="$(this).showPrint('{{ $fund->id }}', 'report_raod');">
                                     <i class="fas fa-print blue-text"></i> Print RAOD
                                 </button>
 

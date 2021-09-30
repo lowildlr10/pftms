@@ -60,6 +60,7 @@ use App\Plugins\PDFGenerator\DocRequisitionIssueSlip;
 use App\Plugins\PDFGenerator\DocPropertyLabel;
 use App\Plugins\PDFGenerator\DocLineItemBudget;
 use App\Plugins\PDFGenerator\DocLineItemBudgetRealignment;
+use App\Plugins\PDFGenerator\DocRegistryAllotmentsORSDV;
 
 class PrintController extends Controller
 {
@@ -501,6 +502,26 @@ class PrintController extends Controller
                 }
                 break;
 
+            case 'report_raod':
+                $data = $this->getDataRAOD($key);
+                $data->doc_type = $documentType;
+
+                if ($test == 'true') {
+                    $instanceDocLog->logDocument($key, Auth::user()->id, NULL, $action);
+                    $msg = "Generated the Reggistry of Allotments, Obligations and Disbursement Report '$key' document.";
+                    Auth::user()->log($request, $msg);
+                } else {
+                    $this->generateRAOD(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
+                }
+                break;
+
             default:
                 # code...
                 break;
@@ -758,6 +779,121 @@ class PrintController extends Controller
         } else {
             return $number. $suffix[$number % 10];
         }
+    }
+
+    private function getDataRAOD($regAllotID) {
+        $itemTableData = [];
+        $suppliers = DB::table('suppliers')->get();
+
+        $regAllotData = DB::table('funding_reg_allotments')
+                              ->where('id', $regAllotID)
+                              ->first();
+        $regAllotmentItems = DB::table('funding_reg_allotment_items')
+                               ->where('reg_allotment_id', $regAllotID)
+                               ->orderBy('order_no')
+                               ->get();
+
+        $periodEnding = date_format(date_create($regAllotData->period_ending), 'F Y');
+        $entityName = $regAllotData->entity_name;
+        $fundCluster = $regAllotData->fund_cluster;
+        $legalBasis = $regAllotData->legal_basis;
+        $mfoPAP = $regAllotData->mfo_pap;
+        $sheetNo = $regAllotData->sheet_no;
+
+        $multiplier = 1;
+
+        foreach ($regAllotmentItems as $ctr => $item) {
+            $payee = Auth::user()->getEmployee($item->payee)->name;
+            $uacsCodes = unserialize($item->uacs_object_code);
+            $uacsObjects = [];
+
+            if (strpos($item->particulars, "\n") !== FALSE) {
+                $searchStr = ["\r\n", "\n", "\r"];
+                $item->particulars = str_replace($searchStr, '<br>', $item->particulars);
+            }
+
+            if (!$payee) {
+                foreach ($suppliers as $key => $bid) {
+                    if ($bid->id == $item->payee) {
+                        $payee = $bid->company_name;
+                        break;
+                    }
+                }
+            }
+
+            foreach ($uacsCodes as $uacs) {
+                $mooeTitleDat = DB::table('mooe_account_titles')
+                                  ->where('id', $uacs)
+                                  ->first();
+
+                if ($mooeTitleDat) {
+                    $uacsObjects[] = $mooeTitleDat->uacs_code;
+                }
+            }
+
+            $uacsObjects = implode(', ', $uacsObjects);
+
+            $item->allotments = number_format($item->allotments, 2);
+            $item->obligations = number_format($item->obligations, 2);
+            $item->unobligated_allot = number_format($item->unobligated_allot, 2);
+            $item->disbursement = number_format($item->disbursement, 2);
+            $item->due_demandable = number_format($item->due_demandable, 2);
+            $item->not_due_demandable = number_format($item->not_due_demandable, 2);
+
+            $itemTableData[] = [
+                $item->date_received,
+                $item->date_obligated,
+                $item->date_released,
+                $payee,
+                $item->particulars,
+                $item->serial_number,
+                $uacsObjects,
+                $item->allotments,
+                $item->obligations,
+                $item->unobligated_allot,
+                $item->disbursement,
+                $item->due_demandable,
+                $item->not_due_demandable,
+            ];
+        }
+
+        $data = [
+            [
+                'aligns' => [
+                    'C', 'C', 'C', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'R'
+                ],
+                'widths' => [
+                    5 * $multiplier, //date_received
+                    5 * $multiplier, //date_obligated
+                    5 * $multiplier, //date_released
+                    9 * $multiplier, //payee
+                    14 * $multiplier, //particulars
+                    7 * $multiplier, //serial_number
+                    7 * $multiplier, //uacs_objects
+                    7 * $multiplier, //allotments
+                    7 * $multiplier, //obligations
+                    7 * $multiplier, //unobligated_allot
+                    7 * $multiplier, //disbursement
+                    10 * $multiplier, //due_demandable
+                    10 * $multiplier, //not_due_demandable
+                ],
+                'font-styles' => [
+                    '', '', '', '', '', '', '', '', '', '', '', '', ''
+                ],
+                'type' => 'row-data',
+                'data' => $itemTableData
+            ]
+        ];
+
+        return (object)[
+            'period_ending' => $periodEnding,
+            'entity_name' => $entityName,
+            'fund_cluster' => $fundCluster,
+            'legal_basis' => $legalBasis,
+            'mfo_pap' => $mfoPAP,
+            'sheet_no' => $sheetNo,
+            'table_data' => $data,
+        ];
     }
 
     private function getDataRealignmentLIB($budRealignID) {
@@ -3997,6 +4133,36 @@ class PrintController extends Controller
 
         //Main document generation code file
         $pdf->printRealignmentLIB($data);
+
+        //Print the document
+        $this->printDocument($pdf, $docTitle, $previewToggle);
+    }
+
+    private function generateRAOD($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
+        //Initiated variables
+        $pageSize = [$pageWidth, $pageHeight];
+        $pdf = new DocRegistryAllotmentsORSDV(
+            'L', $pageUnit, $pageSize
+        );
+
+        $pdf->setHeaderLR(false, true);
+        $pdf->setFontScale($fontScale);
+
+        $docCode = "FM-FAS-BUD F01";
+        $docRev = "Revision 1";
+        $docRevDate = "03-09-15";
+        $docTitle = 'raod_'.strtolower(str_replace(' ', '_', $data->period_ending));
+        $docCreator = "DOST-CAR";
+        $docAuthor = "DOST-CAR";
+        $docSubject = "Registry of Allotments, Obligations and Disbursements";
+        $docKeywords = "RAOD, raod, Registry, registry, Allotments, allotments, Obligations, obligations, Disbursement. disbursement";
+
+        //Set document information
+        $this->setDocumentInfo($pdf, $docCode, $docRev, $docRevDate, $docTitle,
+                               $docCreator, $docAuthor, $docSubject, $docKeywords);
+
+        //Main document generation code file
+        $pdf->printRAOD($data);
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);

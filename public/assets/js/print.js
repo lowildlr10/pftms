@@ -133,6 +133,10 @@ $(function() {
                 $('#print-title').html('Generate Disbursement Ledger');
                 setPaperSize('Long');
                 break;
+            case 'report_raod':
+                $('#print-title').html('Generate Registry of Allotments, Obligations and Disbursements');
+                setPaperSize('Long');
+                break;
 
             default:
                 break;
