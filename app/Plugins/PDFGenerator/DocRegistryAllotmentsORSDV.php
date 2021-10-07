@@ -15,6 +15,14 @@ class DocRegistryAllotmentsORSDV extends PDF {
         $mfoPAP = $data->mfo_pap;
         $sheetNo = $data->sheet_no;
 
+        $currentMonth = $data->current_month;
+        $totalAllot = $data->total_allotment;
+        $totalObli = $data->total_obligation;
+        $totalUnobli = $data->total_unobligated;
+        $totalDisb = $data->total_disbursement;
+        $totalDue = $data->total_due;
+        $totalNotDue = $data->total_not_due;
+
         /* ------------------------------------- Start of Config ------------------------------------- */
 
         //set default monospaced font
@@ -60,10 +68,14 @@ class DocRegistryAllotmentsORSDV extends PDF {
         $this->Cell(0, 4, 'PERSONNEL SERVICES/MAINTENANCE AND OTHER OPERATING EXPENSES ', '', '', 'C');
         $this->Ln();
 
+        /*
         $this->Cell($pageWidth * 0.48, 4, 'For the Period Ending ', '', '', 'R');
         $this->SetFont('helvetica', 'BU', 8 + ($fontScale * 8));
-        $this->Cell($pageWidth * 0.1, 4, $periodEnding, '', '', 'L');
+        $this->Cell($pageWidth * 0.1, 4, " $periodEnding ", '', '', 'L');
         $this->Cell(0, 4, '', '', '', 'C');
+        $this->Ln(8);*/
+
+        $this->MultiCell(0, 4, "For the Period Ending: $periodEnding", '', 'C');
         $this->Ln(8);
 
         $this->SetFont('helvetica', 'B', 8 + ($fontScale * 8));
@@ -139,33 +151,28 @@ class DocRegistryAllotmentsORSDV extends PDF {
         $this->Ln();
 
         // Table body
-        $this->SetFont('helvetica', '', 8 + ($fontScale * 8));
-        $this->htmlTable($data->table_data);
+        foreach ($data->tables as $datCtr => $dat) {
+            $this->SetFont('helvetica', '', 8 + ($fontScale * 8));
+            $this->htmlTable($dat->table_data);
+            $this->htmlTable($dat->table_footer);
 
-        // Table footer
+            if ( $datCtr != count($data->tables) - 1) {
+                $this->Cell(0, 4, '', 'LR', '', 'C');
+                $this->Ln();
+            }
+        }
+
         $this->SetFont('helvetica', 'B', 8 + ($fontScale * 8));
-        $this->Cell(($pageWidth - 14) * 0.24, 4, 'TOTAL FOR THE MONTH OF_______', 'LBR', '', 'L');
+        $this->Cell(($pageWidth - 14) * 0.24, 4, 'TOTAL AS OF '.$currentMonth, 'LBR', '', 'L');
         $this->Cell(($pageWidth - 14) * 0.14, 4, '', 'LBR', '', 'C');
         $this->Cell(($pageWidth - 14) * 0.07, 4, '', 'LBR', '', 'C');
         $this->Cell(($pageWidth - 14) * 0.07, 4, '', 'LBR', '', 'C');
-        $this->Cell(($pageWidth - 14) * 0.07, 4, '', 'LBR', '', 'C');
-        $this->Cell(($pageWidth - 14) * 0.07, 4, '', 'LBR', '', 'C');
-        $this->Cell(($pageWidth - 14) * 0.07, 4, '', 'LBR', '', 'C');
-        $this->Cell(($pageWidth - 14) * 0.07, 4, '', 'LBR', '', 'C');
-        $this->Cell(($pageWidth - 14) * 0.1, 4, '', 'LBR', '', 'C');
-        $this->Cell(0, 4, '', 'LBR', '', 'C');
-        $this->Ln();
-
-        $this->Cell(($pageWidth - 14) * 0.24, 4, 'TOTAL AS OF ________________', 'LBR', '', 'L');
-        $this->Cell(($pageWidth - 14) * 0.14, 4, '', 'LBR', '', 'C');
-        $this->Cell(($pageWidth - 14) * 0.07, 4, '', 'LBR', '', 'C');
-        $this->Cell(($pageWidth - 14) * 0.07, 4, '', 'LBR', '', 'C');
-        $this->Cell(($pageWidth - 14) * 0.07, 4, '', 'LBR', '', 'C');
-        $this->Cell(($pageWidth - 14) * 0.07, 4, '', 'LBR', '', 'C');
-        $this->Cell(($pageWidth - 14) * 0.07, 4, '', 'LBR', '', 'C');
-        $this->Cell(($pageWidth - 14) * 0.07, 4, '', 'LBR', '', 'C');
-        $this->Cell(($pageWidth - 14) * 0.1, 4, '', 'LBR', '', 'C');
-        $this->Cell(0, 4, '', 'LBR', '', 'C');
+        $this->Cell(($pageWidth - 14) * 0.07, 4, $totalAllot, 'LBR', '', 'R');
+        $this->Cell(($pageWidth - 14) * 0.07, 4, $totalObli, 'LBR', '', 'R');
+        $this->Cell(($pageWidth - 14) * 0.07, 4, $totalUnobli, 'LBR', '', 'R');
+        $this->Cell(($pageWidth - 14) * 0.07, 4, $totalDisb, 'LBR', '', 'R');
+        $this->Cell(($pageWidth - 14) * 0.1, 4, $totalDue, 'LBR', '', 'R');
+        $this->Cell(0, 4, $totalNotDue, 'LBR', '', 'R');
         $this->Ln();
 
         /* ------------------------------------- End of Doc ------------------------------------- */

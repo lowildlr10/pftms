@@ -97,7 +97,7 @@ class RegAllotmentController extends Controller
         }
 
         $fundRAOD = $fundRAOD->sortable(['period_ending' => 'desc'])
-                             ->paginate(15);
+                             ->paginate(50);
 
         foreach ($fundRAOD as $raod) {
             $_periodEnding = strtotime($raod->period_ending);

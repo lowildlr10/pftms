@@ -43,6 +43,11 @@
                                 <i class="fas fa-pencil-alt"></i> Create
                             </button>
                             @endif
+
+                            <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
+                                    onclick="$(this).showPrint('id', 'report_raod', 'multiple');">
+                                <i class="fas fa-print"></i> Print Selected
+                            </button>
                         </div>
                         <div>
                             <button class="btn btn-outline-white btn-rounded btn-sm px-2"
@@ -90,8 +95,10 @@
                                         @foreach ($list as $listCtr => $fund)
                                     <tr class="hidden-xs">
                                         <td align="center">
-                                            <i class="fas fa-spinner fa-lg faa-spin fa-pulse material-tooltip-main"
-                                               data-toggle="tooltip" data-placement="right" title="Pending"></i>
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input chk" id="chk-{{ $listCtr }}" value="{{ $fund->id }}">
+                                                <label class="form-check-label" for="chk-{{ $listCtr }}"></label>
+                                            </div>
                                         </td>
                                         <td></td>
                                         <td>{{ $fund->period_ending_month }}</td>

@@ -136,6 +136,21 @@ $(function() {
             case 'report_raod':
                 $('#print-title').html('Generate Registry of Allotments, Obligations and Disbursements');
                 setPaperSize('Long');
+
+                if (otherParam == 'multiple') {
+                    _key = '';
+                    $('.chk').each(function() {
+                        if ($(this).is(':checked')) {
+                            _key += $(this).val() + ';';
+                            key = _key;
+                        }
+                    });
+
+                    if (!key || !_key) {
+                        _key = 'id';
+                        key = _key;
+                    }
+                }
                 break;
 
             default:
