@@ -14,8 +14,12 @@ class Update2ObligationRequestStatus extends Migration
     public function up()
     {
         Schema::table('obligation_request_status', function (Blueprint $table) {
-            //
+            $table->date('date_released')->nullable()->after('date_obligated');
         });
+
+        DB::statement(
+            'ALTER TABLE `obligation_request_status` CHANGE `mfo_pap` `mfo_pap` BLOB NULL;'
+        );
     }
 
     /**
@@ -25,8 +29,14 @@ class Update2ObligationRequestStatus extends Migration
      */
     public function down()
     {
-        Schema::table('obligation_request_status', function (Blueprint $table) {
-            //
-        });
+        if (Schema::hasColumn('obligation_request_status', 'date_released')) {
+            Schema::table('obligation_request_status', function (Blueprint $table) {
+                $table->dropColumn('date_released');
+            });
+        }
+
+        DB::statement(
+            'ALTER TABLE `obligation_request_status` CHANGE `mfo_pap` `mfo_pap` TEXT NULL;'
+        );
     }
 }

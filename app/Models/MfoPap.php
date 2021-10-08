@@ -7,9 +7,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 use Kyslik\ColumnSortable\Sortable;
 
-class MdsGsb extends Model
+class MfoPap extends Model
 {
-
     use SoftDeletes, Sortable;
 
     /**
@@ -17,7 +16,7 @@ class MdsGsb extends Model
      *
      * @var string
      */
-    protected $table = 'mds_gsb';
+    protected $table = 'mfo_pap';
 
     /**
      * The attributes that are mass assignable.
@@ -26,8 +25,8 @@ class MdsGsb extends Model
      */
     protected $fillable = [
         'id',
-        'branch',
-        'sub_account_no',
+        'code',
+        'description',
     ];
 
     /**
@@ -49,7 +48,7 @@ class MdsGsb extends Model
     }
 
     public $sortable = [
-        'branch',
-        'sub_account_no',
+        'code',
+        'description',
     ];
 }

@@ -17,6 +17,8 @@ class CreateFundingRegAllotmentItems extends Migration
             $table->uuid('id')->primary();
             $table->uuid('reg_allotment_id');
             $table->foreign('reg_allotment_id')->references('id')->on('funding_reg_allotments');
+            $table->uuid('ors_id');
+            $table->foreign('ors_id')->references('id')->on('obligation_request_status');
             $table->unsignedInteger('order_no');
             $table->date('date_received')->nullable();
             $table->date('date_obligated');

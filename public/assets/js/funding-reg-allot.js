@@ -149,6 +149,7 @@ $(function() {
                   payee = $(elem).find('.payee').val();
                   particulars = $(elem).find('.particulars').val();
                   serialNumber = $(elem).find('.serial-number').val();
+                  orsID = $(elem).find('.ors-id').val();
                   uacsObjectCode = $(elem).find('.uacs-object').val();
                   allotments = $(elem).find('.allotments').val();
                   obligations = $(elem).find('.obligations').val();
@@ -166,6 +167,7 @@ $(function() {
             formData.append('payee', payee);
             formData.append('particulars', particulars);
             formData.append('serial_number', serialNumber);
+            formData.append('ors_id', orsID);
             formData.append('uacs_object_code', uacsObjectCode);
             formData.append('allotments', allotments);
             formData.append('obligations', obligations);

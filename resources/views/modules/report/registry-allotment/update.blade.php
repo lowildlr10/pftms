@@ -237,6 +237,7 @@
                                         <input type="text" placeholder="..." name="serial_number[]"
                                                value="{{ $item->id ? $item->serial_number : $item->ors_serial_number }}"
                                                class="form-control required form-control-sm serial-number">
+                                        <input type="hidden" name="ors_id" class="ors-id" value="{{ $item->ors_id }}">
                                     </div>
                                 </td>
                                 <td>
