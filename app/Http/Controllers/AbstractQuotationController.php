@@ -160,6 +160,7 @@ class AbstractQuotationController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showCreate($id) {
+        $canSetModeProc = Auth::user()->getModuleAccess('proc_abstract', 'set_mode_proc');
         $instanceAbstract = AbstractQuotation::with('pr')->find($id);
         $prID = $instanceAbstract->pr_id;
         $items = $this->getAbstractTable($prID);
@@ -183,7 +184,8 @@ class AbstractQuotationController extends Controller
             'procurementModes' => $procurementModes,
             'users' => $users,
             'signatories' => $signatories,
-            'abstractItems' => $items
+            'abstractItems' => $items,
+            'canSetModeProc' => $canSetModeProc,
         ]);
     }
 
@@ -322,6 +324,7 @@ class AbstractQuotationController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showEdit($id) {
+        $canSetModeProc = Auth::user()->getModuleAccess('proc_abstract', 'set_mode_proc');
         $instanceAbstract = AbstractQuotation::with('pr')->find($id);
         $prID = $instanceAbstract->pr_id;
         $abstractDate = $instanceAbstract->date_abstract;
@@ -362,6 +365,7 @@ class AbstractQuotationController extends Controller
             'secondMember' => $secondMember,
             'thirdMember' => $thirdMember,
             'endUser' => $endUser,
+            'canSetModeProc' => $canSetModeProc,
         ]);
     }
 
