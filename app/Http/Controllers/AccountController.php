@@ -72,6 +72,7 @@ class AccountController extends Controller
             'abstract_update' => 'Update',
             'abstract_delete' => 'Delete',
             'abstract_approve_po_jo' => 'Set to Approved for PO/JO',
+            'abstract_set_mode_proc' => 'Set the Mode of Procurement',
         'proc_po_jo' => 'Procurement - Purchase/Job Order',
             'po_jo_create' => 'Create',
             'po_jo_update' => 'Update',
@@ -301,6 +302,7 @@ class AccountController extends Controller
             'abstract_update' => 'update',
             'abstract_delete' => 'delete',
             'abstract_approve_po_jo' => 'approve_po_jo',
+            'abstract_set_mode_proc' => 'set_mode_proc',
         ],
         'proc_po_jo' => [
             'po_jo_create' => 'create',

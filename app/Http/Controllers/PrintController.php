@@ -3320,7 +3320,7 @@ class PrintController extends Controller
     private function getDataAbstract($id, $pageHeight) {
         $abstract = DB::table('abstract_quotations as abstract')
                       ->join('purchase_requests as pr', 'pr.id', '=', 'abstract.pr_id')
-                      ->join('procurement_modes as mode', 'mode.id', '=', 'abstract.mode_procurement')
+                      ->leftJoin('procurement_modes as mode', 'mode.id', '=', 'abstract.mode_procurement')
                       ->where('abstract.id', $id)->first();
         $items = $this->getItemGroup($abstract->pr_id);
         $prData = $this->getDataPR($abstract->pr_id)->pr;

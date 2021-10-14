@@ -18,7 +18,7 @@ class DocAbstractQuotation extends PDF {
         $member2 = $data->sig_second_member->name;
         $member3 = $data->sig_third_member->name;
         $endUser = $data->sig_end_user->name;
-        $modeProcurement =  $data->abstract->mode_name;
+        $modeProcurement =  $data->abstract->mode_name ?  $data->abstract->mode_name : '________________';
 
         $abstractSigs = [$chairperson, $viceChairperson, $member1,
                          $member2, $member3, $endUser];

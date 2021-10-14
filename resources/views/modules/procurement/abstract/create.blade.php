@@ -9,6 +9,8 @@
             </div>
         </div>
         <div class="col-md-6">
+
+            @if ($canSetModeProc)
             <div class="md-form">
                 <select class="mdb-select crud-select md-form required" searchable="Search here.."
                         id="mode_procurement">
@@ -24,6 +26,8 @@
                     Mode of Procurement <span class="red-text">*</span>
                 </label>
             </div>
+            @endif
+
         </div>
     </div>
 
