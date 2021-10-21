@@ -280,7 +280,7 @@ class PurchaseJobOrderController extends Controller
             'deliveryTerm', 'amountWords', 'grandTotal', 'paymentTerm',
             'fundCluster', 'sigDepartment', 'sigApproval',
             'sigFundsAvailable', 'poItems', 'signatories',
-            'instancePO' , 'poNumbers',
+            'instancePO' , 'poNumbers', 'modeProcurement',
             'unitIssues'
         ));
     }
