@@ -256,7 +256,7 @@ class PurchaseJobOrderController extends Controller
         $documentType = $instancePO->document_type;
         $poItems = $instancePO->poitems;
         $instanceAbstract = AbstractQuotation::with('modeproc')->where('pr_id', $prID)->first();
-        $modeProcurement = $instanceAbstract->modeproc->mode_name;
+        //$modeProcurement = $instanceAbstract->modeproc->mode_name;
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -280,7 +280,7 @@ class PurchaseJobOrderController extends Controller
             'deliveryTerm', 'amountWords', 'grandTotal', 'paymentTerm',
             'fundCluster', 'sigDepartment', 'sigApproval',
             'sigFundsAvailable', 'poItems', 'signatories',
-            'modeProcurement', 'instancePO' , 'poNumbers',
+            'instancePO' , 'poNumbers',
             'unitIssues'
         ));
     }

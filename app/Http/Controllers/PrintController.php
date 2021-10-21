@@ -3173,7 +3173,7 @@ class PrintController extends Controller
                 ->select('po.*', 'bid.company_name', 'bid.address', 'mode.mode_name')
                 ->join('suppliers as bid', 'bid.id', '=', 'po.awarded_to')
                 ->join('abstract_quotations as abs', 'abs.pr_id', '=', 'po.pr_id')
-                ->join('procurement_modes as mode', 'mode.id', '=', 'abs.mode_procurement')
+                ->leftJoin('procurement_modes as mode', 'mode.id', '=', 'abs.mode_procurement')
                 ->where('po.id', $id)
                 ->first();
         $documentType = $po->document_type;
