@@ -98,18 +98,45 @@ $(function() {
     function initializeInputs() {
         $('#period-ending').change(function() {
             const periodEnding = $(this).val();
+            const mfoPAP = $('#mfo-pap').val();
 
-            $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
-            $('#voucher-table-section').slideUp(300).html('');
-            $('#voucher-table-section').load(`${baseURL}/report/registry-allot-obli-disb/get-vouchers`, {
-                _token: CSRF_TOKEN,
-                period_ending: periodEnding
-            }, function() {
-                $('#mdb-preloader').fadeOut(300);
-                initializeSelect2();
-                initializeSortable();
-                $(this).slideDown(500);
-            });
+            if (!empty(mfoPAP)) {
+                $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+                $('#voucher-table-section').slideUp(300).html('');
+                $('#voucher-table-section').load(`${baseURL}/report/registry-allot-obli-disb/get-vouchers`, {
+                    _token: CSRF_TOKEN,
+                    period_ending: periodEnding,
+                    mfo_pap: mfoPAP,
+                }, function() {
+                    $('#mdb-preloader').fadeOut(300);
+                    initializeSelect2();
+                    initializeSortable();
+                    $(this).slideDown(500);
+                });
+            } else {
+                alert('Please fill-up the MFO/PAP field.');
+            }
+        });
+        $('#mfo-pap').change(function() {
+            const periodEnding = $('#period-ending').val();
+            const mfoPAP = $(this).val();
+
+            if (!empty(periodEnding)) {
+                $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+                $('#voucher-table-section').slideUp(300).html('');
+                $('#voucher-table-section').load(`${baseURL}/report/registry-allot-obli-disb/get-vouchers`, {
+                    _token: CSRF_TOKEN,
+                    period_ending: periodEnding,
+                    mfo_pap: mfoPAP,
+                }, function() {
+                    $('#mdb-preloader').fadeOut(300);
+                    initializeSelect2();
+                    initializeSortable();
+                    $(this).slideDown(500);
+                });
+            } else {
+                alert('Please fill-up the Period Ending field.');
+            }
         });
     }
 
@@ -149,6 +176,7 @@ $(function() {
                   payee = $(elem).find('.payee').val();
                   particulars = $(elem).find('.particulars').val();
                   serialNumber = $(elem).find('.serial-number').val();
+                  orsID = $(elem).find('.ors-id').val();
                   uacsObjectCode = $(elem).find('.uacs-object').val();
                   allotments = $(elem).find('.allotments').val();
                   obligations = $(elem).find('.obligations').val();
@@ -166,6 +194,7 @@ $(function() {
             formData.append('payee', payee);
             formData.append('particulars', particulars);
             formData.append('serial_number', serialNumber);
+            formData.append('ors_id', orsID);
             formData.append('uacs_object_code', uacsObjectCode);
             formData.append('allotments', allotments);
             formData.append('obligations', obligations);

@@ -795,28 +795,15 @@ class PrintController extends Controller
 
     private function getDataRAOD($_regAllotIDs) {
         $regAllotIDs = array_filter(explode(';', $_regAllotIDs));
+        $mfoPapGrps = [];
         $dates = [];
         $data = [];
-
-        $periodEnding = [];
-        $entityName = '';
-        $fundCluster = '';
-        $legalBasis = '';
-        $mfoPAP = '';
-        $sheetNo = '1';
-
-        $currMonth = '';
-        $currTotalAllot = 0;
-        $currTotalOblig = 0;
-        $currTotalUnoblig = 0;
-        $currTotalDisb = 0;
-        $currTotalDue = 0;
-        $currTotalNotDue = 0;
 
         foreach ($regAllotIDs as $regAllotID) {
             $regAllotData = DB::table('funding_reg_allotments')
                                 ->where('id', $regAllotID)
                                 ->first();
+            $mfoPapGrps[] = implode(',', unserialize($regAllotData->mfo_pap));
 
             $dates[] = [
                 'id' => $regAllotID,
@@ -824,212 +811,455 @@ class PrintController extends Controller
             ];
         }
 
+        array_unique($mfoPapGrps);
         usort($dates, ['App\Http\Controllers\PrintController', 'dateCompare']);
 
-        foreach ($dates as $regDat) {
-            $itemTableData = [];
-            $footerTableData = [];
+        foreach ($mfoPapGrps as $papGrp) {
+            $mfoPAPs = [];
+            $periodEnding = [];
+            $entityName = '';
+            $fundCluster = '';
+            $legalBasis = '';
+            $mfoPAP = '';
+            $sheetNo = '1';
+
+            $currMonth = '';
+            $currTotalAllot = 0;
+            $currTotalOblig = 0;
+            $currTotalUnoblig = 0;
+            $currTotalDisb = 0;
+            $currTotalDue = 0;
+            $currTotalNotDue = 0;
+
             $suppliers = DB::table('suppliers')->get();
 
-            $regAllotData = DB::table('funding_reg_allotments')
-                                ->where('id', $regDat['id'])
+            $_mfoPAPs = explode(',', $papGrp);
+
+            foreach ($_mfoPAPs as $grpKey => $pap) {
+                $mfoPapDat = DB::table('mfo_pap')
+                                ->where('id', $pap)
                                 ->first();
-            $regAllotmentItems = DB::table('funding_reg_allotment_items')
-                                ->where('reg_allotment_id', $regDat['id'])
-                                ->orderBy('order_no')
-                                ->get();
 
-            $periodEnding[] = date_format(date_create($regAllotData->period_ending), 'F Y');
-            $entityName = $regAllotData->entity_name;
-            $fundCluster = $regAllotData->fund_cluster;
-            $legalBasis = $regAllotData->legal_basis;
-            $mfoPAP = $regAllotData->mfo_pap;
-            $sheetNo = $regAllotData->sheet_no;
-
-            $_periodEnding = date_format(date_create($regAllotData->period_ending), 'F Y');
-            $currMonth = strtoupper($_periodEnding);
-
-            $multiplier = 1;
-
-            $totalAllot = 0;
-            $totalOblig = 0;
-            $totalUnoblig = 0;
-            $totalDisb = 0;
-            $totalDue = 0;
-            $totalNotDue = 0;
-
-            foreach ($regAllotmentItems as $ctr => $item) {
-                $payee = Auth::user()->getEmployee($item->payee)->name;
-                $uacsCodes = unserialize($item->uacs_object_code);
-                $uacsObjects = [];
-
-                if (strpos($item->particulars, "\n") !== FALSE) {
-                    $searchStr = ["\r\n", "\n", "\r"];
-                    $item->particulars = str_replace($searchStr, '<br>', $item->particulars);
+                if ($mfoPapDat) {
+                    $mfoPAPs[] = $mfoPapDat->code;
                 }
+            }
 
-                if (!$payee) {
-                    foreach ($suppliers as $key => $bid) {
-                        if ($bid->id == $item->payee) {
-                            $payee = $bid->company_name;
-                            break;
+            $mfoPAP = implode(', ', $mfoPAPs);
+            $data[] = (object) [
+                'mfo_pap' => $mfoPAP
+            ];
+            $datKey = count($data) - 1;
+
+            foreach ($dates as $regDat) {
+                $itemTableData = [];
+                $footerTableData = [];
+
+                $regAllotData = DB::table('funding_reg_allotments')
+                                  ->where('id', $regDat['id'])
+                                  ->first();
+
+                if (implode(',', unserialize($regAllotData->mfo_pap)) == $papGrp) {
+                    $itemTableData = [];
+                    $footerTableData = [];
+                    $regAllotmentItems = DB::table('funding_reg_allotment_items')
+                                           ->where('reg_allotment_id', $regDat['id'])
+                                           ->orderBy('order_no')
+                                           ->get();
+
+                    $data[$datKey]->id[] = $regDat['id'];
+                    $periodEnding[] = date_format(date_create($regAllotData->period_ending), 'F Y');
+                    $entityName = $regAllotData->entity_name;
+                    $fundCluster = $regAllotData->fund_cluster;
+                    $legalBasis = $regAllotData->legal_basis;
+                    $sheetNo = $regAllotData->sheet_no;
+
+                    $_periodEnding = date_format(date_create($regAllotData->period_ending), 'F Y');
+                    $currMonth = strtoupper($_periodEnding);
+
+                    $multiplier = 1;
+
+                    $totalAllot = 0;
+                    $totalOblig = 0;
+                    $totalUnoblig = 0;
+                    $totalDisb = 0;
+                    $totalDue = 0;
+                    $totalNotDue = 0;
+
+                    foreach ($regAllotmentItems as $ctr => $item) {
+                        $payee = Auth::user()->getEmployee($item->payee)->name;
+                        $uacsCodes = unserialize($item->uacs_object_code);
+                        $uacsObjects = [];
+
+                        if (strpos($item->particulars, "\n") !== FALSE) {
+                            $searchStr = ["\r\n", "\n", "\r"];
+                            $item->particulars = str_replace($searchStr, '<br>', $item->particulars);
                         }
-                    }
-                }
 
-                foreach ($uacsCodes as $uacs) {
-                    $mooeTitleDat = DB::table('mooe_account_titles')
-                                    ->where('id', $uacs)
+                        if (!$payee) {
+                            foreach ($suppliers as $key => $bid) {
+                                if ($bid->id == $item->payee) {
+                                    $payee = $bid->company_name;
+                                    break;
+                                }
+                            }
+                        }
+
+                        foreach ($uacsCodes as $uacs) {
+                            $mooeTitleDat = DB::table('mooe_account_titles')
+                                            ->where('id', $uacs)
+                                            ->first();
+
+                            if ($mooeTitleDat) {
+                                $uacsObjects[] = $mooeTitleDat->uacs_code;
+                            }
+                        }
+
+                        $uacsObjects = implode(', ', $uacsObjects);
+
+                        $totalAllot += $item->allotments;
+                        $totalOblig += $item->obligations;
+                        $totalUnoblig += $item->unobligated_allot;
+                        $totalDisb += $item->disbursement;
+                        $totalDue += $item->due_demandable;
+                        $totalNotDue += $item->not_due_demandable;
+
+                        $currTotalAllot += $item->allotments;
+                        $currTotalOblig += $item->obligations;
+                        $currTotalUnoblig += $item->unobligated_allot;
+                        $currTotalDisb += $item->disbursement;
+                        $currTotalDue += $item->due_demandable;
+                        $currTotalNotDue += $item->not_due_demandable;
+
+                        $item->allotments = number_format($item->allotments, 2);
+                        $item->obligations = number_format($item->obligations, 2);
+                        $item->unobligated_allot = number_format($item->unobligated_allot, 2);
+                        $item->disbursement = number_format($item->disbursement, 2);
+                        $item->due_demandable = number_format($item->due_demandable, 2);
+                        $item->not_due_demandable = number_format($item->not_due_demandable, 2);
+
+                        $itemTableData[] = [
+                            $item->date_received,
+                            $item->date_obligated,
+                            $item->date_released,
+                            $payee,
+                            $item->particulars,
+                            $item->serial_number,
+                            $uacsObjects,
+                            $item->allotments,
+                            $item->obligations,
+                            $item->unobligated_allot,
+                            $item->disbursement,
+                            $item->due_demandable,
+                            $item->not_due_demandable,
+                        ];
+                    }
+
+                    $totalAllot = number_format($totalAllot, 2);
+                    $totalOblig = number_format($totalOblig, 2);
+                    $totalUnoblig = number_format($totalUnoblig, 2);
+                    $totalDisb = number_format($totalDisb, 2);
+                    $totalDue = number_format($totalDue, 2);
+                    $totalNotDue = number_format($totalNotDue, 2);
+
+                    $footerTableData[] = [
+                        'TOTAL FOR THE MONTH OF '.strtoupper($_periodEnding),
+                        '', '', '', '', '', '',
+                        $totalAllot,
+                        $totalOblig,
+                        $totalUnoblig,
+                        $totalDisb,
+                        $totalDue,
+                        $totalNotDue,
+                    ];
+
+                    $data[$datKey]->table_data[] = (object) [
+                        'table_data' => [
+                            [
+                                'aligns' => [
+                                    'C', 'C', 'C', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'R'
+                                ],
+                                'widths' => [
+                                    5 * $multiplier, //date_received
+                                    5 * $multiplier, //date_obligated
+                                    5 * $multiplier, //date_released
+                                    9 * $multiplier, //payee
+                                    14 * $multiplier, //particulars
+                                    7 * $multiplier, //serial_number
+                                    7 * $multiplier, //uacs_objects
+                                    7 * $multiplier, //allotments
+                                    7 * $multiplier, //obligations
+                                    7 * $multiplier, //unobligated_allot
+                                    7 * $multiplier, //disbursement
+                                    10 * $multiplier, //due_demandable
+                                    10 * $multiplier, //not_due_demandable
+                                ],
+                                'font-styles' => [
+                                    '', '', '', '', '', '', '', '', '', '', '', '', ''
+                                ],
+                                'type' => 'row-data',
+                                'data' => $itemTableData,
+                            ],
+                        ],
+                        'table_footer' => [
+                            [
+                                'col-span' => true,
+                                'col-span-key' => ['0-3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+                                'aligns' => [
+                                    'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R'
+                                ],
+                                'widths' => [
+                                    5 * $multiplier, //date_received
+                                    5 * $multiplier, //date_obligated
+                                    5 * $multiplier, //date_released
+                                    9 * $multiplier, //payee
+                                    14 * $multiplier, //particulars
+                                    7 * $multiplier, //serial_number
+                                    7 * $multiplier, //uacs_objects
+                                    7 * $multiplier, //allotments
+                                    7 * $multiplier, //obligations
+                                    7 * $multiplier, //unobligated_allot
+                                    7 * $multiplier, //disbursement
+                                    10 * $multiplier, //due_demandable
+                                    10 * $multiplier, //not_due_demandable
+                                ],
+                                'font-styles' => [
+                                    'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B'
+                                ],
+                                'type' => 'other',
+                                'data' => $footerTableData
+                            ]
+                        ],
+                        'month' => strtoupper($_periodEnding)
+                    ];
+                }
+            }
+
+            $currTotalAllot = number_format($currTotalAllot, 2);
+            $currTotalOblig = number_format($currTotalOblig, 2);
+            $currTotalUnoblig = number_format($currTotalUnoblig, 2);
+            $currTotalDisb = number_format($currTotalDisb, 2);
+            $currTotalDue = number_format($currTotalDue, 2);
+            $currTotalNotDue = number_format($currTotalNotDue, 2);
+
+            $data[$datKey]->period_ending = implode(', ', $periodEnding);
+            $data[$datKey]->entity_name = $entityName;
+            $data[$datKey]->fund_cluster = $fundCluster;
+            $data[$datKey]->legal_basis = $legalBasis;
+            $data[$datKey]->sheet_no = $sheetNo;
+            $data[$datKey]->current_month = $currMonth;
+            $data[$datKey]->total_allotment = $currTotalAllot;
+            $data[$datKey]->total_obligation = $currTotalOblig;
+            $data[$datKey]->total_unobligated = $currTotalUnoblig;
+            $data[$datKey]->total_disbursement = $currTotalDisb;
+            $data[$datKey]->total_due = $currTotalDue;
+            $data[$datKey]->total_not_due = $currTotalNotDue;
+
+            /*
+            foreach ($dates as $regDat) {
+                $itemTableData = [];
+                $footerTableData = [];
+                $mfoPAPs = [];
+                $suppliers = DB::table('suppliers')->get();
+
+                $regAllotData = DB::table('funding_reg_allotments')
+                                    ->where('id', $regDat['id'])
+                                    ->first();
+                $regAllotmentItems = DB::table('funding_reg_allotment_items')
+                                    ->where('reg_allotment_id', $regDat['id'])
+                                    ->orderBy('order_no')
+                                    ->get();
+
+                $periodEnding[] = date_format(date_create($regAllotData->period_ending), 'F Y');
+                $entityName = $regAllotData->entity_name;
+                $fundCluster = $regAllotData->fund_cluster;
+                $legalBasis = $regAllotData->legal_basis;
+                $_mfoPAPs = $regAllotData->mfo_pap ? unserialize($regAllotData->mfo_pap) : [];
+                $sheetNo = $regAllotData->sheet_no;
+
+                $_periodEnding = date_format(date_create($regAllotData->period_ending), 'F Y');
+                $currMonth = strtoupper($_periodEnding);
+
+                $multiplier = 1;
+
+                $totalAllot = 0;
+                $totalOblig = 0;
+                $totalUnoblig = 0;
+                $totalDisb = 0;
+                $totalDue = 0;
+                $totalNotDue = 0;
+
+                foreach ($_mfoPAPs as $pap) {
+                    $mfoPapDat = DB::table('mfo_pap')
+                                    ->where('id', $pap)
                                     ->first();
 
-                    if ($mooeTitleDat) {
-                        $uacsObjects[] = $mooeTitleDat->uacs_code;
+                    if ($mfoPapDat) {
+                        $mfoPAPs[] = $mfoPapDat->code;
                     }
                 }
 
-                $uacsObjects = implode(', ', $uacsObjects);
+                $mfoPAP = implode(', ', $mfoPAPs);
 
-                $totalAllot += $item->allotments;
-                $totalOblig += $item->obligations;
-                $totalUnoblig += $item->unobligated_allot;
-                $totalDisb += $item->disbursement;
-                $totalDue += $item->due_demandable;
-                $totalNotDue += $item->not_due_demandable;
+                foreach ($regAllotmentItems as $ctr => $item) {
+                    $payee = Auth::user()->getEmployee($item->payee)->name;
+                    $uacsCodes = unserialize($item->uacs_object_code);
+                    $uacsObjects = [];
 
-                $currTotalAllot += $item->allotments;
-                $currTotalOblig += $item->obligations;
-                $currTotalUnoblig += $item->unobligated_allot;
-                $currTotalDisb += $item->disbursement;
-                $currTotalDue += $item->due_demandable;
-                $currTotalNotDue += $item->not_due_demandable;
+                    if (strpos($item->particulars, "\n") !== FALSE) {
+                        $searchStr = ["\r\n", "\n", "\r"];
+                        $item->particulars = str_replace($searchStr, '<br>', $item->particulars);
+                    }
 
-                $item->allotments = number_format($item->allotments, 2);
-                $item->obligations = number_format($item->obligations, 2);
-                $item->unobligated_allot = number_format($item->unobligated_allot, 2);
-                $item->disbursement = number_format($item->disbursement, 2);
-                $item->due_demandable = number_format($item->due_demandable, 2);
-                $item->not_due_demandable = number_format($item->not_due_demandable, 2);
+                    if (!$payee) {
+                        foreach ($suppliers as $key => $bid) {
+                            if ($bid->id == $item->payee) {
+                                $payee = $bid->company_name;
+                                break;
+                            }
+                        }
+                    }
 
-                $itemTableData[] = [
-                    $item->date_received,
-                    $item->date_obligated,
-                    $item->date_released,
-                    $payee,
-                    $item->particulars,
-                    $item->serial_number,
-                    $uacsObjects,
-                    $item->allotments,
-                    $item->obligations,
-                    $item->unobligated_allot,
-                    $item->disbursement,
-                    $item->due_demandable,
-                    $item->not_due_demandable,
+                    foreach ($uacsCodes as $uacs) {
+                        $mooeTitleDat = DB::table('mooe_account_titles')
+                                        ->where('id', $uacs)
+                                        ->first();
+
+                        if ($mooeTitleDat) {
+                            $uacsObjects[] = $mooeTitleDat->uacs_code;
+                        }
+                    }
+
+                    $uacsObjects = implode(', ', $uacsObjects);
+
+                    $totalAllot += $item->allotments;
+                    $totalOblig += $item->obligations;
+                    $totalUnoblig += $item->unobligated_allot;
+                    $totalDisb += $item->disbursement;
+                    $totalDue += $item->due_demandable;
+                    $totalNotDue += $item->not_due_demandable;
+
+                    $currTotalAllot += $item->allotments;
+                    $currTotalOblig += $item->obligations;
+                    $currTotalUnoblig += $item->unobligated_allot;
+                    $currTotalDisb += $item->disbursement;
+                    $currTotalDue += $item->due_demandable;
+                    $currTotalNotDue += $item->not_due_demandable;
+
+                    $item->allotments = number_format($item->allotments, 2);
+                    $item->obligations = number_format($item->obligations, 2);
+                    $item->unobligated_allot = number_format($item->unobligated_allot, 2);
+                    $item->disbursement = number_format($item->disbursement, 2);
+                    $item->due_demandable = number_format($item->due_demandable, 2);
+                    $item->not_due_demandable = number_format($item->not_due_demandable, 2);
+
+                    $itemTableData[] = [
+                        $item->date_received,
+                        $item->date_obligated,
+                        $item->date_released,
+                        $payee,
+                        $item->particulars,
+                        $item->serial_number,
+                        $uacsObjects,
+                        $item->allotments,
+                        $item->obligations,
+                        $item->unobligated_allot,
+                        $item->disbursement,
+                        $item->due_demandable,
+                        $item->not_due_demandable,
+                    ];
+                }
+
+                $totalAllot = number_format($totalAllot, 2);
+                $totalOblig = number_format($totalOblig, 2);
+                $totalUnoblig = number_format($totalUnoblig, 2);
+                $totalDisb = number_format($totalDisb, 2);
+                $totalDue = number_format($totalDue, 2);
+                $totalNotDue = number_format($totalNotDue, 2);
+
+                $footerTableData[] = [
+                    'TOTAL FOR THE MONTH OF '.strtoupper($_periodEnding),
+                    '', '', '', '', '', '',
+                    $totalAllot,
+                    $totalOblig,
+                    $totalUnoblig,
+                    $totalDisb,
+                    $totalDue,
+                    $totalNotDue,
+                ];
+
+                $data[] = (object) [
+                    'table_data' => [
+                        [
+                            'aligns' => [
+                                'C', 'C', 'C', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'R'
+                            ],
+                            'widths' => [
+                                5 * $multiplier, //date_received
+                                5 * $multiplier, //date_obligated
+                                5 * $multiplier, //date_released
+                                9 * $multiplier, //payee
+                                14 * $multiplier, //particulars
+                                7 * $multiplier, //serial_number
+                                7 * $multiplier, //uacs_objects
+                                7 * $multiplier, //allotments
+                                7 * $multiplier, //obligations
+                                7 * $multiplier, //unobligated_allot
+                                7 * $multiplier, //disbursement
+                                10 * $multiplier, //due_demandable
+                                10 * $multiplier, //not_due_demandable
+                            ],
+                            'font-styles' => [
+                                '', '', '', '', '', '', '', '', '', '', '', '', ''
+                            ],
+                            'type' => 'row-data',
+                            'data' => $itemTableData,
+                        ],
+                    ],
+                    'table_footer' => [
+                        [
+                            'col-span' => true,
+                            'col-span-key' => ['0-3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+                            'aligns' => [
+                                'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R'
+                            ],
+                            'widths' => [
+                                5 * $multiplier, //date_received
+                                5 * $multiplier, //date_obligated
+                                5 * $multiplier, //date_released
+                                9 * $multiplier, //payee
+                                14 * $multiplier, //particulars
+                                7 * $multiplier, //serial_number
+                                7 * $multiplier, //uacs_objects
+                                7 * $multiplier, //allotments
+                                7 * $multiplier, //obligations
+                                7 * $multiplier, //unobligated_allot
+                                7 * $multiplier, //disbursement
+                                10 * $multiplier, //due_demandable
+                                10 * $multiplier, //not_due_demandable
+                            ],
+                            'font-styles' => [
+                                'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B'
+                            ],
+                            'type' => 'other',
+                            'data' => $footerTableData
+                        ]
+                    ],
+                    'month' => strtoupper($_periodEnding)
                 ];
             }
 
-            $totalAllot = number_format($totalAllot, 2);
-            $totalOblig = number_format($totalOblig, 2);
-            $totalUnoblig = number_format($totalUnoblig, 2);
-            $totalDisb = number_format($totalDisb, 2);
-            $totalDue = number_format($totalDue, 2);
-            $totalNotDue = number_format($totalNotDue, 2);
-
-            $footerTableData[] = [
-                'TOTAL FOR THE MONTH OF '.strtoupper($_periodEnding),
-                '', '', '', '', '', '',
-                $totalAllot,
-                $totalOblig,
-                $totalUnoblig,
-                $totalDisb,
-                $totalDue,
-                $totalNotDue,
-            ];
-
-            $data[] = (object) [
-                'table_data' => [
-                    [
-                        'aligns' => [
-                            'C', 'C', 'C', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'R'
-                        ],
-                        'widths' => [
-                            5 * $multiplier, //date_received
-                            5 * $multiplier, //date_obligated
-                            5 * $multiplier, //date_released
-                            9 * $multiplier, //payee
-                            14 * $multiplier, //particulars
-                            7 * $multiplier, //serial_number
-                            7 * $multiplier, //uacs_objects
-                            7 * $multiplier, //allotments
-                            7 * $multiplier, //obligations
-                            7 * $multiplier, //unobligated_allot
-                            7 * $multiplier, //disbursement
-                            10 * $multiplier, //due_demandable
-                            10 * $multiplier, //not_due_demandable
-                        ],
-                        'font-styles' => [
-                            '', '', '', '', '', '', '', '', '', '', '', '', ''
-                        ],
-                        'type' => 'row-data',
-                        'data' => $itemTableData,
-                    ],
-                ],
-                'table_footer' => [
-                    [
-                        'col-span' => true,
-                        'col-span-key' => ['0-3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
-                        'aligns' => [
-                            'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R'
-                        ],
-                        'widths' => [
-                            5 * $multiplier, //date_received
-                            5 * $multiplier, //date_obligated
-                            5 * $multiplier, //date_released
-                            9 * $multiplier, //payee
-                            14 * $multiplier, //particulars
-                            7 * $multiplier, //serial_number
-                            7 * $multiplier, //uacs_objects
-                            7 * $multiplier, //allotments
-                            7 * $multiplier, //obligations
-                            7 * $multiplier, //unobligated_allot
-                            7 * $multiplier, //disbursement
-                            10 * $multiplier, //due_demandable
-                            10 * $multiplier, //not_due_demandable
-                        ],
-                        'font-styles' => [
-                            'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B'
-                        ],
-                        'type' => 'other',
-                        'data' => $footerTableData
-                    ]
-                ],
-                'month' => strtoupper($_periodEnding)
-            ];
+            $periodEnding = implode(', ', $periodEnding);
+            $currTotalAllot = number_format($currTotalAllot, 2);
+            $currTotalOblig = number_format($currTotalOblig, 2);
+            $currTotalUnoblig = number_format($currTotalUnoblig, 2);
+            $currTotalDisb = number_format($currTotalDisb, 2);
+            $currTotalDue = number_format($currTotalDue, 2);
+            $currTotalNotDue = number_format($currTotalNotDue, 2);*/
         }
 
-        $periodEnding = implode(', ', $periodEnding);
-        $currTotalAllot = number_format($currTotalAllot, 2);
-        $currTotalOblig = number_format($currTotalOblig, 2);
-        $currTotalUnoblig = number_format($currTotalUnoblig, 2);
-        $currTotalDisb = number_format($currTotalDisb, 2);
-        $currTotalDue = number_format($currTotalDue, 2);
-        $currTotalNotDue = number_format($currTotalNotDue, 2);
-
         return (object)[
-            'id' => $regAllotID,
-            'period_ending' => $periodEnding,
-            'entity_name' => $entityName,
-            'fund_cluster' => $fundCluster,
-            'legal_basis' => $legalBasis,
-            'mfo_pap' => $mfoPAP,
-            'sheet_no' => $sheetNo,
-            'tables' => $data,
-            'current_month' => $currMonth,
-            'total_allotment' => $currTotalAllot,
-            'total_obligation' => $currTotalOblig,
-            'total_unobligated' => $currTotalUnoblig,
-            'total_disbursement' => $currTotalDisb,
-            'total_due' => $currTotalDue,
-            'total_not_due' => $currTotalNotDue,
+            'data' => $data
         ];
     }
 
@@ -2794,12 +3024,13 @@ class PrintController extends Controller
             $dv->responsibility_center = str_replace($searchStr, '<br>', $dv->responsibility_center);
         }
 
+        /*
         if (strpos($dv->mfo_pap, "\n") !== FALSE) {
             $searchStr = ["\r\n", "\n", "\r"];
             $dv->mfo_pap = str_replace($searchStr, '<br>', $dv->mfo_pap);
         } else {
             $dv->mfo_pap = '<br><br><br><br>';
-        }
+        }*/
 
         $instanceSignatory = new Signatory;
         $sign1 = $instanceSignatory->getSignatory($dv->sig_certified)->name;
@@ -2808,8 +3039,20 @@ class PrintController extends Controller
         $position1 = $instanceSignatory->getSignatory($dv->sig_certified)->dv_designation;
         $position2 = $instanceSignatory->getSignatory($dv->sig_accounting)->dv_designation;
         $position3 = $instanceSignatory->getSignatory($dv->sig_agency_head)->dv_designation;
+        $mfoPAPs = [];
         $uacsObjects = [];
+        $_mfoPAPs = $dv->mfo_pap ? unserialize($dv->mfo_pap) : [];
         $uacsCodes = $dv->uacs_object_code ? unserialize($dv->uacs_object_code) : [];
+
+        foreach ($_mfoPAPs as $pap) {
+            $mfoPapDat = DB::table('mfo_pap')
+                              ->where('id', $pap)
+                              ->first();
+
+            if ($mfoPapDat) {
+                $mfoPAPs[] = $mfoPapDat->code;
+            }
+        }
 
         foreach ($uacsCodes as $uacs) {
             $mooeTitleDat = DB::table('mooe_account_titles')
@@ -2821,12 +3064,18 @@ class PrintController extends Controller
             }
         }
 
+        $mfoPAP = implode('<br>', $mfoPAPs);
+
+        if (count($mfoPAPs) <= 3) {
+            $mfoPAP .= '<br><br>';
+        }
+
         $uacsObjects = implode(', ', $uacsObjects);
         $amount = number_format($dv->amount, 2);
 
         $tableData[] = [$dv->particulars,
                         $dv->responsibility_center,
-                        $dv->mfo_pap, $amount];
+                        $mfoPAP, $amount];
 
         if ($dv->module_class == 3) {
             $payee = $dv->company_name;
@@ -3003,6 +3252,7 @@ class PrintController extends Controller
         $position2 = $instanceSignatory->getSignatory($ors->sig_certified_2)->ors_designation;
         $sDate1 = $ors->date_certified_1;
         $sDate2 = $ors->date_certified_2;
+        $mfoPAPs = [];
         $uacsObjects = [];
 
         if ($ors->document_type == 'ors') {
@@ -3021,6 +3271,8 @@ class PrintController extends Controller
 
         $multiplier = 100 / 91.427;
         $itemAmount = number_format($ors->amount, 2);
+        $_mfoPAPs = $ors->mfo_pap ? unserialize($ors->mfo_pap) : [];
+        $uacsCodes = $ors->uacs_object_code ? unserialize($ors->uacs_object_code) : [];
 
         if (strpos($ors->responsibility_center, "\n") !== FALSE) {
             $searchStr = ["\r\n", "\n", "\r"];
@@ -3032,12 +3284,21 @@ class PrintController extends Controller
             $ors->particulars = str_replace($searchStr, '<br>', $ors->particulars);
         }
 
+        /*
         if (strpos($ors->mfo_pap, "\n") !== FALSE) {
             $searchStr = ["\r\n", "\n", "\r"];
             $ors->mfo_pap = str_replace($searchStr, '<br>', $ors->mfo_pap);
-        }
+        }*/
 
-        $uacsCodes = unserialize($ors->uacs_object_code);
+        foreach ($_mfoPAPs as $pap) {
+            $mfoPapDat = DB::table('mfo_pap')
+                              ->where('id', $pap)
+                              ->first();
+
+            if ($mfoPapDat) {
+                $mfoPAPs[] = $mfoPapDat->code;
+            }
+        }
 
         foreach ($uacsCodes as $uacs) {
             $mooeTitleDat = DB::table('mooe_account_titles')
@@ -3049,10 +3310,11 @@ class PrintController extends Controller
             }
         }
 
+        $mfoPAP = implode('<br>', $mfoPAPs);
         $uacsObjects = implode(', ', $uacsObjects);
         $tableData[] = [$ors->responsibility_center,
                         $ors->particulars,
-                        $ors->mfo_pap,
+                        $mfoPAP,
                         $uacsObjects, $itemAmount];
 
         for ($i = 1; $i <= 6 ; $i++) {
@@ -4283,29 +4545,39 @@ class PrintController extends Controller
         );
 
         $pdf->setHeaderLR(false, true);
+        $pdf->setIsPageGrouped(true);
         $pdf->setFontScale($fontScale);
 
         $docCode = "FM-FAS-BUD F01";
         $docRev = "Revision 1";
         $docRevDate = "03-09-15";
-        $docTitle = 'raod_'.strtolower(str_replace(' ', '_', $data->period_ending));
+        $docTitle = 'raod_report';
         $docCreator = "DOST-CAR";
         $docAuthor = "DOST-CAR";
         $docSubject = "Registry of Allotments, Obligations and Disbursements";
         $docKeywords = "RAOD, raod, Registry, registry, Allotments, allotments, Obligations, obligations, Disbursement. disbursement";
+
+        $currentTotalPages = 0;
+
 
         //Set document information
         $this->setDocumentInfo($pdf, $docCode, $docRev, $docRevDate, $docTitle,
                                $docCreator, $docAuthor, $docSubject, $docKeywords);
 
         //Main document generation code file
-        $pdf->printRAOD($data);
+        foreach ($data->data as $dat) {
+            $pdf->printRAOD($dat);
+            $currentTotalPages = $currentTotalPages == 0 ? $pdf->getNumPages() :
+                                 $pdf->getNumPages() - $currentTotalPages;
 
-        DB::table('funding_reg_allotments')
-          ->where('id', $data->id)
-          ->update([
-              'sheet_no' => $pdf->getNumPages()
-          ]);
+            foreach ($dat->id as $id) {
+                DB::table('funding_reg_allotments')
+                ->where('id', $id)
+                ->update([
+                    'sheet_no' => $currentTotalPages
+                ]);
+            }
+        }
 
         //Print the document
         $this->printDocument($pdf, $docTitle, $previewToggle);

@@ -8,21 +8,6 @@ class DocRegistryAllotmentsORSDV extends PDF {
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
 
-        $periodEnding = $data->period_ending;
-        $entityName = $data->entity_name;
-        $fundCluster = $data->fund_cluster;
-        $legalBasis = $data->legal_basis;
-        $mfoPAP = $data->mfo_pap;
-        $sheetNo = $data->sheet_no;
-
-        $currentMonth = $data->current_month;
-        $totalAllot = $data->total_allotment;
-        $totalObli = $data->total_obligation;
-        $totalUnobli = $data->total_unobligated;
-        $totalDisb = $data->total_disbursement;
-        $totalDue = $data->total_due;
-        $totalNotDue = $data->total_not_due;
-
         /* ------------------------------------- Start of Config ------------------------------------- */
 
         //set default monospaced font
@@ -52,7 +37,23 @@ class DocRegistryAllotmentsORSDV extends PDF {
 
         /* ------------------------------------- End of Config ------------------------------------- */
 
+        $periodEnding = $data->period_ending;
+        $entityName = $data->entity_name;
+        $fundCluster = $data->fund_cluster;
+        $legalBasis = $data->legal_basis;
+        $mfoPAP = $data->mfo_pap;
+        $sheetNo = $data->sheet_no;
+
+        $currentMonth = $data->current_month;
+        $totalAllot = $data->total_allotment;
+        $totalObli = $data->total_obligation;
+        $totalUnobli = $data->total_unobligated;
+        $totalDisb = $data->total_disbursement;
+        $totalDue = $data->total_due;
+        $totalNotDue = $data->total_not_due;
+
         //Add a page
+        $this->startPageGroup();
         $this->AddPage();
 
         /* ------------------------------------- Start of Doc ------------------------------------- */
@@ -151,12 +152,12 @@ class DocRegistryAllotmentsORSDV extends PDF {
         $this->Ln();
 
         // Table body
-        foreach ($data->tables as $datCtr => $dat) {
+        foreach ($data->table_data as $datCtr => $dat) {
             $this->SetFont('helvetica', '', 8 + ($fontScale * 8));
             $this->htmlTable($dat->table_data);
             $this->htmlTable($dat->table_footer);
 
-            if ( $datCtr != count($data->tables) - 1) {
+            if ($datCtr != count($data->table_data) - 1) {
                 $this->Cell(0, 4, '', 'LR', '', 'C');
                 $this->Ln();
             }

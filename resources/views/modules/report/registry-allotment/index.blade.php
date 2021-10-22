@@ -74,15 +74,13 @@
                                     <tr>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md text-center" width="3%"></th>
-                                        <th class="th-md" width="81%">
+                                        <th class="th-md" width="71%">
                                             <b>
                                                 @sortablelink('raod.period_ending', 'For the Period Ending', [], ['class' => 'white-text'])
                                             </b>
                                         </th>
-                                        <th class="th-md" width="10%">
-                                            <b>
-                                                @sortablelink('raod.sheet_no', 'Sheet No.', [], ['class' => 'white-text'])
-                                            </b>
+                                        <th class="th-md" width="20%">
+                                            <b>MFO/PAP</b>
                                         </th>
                                         <th class="th-md" width="3%"></th>
                                     </tr>
@@ -102,7 +100,7 @@
                                         </td>
                                         <td></td>
                                         <td>{{ $fund->period_ending_month }}</td>
-                                        <td>{{ $fund->sheet_no }}</td>
+                                        <td>{!! $fund->mfo_pap !!}</td>
 
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
@@ -217,7 +215,7 @@
                             <b>Entity Name: </b> {{ $fund->entity_name }}<br>
                             <b>Fund Cluster: </b> {{ $fund->fund_cluster }}<br>
                             <b>Legal Basis: </b> {{ $fund->legal_basis }}<br>
-                            <b>MFO/PAP: </b> {{ $fund->mfo_pap }}<br>
+                            <b>MFO/PAP: </b> {!! $fund->mfo_pap !!}<br>
                             <b>Sheet No.: </b> {{ $fund->sheet_no }}<br>
                             <hr>
                             <b>Registered Voucher: </b> {{ $fund->voucher_count }}

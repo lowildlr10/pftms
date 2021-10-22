@@ -16,6 +16,7 @@ class PDF extends TCPDF {
     public $footerFontSize = 9;
     public $customPageNo = null;
     public $onlyPageNo = false;
+    public $isPageGrouped = false;
 
     /*
     //Set the array of column alignments
@@ -72,6 +73,10 @@ class PDF extends TCPDF {
 
     public function setIsPageNoOnly($bool) {
         $this->onlyPageNo = $bool;
+    }
+
+    public function setIsPageGrouped($bool) {
+        $this->isPageGrouped = $bool;
     }
 
     private function htmlFontStyle($key) {
@@ -312,7 +317,13 @@ class PDF extends TCPDF {
 
         $this->SetFont('helvetica', 'I', 7);
 
-        $pageNo = 'Page '.$this->getAliasNumPage().' of '.$this->getAliasNbPages();
+        if (!$this->isPageGrouped) {
+            $pageNo = 'Page '.$this->getAliasNumPage().' of '.$this->getAliasNbPages();
+        } else {
+            $pageNo = 'Page '.$this->getPageNumGroupAlias().' of '.$this->getPageGroupAlias();
+        }
+
+
         $this->Cell(0, 3, $pageNo, 0, 0, 'R');
     }
 

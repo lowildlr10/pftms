@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use App\Models\PurchaseJobOrder;
 use App\Models\FundingProject;
 use App\Models\FundingBudget;
 use App\Models\FundingAllotment;
@@ -23,6 +24,7 @@ use App\Models\EmpAccount as User;
 use App\Models\EmpUnit;
 use App\Models\Supplier;
 use App\Models\MooeAccountTitle;
+use App\Models\MfoPap;
 
 use Carbon\Carbon;
 use Auth;
@@ -100,10 +102,18 @@ class RegAllotmentController extends Controller
                              ->paginate(50);
 
         foreach ($fundRAOD as $raod) {
+            $mfoPAPs = [];
             $_periodEnding = strtotime($raod->period_ending);
             $periodEnding = date('F Y', $_periodEnding);
             $raod->period_ending_month = $periodEnding;
             $raod->voucher_count = RegAllotmentItem::where('reg_allotment_id', $raod->id)->count();
+
+            foreach (unserialize($raod->mfo_pap) as $pap) {
+                $mfoPapDat = DB::table('mfo_pap')->where('id', $pap)->first();
+                $mfoPAPs[] = $mfoPapDat->code;
+            }
+
+            $raod->mfo_pap = implode(', ', $mfoPAPs);
         }
 
         return $fundRAOD;
@@ -115,7 +125,8 @@ class RegAllotmentController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showCreate() {
-        return view('modules.report.registry-allotment.create');
+        $mfoPAPs = MfoPap::orderBy('code')->get();
+        return view('modules.report.registry-allotment.create', compact('mfoPAPs'));
     }
 
     /**
@@ -125,6 +136,10 @@ class RegAllotmentController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request) {
+        $mfoPAPs = explode(',', $request->mfo_pap);
+        sort($mfoPAPs);
+        $request->mfo_pap = serialize($mfoPAPs);
+
         $instanceRegAllot = new RegAllotment([
             'period_ending' => $request->period_ending,
             'entity_name' => $request->entity_name,
@@ -139,8 +154,13 @@ class RegAllotmentController extends Controller
     }
 
     public function storeItems(Request $request, $regID) {
+        $orsID =  $request->ors_id;
+        $uacsCode = $request->uacs_object_code ?
+                    serialize(explode(',', $request->uacs_object_code)) :
+                    serialize([]);
         $instanceRegAllot = new RegAllotmentItem([
             'reg_allotment_id' => $regID,
+            'ors_id' => $orsID,
             'order_no' => $request->order_no,
             'date_received' => $request->date_received,
             'date_obligated' => $request->date_obligated,
@@ -148,9 +168,7 @@ class RegAllotmentController extends Controller
             'payee' => $request->payee,
             'particulars' => $request->particulars,
             'serial_number' => $request->serial_number,
-            'uacs_object_code' => $request->uacs_object_code ?
-                                  serialize(explode(',', $request->uacs_object_code)) :
-                                  serialize([]),
+            'uacs_object_code' => $uacsCode,
             'allotments' => $request->allotments,
             'obligations' => $request->obligations,
             'unobligated_allot' => $request->unobligated_allot,
@@ -159,6 +177,22 @@ class RegAllotmentController extends Controller
             'not_due_demandable' => $request->not_due_demandable,
         ]);
         $instanceRegAllot->save();
+
+        $instanceORS = ObligationRequestStatus::find($orsID);
+        $instanceORS->date_obligated = $request->date_obligated;
+        $instanceORS->date_released = $request->date_released;
+        $instanceORS->payee = $request->payee;
+        $instanceORS->particulars = $request->particulars;
+        $instanceORS->serial_no = $request->serial_number;
+        $instanceORS->uacs_object_code = $uacsCode;
+        $instanceORS->save();
+
+        $instancePO = PurchaseJobOrder::where('po_no', $instanceORS->po_no)->first();
+
+        if ($instancePO) {
+            $instancePO->awarded_by;
+            $instancePO->save();
+        }
     }
 
     /**
@@ -179,6 +213,7 @@ class RegAllotmentController extends Controller
      */
     public function showEdit($id) {
         $employees = User::orderBy('firstname')->get();
+        $mfoPAPs = MfoPap::orderBy('code')->get();
         $suppliers = Supplier::orderBy('company_name')->get();
         $uacsObjects = MooeAccountTitle::orderBy('uacs_code')->get();
         $regDat = RegAllotment::find($id);
@@ -186,42 +221,59 @@ class RegAllotmentController extends Controller
         $entityName = $regDat->entity_name;
         $fundCluster = $regDat->fund_cluster;
         $legalBasis = $regDat->legal_basis;
-        $mfoPAP = $regDat->mfo_pap;
+        $mfoPAP = unserialize($regDat->mfo_pap);
         $sheetNo = $regDat->sheet_no;
         $regItems = DB::table('obligation_request_status as ors')
                       ->select(
-                            'reg.id',
-                            'reg.date_received',
-                            'reg.date_obligated',
-                            'reg.date_released',
-                            'reg.payee',
-                            'reg.particulars',
-                            'reg.serial_number',
-                            'reg.uacs_object_code',
-                            'reg.allotments',
-                            'reg.obligations',
-                            'reg.unobligated_allot',
-                            'reg.disbursement',
-                            'reg.due_demandable',
-                            'reg.not_due_demandable',
+                            //'reg.id',
+                            //'reg.date_received',
+                            //'reg.date_obligated',
+                            //'reg.date_released',
+                            //'reg.payee',
+                            //'reg.particulars',
+                            //'reg.serial_number',
+                            //'reg.uacs_object_code',
+                            //'reg.allotments',
+                            //'reg.obligations',
+                            //'reg.unobligated_allot',
+                            //'reg.disbursement',
+                            //'reg.due_demandable',
+                            //'reg.not_due_demandable',
                             'ors.id as ors_id',
                             'ors.serial_no as ors_serial_no',
                             'ors.date_obligated as ors_date_obligated',
+                            'ors.date_released as ors_date_released',
                             'ors.payee as ors_payee',
                             'ors.particulars as ors_particulars',
                             'ors.serial_no as ors_serial_number',
+                            'ors.mfo_pap as mfo_pap',
                             'ors.uacs_object_code as ors_uacs_object_code',
                             'ors.amount as ors_amount',
                             'dv.amount as dv_amount'
-                        )->leftJoin('funding_reg_allotment_items as reg',
-                                 'reg.serial_number', '=', 'ors.serial_no')
+                        )/*->leftJoin('funding_reg_allotment_items as reg',
+                                 'reg.ors_id', '=', 'ors.id')*/
                       ->leftJoin('disbursement_vouchers as dv', 'dv.ors_id', '=', 'ors.id')
-                      ->where('ors.date_obligated', 'like', "%$periodEnding%")
-                      ->orderBy('reg.order_no')
-                      ->get();
+                      ->where('ors.date_obligated', 'like', "%$periodEnding%");
+
+        $regItems = $regItems->where(function($qry) use ($mfoPAP) {
+            foreach ($mfoPAP as $papCtr => $pap) {
+                if ($papCtr == 0) {
+                    $qry->where('ors.mfo_pap', 'like', "%$pap%");
+                } else {
+                    $qry->orWhere('ors.mfo_pap', 'like', "%$pap%");
+                }
+            }
+        });
+
+        $regItems = $regItems//->orderBy('reg.order_no')
+                             ->orderBy('ors.date_obligated')
+                             ->get();
+
+
 
         foreach ($regItems as $reg) {
-            if (!$reg->id) {
+            $reg->raod = RegAllotmentItem::where('ors_id', $reg->ors_id)->first();
+            if (!$reg->raod) {
                 $logs = DB::table('document_logs')
                         ->where([['doc_id', $reg->ors_id], ['action', 'received']])
                         ->orderBy('created_at', 'desc')
@@ -233,7 +285,7 @@ class RegAllotmentController extends Controller
         return view('modules.report.registry-allotment.update', compact(
             'id', 'periodEnding', 'entityName', 'fundCluster',
             'legalBasis', 'mfoPAP', 'sheetNo', 'regItems',
-            'employees', 'suppliers', 'uacsObjects'
+            'employees', 'suppliers', 'uacsObjects', 'mfoPAPs'
         ));
     }
 
@@ -245,6 +297,10 @@ class RegAllotmentController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id) {
+        $mfoPAPs = explode(',', $request->mfo_pap);
+        sort($mfoPAPs);
+        $request->mfo_pap = serialize($mfoPAPs);
+
         $instanceRegAllot = RegAllotment::find($id);
         $instanceRegAllot->period_ending = $request->period_ending;
         $instanceRegAllot->entity_name = $request->entity_name;
@@ -345,27 +401,44 @@ class RegAllotmentController extends Controller
 
     public function getVouchers(Request $request) {
         $periodEnding = $request->period_ending;
+        $mfoPAPs = $request->mfo_pap ? $request->mfo_pap : [];
         $employees = User::orderBy('firstname')->get();
         $suppliers = Supplier::orderBy('company_name')->get();
         $uacsObjects = MooeAccountTitle::orderBy('uacs_code')->get();
-        $vouchers = DB::table('obligation_request_status as ors')
-                      ->select(
-                          'ors.id as ors_id', 'dv.id as dv_id', 'ors.serial_no as serial_no',
-                          'ors.date_obligated as date_obligated', 'ors.payee as payee',
-                          'ors.uacs_object_code as uacs_object', 'ors.amount as obligation',
-                          'ors.continuing as continuing', 'ors.current as current',
-                          'ors.particulars', 'dv.amount as disbursement'
-                      )->leftJoin('disbursement_vouchers as dv', 'dv.ors_id', '=', 'ors.id')
-                      ->where('ors.date_obligated', 'like', "%$periodEnding%")
-                      ->orderBy('ors.date_obligated')
-                      ->get();
 
-        foreach ($vouchers as $ors) {
-            $logs = DB::table('document_logs')
-                      ->where([['doc_id', $ors->ors_id], ['action', 'received']])
-                      ->orderBy('created_at', 'desc')
-                      ->first();
-            $ors->log_date_received = $logs->created_at;
+        if (count($mfoPAPs) > 0) {
+            $vouchers = DB::table('obligation_request_status as ors')
+                        ->select(
+                            'ors.id as ors_id', 'dv.id as dv_id', 'ors.serial_no as serial_no',
+                            'ors.date_obligated as date_obligated', 'ors.payee as payee',
+                            'ors.uacs_object_code as uacs_object', 'ors.amount as obligation',
+                            'ors.continuing as continuing', 'ors.current as current',
+                            'ors.particulars', 'ors.mfo_pap', 'dv.amount as disbursement'
+                        )->leftJoin('disbursement_vouchers as dv', 'dv.ors_id', '=', 'ors.id')
+                        ->where('ors.date_obligated', 'like', "%$periodEnding%");
+
+            $vouchers = $vouchers->where(function($qry) use ($mfoPAPs) {
+                foreach ($mfoPAPs as $papCtr => $pap) {
+                    if ($papCtr == 0) {
+                        $qry->where('ors.mfo_pap', 'like', "%$pap%");
+                    } else {
+                        $qry->orWhere('ors.mfo_pap', 'like', "%$pap%");
+                    }
+                }
+            });
+
+            $vouchers = $vouchers->orderBy('ors.date_obligated')
+                                ->get();
+
+            foreach ($vouchers as $ors) {
+                $logs = DB::table('document_logs')
+                        ->where([['doc_id', $ors->ors_id], ['action', 'received']])
+                        ->orderBy('created_at', 'desc')
+                        ->first();
+                $ors->log_date_received = $logs->created_at;
+            }
+        } else {
+            $vouchers = [];
         }
 
         return view('modules.report.registry-allotment.vouchers-list', compact(

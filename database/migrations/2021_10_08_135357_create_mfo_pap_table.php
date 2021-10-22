@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateFundingRegAllotments extends Migration
+class CreateMfoPapTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,10 @@ class CreateFundingRegAllotments extends Migration
      */
     public function up()
     {
-        Schema::create('funding_reg_allotments', function (Blueprint $table) {
+        Schema::create('mfo_pap', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('period_ending');
-            $table->string('entity_name');
-            $table->string('fund_cluster');
-            $table->string('legal_basis');
-            $table->binary('mfo_pap')->nullable();
-            $table->string('sheet_no');
+            $table->string('code');
+            $table->text('description');
             $table->softDeletes();
             $table->timestamps();
         });
@@ -33,6 +29,6 @@ class CreateFundingRegAllotments extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('funding_reg_allotments');
+        Schema::dropIfExists('mfo_pap');
     }
 }

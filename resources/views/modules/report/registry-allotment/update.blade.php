@@ -35,6 +35,25 @@
                 </div>
                 <div class="col-md-5 offset-md-2">
                     <div class="md-form form-sm">
+                        <select class="mdb-select crud-select sm-form required" searchable="Search here.."
+                                name="mfo_pap[]" id="mfo-pap" multiple>
+                            <option value="" disabled selected>Choose the MFO PAP</option>
+
+                            @if (count($mfoPAPs) > 0)
+                                @foreach ($mfoPAPs as $pap)
+                            <option value="{{ $pap->id }}" {{ in_array($pap->id, $mfoPAP) ? 'selected' : '' }}>
+                                {!! $pap->code !!} : {!! $pap->description !!}
+                            </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <label for="mfo-pap" class="active">
+                            <span class="red-text">* </span>
+                            <b>MFO/PAP</b>
+                        </label>
+                    </div>
+                    {{--
+                    <div class="md-form form-sm">
                         <input type="text" id="mfo-pap" name="mfo_pap"
                                class="form-control required" value="{{ $mfoPAP }}">
                         <label for="mfo-pap" class="active">
@@ -42,6 +61,7 @@
                             <strong>MFO/PAP</strong>
                         </label>
                     </div>
+                    --}}
                 </div>
             </div>
             <div class="row">
@@ -175,21 +195,23 @@
                                 <td>
                                     <div class="md-form form-sm my-0">
                                         @php
-                                            $_dateReceived = strtotime($item->date_received);
+                                            $_dateReceived = $item->raod ? strtotime($item->raod->date_received) :
+                                                             strtotime($item->date_received);
                                             $dateReceived = date('Y-m-d', $_dateReceived);
                                         @endphp
                                         <input type="date" name="date_received[]" value="{{ $dateReceived }}"
                                                class="form-control required form-control-sm date-received text-center">
                                     </div>
 
-                                    @if (empty($item->id))
+                                    @if (empty($item->raod))
                                     <span class="badge badge-success mt-0">New</span>
                                     @endif
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
                                         @php
-                                            $_dateObligated = strtotime($item->id ? $item->date_obligated : $item->ors_date_obligated);
+                                            $_dateObligated = strtotime($item->raod ? $item->raod->date_obligated :
+                                                              $item->ors_date_obligated);
                                             $dateObligated = date('Y-m-d', $_dateObligated);
                                         @endphp
                                         <input type="date" name="date_obligated[]" value="{{ $dateObligated }}"
@@ -199,10 +221,11 @@
                                 <td>
                                     <div class="md-form form-sm my-0">
                                         @php
-                                            $_dateReleased = strtotime($item->date_released);
+                                            $_dateReleased = $item->raod ? strtotime($item->raod->date_released) :
+                                                             strtotime($item->ors_date_released);
                                             $dateReleased = date('Y-m-d', $_dateReleased);
                                         @endphp
-                                        <input type="date" name="date_released[]" value="{{ $item->date_released ? $dateReleased : NULL }}"
+                                        <input type="date" name="date_released[]" value="{{ $item->raod ? $dateReleased : NULL }}"
                                                class="form-control required form-control-sm date-released text-center">
                                     </div>
                                 </td>
@@ -211,13 +234,13 @@
                                         <select class="mdb-select required payee-tokenizer payee"
                                                 name="payee[]">
                                             @foreach ($employees as $emp)
-                                                @if ($emp->id == ($item->id ? $item->payee : $item->ors_payee))
+                                                @if ($emp->id == ($item->raod ? $item->raod->payee : $item->ors_payee))
                                             <option value="{{$emp->id}}" selected>{{$emp->firstname}} {{$emp->lastname}}</option>
                                                     @php break @endphp
                                                 @endif
                                             @endforeach
                                             @foreach ($suppliers as $bid)
-                                                @if ($bid->id == ($item->id ? $item->payee : $item->ors_payee))
+                                                @if ($bid->id == ($item->raod ? $item->raod->payee : $item->ors_payee))
                                             <option value="{{$bid->id}}" selected>{{$bid->company_name}}</option>
                                                     @php break @endphp
                                                 @endif
@@ -229,14 +252,15 @@
                                     <div class="md-form form-sm my-0">
                                         <textarea name="particulars[]" placeholder="..."
                                                   class="md-textarea required form-control-sm w-100 py-1 particulars"
-                                        >{{ $item->id ? $item->particulars : $item->ors_particulars }}</textarea>
+                                        >{{ $item->raod ? $item->raod->particulars : $item->ors_particulars }}</textarea>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="md-form form-sm my-0">
                                         <input type="text" placeholder="..." name="serial_number[]"
-                                               value="{{ $item->id ? $item->serial_number : $item->ors_serial_number }}"
+                                               value="{{ $item->raod ? $item->raod->serial_number : $item->ors_serial_number }}"
                                                class="form-control required form-control-sm serial-number">
+                                        <input type="hidden" name="ors_id[]" class="ors-id" value="{{ $item->ors_id }}">
                                     </div>
                                 </td>
                                 <td>
@@ -245,9 +269,9 @@
                                                 name="uacs_object_no[{{ $itemCtr }}][]">
                                             @foreach ($uacsObjects as $object)
                                                 @php
-                                                    $uacs = unserialize($item->uacs_object_code);
+                                                    $uacs = $item->raod ? unserialize($item->raod->uacs_object_code) : [];
                                                     $orsUacs = unserialize($item->ors_uacs_object_code);
-                                                    $objCode = $item->id ? $uacs : $orsUacs;
+                                                    $objCode = $item->raod ? $uacs : $orsUacs;
                                                 @endphp
 
                                                 @if (in_array($object->id, $objCode))
@@ -261,7 +285,7 @@
                                     <div class="md-form form-sm my-0">
                                         <input type="number" placeholder="..." name="allotments[]" id="allotment-{{ $itemCtr }}"
                                                class="form-control required form-control-sm allotments"
-                                               value="{{ $item->id ? $item->allotments : '' }}"
+                                               value="{{ $item->raod ? $item->raod->allotments : '' }}"
                                                onkeyup="$(this).solveUnobligated('{{ $itemCtr }}')"
                                                onchange="$(this).solveUnobligated('{{ $itemCtr }}')">
                                     </div>
@@ -271,7 +295,7 @@
                                         <input type="number" placeholder="..." name="obligations[]"
                                                class="form-control required form-control-sm obligations"
                                                id="obligation-{{ $itemCtr }}"
-                                               value="{{ $item->id ? $item->obligations : $item->ors_amount }}"
+                                               value="{{ $item->raod ? $item->raod->obligations : $item->ors_amount }}"
                                                onkeyup="$(this).solveUnobligated('{{ $itemCtr }}')"
                                                onchange="$(this).solveUnobligated('{{ $itemCtr }}')">
                                     </div>
@@ -280,7 +304,7 @@
                                     <div class="md-form form-sm my-0">
                                         <input type="number" placeholder="..." name="unobligated[]" id="unobligated-{{ $itemCtr }}"
                                                class="form-control required form-control-sm unobligated"
-                                               value="{{ $item->id ? $item->unobligated_allot : '' }}"
+                                               value="{{ $item->raod ? $item->raod->unobligated_allot : '' }}"
                                                onkeyup="$(this).solveUnobligated('{{ $itemCtr }}')"
                                                onchange="$(this).solveUnobligated('{{ $itemCtr }}')">
                                     </div>
@@ -289,7 +313,7 @@
                                     <div class="md-form form-sm my-0">
                                         <input type="number" placeholder="..." name="disbursements[]"
                                                value="{{
-                                                    $item->disbursement ? $item->disbursement :
+                                                    $item->raod ? $item->raod->disbursement :
                                                     ($item->dv_amount ? $item->dv_amount : 0)
                                                 }}"
                                                class="form-control required form-control-sm disbursements"
@@ -301,7 +325,7 @@
                                         <input type="number" placeholder="..." name="due_demandable[]"
                                                class="form-control required form-control-sm due-demandable"
                                                id="due-demandable-{{ $itemCtr }}"
-                                               value="{{ $item->id ? $item->due_demandable : '' }}"
+                                               value="{{ $item->raod ? $item->raod->due_demandable : '' }}"
                                                onclick="$(this).solveDueDemandable('{{ $itemCtr }}')">
                                     </div>
                                 </td>
@@ -310,7 +334,7 @@
                                         <input type="number" placeholder="..." name="not_due_demandable[]"
                                                class="form-control required form-control-sm not-due-demandable"
                                                id="not-due-demandable-{{ $itemCtr }}"
-                                               value="{{ $item->id ? $item->not_due_demandable : '' }}"
+                                               value="{{ $item->raod ? $item->raod->not_due_demandable : '' }}"
                                                onclick="$(this).solveNotYetDueDemandable('{{ $itemCtr }}')">
                                     </div>
                                 </td>

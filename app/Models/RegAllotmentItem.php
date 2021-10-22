@@ -22,6 +22,7 @@ class RegAllotmentItem extends Model
     protected $fillable = [
         'id',
         'reg_allotment_id',
+        'ors_id',
         'order_no',
         'date_received',
         'date_obligated',

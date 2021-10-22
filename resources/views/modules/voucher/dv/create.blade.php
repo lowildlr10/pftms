@@ -239,11 +239,28 @@
                     <div class="p-2 border-bottom border-dark">
                         <strong>MFO/PAP</strong>
                     </div>
+                    <div class="md-form px-2">
+                        <select class="mdb-select crud-select md-form" searchable="Search here.."
+                                name="mfo_pap[]" multiple>
+                            <option value="" disabled selected>Choose the MFO PAP</option>
+                            <option value="">-- None --</option>
+
+                            @if (count($mfoPAPs) > 0)
+                                @foreach ($mfoPAPs as $pap)
+                            <option value="{{ $pap->id }}" {{ isset($mfoPAP) ? (in_array($pap->id, $mfoPAP) ? 'selected' : '') : '' }}>
+                                {!! $pap->code !!} : {!! $pap->description !!}
+                            </option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                    {{--
                     <div class="form-group p-0 m-0">
                         <textarea class="md-textarea form-control border border-0 rounded-0"
                                   rows="8" placeholder="Write MFO/PAP here..." name="mfo_pap"
                         ></textarea>
                     </div>
+                    --}}
                 </div>
                 <div class="col-md-3 border border-left-0 border-bottom-0 border-dark px-0 text-center">
                     <div class="p-2 border-bottom border-dark">

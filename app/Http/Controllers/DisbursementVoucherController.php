@@ -23,6 +23,7 @@ use App\Models\Supplier;
 use App\Models\Signatory;
 use App\Models\ItemUnitIssue;
 use App\Models\FundingProject;
+use App\Models\MfoPap;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -295,6 +296,9 @@ class DisbursementVoucherController extends Controller
         $orsData = ObligationRequestStatus::with('emppayee')->find($orsID);
         $empID = $orsData->emppayee['emp_id'];
         $payee = $orsData->payee;
+        $mfoPAP = $orsData->mfo_pap ?
+                  unserialize($orsData->mfo_pap) :
+                  [];
         $serialNo = $orsData->serial_no;
         $address = $orsData->address;
         $sigCert1 = $orsData->sig_certified_1;
@@ -305,6 +309,7 @@ class DisbursementVoucherController extends Controller
         $current = $orsData->current;
         $amount = $orsData->amount;
 
+        $mfoPAPs = MfoPap::orderBy('code')->get();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
 
@@ -383,7 +388,7 @@ class DisbursementVoucherController extends Controller
             'serialNo', 'address', 'amount', 'orsList',
             'orsID', 'transactionType', 'sigCert1',
             'project', 'projects', 'priorYear', 'continuing',
-            'current'
+            'current', 'mfoPAPs', 'orsData', 'mfoPAP'
         ));
     }
 
@@ -412,6 +417,7 @@ class DisbursementVoucherController extends Controller
         $current = NULL;
         $amount = 0.00;
 
+        $mfoPAPs = MfoPap::orderBy('code')->get();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
 
@@ -490,7 +496,7 @@ class DisbursementVoucherController extends Controller
             'serialNo', 'address', 'amount', 'orsList',
             'orsID', 'transactionType', 'sigCert1',
             'projects', 'priorYear', 'continuing',
-            'current'
+            'current', 'mfoPAPs'
         ));
     }
 
@@ -512,7 +518,7 @@ class DisbursementVoucherController extends Controller
         $otherPayment = !empty($request->other_payment) ? $request->other_payment : NULL;
         $particulars = $request->particulars;
         $responsibilityCenter = $request->responsibility_center;
-        $mfoPAP = $request->mfo_pap;
+        $mfoPAP = $mfoPAP = $request->mfo_pap ? serialize($request->mfo_pap) : serialize([]);
         $project = $request->funding_source;
         $priorYear = $request->prior_year ? $request->prior_year : 0.00;
         $continuing = $request->continuing ? $request->continuing : 0.00;
@@ -620,7 +626,9 @@ class DisbursementVoucherController extends Controller
         $otherPayment = $dvData->other_payment;
         $responsibilityCenter = $dvData->responsibility_center;
         $particulars = $dvData->particulars;
-        $mfoPAP = $dvData->mfo_pap;
+        $mfoPAP = $dvData->mfo_pap ?
+                  unserialize($dvData->mfo_pap) :
+                  [];
         $priorYear = $dvData->prior_year;
         $continuing = $dvData->continuing;
         $current = $dvData->current;
@@ -665,6 +673,7 @@ class DisbursementVoucherController extends Controller
         }
 
         $projDat = new FundingProject;
+        $mfoPAPs = MfoPap::orderBy('code')->get();
         $_projects = FundingProject::orderBy('project_title');
         $projects = [];
         $tempFundSrcs = [];
@@ -729,7 +738,7 @@ class DisbursementVoucherController extends Controller
             'orNo', 'otherDocuments', 'signatories', 'signatories',
             'serialNo', 'address', 'dvDate', 'payees', 'particulars',
             'payee', 'transactionType', 'orsList', 'orsID', 'projects',
-            'project', 'priorYear', 'continuing', 'current'
+            'project', 'priorYear', 'continuing', 'current', 'mfoPAPs'
         ));
     }
 
@@ -750,7 +759,7 @@ class DisbursementVoucherController extends Controller
         $otherPayment = !empty($request->other_payment) ? $request->other_payment : NULL;
         $particulars = $request->particulars;
         $responsibilityCenter = $request->responsibility_center;
-        $mfoPAP = $request->mfo_pap;
+        $mfoPAP = $mfoPAP = $request->mfo_pap ? serialize($request->mfo_pap) : serialize([]);
         $project = $request->funding_source;
         $priorYear = $request->prior_year ? $request->prior_year : 0.00;
         $continuing = $request->continuing ? $request->continuing : 0.00;

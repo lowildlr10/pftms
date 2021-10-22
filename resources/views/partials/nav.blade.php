@@ -324,6 +324,9 @@
                                 <a href="{{ route('item-classification') }}" class="waves-effect">Item Classifications</a>
                             </li>
                             <li>
+                                <a href="{{ route('mfo-pap') }}" class="waves-effect">MFO/PAP</a>
+                            </li>
+                            <li>
                                 <a href="{{ route('procurement-mode') }}" class="waves-effect">Modes of Procurement</a>
                             </li>
                             <li>
