@@ -13,6 +13,7 @@ class MfoPapSeeder extends Seeder
     public function run()
     {
         $orsDat = DB::table('obligation_request_status')->get();
+        $dvDat = DB::table('disbursement_vouchers')->get();
         $mfoPAPs = [
             (object) [
                 'code' => 'A.III.c.1',
@@ -53,8 +54,29 @@ class MfoPapSeeder extends Seeder
             }
 
             DB::table('obligation_request_status')
-            ->where('id', $ors->id)
-            ->update([
+              ->where('id', $ors->id)
+              ->update([
+                'mfo_pap' => serialize($mfoPAP)
+            ]);
+        }
+
+        $dataCount = $dvDat->count();
+
+        foreach ($dvDat as $ctr => $dv) {
+            $percentage = number_format((($ctr + 1) / $dataCount) * 100, 2);
+            echo "DV: [ $percentage% ] successfully filled the 'mfo_pap' column.\n";
+
+            $mfoPAP = [];
+
+            foreach ($mfoCodes as $mfo) {
+                if (stripos($dv->mfo_pap, $mfo) === true) {
+                    $mfoPAP[] = $mfo;
+                }
+            }
+
+            DB::table('disbursement_vouchers')
+              ->where('id', $dv->id)
+              ->update([
                 'mfo_pap' => serialize($mfoPAP)
             ]);
         }

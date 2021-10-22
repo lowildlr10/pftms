@@ -143,7 +143,7 @@
                 <div class="md-form form-sm my-0">
                     <input type="text" placeholder="..." name="serial_number[]" value="{{ $item->serial_no }}"
                            class="form-control required form-control-sm serial-number">
-                    <input type="hidden" name="ors_id" class="ors-id" value="{{ $item->ors_id }}">
+                    <input type="hidden" name="ors_id[]" class="ors-id" value="{{ $item->ors_id }}">
                 </div>
             </td>
             <td>

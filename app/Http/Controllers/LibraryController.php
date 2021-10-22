@@ -486,6 +486,101 @@ class LibraryController extends Controller
     }
 
     /**
+     *  MFO/PAP Module
+    **/
+    public function indexMfoPap(Request $request) {
+        $mfoPapData = MfoPap::orderBy('code')
+                            ->get();
+
+        return view('modules.library.mfo-pap.index', [
+            'list' => $mfoPapData
+        ]);
+    }
+
+    public function showCreateMfoPap() {
+        return view('modules.library.mfo-pap.create');
+    }
+
+    public function showEditMfoPap($id) {
+        $mfoPapDat = MfoPap::find($id);
+        $code = $mfoPapDat->code;
+        $description = $mfoPapDat->description;
+
+        return view('modules.library.mfo-pap.update', compact(
+            'id', 'code', 'description'
+        ));
+    }
+
+    public function storeMfoPap(Request $request) {
+        $code = $request->code;
+        $description = $request->description;
+
+        try {
+            if (!$this->checkDuplication('MfoPap', $code)) {
+                $instanceMfoPap = new MfoPap;
+                $instanceMfoPap->code = $code;
+                $instanceMfoPap->description = $description;
+                $instanceMfoPap->save();
+
+                $msg = "MFO/PAP '$description' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "MFO/PAP '$description' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function updateMfoPap(Request $request, $id) {
+        $code = $request->code;
+        $description = $request->description;
+
+        try {
+            $instanceMfoPap = MfoPap::find($id);
+            $instanceMfoPap->code = $code;
+            $instanceMfoPap->description = $description;
+            $instanceMfoPap->save();
+
+            $msg = "MFO/PAP '$description' successfully updated.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function deleteMfoPap($id) {
+        try {
+            $instanceMfoPap = MfoPap::find($id);
+            $description = $instanceMfoPap->description;
+            $instanceMfoPap->delete();
+
+            $msg = "MFO/PAP '$description' successfully deleted.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function destroyMfoPap($id) {
+        try {
+            $instanceMfoPap = ItemClassification::find($id);
+            $description = $instanceMfoPap->description;
+            $instanceMfoPap->destroy();
+
+            $msg = "MFO/PAP '$description' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    /**
      *  Monitoring Office Module
     **/
     public function indexMonitoringOffice(Request $request) {
@@ -1910,6 +2005,11 @@ class LibraryController extends Controller
                                                ->orWhere('classification_name', strtolower($data))
                                                ->orWhere('classification_name', strtoupper($data))
                                                ->count();
+                break;
+            case 'MfoPap':
+                $dataCount = MfoPap::where('code', $data)
+                                   ->orWhere('description', strtolower($data))
+                                   ->count();
                 break;
             case 'ProcurementMode':
                 $dataCount = ProcurementMode::where('mode_name', $data)

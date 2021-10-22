@@ -19,7 +19,7 @@ class CreateFundingRegAllotments extends Migration
             $table->string('entity_name');
             $table->string('fund_cluster');
             $table->string('legal_basis');
-            $table->string('mfo_pap');
+            $table->binary('mfo_pap')->nullable();
             $table->string('sheet_no');
             $table->softDeletes();
             $table->timestamps();

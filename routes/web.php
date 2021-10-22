@@ -1503,6 +1503,43 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'destroy'
     ])->name('item-classification-destroy');
 
+    // MFO/PAP
+    Route::any('libraries/mfo-pap', [
+        'uses' => 'LibraryController@indexMfoPap',
+        'module' => 'lib_item_class',
+        'access' => 'is_allowed'
+    ])->name('mfo-pap');
+    Route::get('libraries/mfo-pap/show-create', [
+        'uses' => 'LibraryController@showCreateMfoPap',
+        'module' => 'lib_item_class',
+        'access' => 'create'
+    ])->name('mfo-pap-show-create');
+    Route::post('libraries/mfo-pap/store', [
+        'uses' => 'LibraryController@storeMfoPap',
+        'module' => 'lib_item_class',
+        'access' => 'create'
+    ])->name('mfo-pap-store');
+    Route::get('libraries/mfo-pap/show-edit/{id}', [
+        'uses' => 'LibraryController@showEditMfoPap',
+        'module' => 'lib_item_class',
+        'access' => 'update'
+    ])->name('mfo-pap-show-edit');
+    Route::post('libraries/mfo-pap/update/{id}', [
+        'uses' => 'LibraryController@updateMfoPap',
+        'module' => 'lib_item_class',
+        'access' => 'update'
+    ])->name('mfo-pap-update');
+    Route::post('libraries/mfo-pap/delete/{id}', [
+        'uses' => 'LibraryController@deleteMfoPap',
+        'module' => 'lib_item_class',
+        'access' => 'delete'
+    ])->name('mfo-pap-delete');
+    Route::post('libraries/mfo-pap/destroy/{id}', [
+        'uses' => 'LibraryController@destroyMfoPap',
+        'module' => 'lib_item_class',
+        'access' => 'destroy'
+    ])->name('mfo-pap-destroy');
+
     // Monitoring Office Module
     Route::any('libraries/monitoring-office', [
         'uses' => 'LibraryController@indexMonitoringOffice',

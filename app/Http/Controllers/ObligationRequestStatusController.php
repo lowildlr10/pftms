@@ -22,6 +22,7 @@ use App\Models\Signatory;
 use App\Models\ItemUnitIssue;
 use App\Models\FundingProject;
 use App\Models\MooeAccountTitle;
+use App\Models\MfoPap;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -334,6 +335,7 @@ class ObligationRequestStatusController extends Controller
                     ->whereIn('division', $empDivisionAccess)
                     ->orderBy('firstname')->get();
         $mooeTitles = MooeAccountTitle::orderBy('order_no')->get();
+        $mfoPAPs = MfoPap::orderBy('code')->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -397,7 +399,7 @@ class ObligationRequestStatusController extends Controller
         }
 
         return view('modules.voucher.ors-burs.create', compact(
-            'signatories', 'payees', 'projects', 'mooeTitles'
+            'signatories', 'payees', 'projects', 'mooeTitles', 'mfoPAPs'
         ));
     }
 
@@ -418,7 +420,7 @@ class ObligationRequestStatusController extends Controller
         $address = $request->address;
         $responsibilityCenter = $request->responsibility_center;
         $particulars = $request->particulars;
-        $mfoPAP = $request->mfo_pap;
+        $mfoPAP = $mfoPAP = $request->mfo_pap ? serialize($request->mfo_pap) : serialize([]);
         $uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
         $project = $request->funding_source;
         $priorYear = $request->prior_year ? $request->prior_year : 0.00;
@@ -498,7 +500,9 @@ class ObligationRequestStatusController extends Controller
         $address = $orsData->address;
         $responsibilityCenter = $orsData->responsibility_center;
         $particulars = $orsData->particulars;
-        $mfoPAP = $orsData->mfo_pap;
+        $mfoPAP = $orsData->mfo_pap ?
+                  unserialize($orsData->mfo_pap) :
+                  [];
         $uacsObjectCode = $orsData->uacs_object_code ?
                           unserialize($orsData->uacs_object_code) :
                           [];
@@ -513,6 +517,7 @@ class ObligationRequestStatusController extends Controller
         $transactionType = $orsData->transaction_type;
         $project = $orsData->funding_source;
         $mooeTitles = MooeAccountTitle::orderBy('order_no')->get();
+        $mfoPAPs = MfoPap::orderBy('code')->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -594,7 +599,7 @@ class ObligationRequestStatusController extends Controller
             'fundCluster', 'payee', 'office', 'address',
             'responsibilityCenter', 'particulars', 'mfoPAP',
             'uacsObjectCode', 'uacsObjectCode', 'priorYear',
-            'continuing', 'current', 'amount',
+            'continuing', 'current', 'amount', 'mfoPAPs',
             'sigCertified1', 'sigCertified2', 'dateCertified1',
             'dateCertified2', 'signatories', 'payees', 'isObligated',
             'transactionType', 'projects', 'project', 'mooeTitles'
@@ -618,7 +623,7 @@ class ObligationRequestStatusController extends Controller
         $address = $request->address;
         $responsibilityCenter = $request->responsibility_center;
         $particulars = $request->particulars;
-        $mfoPAP = $request->mfo_pap;
+        $mfoPAP = $request->mfo_pap ? serialize($request->mfo_pap) : serialize([]);
         $uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
         $project = $request->funding_source;
         $priorYear = $request->prior_year ? $request->prior_year : 0.00;
