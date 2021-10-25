@@ -1390,79 +1390,79 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     // Agencies amd LGUs Module
     Route::any('libraries/agency-lgu', [
         'uses' => 'LibraryController@indexAgencyLGU',
-        'module' => 'lib_item_class',
+        'module' => 'lib_agency_lgu',
         'access' => 'is_allowed'
     ])->name('agency-lgu');
     Route::get('libraries/agency-lgu/show-create', [
         'uses' => 'LibraryController@showCreateAgencyLGU',
-        'module' => 'lib_item_class',
+        'module' => 'lib_agency_lgu',
         'access' => 'create'
     ])->name('agency-lgu-show-create');
     Route::post('libraries/agency-lgu/store', [
         'uses' => 'LibraryController@storeAgencyLGU',
-        'module' => 'lib_item_class',
+        'module' => 'lib_agency_lgu',
         'access' => 'create'
     ])->name('agency-lgu-store');
     Route::get('libraries/agency-lgu/show-edit/{id}', [
         'uses' => 'LibraryController@showEditAgencyLGU',
-        'module' => 'lib_item_class',
+        'module' => 'lib_agency_lgu',
         'access' => 'update'
     ])->name('agency-lgu-show-edit');
     Route::post('libraries/agency-lgu/update/{id}', [
         'uses' => 'LibraryController@updateAgencyLGU',
-        'module' => 'lib_item_class',
+        'module' => 'lib_agency_lgu',
         'access' => 'update'
     ])->name('agency-lgu-update');
     Route::post('libraries/agency-lgu/delete/{id}', [
         'uses' => 'LibraryController@deleteAgencyLGU',
-        'module' => 'lib_item_class',
+        'module' => 'lib_agency_lgu',
         'access' => 'delete'
     ])->name('agency-lgu-delete');
     Route::post('libraries/agency-lgu/destroy/{id}', [
         'uses' => 'LibraryController@destroyAgencyLGU',
-        'module' => 'lib_item_class',
+        'module' => 'lib_agency_lgu',
         'access' => 'destroy'
     ])->name('agency-lgu-destroy');
     Route::post('libraries/agency-lgu/get-agencies-lgus', [
         'uses' => 'LibraryController@getListAgencyLGU',
-        'module' => 'lib_item_class',
+        'module' => 'lib_agency_lgu',
         'access' => 'destroy'
     ]);
 
     // Industry/Sectors Module
     Route::any('libraries/industry-sector', [
         'uses' => 'LibraryController@indexIndustrySector',
-        'module' => 'lib_item_class',
+        'module' => 'lib_industry',
         'access' => 'is_allowed'
     ])->name('industry-sector');
     Route::get('libraries/industry-sector/show-create', [
         'uses' => 'LibraryController@showCreateIndustrySector',
-        'module' => 'lib_item_class',
+        'module' => 'lib_industry',
         'access' => 'create'
     ])->name('industry-sector-show-create');
     Route::post('libraries/industry-sector/store', [
         'uses' => 'LibraryController@storeIndustrySector',
-        'module' => 'lib_item_class',
+        'module' => 'lib_industry',
         'access' => 'create'
     ])->name('industry-sector-store');
     Route::get('libraries/industry-sector/show-edit/{id}', [
         'uses' => 'LibraryController@showEditIndustrySector',
-        'module' => 'lib_item_class',
+        'module' => 'lib_industry',
         'access' => 'update'
     ])->name('industry-sector-show-edit');
     Route::post('libraries/industry-sector/update/{id}', [
         'uses' => 'LibraryController@updateIndustrySector',
-        'module' => 'lib_item_class',
+        'module' => 'lib_industry',
         'access' => 'update'
     ])->name('industry-sector-update');
     Route::post('libraries/industry-sector/delete/{id}', [
         'uses' => 'LibraryController@deleteIndustrySector',
-        'module' => 'lib_item_class',
+        'module' => 'lib_industry',
         'access' => 'delete'
     ])->name('industry-sector-delete');
     Route::post('libraries/industry-sector/destroy/{id}', [
         'uses' => 'LibraryController@destroyIndustrySector',
-        'module' => 'lib_item_class',
+        'module' => 'lib_industry',
         'access' => 'destroy'
     ])->name('industry-sector-destroy');
 
@@ -1506,37 +1506,37 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     // Monitoring Office Module
     Route::any('libraries/monitoring-office', [
         'uses' => 'LibraryController@indexMonitoringOffice',
-        'module' => 'lib_item_class',
+        'module' => 'lib_monit_office',
         'access' => 'is_allowed'
     ])->name('monitoring-office');
     Route::get('libraries/monitoring-office/show-create', [
         'uses' => 'LibraryController@showCreateMonitoringOffice',
-        'module' => 'lib_item_class',
+        'module' => 'lib_monit_office',
         'access' => 'create'
     ])->name('monitoring-office-show-create');
     Route::post('libraries/monitoring-office/store', [
         'uses' => 'LibraryController@storeMonitoringOffice',
-        'module' => 'lib_item_class',
+        'module' => 'lib_monit_office',
         'access' => 'create'
     ])->name('monitoring-office-store');
     Route::get('libraries/monitoring-office/show-edit/{id}', [
         'uses' => 'LibraryController@showEditMonitoringOffice',
-        'module' => 'lib_item_class',
+        'module' => 'lib_monit_office',
         'access' => 'update'
     ])->name('monitoring-office-show-edit');
     Route::post('libraries/monitoring-office/update/{id}', [
         'uses' => 'LibraryController@updateMonitoringOffice',
-        'module' => 'lib_item_class',
+        'module' => 'lib_monit_office',
         'access' => 'update'
     ])->name('monitoring-office-update');
     Route::post('libraries/monitoring-office/delete/{id}', [
         'uses' => 'LibraryController@deleteMonitoringOffice',
-        'module' => 'lib_item_class',
+        'module' => 'lib_monit_office',
         'access' => 'delete'
     ])->name('monitoring-office-delete');
     Route::post('libraries/monitoring-office/destroy/{id}', [
         'uses' => 'LibraryController@destroyMonitoringOffice',
-        'module' => 'lib_item_class',
+        'module' => 'lib_monit_office',
         'access' => 'destroy'
     ])->name('monitoring-office-destroy');
 
