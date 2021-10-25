@@ -35,6 +35,25 @@
                 </div>
                 <div class="col-md-5 offset-md-2">
                     <div class="md-form form-sm">
+                        <select class="mdb-select crud-select sm-form required" searchable="Search here.."
+                                name="mfo_pap[]" id="mfo-pap" multiple>
+                            <option value="" disabled selected>Choose the MFO PAP</option>
+
+                            @if (count($mfoPAPs) > 0)
+                                @foreach ($mfoPAPs as $pap)
+                            <option value="{{ $pap->id }}">
+                                {!! $pap->code !!} : {!! $pap->description !!}
+                            </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <label for="mfo-pap" class="active">
+                            <span class="red-text">* </span>
+                            <b>MFO/PAP</b>
+                        </label>
+                    </div>
+                    {{--
+                    <div class="md-form form-sm">
                         <input type="text" id="mfo-pap" name="mfo_pap"
                                class="form-control required" value="3/A.III.c.1/A.III.c.2/A.III.b.1">
                         <label for="mfo-pap" class="active">
@@ -42,6 +61,7 @@
                             <strong>MFO/PAP</strong>
                         </label>
                     </div>
+                    --}}
                 </div>
             </div>
             <div class="row">
