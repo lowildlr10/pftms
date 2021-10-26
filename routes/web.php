@@ -1267,57 +1267,57 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     // Registry of Allotments, Obligations and Disbursements Module
     Route::any('report/registry-allot-obli-disb', [
         'uses' => 'RegAllotmentController@index',
-        'module' => 'report_dvledger',
+        'module' => 'report_raod',
         'access' => 'is_allowed'
     ])->name('report-raod');
     Route::get('report/registry-allot-obli-disb/show-create', [
         'uses' => 'RegAllotmentController@showCreate',
-        'module' => 'report_dvledger',
+        'module' => 'report_raod',
         'access' => 'create'
     ])->name('report-raod-show-create');
     Route::post('report/registry-allot-obli-disb/store', [
         'uses' => 'RegAllotmentController@store',
-        'module' => 'report_dvledger',
+        'module' => 'report_raod',
         'access' => 'create'
     ])->name('report-raod-store');
     Route::post('report/registry-allot-obli-disb/store-items/{regID}', [
         'uses' => 'RegAllotmentController@storeItems',
-        'module' => 'report_dvledger',
+        'module' => 'report_raod',
         'access' => 'create'
     ])->name('report-raod-store-items');
     Route::get('report/registry-allot-obli-disb/show-edit/{id}', [
         'uses' => 'RegAllotmentController@showEdit',
-        'module' => 'report_dvledger',
+        'module' => 'report_raod',
         'access' => 'update'
     ])->name('report-raod-show-edit');
     Route::post('report/registry-allot-obli-disb/update/{id}', [
         'uses' => 'RegAllotmentController@update',
-        'module' => 'report_dvledger',
+        'module' => 'report_raod',
         'access' => 'update'
     ])->name('report-raod-update');
     Route::post('report/registry-allot-obli-disb/update-items/{regID}', [
         'uses' => 'RegAllotmentController@updateItems',
-        'module' => 'report_dvledger',
+        'module' => 'report_raod',
         'access' => 'create'
     ])->name('report-raod-update-items');
     Route::post('report/registry-allot-obli-disb/delete/{id}', [
         'uses' => 'RegAllotmentController@delete',
-        'module' => 'report_dvledger',
+        'module' => 'report_raod',
         'access' => 'delete'
     ])->name('report-raod-delete');
     Route::post('report/registry-allot-obli-disb/get-vouchers', [
         'uses' => 'RegAllotmentController@getVouchers',
-        'module' => 'report_dvledger',
+        'module' => 'report_raod',
         'access' => 'is_allowed'
     ]);
     Route::post('report/registry-allot-obli-disb/get-payee', [
         'uses' => 'RegAllotmentController@getPayees',
-        'module' => 'report_dvledger',
+        'module' => 'report_raod',
         'access' => 'is_allowed'
     ]);
     Route::post('report/registry-allot-obli-disb/get-uacs-object', [
         'uses' => 'RegAllotmentController@getUacsObject',
-        'module' => 'report_dvledger',
+        'module' => 'report_raod',
         'access' => 'is_allowed'
     ]);
     /*
