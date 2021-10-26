@@ -260,7 +260,7 @@ class ObligationRequestStatusController extends Controller
                     $instanceORS->po_no = $poNo;
                     $instanceORS->responsibility_center = "19 001 03000 14";
                     $instanceORS->particulars = "To obligate...";
-                    $instanceORS->mfo_pap = "3-Regional Office\nA.III.c.1\nA.III.b.1\nA.III.c.2";
+                    //$instanceORS->mfo_pap = "3-Regional Office\nA.III.c.1\nA.III.b.1\nA.III.c.2";
                     $instanceORS->payee = $instancePO->awarded_to;
                     $instanceORS->amount = $instancePO->grand_total;
                     $instanceORS->module_class = 3;
