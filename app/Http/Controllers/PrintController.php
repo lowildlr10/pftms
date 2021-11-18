@@ -3245,6 +3245,15 @@ class PrintController extends Controller
             }
         }
 
+        $instanceUacsItems = DB::table('ors_burs_uacs_items as uacs')
+                                ->select(
+                                    'uacs.description', 'uacs.amount', 'mooe.uacs_code'
+                                )
+                                ->join('mooe_account_titles as mooe', 'mooe.id', '=', 'uacs.uacs_id')
+                                ->where('uacs.ors_id', $id)
+                                ->orderBy('mooe.uacs_code')
+                                ->get();
+
         $instanceSignatory = new Signatory;
         $sign1 = $instanceSignatory->getSignatory($ors->sig_certified_1)->name;
         $sign2 = $instanceSignatory->getSignatory($ors->sig_certified_2)->name;
@@ -3312,10 +3321,23 @@ class PrintController extends Controller
 
         $mfoPAP = implode('<br>', $mfoPAPs);
         $uacsObjects = implode(', ', $uacsObjects);
+        $_uacsObjects = '';
+
+        foreach ($instanceUacsItems as $uacsCtr => $uacsItem) {
+            $uacsItem->amount = number_format($uacsItem->amount, 2);
+            $_uacsObjects .= "$uacsItem->description ($uacsItem->uacs_code) - $uacsItem->amount";
+
+            if ($uacsCtr == count($instanceUacsItems)) {
+                $_uacsObjects .=  "";
+            } else {
+                $_uacsObjects .= "<br><br>";
+            }
+        }
+
         $tableData[] = [$ors->responsibility_center,
                         $ors->particulars,
                         $mfoPAP,
-                        $uacsObjects, $itemAmount];
+                        $_uacsObjects, $itemAmount];
 
         for ($i = 1; $i <= 6 ; $i++) {
             $obligationValue = '';

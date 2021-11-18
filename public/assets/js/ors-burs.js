@@ -63,7 +63,7 @@ $(function() {
                     let orsUacsID = $(`#ors_uacs_id_${uacsID}`).val();
                     let amount = $(`#uacs_amount_${uacsID}`).val();
 
-                    description = !empty(description) ? description : uacsDescCode;
+                    description = !empty(description) ? description : uacsDesc;
                     _uacsID = !empty(_uacsID) ? _uacsID : uacsID;
                     orsUacsID = !empty(orsUacsID) ? orsUacsID : '';
                     amount = !empty(amount) ? amount : 0;
