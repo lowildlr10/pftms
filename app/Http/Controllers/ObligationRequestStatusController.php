@@ -23,6 +23,7 @@ use App\Models\ItemUnitIssue;
 use App\Models\FundingProject;
 use App\Models\MooeAccountTitle;
 use App\Models\MfoPap;
+use App\Models\OrsBursUacsItem;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -432,6 +433,12 @@ class ObligationRequestStatusController extends Controller
         $dateCertified1 = !empty($request->date_certified_1) ? $request->date_certified_1: NULL;
         $dateCertified2 = !empty($request->date_certified_2) ? $request->date_certified_2: NULL;
 
+        $uacsIDs = $request->uacs_id;
+        $uacsDescriptions = $request->uacs_description;
+        $uacsAmounts = $request->uacs_amount;
+
+        //dd($uacsDescriptions, $uacsIDs, $uacsAmounts);
+
         $routeName = 'ca-ors-burs';
 
         try {
@@ -459,6 +466,17 @@ class ObligationRequestStatusController extends Controller
             $instanceORS->amount = $amount;
             $instanceORS->module_class = 2;
             $instanceORS->save();
+
+            $orsID = $instanceORS->id->string;
+
+            foreach ($uacsIDs as $uacsCtr => $uacsID) {
+                $instanceUacs = OrsBursUacsItem::create([
+                    'ors_id' => $orsID,
+                    'uacs_id' => $uacsID,
+                    'description' => $uacsDescriptions[$uacsCtr],
+                    'amount' => $uacsAmounts[$uacsCtr]
+                ]);
+            }
 
             $documentType = $documentType == 'ors' ? 'Obligation Request & Status' :
                             'Budget Utilization Request & Status';
@@ -518,6 +536,18 @@ class ObligationRequestStatusController extends Controller
         $project = $orsData->funding_source;
         $mooeTitles = MooeAccountTitle::orderBy('order_no')->get();
         $mfoPAPs = MfoPap::orderBy('code')->get();
+        $uacsItems = DB::table('ors_burs_uacs_items as uacs_item')
+                       ->select(
+                           'uacs_item.id',
+                           'uacs_item.uacs_id',
+                           'uacs_item.description',
+                           'uacs_item.amount',
+                           'mooe.uacs_code'
+                        )
+                       ->join('mooe_account_titles as mooe', 'mooe.id', '=', 'uacs_item.uacs_id')
+                       ->where('uacs_item.ors_id', $id)
+                       ->orderBy('mooe.uacs_code')
+                       ->get();
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -602,7 +632,8 @@ class ObligationRequestStatusController extends Controller
             'continuing', 'current', 'amount', 'mfoPAPs',
             'sigCertified1', 'sigCertified2', 'dateCertified1',
             'dateCertified2', 'signatories', 'payees', 'isObligated',
-            'transactionType', 'projects', 'project', 'mooeTitles'
+            'transactionType', 'projects', 'project', 'mooeTitles',
+            'uacsItems'
         ));
     }
 
@@ -635,7 +666,12 @@ class ObligationRequestStatusController extends Controller
         $dateCertified1 = !empty($request->date_certified_1) ? $request->date_certified_1: NULL;
         $dateCertified2 = !empty($request->date_certified_2) ? $request->date_certified_2: NULL;
 
-        try {
+        $uacsOrsUacsIDs = $request->ors_uacs_id;
+        $uacsIDs = $request->uacs_id;
+        $uacsDescriptions = $request->uacs_description;
+        $uacsAmounts = $request->uacs_amount;
+
+
             $instanceORS = ObligationRequestStatus::find($id);
             $moduleClass = $instanceORS->module_class;
 
@@ -677,11 +713,34 @@ class ObligationRequestStatusController extends Controller
                 $instanceDV->save();
             }
 
+            if (count($uacsOrsUacsIDs) > 0) {
+                foreach ($uacsOrsUacsIDs as $uacsOrsCtr => $uacsOrsID) {
+                    $instanceUacsItem = OrsBursUacsItem::find($uacsOrsID);
+
+                    if ($instanceUacsItem) {
+                        $instanceUacsItem->description = $uacsDescriptions[$uacsOrsCtr];
+                        $instanceUacsItem->amount = $uacsAmounts[$uacsOrsCtr];
+                        $instanceUacsItem->save();
+                    } else {
+                        $instanceUacsItem = OrsBursUacsItem::create([
+                            'ors_id' => $id,
+                            'uacs_id' => $uacsIDs[$uacsOrsCtr],
+                            'description' => $uacsDescriptions[$uacsOrsCtr],
+                            'amount' => $uacsAmounts[$uacsOrsCtr]
+                        ]);
+                    }
+                }
+
+                OrsBursUacsItem::whereNotIn('id', $uacsOrsUacsIDs)->delete();
+            }
+
             $documentType = $documentType == 'ors' ? 'Obligation Request & Status' :
                             'Budget Utilization Request & Status';
 
             $msg = "$documentType '$id' successfully updated.";
             Auth::user()->log($request, $msg);
+
+            try {
             return redirect()->route($routeName, ['keyword' => $id])
                              ->with('success', $msg);
         } catch (\Throwable $th) {

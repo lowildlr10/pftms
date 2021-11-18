@@ -200,9 +200,8 @@
                     </div>
                     <div class="md-form px-2">
                         <select class="mdb-select crud-select md-form" searchable="Search here.."
-                                name="uacs_object_code[]" multiple>
+                                id="sel-uacs-code" name="uacs_object_code[]" multiple>
                             <option value="" disabled selected>Choose the MOOE account titles</option>
-                            <option value="">-- None --</option>
 
                             @if (count($mooeTitles) > 0)
                                 @foreach ($mooeTitles as $mooe)
@@ -247,6 +246,15 @@
                                class="form-control">
                         <label for="current" class="active px-3">Current</label>
                     </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8 border border-bottom-0 border-dark px-0 text-center">
+                    <div id="uacs-description-segment" class="mx-3"></div>
+                </div>
+                <div class="col-md-4 border border-left-0 border-bottom-0 border-dark px-0 text-center">
+                    <div id="uacs-amount-segment" class="mx-3"></div>
                 </div>
             </div>
 

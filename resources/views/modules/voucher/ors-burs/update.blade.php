@@ -206,9 +206,8 @@
                     </div>
                     <div class="md-form px-2">
                         <select class="mdb-select crud-select md-form" searchable="Search here.."
-                                name="uacs_object_code[]" multiple>
+                                id="sel-uacs-code" name="uacs_object_code[]" multiple>
                             <option value="" disabled selected>Choose the MOOE account titles</option>
-                            <option value="">-- None --</option>
 
                             @if (count($mooeTitles) > 0)
                                 @foreach ($mooeTitles as $mooe)
@@ -252,6 +251,49 @@
                         <input type="number" id="current" name="current" placeholder="Current (Optional)..."
                                class="form-control" value="{{ $current }}">
                         <label for="current" class="active px-3">Current</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8 border border-bottom-0 border-dark px-0 text-center">
+                    <div id="uacs-description-segment" class="mx-3">
+                        @foreach ($uacsItems as $itemCtr => $item)
+                        <div class="md-form form-sm" id="uacs_description_{{ $itemCtr }}">
+                            <input type="text" id="uacs_description_{{ $item->uacs_id }}"
+                                   name="uacs_description[]"
+                                class="form-control required" value="{{ $item->description }}">
+                            <input type="hidden" id="uacs_id_{{ $item->uacs_id }}" name="uacs_id[]"
+                                   value="{{ $item->uacs_id }}">
+                            <input type="hidden" id="ors_uacs_id_{{ $item->uacs_id }}" name="ors_uacs_id[]"
+                                   value="{{ $item->id }}">
+                            <label for="uacs_description" class="active">
+                                <span class="red-text">* </span>
+                                <strong>{{ $item->uacs_code }} : {{ $item->description }}</strong>
+                                <a onclick="$(this).deleteUacsItem(
+                                    '#uacs_description_{{ $itemCtr }}', '#uacs_amount_{{ $itemCtr }}',
+                                    '{{ $item->id }}'
+                                   );"
+                                   class="btn btn-red btn-sm py-0 rounded" >
+                                    <strong>Delete</strong>
+                                </a>
+                            </label>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                <div class="col-md-4 border border-left-0 border-bottom-0 border-dark px-0 text-center">
+                    <div id="uacs-amount-segment" class="mx-3">
+                        @foreach ($uacsItems as $itemCtr => $item)
+                        <div class="md-form form-sm" id="uacs_amount_{{ $itemCtr }}">
+                            <input type="text" id="uacs_amount_{{ $item->uacs_id }}" name="uacs_amount[]"
+                                class="form-control required" value="{{ $item->amount }}">
+                            <label for="uacs_amount" class="active">
+                                <span class="red-text">* </span>
+                                <strong>{{ $item->uacs_code }} Amount</strong>
+                            </label>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
             </div>

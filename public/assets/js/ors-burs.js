@@ -44,6 +44,82 @@ $(function() {
         });
     }
 
+    function initializeInputs() {
+        $('#sel-uacs-code').change(function() {
+            const uacsVals = $(this).val();
+            const uacsDescs = $(this).find('option:selected').not('option:disabled').map(function(){
+                return $(this).text().trim();
+            }).get();
+            let uacsDescHTML = '', uacsAmountHTML = '';
+
+            if (!empty(uacsVals) && !empty(uacsDescs)) {
+                uacsVals.forEach((uacsID, uacsIndex) => {
+                    const uacsDescCode = uacsDescs[uacsIndex];
+                    const uacsCode = uacsDescCode.split(" : ")[0];
+                    const uacsDesc = uacsDescCode.split(" : ")[1];
+
+                    let description = $(`#uacs_description_${uacsID}`).val();
+                    let _uacsID = $(`#uacs_id_${uacsID}`).val();
+                    let orsUacsID = $(`#ors_uacs_id_${uacsID}`).val();
+                    let amount = $(`#uacs_amount_${uacsID}`).val();
+
+                    description = !empty(description) ? description : uacsDescCode;
+                    _uacsID = !empty(_uacsID) ? _uacsID : uacsID;
+                    orsUacsID = !empty(orsUacsID) ? orsUacsID : '';
+                    amount = !empty(amount) ? amount : 0;
+
+                    uacsDescHTML += `
+                    <div class="md-form form-sm" id="uacs_description_${uacsIndex}">
+                        <input type="text" id="uacs_description_${uacsID}" name="uacs_description[]"
+                            class="form-control required" value="${description}">
+                        <input type="hidden" id="uacs_id_${uacsID}" name="uacs_id[]" value="${_uacsID}">
+                        <input type="hidden" id="ors_uacs_id_${uacsID}" name="ors_uacs_id[]" value="${orsUacsID}">
+                        <label for="uacs_description" class="active">
+                            <span class="red-text">* </span>
+                            <strong>${uacsDescCode}</strong>
+                            <a onclick="$(this).deleteUacsItem(
+                                '#uacs_description_${uacsIndex}', '#uacs_amount_${uacsIndex}',
+                                '${uacsID}'
+                               );"
+                               class="btn btn-red btn-sm py-0 rounded" >
+                                <strong>Delete</strong>
+                            </a>
+                        </label>
+                    </div>
+                    `;
+                    uacsAmountHTML += `
+                    <div class="md-form form-sm" id="uacs_amount_${uacsIndex}">
+                        <input type="text" id="uacs_amount_${uacsID}" name="uacs_amount[]"
+                            class="form-control required" value="${amount}">
+                        <label for="uacs_amount" class="active">
+                            <span class="red-text">* </span>
+                            <strong>${uacsCode} Amount</strong>
+                        </label>
+                    </div>
+                    `;
+                });
+            } else {
+                uacsDescHTML = '';
+                uacsAmountHTML = '';
+            }
+
+            $('#uacs-description-segment').html(uacsDescHTML);
+            $('#uacs-amount-segment').html(uacsAmountHTML);
+        });
+
+        $('#amount').change(function() {
+            const amount = $(this).val();
+            $('#total').val(amount);
+        });
+    }
+
+    $.fn.deleteUacsItem = function(elemDescID, elemAmountID, uacsID) {
+        $(elemDescID).remove();
+        $(elemAmountID).remove();
+
+        //$(`#sel-uacs-code option:selected`).removeAttr('selected');
+    }
+
     $.fn.refreshRemarks = function(refreshURL) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-show').load(refreshURL, function() {
@@ -70,10 +146,7 @@ $(function() {
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
 
-            $('#amount').change(function() {
-                const amount = $(this).val();
-                $('#total').val(amount);
-            });
+            initializeInputs();
         });
         $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
@@ -90,10 +163,7 @@ $(function() {
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
 
-            $('#amount').change(function() {
-                const amount = $(this).val();
-                $('#total').val(amount);
-            });
+            initializeInputs();
         });
         $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
@@ -118,10 +188,7 @@ $(function() {
             $('.crud-select').materialSelect();
             $(this).slideToggle(500);
 
-            $('#amount').change(function() {
-                const amount = $(this).val();
-                $('#total').val(amount);
-            });
+            initializeInputs();
         });
         $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {
