@@ -671,7 +671,7 @@ class ObligationRequestStatusController extends Controller
         $uacsDescriptions = $request->uacs_description;
         $uacsAmounts = $request->uacs_amount;
 
-
+        try {
             $instanceORS = ObligationRequestStatus::find($id);
             $moduleClass = $instanceORS->module_class;
 
@@ -740,7 +740,6 @@ class ObligationRequestStatusController extends Controller
             $msg = "$documentType '$id' successfully updated.";
             Auth::user()->log($request, $msg);
 
-            try {
             return redirect()->route($routeName, ['keyword' => $id])
                              ->with('success', $msg);
         } catch (\Throwable $th) {

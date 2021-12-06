@@ -3325,7 +3325,7 @@ class PrintController extends Controller
 
         foreach ($instanceUacsItems as $uacsCtr => $uacsItem) {
             $uacsItem->amount = number_format($uacsItem->amount, 2);
-            $_uacsObjects .= "$uacsItem->description ($uacsItem->uacs_code) - $uacsItem->amount";
+            $_uacsObjects .= "$uacsItem->description ($uacsItem->uacs_code) = $uacsItem->amount";
 
             if ($uacsCtr == count($instanceUacsItems)) {
                 $_uacsObjects .=  "";
