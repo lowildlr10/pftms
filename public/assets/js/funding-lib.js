@@ -51,6 +51,45 @@ $(function() {
             },
             //theme: "material"
         });
+        $('.uacs-class-tokenizer').select2({
+            tokenSeparators: [','],
+            placeholder: "Value...",
+            width: '100%',
+            maximumSelectionSize: 4,
+            allowClear: true,
+            ajax: {
+                url: `${baseURL}/report/registry-allot-obli-disb/get-uacs-object`,
+                type: "post",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        _token: CSRF_TOKEN,
+                        search: params.term
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: $.map(data, function(item) {
+                            let jsonData = {};
+                            jsonData['uacs_code'] = item.uacs_code;
+                            jsonData['name'] = item.name;
+                            allotClassData[item.id] = jsonData;
+
+                            return {
+                                text: `${item.uacs_code} : ${item.name}`,
+                                id: item.id
+                            }
+                        }),
+                        pagination: {
+                            more: true
+                        }
+                    };
+                },
+                cache: true
+            },
+            //theme: "material"
+        });
     }
 
     function initializeSortable() {
@@ -152,6 +191,13 @@ $(function() {
                             id="allotment-name-${newID}">
                     </div>
                 </td>`,
+                uacsCode = `
+                <td>
+                    <div class="md-form my-0">
+                        <select class="mdb-select required uacs-class-tokenizer"
+                                name="uacs_code[${newID}]"></select>
+                    </div>
+                </td>`,
                 allotmentClassification = `
                 <td>
                     <div class="md-form my-0">
@@ -204,8 +250,9 @@ $(function() {
                 </td>`;
 
             rowOutput = '<tr id="item-row-'+newID+'" class="item-row">'+
-                        allotmentName + allotmentClassification + allotmentBudget + coimplementorBudget +
-                        justification + deleteButton + sortableButton + '</tr>';
+                        allotmentName + uacsCode + allotmentClassification +
+                        allotmentBudget + coimplementorBudget + justification +
+                        deleteButton + sortableButton + '</tr>';
 
             $(rowOutput).insertAfter('#' + lastRowID);
             initializeSelect2();
@@ -227,8 +274,8 @@ $(function() {
                         }) : '') +
                     `</div>
                 </td>`,
-                additionalTD = !isRealignment ? `<td colspan="${countCoimplementors + 2}"></td>` :
-                               `<td colspan="${countCoimplementors + 3}"></td>`,
+                additionalTD = !isRealignment ? `<td colspan="${countCoimplementors + 3}"></td>` :
+                               `<td colspan="${countCoimplementors + 4}"></td>`,
                 deleteButton = `
                 <td class="align-middle">
                     <a onclick="$(this).deleteRow('#header-row-${newID}');"
@@ -248,7 +295,7 @@ $(function() {
             $(rowOutput).insertAfter('#' + lastRowID);
         } else if (type == 'header-break') {
              let allotmentHeaderName = `
-                <td colspan="` + ((!isRealignment ? 3 : 4) + countCoimplementors) + `">
+                <td colspan="` + ((!isRealignment ? 4 : 5) + countCoimplementors) + `">
                     <hr>
                     <div class="md-form form-sm my-0">
                         <input name="row_type[${newID}]" type="hidden" value="${type}">

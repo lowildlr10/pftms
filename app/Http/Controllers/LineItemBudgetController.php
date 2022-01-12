@@ -320,6 +320,7 @@ class LineItemBudgetController extends Controller
 
         $rowTypes = $request->row_type;
         $allotmentNames = $request->allotment_name;
+        $uacsCodes = $request->uacs_code;
         $allotmentClasses = $request->allot_class;
         $allottedBudgets = $request->allotted_budget;
         $coimplementorIDs = $request->coimplementor_id;
@@ -376,6 +377,7 @@ class LineItemBudgetController extends Controller
                         $instanceAllotment->project_id = $project;
                         $instanceAllotment->budget_id = $lastID;
                         $instanceAllotment->allotment_class = $allotmentClass;
+                        $instanceAllotment->uacs_id = !empty($uacsCodes[$ctr]) ? $uacsCodes[$ctr] : NULL;
                         $instanceAllotment->order_no = $orderNo;
                         $instanceAllotment->allotment_name = empty($headerName) ? $allotmentNames[$ctr] :
                                                             "$headerName::".$allotmentNames[$ctr];
@@ -418,6 +420,7 @@ class LineItemBudgetController extends Controller
         $rowTypes = $request->row_type;
         $allotmentIDs = $request->allotment_id;
         $allotmentNames = $request->allotment_name;
+        $uacsCodes = $request->uacs_code;
         $allotmentClasses = $request->allot_class;
         $allottedBudgets = $request->allotted_budget;
         $coimplementorIDs = $request->coimplementor_id;
@@ -481,6 +484,7 @@ class LineItemBudgetController extends Controller
                         $instanceRealignedAllot->budget_id = $id;
                         $instanceRealignedAllot->allotment_id = $allotmentID ? $allotmentID : NULL;
                         $instanceRealignedAllot->budget_realign_id = $lastID->id;
+                        $instanceRealignedAllot->uacs_id = !empty($uacsCodes[$ctr]) ? $uacsCodes[$ctr] : NULL;
                         $instanceRealignedAllot->allotment_class = $allotmentClasses[$ctr];
                         $instanceRealignedAllot->order_no = $orderNo;
                         $instanceRealignedAllot->realigned_allotment_cost = $allottedBudgets[$ctr];
@@ -531,6 +535,7 @@ class LineItemBudgetController extends Controller
         $allotments = FundingAllotment::where('budget_id', $budgetID)
                                       ->orderBy('order_no')
                                       ->get();
+        $uacsCodes = MooeAccountTitle::orderBy('account_title')->get();
         $allotmentClassifications = AllotmentClass::orderBy('class_name')->get();
 
         $projDat = new FundingProject;
@@ -622,6 +627,7 @@ class LineItemBudgetController extends Controller
         return view('modules.fund-utilization.fund-project-lib.update', compact(
             'id',
             'projects',
+            'uacsCodes',
             'allotmentClassifications',
             'budget',
             'allotments',
@@ -651,6 +657,7 @@ class LineItemBudgetController extends Controller
         $rowTypes = $request->row_type;
         $allotmentIDs = $request->allotment_id;
         $allotmentNames = $request->allotment_name;
+        $uacsCodes = $request->uacs_code;
         $allotmentClasses = $request->allot_class;
         $allottedBudgets = $request->allotted_budget;
         $coimplementorIDs = $request->coimplementor_id;
@@ -711,6 +718,7 @@ class LineItemBudgetController extends Controller
                             }
                         }
 
+                        $instanceAllotment->uacs_id = !empty($uacsCodes[$ctr]) ? $uacsCodes[$ctr] : NULL;
                         $instanceAllotment->allotment_class = $allotmentClasses[$ctr];
                         $instanceAllotment->order_no = $orderNo;
                         $instanceAllotment->allotment_name = empty($headerName) ? $allotmentNames[$ctr] :
@@ -762,6 +770,7 @@ class LineItemBudgetController extends Controller
         $allotmentIDs = $request->allotment_id;
         $realignedAllotIDs = $request->allotment_realign_id;
         $allotmentNames = $request->allotment_name;
+        $uacsCodes = $request->uacs_code;
         $allotmentClasses = $request->allot_class;
         $allottedBudgets = $request->allotted_budget;
         $coimplementorIDs = $request->coimplementor_id;
@@ -822,6 +831,7 @@ class LineItemBudgetController extends Controller
                             }
                         }
 
+                        $instanceRealignedAllot->uacs_id = !empty($uacsCodes[$ctr]) ? $uacsCodes[$ctr] : NULL;
                         $instanceRealignedAllot->allotment_id = $allotmentID ? $allotmentID : NULL;
                         $instanceRealignedAllot->budget_realign_id = $realignedBudgetID;
                         $instanceRealignedAllot->allotment_class = $allotmentClasses[$ctr];
@@ -871,6 +881,7 @@ class LineItemBudgetController extends Controller
 
         $allotmentClassifications = AllotmentClass::orderBy('class_name')->get();
         $budgetData = FundingBudget::find($id);
+        $uacsCodes = MooeAccountTitle::orderBy('account_title')->get();
         $budgetRealignedData = FundingBudgetRealignment::where('budget_id', $id)
                                                        ->orderBy('realignment_order', 'desc')
                                                        ->first();
@@ -882,7 +893,8 @@ class LineItemBudgetController extends Controller
                         ->select('allot.id as id', 'r_allot.allotment_name as allotment_name',
                                 'r_allot.realigned_allotment_cost as allotment_cost',
                                 'r_allot.allotment_class as allotment_class', 'r_allot.coimplementers',
-                                'r_allot.id as r_allot_id', 'r_allot.justification',)
+                                'r_allot.id as r_allot_id', 'r_allot.justification',
+                                'r_allot.uacs_id')
                         ->leftJoin('funding_allotments as allot', 'allot.id', '=',
                                    'r_allot.allotment_id')
                         ->where('r_allot.budget_realign_id', $budgetRealignedData->id)
@@ -927,6 +939,7 @@ class LineItemBudgetController extends Controller
             'approvedBudget',
             'remainingBudget',
             'allotments',
+            'uacsCodes',
             'allotmentClassifications',
             'users',
             'signatories',

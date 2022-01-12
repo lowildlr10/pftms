@@ -61,6 +61,11 @@
                                     <span class="red-text">* </span> Allotment Name
                                 </b>
                             </th>
+                            <th class="align-middle" width="300px">
+                                <b>
+                                    <span class="red-text">* </span> UACS Code
+                                </b>
+                            </th>
                             <th class="align-middle" width="150px">
                                 <b>
                                     <span class="red-text">* </span> Allotment Class
@@ -108,6 +113,19 @@
                                     <input type="text" placeholder=" Value..." name="allotment_name[{{ $itemCounter }}]"
                                             class="form-control required form-control-sm allotment-name py-1"
                                             id="allotment-name-{{ $itemCounter }}" value="{{ $item->allotment_name }}">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="md-form my-0">
+                                    <select class="mdb-select required uacs-class-tokenizer"
+                                            name="uacs_code[{{ $itemCounter }}]">
+                                        @foreach ($uacsCodes as $uacs)
+                                        <option {{ $uacs->id == $item->uacs_id ? 'selected' : '' }}
+                                                value="{{ $uacs->id }}">
+                                            {{ $uacs->uacs_code }} : {{ $uacs->account_title }}
+                                        </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </td>
                             <td>

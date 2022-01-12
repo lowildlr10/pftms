@@ -71,6 +71,11 @@
                             </th>
                             <th class="align-middle" width="150px">
                                 <b>
+                                    <span class="red-text">* </span> UACS Code
+                                </b>
+                            </th>
+                            <th class="align-middle" width="150px">
+                                <b>
                                     <span class="red-text">* </span> Allotment Class
                                 </b>
                             </th>
