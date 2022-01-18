@@ -380,7 +380,7 @@ class LedgerController extends Controller
             $vouchers = ObligationRequestStatus::select(
                 DB::raw("DATE_FORMAT(date_obligated, '%Y-%m-%d') as date_obligated"),
                 'id', 'payee', 'particulars', 'serial_no', 'prior_year', 'continuing',
-                'current', 'amount'
+                'current', 'amount', 'uacs_object_code'
             )->where([['funding_source', $projectID]])
              ->whereNotNull('date_obligated')
              ->orderBy('date_obligated')
@@ -1402,6 +1402,7 @@ class LedgerController extends Controller
 
             foreach ($currRealignAllotments as $realignAllotCtr => $realignAllot) {
                 $_allotments[$realignAllotCtr] = (object) [
+                    'uacs_id' => $realignAllot->uacs_id,
                     'allotment_class' => $realignAllot->allotment_class,
                     'allotment_name' => $realignAllot->allotment_name,
                     "realignment_$realignOrder" => (object) [
@@ -1414,6 +1415,7 @@ class LedgerController extends Controller
                                        ->where('id', $realignAllot->allotment_id)
                                        ->first();
                     $_allotments[$realignAllotCtr]->allotment_id = $allotmentData->id;
+                    $_allotments[$realignAllotCtr]->uacs_id = $allotmentData->uacs_id;
                     $_allotments[$realignAllotCtr]->allotment_cost = $allotmentData->allotment_cost;
                     $allotCoimplementers = unserialize($allotmentData->coimplementers);
 
@@ -1422,6 +1424,7 @@ class LedgerController extends Controller
                     }
                 } else {
                     $_allotments[$realignAllotCtr]->allotment_id = NULL;
+                    $_allotments[$realignAllotCtr]->uacs_id = NULL;
                     $_allotments[$realignAllotCtr]->allotment_cost = 0;
                 }
 
@@ -1448,6 +1451,7 @@ class LedgerController extends Controller
 
                             $_allotments[$realignAllotCtr]->{$realignIndex} = (object) [
                                 'allotment_id' => $rAllot->allotment_id,
+                                'uacs_id' => $rAllot->uacs_id,
                                 'allotment_realign_id' => $rAllot->id,
                                 'allotment_cost' => $rAllot->realigned_allotment_cost,
                             ];

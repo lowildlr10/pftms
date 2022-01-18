@@ -280,6 +280,11 @@
                                             @if (is_int($allotCtr))
                                 <td class="material-tooltip-main" data-toggle="tooltip" title="Particulars: {{ $ors->particulars }}">
                                     <div class="md-form form-sm my-0">
+                                        @php
+                                            $uacsDat = App\Models\OrsBursUacsItem::where([
+                                                ['ors_id', $ors->id], ['uacs_id', $item->uacs_id]
+                                            ])->first();
+                                        @endphp
                                         <input type="number" name="allotment[{{ $itemCounter }}][{{ $allotmentCounter }}]"
                                                class="form-control required form-control-sm date-ors-burs py-1 text-center
                                                       material-tooltip-main allotment-{{ $allotmentCounter + 1 }}"
@@ -288,7 +293,8 @@
                                                id="allot-remain-{{ $itemCounter }}-{{ $allotmentCounter + 1 }}"
                                                onkeyup="$(this).computeAllotmentRemaining();"
                                                onchange="$(this).computeAllotmentRemaining();"
-                                               placeholder="Value..." value="0">
+                                               placeholder="Value..."
+                                               value="{{ $uacsDat ? $uacsDat->amount : 0 }}">
                                     </div>
                                 </td>
                                                 @php $allotmentCounter++; @endphp
