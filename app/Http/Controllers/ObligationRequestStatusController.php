@@ -713,7 +713,7 @@ class ObligationRequestStatusController extends Controller
                 $instanceDV->save();
             }
 
-            if (count($uacsOrsUacsIDs) > 0) {
+            if ($uacsOrsUacsIDs && count($uacsOrsUacsIDs) > 0) {
                 foreach ($uacsOrsUacsIDs as $uacsOrsCtr => $uacsOrsID) {
                     $instanceUacsItem = OrsBursUacsItem::find($uacsOrsID);
 

@@ -21,6 +21,7 @@ use App\Models\EmpAccount as User;
 use App\Models\EmpUnit;
 use App\Models\Supplier;
 use App\Models\MooeAccountTitle;
+use App\Models\OrsBursUacsItem;
 
 use Carbon\Carbon;
 use Auth;
@@ -391,6 +392,17 @@ class LedgerController extends Controller
                     'total' => $libData->approved_budget
                 ]
             ];
+
+            foreach ($vouchers as $ors) {
+                $_particulars = '';
+                $uacsItems = OrsBursUacsItem::where('ors_id', $ors->id)->get();
+
+                foreach ($uacsItems as $uacsItem) {
+                    $_particulars .= "$uacsItem->description\n";
+                }
+
+                $ors->new_particulars = $_particulars;
+            }
 
             foreach ($libRealignments as $realignCtr => $libRealign) {
                 $approvedBudgets[] = (object) [
@@ -1492,7 +1504,7 @@ class LedgerController extends Controller
                         }
 
                         $allotmentHeaders[] = (object) [
-                            'allotment_id' => $item->allotment_id,
+                            'allotment_id' => $item->id,
                             'realign_allotment_id' => NULL,
                             'allotment_name' => $item->allotment_name,
                             'allotment_cost' => $item->allotment_cost,

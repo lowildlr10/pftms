@@ -127,7 +127,7 @@
                                     <div class="md-form form-sm my-0">
                                         <input type="hidden" id="allotment-id-{{ $allotmentCounter + 1 }}"
                                                name="allotment_id[{{ $allotmentCounter }}]"
-                                               value="{{ $item->allotment_id }}">
+                                               value="{{ $item->id }}">
                                         <input type="hidden" id="allotment-cost-{{ $allotmentCounter + 1 }}"
                                                value="{{ $item->allotment_cost }}">
                                         {{ $item->allotment_cost ?
@@ -254,7 +254,7 @@
                                         <textarea name="particular[{{ $itemCounter }}]" placeholder=" Value..."
                                                   class="md-textarea required form-control-sm w-100 py-1"
                                                   placeholder="Value..."
-                                        >{{ $ors->particulars }}</textarea>
+                                        >{{ $ors->ledger_particulars }}</textarea>
                                     </div>
                                 </td>
                                 <td>
