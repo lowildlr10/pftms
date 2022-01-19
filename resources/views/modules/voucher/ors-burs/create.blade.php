@@ -251,15 +251,6 @@
 
             <div class="row">
                 <div class="col-md-8 border border-bottom-0 border-dark px-0 text-center">
-                    <div id="uacs-description-segment" class="mx-3"></div>
-                </div>
-                <div class="col-md-4 border border-left-0 border-bottom-0 border-dark px-0 text-center">
-                    <div id="uacs-amount-segment" class="mx-3"></div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-8 border border-bottom-0 border-dark px-0 text-center">
                     <div class="md-form">
                         <strong>TOTAL</strong>
                     </div>

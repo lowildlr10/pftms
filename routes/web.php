@@ -173,6 +173,16 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'ca_ors_burs',
         'access' => 'is_allowed'
     ])->name('ca-ors-burs-store-remarks');
+    Route::get('cadv-reim-liquidation/ors-burs/show-uacs-items/{id}', [
+        'uses' => 'ObligationRequestStatusController@showUacsItems',
+        'module' => 'ca_ors_burs',
+        'access' => 'is_allowed'
+    ])->name('ca-ors-burs-show-uacs-items');
+    Route::post('cadv-reim-liquidation/ors-burs/update-uacs-items/{id}', [
+        'uses' => 'ObligationRequestStatusController@updateUacsItems',
+        'module' => 'ca_ors_burs',
+        'access' => 'is_allowed'
+    ])->name('ca-ors-burs-update-uacs-items');
 
     // Disbursement Voucher
     Route::any('cadv-reim-liquidation/dv', [
@@ -719,6 +729,16 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'proc_ors_burs',
         'access' => 'is_allowed'
     ])->name('proc-ors-burs-store-remarks');
+    Route::get('procurement/ors-burs/show-uacs-items/{id}', [
+        'uses' => 'ObligationRequestStatusController@showUacsItems',
+        'module' => 'proc_ors_burs',
+        'access' => 'is_allowed'
+    ])->name('proc-ors-burs-show-uacs-items');
+    Route::post('procurement/ors-burs/update-uacs-items/{id}', [
+        'uses' => 'ObligationRequestStatusController@updateUacsItems',
+        'module' => 'proc_ors_burs',
+        'access' => 'is_allowed'
+    ])->name('proc-ors-burs-update-uacs-items');
 
     // Inpection and Acceptance Report Module
     Route::any('procurement/iar', [

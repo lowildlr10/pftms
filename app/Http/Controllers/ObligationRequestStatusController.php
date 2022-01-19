@@ -751,6 +751,122 @@ class ObligationRequestStatusController extends Controller
     }
 
     /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showUacsItems($id) {
+        $instanceORS = ObligationRequestStatus::find($id);
+        $amount = $instanceORS->amount;
+        $uacsObjectCode = $instanceORS->uacs_object_code ?
+                          unserialize($instanceORS->uacs_object_code) :
+                          [];
+        $mooeTitles = MooeAccountTitle::orderBy('order_no')->get();
+        $_uacsItems = MooeAccountTitle::whereIn('id', $uacsObjectCode)
+                                      ->orderBy('order_no')->get();
+        $uacsItems = DB::table('ors_burs_uacs_items as uacs_item')
+                       ->select(
+                           'uacs_item.id',
+                           'uacs_item.uacs_id',
+                           'uacs_item.description',
+                           'uacs_item.amount',
+                           'mooe.uacs_code'
+                        )
+                       ->join('mooe_account_titles as mooe', 'mooe.id', '=', 'uacs_item.uacs_id')
+                       ->where('uacs_item.ors_id', $id)
+                       ->orderBy('mooe.uacs_code')
+                       ->get();
+        $moduleClass = $instanceORS->module_class;
+
+        if ($moduleClass == 3) {
+            $viewFile = 'modules.procurement.ors-burs.update-uacs';
+        } else if ($moduleClass == 2) {
+            $viewFile = 'modules.voucher.ors-burs.update-uacs';
+        }
+
+        return view($viewFile, [
+            'id' => $id,
+            'uacsObjectCode' => $uacsObjectCode,
+            'uacsItems' => $uacsItems,
+            '_uacsItems' => $_uacsItems,
+            'mooeTitles' => $mooeTitles,
+            'amount' => $amount
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function updateUacsItems(Request $request, $id) {
+        $uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
+        $uacsIDs = $request->uacs_id;
+        $uacsDescriptions = $request->uacs_description;
+        $uacsAmounts = $request->uacs_amount;
+        $uacsOrsUacsIDs = $request->ors_uacs_id;
+
+        try {
+            $instanceDocLog = new DocLog;
+            $instanceNotif = new Notif;
+            $instanceORS = ObligationRequestStatus::find($id);
+            $serialNo = $instanceORS->serial_no;
+            $moduleClass = $instanceORS->module_class;
+            $documentType = $instanceORS->document_type;
+            $documentType = $documentType == 'ors' ? 'Obligation Request & Status' :
+                                             'Budget Utilization Request & Status';
+
+            if ($moduleClass == 3) {
+                $routeName = 'proc-ors-burs';
+            } else if ($moduleClass == 2) {
+                $routeName = 'ca-ors-burs';
+            }
+
+            $instanceORS->uacs_object_code = $uacsObjectCode;
+            $instanceORS->save();
+
+            if ($uacsOrsUacsIDs && count($uacsOrsUacsIDs) > 0) {
+                foreach ($uacsOrsUacsIDs as $uacsOrsCtr => $uacsOrsID) {
+                    $instanceUacsItem = OrsBursUacsItem::find($uacsOrsID);
+
+                    if ($instanceUacsItem) {
+                        $instanceUacsItem->description = $uacsDescriptions[$uacsOrsCtr];
+                        $instanceUacsItem->amount = $uacsAmounts[$uacsOrsCtr];
+                        $instanceUacsItem->save();
+                    } else {
+                        $instanceUacsItem = OrsBursUacsItem::create([
+                            'ors_id' => $id,
+                            'uacs_id' => $uacsIDs[$uacsOrsCtr],
+                            'description' => $uacsDescriptions[$uacsOrsCtr],
+                            'amount' => $uacsAmounts[$uacsOrsCtr]
+                        ]);
+                        $uacsOrsUacsIDs[] = $instanceUacsItem->id;
+                    }
+                }
+
+                OrsBursUacsItem::whereNotIn('id', $uacsOrsUacsIDs)
+                               ->where('ors_id', $id)
+                               ->delete();
+            }
+
+            $instanceNotif->notifyObligatedORS($id, $routeName);
+
+            $msg = "UACS item/s in $documentType's with a serial number of '$serialNo'
+                    successfully updated.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    /**
      * Soft deletes the specified resource from storage.
      *
      * @param  int  $id
@@ -1046,6 +1162,25 @@ class ObligationRequestStatusController extends Controller
 
     public function showObligate($id) {
         $instanceORS = ObligationRequestStatus::find($id);
+        $amount = $instanceORS->amount;
+        $uacsObjectCode = $instanceORS->uacs_object_code ?
+                          unserialize($instanceORS->uacs_object_code) :
+                          [];
+        $mooeTitles = MooeAccountTitle::orderBy('order_no')->get();
+        $_uacsItems = MooeAccountTitle::whereIn('id', $uacsObjectCode)
+                                      ->orderBy('order_no')->get();
+        $uacsItems = DB::table('ors_burs_uacs_items as uacs_item')
+                       ->select(
+                           'uacs_item.id',
+                           'uacs_item.uacs_id',
+                           'uacs_item.description',
+                           'uacs_item.amount',
+                           'mooe.uacs_code'
+                        )
+                       ->join('mooe_account_titles as mooe', 'mooe.id', '=', 'uacs_item.uacs_id')
+                       ->where('uacs_item.ors_id', $id)
+                       ->orderBy('mooe.uacs_code')
+                       ->get();
         $moduleClass = $instanceORS->module_class;
         $serialNos = [
             (object) [
@@ -1069,11 +1204,20 @@ class ObligationRequestStatusController extends Controller
             'id' => $id,
             'serialNo' => $serialNo,
             'serialNos' => $serialNos,
+            'uacsObjectCode' => $uacsObjectCode,
+            'uacsItems' => $uacsItems,
+            '_uacsItems' => $_uacsItems,
+            'mooeTitles' => $mooeTitles,
+            'amount' => $amount
         ]);
     }
 
     public function obligate(Request $request, $id) {
         $serialNo = $request->serial_no;
+        $uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
+        $uacsIDs = $request->uacs_id;
+        $uacsDescriptions = $request->uacs_description;
+        $uacsAmounts = $request->uacs_amount;
 
         try {
             $instanceDocLog = new DocLog;
@@ -1093,10 +1237,20 @@ class ObligationRequestStatusController extends Controller
                 $routeName = 'ca-ors-burs';
             }
 
+            $instanceORS->uacs_object_code = $uacsObjectCode;
             $instanceORS->date_obligated = Carbon::now();
             $instanceORS->obligated_by = Auth::user()->id;
             $instanceORS->serial_no = $serialNo;
             $instanceORS->save();
+
+            foreach ($uacsIDs as $uacsCtr => $uacsID) {
+                $instanceUacs = OrsBursUacsItem::create([
+                    'ors_id' => $id,
+                    'uacs_id' => $uacsID,
+                    'description' => $uacsDescriptions[$uacsCtr],
+                    'amount' => $uacsAmounts[$uacsCtr]
+                ]);
+            }
 
             $instanceNotif->notifyObligatedORS($id, $routeName);
 

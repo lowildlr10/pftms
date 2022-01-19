@@ -225,7 +225,13 @@
                                             @endforeach
                                 </td>
                                 <td>
-                                    {{ $ors->ledger_particulars }}
+                                    @php
+                                        if (strpos($ors->ledger_particulars, "\n") !== FALSE) {
+                                            $searchStr = ["\r\n", "\n", "\r"];
+                                            $ors->ledger_particulars = str_replace($searchStr, '<br>', $ors->ledger_particulars);
+                                        }
+                                    @endphp
+                                    {!! $ors->ledger_particulars !!}
                                 </td>
                                 <td  align="center">
                                     {{ $ors->serial_no ? $ors->serial_no : $ors->ors_no }}
