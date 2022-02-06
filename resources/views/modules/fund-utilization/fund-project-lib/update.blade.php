@@ -235,6 +235,19 @@
                             </td>
                             <td>
                                 <div class="md-form my-0">
+                                    <select class="mdb-select required uacs-class-tokenizer"
+                                            name="uacs_code[{{ $itemCounter }}]">
+                                        @foreach ($uacsCodes as $uacs)
+                                        <option {{ $uacs->id == $itm->uacs_id ? 'selected' : '' }}
+                                                value="{{ $uacs->id }}">
+                                            {{ $uacs->uacs_code }} : {{ $uacs->account_title }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="md-form my-0">
                                     <select class="mdb-select form-control-sm required allot-class-tokenizer"
                                             name="allot_class[{{ $itemCounter }}]">
                                         @foreach ($allotmentClassifications as $class)

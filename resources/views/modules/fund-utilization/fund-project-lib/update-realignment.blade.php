@@ -210,7 +210,7 @@
                                     @endforeach
                                 </div>
                             </td>
-                            <td colspan="{{ count($coimplementors) + 3 }}"></td>
+                            <td colspan="{{ count($coimplementors) + 4 }}"></td>
                             <td class="align-middle">
                                 <a onclick="$(this).deleteRow('#header-row-{{ $itemCounter }}');"
                                 class="btn btn-outline-red px-1 py-0">
@@ -236,6 +236,19 @@
                                             class="form-control required form-control-sm allotment-name py-1"
                                             id="allotment-name-{{ $itemCounter }}"
                                             value="{{ explode('::', $itm->allotment_name)[1] }}">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="md-form my-0">
+                                    <select class="mdb-select required uacs-class-tokenizer"
+                                            name="uacs_code[{{ $itemCounter }}]">
+                                        @foreach ($uacsCodes as $uacs)
+                                        <option {{ $uacs->id == $itm->uacs_id ? 'selected' : '' }}
+                                                value="{{ $uacs->id }}">
+                                            {{ $uacs->uacs_code }} : {{ $uacs->account_title }}
+                                        </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </td>
                             <td>
@@ -301,7 +314,7 @@
                                     @endforeach
 
                         <tr id="headerbreak-row-{{ $itemCounter }}" class="item-row">
-                            <td colspan="{{ count($coimplementors) + 4 }}">
+                            <td colspan="{{ count($coimplementors) + 5 }}">
                                 <hr>
                                 <div class="md-form form-sm my-0">
                                     <input name="row_type[{{ $itemCounter }}]" type="hidden" value="header-break">

@@ -208,7 +208,7 @@
                                     @endforeach
                                 </div>
                             </td>
-                            <td colspan="{{ count($coimplementors) + 3 }}"></td>
+                            <td colspan="{{ count($coimplementors) + 4 }}"></td>
                             <td class="align-middle">
                                 <a onclick="$(this).deleteRow('#header-row-{{ $itemCounter }}');"
                                 class="btn btn-outline-red px-1 py-0">
@@ -240,7 +240,7 @@
                                     <select class="mdb-select required uacs-class-tokenizer"
                                             name="uacs_code[{{ $itemCounter }}]">
                                         @foreach ($uacsCodes as $uacs)
-                                        <option {{ $uacs->id == $item->uacs_id ? 'selected' : '' }}
+                                        <option {{ $uacs->id == $itm->uacs_id ? 'selected' : '' }}
                                                 value="{{ $uacs->id }}">
                                             {{ $uacs->uacs_code }} : {{ $uacs->account_title }}
                                         </option>
@@ -312,7 +312,7 @@
                                     @endforeach
 
                         <tr id="headerbreak-row-{{ $itemCounter }}" class="item-row">
-                            <td colspan="{{ count($coimplementors) + 4 }}">
+                            <td colspan="{{ count($coimplementors) + 5 }}">
                                 <hr>
                                 <div class="md-form form-sm my-0">
                                     <input name="row_type[{{ $itemCounter }}]" type="hidden" value="header-break">
