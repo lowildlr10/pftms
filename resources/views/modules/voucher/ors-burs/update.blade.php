@@ -179,7 +179,7 @@
                         <strong>MFO/PAP</strong>
                     </div>
                     <div class="md-form px-2">
-                        <select class="mdb-select crud-select md-form required" searchable="Search here.."
+                        <select class="mdb-select crud-select md-form" searchable="Search here.."
                                 name="mfo_pap[]" multiple>
                             <option value="" disabled selected>Choose the MFO PAP</option>
 

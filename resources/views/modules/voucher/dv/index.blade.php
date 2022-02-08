@@ -334,6 +334,15 @@
                                 <i class="far fa-comment-dots"></i> View Remarks
                             </button>
                         </div>
+
+                        <!-- View UACS Items Button Section -->
+                        <button type="button" class="btn btn-sm btn-green btn-rounded
+                                btn-block waves-effect mb-2"
+                                onclick="$(this).showUacsItems('{{ route('ca-dv-show-uacs-items',
+                                                            ['id' => $dv->id]) }}');">
+                            <i class="fas fa-tags"></i> Open UACS Items
+                        </button>
+                        <!-- End View UACS Items Button Section -->
                     </div>
                 </div>
                 <hr>
@@ -484,6 +493,7 @@
 @include('modals.receive-back')
 @include('modals.payment')
 @include('modals.disburse')
+@include('modals.uacs-items')
 @include('modals.print')
 @include('modals.attachment')
 

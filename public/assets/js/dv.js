@@ -44,6 +44,114 @@ $(function() {
         });
     }
 
+    function computeRemainingUacs() {
+        $('.uacs_amount').on('keyup change', function() {
+            const amount = parseFloat($('#remaining-original').val());
+            let remaining = amount;
+
+            $('.uacs_amount').each(function() {
+                const valAmount = !isNaN(parseFloat($(this).val())) ? parseFloat($(this).val()) : 0.00;
+                console.log(valAmount);
+                remaining -= valAmount;
+            });
+
+            $('#remaining').val(remaining.toFixed(2));
+
+            if (parseFloat($('#remaining').val()) < 0) {
+                $('#remaining').addClass('input-error-highlighter')
+                               .tooltip('show');
+            } else {
+                $('#remaining').removeClass('input-error-highlighter')
+                               .tooltip('hide');
+            }
+        });
+    }
+
+    function initializeInputs() {
+        $('#sel-uacs-code').change(function() {
+            const uacsVals = $(this).val();
+            const uacsDescs = $(this).find('option:selected').not('option:disabled').map(function(){
+                return $(this).text().trim();
+            }).get();
+            let uacsHTML = '';
+
+            if (!empty(uacsVals) && !empty(uacsDescs)) {
+                uacsVals.forEach((uacsID, uacsIndex) => {
+                    const uacsDescCode = uacsDescs[uacsIndex];
+                    const uacsCode = uacsDescCode.split(" : ")[0];
+                    const uacsDesc = uacsDescCode.split(" : ")[1];
+
+                    let description = $(`#uacs_description_${uacsID}`).val();
+                    let _uacsID = $(`#uacs_id_${uacsID}`).val();
+                    let dvUacsID = $(`#dv_uacs_id_${uacsID}`).val();
+                    let amount = $(`#uacs_amount_${uacsID}`).val();
+
+                    description = !empty(description) ? description : '';
+                    _uacsID = !empty(_uacsID) ? _uacsID : uacsID;
+                    dvUacsID = !empty(dvUacsID) ? dvUacsID : '';
+                    amount = !empty(amount) ? amount : 0;
+
+                    uacsHTML += `
+                    <div class="row" id="uacs_description_{{ $itemCtr }}">
+                        <div class="col-md-10 border">
+                            <div class="md-form form-sm" id="uacs_description_${uacsIndex}">
+                                <input type="text" id="uacs_description_${uacsID}" name="uacs_description[]"
+                                    class="form-control required" placeholder="Item Description for '${uacsDesc}'"
+                                    value="${description}">
+                                <input type="hidden" id="uacs_id_${uacsID}" name="uacs_id[]" value="${_uacsID}">
+                                <input type="hidden" id="dv_uacs_id_${uacsID}" name="dv_uacs_id[]" value="${dvUacsID}">
+                                <label for="uacs_description_${uacsID}" class="active">
+                                    <span class="red-text">* </span>
+                                    <strong>${uacsDescCode}</strong>
+                                </label>
+                            </div>
+                            <div class="md-form form-sm" id="uacs_amount_${uacsIndex}">
+                                <input type="number" id="uacs_amount_${uacsID}" name="uacs_amount[]"
+                                    class="form-control uacs_amount required" value="${amount}">
+                                <label for="uacs_amount_${uacsID}" class="active">
+                                    <span class="red-text">* </span>
+                                    <strong>Amount</strong>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-2 p-0 border">
+                            <a onclick="$(this).deleteUacsItem(
+                                '#uacs_description_${uacsIndex}', '#uacs_amount_${uacsIndex}',
+                                '${uacsID}'
+                            );"
+                            class="btn btn-red btn-sm btn-block h-100 text-center" >
+                                <strong>Del <i class="fas fa-trash-alt fa-2x"></i></strong>
+                            </a>
+                        </div>
+                    </div>
+                    `;
+                });
+                $('#remaining-amount-segment').show();
+            } else {
+                $('#remaining-amount-segment').hide();
+                uacsHTML = '';
+            }
+
+            $('#uacs-description-segment').html(uacsHTML);
+
+            computeRemainingUacs();
+        });
+
+        $('#amount').change(function() {
+            const amount = $(this).val();
+            $('#total').val(amount);
+        });
+
+        computeRemainingUacs();
+    }
+
+    $.fn.deleteUacsItem = function(elemDescID, elemAmountID, uacsID) {
+        $(elemDescID).remove();
+        $(elemAmountID).remove();
+
+        //$(`#sel-uacs-code option:selected`).removeAttr('selected');
+    }
+
     $.fn.refreshRemarks = function(refreshURL) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-show').load(refreshURL, function() {
@@ -276,6 +384,30 @@ $(function() {
 
         if (!withError) {
             $('#form-disburse').submit();
+        }
+    }
+
+    $.fn.showUacsItems = function(url) {
+        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+        $('#modal-body-uacs').load(url, function() {
+            $('#mdb-preloader').fadeOut(300);
+            $('.crud-select').materialSelect();
+            $(this).slideToggle(500);
+            initializeInputs();
+        });
+        $("#modal-uacs").modal({keyboard: false, backdrop: 'static'})
+						        .on('shown.bs.modal', function() {
+            $('#uacs-title').html('Update DV UACS Items');
+		}).on('hidden.bs.modal', function() {
+            $('#modal-body-uacs').html('').css('display', 'none');
+		});
+    }
+
+    $.fn.updateUacsItems = function() {
+        const withError = inputValidation(false);
+
+        if (!withError) {
+            $('#form-uacs-items').submit();
         }
     }
 

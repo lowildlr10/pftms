@@ -22,6 +22,7 @@ use App\Models\EmpUnit;
 use App\Models\Supplier;
 use App\Models\MooeAccountTitle;
 use App\Models\OrsBursUacsItem;
+use App\Models\DvUacsItem;
 
 use Carbon\Carbon;
 use Auth;
@@ -430,6 +431,17 @@ class LedgerController extends Controller
                     'total' => $libData->approved_budget
                 ]
             ];
+
+            foreach ($vouchers as $dv) {
+                $_particulars = '';
+                $uacsItems = DvUacsItem::where('dv_id', $dv->id)->get();
+
+                foreach ($uacsItems as $uacsItem) {
+                    $_particulars .= "$uacsItem->description\n";
+                }
+
+                $dv->new_particulars = $_particulars;
+            }
 
             foreach ($libRealignments as $realignCtr => $libRealign) {
                 $approvedBudgets[] = (object) [

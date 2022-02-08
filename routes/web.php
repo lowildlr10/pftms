@@ -295,6 +295,16 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'ca_dv',
         'access' => 'is_allowed'
     ])->name('ca-dv-store-remarks');
+    Route::get('cadv-reim-liquidation/dv/show-uacs-items/{id}', [
+        'uses' => 'DisbursementVoucherController@showUacsItems',
+        'module' => 'ca_ors_burs',
+        'access' => 'is_allowed'
+    ])->name('ca-dv-show-uacs-items');
+    Route::post('cadv-reim-liquidation/dv/update-uacs-items/{id}', [
+        'uses' => 'DisbursementVoucherController@updateUacsItems',
+        'module' => 'ca_ors_burs',
+        'access' => 'is_allowed'
+    ])->name('ca-dv-update-uacs-items');
 
     // Liquidation Report
     Route::any('cadv-reim-liquidation/liquidation', [
@@ -863,6 +873,16 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'proc_dv',
         'access' => 'is_allowed'
     ])->name('proc-dv-store-remarks');
+    Route::get('procurement/dv/show-uacs-items/{id}', [
+        'uses' => 'DisbursementVoucherController@showUacsItems',
+        'module' => 'proc_ors_burs',
+        'access' => 'is_allowed'
+    ])->name('proc-dv-show-uacs-items');
+    Route::post('procurement/dv/update-uacs-items/{id}', [
+        'uses' => 'DisbursementVoucherController@updateUacsItems',
+        'module' => 'proc_ors_burs',
+        'access' => 'is_allowed'
+    ])->name('proc-dv-update-uacs-items');
 
     /*===================== INVENTORY ROUTES =====================*/
 

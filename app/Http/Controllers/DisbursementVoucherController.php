@@ -23,10 +23,14 @@ use App\Models\Supplier;
 use App\Models\Signatory;
 use App\Models\ItemUnitIssue;
 use App\Models\FundingProject;
+use App\Models\MooeAccountTitle;
 use App\Models\MfoPap;
+use App\Models\DvUacsItem;
 use Carbon\Carbon;
 use Auth;
 use DB;
+
+use App\Plugins\Notification as Notif;
 
 class DisbursementVoucherController extends Controller
 {
@@ -846,6 +850,120 @@ class DisbursementVoucherController extends Controller
             Auth::user()->log($request, $msg);
             return redirect(url()->previous())
                                  ->with('failed', $msg);
+        }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showUacsItems($id) {
+        $instanceDV = DisbursementVoucher::find($id);
+        $amount = $instanceDV->amount;
+        $uacsObjectCode = $instanceDV->uacs_object_code ?
+                          unserialize($instanceDV->uacs_object_code) :
+                          [];
+        $mooeTitles = MooeAccountTitle::orderBy('order_no')->get();
+        $_uacsItems = MooeAccountTitle::whereIn('id', $uacsObjectCode)
+                                      ->orderBy('order_no')->get();
+        $uacsItems = DB::table('dv_uacs_items as uacs_item')
+                       ->select(
+                           'uacs_item.id',
+                           'uacs_item.uacs_id',
+                           'uacs_item.description',
+                           'uacs_item.amount',
+                           'mooe.uacs_code'
+                        )
+                       ->join('mooe_account_titles as mooe', 'mooe.id', '=', 'uacs_item.uacs_id')
+                       ->where('uacs_item.dv_id', $id)
+                       ->orderBy('mooe.uacs_code')
+                       ->get();
+        $moduleClass = $instanceDV->module_class;
+
+        if ($moduleClass == 3) {
+            $viewFile = 'modules.procurement.dv.update-uacs';
+        } else if ($moduleClass == 2) {
+            $viewFile = 'modules.voucher.dv.update-uacs';
+        }
+
+        return view($viewFile, [
+            'id' => $id,
+            'uacsObjectCode' => $uacsObjectCode,
+            'uacsItems' => $uacsItems,
+            '_uacsItems' => $_uacsItems,
+            'mooeTitles' => $mooeTitles,
+            'amount' => $amount
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function updateUacsItems(Request $request, $id) {
+        $uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
+        $uacsIDs = $request->uacs_id;
+        $uacsDescriptions = $request->uacs_description;
+        $uacsAmounts = $request->uacs_amount;
+        $uacsDvUacsIDs = $request->dv_uacs_id;
+
+        try {
+            $instanceDocLog = new DocLog;
+            //$instanceNotif = new Notif;
+            $instanceDV = DisbursementVoucher::find($id);
+            $dvNo = $instanceDV->dv_no;
+            $moduleClass = $instanceDV->module_class;
+            $documentType = 'Disbursement Voucher';
+
+            if ($moduleClass == 3) {
+                $routeName = 'proc-dv';
+            } else if ($moduleClass == 2) {
+                $routeName = 'ca-dv';
+            }
+
+            $instanceDV->uacs_object_code = $uacsObjectCode;
+            $instanceDV->save();
+
+            if ($uacsDvUacsIDs && count($uacsDvUacsIDs) > 0) {
+                foreach ($uacsDvUacsIDs as $uacsDvCtr => $uacsDvID) {
+                    $instanceUacsItem = DvUacsItem::find($uacsDvID);
+
+                    if ($instanceUacsItem) {
+                        $instanceUacsItem->description = $uacsDescriptions[$uacsDvCtr];
+                        $instanceUacsItem->amount = $uacsAmounts[$uacsDvCtr];
+                        $instanceUacsItem->save();
+                    } else {
+                        $instanceUacsItem = DvUacsItem::create([
+                            'dv_id' => $id,
+                            'uacs_id' => $uacsIDs[$uacsDvCtr],
+                            'description' => $uacsDescriptions[$uacsDvCtr],
+                            'amount' => $uacsAmounts[$uacsDvCtr]
+                        ]);
+                        $uacsDvUacsIDs[] = $instanceUacsItem->id;
+                    }
+                }
+
+                DvUacsItem::whereNotIn('id', $uacsDvUacsIDs)
+                                   ->where('dv_id', $id)
+                                   ->delete();
+            }
+
+            //$instanceNotif->notifyObligatedORS($id, $routeName);
+
+            $msg = "UACS item/s in $documentType's with a DV number of '$dvNo'
+                    successfully updated.";
+            Auth::user()->log($request, $msg);
+            return redirect()->route($routeName, ['keyword' => $id])
+                             ->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            Auth::user()->log($request, $msg);
+            return redirect(url()->previous())->with('failed', $msg);
         }
     }
 

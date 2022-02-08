@@ -15,7 +15,7 @@
                     <table class="table table-sm table-hover table-bordered" style="width: max-content;">
                         <thead class="text-center">
                             <tr>
-                                <th class="align-middle" colspan="5"></th>
+                                <th class="align-middle" colspan="4"></th>
 
                                 @foreach ($classItemCounts as $classKey => $count)
                                     @if ($count > 0)
@@ -123,7 +123,7 @@
                                     <div class="md-form form-sm my-0">
                                         <input type="hidden" id="allotment-id-{{ $allotmentCounter + 1 }}"
                                                name="allotment_id[{{ $allotmentCounter }}]"
-                                               value="{{ $item->allotment_id }}">
+                                               value="{{ $item->id }}">
                                         <input type="hidden" id="allotment-cost-{{ $allotmentCounter + 1 }}"
                                                value="{{ $item->allotment_cost }}">
                                         {{ $item->allotment_cost ?
@@ -263,7 +263,7 @@
                                         <textarea name="particular[{{ $itemCounter }}]" placeholder=" Value..."
                                                   class="md-textarea required form-control-sm w-100 py-1"
                                                   placeholder="Value..."
-                                        >{{ $dv->particulars }}</textarea>
+                                        >{{ !empty(trim($dv->new_particulars)) ? $dv->new_particulars : $dv->particulars }}</textarea>
                                     </div>
                                 </td>
 
@@ -272,6 +272,11 @@
                                             @if (is_int($allotCtr))
                                 <td class="material-tooltip-main" data-toggle="tooltip" title="Particulars: {{ $dv->particulars }}">
                                     <div class="md-form form-sm my-0">
+                                        @php
+                                            $uacsDat = App\Models\DvUacsItem::where([
+                                                ['dv_id', $dv->id], ['uacs_id', $item->uacs_id]
+                                            ])->first();
+                                        @endphp
                                         <input type="number" name="allotment[{{ $itemCounter }}][{{ $allotmentCounter }}]"
                                                class="form-control required form-control-sm date-ors-burs py-1 text-center
                                                       material-tooltip-main allotment-{{ $allotmentCounter + 1 }}"
@@ -280,7 +285,7 @@
                                                id="allot-remain-{{ $itemCounter }}-{{ $allotmentCounter + 1 }}"
                                                onkeyup="$(this).computeAllotmentRemaining();"
                                                onchange="$(this).computeAllotmentRemaining();"
-                                               placeholder="Value..." value="0">
+                                               placeholder="Value..." value="{{ $uacsDat ? $uacsDat->amount : 0 }}">
                                     </div>
                                 </td>
                                                 @php $allotmentCounter++; @endphp
@@ -288,6 +293,11 @@
                                                 @foreach ($item as $itm)
                                 <td class="material-tooltip-main" data-toggle="tooltip" title="Particulars: {{ $dv->particulars }}">
                                     <div class="md-form form-sm my-0">
+                                        @php
+                                            $uacsDat = App\Models\DvUacsItem::where([
+                                                ['dv_id', $dv->id], ['uacs_id', $itm->uacs_id]
+                                            ])->first();
+                                        @endphp
                                         <input type="number" name="allotment[{{ $itemCounter }}][{{ $allotmentCounter }}]"
                                                class="form-control required form-control-sm date-ors-burs py-1 text-center
                                                       material-tooltip-main allotment-{{ $allotmentCounter + 1 }}"
@@ -296,7 +306,7 @@
                                                id="allot-remain-{{ $itemCounter }}-{{ $allotmentCounter + 1 }}"
                                                onkeyup="$(this).computeAllotmentRemaining();"
                                                onchange="$(this).computeAllotmentRemaining();"
-                                               placeholder="Value..." value="0">
+                                               placeholder="Value..." value="{{ $uacsDat ? $uacsDat->amount : 0 }}">
                                     </div>
                                 </td>
                                                     @php $allotmentCounter++; @endphp
