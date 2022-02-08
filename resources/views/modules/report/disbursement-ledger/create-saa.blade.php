@@ -273,9 +273,13 @@
                                 <td class="material-tooltip-main" data-toggle="tooltip" title="Particulars: {{ $dv->particulars }}">
                                     <div class="md-form form-sm my-0">
                                         @php
-                                            $uacsDat = App\Models\DvUacsItem::where([
-                                                ['dv_id', $dv->id], ['uacs_id', $item->uacs_id]
-                                            ])->first();
+                                            $qry = [['dv_id', $dv->id], ['uacs_id', $item->uacs_id]];
+
+                                            if ($isRealignment) {
+                                                $qry = [['dv_id', $dv->id], ['uacs_id', $item->{$realignOrderKey}->uacs_id]];
+                                            }
+
+                                            $uacsDat = App\Models\DvUacsItem::where($qry)->first();
                                         @endphp
                                         <input type="number" name="allotment[{{ $itemCounter }}][{{ $allotmentCounter }}]"
                                                class="form-control required form-control-sm date-ors-burs py-1 text-center
@@ -294,9 +298,13 @@
                                 <td class="material-tooltip-main" data-toggle="tooltip" title="Particulars: {{ $dv->particulars }}">
                                     <div class="md-form form-sm my-0">
                                         @php
-                                            $uacsDat = App\Models\DvUacsItem::where([
-                                                ['dv_id', $dv->id], ['uacs_id', $itm->uacs_id]
-                                            ])->first();
+                                            $qry = [['dv_id', $dv->id], ['uacs_id', $itm->uacs_id]];
+
+                                            if ($isRealignment) {
+                                                $qry = [['dv_id', $dv->id], ['uacs_id', $itm->{$realignOrderKey}->uacs_id]];
+                                            }
+
+                                            $uacsDat = App\Models\DvUacsItem::where($qry)->first();
                                         @endphp
                                         <input type="number" name="allotment[{{ $itemCounter }}][{{ $allotmentCounter }}]"
                                                class="form-control required form-control-sm date-ors-burs py-1 text-center

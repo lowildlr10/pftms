@@ -15,7 +15,7 @@
                     <table class="table table-sm table-hover table-bordered" style="width: max-content;">
                         <thead class="text-center">
                             <tr>
-                                <th class="align-middle" colspan="5"></th>
+                                <th class="align-middle" colspan="4"></th>
 
                                 @foreach ($classItemCounts as $classKey => $count)
                                     @if ($count > 0)
@@ -267,7 +267,7 @@
                                         <textarea name="particular[{{ $itemCounter }}]" placeholder=" Value..."
                                                   class="md-textarea required form-control-sm w-100 py-1"
                                                   placeholder="Value..."
-                                        >{{ $dv->particulars }}</textarea>
+                                        >{{ $dv->ledger_particulars }}</textarea>
                                     </div>
                                 </td>
 

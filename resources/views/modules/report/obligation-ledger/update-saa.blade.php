@@ -274,7 +274,7 @@
                                                       material-tooltip-main amount"
                                                data-toggle="tooltip" data-placement="left"
                                                title="Column: Total"
-                                               value="{{ $ors->amount }}"
+                                               value="{{ $ors->amount ? $ors->amount : 0 }}"
                                                onkeyup="$(this).computeTotalRemaining();"
                                                onchange="$(this).computeTotalRemaining();"
                                                placeholder="Value...">

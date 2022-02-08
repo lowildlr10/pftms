@@ -233,7 +233,13 @@
                                             @endforeach
                                 </td>
                                 <td>
-                                    {{ $dv->particulars }}
+                                    @php
+                                        if (strpos($dv->ledger_particulars, "\n") !== FALSE) {
+                                            $searchStr = ["\r\n", "\n", "\r"];
+                                            $dv->ledger_particulars = str_replace($searchStr, '<br>', $dv->ledger_particulars);
+                                        }
+                                    @endphp
+                                    {!! $dv->ledger_particulars !!}
                                 </td>
 
                                             @foreach ($dv->allotments as $allotCtr => $item)

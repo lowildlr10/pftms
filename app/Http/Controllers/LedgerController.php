@@ -649,7 +649,10 @@ class LedgerController extends Controller
                         $instanceLedgerItem->save();
 
                         $ledgerItemDat = DB::table('funding_ledger_items')
-                                           ->where('order_no', $orderNo)->first();
+                                           ->where([
+                                                ['order_no', $orderNo],
+                                                ['ledger_id', $ledgerID
+                                            ]])->first();
                         $ledgerItemID = $ledgerItemDat->id;
 
                         foreach ($allotments[$dvCtr] as $allotCtr => $total) {

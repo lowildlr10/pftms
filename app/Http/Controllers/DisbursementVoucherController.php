@@ -949,8 +949,8 @@ class DisbursementVoucherController extends Controller
                 }
 
                 DvUacsItem::whereNotIn('id', $uacsDvUacsIDs)
-                                   ->where('dv_id', $id)
-                                   ->delete();
+                          ->where('dv_id', $id)
+                          ->delete();
             }
 
             //$instanceNotif->notifyObligatedORS($id, $routeName);

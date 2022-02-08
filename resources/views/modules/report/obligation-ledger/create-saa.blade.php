@@ -281,9 +281,13 @@
                                 <td class="material-tooltip-main" data-toggle="tooltip" title="Particulars: {{ $ors->particulars }}">
                                     <div class="md-form form-sm my-0">
                                         @php
-                                            $uacsDat = App\Models\OrsBursUacsItem::where([
-                                                ['ors_id', $ors->id], ['uacs_id', $item->uacs_id]
-                                            ])->first();
+                                            $qry = [['ors_id', $ors->id], ['uacs_id', $item->uacs_id]];
+
+                                            if ($isRealignment) {
+                                                $qry = [['ors_id', $ors->id], ['uacs_id', $item->{$realignOrderKey}->uacs_id]];
+                                            }
+
+                                            $uacsDat = App\Models\OrsBursUacsItem::where($qry)->first();
                                         @endphp
                                         <input type="number" name="allotment[{{ $itemCounter }}][{{ $allotmentCounter }}]"
                                                class="form-control required form-control-sm date-ors-burs py-1 text-center
@@ -303,9 +307,13 @@
                                 <td class="material-tooltip-main" data-toggle="tooltip" title="Particulars: {{ $ors->particulars }}">
                                     <div class="md-form form-sm my-0">
                                         @php
-                                            $uacsDat = App\Models\OrsBursUacsItem::where([
-                                                ['ors_id', $ors->id], ['uacs_id', $itm->uacs_id]
-                                            ])->first();
+                                            $qry = [['ors_id', $ors->id], ['uacs_id', $itm->uacs_id]];
+
+                                            if ($isRealignment) {
+                                                $qry = [['ors_id', $ors->id], ['uacs_id', $itm->{$realignOrderKey}->uacs_id]];
+                                            }
+
+                                            $uacsDat = App\Models\OrsBursUacsItem::where($qry)->first();
                                         @endphp
                                         <input type="number" name="allotment[{{ $itemCounter }}][{{ $allotmentCounter }}]"
                                                class="form-control required form-control-sm date-ors-burs py-1 text-center
