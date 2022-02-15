@@ -160,9 +160,23 @@
                                         <!--Table head-->
                                         <thead class="mdb-color darken-3 white-text">
                                             <tr>
+                                                <th class="th-sm" width="3%"></th>
+                                                <th class="th-sm" width="51%">
+                                                    <strong></strong>
+                                                </th>
+                                                <th class="th-sm" width="40%">
+                                                    <strong></strong>
+                                                </th>
+                                                <th class="th-sm" width="3%"></th>
+                                                <th class="th-sm" width="3%"></th>
+                                            </tr>
+                                            <tr>
                                                 <th class="th-md" width="3%"></th>
-                                                <th class="th-md" width="91%">
+                                                <th class="th-md" width="51%">
                                                     <strong>Project</strong>
+                                                </th>
+                                                <th class="th-md" width="40%">
+                                                    <strong>Project Site/s</strong>
                                                 </th>
                                                 <th class="th-md" width="3%"></th>
                                                 <th class="th-md" width="3%"></th>
@@ -176,7 +190,15 @@
                                                 @foreach ($list as $listCtr => $project)
                                             <tr>
                                                 <td></td>
-                                                <td>{{ $project->project_title }}</td>
+                                                <td>
+                                                    @if ($project->directory)
+                                                    <small class="grey-text">
+                                                        <b><em>{{ implode(' / ', unserialize($project->directory)) }} /</em></b>
+                                                    </small><br>
+                                                    @endif
+                                                    {{ $project->project_title }}
+                                                </td>
+                                                <td>{!! $project->project_site ? implode(' | ', $project->project_site) : '' !!}</td>
                                                 <td align="center">
                                                     <a class="btn-floating btn-sm btn-orange p-2 waves-effect material-tooltip-main mr-0"
                                                        onclick="$(this).showEdit('{{ route('project-show-edit',

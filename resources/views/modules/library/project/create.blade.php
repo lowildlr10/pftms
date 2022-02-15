@@ -53,13 +53,13 @@
 
     <div class="md-form">
         <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                name="project_site">
+                name="project_site[]" multiple>
             <option value="" disabled selected>Choose a project site</option>
 
-            @if (count($municipalities) > 0)
-                @foreach ($municipalities as $municipality)
-            <option value="{{ $municipality->id }}">
-                {!! $municipality->municipality_name !!}
+            @if (count($projectSites) > 0)
+                @foreach ($projectSites as $site)
+            <option value="{{ $site->id }}">
+                {!! $site->name !!}
             </option>
                 @endforeach
             @endif

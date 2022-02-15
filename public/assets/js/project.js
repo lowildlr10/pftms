@@ -105,8 +105,11 @@ $(function() {
         let totalProjectCost = 0;
 
         totalProjectCost += parseFloat($('#implementing-project-cost').val());
+
         $('.coimplementing-project-cost').each(function() {
-            totalProjectCost += parseFloat($(this).val());
+            if (!isNaN(parseFloat($(this).val()))) {
+                totalProjectCost += parseFloat($(this).val());
+            }
         });
         $('#project-cost').val(totalProjectCost);
     }

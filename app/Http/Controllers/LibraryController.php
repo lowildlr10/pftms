@@ -715,11 +715,33 @@ class LibraryController extends Controller
         $directories = [];
 
         foreach ($projectData as $proj) {
+            $_projectSites = [];
+            $projectSites = $proj->project_site ? unserialize($proj->project_site) : [];
             $_directories = $proj->directory ? unserialize($proj->directory) : [];
             $projID = $proj->id;
             $projTitle = (strlen($proj->project_title) > 30 ?
                          substr($proj->project_title, 0, 30).'...' :
                          $proj->project_title);
+
+            foreach ($projectSites as $site) {
+                $projSiteDat = Region::select('region_name as name')
+                                 ->find($site);
+                $projSiteDat = !$projSiteDat ? DB::table('provinces as prov')
+                                                 ->select(DB::raw("CONCAT(prov.province_name, ', ', reg.region_name) as name"))
+                                                 ->leftJoin('regions as reg', 'reg.id', '=', 'prov.region')
+                                                 ->where('prov.id', $site)->first() : $projSiteDat;
+                $projSiteDat = !$projSiteDat ? DB::table('municipalities as mun')
+                                                 ->select(DB::raw("CONCAT(mun.municipality_name, ', ', prov.province_name, ', ', reg.region_name) as name"))
+                                                 ->leftJoin('regions as reg', 'reg.id', '=', 'mun.region')
+                                                 ->leftJoin('provinces as prov', 'prov.id', '=', 'mun.province')
+                                                 ->where('mun.id', $site)->first() : $projSiteDat;
+
+                if ($projSiteDat) {
+                    $_projectSites[] = $projSiteDat->name;
+                }
+            }
+
+            $proj->project_site = $_projectSites;
 
             if (count($_directories) > 0) {
                 $dirs = $_directories;
@@ -784,7 +806,21 @@ class LibraryController extends Controller
     public function showCreateProject() {
         $projects = FundingProject::get();
         $industries = IndustrySector::orderBy('sector_name')->get();
-        $municipalities = Municipality::orderBy('municipality_name')->get();
+        $projectSites1 = DB::table('regions as _reg')
+                           ->select('_reg.id', '_reg.region_name as name')
+                           ->orderBy('name');
+        $projectSites2 = DB::table('provinces as _prov')
+                           ->select('_prov.id', DB::raw("CONCAT(_prov.province_name, ', ', __reg.region_name) as name"))
+                           ->leftJoin('regions as __reg', '__reg.id', '=', '_prov.region')
+                           ->orderBy('name');
+        $projectSites = DB::table('municipalities as mun')
+                          ->select('mun.id', DB::raw("CONCAT(mun.municipality_name, ', ', prov.province_name, ', ', reg.region_name) as name"))
+                          ->leftJoin('regions as reg', 'reg.id', '=', 'mun.region')
+                          ->leftJoin('provinces as prov', 'prov.id', '=', 'mun.province')
+                          ->union($projectSites2)
+                          ->union($projectSites1)
+                          ->get();
+
         $empUnits = EmpUnit::orderBy('unit_name')->get();
         $empGroups = EmpGroup::orderBy('group_name')->get();
         $agencies = AgencyLGU::orderBy('agency_name')->get();
@@ -822,7 +858,7 @@ class LibraryController extends Controller
 
         return view('modules.library.project.create', compact(
             'industries',
-            'municipalities',
+            'projectSites',
             'empUnits',
             'agencies',
             'monitoringOffices',
@@ -835,14 +871,27 @@ class LibraryController extends Controller
         $projects = DB::table('funding_projects')->get();
         $projectData = FundingProject::find($id);
         $industries = IndustrySector::orderBy('sector_name')->get();
-        $municipalities = Municipality::orderBy('municipality_name')->get();
+        $projectSites1 = DB::table('regions as _reg')
+                           ->select('_reg.id', '_reg.region_name as name')
+                           ->orderBy('name');
+        $projectSites2 = DB::table('provinces as _prov')
+                           ->select('_prov.id', DB::raw("CONCAT(_prov.province_name, ', ', __reg.region_name) as name"))
+                           ->leftJoin('regions as __reg', '__reg.id', '=', '_prov.region')
+                           ->orderBy('name');
+        $projectSites = DB::table('municipalities as mun')
+                          ->select('mun.id', DB::raw("CONCAT(mun.municipality_name, ', ', prov.province_name, ', ', reg.region_name) as name"))
+                          ->leftJoin('regions as reg', 'reg.id', '=', 'mun.region')
+                          ->leftJoin('provinces as prov', 'prov.id', '=', 'mun.province')
+                          ->union($projectSites2)
+                          ->union($projectSites1)
+                          ->get();
         $empUnits = EmpUnit::orderBy('unit_name')->get();
         $agencies = AgencyLGU::orderBy('agency_name')->get();
         $monitoringOffices = MonitoringOffice::orderBy('office_name')->get();
         $empGroups = EmpGroup::orderBy('group_name')->get();
 
         $industrySector = $projectData->industry_sector;
-        $projectSite = $projectData->project_site;
+        $projectSite = $projectData->project_site ? unserialize($projectData->project_site) : [];
         $implementingAgency = $projectData->implementing_agency;
         $implementingBudget = $projectData->implementing_project_cost;
         $comimplementingAgencyLGUs = unserialize($projectData->comimplementing_agency_lgus);
@@ -897,7 +946,7 @@ class LibraryController extends Controller
         return view('modules.library.project.update', compact(
             'id',
             'industries',
-            'municipalities',
+            'projectSites',
             'empUnits',
             'agencies',
             'monitoringOffices',
@@ -927,7 +976,7 @@ class LibraryController extends Controller
         $directory = $request->directory ? serialize($request->directory) : serialize([]);
         $projectTitle = $request->project_title;
         $industrySector = $request->industry_sector;
-        $projectSite = $request->project_site;
+        $projectSite = $request->project_site ? serialize($request->project_site) : serialize([]);
         $implementingAgency = $request->implementing_agency;
         $implementingBudget = $request->implementing_project_cost;
         $withCoimplementingAgency = $request->with_coimplementing_agency;
@@ -984,7 +1033,7 @@ class LibraryController extends Controller
         $directory = $request->directory ? serialize($request->directory) : serialize([]);
         $projectTitle = $request->project_title;
         $industrySector = $request->industry_sector;
-        $projectSite = $request->project_site;
+        $projectSite = $request->project_site ? serialize($request->project_site) : serialize([]);
         $implementingAgency = $request->implementing_agency;
         $implementingBudget = $request->implementing_project_cost;
         $withCoimplementingAgency = $request->with_coimplementing_agency;
