@@ -189,7 +189,7 @@
         $isVisiblePR = $isAllowedPR;
         $isVisibleAbstract = $isAllowedAbstract;
 
-        if ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) {
+        if ($roleHasBudget || $roleHasAccountant) {
             if (Auth::user()->id == $rfq->requestor['id']) {
                 $isVisibleUpdate = $isAllowedUpdate ? $isAllowedUpdate : false;
                 $isVisibleViewAttachment = true;

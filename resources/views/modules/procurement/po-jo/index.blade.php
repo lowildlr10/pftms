@@ -329,7 +329,7 @@
                 $isVisibleAbstract = $isAllowedAbstract;
                 $isVisibleIAR = $isAllowedIAR;
 
-                if ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) {
+                if ($roleHasBudget || $roleHasAccountant) {
                     $isVisibleCreate = false;
                     $isVisibleUpdate = false;
                     $isVisibleDelete = false;

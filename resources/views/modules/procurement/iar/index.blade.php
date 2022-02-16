@@ -299,7 +299,7 @@
                 $isVisibleCreateStock = $isAllowedCreateStocks;
                 $isVisibleUpdateStocks = $isAllowedUpdateStocks;
 
-                if ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) {
+                if ($roleHasBudget || $roleHasAccountant) {
                     $isVisibleUpdate = false;
                     $isVisibleViewAttachment = false;
                     $isVisibleIssue = false;

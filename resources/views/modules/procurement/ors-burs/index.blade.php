@@ -277,7 +277,7 @@
         $isVisibleObligate = $isAllowedObligate;
         $isVisiblePO = $isAllowedPO;
 
-        if ($roleHasOrdinary || $roleHasAccountant) {
+        if ($roleHasAccountant) {
             $isVisibleUpdate = false;
             $isVisibleViewAttachment = false;
             $isVisibleIssue = false;

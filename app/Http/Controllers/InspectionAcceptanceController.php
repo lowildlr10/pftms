@@ -15,6 +15,7 @@ use App\Models\DisbursementVoucher;
 use App\Models\InventoryStock;
 
 use App\Models\EmpAccount as User;
+use App\Models\EmpUnit;
 use App\Models\DocumentLog as DocLog;
 use App\Models\PaperSize;
 use App\Models\Supplier;
@@ -50,11 +51,25 @@ class InspectionAcceptanceController extends Controller
         $isAllowedUpdateStocks = Auth::user()->getModuleAccess('inv_stocks', 'update');
 
         // User groups
-        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
         $roleHasBudget = Auth::user()->hasBudgetRole();
         $roleHasAccountant = Auth::user()->hasAccountantRole();
+        $roleHasAdministrator = Auth::user()->hasOrdinaryRole();
+        $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
+        $empUnitDat = EmpUnit::has('unithead')->find(Auth::user()->unit);
+        $userIDs = Auth::user()->getGroupHeads();
+        $userIDs[] = Auth::user()->id;
+
+        if ($empUnitDat && $empUnitDat->unithead) {
+            $userIDs[] = $empUnitDat->unithead->id;
+        }
+
+        if ($roleHasOrdinary && Auth::user()->getDivisionAccess()) {
+            $empDivisionAccess = Auth::user()->getDivisionAccess();
+        }
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
@@ -67,6 +82,18 @@ class InspectionAcceptanceController extends Controller
         })->whereHas('po', function($query) {
             $query->whereNull('date_cancelled');
         })->whereNull('date_pr_cancelled');
+
+        if ($roleHasOrdinary) {
+            if ($roleHasDeveloper || $roleHasAccountant ||
+                $roleHasBudget || $roleHasPropertySupply) {
+            } else {
+                if (Auth::user()->emp_type == 'contractual') {
+                    $iarData = $iarData->whereIn('requested_by', $userIDs);
+                } else {
+                    $iarData = $iarData->where('requested_by', Auth::user()->id);
+                }
+            }
+        }
 
         if (!empty($keyword)) {
             $iarData = $iarData->where(function($qry) use ($keyword) {

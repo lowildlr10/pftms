@@ -273,7 +273,7 @@
         $isVisibleIAR = $isAllowedIAR;
         $isVisibleLDDAP = $isAllowedLDDAP;
 
-        if ($roleHasOrdinary || $roleHasBudget) {
+        if ($roleHasBudget) {
             $isVisibleUpdate = false;
             $isVisibleViewAttachment = false;
             $isVisibleIssue = false;

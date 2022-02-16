@@ -14,6 +14,7 @@ use App\Models\DisbursementVoucher;
 use App\Models\InventoryStock;
 
 use App\Models\EmpAccount as User;
+use App\Models\EmpUnit;
 use App\Models\FundingProject;
 use App\Models\ItemUnitIssue;
 use App\Models\Signatory;
@@ -62,6 +63,17 @@ class RequestQuotationController extends Controller
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
+        $empUnitDat = EmpUnit::has('unithead')->find(Auth::user()->unit);
+        $userIDs = Auth::user()->getGroupHeads();
+        $userIDs[] = Auth::user()->id;
+
+        if ($empUnitDat && $empUnitDat->unithead) {
+            $userIDs[] = $empUnitDat->unithead->id;
+        }
+
+        if ($roleHasOrdinary && Auth::user()->getDivisionAccess()) {
+            $empDivisionAccess = Auth::user()->getDivisionAccess();
+        }
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
@@ -73,11 +85,24 @@ class RequestQuotationController extends Controller
             $query->whereNotNull('id');
         })->whereNull('date_pr_cancelled');
 
+        /*
         if ($roleHasOrdinary) {
             if ($roleHasDeveloper || $roleHasAccountant ||
                 $roleHasBudget || $roleHasPropertySupply) {
             } else {
                 $rfqData = $rfqData->where('requested_by', Auth::user()->id);
+            }
+        }*/
+
+        if ($roleHasOrdinary) {
+            if ($roleHasDeveloper || $roleHasAccountant ||
+                $roleHasBudget || $roleHasPropertySupply) {
+            } else {
+                if (Auth::user()->emp_type == 'contractual') {
+                    $rfqData = $rfqData->whereIn('requested_by', $userIDs);
+                } else {
+                    $rfqData = $rfqData->where('requested_by', Auth::user()->id);
+                }
             }
         }
 
