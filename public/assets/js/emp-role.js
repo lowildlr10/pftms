@@ -51,7 +51,8 @@ $(function() {
         '#acc_account',
         '#acc_user_log',
         '#place_region',
-        '#place_province'
+        '#place_province',
+        '#place_municipality'
     ];
 
     function convertAccessToJson() {

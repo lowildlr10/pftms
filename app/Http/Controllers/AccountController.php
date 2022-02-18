@@ -266,6 +266,11 @@ class AccountController extends Controller
             'province_update' => 'Update',
             'province_delete' => 'Delete',
             'province_destroy' => 'Destroy',
+        'place_municipality' => 'Places - Municipalities',
+            'municipality_create' => 'Create',
+            'municipality_update' => 'Update',
+            'municipality_delete' => 'Delete',
+            'municipality_destroy' => 'Destroy',
     ];
     protected $modules = [
         'ca_ors_burs' => [
@@ -547,6 +552,12 @@ class AccountController extends Controller
             'province_update' => 'update',
             'province_delete' => 'delete',
             'province_destroy' => 'destroy',
+        ],
+        'place_municipality' => [
+            'municipality_create' => 'create',
+            'municipality_update' => 'update',
+            'municipality_delete' => 'delete',
+            'municipality_destroy' => 'destroy',
         ],
     ];
 
