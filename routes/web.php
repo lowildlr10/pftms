@@ -1471,7 +1471,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     Route::post('libraries/agency-lgu/get-agencies-lgus', [
         'uses' => 'LibraryController@getListAgencyLGU',
         'module' => 'lib_agency_lgu',
-        'access' => 'destroy'
+        'access' => 'is_allowed'
     ]);
 
     // Industry/Sectors Module

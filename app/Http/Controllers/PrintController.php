@@ -1502,7 +1502,7 @@ class PrintController extends Controller
 
                         if ($tblHeadCtr == 0) {
                             $aligns[] = "L";
-                            $fontStyles[] = "B";
+                            $fontStyles[] = "";
                             $widths[] = $firstColWidth;
 
                         } else {
@@ -1911,7 +1911,7 @@ class PrintController extends Controller
                         $colSpanKeys[] = "$tblHeadCtr";
 
                         if ($tblHeadCtr == 0) {
-                            $fontStyles[] = "B";
+                            $fontStyles[] = "";
                             $aligns[] = "L";
                             $widths[] = $firstColWidth;
                         } else if ($tblHeadCtr == 1 || $tblHeadCtr == 1) {
@@ -1952,7 +1952,7 @@ class PrintController extends Controller
                         $colSpanKeys[] = "$tblHeadCtr";
 
                         if ($tblHeadCtr == 0) {
-                            $fontStyles[] = "";
+                            $fontStyles[] = "B";
                             $aligns[] = "L";
                             $widths[] = $firstColWidth;
                         } else if ($tblHeadCtr == 1 || $tblHeadCtr == 2) {

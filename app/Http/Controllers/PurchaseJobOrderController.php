@@ -68,46 +68,58 @@ class PurchaseJobOrderController extends Controller
 
         // User groups
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+        $roleHasAdministrator = Auth::user()->hasOrdinaryRole();
+        $roleHasRD = Auth::user()->hasRdRole();
+        $roleHasARD = Auth::user()->hasArdRole();
+        $roleHasPSTD = Auth::user()->hasPstdRole();
+        $roleHasPlanning = Auth::user()->hasPlanningRole();
+        $roleHasProjectStaff = Auth::user()->hasProjectStaffRole();
         $roleHasBudget = Auth::user()->hasBudgetRole();
         $roleHasAccountant = Auth::user()->hasAccountantRole();
-        $roleHasAdministrator = Auth::user()->hasOrdinaryRole();
         $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
-                             [Auth::user()->division];
-        $empUnitDat = EmpUnit::has('unithead')->find(Auth::user()->unit);
+
         $userIDs = Auth::user()->getGroupHeads();
+        $empUnitDat = EmpUnit::has('unithead')->find(Auth::user()->unit);
         $userIDs[] = Auth::user()->id;
 
         if ($empUnitDat && $empUnitDat->unithead) {
             $userIDs[] = $empUnitDat->unithead->id;
         }
 
-        if ($roleHasOrdinary && Auth::user()->getDivisionAccess()) {
-            $empDivisionAccess = Auth::user()->getDivisionAccess();
-        }
-
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
         $poData = PurchaseRequest::with(['funding', 'requestor'])
-                                 ->whereHas('division', function($query)
-                                            use($empDivisionAccess) {
-            $query->whereIn('id', $empDivisionAccess);
-        })->whereHas('po', function($query) {
+                                 ->whereHas('po', function($query) {
             $query->whereNotNull('id');
         })->whereNull('date_pr_cancelled');
 
-        if ($roleHasOrdinary) {
-            if ($roleHasDeveloper || $roleHasAccountant ||
-                $roleHasBudget || $roleHasPropertySupply) {
-            } else {
-                if (Auth::user()->emp_type == 'contractual') {
-                    $poData = $poData->whereIn('requested_by', $userIDs);
+        if ($roleHasOrdinary && (!$roleHasDeveloper || !$roleHasRD || !$roleHasPropertySupply ||
+            !$roleHasAccountant || !$roleHasBudget || !$roleHasPSTD)) {
+            if (Auth::user()->emp_type == 'contractual') {
+                if (Auth::user()->getDivisionAccess()) {
+                    $empDivisionAccess = Auth::user()->getDivisionAccess();
                 } else {
-                    $poData = $poData->where('requested_by', Auth::user()->id);
+                    $empDivisionAccess = [Auth::user()->division];
                 }
+
+                $poData = $poData->whereIn('requested_by', $userIDs);
+            } else {
+                $empDivisionAccess = [Auth::user()->division];
+                $poData = $poData->where('requested_by', Auth::user()->id);
+            }
+        } else {
+            if ($roleHasPSTD) {
+                $empDivisionAccess = [Auth::user()->division];
+            } else {
+                $empDivisionAccess = Auth::user()->getDivisionAccess();
             }
         }
+
+        $poData = $poData->whereHas('division', function($query)
+                use($empDivisionAccess) {
+            $query->whereIn('id', $empDivisionAccess);
+        });
 
         if (!empty($keyword)) {
             $poData = $poData->where(function($qry) use ($keyword) {

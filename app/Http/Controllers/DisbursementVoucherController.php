@@ -52,9 +52,18 @@ class DisbursementVoucherController extends Controller
     public function indexProc(Request $request) {
         $data = $this->getIndexData($request, 'procurement');
 
-        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $roleHasAccountant = Auth::user()->hasAccountantRole();
+        // User groups
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+        $roleHasAdministrator = Auth::user()->hasOrdinaryRole();
+        $roleHasRD = Auth::user()->hasRdRole();
+        $roleHasARD = Auth::user()->hasArdRole();
+        $roleHasPSTD = Auth::user()->hasPstdRole();
+        $roleHasPlanning = Auth::user()->hasPlanningRole();
+        $roleHasProjectStaff = Auth::user()->hasProjectStaffRole();
         $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
+        $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
 
         // Get module access
         $module = 'proc_dv';

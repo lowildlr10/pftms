@@ -110,6 +110,13 @@
                                         <td>{{ $user->emp_id }}</td>
                                         <td>
                                             {{ $user->firstname }}{{ !empty($user->middlename) ? ' '.$user->middlename[0].'. ' : ' ' }}{{ $user->lastname }}
+                                            <hr class="my-1">
+                                            <small class="grey-text">
+                                                <em>
+                                                    <b>Role/s: </b><br>
+                                                    {{ Auth::user()->getEmployee($user->id)->roleName }}
+                                                </em>
+                                            </small>
                                         </td>
                                         <td>
                                             {{ $user->emp_type == 'regular' ? 'Regular' : 'Contractual' }}

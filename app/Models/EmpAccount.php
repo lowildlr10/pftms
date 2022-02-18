@@ -153,21 +153,19 @@ class EmpAccount extends Authenticatable
             $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
         }
 
-        if (empty($roles)) {
-            return true;
+        if (count($roles) == 0) {
+            return false;
         } else {
             foreach ($roles as $role) {
                 $roleData = Role::find($role);
 
-                if ($roleData->is_developer == 'n') {
-                    return false;
-                } else {
+                if ($roleData->is_pstd == 'y') {
                     return true;
                 }
             }
         }
 
-        return true;
+        return false;
     }
 
     public function hasAdministratorRole($userID = '') {
@@ -178,21 +176,134 @@ class EmpAccount extends Authenticatable
             $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
         }
 
-        if (empty($roles)) {
-            return true;
+        if (count($roles) == 0) {
+            return false;
         } else {
             foreach ($roles as $role) {
                 $roleData = Role::find($role);
 
-                if ($roleData->is_administrator == 'n') {
-                    return false;
-                } else {
+                if ($roleData->is_pstd == 'y') {
                     return true;
                 }
             }
         }
 
-        return true;
+        return false;
+    }
+
+    public function hasRdRole($userID = '') {
+        if (empty($userID)) {
+            $roles = !empty($this->roles) ? unserialize($this->roles) : [];
+        } else {
+            $userData = $this::find($userID);
+            $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
+        }
+
+        if (count($roles) == 0) {
+            return false;
+        } else {
+            foreach ($roles as $role) {
+                $roleData = Role::find($role);
+
+                if ($roleData->is_rd == 'y') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function hasArdRole($userID = '') {
+        if (empty($userID)) {
+            $roles = !empty($this->roles) ? unserialize($this->roles) : [];
+        } else {
+            $userData = $this::find($userID);
+            $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
+        }
+
+        if (count($roles) == 0) {
+            return false;
+        } else {
+            foreach ($roles as $role) {
+                $roleData = Role::find($role);
+
+                if ($roleData->is_ard == 'y') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function hasPstdRole($userID = '') {
+        if (empty($userID)) {
+            $roles = !empty($this->roles) ? unserialize($this->roles) : [];
+        } else {
+            $userData = $this::find($userID);
+            $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
+        }
+
+        if (count($roles) == 0) {
+            return false;
+        } else {
+            foreach ($roles as $role) {
+                $roleData = Role::find($role);
+
+                if ($roleData->is_pstd == 'y') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function hasPlanningRole($userID = '') {
+        if (empty($userID)) {
+            $roles = !empty($this->roles) ? unserialize($this->roles) : [];
+        } else {
+            $userData = $this::find($userID);
+            $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
+        }
+
+        if (count($roles) == 0) {
+            return false;
+        } else {
+            foreach ($roles as $role) {
+                $roleData = Role::find($role);
+
+                if ($roleData->is_planning == 'y') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function hasProjectStaffRole($userID = '') {
+        if (empty($userID)) {
+            $roles = !empty($this->roles) ? unserialize($this->roles) : [];
+        } else {
+            $userData = $this::find($userID);
+            $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
+        }
+
+        if (count($roles) == 0) {
+            return false;
+        } else {
+            foreach ($roles as $role) {
+                $roleData = Role::find($role);
+
+                if ($roleData->is_project_staff == 'y') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public function hasAccountantRole($userID = '') {
@@ -203,21 +314,19 @@ class EmpAccount extends Authenticatable
             $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
         }
 
-        if (empty($roles)) {
-            return true;
+        if (count($roles) == 0) {
+            return false;
         } else {
             foreach ($roles as $role) {
                 $roleData = Role::find($role);
 
-                if ($roleData->is_accountant == 'n') {
-                    return false;
-                } else {
+                if ($roleData->is_accountant == 'y') {
                     return true;
                 }
             }
         }
 
-        return true;
+        return false;
     }
 
     public function hasBudgetRole($userID = '') {
@@ -228,21 +337,19 @@ class EmpAccount extends Authenticatable
             $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
         }
 
-        if (empty($roles)) {
-            return true;
+        if (count($roles) == 0) {
+            return false;
         } else {
             foreach ($roles as $role) {
                 $roleData = Role::find($role);
 
-                if ($roleData->is_budget == 'n') {
-                    return false;
-                } else {
+                if ($roleData->is_budget == 'y') {
                     return true;
                 }
             }
         }
 
-        return true;
+        return false;
     }
 
     public function hasCashierRole($userID = '') {
@@ -253,21 +360,19 @@ class EmpAccount extends Authenticatable
             $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
         }
 
-        if (empty($roles)) {
-            return true;
+        if (count($roles) == 0) {
+            return false;
         } else {
             foreach ($roles as $role) {
                 $roleData = Role::find($role);
 
-                if ($roleData->is_cashier == 'n') {
-                    return false;
-                } else {
+                if ($roleData->is_cashier == 'y') {
                     return true;
                 }
             }
         }
 
-        return true;
+        return false;
     }
 
     public function hasPropertySupplyRole($userID = '') {
@@ -278,21 +383,19 @@ class EmpAccount extends Authenticatable
             $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
         }
 
-        if (empty($roles)) {
-            return true;
+        if (count($roles) == 0) {
+            return false;
         } else {
             foreach ($roles as $role) {
                 $roleData = Role::find($role);
 
-                if ($roleData->is_property_supply == 'n') {
-                    return false;
-                } else {
+                if ($roleData->is_property_supply == 'y') {
                     return true;
                 }
             }
         }
 
-        return true;
+        return false;
     }
 
     public function hasOrdinaryRole($userID = '') {
@@ -303,21 +406,19 @@ class EmpAccount extends Authenticatable
             $roles = !empty($userData->roles) ? unserialize($userData->roles) : [];
         }
 
-        if (empty($roles)) {
-            return true;
+        if (count($roles) == 0) {
+            return false;
         } else {
             foreach ($roles as $role) {
                 $roleData = Role::find($role);
 
-                if ($roleData->is_ordinary == 'n') {
-                    return false;
-                } else {
+                if ($roleData->is_ordinary == 'y') {
                     return true;
                 }
             }
         }
 
-        return true;
+        return false;
     }
 
     public function getEmployee($id) {
@@ -338,12 +439,22 @@ class EmpAccount extends Authenticatable
             $roles = !empty($userData->roles) ?
                      unserialize($userData->roles) :
                      [];
+            $roleNames = [];
+
+            $roledat = Role::whereIn('id', $roles)->orderBy('role')->get();
+
+            foreach ($roledat as $role) {
+                $roleNames[] = $role->role;
+            }
+
+            $roleName = count($roleNames) > 0 ? implode(', ', $roleNames) : '';
         } else {
             $fullname = NULL;
             $position = NULL;
             $signature = NULL;
             $groups = [];
             $roles = [];
+            $roleName = '';
         }
 
         return (object) [
@@ -352,6 +463,7 @@ class EmpAccount extends Authenticatable
             'signature' => $signature,
             'groups' => $groups,
             'roles' => $roles,
+            'roleName' => $roleName,
         ];
     }
 

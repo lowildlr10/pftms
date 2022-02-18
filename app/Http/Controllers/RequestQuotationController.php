@@ -56,55 +56,58 @@ class RequestQuotationController extends Controller
 
         // User groups
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+        $roleHasAdministrator = Auth::user()->hasOrdinaryRole();
+        $roleHasRD = Auth::user()->hasRdRole();
+        $roleHasARD = Auth::user()->hasArdRole();
+        $roleHasPSTD = Auth::user()->hasPstdRole();
+        $roleHasPlanning = Auth::user()->hasPlanningRole();
+        $roleHasProjectStaff = Auth::user()->hasProjectStaffRole();
         $roleHasBudget = Auth::user()->hasBudgetRole();
         $roleHasAccountant = Auth::user()->hasAccountantRole();
-        $roleHasAdministrator = Auth::user()->hasOrdinaryRole();
         $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
-                             [Auth::user()->division];
-        $empUnitDat = EmpUnit::has('unithead')->find(Auth::user()->unit);
+
         $userIDs = Auth::user()->getGroupHeads();
+        $empUnitDat = EmpUnit::has('unithead')->find(Auth::user()->unit);
         $userIDs[] = Auth::user()->id;
 
         if ($empUnitDat && $empUnitDat->unithead) {
             $userIDs[] = $empUnitDat->unithead->id;
         }
 
-        if ($roleHasOrdinary && Auth::user()->getDivisionAccess()) {
-            $empDivisionAccess = Auth::user()->getDivisionAccess();
-        }
-
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
         $rfqData = PurchaseRequest::with(['funding', 'requestor'])
-                                  ->whereHas('division', function($query)
-                                            use($empDivisionAccess) {
-            $query->whereIn('id', $empDivisionAccess);
-        })->whereHas('rfq', function($query) {
+                                  ->whereHas('rfq', function($query) {
             $query->whereNotNull('id');
         })->whereNull('date_pr_cancelled');
 
-        /*
-        if ($roleHasOrdinary) {
-            if ($roleHasDeveloper || $roleHasAccountant ||
-                $roleHasBudget || $roleHasPropertySupply) {
+        if ($roleHasOrdinary && (!$roleHasDeveloper || !$roleHasRD || !$roleHasPropertySupply ||
+            !$roleHasAccountant || !$roleHasBudget || !$roleHasPSTD)) {
+            if (Auth::user()->emp_type == 'contractual') {
+                if (Auth::user()->getDivisionAccess()) {
+                    $empDivisionAccess = Auth::user()->getDivisionAccess();
+                } else {
+                    $empDivisionAccess = [Auth::user()->division];
+                }
+
+                $rfqData = $rfqData->whereIn('requested_by', $userIDs);
             } else {
+                $empDivisionAccess = [Auth::user()->division];
                 $rfqData = $rfqData->where('requested_by', Auth::user()->id);
             }
-        }*/
-
-        if ($roleHasOrdinary) {
-            if ($roleHasDeveloper || $roleHasAccountant ||
-                $roleHasBudget || $roleHasPropertySupply) {
+        } else {
+            if ($roleHasPSTD) {
+                $empDivisionAccess = [Auth::user()->division];
             } else {
-                if (Auth::user()->emp_type == 'contractual') {
-                    $rfqData = $rfqData->whereIn('requested_by', $userIDs);
-                } else {
-                    $rfqData = $rfqData->where('requested_by', Auth::user()->id);
-                }
+                $empDivisionAccess = Auth::user()->getDivisionAccess();
             }
         }
+
+        $rfqData = $rfqData->whereHas('division', function($query)
+                use($empDivisionAccess) {
+            $query->whereIn('id', $empDivisionAccess);
+        });
 
         if (!empty($keyword)) {
             $rfqData = $rfqData->where(function($qry) use ($keyword) {

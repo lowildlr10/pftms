@@ -204,7 +204,7 @@
                                     @endforeach
                                 </div>
                             </td>
-                            <td colspan="{{ count($coimplementors) + 2 }}"></td>
+                            <td colspan="{{ count($coimplementors) + 3 }}"></td>
                             <td class="align-middle">
                                 <a onclick="$(this).deleteRow('#header-row-{{ $itemCounter }}');"
                                 class="btn btn-outline-red px-1 py-0">
@@ -302,7 +302,7 @@
                                     @endforeach
 
                         <tr id="headerbreak-row-{{ $itemCounter }}" class="item-row">
-                            <td colspan="{{ count($coimplementors) + 3 }}">
+                            <td colspan="{{ count($coimplementors) + 4 }}">
                                 <hr>
                                 <div class="md-form form-sm my-0">
                                     <input name="row_type[{{ $itemCounter }}]" type="hidden" value="header-break">

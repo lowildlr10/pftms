@@ -58,6 +58,10 @@
                                                    value="{{ $lastLogin }}" readonly>
                                             <label for="last-login">Last Login</label>
                                         </div>
+                                        <div>
+                                            <b>Role/s: </b>
+                                             {{ Auth::user()->getEmployee(Auth::user()->id)->roleName }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

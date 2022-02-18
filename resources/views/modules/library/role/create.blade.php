@@ -65,9 +65,9 @@
     <div class="md-form">
         <select class="mdb-select md-form required" searchable="Search here.."
                 name="is_developer">
-            <option value="" disabled selected>Choose a value</option>
+            <option value="" disabled>Choose a value</option>
             <option value="y">Yes</option>
-            <option value="n">No</option>
+            <option value="n" selected>No</option>
         </select>
         <label class="mdb-main-label">
             Is a Developer Role? <span class="red-text">*</span>
@@ -77,9 +77,9 @@
     <div class="md-form">
         <select class="mdb-select md-form required" searchable="Search here.."
                 name="is_administrator">
-            <option value="" disabled selected>Choose a value</option>
+            <option value="" disabled>Choose a value</option>
             <option value="y">Yes</option>
-            <option value="n">No</option>
+            <option value="n" selected>No</option>
         </select>
         <label class="mdb-main-label">
             Is an Administrator Role? <span class="red-text">*</span>
@@ -88,10 +88,70 @@
 
     <div class="md-form">
         <select class="mdb-select md-form required" searchable="Search here.."
-                name="is_accountant">
-            <option value="" disabled selected>Choose a value</option>
+                name="is_rd">
+            <option value="" disabled>Choose a value</option>
             <option value="y">Yes</option>
-            <option value="n">No</option>
+            <option value="n" selected>No</option>
+        </select>
+        <label class="mdb-main-label">
+            Is a Regional Director Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_ard">
+            <option value="" disabled>Choose a value</option>
+            <option value="y">Yes</option>
+            <option value="n" selected>No</option>
+        </select>
+        <label class="mdb-main-label">
+            Is an Assistant Regional Director Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_pstd">
+            <option value="" disabled>Choose a value</option>
+            <option value="y">Yes</option>
+            <option value="n" selected>No</option>
+        </select>
+        <label class="mdb-main-label">
+            Is a Provincial Science & Technology Director Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_planning">
+            <option value="" disabled>Choose a value</option>
+            <option value="y">Yes</option>
+            <option value="n" selected>No</option>
+        </select>
+        <label class="mdb-main-label">
+            Is a Planning Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_project_staff">
+            <option value="" disabled>Choose a value</option>
+            <option value="y">Yes</option>
+            <option value="n" selected>No</option>
+        </select>
+        <label class="mdb-main-label">
+            Is a Project Staff Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_accountant">
+            <option value="" disabled>Choose a value</option>
+            <option value="y">Yes</option>
+            <option value="n" selected>No</option>
         </select>
         <label class="mdb-main-label">
             Is an Accountant Role? <span class="red-text">*</span>
@@ -101,9 +161,9 @@
     <div class="md-form">
         <select class="mdb-select md-form required" searchable="Search here.."
                 name="is_budget">
-            <option value="" disabled selected>Choose a value</option>
+            <option value="" disabled>Choose a value</option>
             <option value="y">Yes</option>
-            <option value="n">No</option>
+            <option value="n" selected>No</option>
         </select>
         <label class="mdb-main-label">
             Is a Budget Role? <span class="red-text">*</span>
@@ -113,9 +173,9 @@
     <div class="md-form">
         <select class="mdb-select md-form required" searchable="Search here.."
                 name="is_cashier">
-            <option value="" disabled selected>Choose a value</option>
+            <option value="" disabled>Choose a value</option>
             <option value="y">Yes</option>
-            <option value="n">No</option>
+            <option value="n" selected>No</option>
         </select>
         <label class="mdb-main-label">
             Is a Cashier Role? <span class="red-text">*</span>
@@ -125,9 +185,9 @@
     <div class="md-form">
         <select class="mdb-select md-form required" searchable="Search here.."
                 name="is_property_supply">
-            <option value="" disabled selected>Choose a value</option>
+            <option value="" disabled>Choose a value</option>
             <option value="y">Yes</option>
-            <option value="n">No</option>
+            <option value="n" selected>No</option>
         </select>
         <label class="mdb-main-label">
             Is a Property & Supply Role? <span class="red-text">*</span>
@@ -137,9 +197,9 @@
     <div class="md-form">
         <select class="mdb-select md-form required" searchable="Search here.."
                 name="is_ordinary">
-            <option value="" disabled selected>Choose a value</option>
+            <option value="" disabled>Choose a value</option>
             <option value="y">Yes</option>
-            <option value="n">No</option>
+            <option value="n" selected>No</option>
         </select>
         <label class="mdb-main-label">
             Is an Ordinary Role? <span class="red-text">*</span>

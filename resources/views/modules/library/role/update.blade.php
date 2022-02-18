@@ -104,6 +104,86 @@
 
     <div class="md-form">
         <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_rd">
+            <option value="" disabled>Choose a value</option>
+            <option value="y" {{ $isRD == 'y' ? 'selected': '' }}>
+                Yes
+            </option>
+            <option value="n" {{ $isRD == 'n' ? 'selected': '' }}>
+                No
+            </option>
+        </select>
+        <label class="mdb-main-label">
+            Is a Regional Director Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_ard">
+            <option value="" disabled>Choose a value</option>
+            <option value="y" {{ $isARD == 'y' ? 'selected': '' }}>
+                Yes
+            </option>
+            <option value="n" {{ $isARD == 'n' ? 'selected': '' }}>
+                No
+            </option>
+        </select>
+        <label class="mdb-main-label">
+            Is an Assistant Regional Director Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_pstd">
+            <option value="" disabled>Choose a value</option>
+            <option value="y" {{ $isPSTD == 'y' ? 'selected': '' }}>
+                Yes
+            </option>
+            <option value="n" {{ $isPSTD == 'n' ? 'selected': '' }}>
+                No
+            </option>
+        </select>
+        <label class="mdb-main-label">
+            Is a Provincial Science & Technology Director Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_planning">
+            <option value="" disabled>Choose a value</option>
+            <option value="y" {{ $isPlanning == 'y' ? 'selected': '' }}>
+                Yes
+            </option>
+            <option value="n" {{ $isPlanning == 'n' ? 'selected': '' }}>
+                No
+            </option>
+        </select>
+        <label class="mdb-main-label">
+            Is a Planning Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
+                name="is_project_staff">
+            <option value="" disabled>Choose a value</option>
+            <option value="y" {{ $isProjectStaff == 'y' ? 'selected': '' }}>
+                Yes
+            </option>
+            <option value="n" {{ $isProjectStaff == 'n' ? 'selected': '' }}>
+                No
+            </option>
+        </select>
+        <label class="mdb-main-label">
+            Is a Project Staff Role? <span class="red-text">*</span>
+        </label>
+    </div>
+
+    <div class="md-form">
+        <select class="mdb-select md-form required" searchable="Search here.."
                 name="is_accountant">
             <option value="" disabled selected>Choose a value</option>
             <option value="y" {{ $isAccountant == 'y' ? 'selected': '' }}>

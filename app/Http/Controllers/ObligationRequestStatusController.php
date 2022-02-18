@@ -125,6 +125,16 @@ class ObligationRequestStatusController extends Controller
         $instanceDocLog = new DocLog;
 
         // User groups
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+        $roleHasAdministrator = Auth::user()->hasOrdinaryRole();
+        $roleHasRD = Auth::user()->hasRdRole();
+        $roleHasARD = Auth::user()->hasArdRole();
+        $roleHasPSTD = Auth::user()->hasPstdRole();
+        $roleHasPlanning = Auth::user()->hasPlanningRole();
+        $roleHasProjectStaff = Auth::user()->hasProjectStaffRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
+        $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];

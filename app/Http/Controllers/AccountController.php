@@ -1161,6 +1161,11 @@ class AccountController extends Controller
         $isBudget = $userRoleData->is_budget;
         $isAccountant = $userRoleData->is_accountant;
         $isCashier = $userRoleData->is_cashier;
+        $isProjectStaff = $userRoleData->is_project_staff;
+        $isPlanning = $userRoleData->is_planning;
+        $isPSTD = $userRoleData->is_pstd;
+        $isARD = $userRoleData->is_ard;
+        $isRD = $userRoleData->is_rd;
         $isAdministrator = $userRoleData->is_administrator;
         $isDeveloper = $userRoleData->is_developer;
         $module = json_decode($userRoleData->module_access);
@@ -1176,6 +1181,11 @@ class AccountController extends Controller
             'isBudget' => $isBudget,
             'isAccountant' => $isAccountant,
             'isCashier' => $isCashier,
+            'isProjectStaff' => $isProjectStaff,
+            'isPlanning' => $isPlanning,
+            'isPSTD' => $isPSTD,
+            'isARD' => $isARD,
+            'isRD' => $isRD,
             'isAdministrator' => $isAdministrator,
             'isDeveloper' => $isDeveloper,
         ]);
@@ -1188,6 +1198,11 @@ class AccountController extends Controller
         $isBudget = $request->is_budget;
         $isAccountant = $request->is_accountant;
         $isCashier = $request->is_cashier;
+        $isProjectStaff = $request->is_project_staff;
+        $isPlanning = $request->is_planning;
+        $isPSTD = $request->is_pstd;
+        $isARD = $request->is_ard;
+        $isRD = $request->is_rd;
         $isAdministrator = $request->is_administrator;
         $isDeveloper = $request->is_developer;
         $moduleAccess = $request->module_access;
@@ -1204,6 +1219,11 @@ class AccountController extends Controller
                 $instanceEmpRole->is_budget = $isBudget;
                 $instanceEmpRole->is_accountant = $isAccountant;
                 $instanceEmpRole->is_cashier = $isCashier;
+                $instanceEmpRole->is_project_staff = $isProjectStaff;
+                $instanceEmpRole->is_planning = $isPlanning;
+                $instanceEmpRole->is_pstd = $isPSTD;
+                $instanceEmpRole->is_ard = $isARD;
+                $instanceEmpRole->is_rd = $isRD;
                 $instanceEmpRole->is_administrator = $isAdministrator;
                 $instanceEmpRole->is_developer = $isDeveloper;
                 $instanceEmpRole->module_access = $moduleAccess;
@@ -1228,6 +1248,11 @@ class AccountController extends Controller
         $isBudget = $request->is_budget;
         $isAccountant = $request->is_accountant;
         $isCashier = $request->is_cashier;
+        $isProjectStaff = $request->is_project_staff;
+        $isPlanning = $request->is_planning;
+        $isPSTD = $request->is_pstd;
+        $isARD = $request->is_ard;
+        $isRD = $request->is_rd;
         $isAdministrator = $request->is_administrator;
         $isDeveloper = $request->is_developer;
         $moduleAccess = $request->module_access;
@@ -1243,6 +1268,11 @@ class AccountController extends Controller
             $instanceEmpRole->is_budget = $isBudget;
             $instanceEmpRole->is_accountant = $isAccountant;
             $instanceEmpRole->is_cashier = $isCashier;
+            $instanceEmpRole->is_project_staff = $isProjectStaff;
+            $instanceEmpRole->is_planning = $isPlanning;
+            $instanceEmpRole->is_pstd = $isPSTD;
+            $instanceEmpRole->is_ard = $isARD;
+            $instanceEmpRole->is_rd = $isRD;
             $instanceEmpRole->is_administrator = $isAdministrator;
             $instanceEmpRole->is_developer = $isDeveloper;
             $instanceEmpRole->module_access = $moduleAccess;
