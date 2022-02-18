@@ -1019,6 +1019,7 @@ class LibraryController extends Controller
             $instanceProject->monitoring_offices = serialize($monitoringOffice);
             $instanceProject->access_groups = $accessGroup ? serialize($accessGroup) : serialize([]);
             $instanceProject->project_type = $projectType;
+            $instanceProject->created_by = Auth::user()->id;
             $instanceProject->save();
 
             $msg = "Project '$projectTitle' successfully created.";

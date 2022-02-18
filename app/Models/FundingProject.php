@@ -97,11 +97,13 @@ class FundingProject extends Model
 
     public function getAccessibleProjects() {
         $projectIDs = [];
+        $userID = Auth::user()->id;
         $userUnit = Auth::user()->unit;
         $userGroups = Auth::user()->groups ? unserialize(Auth::user()->groups) : [];
         $fundProject = $this->get();
 
         foreach ($fundProject as $project) {
+            $createdBy = $project->created_by;
             $units = $project->proponent_units ? unserialize($project->proponent_units) :
                      [];
             $accessGroups = $project->access_groups ? unserialize($project->access_groups) :
@@ -117,6 +119,10 @@ class FundingProject extends Model
                 if ($unit == $userUnit) {
                     $projectIDs[] = $project->id;
                 }
+            }
+
+            if ($createdBy == $userID) {
+                $projectIDs[] = $project->id;
             }
         }
 
