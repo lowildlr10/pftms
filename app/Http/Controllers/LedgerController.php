@@ -94,15 +94,33 @@ class LedgerController extends Controller
     private function getIndexData($request, $for) {
         $keyword = trim($request->keyword);
 
-        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $roleHasBudget = Auth::user()->hasBudgetRole();
-        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
+        // User groups
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+        $roleHasAdministrator = Auth::user()->hasOrdinaryRole();
+        $roleHasRD = Auth::user()->hasRdRole();
+        $roleHasARD = Auth::user()->hasArdRole();
+        $roleHasPSTD = Auth::user()->hasPstdRole();
+        $roleHasPlanning = Auth::user()->hasPlanningRole();
+        $roleHasProjectStaff = Auth::user()->hasProjectStaffRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
+        $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
 
         $projDat = new FundingProject;
         $fundProject = FundingProject::whereHas('budget', function($query) {
             $query->whereNotNull('date_approved');
         });
+
+        if ($roleHasDeveloper || $roleHasRD || $roleHasARD || $roleHasPlanning ||
+            $roleHasBudget || $roleHasAccountant) {
+        } else {
+            $projectIDs = $projDat->getAccessibleProjects();
+
+            $fundProject = $fundProject->where(function($qry) use ($projectIDs) {
+                $qry->whereIn('id', $projectIDs);
+            });
+        }
 
         if (!empty($keyword)) {
             $fundProject = $fundProject->where(function($qry) use ($keyword) {
@@ -120,14 +138,6 @@ class LedgerController extends Controller
                         $query->where('id', 'like', "%$keyword%")
                               ->orWhere('municipality_name', 'like', "%$keyword%");
                     });
-            });
-        }
-
-        if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
-            $projectIDs = $projDat->getAccessibleProjects();
-
-            $fundProject = $fundProject->where(function($qry) use ($projectIDs) {
-                $qry->whereIn('id', $projectIDs);
             });
         }
 

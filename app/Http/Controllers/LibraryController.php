@@ -694,15 +694,32 @@ class LibraryController extends Controller
      *  Project Module
     **/
     public function indexProject(Request $request) {
-        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $roleHasBudget = Auth::user()->hasBudgetRole();
-        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
+
+        // Get module access
+        $module = 'lib_funding';
+        $isAllowedCreate = Auth::user()->getModuleAccess($module, 'create');
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
+        $isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
+
+        // User groups
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+        $roleHasAdministrator = Auth::user()->hasOrdinaryRole();
+        $roleHasRD = Auth::user()->hasRdRole();
+        $roleHasARD = Auth::user()->hasArdRole();
+        $roleHasPSTD = Auth::user()->hasPstdRole();
+        $roleHasPlanning = Auth::user()->hasPlanningRole();
+        $roleHasProjectStaff = Auth::user()->hasProjectStaffRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
+        $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
 
         $projDat = new FundingProject;
         $projectData = FundingProject::orderBy('project_title');
 
-        if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
+        if ($roleHasDeveloper || $roleHasRD || $roleHasARD || $roleHasPlanning || $roleHasBudget) {
+        } else {
             $projectIDs = $projDat->getAccessibleProjects();
 
             $projectData = $projectData->where(function($qry) use ($projectIDs) {
@@ -799,7 +816,11 @@ class LibraryController extends Controller
 
         return view('modules.library.project.index', [
             'list' => $projectData,
-            'directories' => $directories
+            'directories' => $directories,
+            'isAllowedCreate' => $isAllowedCreate,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedDelete' => $isAllowedDelete,
+            'isAllowedDestroy' => $isAllowedDestroy,
         ]);
     }
 

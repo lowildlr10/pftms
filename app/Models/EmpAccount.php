@@ -159,7 +159,7 @@ class EmpAccount extends Authenticatable
             foreach ($roles as $role) {
                 $roleData = Role::find($role);
 
-                if ($roleData->is_pstd == 'y') {
+                if ($roleData->is_developer == 'y') {
                     return true;
                 }
             }
@@ -182,7 +182,7 @@ class EmpAccount extends Authenticatable
             foreach ($roles as $role) {
                 $roleData = Role::find($role);
 
-                if ($roleData->is_pstd == 'y') {
+                if ($roleData->is_administrator == 'y') {
                     return true;
                 }
             }

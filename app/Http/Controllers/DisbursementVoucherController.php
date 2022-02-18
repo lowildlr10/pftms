@@ -17,6 +17,7 @@ use App\Models\InventoryStock;
 use App\Models\ListDemandPayable;
 
 use App\Models\EmpAccount as User;
+use App\Models\EmpUnit;
 use App\Models\DocumentLog as DocLog;
 use App\Models\PaperSize;
 use App\Models\Supplier;
@@ -143,9 +144,17 @@ class DisbursementVoucherController extends Controller
         $instanceDocLog = new DocLog;
 
         // User groups
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+        $roleHasAdministrator = Auth::user()->hasOrdinaryRole();
+        $roleHasRD = Auth::user()->hasRdRole();
+        $roleHasARD = Auth::user()->hasArdRole();
+        $roleHasPSTD = Auth::user()->hasPstdRole();
+        $roleHasPlanning = Auth::user()->hasPlanningRole();
+        $roleHasProjectStaff = Auth::user()->hasProjectStaffRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
+        $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
-                             [Auth::user()->division];
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
@@ -162,16 +171,52 @@ class DisbursementVoucherController extends Controller
                       ->whereNull('date_pr_cancelled');
             }])->where('disbursement_vouchers.module_class', 3);*/
 
+            $userIDs = Auth::user()->getGroupHeads();
+            $empUnitDat = EmpUnit::has('unithead')->find(Auth::user()->unit);
+            $userIDs[] = Auth::user()->id;
+
+            if ($empUnitDat && $empUnitDat->unithead) {
+                $userIDs[] = $empUnitDat->unithead->id;
+            }
+
             $dvData = DisbursementVoucher::select('id', 'pr_id', 'particulars', 'module_class', 'dv_no',
                                                   'date_for_payment', 'date_disbursed')
-                                         ->whereHas('pr', function($query)
-                                                use($empDivisionAccess) {
-                $query->whereIn('division', $empDivisionAccess)
-                    ->whereNull('date_pr_cancelled');
-            })->whereHas('procors', function($query)
-                         use($empDivisionAccess) {
+                                         ->whereHas('procors', function($query) {
                 $query->select('id', 'po_no');
             })->with('bidpayee');
+
+            if ($roleHasOrdinary && (!$roleHasDeveloper || !$roleHasRD || !$roleHasPropertySupply ||
+                !$roleHasAccountant || !$roleHasBudget || !$roleHasPSTD)) {
+                if (Auth::user()->emp_type == 'contractual') {
+                    if (Auth::user()->getDivisionAccess()) {
+                        $empDivisionAccess = Auth::user()->getDivisionAccess();
+                    } else {
+                        $empDivisionAccess = [Auth::user()->division];
+                    }
+                } else {
+                    $empDivisionAccess = [Auth::user()->division];
+                }
+            } else {
+                if ($roleHasPSTD) {
+                    $empDivisionAccess = [Auth::user()->division];
+                } else {
+                    $empDivisionAccess = Auth::user()->getDivisionAccess();
+                }
+            }
+
+            $dvData = $dvData->whereHas('pr', function($query)
+                    use($empDivisionAccess, $roleHasOrdinary, $userIDs) {
+                $query->whereIn('division', $empDivisionAccess)
+                      ->whereNull('date_pr_cancelled');
+
+                if ($roleHasOrdinary) {
+                    if (Auth::user()->emp_type == 'contractual') {
+                        $query->whereIn('requested_by', $userIDs);
+                    } else {
+                        $query->where('requested_by', Auth::user()->id);
+                    }
+                }
+            });
 
             if (!empty($keyword)) {
                 $dvData = $dvData->where(function($qry) use ($keyword) {
@@ -245,13 +290,15 @@ class DisbursementVoucherController extends Controller
                 $dvDat->doc_status = $instanceDocLog->checkDocStatus($dvDat->procdv['id']);
             }*/
         } else {
-            $dvData = DisbursementVoucher::with('procors')->whereHas('emppayee', function($query)
-                                           use($empDivisionAccess) {
-                $query->whereIn('division', $empDivisionAccess);
-            })->whereNull('deleted_at')->where('module_class', 2);
+            $dvData = DisbursementVoucher::with('procors')
+                                         ->whereNull('deleted_at')
+                                         ->where('module_class', 2);
 
-            if ($roleHasOrdinary) {
-                $dvData = $dvData->where('payee', Auth::user()->id);
+            if ($roleHasDeveloper || $roleHasBudget || $roleHasAccountant || $roleHasRD ||
+                $roleHasARD) {
+                $dvData = $dvData->orderBy('payee');
+            } else {
+                 $dvData = $dvData->where('payee', Auth::user()->id);
             }
 
             if (!empty($keyword)) {

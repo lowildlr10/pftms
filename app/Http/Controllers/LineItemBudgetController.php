@@ -80,13 +80,32 @@ class LineItemBudgetController extends Controller
         $keyword = trim($request->keyword);
         $userID = Auth::user()->id;
 
-        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $roleHasBudget = Auth::user()->hasBudgetRole();
-        $roleHasAdministrator = Auth::user()->hasAdministratorRole();
+        // User groups
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+        $roleHasAdministrator = Auth::user()->hasOrdinaryRole();
+        $roleHasRD = Auth::user()->hasRdRole();
+        $roleHasARD = Auth::user()->hasArdRole();
+        $roleHasPSTD = Auth::user()->hasPstdRole();
+        $roleHasPlanning = Auth::user()->hasPlanningRole();
+        $roleHasProjectStaff = Auth::user()->hasProjectStaffRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
+        $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
+        $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
 
         $projDat = new FundingProject;
         $fundBudget = new FundingBudget;
+
+        if ($roleHasDeveloper || $roleHasRD || $roleHasARD || $roleHasPlanning || $roleHasBudget) {
+        } else {
+            $projectIDs = $projDat->getAccessibleProjects();
+
+            $fundBudget = $fundBudget->where(function($qry) use ($userID, $projectIDs) {
+                $qry->where('created_by', $userID)
+                    ->orWhere('sig_submitted_by', $userID)
+                    ->orWhereIn('project_id', $projectIDs);
+            });
+        }
 
         if (!empty($keyword)) {
             $fundBudget = $fundBudget->where(function($qry) use ($keyword) {
@@ -95,16 +114,6 @@ class LineItemBudgetController extends Controller
                     ->orWhere('date_to', 'like', "%$keyword%")
                     ->orWhere('approved_budget', 'like', "%$keyword%")
                     ->orWhere('project_id', 'like', "%$keyword%");
-            });
-        }
-
-        if (!$roleHasBudget && !$roleHasAdministrator && !$roleHasDeveloper) {
-            $projectIDs = $projDat->getAccessibleProjects();
-
-            $fundBudget = $fundBudget->where(function($qry) use ($userID, $projectIDs) {
-                $qry->where('created_by', $userID)
-                    ->orWhere('sig_submitted_by', $userID)
-                    ->orWhereIn('project_id', $projectIDs);
             });
         }
 
@@ -336,7 +345,7 @@ class LineItemBudgetController extends Controller
         $routeName = 'fund-project-lib';
 
         try {
-            $projectData = FundingProject::find($project);
+            $a = FundingProject::find($project);
             $dateFrom = $projectData->date_from;
             $dateTo = $projectData->date_to;
 

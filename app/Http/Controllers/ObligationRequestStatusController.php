@@ -15,6 +15,7 @@ use App\Models\DisbursementVoucher;
 use App\Models\InventoryStock;
 
 use App\Models\EmpAccount as User;
+use App\Models\EmpUnit;
 use App\Models\DocumentLog as DocLog;
 use App\Models\PaperSize;
 use App\Models\Supplier;
@@ -136,20 +137,55 @@ class ObligationRequestStatusController extends Controller
         $roleHasAccountant = Auth::user()->hasAccountantRole();
         $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
-                             [Auth::user()->division];
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
 
         if ($type == 'procurement') {
-            $orsData = PurchaseJobOrder::with('bidpayee')->whereHas('pr', function($query)
-                                                use($empDivisionAccess) {
-                $query->whereIn('division', $empDivisionAccess)
-                      ->whereNull('date_pr_cancelled');
-            })->whereHas('ors', function($query) {
+            $userIDs = Auth::user()->getGroupHeads();
+            $empUnitDat = EmpUnit::has('unithead')->find(Auth::user()->unit);
+            $userIDs[] = Auth::user()->id;
+
+            if ($empUnitDat && $empUnitDat->unithead) {
+                $userIDs[] = $empUnitDat->unithead->id;
+            }
+
+            $orsData = PurchaseJobOrder::with('bidpayee')->whereHas('ors', function($query) {
                 $query->whereNull('deleted_at');
             })->whereNull('date_cancelled');
+
+            if ($roleHasOrdinary && (!$roleHasDeveloper || !$roleHasRD || !$roleHasPropertySupply ||
+                !$roleHasAccountant || !$roleHasBudget || !$roleHasPSTD)) {
+                if (Auth::user()->emp_type == 'contractual') {
+                    if (Auth::user()->getDivisionAccess()) {
+                        $empDivisionAccess = Auth::user()->getDivisionAccess();
+                    } else {
+                        $empDivisionAccess = [Auth::user()->division];
+                    }
+                } else {
+                    $empDivisionAccess = [Auth::user()->division];
+                }
+            } else {
+                if ($roleHasPSTD) {
+                    $empDivisionAccess = [Auth::user()->division];
+                } else {
+                    $empDivisionAccess = Auth::user()->getDivisionAccess();
+                }
+            }
+
+            $orsData = $orsData->whereHas('pr', function($query)
+                    use($empDivisionAccess, $roleHasOrdinary, $userIDs) {
+                $query->whereIn('division', $empDivisionAccess)
+                      ->whereNull('date_pr_cancelled');
+
+                if ($roleHasOrdinary) {
+                    if (Auth::user()->emp_type == 'contractual') {
+                        $query->whereIn('requested_by', $userIDs);
+                    } else {
+                        $query->where('requested_by', Auth::user()->id);
+                    }
+                }
+            });
 
             if (!empty($keyword)) {
                 $orsData = $orsData->where(function($qry) use ($keyword) {
@@ -189,13 +225,14 @@ class ObligationRequestStatusController extends Controller
                 $orsDat->doc_status = $instanceDocLog->checkDocStatus($orsDat->ors['id']);
             }
         } else {
-            $orsData = ObligationRequestStatus::whereHas('emppayee', function($query)
-                                                use($empDivisionAccess) {
-                $query->whereIn('division', $empDivisionAccess);
-            })->whereNull('deleted_at')->where('module_class', 2);
+            $orsData = ObligationRequestStatus::whereNull('deleted_at')
+                                              ->where('module_class', 2);
 
-            if ($roleHasOrdinary) {
-                $orsData = $orsData->where('payee', Auth::user()->id);
+            if ($roleHasDeveloper || $roleHasBudget || $roleHasAccountant || $roleHasRD ||
+                $roleHasARD) {
+                $orsData = $orsData->orderBy('payee');
+            } else {
+                 $orsData = $orsData->where('payee', Auth::user()->id);
             }
 
             if (!empty($keyword)) {
@@ -443,7 +480,6 @@ class ObligationRequestStatusController extends Controller
         $dateCertified1 = !empty($request->date_certified_1) ? $request->date_certified_1: NULL;
         $dateCertified2 = !empty($request->date_certified_2) ? $request->date_certified_2: NULL;
 
-        $uacsIDs = $request->uacs_id;
         $uacsDescriptions = $request->uacs_description;
         $uacsAmounts = $request->uacs_amount;
 
@@ -478,15 +514,6 @@ class ObligationRequestStatusController extends Controller
             $instanceORS->save();
 
             $orsID = $instanceORS->id->string;
-
-            foreach ($uacsIDs as $uacsCtr => $uacsID) {
-                $instanceUacs = OrsBursUacsItem::create([
-                    'ors_id' => $orsID,
-                    'uacs_id' => $uacsID,
-                    'description' => $uacsDescriptions[$uacsCtr],
-                    'amount' => $uacsAmounts[$uacsCtr]
-                ]);
-            }
 
             $documentType = $documentType == 'ors' ? 'Obligation Request & Status' :
                             'Budget Utilization Request & Status';
