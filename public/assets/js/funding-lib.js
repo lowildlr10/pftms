@@ -58,7 +58,7 @@ $(function() {
             maximumSelectionSize: 4,
             allowClear: true,
             ajax: {
-                url: `${baseURL}/report/registry-allot-obli-disb/get-uacs-object`,
+                url: `${baseURL}/fund-utilization/project-lib/get-uacs-object`,
                 type: "post",
                 dataType: 'json',
                 delay: 250,

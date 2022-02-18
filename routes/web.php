@@ -1167,6 +1167,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'fund_lib',
         'access' => 'is_allowed'
     ]);
+    Route::post('fund-utilization/project-lib/get-uacs-object', [
+        'uses' => 'RegAllotmentController@getUacsObject',
+        'module' => 'fund_lib',
+        'access' => 'is_allowed'
+    ]);
     Route::post('fund-utilization/project-lib/approve/{id}/{isRealignment}', [
         'uses' => 'LineItemBudgetController@approve',
         'module' => 'fund_lib',
