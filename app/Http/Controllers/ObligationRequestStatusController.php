@@ -230,7 +230,6 @@ class ObligationRequestStatusController extends Controller
 
             if ($roleHasDeveloper || $roleHasBudget || $roleHasAccountant || $roleHasRD ||
                 $roleHasARD) {
-                $orsData = $orsData->orderBy('payee');
             } else {
                  $orsData = $orsData->where('payee', Auth::user()->id);
             }

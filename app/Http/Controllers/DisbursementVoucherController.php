@@ -296,7 +296,6 @@ class DisbursementVoucherController extends Controller
 
             if ($roleHasDeveloper || $roleHasBudget || $roleHasAccountant || $roleHasRD ||
                 $roleHasARD) {
-                $dvData = $dvData->orderBy('payee');
             } else {
                  $dvData = $dvData->where('payee', Auth::user()->id);
             }
