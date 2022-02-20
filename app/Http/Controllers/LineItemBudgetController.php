@@ -345,7 +345,7 @@ class LineItemBudgetController extends Controller
         $routeName = 'fund-project-lib';
 
         try {
-            $a = FundingProject::find($project);
+            $projectData = FundingProject::find($project);
             $dateFrom = $projectData->date_from;
             $dateTo = $projectData->date_to;
 
