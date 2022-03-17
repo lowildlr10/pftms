@@ -1665,23 +1665,6 @@ class LibraryController extends Controller
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      *  UACS Object Classifications Module
     **/
@@ -1777,41 +1760,94 @@ class LibraryController extends Controller
      *  UACS Object Codes Module
     **/
     public function indexUacsObjCode(Request $request) {
-        $unitIssueData = ItemUnitIssue::orderBy('unit_name')
-                                      ->get();
+        $_uacsObjCodeDat = UacsObjectCode::orderBy('uacs_code')
+                                         ->get();
+        $uacsObjCodeDat = [];
+
+        foreach ($_uacsObjCodeDat as $uacs) {
+            $uacsClassDat = UacsObjectClassification::find($uacs->classification_id);
+            $uacsAccTitles = explode('::', $uacs->account_title);
+
+            $uacs->classification = $uacsClassDat->classification_name;
+
+            if (count($uacsAccTitles) > 1) {
+                $uacs->account_title = $uacsAccTitles[1];
+                $uacs->account_title_header = $uacsAccTitles[0];
+                $keyString = strtolower(preg_replace('/\s+/', '', $uacsAccTitles[0]));
+                $uacsObjCodeDat[$keyString][] = $uacs;
+            } else {
+                $uacsObjCodeDat[] = $uacs;
+            }
+        }
 
         return view('modules.library.uacs-code.index', [
-            'list' => $unitIssueData
+            'list' => $uacsObjCodeDat
         ]);
     }
 
     public function showCreateUacsObjCode() {
-        return view('modules.library.uacs-code.create');
+        $uacsClassifications = DB::table('mooe_classifications')
+                                 ->orderBy('classification_name')
+                                 ->get();
+
+        return view('modules.library.uacs-code.create', [
+            'uacsClassifications' => $uacsClassifications,
+        ]);
     }
 
     public function showEditUacsObjCode($id) {
-        $unitIssueData = ItemUnitIssue::find($id);
-        $unit = $unitIssueData->unit_name;
+        $uacsClassifications = DB::table('mooe_classifications')
+                                 ->orderBy('classification_name')
+                                 ->get();
+        $uacsObjCodeDat = UacsObjectCode::find($id);
+        $uacsClassification = $uacsObjCodeDat->classification_id;
+        $accountTitles = explode('::', $uacsObjCodeDat->account_title);
+        $uacsCode = $uacsObjCodeDat->uacs_code;
+        $description = $uacsObjCodeDat->description;
+
+        if (count($accountTitles) > 1) {
+            $accountTitleHeader = $accountTitles[0];
+            $accountTitle = $accountTitles[1];
+        } else {
+            $accountTitleHeader = '';
+            $accountTitle = $accountTitles[0];
+        }
 
         return view('modules.library.uacs-code.update', [
             'id' => $id,
-            'unit' => $unit
+            'uacsClassifications' => $uacsClassifications,
+            'uacsClassification' => $uacsClassification,
+            'accountTitleHeader' => $accountTitleHeader,
+            'accountTitle' => $accountTitle,
+            'uacsCode' => $uacsCode,
+            'description' => $description
         ]);
     }
 
     public function storeUacsObjCode(Request $request) {
-        $unitName = $request->unit_name;
+        $classification = $request->classification;
+        $_accountTitleHeader = $request->account_title_header;
+        $_accountTitle = $request->account_title;
+        $accountTitle = !empty($_accountTitleHeader) ?
+                        "$_accountTitleHeader::$_accountTitle" :
+                         $_accountTitle;
+        $uacsCode = $request->uacs_code;
+        $description = $request->description;
 
         try {
-            if (!$this->checkDuplication('ItemUnitIssue', $unitName)) {
-                $instanceUnitIssue = new ItemUnitIssue;
-                $instanceUnitIssue->unit_name = $unitName;
-                $instanceUnitIssue->save();
+            if (!$this->checkDuplication('UacsObjectCode', $uacsCode)) {
+                $instanceUacsCode = new UacsObjectCode;
+                $instanceUacsCode->classification_id = $classification;
+                $instanceUacsCode->account_title = $accountTitle;
+                $instanceUacsCode->uacs_code = $uacsCode;
+                $instanceUacsCode->description = $description;
+                $instanceUacsCode->order_no = 0;
+                $instanceUacsCode->save();
 
-                $msg = "Unit of issue '$unitName' successfully created.";
+                $msg = "UACS Object Code '$uacsCode - $accountTitle' successfully created.";
                 return redirect(url()->previous())->with('success', $msg);
             } else {
-                $msg = "Unit of issue '$unitName' has a duplicate.";
+                $msg = "UACS Object Code '$uacsCode - $accountTitle' has a duplicate.";
                 return redirect(url()->previous())->with('warning', $msg);
             }
         } catch (\Throwable $th) {
@@ -1821,14 +1857,24 @@ class LibraryController extends Controller
     }
 
     public function updateUacsObjCode(Request $request, $id) {
-        $unitName = $request->unit_name;
+        $classification = $request->classification;
+        $_accountTitleHeader = $request->account_title_header;
+        $_accountTitle = $request->account_title;
+        $accountTitle = !empty($_accountTitleHeader) ?
+                        "$_accountTitleHeader::$_accountTitle" :
+                         $_accountTitle;
+        $uacsCode = $request->uacs_code;
+        $description = $request->description;
 
         try {
-            $instanceUnitIssue = ItemUnitIssue::find($id);
-            $instanceUnitIssue->unit_name = $unitName;
-            $instanceUnitIssue->save();
+            $instanceUacsCode = UacsObjectCode::find($id);
+            $instanceUacsCode->classification_id = $classification;
+            $instanceUacsCode->account_title = $accountTitle;
+            $instanceUacsCode->uacs_code = $uacsCode;
+            $instanceUacsCode->description = $description;
+            $instanceUacsCode->save();
 
-            $msg = "Unit of issue '$unitName' successfully created.";
+            $msg = "UACS Object Code '$uacsCode - $accountTitle' successfully created.";
             return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
@@ -1838,11 +1884,12 @@ class LibraryController extends Controller
 
     public function deleteUacsObjCode($id) {
         try {
-            $instanceUnitIssue = ItemUnitIssue::find($id);
-            $unitName = $instanceUnitIssue->unit_name;
-            $instanceUnitIssue->delete();
+            $instanceUacsCode = UacsObjectCode::find($id);
+            $uacsCode = $instanceUacsCode->uacs_code;
+            $accountTitle = $instanceUacsCode->account_title;
+            $instanceUacsCode->delete();
 
-            $msg = "Unit of issue '$unitName' successfully deleted.";
+            $msg = "UACS Object Code '$uacsCode - $accountTitle' successfully deleted.";
             return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
@@ -1852,24 +1899,18 @@ class LibraryController extends Controller
 
     public function destroyUacsObjCode($id) {
         try {
-            $instanceUnitIssue = ItemUnitIssue::find($id);
-            $unitName = $instanceUnitIssue->unit_name;
-            $instanceUnitIssue->destroy();
+            $instanceUacsCode = UacsObjectCode::find($id);
+            $uacsCode = $instanceUacsCode->uacs_code;
+            $accountTitle = $instanceUacsCode->account_title;
+            $instanceUacsCode->destroy();
 
-            $msg = "Unit of issue '$unitName' successfully destroyed.";
+            $msg = "UACS Object Code '$uacsCode - $accountTitle' successfully destroyed.";
             return redirect(url()->previous())->with('success', $msg);
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             return redirect(url()->previous())->with('failed', $msg);
         }
     }
-
-
-
-
-
-
-
 
     /**
      *  Item Unit Issue Module
@@ -2322,6 +2363,12 @@ class LibraryController extends Controller
                 $dataCount = UacsObjectClassification::where('classification_name', $data)
                                           ->orWhere('classification_name', strtolower($data))
                                           ->orWhere('classification_name', strtoupper($data))
+                                          ->count();
+                break;
+            case 'UacsObjectCode':
+                $dataCount = UacsObjectCode::where('uacs_code', $data)
+                                          ->orWhere('uacs_code', strtolower($data))
+                                          ->orWhere('uacs_code', strtoupper($data))
                                           ->count();
                 break;
             case 'ItemUnitIssue':

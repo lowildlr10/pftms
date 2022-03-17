@@ -18,7 +18,7 @@
             <div class="card-body">
                 <h5 class="card-title white-text">
                     <strong>
-                        <i class="fas fa-book"></i> Libraries: Supplier Classifications
+                        <i class="fas fa-book"></i> Libraries: UACS Object Codes
                     </strong>
                 </h5>
                 <hr class="white">
@@ -27,8 +27,8 @@
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
                     <li class="active">
-                        <a href="{{ route('supplier-classification') }}" class="waves-effect waves-light cyan-text">
-                            Supplier Classifications
+                        <a href="{{ route('uacs-object-code') }}" class="waves-effect waves-light cyan-text">
+                            UACS Object Codes
                         </a>
                     </li>
                 </ul>
@@ -42,7 +42,7 @@
                                 align-items-center">
                         <div>
                             <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
-                                    onclick="$(this).showCreate('{{ route('supplier-classification-show-create') }}');">
+                                    onclick="$(this).showCreate('{{ route('uacs-object-code-show-create') }}');">
                                 <i class="fas fa-pencil-alt"></i> Create
                             </button>
                         </div>
@@ -51,7 +51,7 @@
                                     data-target="#top-fluid-modal" data-toggle="modal">
                                 <i class="fas fa-search"></i>
                             </button>
-                            <a href="{{ route('supplier-classification') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
+                            <a href="{{ route('uacs-object-code') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
                             </a>
 
@@ -69,8 +69,17 @@
                                 <thead class="mdb-color darken-3 white-text">
                                     <tr>
                                         <th class="th-md" width="3%"></th>
-                                        <th class="th-md" width="91%">
+                                        <th class="th-md" width="20%">
                                             <strong>Classification</strong>
+                                        </th>
+                                        <th class="th-md" width="20%">
+                                            <strong>Account Title</strong>
+                                        </th>
+                                        <th class="th-md" width="15%">
+                                            <strong>UACS Code</strong>
+                                        </th>
+                                        <th class="th-md" width="36%">
+                                            <strong>Description</strong>
                                         </th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
@@ -81,27 +90,63 @@
                                 <!--Table body-->
                                 <tbody>
                                     @if (count($list) > 0)
-                                        @foreach ($list as $listCtr => $class)
+                                        @foreach ($list as $listCtr => $uacs)
+
+                                            @if (is_int($listCtr))
                                     <tr>
                                         <td align="center"></td>
-                                        <td>{{ $class->classification_name }}</td>
+                                        <td>{{ $uacs->classification }}</td>
+                                        <td>{{ $uacs->account_title }}</td>
+                                        <td>{{ $uacs->uacs_code }}</td>
+                                        <td>{{ $uacs->description }}</td>
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-orange p-2 waves-effect material-tooltip-main mr-0"
-                                               onclick="$(this).showEdit('{{ route('supplier-classification-show-edit',
-                                                                                   ['id' => $class->id]) }}');"
+                                               onclick="$(this).showEdit('{{ route('uacs-object-code-show-edit',
+                                                                                   ['id' => $uacs->id]) }}');"
                                                data-toggle="tooltip" data-placement="left" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         </td>
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-red p-2 waves-effect material-tooltip-main mr-0"
-                                               onclick="$(this).showDelete('{{ route('supplier-classification-delete', ['id' => $class->id]) }}',
-                                                                           '{{ $class->classification_name }}');"
+                                               onclick="$(this).showDelete('{{ route('uacs-object-code-delete', ['id' => $uacs->id]) }}',
+                                                                           '{{ $uacs->account_title }}');"
                                                data-toggle="tooltip" data-placement="left" title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </td>
                                     </tr>
+                                            @else
+                                                @foreach ($uacs as $_uacs)
+                                    <tr>
+                                        <td align="center"></td>
+                                        <td>{{ $_uacs->classification }}</td>
+                                        <td>
+                                            <small><b><em>{{ $_uacs->account_title_header }} &rarr; </em></b></small><br>
+                                            {{ $_uacs->account_title }}
+                                        </td>
+                                        <td>{{ $_uacs->uacs_code }}</td>
+                                        <td>{{ $_uacs->description }}</td>
+                                        <td align="center">
+                                            <a class="btn-floating btn-sm btn-orange p-2 waves-effect material-tooltip-main mr-0"
+                                               onclick="$(this).showEdit('{{ route('uacs-object-code-show-edit',
+                                                                                   ['id' => $_uacs->id]) }}');"
+                                               data-toggle="tooltip" data-placement="left" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </td>
+                                        <td align="center">
+                                            <a class="btn-floating btn-sm btn-red p-2 waves-effect material-tooltip-main mr-0"
+                                               onclick="$(this).showDelete('{{ route('uacs-object-code-delete', ['id' => $_uacs->id]) }}',
+                                                                           '{{ $_uacs->account_title }}');"
+                                               data-toggle="tooltip" data-placement="left" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                                @endforeach
+                                            @endif
+
                                         @endforeach
                                     @endif
                                 </tbody>
@@ -137,7 +182,7 @@
 <script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables-select.min.js') }}"></script>
 
 <script src="{{ asset('assets/js/input-validation.js') }}"></script>
-<script src="{{ asset('assets/js/supplier-classification.js') }}"></script>
+<script src="{{ asset('assets/js/uacs-object-code.js') }}"></script>
 <script src="{{ asset('assets/js/custom-datatables.js') }}"></script>
 
 @if (!empty(session("success")))
