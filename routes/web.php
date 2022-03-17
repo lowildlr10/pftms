@@ -1770,6 +1770,80 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'destroy'
     ])->name('supplier-destroy');
 
+    // UACS Object Classifications Module
+    Route::any('libraries/uacs-classification', [
+        'uses' => 'LibraryController@indexUacsClassification',
+        'module' => 'lib_unit_issue',
+        'access' => 'is_allowed'
+    ])->name('uacs-classification');
+    Route::get('libraries/uacs-classification/show-create', [
+        'uses' => 'LibraryController@showCreateUacsClassification',
+        'module' => 'lib_unit_issue',
+        'access' => 'create'
+    ])->name('uacs-classification-show-create');
+    Route::post('libraries/uacs-classification/store', [
+        'uses' => 'LibraryController@storeUacsClassification',
+        'module' => 'lib_unit_issue',
+        'access' => 'create'
+    ])->name('uacs-classification-store');
+    Route::get('libraries/uacs-classification/show-edit/{id}', [
+        'uses' => 'LibraryController@showEditUacsClassification',
+        'module' => 'lib_unit_issue',
+        'access' => 'update'
+    ])->name('uacs-classification-show-edit');
+    Route::post('libraries/uacs-classification/update/{id}', [
+        'uses' => 'LibraryController@updateUacsClassification',
+        'module' => 'lib_unit_issue',
+        'access' => 'update'
+    ])->name('uacs-classification-update');
+    Route::post('libraries/uacs-classification/delete/{id}', [
+        'uses' => 'LibraryController@deleteUacsClassification',
+        'module' => 'lib_unit_issue',
+        'access' => 'delete'
+    ])->name('uacs-classification-delete');
+    Route::post('libraries/uacs-classification/destroy/{id}', [
+        'uses' => 'LibraryController@destroyUacsClassification',
+        'module' => 'lib_unit_issue',
+        'access' => 'destroy'
+    ])->name('uacs-classification-destroy');
+
+    // UACS Object Codes Module
+    Route::any('libraries/uacs-object-code', [
+        'uses' => 'LibraryController@indexUacsObjCode',
+        'module' => 'lib_unit_issue',
+        'access' => 'is_allowed'
+    ])->name('uacs-object-code');
+    Route::get('libraries/uacs-object-code/show-create', [
+        'uses' => 'LibraryController@showCreateUacsObjCode',
+        'module' => 'lib_unit_issue',
+        'access' => 'create'
+    ])->name('uacs-object-code-show-create');
+    Route::post('libraries/uacs-object-code/store', [
+        'uses' => 'LibraryController@storeUacsObjCode',
+        'module' => 'lib_unit_issue',
+        'access' => 'create'
+    ])->name('uacs-object-code-store');
+    Route::get('libraries/uacs-object-code/show-edit/{id}', [
+        'uses' => 'LibraryController@showEditUacsObjCode',
+        'module' => 'lib_unit_issue',
+        'access' => 'update'
+    ])->name('uacs-object-code-show-edit');
+    Route::post('libraries/uacs-object-code/update/{id}', [
+        'uses' => 'LibraryController@updateUacsObjCode',
+        'module' => 'lib_unit_issue',
+        'access' => 'update'
+    ])->name('uacs-object-code-update');
+    Route::post('libraries/uacs-object-code/delete/{id}', [
+        'uses' => 'LibraryController@deleteUacsObjCode',
+        'module' => 'lib_unit_issue',
+        'access' => 'delete'
+    ])->name('uacs-object-code-delete');
+    Route::post('libraries/uacs-object-code/destroy/{id}', [
+        'uses' => 'LibraryController@destroyUacsObjCode',
+        'module' => 'lib_unit_issue',
+        'access' => 'destroy'
+    ])->name('uacs-object-code-destroy');
+
     // Item Unit Issue Module
     Route::any('libraries/item-unit-issue', [
         'uses' => 'LibraryController@indexUnitissue',

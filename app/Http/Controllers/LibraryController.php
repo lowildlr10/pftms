@@ -28,6 +28,8 @@ use App\Models\Municipality;
 use App\Models\MonitoringOffice;
 use App\Models\AgencyLGU;
 use App\Models\MfoPap;
+use App\Models\UacsObjectClassification;
+use App\Models\UacsObjectCode;
 
 use DB;
 use Auth;
@@ -1663,6 +1665,212 @@ class LibraryController extends Controller
         }
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     *  UACS Object Classifications Module
+    **/
+    public function indexUacsClassification(Request $request) {
+        $uacsClassData = UacsObjectClassification::orderBy('classification_name')
+                                                 ->get();
+
+        return view('modules.library.uacs-classification.index', [
+            'list' => $uacsClassData
+        ]);
+    }
+
+    public function showCreateUacsClassification() {
+        return view('modules.library.uacs-classification.create');
+    }
+
+    public function showEditUacsClassification($id) {
+        $uacsClassData = UacsObjectClassification::find($id);
+        $className = $uacsClassData->classification_name;
+
+        return view('modules.library.uacs-classification.update', [
+            'id' => $id,
+            'classificationName' => $className
+        ]);
+    }
+
+    public function storeUacsClassification(Request $request) {
+        $className = $request->classification_name;
+
+        try {
+            if (!$this->checkDuplication('UacsObjectClassification', $className)) {
+                $instanceUacsClass = new UacsObjectClassification;
+                $instanceUacsClass->classification_name = $className;
+                $instanceUacsClass->save();
+
+                $msg = "UACS Object Classification '$className' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "UACS Object Classification '$className' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function updateUacsClassification(Request $request, $id) {
+        $className = $request->classification_name;
+
+        try {
+            $instanceUacsClass = UacsObjectClassification::find($id);
+            $instanceUacsClass->classification_name = $className;
+            $instanceUacsClass->save();
+
+            $msg = "UACS Object Classification '$className' successfully created.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function deleteUacsClassification($id) {
+        try {
+            $instanceUacsClass = UacsObjectClassification::find($id);
+            $className = $instanceUacsClass->classification_name;
+            $instanceUacsClass->delete();
+
+            $msg = "UACS Object Classification '$className' successfully deleted.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function destroyUacsClassification($id) {
+        try {
+            $instanceUacsClass = UacsObjectClassification::find($id);
+            $className = $instanceUacsClass->classification_name;
+            $instanceUacsClass->destroy();
+
+            $msg = "UACS Object Classification '$className' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    /**
+     *  UACS Object Codes Module
+    **/
+    public function indexUacsObjCode(Request $request) {
+        $unitIssueData = ItemUnitIssue::orderBy('unit_name')
+                                      ->get();
+
+        return view('modules.library.uacs-code.index', [
+            'list' => $unitIssueData
+        ]);
+    }
+
+    public function showCreateUacsObjCode() {
+        return view('modules.library.uacs-code.create');
+    }
+
+    public function showEditUacsObjCode($id) {
+        $unitIssueData = ItemUnitIssue::find($id);
+        $unit = $unitIssueData->unit_name;
+
+        return view('modules.library.uacs-code.update', [
+            'id' => $id,
+            'unit' => $unit
+        ]);
+    }
+
+    public function storeUacsObjCode(Request $request) {
+        $unitName = $request->unit_name;
+
+        try {
+            if (!$this->checkDuplication('ItemUnitIssue', $unitName)) {
+                $instanceUnitIssue = new ItemUnitIssue;
+                $instanceUnitIssue->unit_name = $unitName;
+                $instanceUnitIssue->save();
+
+                $msg = "Unit of issue '$unitName' successfully created.";
+                return redirect(url()->previous())->with('success', $msg);
+            } else {
+                $msg = "Unit of issue '$unitName' has a duplicate.";
+                return redirect(url()->previous())->with('warning', $msg);
+            }
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function updateUacsObjCode(Request $request, $id) {
+        $unitName = $request->unit_name;
+
+        try {
+            $instanceUnitIssue = ItemUnitIssue::find($id);
+            $instanceUnitIssue->unit_name = $unitName;
+            $instanceUnitIssue->save();
+
+            $msg = "Unit of issue '$unitName' successfully created.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function deleteUacsObjCode($id) {
+        try {
+            $instanceUnitIssue = ItemUnitIssue::find($id);
+            $unitName = $instanceUnitIssue->unit_name;
+            $instanceUnitIssue->delete();
+
+            $msg = "Unit of issue '$unitName' successfully deleted.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+    public function destroyUacsObjCode($id) {
+        try {
+            $instanceUnitIssue = ItemUnitIssue::find($id);
+            $unitName = $instanceUnitIssue->unit_name;
+            $instanceUnitIssue->destroy();
+
+            $msg = "Unit of issue '$unitName' successfully destroyed.";
+            return redirect(url()->previous())->with('success', $msg);
+        } catch (\Throwable $th) {
+            $msg = "Unknown error has occured. Please try again.";
+            return redirect(url()->previous())->with('failed', $msg);
+        }
+    }
+
+
+
+
+
+
+
+
     /**
      *  Item Unit Issue Module
     **/
@@ -2109,6 +2317,12 @@ class LibraryController extends Controller
                                      ->orWhere('company_name', strtolower($data))
                                      ->orWhere('company_name', strtoupper($data))
                                      ->count();
+                break;
+            case 'UacsObjectClassification':
+                $dataCount = UacsObjectClassification::where('classification_name', $data)
+                                          ->orWhere('classification_name', strtolower($data))
+                                          ->orWhere('classification_name', strtoupper($data))
+                                          ->count();
                 break;
             case 'ItemUnitIssue':
                 $dataCount = ItemUnitIssue::where('unit_name', $data)

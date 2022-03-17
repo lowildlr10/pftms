@@ -345,6 +345,12 @@
                                 <a href="{{ route('supplier') }}" class="waves-effect">Suppliers</a>
                             </li>
                             <li>
+                                <a href="{{ route('uacs-classification') }}" class="waves-effect">UACS Object Classifications</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('uacs-object-code') }}" class="waves-effect">UACS Object Codes</a>
+                            </li>
+                            <li>
                                 <a href="{{ route('item-unit-issue') }}" class="waves-effect">Unit of Issues</a>
                             </li>
                             <li>
