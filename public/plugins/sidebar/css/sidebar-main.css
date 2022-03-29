@@ -196,77 +196,36 @@
     height: 76vh;
 }
 
-/*
-  ##Device = Desktops
-  ##Screen = 1281px to higher resolution desktops
-*/
-
-@media (min-width: 1367px) {
+@media only screen and (max-width: 1920px) {
     .sidebar-wrapper .sidebar-menu {
-        height: 74vh;
+        height: 75.5vh !important;
     }
 }
 
-@media (min-width: 1281px) and (max-width: 1367px) {
+@media only screen and (max-width: 1600px) {
     .sidebar-wrapper .sidebar-menu {
-        height: 67vh;
+        height: 78.5vh !important;
     }
 }
 
-/*
-  ##Device = Laptops, Desktops
-  ##Screen = B/w 1025px to 1280px
-*/
-
-@media (min-width: 1025px) and (max-width: 1280px) {
-
-
-
-}
-
-/*
-  ##Device = Tablets, Ipads (portrait)
-  ##Screen = B/w 768px to 1024px
-*/
-
-@media (min-width: 768px) and (max-width: 1024px) {
-
-
-
-}
-
-/*
-  ##Device = Tablets, Ipads (landscape)
-  ##Screen = B/w 768px to 1024px
-*/
-
-@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
-
-
-
-}
-
-/*
-  ##Device = Low Resolution Tablets, Mobiles (Landscape)
-  ##Screen = B/w 481px to 767px
-*/
-
-@media (min-width: 481px) and (max-width: 767px) {
-
-
-
-}
-
-/*
-  ##Device = Most of the Smartphones Mobiles (Portrait)
-  ##Screen = B/w 320px to 479px
-*/
-
-@media (min-width: 320px) and (max-width: 480px) {
+@media only screen and (max-width: 1440px) {
     .sidebar-wrapper .sidebar-menu {
-        height: 59vh;
+        height: 70.5vh !important;
     }
 }
+
+@media only screen and (max-width: 1366px) {
+    .sidebar-wrapper .sidebar-menu {
+        height: 65.5vh !important;
+    }
+}
+
+@media only screen and (max-width: 1280px) {
+    .sidebar-wrapper .sidebar-menu {
+        height: 63vh !important;
+    }
+}
+
 .sidebar-wrapper .sidebar-menu .header-menu span {
     font-weight: bold;
     font-size: 14px;

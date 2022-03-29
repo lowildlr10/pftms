@@ -2,11 +2,9 @@
 
 @section('login-content')
 
-<div class="view full-page-intro"
-     style="background-image: url('{{ asset('images/bg.jpg') }}');
-            background-repeat: no-repeat; background-size: cover;">
+<div class="view">
     <!-- Mask & flexbox options-->
-    <div class="mask rgba-black-light d-flex justify-content-center align-items-center">
+    <div class="mask d-flex justify-content-center align-items-center">
 
         <!-- Content -->
         <div class="container">
@@ -17,7 +15,7 @@
                 <!--Grid column-->
                 <div id="login-title" class="col-sm-12 col-md-6 mb-4 white-text text-center text-md-left p-4 hidden-xs">
                     <h2 class="font-weight-bold text-center">
-                        <img class="d-inline-block align-top mb-3" src="{{ asset('images/logo/pftms-logo.jpg') }}"
+                        <img class="d-inline-block align-top mb-3" src="{{ asset('images/logo/pftms-logo-v2.svg') }}"
                              height="85" alt="dost logo"><br>
                         <p>Procurement & Financial Transaction Management System</p>
                     </h2>
@@ -33,7 +31,7 @@
                 <div id="login-content" class="col-sm-12 col-md-6 col-xl-5 mb-4">
 
                     <!--Card-->
-                    <div class="card rounded-0">
+                    <div class="card login-card">
 
                         <!--Card content-->
                         <div class="card-body">

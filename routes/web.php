@@ -58,6 +58,7 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     // Dashboard Module
     Route::get('/', 'HomeController@index')->name('dashboard');
+    Route::get('/show-dashboard/{dashboardID}', 'HomeController@showDashboard')->name('get-dashboard');
 
     // Document Printing Module
     Route::any('print/{key}', 'PrintController@index')->name('doc-print');

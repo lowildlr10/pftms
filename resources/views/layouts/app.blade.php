@@ -26,7 +26,7 @@
 
     @yield('custom-css')
 </head>
-<body class="mdb-color lighten-3">
+<body class="m-0" style="background: rgb(55 78 96);">
     <div id="mdb-preloader" class="flex-center preloader">
         <div class="spinner-grow text-light fast" style="width: 3rem; height: 3rem;" role="status">
             <span class="sr-only">Loading...</span>
@@ -44,11 +44,10 @@
             <!-- Brand -->
             @guest
             <a class="navbar-brand nav-link waves-effect waves-light" href="{{ url('/') }}">
-                <img class="d-inline-block align-top" src="{{ asset('images/logo/pftms-logo-2.jpg') }}"
+                <img class="d-inline-block align-top" src="{{ asset('images/logo/pftms-logo-v2-short.svg') }}"
                      height="30" alt="pfms logo">
-                <strong>P-F-T-M-S</strong>
                 <strong class="d-none show-xs mt-2" style="font-size: 7pt;">
-                    Procurement & Financial Transaction<br>Management System v2
+                    Procurement & Financial Transaction<br>Management System v3
                 </strong>
             </a>
             @endguest
@@ -77,15 +76,15 @@
                     @else
                         <li class="nav-item active">
                             <a class="toggle-sidebar rounded button-collapse nav-link waves-effect
-                                      waves-light px-3 mr-2">
-                                <i class="far fa-window-restore" aria-hidden="true"></i>
+                                      waves-light px-2 mr-2">
+                                <i class="fa fa-bars fa-lg" aria-hidden="true"></i>
                                 <span class="sr-only">(current)</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link waves-effect waves-light" href="{{ url('/') }}"
                                id="sidebarCollapse">
-                                <i class="fa fa-tachometer-alt" aria-hidden="true"></i> Dashboard
+                                <i class="fa fa-tachometer-alt fa-lg" aria-hidden="true"></i>&nbsp;&nbsp;Dashboard
                                 <span class="sr-only">(current)</span>
                             </a>
                         </li>
@@ -96,11 +95,21 @@
                 <ul class="navbar-nav ml-auto nav-flex-icons">
                     @guest
                     @else
+                    {{--
                     <a id="datetime" class="nav-link waves-effect waves-light white-text"></a>
-                    <a onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                       class="nav-link waves-effect waves-light white-text">
-                        <i class="fa fa-power-off"></i>
-                    </a>
+                    --}}
+                    <li class="nav-item">
+                        <a class="nav-link waves-effect waves-light white-text px-3 mr-3" target="_blank"
+                           href="https://drive.google.com/file/d/1_MPlkJelVDM8ErQpNmSq4ktvjph2oe7q/view?usp=sharing">
+                            <i class="fas fa-file-pdf"></i> User Manual
+                        </a>
+                    </li>
+                    <li class="nav-item ml-2">
+                        <a onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                        class="nav-link waves-effect waves-light white-text">
+                            <i class="fa fa-power-off fa-lg"></i>
+                        </a>
+                    </li>
                     @endguest
                 </ul>
             </div>

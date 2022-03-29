@@ -3,8 +3,7 @@
         <!-- sidebar-brand  -->
         <div class="sidebar-item sidebar-brand">
             <a href="{{ url('/') }}">
-                <img src="{{ asset('images/logo/pftms-logo.jpg') }}" alt="brand-logo" width="20px">
-                P-F-T-M-S
+                <img src="{{ asset('images/logo/pftms-logo-v2-short.svg') }}" alt="brand-logo" height="30">
             </a>
             <a href="#" class="toggle-sidebar text-right">
                 <small>

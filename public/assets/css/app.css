@@ -1,4 +1,10 @@
 
+body {
+    margin: 1.5em;
+    font-family: 'Poppins', -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    background-color: linear-gradient(40deg, #45cafc, #303f9f) !important;
+}
+
 .btn-menu-1 {
 	width: 100%;
 }
@@ -290,6 +296,10 @@ html, body, header, .view {
     background-color: #1c2a48;
 }
 
+.login-card {
+    border-radius: 1.25rem !important;
+}
+
 /* Extra Small devices (landscape phones, atmost 575px) */
 @media (max-width: 575px) {
     body {
@@ -521,7 +531,7 @@ html, body, header, .view {
         padding: 0 !important;
     }
     #login-content>.card {
-        background: #0000006b !important;
+        background: #00000000 !important;
         padding: 100% 0 !important;
         margin-top: 30px !important;
     }
