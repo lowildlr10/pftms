@@ -186,12 +186,12 @@
                     {{ $data->total_delivered }}
                 ],
                 backgroundColor: [
-                    'RGBA(22,26,55,0.4)',
-                    'RGBA(22,215,55,1)',
-                    'RGBA(22,37,49,1)',
-                    'RGBA(205,22,32,0.84)',
-                    'RGBA(205,138,9,0.7)',
-                    'RGBA(205,255,9,0.7)'
+                    '#DBDCDA',
+                    '#52B7E5',
+                    '#374040',
+                    '#7C3405',
+                    '#478AC3',
+                    '#31475E'
                 ]
             }]
         },
@@ -202,7 +202,7 @@
             },
             title: {
                 display: true,
-                text: 'Total Overview',
+                text: 'Total',
                 position: 'top',
                 fontSize: 20,
                 padding: 20
@@ -219,7 +219,7 @@
         data: {
             labels: ['Pending', 'Approved', 'Disapproved', 'Cancelled', 'For Delivery', 'Delivered/For Inspection'],
             datasets: [{
-                label: 'Total',
+                label: 'Monthly Total',
                 data: [
                     {{ $data->pending }},
                     {{ $data->approved }},
@@ -229,12 +229,12 @@
                     {{ $data->delivered }}
                 ],
                 backgroundColor: [
-                    'RGBA(22,26,55,0.4)',
-                    'RGBA(22,215,55,1)',
-                    'RGBA(22,37,49,1)',
-                    'RGBA(205,22,32,0.84)',
-                    'RGBA(205,138,9,0.7)',
-                    'RGBA(205,255,9,0.7)'
+                    '#DBDCDA',
+                    '#52B7E5',
+                    '#374040',
+                    '#7C3405',
+                    '#478AC3',
+                    '#31475E'
                 ]
             }]
         },
@@ -245,7 +245,7 @@
             },
             title: {
                 display: true,
-                text: 'Monthly Total Overview',
+                text: 'Monthly Total',
                 position: 'top',
                 fontSize: 20,
                 padding: 20

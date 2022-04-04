@@ -94,7 +94,9 @@ class LineItemBudgetController extends Controller
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
 
         $projDat = new FundingProject;
-        $fundBudget = new FundingBudget;
+        $fundBudget = FundingBudget::whereHas('project', function($query) {
+            $query->whereNotNull('id');
+        });
 
         if ($roleHasDeveloper || $roleHasRD || $roleHasARD || $roleHasPlanning || $roleHasBudget) {
         } else {

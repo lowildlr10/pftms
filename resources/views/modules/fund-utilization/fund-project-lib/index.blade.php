@@ -118,12 +118,12 @@
                                         </td>
                                         <td></td>
                                         <td>
-                                            @if ($fund->project->directory)
+                                            @if (isset($fund->project->directory) && $fund->project->directory)
                                             <small class="grey-text">
                                                 <b><em>{{ implode(' / ',unserialize($fund->project->directory)) }} /</em></b>
                                             </small><br>
                                             @endif
-                                            {{ $fund->project->project_title }}
+                                            {{ isset($fund->project->project_title) ? $fund->project->project_title : '' }}
                                         </td>
                                         <td>{{ date_format(date_create($fund->date_from), "F j, Y") }}</td>
                                         <td>{{ date_format(date_create($fund->date_to), "F j, Y") }}</td>
