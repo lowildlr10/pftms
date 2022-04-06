@@ -12,6 +12,11 @@ class DocPurchaseRequest extends PDF {
         $data->approved_by->name = strtoupper($data->approved_by->name);
         $data->recommended_by->name = strtoupper($data->recommended_by->name);
 
+        $data->pr->purpose = $data->pr->funding ?
+                            'Purpose: ' . $data->pr->purpose .
+                                "\n\n*Charged to ".'"'.$data->pr->funding->project_title.'"' :
+                            'Purpose: ' . $data->pr->purpose;
+
         /* ------------------------------------- Start of Config ------------------------------------- */
 
         //set default monospaced font
@@ -73,7 +78,7 @@ class DocPurchaseRequest extends PDF {
         $this->Ln();
 
         //Table footer
-        $this->MultiCell(0, 5, 'Purpose: ' . $data->pr->purpose, 'BLR', 'L');
+        $this->MultiCell(0, 5, $data->pr->purpose, 'BLR', 'L');
 
         if ($data->pr->funding['source_name']) {
             $this->MultiCell(0, 5, 'Charged to: ' . $data->pr->funding['source_name'], 'BLR', 'L');
