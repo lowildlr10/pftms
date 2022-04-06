@@ -14,7 +14,7 @@ class DocPurchaseRequest extends PDF {
 
         $data->pr->purpose = $data->pr->funding ?
                             'Purpose: ' . $data->pr->purpose .
-                                "\n\n*Charged to ".'"'.$data->pr->funding->project_title.'"' :
+                                "\n(Charged to ".'"'.$data->pr->funding->project_title.'")' :
                             'Purpose: ' . $data->pr->purpose;
 
         /* ------------------------------------- Start of Config ------------------------------------- */
