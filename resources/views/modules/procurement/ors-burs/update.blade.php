@@ -2,7 +2,7 @@
       action="{{ route('proc-ors-burs-update', ['id' => $id]) }}">
     @csrf
 
-    <div class="card w-responsive">
+    <div class="card doc-voucher p-0 w-responsive">
         <div class="card-body py-1">
             <div class="row">
                 <div class="col-md-8 border border-bottom-0 border-dark">
@@ -185,6 +185,41 @@
                     <div class="p-2 border-bottom border-dark">
                         <strong>UACS Object Code</strong>
                     </div>
+
+                    <button type="button" class="btn btn-link btn-block waves-effect my-2"
+                            onclick="$(this).showUacsItems('{{ route('proc-ors-burs-show-uacs-items',
+                            ['id' => $id]) }}');">
+                        <i class="fas fa-tags"></i> Update UACS Items
+                    </button>
+
+                    <div class="md-form p-0">
+                        <textarea id="uacs-code-display" rows="8" class="md-textarea w-75 p-0" style="overflow: auto;"
+                                  placeholder="Selected UACS Object Codes" readonly>{!! $uacsDisplay !!}</textarea>
+                    </div>
+
+                    <input type="hidden" id="uacs-code" name="uacs_object_code">
+                    <div id="uacs-items-segment" style="display: none;">
+                        @if (count($uacsItems) > 0)
+                            @foreach ($uacsItems as $itemCtr => $item)
+                        <input type="hidden" name="uacs_description[{{ $itemCtr }}]" value="{{ $item->description }}">
+                        <input type="hidden" name="uacs_id[{{ $itemCtr }}]" value="{{ $item->uacs_id }}">
+                        <input type="hidden" name="ors_uacs_id[{{ $itemCtr }}]" value="{{ $item->id }}">
+                        <input type="hidden" name="uacs_amount[{{ $itemCtr }}]" value="{{ $item->amount }}">
+                            @endforeach
+                        @endif
+
+                        @if (count($_uacsItems) > 0 && count($uacsItems) == 0)
+                            @foreach ($_uacsItems as $itemCtr => $item)
+                        <input type="hidden" name="uacs_description[{{ $itemCtr }}]" value="{{ $item->account_title }}">
+                        <input type="hidden" name="uacs_id[{{ $itemCtr }}]" value="{{ $item->id }}">
+                        <input type="hidden" name="ors_uacs_id[{{ $itemCtr }}]" value="">
+                        <input type="hidden" name="uacs_amount[{{ $itemCtr }}]" value="0">
+                            @endforeach
+                        @endif
+                    </div>
+
+
+                    {{--
                     <div class="md-form px-2">
                         <select class="mdb-select crud-select md-form" searchable="Search here.."
                                 id="sel-uacs-code" name="uacs_object_code[]" multiple>
@@ -200,12 +235,6 @@
                             @endif
                         </select>
                     </div>
-                    {{--
-                    <div class="form-group p-0 m-0">
-                        <textarea class="md-textarea form-control border border-0 rounded-0"
-                                  id="uacs-object-code" name="uacs_object_code" rows="8"
-                                  placeholder="Write UACS Object Code here...">{{ $uacsObjectCode }}</textarea>
-                    </div>
                     --}}
                 </div>
                 <div class="col-md-2 border border-left-0 border-bottom-0 border-dark px-0 text-center">
@@ -214,7 +243,9 @@
                     </div>
                     <div class="md-form px-3">
                         <input type="number" id="amount" name="amount" placeholder="Total Amount..."
-                               class="form-control required" value="{{ $amount }}">
+                               class="form-control required" value="{{ $amount }}"
+                               data-toggle="tooltip" data-placement="right"
+                               title="This should be equals or greater than zero.">
                         <label for="amount" class="active px-3">
                             Total Amount <span class="red-text">*</span>
                         </label>

@@ -258,7 +258,10 @@ class ObligationRequestStatusController extends Controller
                 });
             }
 
-            $orsData = $orsData->sortable(['created_at' => 'desc'])->paginate(15);
+            $orsData = $orsData->orderBy('created_at', 'desc')
+                              ->orderBy('serial_no', 'desc')
+                              ->sortable(['created_at' => 'desc', 'serial_no' => 'desc'])
+                              ->paginate(15);
 
             foreach ($orsData as $orsDat) {
                 $orsDat->doc_status = $instanceDocLog->checkDocStatus($orsDat->id);
@@ -468,7 +471,7 @@ class ObligationRequestStatusController extends Controller
         $responsibilityCenter = $request->responsibility_center;
         $particulars = $request->particulars;
         $mfoPAP = $mfoPAP = $request->mfo_pap ? serialize($request->mfo_pap) : serialize([]);
-        $uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
+        //$uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
         $project = $request->funding_source;
         $priorYear = $request->prior_year ? $request->prior_year : 0.00;
         $continuing = $request->continuing ? $request->continuing : 0.00;
@@ -482,7 +485,7 @@ class ObligationRequestStatusController extends Controller
         $uacsDescriptions = $request->uacs_description;
         $uacsAmounts = $request->uacs_amount;
 
-        //dd($uacsDescriptions, $uacsIDs, $uacsAmounts);
+        $uacsObjectCode = serialize(explode(',', $request->uacs_object_code));
 
         $routeName = 'ca-ors-burs';
 
@@ -514,6 +517,8 @@ class ObligationRequestStatusController extends Controller
 
             $orsID = $instanceORS->id->string;
 
+            $this->updateUacsItems($request, $orsID);
+
             $documentType = $documentType == 'ors' ? 'Obligation Request & Status' :
                             'Budget Utilization Request & Status';
 
@@ -536,6 +541,8 @@ class ObligationRequestStatusController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showEdit($id) {
+        $uacsData = $this->showUacsItemData($id);
+
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $roleHasBudget = Auth::user()->hasBudgetRole();
         $roleHasAdministrator = Auth::user()->hasAdministratorRole();
@@ -660,16 +667,27 @@ class ObligationRequestStatusController extends Controller
             }
         }
 
+        $uacsDisplay = '';
+        $uacsObjectCode = $uacsData->uacs_object_code;
+        $uacsItems = $uacsData->uacs_items;
+        $_uacsItems = $uacsData->_uacs_items;
+        $mooeTitles = $uacsData->mooe_titles;
+
+        foreach ($uacsItems as $uacsCtr => $uacsItm) {
+            $formatUacsAmt = number_format($uacsItm->amount, 2);
+            $uacsDisplay .= "$uacsItm->uacs_code : $uacsItm->description = $formatUacsAmt\n\n";
+        }
+
         return view($viewFile, compact(
             'id', 'documentType', 'serialNo', 'dateORS',
             'fundCluster', 'payee', 'office', 'address',
             'responsibilityCenter', 'particulars', 'mfoPAP',
-            'uacsObjectCode', 'uacsObjectCode', 'priorYear',
             'continuing', 'current', 'amount', 'mfoPAPs',
             'sigCertified1', 'sigCertified2', 'dateCertified1',
             'dateCertified2', 'signatories', 'payees', 'isObligated',
             'transactionType', 'projects', 'project', 'mooeTitles',
-            'uacsItems'
+            'priorYear', 'uacsObjectCode', 'uacsItems', '_uacsItems',
+            'uacsDisplay'
         ));
     }
 
@@ -691,7 +709,7 @@ class ObligationRequestStatusController extends Controller
         $responsibilityCenter = $request->responsibility_center;
         $particulars = $request->particulars;
         $mfoPAP = $request->mfo_pap ? serialize($request->mfo_pap) : serialize([]);
-        $uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
+        //$uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
         $project = $request->funding_source;
         $priorYear = $request->prior_year ? $request->prior_year : 0.00;
         $continuing = $request->continuing ? $request->continuing : 0.00;
@@ -702,10 +720,7 @@ class ObligationRequestStatusController extends Controller
         $dateCertified1 = !empty($request->date_certified_1) ? $request->date_certified_1: NULL;
         $dateCertified2 = !empty($request->date_certified_2) ? $request->date_certified_2: NULL;
 
-        $uacsOrsUacsIDs = $request->ors_uacs_id;
-        $uacsIDs = $request->uacs_id;
-        $uacsDescriptions = $request->uacs_description;
-        $uacsAmounts = $request->uacs_amount;
+        $uacsObjectCode = serialize(explode(',', $request->uacs_object_code));
 
         try {
             $instanceORS = ObligationRequestStatus::find($id);
@@ -749,26 +764,7 @@ class ObligationRequestStatusController extends Controller
                 $instanceDV->save();
             }
 
-            if ($uacsOrsUacsIDs && count($uacsOrsUacsIDs) > 0) {
-                foreach ($uacsOrsUacsIDs as $uacsOrsCtr => $uacsOrsID) {
-                    $instanceUacsItem = OrsBursUacsItem::find($uacsOrsID);
-
-                    if ($instanceUacsItem) {
-                        $instanceUacsItem->description = $uacsDescriptions[$uacsOrsCtr];
-                        $instanceUacsItem->amount = $uacsAmounts[$uacsOrsCtr];
-                        $instanceUacsItem->save();
-                    } else {
-                        $instanceUacsItem = OrsBursUacsItem::create([
-                            'ors_id' => $id,
-                            'uacs_id' => $uacsIDs[$uacsOrsCtr],
-                            'description' => $uacsDescriptions[$uacsOrsCtr],
-                            'amount' => $uacsAmounts[$uacsOrsCtr]
-                        ]);
-                    }
-                }
-
-                OrsBursUacsItem::whereNotIn('id', $uacsOrsUacsIDs)->delete();
-            }
+            $this->updateUacsItems($request, $id);
 
             $documentType = $documentType == 'ors' ? 'Obligation Request & Status' :
                             'Budget Utilization Request & Status';
@@ -793,42 +789,63 @@ class ObligationRequestStatusController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showUacsItems($id) {
-        $instanceORS = ObligationRequestStatus::find($id);
-        $amount = $instanceORS->amount;
-        $uacsObjectCode = $instanceORS->uacs_object_code ?
-                          unserialize($instanceORS->uacs_object_code) :
-                          [];
-        $mooeTitles = MooeAccountTitle::orderBy('order_no')->get();
-        $_uacsItems = MooeAccountTitle::whereIn('id', $uacsObjectCode)
-                                      ->orderBy('order_no')->get();
-        $uacsItems = DB::table('ors_burs_uacs_items as uacs_item')
-                       ->select(
-                           'uacs_item.id',
-                           'uacs_item.uacs_id',
-                           'uacs_item.description',
-                           'uacs_item.amount',
-                           'mooe.uacs_code'
-                        )
-                       ->join('mooe_account_titles as mooe', 'mooe.id', '=', 'uacs_item.uacs_id')
-                       ->where('uacs_item.ors_id', $id)
-                       ->orderBy('mooe.uacs_code')
-                       ->get();
-        $moduleClass = $instanceORS->module_class;
+        $itemData = $this->showUacsItemData($id);
 
-        if ($moduleClass == 3) {
+        if ($itemData->module_class == 3) {
             $viewFile = 'modules.procurement.ors-burs.update-uacs';
-        } else if ($moduleClass == 2) {
+        } else if ($itemData->module_class == 2) {
             $viewFile = 'modules.voucher.ors-burs.update-uacs';
         }
 
         return view($viewFile, [
             'id' => $id,
-            'uacsObjectCode' => $uacsObjectCode,
-            'uacsItems' => $uacsItems,
-            '_uacsItems' => $_uacsItems,
-            'mooeTitles' => $mooeTitles,
-            'amount' => $amount
+            'uacsObjectCode' => $itemData->uacs_object_code,
+            'uacsItems' => $itemData->uacs_items,
+            '_uacsItems' => $itemData->_uacs_items,
+            'mooeTitles' => $itemData->mooe_titles,
+            'amount' => $itemData->amount
         ]);
+    }
+
+    private function showUacsItemData($id) {
+        $moduleClass = 2;
+        $uacsObjectCode = [];
+        $uacsItems = [];
+        $_uacsItems = [];
+        $amount = 0;
+
+        if ($id != 'none') {
+            $instanceORS = ObligationRequestStatus::find($id);
+            $amount = $instanceORS->amount;
+            $uacsObjectCode = $instanceORS->uacs_object_code ?
+                            unserialize($instanceORS->uacs_object_code) :
+                            [];
+            $_uacsItems = MooeAccountTitle::whereIn('id', $uacsObjectCode)
+                                    ->orderBy('order_no')->get();
+            $uacsItems = DB::table('ors_burs_uacs_items as uacs_item')
+                        ->select(
+                            'uacs_item.id',
+                            'uacs_item.uacs_id',
+                            'uacs_item.description',
+                            'uacs_item.amount',
+                            'mooe.uacs_code'
+                        )->join('mooe_account_titles as mooe', 'mooe.id', '=', 'uacs_item.uacs_id')
+                        ->where('uacs_item.ors_id', $id)
+                        ->orderBy('mooe.uacs_code')
+                        ->get();
+            $moduleClass = $instanceORS->module_class;
+        }
+
+        $mooeTitles = MooeAccountTitle::orderBy('order_no')->get();
+
+        return (object) [
+            'module_class' => $moduleClass,
+            'uacs_object_code' => $uacsObjectCode,
+            'uacs_items' => $uacsItems,
+            '_uacs_items' => $_uacsItems,
+            'mooe_titles' => $mooeTitles,
+            'amount' => $amount
+        ];
     }
 
     /**
@@ -838,8 +855,9 @@ class ObligationRequestStatusController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function updateUacsItems(Request $request, $id) {
-        $uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
+    private function updateUacsItems($request, $id) {
+        //$uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
+        $uacsObjectCode = serialize(explode(',', $request->uacs_object_code));
         $uacsIDs = $request->uacs_id;
         $uacsDescriptions = $request->uacs_description;
         $uacsAmounts = $request->uacs_amount;

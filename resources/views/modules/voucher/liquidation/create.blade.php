@@ -1,7 +1,7 @@
 <form id="form-store" class="wow animated fadeIn d-flex justify-content-center" method="POST"
       action="{{ route('ca-lr-store') }}">
     @csrf
-    <div class="card w-responsive">
+    <div class="card doc-voucher p-0">
         <div class="card-body py-1">
             <div class="row">
                 <div class="col-md-8 border border-bottom-0 border-dark">

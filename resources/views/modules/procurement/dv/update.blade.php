@@ -2,7 +2,7 @@
       action="{{ route('proc-dv-update', ['id' => $id]) }}">
     @csrf
 
-    <div class="card w-responsive">
+    <div class="card doc-voucher p-0 w-responsive">
         <div class="card-body py-1">
             <div class="row">
                 <div class="col-md-9 border border-bottom-0 border-dark">
@@ -298,6 +298,61 @@
                         <small>
                             [ B ] Accounting Entry
                         </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-5 border border-bottom-0 border-dark px-0 text-center">
+                    <div class="p-2 border-bottom border-dark">
+                        <strong>Account Title</strong>
+                    </div>
+                </div>
+                <div class="col-md-3 border border-left-0 border-bottom-0 border-dark px-0 text-center">
+                    <div class="p-2 border-bottom border-dark">
+                        <strong>UACS Code</strong>
+                    </div>
+
+                    <button type="button" class="btn btn-link btn-block waves-effect my-2"
+                            onclick="$(this).showUacsItems('{{ route('proc-dv-show-uacs-items',
+                            ['id' => $id]) }}');">
+                        <i class="fas fa-tags"></i> <b>Add/Update UACS Items</b>
+                    </button>
+
+                    <div class="md-form p-0">
+                        <textarea id="uacs-code-display" rows="8" class="md-textarea w-75 p-0" style="overflow: auto;"
+                                  placeholder="Selected UACS Object Codes" readonly>{!! $uacsDisplay !!}</textarea>
+                    </div>
+
+                    <input type="hidden" id="uacs-code" name="uacs_object_code">
+                    <div id="uacs-items-segment" style="display: none;">
+                        @if (count($uacsItems) > 0)
+                            @foreach ($uacsItems as $itemCtr => $item)
+                        <input type="hidden" name="uacs_description[{{ $itemCtr }}]" value="{{ $item->description }}">
+                        <input type="hidden" name="uacs_id[{{ $itemCtr }}]" value="{{ $item->uacs_id }}">
+                        <input type="hidden" name="dv_uacs_id[{{ $itemCtr }}]" value="{{ $item->id }}">
+                        <input type="hidden" name="uacs_amount[{{ $itemCtr }}]" value="{{ $item->amount }}">
+                            @endforeach
+                        @endif
+
+                        @if (count($_uacsItems) > 0 && count($uacsItems) == 0)
+                            @foreach ($_uacsItems as $itemCtr => $item)
+                        <input type="hidden" name="uacs_description[{{ $itemCtr }}]" value="{{ $item->account_title }}">
+                        <input type="hidden" name="uacs_id[{{ $itemCtr }}]" value="{{ $item->id }}">
+                        <input type="hidden" name="dv_uacs_id[{{ $itemCtr }}]" value="">
+                        <input type="hidden" name="uacs_amount[{{ $itemCtr }}]" value="0">
+                            @endforeach
+                        @endif
+                    </div>
+                </div>
+                <div class="col-md-2 border border-left-0 border-bottom-0 border-dark px-0 text-center">
+                    <div class="p-2 border-bottom border-dark">
+                        <strong>Debit</strong>
+                    </div>
+                </div>
+                <div class="col-md-2 border border-left-0 border-bottom-0 border-dark px-0 text-center">
+                    <div class="p-2 border-bottom border-dark">
+                        <strong>Credit</strong>
                     </div>
                 </div>
             </div>

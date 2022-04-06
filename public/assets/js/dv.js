@@ -51,7 +51,6 @@ $(function() {
 
             $('.uacs_amount').each(function() {
                 const valAmount = !isNaN(parseFloat($(this).val())) ? parseFloat($(this).val()) : 0.00;
-                console.log(valAmount);
                 remaining -= valAmount;
             });
 
@@ -86,7 +85,7 @@ $(function() {
                     let dvUacsID = $(`#dv_uacs_id_${uacsID}`).val();
                     let amount = $(`#uacs_amount_${uacsID}`).val();
 
-                    description = !empty(description) ? description : '';
+                    description = !empty(description) ? description : uacsDesc;
                     _uacsID = !empty(_uacsID) ? _uacsID : uacsID;
                     dvUacsID = !empty(dvUacsID) ? dvUacsID : '';
                     amount = !empty(amount) ? amount : 0;
@@ -96,10 +95,10 @@ $(function() {
                         <div class="col-md-10 border">
                             <div class="md-form form-sm" id="uacs_description_${uacsIndex}">
                                 <input type="text" id="uacs_description_${uacsID}" name="uacs_description[]"
-                                    class="form-control required" placeholder="Item Description for '${uacsDesc}'"
+                                    class="form-control uacs_description required" placeholder="Item Description for '${uacsDesc}'"
                                     value="${description}">
-                                <input type="hidden" id="uacs_id_${uacsID}" name="uacs_id[]" value="${_uacsID}">
-                                <input type="hidden" id="dv_uacs_id_${uacsID}" name="dv_uacs_id[]" value="${dvUacsID}">
+                                <input type="hidden" id="uacs_id_${uacsID}" class="uacs_id" name="uacs_id[]" value="${_uacsID}">
+                                <input type="hidden" id="dv_uacs_id_${uacsID}" class="dv_uacs_id" name="dv_uacs_id[]" value="${dvUacsID}">
                                 <label for="uacs_description_${uacsID}" class="active">
                                     <span class="red-text">* </span>
                                     <strong>${uacsDescCode}</strong>
@@ -110,7 +109,7 @@ $(function() {
                                     class="form-control uacs_amount required" value="${amount}">
                                 <label for="uacs_amount_${uacsID}" class="active">
                                     <span class="red-text">* </span>
-                                    <strong>Amount</strong>
+                                    <strong>Amount for ${uacsDesc}</strong>
                                 </label>
                             </div>
                         </div>
@@ -388,28 +387,98 @@ $(function() {
     }
 
     $.fn.showUacsItems = function(url) {
-        $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
-        $('#modal-body-uacs').load(url, function() {
-            $('#mdb-preloader').fadeOut(300);
-            $('.crud-select').materialSelect();
-            $(this).slideToggle(500);
-            initializeInputs();
-        });
-        $("#modal-uacs").modal({keyboard: false, backdrop: 'static'})
-						        .on('shown.bs.modal', function() {
-            $('#uacs-title').html('Update DV UACS Items');
-		}).on('hidden.bs.modal', function() {
-            $('#modal-body-uacs').html('').css('display', 'none');
-		});
+        const totalAmount = $('#amount').val();
+
+        if (!empty(totalAmount) && totalAmount > 0) {
+            $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
+            $('#modal-body-uacs').load(url, function() {
+                let amount = $('#amount').val();
+
+                $('#mdb-preloader').fadeOut(300);
+                //$('.crud-select').materialSelect();
+                $('#sel-uacs-code').select2({
+                    tokenSeparators: [','],
+                    placeholder: "Choose the MOOE account titles",
+                    width: '100%',
+                    maximumSelectionSize: 4,
+                    allowClear: true
+                });
+
+                $('#remaining-original').val(amount);
+                $('#uacs-description-segment').find('.uacs_amount').each((key, elem) => {
+                    const uacsAmount = parseFloat($(elem).val()).toFixed(2);
+                    amount -= uacsAmount;
+                });
+                $('#remaining').val(amount);
+                $(this).slideToggle(500);
+                initializeInputs();
+
+                $('#amount').removeClass('input-error-highlighter')
+                            .tooltip('hide');
+            });
+            $("#modal-uacs").modal({keyboard: false, backdrop: 'static'})
+                                    .on('shown.bs.modal', function() {
+                $('#uacs-title').html('Update ORS/BURS UACS Items');
+            }).on('hidden.bs.modal', function() {
+                $('#modal-body-uacs').html('').css('display', 'none');
+            });
+        } else {
+            $('#amount').addClass('input-error-highlighter')
+                        .tooltip('show')
+                        .focus();
+        }
     }
 
     $.fn.updateUacsItems = function() {
-        const withError = inputValidation(false);
+        let formElem = '', uacsDisplay = '', listDesc = [], listAmount = [];
 
-        if (!withError) {
-            $('#form-uacs-items').submit();
+        $('#uacs-items-segment').html('');
+        //$('#uacs-code-display').val($('#sel-uacs-code').find(':selected').text().trim());
+        $('#uacs-code').val($('#sel-uacs-code').val());
+
+        $('#uacs-description-segment').find('.uacs_id').each((key, elem) => {
+            const uacsID = $(elem).val();
+            formElem += `<input type="hidden" name="uacs_id[${key}]" value="${uacsID}">`;
+        });
+
+        if ($('#uacs-description-segment').find('.dv_uacs_id').length > 0) {
+            $('#uacs-description-segment').find('.dv_uacs_id').each((key, elem) => {
+                const dvUacsID = $(elem).val();
+                formElem += `<input type="hidden" name="dv_uacs_id[${key}]" value="${dvUacsID}">`;
+            });
+        } else {
+            const uacsIdCount = $('#uacs-description-segment').find('.uacs_id').length;
+
+            for (let uacsCtr = 0; uacsCtr < uacsIdCount; uacsCtr++) {
+                formElem += `<input type="hidden" name="dv_uacs_id[${uacsCtr}]" value="">`;
+            }
         }
+
+        $('#uacs-description-segment').find('.uacs_description').each((key, elem) => {
+            const uacsDesc = $(elem).val();
+            formElem += `<input type="hidden" name="uacs_description[${key}]" value="${uacsDesc}">`;
+            listDesc.push(uacsDesc);
+        });
+
+        $('#uacs-description-segment').find('.uacs_amount').each((key, elem) => {
+            const uacsAmount = $(elem).val();
+            formElem += `<input type="hidden" name="uacs_amount[${key}]" value="${uacsAmount}">`;
+            listAmount.push(uacsAmount);
+        });
+
+        $.each(listDesc, (key, desc) => {
+            const amount = parseFloat(listAmount[key]).toFixed(2);
+            uacsDisplay += `${desc} = ${amount}\n\n`;
+        });
+
+        $('#uacs-code-display').val(uacsDisplay);
+        $('#uacs-items-segment').html(formElem);
+        $("#modal-uacs").modal('hide');
     }
+
+    $('.material-tooltip-main').tooltip({
+        template: template
+    });
 
     $('.material-tooltip-main').tooltip({
         template: template

@@ -2,7 +2,7 @@
       action="{{ route('ca-dv-store') }}">
     @csrf
 
-    <div class="card w-responsive">
+    <div class="card w-75 doc-voucher p-0">
         <div class="card-body py-1">
             <div class="row">
                 <div class="col-md-9 border border-bottom-0 border-dark">
@@ -50,7 +50,7 @@
                                         @endforeach
                                     </select>
                                     <label class="mdb-main-label">
-                                        ORS/BURS Document <span class="red-text">*</span>
+                                        ORS/BURS Document
                                     </label>
                                 </div>
 
@@ -221,7 +221,7 @@
                     <div class="form-group p-0 m-0">
                         <textarea class="md-textarea form-control border border-0 rounded-0 required"
                                   id="particulars" name="particulars" rows="8"
-                                  placeholder="Write particulars here..."></textarea>
+                                  placeholder="Write particulars here...">To payment...</textarea>
                     </div>
                 </div>
                 <div class="col-md-2 border border-left-0 border-bottom-0 border-dark px-0 text-center">
@@ -268,7 +268,9 @@
                     </div>
                     <div class="md-form px-3">
                         <input type="number" id="amount" name="amount" placeholder="Total Amount..."
-                               class="form-control required" value="{{ $amount }}">
+                               class="form-control required" value="{{ $amount }}"
+                               data-toggle="tooltip" data-placement="right"
+                               title="This should be equals or greater than zero.">
                         <label for="amount" class="active px-3">
                             Total Amount <span class="red-text">*</span>
                         </label>
@@ -337,6 +339,43 @@
                         <small>
                             [ B ] Accounting Entry
                         </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-5 border border-bottom-0 border-dark px-0 text-center">
+                    <div class="p-2 border-bottom border-dark">
+                        <strong>Account Title</strong>
+                    </div>
+                </div>
+                <div class="col-md-3 border border-left-0 border-bottom-0 border-dark px-0 text-center">
+                    <div class="p-2 border-bottom border-dark">
+                        <strong>UACS Code</strong>
+                    </div>
+
+                    <button type="button" class="btn btn-link btn-block waves-effect my-2"
+                            onclick="$(this).showUacsItems('{{ route('ca-dv-show-uacs-items',
+                            ['id' => 'none']) }}');">
+                        <i class="fas fa-tags"></i> <b>Add/Update UACS Items</b>
+                    </button>
+
+                    <div class="md-form p-0">
+                        <textarea id="uacs-code-display" rows="8" class="md-textarea w-75 p-0" style="overflow: auto;"
+                                  placeholder="Selected UACS Object Codes" readonly></textarea>
+                    </div>
+
+                    <input type="hidden" id="uacs-code" name="uacs_object_code">
+                    <div id="uacs-items-segment" style="display: none;"></div>
+                </div>
+                <div class="col-md-2 border border-left-0 border-bottom-0 border-dark px-0 text-center">
+                    <div class="p-2 border-bottom border-dark">
+                        <strong>Debit</strong>
+                    </div>
+                </div>
+                <div class="col-md-2 border border-left-0 border-bottom-0 border-dark px-0 text-center">
+                    <div class="p-2 border-bottom border-dark">
+                        <strong>Credit</strong>
                     </div>
                 </div>
             </div>

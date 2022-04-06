@@ -1,12 +1,10 @@
-<form id="form-uacs-items" class="wow animated fadeIn" method="POST"
-      action="{{ route('proc-ors-burs-update-uacs-items', ['id' => $id]) }}">
-    @csrf
-
+<form id="form-uacs-items" class="wow animated fadeIn" method="POST">
     <div class="row">
         <div class="col-md-12">
+            <label for="sel-uacs-code">Choose the MOOE account titles</label>
             <select class="mdb-select crud-select md-form" searchable="Search here.."
                     id="sel-uacs-code" name="uacs_object_code[]" multiple>
-                <option value="" disabled selected>Choose the MOOE account titles</option>
+                <option value="" disabled>Choose the MOOE account titles</option>
 
                 @if (count($mooeTitles) > 0)
                     @foreach ($mooeTitles as $mooe)
@@ -43,14 +41,14 @@
                                 <div class="md-form form-sm">
                                     <input type="text" id="uacs_description_{{ $item->uacs_id }}"
                                         name="uacs_description[]" placeholder="Item Description for '{{ $item->description }}'"
-                                        class="form-control required" value="{{ $item->description }}">
-                                    <input type="hidden" id="uacs_id_{{ $item->uacs_id }}" name="uacs_id[]"
+                                        class="form-control uacs_description required" value="{{ $item->description }}">
+                                    <input type="hidden" id="uacs_id_{{ $item->uacs_id }}" class="uacs_id" name="uacs_id[]"
                                         value="{{ $item->uacs_id }}">
                                     <input type="hidden" id="ors_uacs_id_{{ $item->uacs_id }}" name="ors_uacs_id[]"
-                                        value="{{ $item->id }}">
+                                        class="ors_uacs_id" value="{{ $item->id }}">
                                     <label for="uacs_description_{{ $item->uacs_id }}" class="active">
                                         <span class="red-text">* </span>
-                                        <strong>{{ $item->uacs_code }} : {{ $item->description }}</strong>
+                                        <strong>{{ $item->uacs_code }} : Description</strong>
                                     </label>
                                 </div>
                                 <div class="md-form form-sm" id="uacs_amount_{{ $itemCtr }}">
@@ -58,7 +56,7 @@
                                         class="form-control uacs_amount required" value="{{ $item->amount }}">
                                     <label for="uacs_amount_{{ $item->uacs_id }}" class="active">
                                         <span class="red-text">* </span>
-                                        <strong>{{ $item->uacs_code }} Amount</strong>
+                                        <strong>{{ $item->uacs_code }} : Amount</strong>
                                     </label>
                                 </div>
                             </div>
@@ -82,11 +80,11 @@
                                 <div class="md-form form-sm">
                                     <input type="text" id="uacs_description_{{ $item->id }}"
                                         name="uacs_description[]" placeholder="Item Description for '{{ $item->account_title }}'"
-                                        class="form-control required" value="">
+                                        class="form-control uacs_description required" value="">
                                     <input type="hidden" id="uacs_id_{{ $item->id }}" name="uacs_id[]"
-                                        value="{{ $item->id }}">
+                                        value="{{ $item->id }}" class="uacs_id">
                                     <input type="hidden" id="ors_uacs_id_{{ $item->id }}" name="ors_uacs_id[]"
-                                           value="">
+                                           value="" class="ors_uacs_id">
                                     <label for="uacs_description_{{ $item->id }}" class="active">
                                         <span class="red-text">* </span>
                                         <strong>{{ $item->uacs_code }} : {{ $item->account_title }}</strong>
@@ -107,7 +105,7 @@
                                         '#uacs_description_{{ $itemCtr }}', '#uacs_amount_{{ $itemCtr }}',
                                         '{{ $item->id }}'
                                     );"
-                                    class="btn btn-red btn-sm btn-block h-100 text-center" >
+                                    class="btn btn-red btn-sm btn-block h-100 text-center">
                                     <strong>Del <i class="fas fa-trash-alt fa-2x"></i></strong>
                                 </a>
                             </div>

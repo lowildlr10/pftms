@@ -405,17 +405,6 @@
                                 <i class="far fa-comment-dots"></i> View Remarks
                             </button>
                             <!-- End View Remarks Button Section -->
-
-                            <!-- View UACS Items Button Section -->
-                            @if ($isVisibleUpdate)
-                            <button type="button" class="btn btn-sm btn-green btn-rounded
-                                    btn-block waves-effect mb-2"
-                                    onclick="$(this).showUacsItems('{{ route('proc-dv-show-uacs-items',
-                                                                   ['id' => $dv->id]) }}');">
-                                <i class="fas fa-tags"></i> Open UACS Items
-                            </button>
-                            @endif
-                            <!-- End View UACS Items Button Section -->
                         </div>
                     </div>
                 </div>

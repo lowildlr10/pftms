@@ -5,7 +5,7 @@
     <hr>
     <label for="directory" class="py-0 w-100">
         <div class="md-form py-0">
-            <b>Directory</b> <small id="directory-view">(e.g. "MOOE / RO / DRRM")</small>
+            <b>Folder Name</b>
             <select id="directory" class="form-control-sm directory-tokenizer"
                     name="directory[]" style="width: 100%;" multiple>
                 @if (isset($directories['directory']) && count($directories['directory']) > 0)

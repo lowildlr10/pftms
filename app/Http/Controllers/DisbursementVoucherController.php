@@ -323,7 +323,9 @@ class DisbursementVoucherController extends Controller
                 });
             }
 
-            $dvData = $dvData->sortable(['created_at' => 'desc'])->paginate(15);
+            $dvData = $dvData->orderBy('created_at', 'desc')
+                            ->orderBy('dv_no', 'desc')
+                            ->sortable(['created_at' => 'desc', 'dv_no' => 'desc'])->paginate(15);
 
             foreach ($dvData as $dvDat) {
                 $dvDat->doc_status = $instanceDocLog->checkDocStatus($dvDat->id);
@@ -613,6 +615,8 @@ class DisbursementVoucherController extends Controller
             $modePayment .= '-0';
         }
 
+        $uacsObjectCode = serialize(explode(',', $request->uacs_object_code));
+
         $routeName = 'ca-dv';
 
         try {
@@ -642,6 +646,10 @@ class DisbursementVoucherController extends Controller
             $instanceDV->funding_source = $project;
             $instanceDV->save();
 
+            $dvID = $instanceDV->id->string;
+
+            $this->updateUacsItems($request, $dvID);
+
             $documentType = 'Disbursement Voucher';
 
             $msg = "$documentType '$orsID' successfully updated.";
@@ -663,6 +671,8 @@ class DisbursementVoucherController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showEdit($id) {
+        $uacsData = $this->showUacsItemData($id);
+
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $roleHasBudget = Auth::user()->hasBudgetRole();
         $roleHasAdministrator = Auth::user()->hasAdministratorRole();
@@ -786,6 +796,17 @@ class DisbursementVoucherController extends Controller
             }
         }
 
+        $uacsDisplay = '';
+        $uacsObjectCode = $uacsData->uacs_object_code;
+        $uacsItems = $uacsData->uacs_items;
+        $_uacsItems = $uacsData->_uacs_items;
+        $mooeTitles = $uacsData->mooe_titles;
+
+        foreach ($uacsItems as $uacsCtr => $uacsItm) {
+            $formatUacsAmt = number_format($uacsItm->amount, 2);
+            $uacsDisplay .= "$uacsItm->uacs_code : $uacsItm->description = $formatUacsAmt\n\n";
+        }
+
         return view($viewFile, compact(
             'id', 'dvData', 'dvNo', 'fundCluster', 'tinNo',
             'paymentMode1', 'paymentMode2', 'paymentMode3',
@@ -797,7 +818,9 @@ class DisbursementVoucherController extends Controller
             'orNo', 'otherDocuments', 'signatories', 'signatories',
             'serialNo', 'address', 'dvDate', 'payees', 'particulars',
             'payee', 'transactionType', 'orsList', 'orsID', 'projects',
-            'project', 'priorYear', 'continuing', 'current', 'mfoPAPs'
+            'project', 'priorYear', 'continuing', 'current', 'mfoPAPs',
+            'uacsDisplay', 'uacsObjectCode', 'uacsItems', '_uacsItems',
+            'mooeTitles'
         ));
     }
 
@@ -894,6 +917,8 @@ class DisbursementVoucherController extends Controller
 
             $instanceDV->save();
 
+            $this->updateUacsItems($request, $id);
+
             $documentType = 'Disbursement Voucher';
 
             $msg = "$documentType '$id' successfully updated.";
@@ -915,15 +940,40 @@ class DisbursementVoucherController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showUacsItems($id) {
-        $instanceDV = DisbursementVoucher::find($id);
-        $amount = $instanceDV->amount;
-        $uacsObjectCode = $instanceDV->uacs_object_code ?
-                          unserialize($instanceDV->uacs_object_code) :
-                          [];
-        $mooeTitles = MooeAccountTitle::orderBy('order_no')->get();
-        $_uacsItems = MooeAccountTitle::whereIn('id', $uacsObjectCode)
-                                      ->orderBy('order_no')->get();
-        $uacsItems = DB::table('dv_uacs_items as uacs_item')
+        $itemData = $this->showUacsItemData($id);
+
+        if ($itemData->module_class == 3) {
+            $viewFile = 'modules.procurement.dv.update-uacs';
+        } else if ($itemData->module_class == 2) {
+            $viewFile = 'modules.voucher.dv.update-uacs';
+        }
+
+        return view($viewFile, [
+            'id' => $id,
+            'uacsObjectCode' => $itemData->uacs_object_code,
+            'uacsItems' => $itemData->uacs_items,
+            '_uacsItems' => $itemData->_uacs_items,
+            'mooeTitles' => $itemData->mooe_titles,
+            'amount' => $itemData->amount
+        ]);
+    }
+
+    private function showUacsItemData($id) {
+        $moduleClass = 2;
+        $uacsObjectCode = [];
+        $uacsItems = [];
+        $_uacsItems = [];
+        $amount = 0;
+
+        if ($id != 'none') {
+            $instanceDV = DisbursementVoucher::find($id);
+            $amount = $instanceDV->amount;
+            $uacsObjectCode = $instanceDV->uacs_object_code ?
+                            unserialize($instanceDV->uacs_object_code) :
+                            [];
+            $_uacsItems = MooeAccountTitle::whereIn('id', $uacsObjectCode)
+                                    ->orderBy('order_no')->get();
+            $uacsItems = DB::table('dv_uacs_items as uacs_item')
                        ->select(
                            'uacs_item.id',
                            'uacs_item.uacs_id',
@@ -935,22 +985,19 @@ class DisbursementVoucherController extends Controller
                        ->where('uacs_item.dv_id', $id)
                        ->orderBy('mooe.uacs_code')
                        ->get();
-        $moduleClass = $instanceDV->module_class;
-
-        if ($moduleClass == 3) {
-            $viewFile = 'modules.procurement.dv.update-uacs';
-        } else if ($moduleClass == 2) {
-            $viewFile = 'modules.voucher.dv.update-uacs';
+            $moduleClass = $instanceDV->module_class;
         }
 
-        return view($viewFile, [
-            'id' => $id,
-            'uacsObjectCode' => $uacsObjectCode,
-            'uacsItems' => $uacsItems,
-            '_uacsItems' => $_uacsItems,
-            'mooeTitles' => $mooeTitles,
+        $mooeTitles = MooeAccountTitle::orderBy('order_no')->get();
+
+        return (object) [
+            'module_class' => $moduleClass,
+            'uacs_object_code' => $uacsObjectCode,
+            'uacs_items' => $uacsItems,
+            '_uacs_items' => $_uacsItems,
+            'mooe_titles' => $mooeTitles,
             'amount' => $amount
-        ]);
+        ];
     }
 
     /**
@@ -960,8 +1007,9 @@ class DisbursementVoucherController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function updateUacsItems(Request $request, $id) {
-        $uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
+    private function updateUacsItems(Request $request, $id) {
+        //$uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
+        $uacsObjectCode = serialize(explode(',', $request->uacs_object_code));
         $uacsIDs = $request->uacs_id;
         $uacsDescriptions = $request->uacs_description;
         $uacsAmounts = $request->uacs_amount;

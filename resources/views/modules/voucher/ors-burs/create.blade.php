@@ -2,7 +2,7 @@
       action="{{ route('ca-ors-burs-store') }}">
     @csrf
 
-    <div class="card w-responsive">
+    <div class="card doc-voucher p-0">
         <div class="card-body py-1">
             <div class="row">
                 <div class="col-md-8 border border-bottom-0 border-dark">
@@ -165,7 +165,7 @@
                     <div class="form-group p-0 m-0">
                         <textarea class="md-textarea form-control border border-0 rounded-0 required"
                                   id="particulars" name="particulars" rows="8"
-                                  placeholder="Write particulars here..."></textarea>
+                                  placeholder="Write particulars here...">To obligate...</textarea>
                     </div>
                 </div>
                 <div class="col-md-2 border border-left-0 border-bottom-0 border-dark px-0 text-center">
@@ -198,6 +198,22 @@
                     <div class="p-2 border-bottom border-dark">
                         <strong>UACS Object Code</strong>
                     </div>
+
+                    <button type="button" class="btn btn-link btn-block waves-effect my-2"
+                            onclick="$(this).showUacsItems('{{ route('ca-ors-burs-show-uacs-items',
+                            ['id' => 'none']) }}');">
+                        <i class="fas fa-tags"></i> <b>Add/Update UACS Items</b>
+                    </button>
+
+                    <div class="md-form p-0">
+                        <textarea id="uacs-code-display" rows="8" class="md-textarea w-75 p-0" style="overflow: auto;"
+                                  placeholder="Selected UACS Object Codes" readonly></textarea>
+                    </div>
+
+                    <input type="hidden" id="uacs-code" name="uacs_object_code">
+                    <div id="uacs-items-segment" style="display: none;"></div>
+
+                    {{--
                     <div class="md-form px-2">
                         <select class="mdb-select crud-select md-form" searchable="Search here.."
                                 id="sel-uacs-code" name="uacs_object_code[]" multiple>
@@ -212,12 +228,6 @@
                             @endif
                         </select>
                     </div>
-                    {{--
-                    <div class="form-group p-0 m-0">
-                        <textarea class="md-textarea form-control border border-0 rounded-0"
-                                  id="uacs-object-code" name="uacs_object_code" rows="8"
-                                  placeholder="Write UACS Object Code here..."></textarea>
-                    </div>
                     --}}
                 </div>
                 <div class="col-md-2 border border-left-0 border-bottom-0 border-dark px-0 text-center">
@@ -226,7 +236,8 @@
                     </div>
                     <div class="md-form px-3">
                         <input type="number" id="amount" name="amount" placeholder="Total Amount..."
-                               class="form-control required">
+                               class="form-control required" data-toggle="tooltip" data-placement="right"
+                               title="This should be equals or greater than zero.">
                         <label for="amount" class="active px-3">
                             Total Amount <span class="red-text">*</span>
                         </label>
@@ -335,6 +346,42 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="modal fade top" id="modal-uacs-items" tabindex="-1"
+         role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-top" role="document">
+            <!--Content-->
+            <div class="modal-content">
+                <!--Header-->
+                <div class="modal-header unique-color-dark white-text">
+                    <h6 class="mt-1">
+                        <i class="fas fa-tags"></i> Add UACS Items
+                    </h6>
+                    <button type="button" class="close white-text" onclick="$('#modal-uacs-items').modal('hide');"
+                            aria-label="Close">
+                        &times;
+                    </button>
+                </div>
+
+                <!--Body-->
+                <div class="modal-body p-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="modal-body-show" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Footer-->
+                <div class="modal-footer p-1">
+                    <button type="button" class="btn btn btn-light btn-sm waves-effect" onclick="$('#modal-uacs-items').modal('hide');">
+                        <i class="far fa-window-close"></i> Close
+                    </button>
+                </div>
+            </div>
+            <!--/.Content-->
         </div>
     </div>
 </form>

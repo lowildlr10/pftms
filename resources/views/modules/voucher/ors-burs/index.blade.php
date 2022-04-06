@@ -350,15 +350,6 @@
                                                                 ['id' => $ors->id]) }}');">
                                 <i class="far fa-comment-dots"></i> View Remarks
                             </button>
-
-                            <!-- View UACS Items Button Section -->
-                            <button type="button" class="btn btn-sm btn-green btn-rounded
-                                    btn-block waves-effect mb-2"
-                                    onclick="$(this).showUacsItems('{{ route('ca-ors-burs-show-uacs-items',
-                                                                ['id' => $ors->id]) }}');">
-                                <i class="fas fa-tags"></i> Open UACS Items
-                            </button>
-                            <!-- End View UACS Items Button Section -->
                         </div>
                     </div>
                 </div>

@@ -5,6 +5,11 @@ body {
     background-color: linear-gradient(40deg, #45cafc, #303f9f) !important;
 }
 
+.doc-voucher {
+    border: 2px solid rgb(26, 26, 26) !important;
+    width: 100% !important;
+}
+
 .btn-menu-1 {
 	width: 100%;
 }

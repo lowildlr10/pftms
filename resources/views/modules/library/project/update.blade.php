@@ -5,8 +5,8 @@
     <hr>
     <label for="directory" class="py-0 w-100"">
         <div class="md-form py-0">
-            <b>Directory</b> <small id="directory-view">
-                {{ $directory ? "($directory)" : '(e.g. "MOOE / RO / DRRM")' }}
+            <b>Folder Name</b>
+                {{ $directory ? "($directory)" : '' }}
             </small>
             <select id="directory" class="form-control-sm directory-tokenizer"
                     name="directory[]" style="width: 100%;" multiple>
