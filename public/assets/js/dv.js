@@ -401,7 +401,7 @@ $(function() {
                     placeholder: "Choose the MOOE account titles",
                     width: '100%',
                     maximumSelectionSize: 4,
-                    allowClear: true
+                    allowClear: true,
                 });
 
                 $('#remaining-original').val(amount);

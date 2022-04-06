@@ -12,9 +12,9 @@ class DocLiquidationReport extends PDF {
         $dateClaimant = $data->liq->date_claimant;
         $dateSupervisor = $data->liq->date_supervisor;
         $dateAccountant = $data->liq->date_accounting;
-        $claimant = $data->claimant;
-        $supervisor = $data->supervisor;
-        $accounting = $data->accounting;
+        $claimant = strtoupper($data->claimant);
+        $supervisor = strtoupper($data->supervisor);
+        $accounting = strtoupper($data->accounting);
 
         /* ------------------------------------- Start of Config ------------------------------------- */
 

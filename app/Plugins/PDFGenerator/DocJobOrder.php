@@ -9,9 +9,9 @@ class DocJobOrder extends PDF {
         $fontScale = $this->fontScale;
         $contentWidth = $pageWidth  - 20;
         $joDate = $data->jo->date_po;
-        $deptName = $data->jo->sig_department;
-        $appName = $data->jo->sig_approval;
-        $fundsName = $data->jo->sig_funds_available;
+        $deptName = strtoupper($data->jo->sig_department);
+        $appName = strtoupper($data->jo->sig_approval);
+        $fundsName = strtoupper($data->jo->sig_funds_available);
 
         /* ------------------------------------- Start of Config ------------------------------------- */
 

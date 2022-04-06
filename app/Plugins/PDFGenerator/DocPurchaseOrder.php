@@ -8,8 +8,8 @@ class DocPurchaseOrder extends PDF {
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
         $poDate = $data->po->date_po;
-        $appName = $data->po->sig_approval;
-        $deptName = $data->po->sig_funds_available;
+        $appName = strtoupper($data->po->sig_approval);
+        $deptName = strtoupper($data->po->sig_funds_available);
 
         /* ------------------------------------- Start of Config ------------------------------------- */
 

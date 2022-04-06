@@ -12,12 +12,12 @@ class DocAbstractQuotation extends PDF {
         $abstractDate = $data->abstract->date_abstract;
 
 
-        $chairperson = $data->sig_chairperson->name;
-        $viceChairperson = $data->sig_vice_chairperson->name;
-        $member1 = $data->sig_first_member->name;
-        $member2 = $data->sig_second_member->name;
-        $member3 = $data->sig_third_member->name;
-        $endUser = $data->sig_end_user->name;
+        $chairperson = strtoupper($data->sig_chairperson->name);
+        $viceChairperson = strtoupper($data->sig_vice_chairperson->name);
+        $member1 = strtoupper($data->sig_first_member->name);
+        $member2 = strtoupper($data->sig_second_member->name);
+        $member3 = strtoupper($data->sig_third_member->name);
+        $endUser = strtoupper($data->sig_end_user->name);
         $modeProcurement =  $data->abstract->mode_name ?  $data->abstract->mode_name : '________________';
 
         $abstractSigs = [$chairperson, $viceChairperson, $member1,

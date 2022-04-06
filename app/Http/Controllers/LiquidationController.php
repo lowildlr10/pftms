@@ -303,7 +303,7 @@ class LiquidationController extends Controller
                 return redirect()->route($routeName, ['keyword' => $dvID])
                                  ->with('success', $msg);
             } else {
-                $msg = "DV number must not be empty.";
+                $msg = "DV number should not be empty.";
                 Auth::user()->log($request, $msg);
                 return redirect(url()->previous())
                                      ->with('warning', $msg);

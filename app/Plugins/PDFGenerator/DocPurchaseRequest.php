@@ -8,6 +8,10 @@ class DocPurchaseRequest extends PDF {
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
 
+        $data->requested_by->name = strtoupper($data->requested_by->name);
+        $data->approved_by->name = strtoupper($data->approved_by->name);
+        $data->recommended_by->name = strtoupper($data->recommended_by->name);
+
         /* ------------------------------------- Start of Config ------------------------------------- */
 
         //set default monospaced font
@@ -85,20 +89,24 @@ class DocPurchaseRequest extends PDF {
         $xCoor = $this->GetX();
         $yCoor = $this->GetY();
 
-        if (!empty($data->requested_by->signature)) {
-            $options = [
-                "ssl" => [
-                "verify_peer"=>false,
-                "verify_peer_name"=>false,
-                ],
-            ];
+        try {
+            if (!empty($data->requested_by->signature)) {
+                $options = [
+                    "ssl" => [
+                    "verify_peer"=>false,
+                    "verify_peer_name"=>false,
+                    ],
+                ];
 
-            $context = stream_context_create($options);
-            session_write_close();   // this is the key
-            $img = file_get_contents(url($data->requested_by->signature), false, $context);
+                $context = stream_context_create($options);
+                session_write_close();   // this is the key
+                $img = file_get_contents(url($data->requested_by->signature), false, $context);
 
-            $this->Image('@' . $img,
-                        $xCoor + (($pageWidth * 0.362) / 3) + 3, $yCoor - 2, 16, 0, 'PNG');
+                $this->Image('@' . $img,
+                            $xCoor + (($pageWidth * 0.362) / 3) + 3, $yCoor - 2, 16, 0, 'PNG');
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
         }
 
         $this->Cell($pageWidth * 0.02, 5, "", "L", "", "L");
@@ -108,20 +116,24 @@ class DocPurchaseRequest extends PDF {
         $xCoor = $this->GetX();
         $yCoor = $this->GetY();
 
-        if (!empty($data->approved_by->signature)  && !empty($data->pr->date_pr_approve)) {
-            $options = [
-                "ssl" => [
-                "verify_peer"=>false,
-                "verify_peer_name"=>false,
-                ],
-            ];
+        try {
+            if (!empty($data->approved_by->signature)  && !empty($data->pr->date_pr_approve)) {
+                $options = [
+                    "ssl" => [
+                    "verify_peer"=>false,
+                    "verify_peer_name"=>false,
+                    ],
+                ];
 
-            $context = stream_context_create($options);
-            session_write_close();   // this is the key
-            $img = file_get_contents(url($data->approved_by->signature), false, $context);
+                $context = stream_context_create($options);
+                session_write_close();   // this is the key
+                $img = file_get_contents(url($data->approved_by->signature), false, $context);
 
-            $this->Image('@' . $img,
-                        $xCoor + (($pageWidth * 0.362) / 3) + 5, $yCoor - 2, 16, 0, 'PNG');
+                $this->Image('@' . $img,
+                            $xCoor + (($pageWidth * 0.362) / 3) + 5, $yCoor - 2, 16, 0, 'PNG');
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
         }
 
         $this->Cell(0, 5, "", "LR", "", "L");
@@ -169,20 +181,24 @@ class DocPurchaseRequest extends PDF {
         $xCoor = $this->GetX();
         $yCoor = $this->GetY();
 
-        if (!empty($data->recommended_by->signature) && !empty($data->pr->date_pr_approve)) {
-            $options = [
-                "ssl" => [
-                "verify_peer"=>false,
-                "verify_peer_name"=>false,
-                ],
-            ];
+        try {
+            if (!empty($data->recommended_by->signature) && !empty($data->pr->date_pr_approve)) {
+                $options = [
+                    "ssl" => [
+                    "verify_peer"=>false,
+                    "verify_peer_name"=>false,
+                    ],
+                ];
 
-            $context = stream_context_create($options);
-            session_write_close();   // this is the key
-            $img = file_get_contents(url($data->recommended_by->signature), false, $context);
+                $context = stream_context_create($options);
+                session_write_close();   // this is the key
+                $img = file_get_contents(url($data->recommended_by->signature), false, $context);
 
-            $this->Image('@' . $img,
-                        $xCoor + (($pageWidth * 0.362) / 3) + 5, $yCoor - 7, 16, 0, 'PNG');
+                $this->Image('@' . $img,
+                            $xCoor + (($pageWidth * 0.362) / 3) + 5, $yCoor - 7, 16, 0, 'PNG');
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
         }
 
         $this->Cell($pageWidth * 0.04, 5, "", "L", "", "L");

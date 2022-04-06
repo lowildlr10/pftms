@@ -10,6 +10,8 @@ class DocInventoryCustodian extends PDF {
 
         $data->fund_cluster = $data->fund_cluster ? $data->fund_cluster : '01';
         $data->entity_name = $data->entity_name ? $data->entity_name : 'Department of Science and Technology - CAR';
+        $data->received_from_name = strtoupper($data->received_from_name);
+        $data->received_by_name = strtoupper($data->received_by_name);
 
         /* ------------------------------------- Start of Config ------------------------------------- */
 

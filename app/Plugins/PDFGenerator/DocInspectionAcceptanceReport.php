@@ -13,8 +13,8 @@ class DocInspectionAcceptanceReport extends PDF {
         $invoiceDate = $data->iar->date_invoice;
 
         $contentWidth = $pageWidth  - 20;
-        $sign1 = $data->iar->sig_inspection;
-        $sign2 = $data->iar->sig_supply;
+        $sign1 = strtoupper($data->iar->sig_inspection);
+        $sign2 = strtoupper($data->iar->sig_supply);
 
         /* ------------------------------------- Start of Config ------------------------------------- */
 

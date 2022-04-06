@@ -284,7 +284,9 @@ $(function() {
             $(this).slideToggle(500);
 
             initInputs(id);
-            $('.sel-supplier').select2();
+            $('.sel-supplier').select2({
+                dropdownParent: $("#modal-lg-create")
+            });
         });
         $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
@@ -316,7 +318,9 @@ $(function() {
             $(this).slideToggle(500);
 
             initInputs(id);
-            $('.sel-supplier').select2();
+            $('.sel-supplier').select2({
+                dropdownParent: $("#modal-lg-edit")
+            });
         });
         $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {

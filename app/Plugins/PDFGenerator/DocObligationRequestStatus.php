@@ -10,6 +10,8 @@ class DocObligationRequestStatus extends PDF {
         $orsDate = $data->ors->date_ors_burs;
         $sDate2 = $data->sDate1;
         $sDate1 = $data->sDate2;
+        $data->sign1 = strtoupper($data->sign1);
+        $data->sign2 = strtoupper($data->sign2);
 
         /* ------------------------------------- Start of Config ------------------------------------- */
 

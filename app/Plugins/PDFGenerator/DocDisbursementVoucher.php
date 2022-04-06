@@ -8,9 +8,9 @@ class DocDisbursementVoucher extends PDF {
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
         $dvDate = $data->dv->date_dv;
-        $signatory = $data->sign1;
-        $sign1 = $data->sign2;
-        $sign2 = $data->sign3;
+        $signatory = strtoupper($data->sign1);
+        $sign1 = strtoupper($data->sign2);
+        $sign2 = strtoupper($data->sign3);
         $paymentMode = explode("-", $data->dv->payment_mode);
 
         /* ------------------------------------- Start of Config ------------------------------------- */

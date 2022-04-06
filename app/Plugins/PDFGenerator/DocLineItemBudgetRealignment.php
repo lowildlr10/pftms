@@ -17,8 +17,8 @@ class DocLineItemBudgetRealignment extends PDF {
         $monitoringOffices = $data->monitoring_offices;
         $leader = $data->leader;
         $totalCost = $data->total_cost;
-        $preparedBy = $data->submitted_by;
-        $approvedBy = $data->approved_by;
+        $preparedBy = strtoupper($data->submitted_by);
+        $approvedBy = strtoupper($data->approved_by);
         $preparedByPos = $data->submitted_by_pos;
         $approvedByPos = $data->approved_by_pos;
 

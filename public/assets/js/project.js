@@ -44,11 +44,13 @@ $(function() {
             }
         });
         $('.agencies-tokenizer').select2({
+            tags: true,
             tokenSeparators: [','],
             placeholder: "Coimplementing Agency/LGU",
             width: '100%',
             maximumSelectionSize: 4,
             allowClear: true,
+            dropdownParent: $('.modal.show').find('.modal-content'),
             ajax: {
                 url: `${baseURL}/libraries/agency-lgu/get-agencies-lgus`,
                 type: "post",
