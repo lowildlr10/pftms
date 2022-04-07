@@ -74,11 +74,9 @@
                     name="project_site[]" style="width: 100%;" multiple>
                 @if (count($projectSites) > 0)
                     @foreach ($projectSites as $site)
-                        @if (in_array($site->id, $projectSite))
-                <option value="{{ $site->id }}" selected>
+                <option value="{{ $site->id }}" {{ in_array($site->id, $projectSite) ? 'selected' : '' }}>
                     {!! $site->name !!}
                 </option>
-                        @endif
                     @endforeach
                 @endif
             </select>
@@ -201,11 +199,9 @@
                     name="proponent_units[]" style="width: 100%;" multiple>
                 @if (count($empUnits) > 0)
                     @foreach ($empUnits as $unit)
-                        @if (in_array($unit->id, $proponentUnits))
-                <option value="{{ $unit->id }}" selected>
+                <option value="{{ $unit->id }}" {{ in_array($unit->id, $proponentUnits) ? 'selected' : '' }}>
                     {!! $unit->unit_name !!}
                 </option>
-                        @endif
                     @endforeach
                 @endif
             </select>

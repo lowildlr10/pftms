@@ -86,6 +86,8 @@ $(function() {
             }
         });
 
+        multiSelectConf['maximumSelectionLength'] = false
+
         singleSelectConf['placeholder'] = 'Coimplementing Agency/LGU';
         singleSelectConf['ajax']['url'] = `${baseURL}/libraries/agency-lgu/get-agencies-lgus`;
         singleSelectConf['ajax']['processResults'] = (data) => {
