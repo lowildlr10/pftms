@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Webpatser\Uuid\Uuid;
+use Kyslik\ColumnSortable\Sortable;
 
 class EmpLog extends Model
 {
+    use Sortable;
+
     const CREATED_AT = 'logged_at';
 
     /**
@@ -52,4 +55,17 @@ class EmpLog extends Model
     public function getUpdatedAtColumn() {
         return null;
     }
+
+    public function employee() {
+        return $this->hasOne('App\Models\EmpAccount', 'id', 'emp_id');
+    }
+
+    public $sortable = [
+        'request',
+        'method',
+        'host',
+        'user_agent',
+        'remarks',
+        'logged_at'
+    ];
 }

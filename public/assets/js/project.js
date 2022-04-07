@@ -4,10 +4,50 @@ $(function() {
     const template = '<div class="tooltip md-tooltip">' +
                      '<div class="tooltip-arrow md-arrow"></div>' +
                      '<div class="tooltip-inner md-inner stylish-color"></div></div>';
-    let agenciesData = {};
+    let selectAjaxData = {};
 
     function initializeSelect2() {
-        $('.directory-tokenizer').select2({
+        let singleSelectConf = {
+            tags: true,
+            tokenSeparators: [','],
+            placeholder: "Coimplementing Agency/LGU",
+            width: '100%',
+            maximumSelectionSize: 4,
+            allowClear: true,
+            //dropdownParent: $('.modal.show').find('.modal-content'),
+            ajax: {
+                url: `${baseURL}/libraries/agency-lgu/get-agencies-lgus`,
+                type: "post",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        _token: CSRF_TOKEN,
+                        search: params.term
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: $.map(data, function(item) {
+                            let jsonData = {};
+                            jsonData['agency_name'] = item.agency_name;
+                            selectAjaxData[item.id] = jsonData;
+
+                            return {
+                                text: `${item.agency_name}`,
+                                id: item.id
+                            }
+                        }),
+                        pagination: {
+                            more: true
+                        }
+                    };
+                },
+                cache: true
+            },
+            //theme: "material"
+        };
+        let multiSelectConf = {
             tags: true,
             tokenSeparators: [',', '/'],
             width: 'resolve',
@@ -16,7 +56,9 @@ $(function() {
             maximumSelectionLength: 5,
             allowClear: true,
             theme: "classic"
-        });
+        };
+
+        $('.directory-tokenizer').select2(multiSelectConf);
         $('.directory-tokenizer').on("select2:select", function (evt) {
             const element = evt.params.data.element;
             const $element = $(element);
@@ -43,46 +85,112 @@ $(function() {
                 $('#directory-view').html('(e.g. "MOOE / RO / DRRM")');
             }
         });
-        $('.agencies-tokenizer').select2({
-            tags: true,
-            tokenSeparators: [','],
-            placeholder: "Coimplementing Agency/LGU",
-            width: '100%',
-            maximumSelectionSize: 4,
-            allowClear: true,
-            dropdownParent: $('.modal.show').find('.modal-content'),
-            ajax: {
-                url: `${baseURL}/libraries/agency-lgu/get-agencies-lgus`,
-                type: "post",
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return {
-                        _token: CSRF_TOKEN,
-                        search: params.term
-                    };
-                },
-                processResults: function(data) {
-                    return {
-                        results: $.map(data, function(item) {
-                            let jsonData = {};
-                            jsonData['agency_name'] = item.agency_name;
-                            agenciesData[item.id] = jsonData;
 
-                            return {
-                                text: `${item.agency_name}`,
-                                id: item.id
-                            }
-                        }),
-                        pagination: {
-                            more: true
-                        }
-                    };
-                },
-                cache: true
+        singleSelectConf['placeholder'] = 'Coimplementing Agency/LGU';
+        singleSelectConf['ajax']['url'] = `${baseURL}/libraries/agency-lgu/get-agencies-lgus`;
+        singleSelectConf['ajax']['processResults'] = (data) => {
+            return {
+                results: $.map(data, function(item) {
+                    let jsonData = {};
+                    jsonData['agency_name'] = item.agency_name;
+                    selectAjaxData[item.id] = jsonData;
+
+                    return {
+                        text: `${item.agency_name}`,
+                        id: item.id
+                    }
+                }),
+                pagination: {
+                    more: true
+                }
+            };
+        };
+
+        $('.coimp-agencies-tokenizer').select2(singleSelectConf);
+
+        singleSelectConf['placeholder'] = 'Choose an Industry/Sector';
+        singleSelectConf['ajax']['url'] = `${baseURL}/libraries/industry-sector/get-industry-sector`;
+        singleSelectConf['ajax']['processResults'] = (data) => {
+            return {
+                results: $.map(data, function(item) {
+                    let jsonData = {};
+                    jsonData['sector_name'] = item.sector_name;
+                    selectAjaxData[item.id] = jsonData;
+
+                    return {
+                        text: `${item.sector_name}`,
+                        id: item.id
+                    }
+                }),
+                pagination: {
+                    more: true
+                }
+            };
+        };
+
+        $('.industry-tokenizer').select2(singleSelectConf);
+
+        multiSelectConf['tags'] = false;
+        $('.proj-site-tokenizer').select2(multiSelectConf);
+
+        singleSelectConf['placeholder'] = 'Choose an Implementing Agency';
+        singleSelectConf['ajax']['url'] = `${baseURL}/libraries/agency-lgu/get-agencies-lgus`;
+        singleSelectConf['ajax']['processResults'] = (data) => {
+            return {
+                results: $.map(data, function(item) {
+                    let jsonData = {};
+                    jsonData['agency_name'] = item.agency_name;
+                    selectAjaxData[item.id] = jsonData;
+
+                    return {
+                        text: `${item.agency_name}`,
+                        id: item.id
+                    }
+                }),
+                pagination: {
+                    more: true
+                }
+            };
+        };
+
+        $('.agency-tokenizer').select2(singleSelectConf);
+
+        multiSelectConf['tags'] = false;
+        $('.proponent-tokenizer').select2(multiSelectConf);
+
+        multiSelectConf['tags'] = true;
+        multiSelectConf.ajax = {
+            url: `${baseURL}/libraries/monitoring-office/get-monitoring-office`,
+            type: "post",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    _token: CSRF_TOKEN,
+                    search: params.term
+                };
             },
-            //theme: "material"
-        });
+            processResults: function(data) {
+                return {
+                    results: $.map(data, function(item) {
+                        let jsonData = {};
+                        jsonData['office_name'] = item.office_name;
+                        selectAjaxData[item.id] = jsonData;
+
+                        return {
+                            text: `${item.office_name}`,
+                            id: item.id
+                        }
+                    }),
+                    pagination: {
+                        more: true
+                    }
+                };
+            },
+            cache: true
+        };
+
+        $('.monitoring-tokenizer').select2(multiSelectConf);
     }
 
     function toggleComimplementingMenu() {
@@ -124,7 +232,8 @@ $(function() {
 
         let coimplementingAgency = `
             <div class="md-form">
-                <select class="mdb-select form-control-sm agencies-tokenizer required coimplementing-agency-lgus"
+                <em><small>(Dynamic)</small></em>
+                <select class="mdb-select form-control-sm coimp-agencies-tokenizer coimplementing-agency-lgus"
                         name="comimplementing_agency_lgus[]"></select>
             </div>`,
             projectCost = `

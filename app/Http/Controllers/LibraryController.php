@@ -1002,7 +1002,7 @@ class LibraryController extends Controller
         $projectSite = $request->project_site ? serialize($request->project_site) : serialize([]);
         $implementingAgency = $request->implementing_agency;
         $implementingBudget = $request->implementing_project_cost;
-        $withCoimplementingAgency = $request->with_coimplementing_agency;
+        $withCoimplementingAgency = $request->with_coimplementing_agency == 'on' ? true : false;
         $projectCost = $request->project_cost;
         $projectLeader = $request->project_leader;
         $dateFrom = $request->date_from;
@@ -1017,13 +1017,61 @@ class LibraryController extends Controller
         $coimplementingAgencies = [];
 
         try {
+            $newMonitoringOffices = [];
+
             if ($withCoimplementingAgency) {
                 foreach ($comimplementingAgencyLGUs as $coimpCtr => $agency) {
+                    $agencyLguDat = AgencyLGU::find($agency);
+                    $coimpProjCost = $coimplementingProjectCosts[$coimpCtr] ?
+                                     $coimplementingProjectCosts[$coimpCtr] :
+                                     0;
+
+                    if (!$agencyLguDat) {
+                        $instanceAgency = new AgencyLGU;
+                        $instanceAgency->agency_name = $agency;
+                        $instanceAgency->save();
+
+                        $agency = $instanceAgency->id->string;
+                    }
+
                     $coimplementingAgencies[] = [
                         'comimplementing_agency_lgu' => $agency,
-                        'coimplementing_project_cost' => $coimplementingProjectCosts[$coimpCtr]
+                        'coimplementing_project_cost' => $coimpProjCost
                     ];
                 }
+            }
+
+            $industryDat = IndustrySector::find($industrySector);
+            $agencyLguDat = AgencyLGU::find($implementingAgency);
+
+            if (!$industryDat) {
+                $instanceIndustry = new IndustrySector;
+                $instanceIndustry->sector_name = $industrySector;
+                $instanceIndustry->save();
+
+                $industrySector = $instanceIndustry->id->string;
+            }
+
+            if (!$agencyLguDat) {
+                $instanceAgency = new AgencyLGU;
+                $instanceAgency->agency_name = $implementingAgency;
+                $instanceAgency->save();
+
+                $implementingAgency = $instanceAgency->id->string;
+            }
+
+            foreach ($monitoringOffice as $monitOffice) {
+                $monitoringDat = MonitoringOffice::find($monitOffice);
+
+                if (!$monitoringDat) {
+                    $instanceMonit = new MonitoringOffice;
+                    $instanceMonit->office_name = $monitOffice;
+                    $instanceMonit->save();
+
+                    $monitOffice = $instanceMonit->id->string;
+                }
+
+                $newMonitoringOffices[] = $monitOffice;
             }
 
             $instanceProject = new FundingProject;
@@ -1039,7 +1087,7 @@ class LibraryController extends Controller
             $instanceProject->date_to = $dateTo;
             $instanceProject->project_cost = $projectCost;
             $instanceProject->project_leader = $projectLeader;
-            $instanceProject->monitoring_offices = serialize($monitoringOffice);
+            $instanceProject->monitoring_offices = serialize($newMonitoringOffices);
             $instanceProject->access_groups = $accessGroup ? serialize($accessGroup) : serialize([]);
             $instanceProject->project_type = $projectType;
             $instanceProject->created_by = Auth::user()->id;
@@ -1060,7 +1108,7 @@ class LibraryController extends Controller
         $projectSite = $request->project_site ? serialize($request->project_site) : serialize([]);
         $implementingAgency = $request->implementing_agency;
         $implementingBudget = $request->implementing_project_cost;
-        $withCoimplementingAgency = $request->with_coimplementing_agency;
+        $withCoimplementingAgency = $request->with_coimplementing_agency == 'on' ? true : false;
         $projectCost = $request->project_cost;
         $projectLeader = $request->project_leader;
         $dateFrom = $request->date_from;
@@ -1075,13 +1123,61 @@ class LibraryController extends Controller
         $coimplementingAgencies = [];
 
         try {
+            $newMonitoringOffices = [];
+
             if ($withCoimplementingAgency) {
                 foreach ($comimplementingAgencyLGUs as $coimpCtr => $agency) {
+                    $agencyLguDat = AgencyLGU::find($agency);
+                    $coimpProjCost = $coimplementingProjectCosts[$coimpCtr] ?
+                                     $coimplementingProjectCosts[$coimpCtr] :
+                                     0;
+
+                    if (!$agencyLguDat) {
+                        $instanceAgency = new AgencyLGU;
+                        $instanceAgency->agency_name = $agency;
+                        $instanceAgency->save();
+
+                        $agency = $instanceAgency->id->string;
+                    }
+
                     $coimplementingAgencies[] = [
                         'comimplementing_agency_lgu' => $agency,
-                        'coimplementing_project_cost' => $coimplementingProjectCosts[$coimpCtr]
+                        'coimplementing_project_cost' => $coimpProjCost
                     ];
                 }
+            }
+
+            $industryDat = IndustrySector::find($industrySector);
+            $agencyLguDat = AgencyLGU::find($implementingAgency);
+
+            if (!$industryDat) {
+                $instanceIndustry = new IndustrySector;
+                $instanceIndustry->sector_name = $industrySector;
+                $instanceIndustry->save();
+
+                $industrySector = $instanceIndustry->id->string;
+            }
+
+            if (!$agencyLguDat) {
+                $instanceAgency = new AgencyLGU;
+                $instanceAgency->agency_name = $implementingAgency;
+                $instanceAgency->save();
+
+                $implementingAgency = $instanceAgency->id->string;
+            }
+
+            foreach ($monitoringOffice as $monitOffice) {
+                $monitoringDat = MonitoringOffice::find($monitOffice);
+
+                if (!$monitoringDat) {
+                    $instanceMonit = new MonitoringOffice;
+                    $instanceMonit->office_name = $monitOffice;
+                    $instanceMonit->save();
+
+                    $monitOffice = $instanceMonit->id->string;
+                }
+
+                $newMonitoringOffices[] = $monitOffice;
             }
 
             $instanceProject = FundingProject::find($id);
@@ -1098,7 +1194,7 @@ class LibraryController extends Controller
             $instanceProject->date_to = $dateTo;
             $instanceProject->project_cost = $projectCost;
             $instanceProject->project_leader = $projectLeader;
-            $instanceProject->monitoring_offices = serialize($monitoringOffice);
+            $instanceProject->monitoring_offices = serialize($newMonitoringOffices);
             $instanceProject->access_groups = $accessGroup ? serialize($accessGroup) : serialize([]);
             $instanceProject->project_type = $projectType;
             $instanceProject->save();
@@ -2399,5 +2495,37 @@ class LibraryController extends Controller
                                        ->get();
 
         return response()->json($agencyLGUData);
+    }
+
+    public function getListIndustrySector(Request $request) {
+        $keyword = trim($request->search);
+        $industrySecData = IndustrySector::select('id', 'sector_name');
+
+        if ($keyword) {
+            $industrySecData = $industrySecData->where(function($qry) use ($keyword) {
+                $qry->where('sector_name', 'like', "%$keyword%");
+            });
+        }
+
+        $industrySecData = $industrySecData->orderBy('sector_name')
+                                       ->get();
+
+        return response()->json($industrySecData);
+    }
+
+    public function getListMonitoringOffice(Request $request) {
+        $keyword = trim($request->search);
+        $monitoringData = MonitoringOffice::select('id', 'office_name');
+
+        if ($keyword) {
+            $monitoringData = $monitoringData->where(function($qry) use ($keyword) {
+                $qry->where('office_name', 'like', "%$keyword%");
+            });
+        }
+
+        $monitoringData = $monitoringData->orderBy('office_name')
+                                       ->get();
+
+        return response()->json($monitoringData);
     }
 }

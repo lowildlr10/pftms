@@ -33,61 +33,39 @@
         </label>
     </div>
 
-    <div class="md-form">
-        <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                name="industry_sector">
-            <option value="" disabled selected>Choose an Industry/Sector</option>
-
-            @if (count($industries) > 0)
-                @foreach ($industries as $industry)
-            <option value="{{ $industry->id }}">
-                {!! $industry->sector_name !!}
-            </option>
-                @endforeach
-            @endif
-        </select>
-        <label class="mdb-main-label">
-            Industry/Sector <span class="red-text">*</span>
-        </label>
+    <label>
+        Industry/Sector <em><small>(Dynamic)</small></em> <span class="red-text">*</span>
+    </label>
+    <div class="md-form mt-0">
+        <select class="mdb-select form-control-sm industry-tokenizer required"
+                name="industry_sector"></select>
     </div>
 
-    <div class="md-form">
-        <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                name="project_site[]" multiple>
-            <option value="" disabled selected>Choose a project site</option>
-
-            @if (count($projectSites) > 0)
-                @foreach ($projectSites as $site)
-            <option value="{{ $site->id }}">
-                {!! $site->name !!}
-            </option>
-                @endforeach
-            @endif
-        </select>
-        <label class="mdb-main-label">
+    <label for="project-site" class="py-0 w-100">
+        <div class="md-form py-0 my-0">
             Project Site <span class="red-text">*</span>
-        </label>
+            <select id="project-site" class="form-control-sm proj-site-tokenizer required"
+                    name="project_site[]" style="width: 100%;" multiple>
+                @if (count($projectSites) > 0)
+                    @foreach ($projectSites as $site)
+                <option value="{{ $site->id }}">
+                    {!! $site->name !!}
+                </option>
+                    @endforeach
+                @endif
+            </select>
+        </div>
+    </label>
+
+    <label class="mt-3">
+        Implementing Agency <em><small>(Dynamic)</small></em> <span class="red-text">*</span>
+    </label>
+    <div class="md-form mt-0">
+        <select class="mdb-select form-control-sm agency-tokenizer required"
+                name="implementing_agency"></select>
     </div>
 
-    <div class="md-form">
-        <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                name="implementing_agency">
-            <option value="" disabled selected>Choose an Implementing Agency</option>
-
-            @if (count($agencies) > 0)
-                @foreach ($agencies as $agency)
-            <option value="{{ $agency->id }}">
-                {!! $agency->agency_name !!}
-            </option>
-                @endforeach
-            @endif
-        </select>
-        <label class="mdb-main-label">
-            Implementing Agency <span class="red-text">*</span>
-        </label>
-    </div>
-
-    <div class="md-form">
+    <div class="md-form my-5">
         <input type="number" id="implementing-project-cost" class="form-control required"
                name="implementing_project_cost" value="0.00"
                onchange="$(this).computeTotalProjectCost();"
@@ -111,7 +89,8 @@
             <div class="coimplementing-form-group border rounded p-3"
                  id="coimplementing-form-group-0">
                 <div class="md-form">
-                    <select class="mdb-select form-control-sm agencies-tokenizer coimplementing-agency-lgus"
+                    <em><small>(Dynamic)</small></em>
+                    <select class="mdb-select form-control-sm coimp-agencies-tokenizer coimplementing-agency-lgus"
                             name="comimplementing_agency_lgus[]"></select>
                 </div>
 
@@ -139,44 +118,32 @@
     </div>
     <hr class="my-1"><br>
 
-    <div class="md-form">
-
-        <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                name="proponent_units[]" multiple>
-            <option value="" disabled selected>Choose a Proponent Units/PSTCs</option>
-
-            @if (count($empUnits) > 0)
-                @foreach ($empUnits as $unit)
-            <option value="{{ $unit->id }}">
-                {!! $unit->unit_name !!}
-            </option>
-                @endforeach
-            @endif
-        </select>
-        <label class="mdb-main-label">
+    <label for="proponent-units" class="py-0 w-100">
+        <div class="md-form py-0 my-0">
             Proponent Units/PSTCs <span class="red-text">*</span>
-        </label>
-    </div>
+            <select id="proponent-units" class="form-control-sm proponent-tokenizer required"
+                    name="proponent_units[]" style="width: 100%;" multiple>
+                @if (count($empUnits) > 0)
+                    @foreach ($empUnits as $unit)
+                <option value="{{ $unit->id }}">
+                    {!! $unit->unit_name !!}
+                </option>
+                    @endforeach
+                @endif
+            </select>
+        </div>
+    </label>
 
-    <div class="md-form">
-        <select class="mdb-select crud-select md-form required" searchable="Search here.."
-                name="monitoring_office[]" multiple>
-            <option value="" disabled selected>Choose a Monitoring Offices</option>
+    <label for="monitoring-office" class="py-0 mt-3 w-100">
+        <div class="md-form py-0 my-0">
+            Monitoring Office <em><small>(Dynamic)</small></em> <span class="red-text">*</span>
+            <select id="monitoring-office" class="form-control-sm monitoring-tokenizer required"
+                    name="monitoring_office[]" style="width: 100%;" multiple>
+            </select>
+        </div>
+    </label>
 
-            @if (count($monitoringOffices) > 0)
-                @foreach ($monitoringOffices as $office)
-            <option value="{{ $office->id }}">
-                {!! $office->office_name !!}
-            </option>
-                @endforeach
-            @endif
-        </select>
-        <label class="mdb-main-label">
-            Monitoring Office <span class="red-text">*</span>
-        </label>
-    </div>
-
-    <div class="md-form">
+    <div class="md-form mt-5">
         <input type="number" id="project-cost" class="form-control required"
                name="project_cost" value="0.00">
         <label for="project-cost" class="active">

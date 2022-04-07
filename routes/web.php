@@ -1511,6 +1511,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'lib_industry',
         'access' => 'destroy'
     ])->name('industry-sector-destroy');
+    Route::post('libraries/industry-sector/get-industry-sector', [
+        'uses' => 'LibraryController@getListIndustrySector',
+        'module' => 'lib_industry',
+        'access' => 'is_allowed'
+    ]);
 
     // Item Classification Module
     Route::any('libraries/item-classification', [
@@ -1622,6 +1627,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'lib_monit_office',
         'access' => 'destroy'
     ])->name('monitoring-office-destroy');
+    Route::post('libraries/monitoring-office/get-monitoring-office', [
+        'uses' => 'LibraryController@getListMonitoringOffice',
+        'module' => 'lib_monit_office',
+        'access' => 'is_allowed'
+    ]);
 
     // Project
     Route::any('libraries/project', [

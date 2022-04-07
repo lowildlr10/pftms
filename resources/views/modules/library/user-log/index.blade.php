@@ -42,9 +42,21 @@
                                 align-items-center">
                         <div></div>
                         <div>
+                            {{--
                             <button class="btn btn-outline-white btn-rounded btn-sm px-2"
                                     data-target="#top-fluid-modal" data-toggle="modal">
                                 <i class="fas fa-search"></i>
+                            </button>
+                            <a href="{{ route('emp-log') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
+                                <i class="fas fa-sync-alt fa-pulse"></i>
+                            </a>
+                            --}}
+
+                            <button class="btn btn-outline-white btn-rounded btn-sm px-2"
+                                    data-target="#top-fluid-modal" data-toggle="modal"
+                                    onclick="$('#search').focus()">
+                                <i class="fas fa-search"></i> {{ !empty($keyword) ? (strlen($keyword) > 15) ?
+                                'Search: '.substr($keyword, 0, 15).'...' : 'Search: '.$keyword : '' }}
                             </button>
                             <a href="{{ route('emp-log') }}" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
@@ -64,25 +76,32 @@
                                     <tr>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="15%">
-                                            <strong>Employee</strong>
+                                            {{--<strong>Employee</strong>--}}
+                                            @sortablelink('employee.firstname', 'Employee', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="13%">
-                                            <strong>Request</strong>
+                                            {{--<strong>Request</strong>--}}
+                                            @sortablelink('request', 'Request', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="9%">
-                                            <strong>Method</strong>
+                                            {{--<strong>Method</strong>--}}
+                                            @sortablelink('method', 'Method', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="9%">
-                                            <strong>Host</strong>
+                                            {{--<strong>Host</strong>--}}
+                                            @sortablelink('host', 'Host', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="18%">
-                                            <strong>User Agent</strong>
+                                            {{--<strong>User Agent</strong>--}}
+                                            @sortablelink('user_agent', 'User Agent', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="20%">
-                                            <strong>Remarks</strong>
+                                            {{--<strong>Remarks</strong>--}}
+                                            @sortablelink('remarks', 'Remarks', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="10%">
-                                            <strong>Logged At</strong>
+                                            {{--<strong>Logged At</strong>--}}
+                                            @sortablelink('logged_at', 'Logged At', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="3%"></th>
                                     </tr>
@@ -95,7 +114,9 @@
                                         @foreach ($list as $listCtr => $log)
                                     <tr>
                                         <td></td>
-                                        <td>{{ $log->name ? $log->name : 'Guest' }}</td>
+                                        <td>
+                                            {{ $log->employee ? $log->employee->firstname . ' ' . $log->employee->lastname : 'Guest' }}
+                                        </td>
                                         <td>{{ $log->request }}</td>
                                         <td>{{ $log->method }}</td>
                                         <td>{{ $log->host }}</td>
@@ -121,6 +142,10 @@
 
                         </div>
                     </div>
+
+                    <div class="mt-3">
+                        {!! $list->appends(\Request::except('page'))->render('pagination') !!}
+                    </div>
                 </div>
                 <!-- Table with panel -->
 
@@ -130,22 +155,27 @@
 </div>
 
 <!-- Modals -->
-@include('modals.search')
+@include('modals.search-post')
 @include('modals.delete')
 
 @endsection
 
 @section('custom-js')
 
+{{--
 <!-- DataTables JS -->
 <script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables.min.js') }}"></script>
 
 <!-- DataTables Select JS -->
 <script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables-select.min.js') }}"></script>
+--}}
 
 <script src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script src="{{ asset('assets/js/emp-log.js') }}"></script>
+
+{{--
 <script src="{{ asset('assets/js/custom-datatables.js') }}"></script>
+--}}
 
 @if (!empty(session("success")))
     @include('modals.alert')

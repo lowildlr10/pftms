@@ -1511,11 +1511,34 @@ class AccountController extends Controller
      *  Employee Log Module
     **/
     public function indexLogs(Request $request) {
+        $keyword = trim($request->keyword);
+
+        /*
         $userLogData = EmpLog::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'emp_logs.emp_id')
                           ->limit(1)
-        ])->orderBy('logged_at', 'desc')->get();
+        ]);*/
+
+        $userLogData = EmpLog::with('employee');
+
+        if (!empty($keyword)) {
+            $userLogData = $userLogData->where(function($qry) use ($keyword) {
+                $qry->where('request', 'like', "%$keyword%")
+                    ->orWhere('method', 'like', "%$keyword%")
+                    ->orWhere('host', 'like', "%$keyword%")
+                    ->orWhere('user_agent', 'like', "%$keyword%")
+                    ->orWhere('remarks', 'like', "%$keyword%")
+                    ->orWhereHas('employee', function($query) use ($keyword) {
+                        $query->where('firstname', 'like', "%$keyword%")
+                              ->orWhere('middlename', 'like', "%$keyword%")
+                              ->orWhere('lastname', 'like', "%$keyword%");
+                    });
+            });
+        }
+
+        $userLogData = $userLogData->sortable(['logged_at' => 'desc'])
+                                ->paginate(50);
 
         return view('modules.library.user-log.index', [
             'list' => $userLogData
