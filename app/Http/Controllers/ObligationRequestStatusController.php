@@ -1268,10 +1268,13 @@ class ObligationRequestStatusController extends Controller
 
     public function obligate(Request $request, $id) {
         $serialNo = $request->serial_no;
-        $uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
+        $request->uacs_object_code = implode(',', $request->uacs_object_code);
+        //$uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
         $uacsIDs = $request->uacs_id;
         $uacsDescriptions = $request->uacs_description;
         $uacsAmounts = $request->uacs_amount;
+
+        $uacsObjectCode = serialize(explode(',', $request->uacs_object_code));
 
         try {
             $instanceDocLog = new DocLog;
@@ -1297,14 +1300,7 @@ class ObligationRequestStatusController extends Controller
             $instanceORS->serial_no = $serialNo;
             $instanceORS->save();
 
-            foreach ($uacsIDs as $uacsCtr => $uacsID) {
-                $instanceUacs = OrsBursUacsItem::create([
-                    'ors_id' => $id,
-                    'uacs_id' => $uacsID,
-                    'description' => $uacsDescriptions[$uacsCtr],
-                    'amount' => $uacsAmounts[$uacsCtr]
-                ]);
-            }
+            $this->updateUacsItems($request, $id);
 
             $instanceNotif->notifyObligatedORS($id, $routeName);
 

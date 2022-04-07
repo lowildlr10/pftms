@@ -141,7 +141,7 @@
                                     <div class="md-form form-sm my-0">
                                         <input type="hidden" id="allotment-id-{{ $allotmentCounter + 1 }}"
                                                name="allotment_id[{{ $allotmentCounter }}]"
-                                               value="{{ $itm->allotment_id }}">
+                                               value="{{ $itm->id }}">
                                         <input type="hidden" id="allotment-cost-{{ $allotmentCounter + 1 }}"
                                                value="{{ $itm->allotment_cost }}">
                                         {{ $itm->allotment_cost ?
