@@ -362,11 +362,20 @@
 
                     <div class="md-form p-0">
                         <textarea id="uacs-code-display" rows="8" class="md-textarea w-75 p-0" style="overflow: auto;"
-                                  placeholder="Selected UACS Object Codes" readonly></textarea>
+                                  placeholder="Selected UACS Object Codes" readonly>{!! $uacsDisplay !!}</textarea>
                     </div>
 
-                    <input type="hidden" id="uacs-code" name="uacs_object_code">
-                    <div id="uacs-items-segment" style="display: none;"></div>
+                    <input type="hidden" id="uacs-code" name="uacs_object_code" value="{{ $uacsObjectCode }}">
+                    <div id="uacs-items-segment" style="display: none;">
+                        @if (count($orsListUacs) > 0)
+                            @foreach ($orsListUacs as $itemCtr => $item)
+                        <input type="hidden" name="uacs_description[{{ $itemCtr }}]" value="{{ $item->description }}">
+                        <input type="hidden" name="uacs_id[{{ $itemCtr }}]" value="{{ $item->uacs_id }}">
+                        <input type="hidden" name="dv_uacs_id[{{ $itemCtr }}]" value="{{ $item->id }}">
+                        <input type="hidden" name="uacs_amount[{{ $itemCtr }}]" value="{{ $item->amount }}">
+                            @endforeach
+                        @endif
+                    </div>
                 </div>
                 <div class="col-md-2 border border-left-0 border-bottom-0 border-dark px-0 text-center">
                     <div class="p-2 border-bottom border-dark">

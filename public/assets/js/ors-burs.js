@@ -330,11 +330,27 @@ $(function() {
     $.fn.showObligate = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-obligate').load(url, function() {
+            let amount = $('#remaining').val();
+
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
             $('#type').change(function() {
                 $('#serial_no').val($(this).val().split('-')[1]).siblings('label').addClass('active');
             });
+            $('#sel-uacs-code').select2({
+                tokenSeparators: [','],
+                placeholder: "Choose the MOOE account titles",
+                width: '100%',
+                maximumSelectionSize: 4,
+                allowClear: true
+            });
+
+            $('#remaining-original').val(amount);
+            $('#uacs-description-segment').find('.uacs_amount').each((key, elem) => {
+                const uacsAmount = parseFloat($(elem).val()).toFixed(2);
+                amount -= uacsAmount;
+            });
+            $('#remaining').val(amount);
             $(this).slideToggle(500);
             initializeInputs();
         });

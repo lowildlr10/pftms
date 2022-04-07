@@ -27,6 +27,7 @@ use App\Models\FundingProject;
 use App\Models\MooeAccountTitle;
 use App\Models\MfoPap;
 use App\Models\DvUacsItem;
+use App\Models\OrsBursUacsItem;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -353,6 +354,9 @@ class DisbursementVoucherController extends Controller
         $roleHasAdministrator = Auth::user()->hasAdministratorRole();
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
 
+        $orsListUacs = OrsBursUacsItem::where('ors_id', $orsID)
+                                      ->orderBy('description')
+                                      ->get();
         $orsList = ObligationRequestStatus::all();
         $orsData = ObligationRequestStatus::with('emppayee')->find($orsID);
         $empID = $orsData->emppayee['emp_id'];
@@ -363,6 +367,7 @@ class DisbursementVoucherController extends Controller
         $serialNo = $orsData->serial_no;
         $address = $orsData->address;
         $sigCert1 = $orsData->sig_certified_1;
+        $uacsObjectCode = implode(',', unserialize($orsData->uacs_object_code));
         $transactionType = $orsData->transaction_type;
         $project = $orsData->funding_source;
         $priorYear = $orsData->prior_year;
@@ -444,12 +449,20 @@ class DisbursementVoucherController extends Controller
             }
         }
 
+        $uacsDisplay = '';
+
+        foreach ($orsListUacs as $uacsCtr => $uacsItm) {
+            $formatUacsAmt = number_format($uacsItm->amount, 2);
+            $uacsDisplay .= "$uacsItm->description = $formatUacsAmt\n\n";
+        }
+
         return view('modules.voucher.dv.create', compact(
             'signatories', 'payees', 'payee', 'empID',
             'serialNo', 'address', 'amount', 'orsList',
             'orsID', 'transactionType', 'sigCert1',
             'project', 'projects', 'priorYear', 'continuing',
-            'current', 'mfoPAPs', 'orsData', 'mfoPAP'
+            'current', 'mfoPAPs', 'orsData', 'mfoPAP', 'orsListUacs',
+            'uacsDisplay', 'uacsObjectCode'
         ));
     }
 
@@ -1341,7 +1354,7 @@ class DisbursementVoucherController extends Controller
     public function showPayment($id) {
         $instanceDV = DisbursementVoucher::find($id);
         $moduleClass = $instanceDV->module_class;
-        $dvNo = $instanceDV->dv_no ? $instanceDV->dv_no : date('Ym');
+        $dvNo = $instanceDV->dv_no ? $instanceDV->dv_no : date('Y m ');
 
         if ($moduleClass == 3) {
             $viewFile = 'modules.procurement.dv.payment';

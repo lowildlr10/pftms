@@ -31,11 +31,13 @@
             </div>
         </div>
     </div>
+
     <div class="row">
         <div class="col-md-12">
-            <select class="mdb-select crud-select md-form" searchable="Search here.."
+            <label for="sel-uacs-code">Choose the MOOE account titles</label>
+            <select class="mdb-select md-form" searchable="Search here.."
                     id="sel-uacs-code" name="uacs_object_code[]" multiple>
-                <option value="" disabled selected>Choose the MOOE account titles</option>
+                <option value="" disabled>Choose the MOOE account titles</option>
 
                 @if (count($mooeTitles) > 0)
                     @foreach ($mooeTitles as $mooe)
@@ -47,7 +49,6 @@
             </select>
         </div>
         <div class="col-md-12 px-0 text-center">
-
             <div class="col-md-12 border p-0">
                 <div id="remaining-amount-segment" class="col-md-12"
                      style="{{ count($uacsItems) > 0 || count($_uacsItems) > 0 ? '' : 'display: none;'}}">
