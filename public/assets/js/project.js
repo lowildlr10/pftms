@@ -289,6 +289,7 @@ $(function() {
             $('.crud-select').materialSelect();
             toggleComimplementingMenu();
             initializeSelect2();
+            initializeSelect2();
         });
         $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
@@ -313,6 +314,7 @@ $(function() {
             $(this).slideToggle(500);
             $('.crud-select').materialSelect();
             toggleComimplementingMenu();
+            initializeSelect2();
             initializeSelect2();
         });
         $("#modal-sm-edit").modal({keyboard: false, backdrop: 'static'})
