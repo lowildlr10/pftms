@@ -20,6 +20,7 @@ Route::get('profile/registration', 'AccountController@showCreateProfile')
      ->name('profile-registration');
 Route::post('profile/register', 'AccountController@storeProfile')
      ->name('profile-store');
+Route::post('profile/get-province/{region_id}', 'AccountController@getProvince');
 
 // Registration Routes...
 Route::get('register', 'AccountController@showCreateProfile')
