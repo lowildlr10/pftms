@@ -99,7 +99,7 @@
                     <a id="datetime" class="nav-link waves-effect waves-light white-text"></a>
                     --}}
                     <li class="nav-item">
-                        <a class="nav-link waves-effect waves-light white-text px-3 mr-3" target="_blank"
+                        <a class="nav-link waves-effect waves-light white-text px-2 mr-2" target="_blank"
                            href="https://drive.google.com/file/d/1_MPlkJelVDM8ErQpNmSq4ktvjph2oe7q/view?usp=sharing">
                             <i class="fas fa-file-pdf"></i> User Manual
                         </a>
