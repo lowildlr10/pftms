@@ -146,7 +146,7 @@
                                                     </div>
                                                     <div class="col-md-6">
                                                         <div class="md-form">
-                                                            <select class="mdb-select md-form required" searchable="Search here.."
+                                                            <select id="sel-region" class="mdb-select md-form required" searchable="Search here.."
                                                                     name="region">
                                                                 <option value="" disabled selected>Choose a region *</option>
 
@@ -160,16 +160,11 @@
                                                     </div>
 
                                                     <div class="col-md-6">
-                                                        <div class="md-form">
-                                                            <select class="mdb-select md-form required" searchable="Search here.."
+                                                        <div class="md-form" id="province-section">
+                                                            <select id="sel-province" class="mdb-select md-form required" searchable="Search here.."
                                                                     name="province">
                                                                 <option value="" disabled selected>Choose a province *</option>
-
-                                                                @if (!empty($provinces))
-                                                                    @foreach ($provinces as $prov)
-                                                                <option value="{{ $prov->id }}">{{ $prov->province_name }}</option>
-                                                                    @endforeach
-                                                                @endif
+                                                                <option value="" disabled>No data</option>
                                                             </select>
                                                         </div>
                                                     </div>

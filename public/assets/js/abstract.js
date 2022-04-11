@@ -222,6 +222,14 @@ $(function() {
     }
 
     function initInputs(id) {
+        let dropdownParent = '#modal-lg-create';
+
+        if ($('#modal-lg-create').hasClass('show')) {
+            dropdownParent = '#modal-lg-create';
+        } else {
+            dropdownParent = '#modal-lg-edit';
+        }
+
         $('.sel-bidder-count').each(function(bidCount, bidCountElem) {
             $(this).change(function() {
                 const bidderCount = $(this).val(),
@@ -248,8 +256,10 @@ $(function() {
 
                             //$(bidID).materialSelect('destroy');
                             //$(bidID).materialSelect();
-                            $(`#${bidID}`).select2();
-                            console.log(bidID);
+                            $(`#${bidID}`).select2({
+                                dropdownParent: $(dropdownParent)
+                            });
+                            //console.log(bidID);
                             $(`#select2-${bidID}-container`).addClass('input-error-highlighter');
                             //$(bidID).siblings('.select-dropdown').addClass("input-error-highlighter");
                         });

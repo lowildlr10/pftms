@@ -13,12 +13,21 @@ $(function() {
     }
 
     function initializeSelect2() {
+        let dropdownParent = '#modal-lg-create';
+
+        if ($('#modal-lg-create').hasClass('show')) {
+            dropdownParent = '#modal-lg-create';
+        } else {
+            dropdownParent = '#modal-lg-edit';
+        }
+
         $('.allot-class-tokenizer').select2({
             tokenSeparators: [','],
             placeholder: "Value...",
             width: '100%',
             maximumSelectionSize: 4,
             allowClear: true,
+            dropdownParent: $(dropdownParent),
             ajax: {
                 url: `${baseURL}/fund-utilization/project-lib/get-allot-class`,
                 type: "post",
@@ -57,6 +66,7 @@ $(function() {
             width: '100%',
             maximumSelectionSize: 4,
             allowClear: true,
+            dropdownParent: $(dropdownParent),
             ajax: {
                 url: `${baseURL}/fund-utilization/project-lib/get-uacs-object`,
                 type: "post",

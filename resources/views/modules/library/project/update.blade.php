@@ -163,6 +163,7 @@
             <div class="coimplementing-form-group border rounded p-3"
                  id="coimplementing-form-group-0">
                 <div class="md-form">
+                    <em><small>(Dynamic)</small></em>
                     <select class="mdb-select form-control-sm coimp-agencies-tokenizer coimplementing-agency-lgus"
                             name="comimplementing_agency_lgus[]"></select>
                 </div>

@@ -7,6 +7,14 @@ $(function() {
     let selectAjaxData = {};
 
     function initializeSelect2() {
+        let dropdownParent = '#modal-sm-create';
+
+        if ($('#modal-sm-create').hasClass('show')) {
+            dropdownParent = '#modal-sm-create';
+        } else {
+            dropdownParent = '#modal-sm-edit';
+        }
+
         let singleSelectConf = {
             tags: true,
             tokenSeparators: [','],
@@ -14,7 +22,7 @@ $(function() {
             width: '100%',
             maximumSelectionSize: 4,
             allowClear: true,
-            dropdownParent: $('.modal.show').find('.modal-content'),
+            dropdownParent: $(dropdownParent),
             ajax: {
                 url: `${baseURL}/libraries/agency-lgu/get-agencies-lgus`,
                 type: "post",
@@ -89,6 +97,7 @@ $(function() {
         multiSelectConf['maximumSelectionLength'] = false
 
         singleSelectConf['placeholder'] = 'Coimplementing Agency/LGU';
+        singleSelectConf['dropdownParent'] = $('#coimplementing-agency-menu');
         singleSelectConf['ajax']['url'] = `${baseURL}/libraries/agency-lgu/get-agencies-lgus`;
         singleSelectConf['ajax']['processResults'] = (data) => {
             return {

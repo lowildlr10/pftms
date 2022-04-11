@@ -1645,4 +1645,15 @@ class AccountController extends Controller
 
         return ($dataCount > 0) ? 1 : 0;;
     }
+
+    public function getProvince($regionID) {
+        $provinceData = DB::table('provinces')
+                          ->select('id', 'province_name')
+                          ->where('region', $regionID);
+
+        $provinceData = $provinceData->orderBy('province_name')
+                                     ->get();
+
+        return response()->json($provinceData);
+    }
 }

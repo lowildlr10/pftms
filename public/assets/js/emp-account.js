@@ -3,11 +3,21 @@ $(function() {
                      '<div class="tooltip-arrow md-arrow"></div>' +
                      '<div class="tooltip-inner md-inner stylish-color"></div></div>';
 
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
     $.fn.showCreate = function(url) {
         $('#mdb-preloader').css('background', '#000000ab').fadeIn(300);
         $('#modal-body-create').load(url,function() {
             $('#mdb-preloader').fadeOut(300);
             $('.mdb-select').materialSelect();
+            $('#sel-region').change(() => {
+                const regionID = $('#sel-region').val();
+                getProvinces(regionID);
+            });
             $(this).slideToggle(500);
         });
         $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
@@ -31,6 +41,10 @@ $(function() {
         $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $('.mdb-select').materialSelect();
+            $('#sel-region').change(() => {
+                const regionID = $('#sel-region').val();
+                getProvinces(regionID);
+            });
             $(this).slideToggle(500);
         });
         $("#modal-sm-edit").modal({keyboard: false, backdrop: 'static'})
@@ -124,6 +138,46 @@ $(function() {
 
 	        reader.readAsDataURL(input.files[0]);
 	    }
+    }
+
+    function getProvinces(regionID) {
+        const url = `${baseURL}/profile/get-province/${regionID}`;
+        $.ajax({
+		    url: url,
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            //async: false,
+            //data: formData,
+            //dataType: 'json',
+		    success: function(response) {
+                let selProvince = `
+                <select id="sel-province" class="mdb-select md-form required" searchable="Search here.."
+                        name="province">
+                    <option value="" disabled selected>Choose a province *</option>
+                `;
+
+                if (response.length > 0) {
+                    $.each(response, (key, json) => {
+                        selProvince += `<option value="${json.id}">${json.province_name}</option>`;
+                    });
+                } else {
+                    selProvince += `<option value="" disabled>No data</option>`;
+                }
+
+                selProvince += `</select>`;
+                $('#province-section').html(selProvince);
+                $('#sel-province').materialSelect();
+
+                console.log(response);
+            },
+            fail: function(xhr, textStatus, errorThrown) {
+                getProvinces(regionID);
+		    },
+		    error: function(data) {
+                getProvinces(regionID);
+		    }
+        });
     }
 
 	$("#img-input").change(function(){

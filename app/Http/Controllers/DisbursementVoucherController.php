@@ -490,6 +490,9 @@ class DisbursementVoucherController extends Controller
         $continuing = NULL;
         $current = NULL;
         $amount = 0.00;
+        $uacsDisplay = '';
+        $uacsObjectCode = '';
+        $orsListUacs = [];
 
         $mfoPAPs = MfoPap::orderBy('code')->get();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
@@ -570,7 +573,8 @@ class DisbursementVoucherController extends Controller
             'serialNo', 'address', 'amount', 'orsList',
             'orsID', 'transactionType', 'sigCert1',
             'projects', 'priorYear', 'continuing',
-            'current', 'mfoPAPs'
+            'current', 'mfoPAPs', 'uacsDisplay',
+            'uacsObjectCode', 'orsListUacs'
         ));
     }
 
