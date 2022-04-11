@@ -6,14 +6,25 @@ $(function() {
                      '<div class="tooltip-inner md-inner stylish-color"></div></div>';
     let selectAjaxData = {};
 
-    function initializeSelect2() {
+    function initializeSelect2(reInit = false) {
+        if (reInit) {
+            $('.industry-tokenizer').select2('destroy');
+            $('.coimp-agencies-tokenizer').select2('destroy');
+            $('.agency-tokenizer').select2('destroy');
+        }
+
+        /*
         let dropdownParent = '#modal-sm-create';
 
         if ($('#modal-sm-create').hasClass('show')) {
             dropdownParent = '#modal-sm-create';
         } else {
             dropdownParent = '#modal-sm-edit';
-        }
+        }*/
+
+        let dropdownParent = '';
+
+        //console.log(dropdownParent);
 
         let singleSelectConf = {
             tags: true,
@@ -22,7 +33,7 @@ $(function() {
             width: '100%',
             maximumSelectionSize: 4,
             allowClear: true,
-            dropdownParent: $(dropdownParent),
+            dropdownParent: '',
             ajax: {
                 url: `${baseURL}/libraries/agency-lgu/get-agencies-lgus`,
                 type: "post",
@@ -96,30 +107,35 @@ $(function() {
 
         multiSelectConf['maximumSelectionLength'] = false
 
-        singleSelectConf['placeholder'] = 'Coimplementing Agency/LGU';
-        singleSelectConf['dropdownParent'] = $('#coimplementing-agency-menu');
-        singleSelectConf['ajax']['url'] = `${baseURL}/libraries/agency-lgu/get-agencies-lgus`;
-        singleSelectConf['ajax']['processResults'] = (data) => {
-            return {
-                results: $.map(data, function(item) {
-                    let jsonData = {};
-                    jsonData['agency_name'] = item.agency_name;
-                    selectAjaxData[item.id] = jsonData;
 
-                    return {
-                        text: `${item.agency_name}`,
-                        id: item.id
+        $('.coimp-agencies-tokenizer').each((key, elem) => {
+            singleSelectConf['placeholder'] = 'Coimplementing Agency/LGU';
+            singleSelectConf['dropdownParent'] = $(elem).parent();
+            //singleSelectConf['dropdownParent'] = $(`${dropdownParent} #coimplementing-agency-menu`);
+            singleSelectConf['ajax']['url'] = `${baseURL}/libraries/agency-lgu/get-agencies-lgus`;
+            singleSelectConf['ajax']['processResults'] = (data) => {
+                return {
+                    results: $.map(data, function(item) {
+                        let jsonData = {};
+                        jsonData['agency_name'] = item.agency_name;
+                        selectAjaxData[item.id] = jsonData;
+
+                        return {
+                            text: `${item.agency_name}`,
+                            id: item.id
+                        }
+                    }),
+                    pagination: {
+                        more: true
                     }
-                }),
-                pagination: {
-                    more: true
-                }
+                };
             };
-        };
 
-        $('.coimp-agencies-tokenizer').select2(singleSelectConf);
+            $(elem).select2(singleSelectConf);
+        });
 
         singleSelectConf['placeholder'] = 'Choose an Industry/Sector';
+        singleSelectConf['dropdownParent'] = $('.industry-tokenizer').parent();
         singleSelectConf['ajax']['url'] = `${baseURL}/libraries/industry-sector/get-industry-sector`;
         singleSelectConf['ajax']['processResults'] = (data) => {
             return {
@@ -145,6 +161,7 @@ $(function() {
         $('.proj-site-tokenizer').select2(multiSelectConf);
 
         singleSelectConf['placeholder'] = 'Choose an Implementing Agency';
+        singleSelectConf['dropdownParent'] = $('.agency-tokenizer').parent();
         singleSelectConf['ajax']['url'] = `${baseURL}/libraries/agency-lgu/get-agencies-lgus`;
         singleSelectConf['ajax']['processResults'] = (data) => {
             return {
@@ -211,7 +228,7 @@ $(function() {
 		moduleCbox.unbind('change').change(function() {
 			if (moduleCbox.is(':checked')) {
                 menuGroup.slideToggle(300);
-                initializeSelect2();
+                initializeSelect2(true);
                 $('.coimplementing-agency-lgus').addClass('required');
                 $('.coimplementing-project-cost').addClass('required');
 			} else {
@@ -272,7 +289,9 @@ $(function() {
         </div>`;
 
         $(rowOutput).insertAfter('#' + lastRowID);
-        initializeSelect2();
+
+        $('.coimp-agencies-tokenizer').select2();
+        initializeSelect2(true);
     }
 
     $.fn.deleteRow = function(elemID) {
@@ -298,7 +317,7 @@ $(function() {
             $('.crud-select').materialSelect();
             toggleComimplementingMenu();
             initializeSelect2();
-            initializeSelect2();
+            //initializeSelect2();
         });
         $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
@@ -324,7 +343,7 @@ $(function() {
             $('.crud-select').materialSelect();
             toggleComimplementingMenu();
             initializeSelect2();
-            initializeSelect2();
+            //initializeSelect2();
         });
         $("#modal-sm-edit").modal({keyboard: false, backdrop: 'static'})
 						   .on('shown.bs.modal', function() {
