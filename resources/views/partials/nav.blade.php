@@ -433,6 +433,7 @@
                 <div id="notif-body">
                     @if (count(Auth::user()->unreadNotifications) > 0)
                         @foreach(Auth::user()->unreadNotifications as $notification)
+                            @if (isset($notification->data['sub_module']))
                     <a onclick="$(this).redirectToDoc('{{ route($notification->data['sub_module']) }}',
                        '{{ $notification->data['id'] }}'); $(this).setAsReadNotification('{{ $notification->id }}');"
                        class="dropdown-item">
@@ -460,6 +461,29 @@
                             </div>
                         </div>
                     </a>
+                            @else
+                    {{--
+                                @if ($notification->data['type'] == 'message')
+                    <a onclick="$(this).redirectToDoc('{{ route($notification->data['module']) }}',
+                       '{{ $notification->data['ors_id'] }}'); $(this).setAsReadNotification('{{ $notification->id }}');"
+                       class="dropdown-item">
+                        <div class="notification-content">
+                            <div class="icon font-weight-bolder pb-3">
+                                <i class="fa fa-envelope"></i>
+                            </div>
+                            <div class="content">
+                                <div class="notification-detail text-wrap">
+                                    {!! $notification->data['msg'] !!}
+                                </div>
+                                <div class="notification-time">
+                                    <i class="far fa-calendar-alt"></i> {{ \Carbon\Carbon::parse($notification->created_at)->diffForHumans() }}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                                @endif
+                    --}}
+                            @endif
                         @endforeach
                     @else
                     <a class="dropdown-item" href="#">

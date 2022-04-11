@@ -7,6 +7,14 @@ $(function() {
     let selectAjaxData = {};
 
     function initializeSelect2() {
+        let dropdownParent = '#modal-sm-create';
+
+        if ($('#modal-sm-create').hasClass('show')) {
+            dropdownParent = '#modal-sm-create';
+        } else {
+            dropdownParent = '#modal-sm-edit';
+        }
+
         let singleSelectConf = {
             tags: true,
             tokenSeparators: [','],
@@ -14,7 +22,7 @@ $(function() {
             width: '100%',
             maximumSelectionSize: 4,
             allowClear: true,
-            dropdownParent: $('.modal.show').find('.modal-content'),
+            dropdownParent: $(dropdownParent),
             ajax: {
                 url: `${baseURL}/libraries/agency-lgu/get-agencies-lgus`,
                 type: "post",
@@ -89,6 +97,7 @@ $(function() {
         multiSelectConf['maximumSelectionLength'] = false
 
         singleSelectConf['placeholder'] = 'Coimplementing Agency/LGU';
+        singleSelectConf['dropdownParent'] = $('#coimplementing-agency-menu');
         singleSelectConf['ajax']['url'] = `${baseURL}/libraries/agency-lgu/get-agencies-lgus`;
         singleSelectConf['ajax']['processResults'] = (data) => {
             return {
@@ -289,6 +298,7 @@ $(function() {
             $('.crud-select').materialSelect();
             toggleComimplementingMenu();
             initializeSelect2();
+            initializeSelect2();
         });
         $("#modal-sm-create").modal({keyboard: false, backdrop: 'static'})
 						     .on('shown.bs.modal', function() {
@@ -313,6 +323,7 @@ $(function() {
             $(this).slideToggle(500);
             $('.crud-select').materialSelect();
             toggleComimplementingMenu();
+            initializeSelect2();
             initializeSelect2();
         });
         $("#modal-sm-edit").modal({keyboard: false, backdrop: 'static'})
