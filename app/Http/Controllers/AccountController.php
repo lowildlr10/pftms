@@ -1440,11 +1440,36 @@ class AccountController extends Controller
      *  Employee Acount Module
     **/
     public function indexAccount(Request $request) {
+        $keyword = trim($request->keyword);
+
+        /*
         $userData = User::addSelect([
             'division' => EmpDivision::select('division_name')
                           ->whereColumn('id', 'emp_accounts.division')
                           ->limit(1)
-        ])->orderBy('firstname')->get();
+        ])->orderBy('firstname')->get();*/
+
+        $userData = User::with('div');
+
+        if (!empty($keyword)) {
+            $userData = $userData->where(function($qry) use ($keyword) {
+                $qry->where('id', 'like', "%$keyword%")
+                    ->orWhere('emp_id', 'like', "%$keyword%")
+                    ->orWhere('firstname', 'like', "%$keyword%")
+                    ->orWhere('middlename', 'like', "%$keyword%")
+                    ->orWhere('lastname', 'like', "%$keyword%")
+                    ->orWhere('gender', 'like', "%$keyword%")
+                    ->orWhere('position', 'like', "%$keyword%")
+                    ->orWhere('emp_type', 'like', "%$keyword%")
+                    ->orWhere('username', 'like', "%$keyword%")
+                    ->orWhere('email', 'like', "%$keyword%")
+                    ->orWhere('address', 'like', "%$keyword%")
+                    ->orWhere('mobile_no', 'like', "%$keyword%");
+            });
+        }
+
+        $userData = $userData->sortable(['firstname' => 'asc'])
+                             ->paginate(30);
 
         return view('modules.library.account.index', [
             'list' => $userData
