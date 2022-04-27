@@ -47,11 +47,11 @@
         </tr>
     </thead>
 
-    @if (count($data) > 0)
-        @foreach ($data as $listCounter => $log)
+    @if (count($prRfqData) > 0)
+        @foreach ($prRfqData as $listCounter => $log)
     <tr>
         <td class="table-border-left" align="center">
-            {{ ($listCounter + 1) + (($data->currentpage() - 1) * $data->perpage()) }}
+            {{ ($listCounter + 1) + (($prRfqData->currentpage() - 1) * $prRfqData->perpage()) }}
         </td>
 
         <!-- PR Division -->

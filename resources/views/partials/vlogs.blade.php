@@ -3,7 +3,7 @@
         @if (!empty($search))
         <label class="red-text">
             You searched for "{{ $search }}"
-        </label> 
+        </label>
         @endif
     </div>
 

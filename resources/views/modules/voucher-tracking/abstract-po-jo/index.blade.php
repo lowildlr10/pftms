@@ -46,11 +46,11 @@
         </tr>
     </thead>
 
-    @if (count($data) > 0)
-        @foreach ($data as $listCounter => $log)
+    @if (count($absPoData) > 0)
+        @foreach ($absPoData as $listCounter => $log)
     <tr>
         <td class="table-border-left" align="center">
-            {{ ($listCounter + 1) + (($data->currentpage() - 1) * $data->perpage()) }}
+            {{ ($listCounter + 1) + (($absPoData->currentpage() - 1) * $absPoData->perpage()) }}
         </td>
 
         <!-- Abstract Division -->

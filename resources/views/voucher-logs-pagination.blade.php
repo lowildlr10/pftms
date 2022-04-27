@@ -24,7 +24,7 @@
                     </li>
                 @else
                     <li class="paginate_button page-item previous" id="dtBasicExample_previous">
-                        <a onclick="$(this).generateNextPrev('{{ $paginator->previousPageUrl() }}');"
+                        <a onclick="$(this).generateNextPrev('{{ $paginator->previousPageUrl() }}', '{{ request()->module }}');"
                            aria-controls="dtBasicExample" data-dt-idx="0" tabindex="0" class="page-link">
                             Previous
                         </a>
@@ -50,7 +50,7 @@
                                 </li>
                             @else
                                 <li class="paginate_button page-item">
-                                    <a onclick="$(this).generateNextPrev('{{ $url }}');" aria-controls="dtBasicExample"
+                                    <a onclick="$(this).generateNextPrev('{{ $url }}', '{{ request()->module }}');" aria-controls="dtBasicExample"
                                        data-dt-idx="1" tabindex="0" class="page-link">
                                         {{ $page }}
                                     </a>
@@ -63,13 +63,13 @@
                 {{-- Next Page Link --}}
                 @if ($paginator->hasMorePages())
                     <li class="paginate_button page-item next" id="dtBasicExample_next">
-                        <a onclick="$(this).generateNextPrev('{{ $paginator->nextPageUrl() }}');"
+                        <a onclick="$(this).generateNextPrev('{{ $paginator->nextPageUrl() }}', '{{ request()->module }}');"
                            aria-controls="dtBasicExample" data-dt-idx="7" tabindex="0"
                            class="page-link">Next</a>
                     </li>
                 @else
                     <li class="paginate_button page-item next disabled" id="dtBasicExample_next">
-                        <a onclick="$(this).generateNextPrev('{{ $paginator->nextPageUrl() }}');"
+                        <a onclick="$(this).generateNextPrev('{{ $paginator->nextPageUrl() }}', '{{ request()->module }}');"
                            aria-controls="dtBasicExample" data-dt-idx="7" tabindex="0"
                            class="page-link">Next</a>
                     </li>

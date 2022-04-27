@@ -52,11 +52,11 @@
         </tr>
     </thead>
 
-    @if (count($data) > 0)
-        @foreach ($data as $listCounter => $log)
+    @if (count($orsDvData) > 0)
+        @foreach ($orsDvData as $listCounter => $log)
     <tr>
         <td class="table-border-left" align="center">
-            {{ ($listCounter + 1) + (($data->currentpage() - 1) * $data->perpage()) }}
+            {{ ($listCounter + 1) + (($orsDvData->currentpage() - 1) * $orsDvData->perpage()) }}
         </td>
 
         <!-- ORS/BURS Division -->

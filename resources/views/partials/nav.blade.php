@@ -253,13 +253,26 @@
                         </ul>
                     </div>
                 </li>
-                <li class="sidebar-dropdown">
+                <li id="vtrack-dropdown" class="sidebar-dropdown">
                     <a href="#">
                         <i class="fas fa-chalkboard"></i>
                         <span class="menu-text">Voucher Tracking</span>
                     </a>
                     <div class="sidebar-submenu">
                         <ul>
+                            <li class="px-3">
+                                <form action="{{ Route('voucher-tracking-search') }}" method="POST">
+                                    @csrf
+                                    <div class="md-form form-sm my-2 mt-3">
+                                        <input type="text" id="vtrack-search" class="form-control white-text px-2"
+                                               style="background: rgb(60 66 69);" name="vtrack_search"
+                                               value="{{ isset($keyword) ? $keyword : '' }}">
+                                        <label for="vtrack-search" class="pl-2 white-text {{ isset($keyword) ? 'active' : '' }}">
+                                            Search
+                                        </label>
+                                    </div>
+                                </form>
+                            </li>
                             <li>
                                 <a href="{{ url('voucher-tracking/pr-rfq') }}" class="waves-effect">PR => RFQ</a>
                             </li>

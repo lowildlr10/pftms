@@ -41,11 +41,11 @@
         </tr>
     </thead>
 
-    @if (count($data) > 0)
-        @foreach ($data as $listCounter => $log)
+    @if (count($rfqAbsData) > 0)
+        @foreach ($rfqAbsData as $listCounter => $log)
     <tr>
         <td class="table-border-left" align="center">
-            {{ ($listCounter + 1) + (($data->currentpage() - 1) * $data->perpage()) }}
+            {{ ($listCounter + 1) + (($rfqAbsData->currentpage() - 1) * $rfqAbsData->perpage()) }}
         </td>
 
         <!-- RFQ Division -->
