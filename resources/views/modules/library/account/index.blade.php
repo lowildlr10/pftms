@@ -69,24 +69,32 @@
                                 <thead class="mdb-color darken-3 white-text">
                                     <tr>
                                         <th class="th-md" width="3%"></th>
-                                        <th class="th-md" width="3%"></th>
+                                        <th class="th-md" width="3%">
+                                            @sortablelink('is_active', 'Status', [], ['class' => 'white-text'])
+                                        </th>
                                         <th class="th-md" width="10%">
-                                            <strong>ID</strong>
+                                            {{-- <strong>ID</strong> --}}
+                                            @sortablelink('emp_id', 'ID', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="22%">
-                                            <strong>Full Name</strong>
+                                            {{-- <strong>FullName</strong> --}}
+                                            @sortablelink('firstname', 'Full Name', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="10%">
-                                            <strong>Employment Type</strong>
+                                            {{-- <strong>EmploymentType</strong> --}}
+                                            @sortablelink('emp_type', 'Employment Type', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="16%">
-                                            <strong>Position</strong>
+                                            {{-- <strong>Position</strong> --}}
+                                            @sortablelink('position', 'Position', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="16%">
-                                            <strong>Division</strong>
+                                            {{-- <strong>Division</strong> --}}
+                                            @sortablelink('div.division_name', 'Division', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="14%">
-                                            <strong>Last Login</strong>
+                                            {{-- <strong>LastLogin</strong> --}}
+                                            @sortablelink('last_login', 'Last Login', [], ['class' => 'white-text'])
                                         </th>
                                         <th class="th-md" width="3%"></th>
                                         <th class="th-md" width="3%"></th>
@@ -122,7 +130,7 @@
                                             {{ $user->emp_type == 'regular' ? 'Regular' : 'Contractual' }}
                                         </td>
                                         <td>{{ $user->position }}</td>
-                                        <td>{{ $user->division }}</td>
+                                        <td>{{ $user->div['division_name'] }}</td>
                                         <td>{{ $user->last_login }}</td>
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-orange p-2 waves-effect material-tooltip-main mr-0"
@@ -151,6 +159,10 @@
 
                         </div>
                     </div>
+
+                    <div class="mt-3">
+                        {!! $list->appends(\Request::except('page'))->render('pagination') !!}
+                    </div>
                 </div>
                 <!-- Table with panel -->
 
@@ -160,7 +172,7 @@
 </div>
 
 <!-- Modals -->
-@include('modals.search')
+@include('modals.search-post')
 @include('modals.sm-create')
 @include('modals.sm-edit')
 @include('modals.delete')
@@ -169,15 +181,20 @@
 
 @section('custom-js')
 
+{{--
 <!-- DataTables JS -->
 <script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables.min.js') }}"></script>
 
 <!-- DataTables Select JS -->
 <script type="text/javascript" src="{{ asset('plugins/mdb/js/addons/datatables-select.min.js') }}"></script>
+--}}
 
 <script src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script src="{{ asset('assets/js/emp-account.js') }}"></script>
+
+{{--
 <script src="{{ asset('assets/js/custom-datatables.js') }}"></script>
+--}}
 
 @if (!empty(session("success")))
     @include('modals.alert')

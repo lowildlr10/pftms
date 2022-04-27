@@ -90,7 +90,12 @@ class EmpAccount extends Authenticatable
     public $sortable = [
         'firstname',
         'middlename',
-        'lastname'
+        'lastname',
+        'position',
+        'emp_type',
+        'emp_id',
+        'is_active',
+        'last_login'
     ];
 
     public function hasModuleAccess($roleIDs, $module, $access) {
@@ -511,5 +516,9 @@ class EmpAccount extends Authenticatable
         $instanceEmpLog->user_agent = $userAgent;
         $instanceEmpLog->remarks = $msg;
         $instanceEmpLog->save();
+    }
+
+    public function div() {
+        return $this->hasOne('App\Models\EmpDivision', 'id', 'division');
     }
 }
