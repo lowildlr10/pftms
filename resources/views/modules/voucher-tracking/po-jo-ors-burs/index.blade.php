@@ -53,11 +53,11 @@
         </tr>
     </thead>
 
-    @if (count($data) > 0)
-        @foreach ($data as $listCounter => $log)
+    @if (count($poOrsData) > 0)
+        @foreach ($poOrsData as $listCounter => $log)
     <tr>
         <td class="table-border-left" align="center">
-            {{ ($listCounter + 1) + (($data->currentpage() - 1) * $data->perpage()) }}
+            {{ ($listCounter + 1) + (($poOrsData->currentpage() - 1) * $poOrsData->perpage()) }}
         </td>
 
         <!-- PO/JO Division -->

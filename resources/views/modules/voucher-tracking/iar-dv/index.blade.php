@@ -53,11 +53,11 @@
         </tr>
     </thead>
 
-    @if (count($data) > 0)
-        @foreach ($data as $listCounter => $log)
+    @if (count($iarDvData) > 0)
+        @foreach ($iarDvData as $listCounter => $log)
     <tr>
         <td class="table-border-left" align="center">
-            {{ ($listCounter + 1) + (($data->currentpage() - 1) * $data->perpage()) }}
+            {{ ($listCounter + 1) + (($iarDvData->currentpage() - 1) * $iarDvData->perpage()) }}
         </td>
 
         <!-- IAR Division -->

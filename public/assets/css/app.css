@@ -1,7 +1,9 @@
-
 body {
     margin: 1.5em;
-    font-family: 'Poppins', -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
     background-color: linear-gradient(40deg, #45cafc, #303f9f) !important;
 }
 
@@ -11,30 +13,30 @@ body {
 }
 
 .btn-menu-1 {
-	width: 100%;
+    width: 100%;
 }
-.btn-menu-1>button {
-	width: 100%;
+.btn-menu-1 > button {
+    width: 100%;
 }
-.btn-menu-1>a {
-	width: 100%;
+.btn-menu-1 > a {
+    width: 100%;
 }
 
 .signature-thumbnail {
-	height: 200px;
+    height: 200px;
     overflow: auto;
 }
 
-#table-list>thead>tr>td {
-	font-size: 11px;
-	font-weight: 900;
-	text-align: center;
+#table-list > thead > tr > td {
+    font-size: 0.8rem;
+    font-weight: 900;
+    text-align: center;
 }
-#table-list>tbody>tr>td {
-	font-size: 11px;
+#table-list > tbody > tr > td {
+    font-size: 0.8rem;
 }
 .table-divider {
-	border-left: 2px solid #3f5371 !important;
+    border-left: 2px solid #3f5371 !important;
 }
 .table a {
     margin-right: 0 !important;
@@ -64,14 +66,14 @@ body {
     left: 0;
     overflow: hidden;
 }
-.custom-fullwidth-modal>.modal-dialog {
+.custom-fullwidth-modal > .modal-dialog {
     position: fixed;
     margin: 0;
     width: 100%;
     height: 100%;
     padding: 0;
 }
-.custom-fullwidth-modal>.modal-dialog>.modal-content {
+.custom-fullwidth-modal > .modal-dialog > .modal-content {
     position: absolute;
     top: 0;
     right: 0;
@@ -81,7 +83,7 @@ body {
     border-radius: 0;
     box-shadow: none;
 }
-.custom-fullwidth-modal>.modal-dialog>.modal-content>.modal-header {
+.custom-fullwidth-modal > .modal-dialog > .modal-content > .modal-header {
     position: absolute;
     top: 0;
     right: 0;
@@ -91,7 +93,7 @@ body {
     background: #3e4551;
     border: 0;
 }
-.custom-fullwidth-modal>.modal-dialog>.modal-content>.modal-body {
+.custom-fullwidth-modal > .modal-dialog > .modal-content > .modal-body {
     position: absolute;
     top: 50px;
     bottom: 50px;
@@ -99,7 +101,7 @@ body {
     font-weight: 300;
     overflow: auto;
 }
-.custom-fullwidth-modal>.modal-dialog>.modal-content>.modal-footer {
+.custom-fullwidth-modal > .modal-dialog > .modal-content > .modal-footer {
     position: absolute;
     right: 0;
     bottom: 0;
@@ -116,12 +118,12 @@ body {
     left: 0;
     overflow: hidden;
 }
-.custom-rightmenu-modal>.modal-dialog {
+.custom-rightmenu-modal > .modal-dialog {
     margin: 0;
     height: 100%;
     padding: 0;
 }
-.custom-rightmenu-modal>.modal-dialog>.modal-content {
+.custom-rightmenu-modal > .modal-dialog > .modal-content {
     position: absolute;
     top: 0;
     right: 0;
@@ -131,7 +133,7 @@ body {
     border-radius: 0;
     box-shadow: none;
 }
-.custom-rightmenu-modal>.modal-dialog>.modal-content>.modal-header {
+.custom-rightmenu-modal > .modal-dialog > .modal-content > .modal-header {
     position: absolute;
     top: 0;
     right: 0;
@@ -142,7 +144,7 @@ body {
     background: #3e4551;
     border: 0;
 }
-.custom-rightmenu-modal>.modal-dialog>.modal-content>.modal-body {
+.custom-rightmenu-modal > .modal-dialog > .modal-content > .modal-body {
     position: absolute;
     top: 50px;
     bottom: 50px;
@@ -150,7 +152,7 @@ body {
     font-weight: 300;
     overflow: auto;
 }
-.custom-rightmenu-modal>.modal-dialog>.modal-content>.modal-footer {
+.custom-rightmenu-modal > .modal-dialog > .modal-content > .modal-footer {
     position: absolute;
     right: 0;
     left: 0;
@@ -163,7 +165,7 @@ body.modal-open {
     overflow: hidden;
 }
 
-.module-table>thead>tr>th {
+.module-table > thead > tr > th {
     text-align: center;
 }
 
@@ -192,73 +194,97 @@ body.modal-open {
 
 /* Safari */
 @-webkit-keyframes spin {
-    0% { -webkit-transform: rotate(0deg); }
-    100% { -webkit-transform: rotate(360deg); }
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
 }
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 /*** End Preloader ***/
 
 /* mdbootstrap */
-.btn-mdb-color, .btn-orange, .btn-red {
+.btn-mdb-color,
+.btn-orange,
+.btn-red {
     color: #fff !important;
 }
 .btn-light {
-    color: #1C2331 !important;
+    color: #1c2331 !important;
 }
-.view, body, html {
-    height:100%;
-}
-@media (max-width:740px) {
-    .full-page-intro {
-        height:1000px;
-    }
-}
-.carousel {
-    height:50%;
-}
-.carousel .carousel-inner, .carousel .carousel-inner .active, .carousel
-.carousel-inner .carousel-item {
-    height:100%;
-}
-@media (max-width:776px) {
-    .carousel {
-        height:100%;
-    }
-}
-.navbar {
-    background-color:rgba(0,0,0,.3);
-}
-.page-footer, .top-nav-collapse {
-    background-color:#1C2331;
-}
-@media only screen and (max-width:768px) {
-    .navbar{background-color:#1C2331;
-    }
-}
-html, body, header, .view {
+.view,
+body,
+html {
     height: 100%;
 }
 @media (max-width: 740px) {
-    html,body,header,.view {
+    .full-page-intro {
+        height: 1000px;
+    }
+}
+.carousel {
+    height: 50%;
+}
+.carousel .carousel-inner,
+.carousel .carousel-inner .active,
+.carousel .carousel-inner .carousel-item {
+    height: 100%;
+}
+@media (max-width: 776px) {
+    .carousel {
+        height: 100%;
+    }
+}
+.navbar {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+.page-footer,
+.top-nav-collapse {
+    background-color: #1c2331;
+}
+@media only screen and (max-width: 768px) {
+    .navbar {
+        background-color: #1c2331;
+    }
+}
+html,
+body,
+header,
+.view {
+    height: 100%;
+}
+@media (max-width: 740px) {
+    html,
+    body,
+    header,
+    .view {
         height: 1000px;
     }
 }
 @media (min-width: 800px) and (max-width: 850px) {
-    html, body, header, .view {
+    html,
+    body,
+    header,
+    .view {
         height: 650px;
     }
 }
 @media (min-width: 800px) and (max-width: 850px) {
     .navbar:not(.top-nav-collapse) {
-        background: #1C2331!important;
+        background: #1c2331 !important;
     }
 }
 ::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-    background-color: #F5F5F5;
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #f5f5f5;
     border-radius: 10px;
 }
 ::-webkit-scrollbar {
@@ -268,12 +294,14 @@ html, body, header, .view {
 ::-webkit-scrollbar-thumb {
     border-radius: 10px;
     -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
-    background-image: -webkit-gradient(linear,
-									   left bottom,
-									   left top,
-									   color-stop(0.44, rgb(122,153,217)),
-									   color-stop(0.72, rgb(73,125,189)),
-									   color-stop(0.86, rgb(28,58,148)));
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.44, rgb(122, 153, 217)),
+        color-stop(0.72, rgb(73, 125, 189)),
+        color-stop(0.86, rgb(28, 58, 148))
+    );
 }
 ::-webkit-scrollbar-track {
     /*border-radius:0!important;*/
@@ -311,22 +339,24 @@ html, body, header, .view {
         overflow-x: hidden;
     }
 
-    .form-group>.form-control {
+    .form-group > .form-control {
         font-size: 10pt !important;
     }
 
     #item-pr-table {
         width: 1000px;
     }
-    #item-pr-table tr>th {
+    #item-pr-table tr > th {
         font-size: 9pt;
         text-align: center;
     }
-    #item-pr-table tr>td>input, #item-pr-table tr>td>select,
-    #item-pr-table tr>td>textarea, #item-pr-table tr>td {
+    #item-pr-table tr > td > input,
+    #item-pr-table tr > td > select,
+    #item-pr-table tr > td > textarea,
+    #item-pr-table tr > td {
         font-size: 9pt !important;
     }
-    #item-pr-table tr>td>.btn {
+    #item-pr-table tr > td > .btn {
         font-size: 9pt !important;
         padding: 4px;
     }
@@ -339,11 +369,11 @@ html, body, header, .view {
         font-size: 14pt;
     }
 
-    #login-title>p {
+    #login-title > p {
         font-size: 9pt;
     }
 
-    .notifications-nav>.dropdown-menu {
+    .notifications-nav > .dropdown-menu {
         position: fixed !important;
     }
     .mobile-dropdown-notif {
@@ -390,7 +420,7 @@ html, body, header, .view {
     #disp-notif-count-mobile {
         font-size: 8pt;
     }
-    #notification-body-mobile>.dropdown-item {
+    #notification-body-mobile > .dropdown-item {
         font-size: 8pt !important;
     }
 
@@ -409,37 +439,37 @@ html, body, header, .view {
         margin-bottom: 135px !important;
         padding: 0 10px !important;
     }
-    .module-container>.card>.card-body>.card-title {
+    .module-container > .card > .card-body > .card-title {
         text-align: center;
         font-size: 10pt;
     }
-    .module-container>.card {
+    .module-container > .card {
         border-radius: 0 !important;
     }
-    .module-container>.card>.card-body {
+    .module-container > .card > .card-body {
         padding-left: 2px !important;
         padding-right: 2px !important;
     }
-    .gradient-card-header>div>.btn {
+    .gradient-card-header > div > .btn {
         font-size: 6pt !important;
     }
-    .gradient-card-header>div>.dropdown>.btn {
+    .gradient-card-header > div > .dropdown > .btn {
         font-size: 6pt !important;
     }
-    .dropdown-menu>a {
+    .dropdown-menu > a {
         font-size: 8pt !important;
     }
-    .module-table-container>.card-body>.breadcrumb {
+    .module-table-container > .card-body > .breadcrumb {
         padding: 0px 10px 0px 10px !important;
         margin-bottom: 0 !important;
     }
-    .module-table-container>.card-body>.breadcrumb>li {
+    .module-table-container > .card-body > .breadcrumb > li {
         font-size: 9pt !important;
     }
-    .module-table-container>.card-body {
+    .module-table-container > .card-body {
         padding: 22px 0 0 0;
     }
-    .module-table-container>.card-body>.card-title {
+    .module-table-container > .card-body > .card-title {
         text-align: center;
         font-size: 13pt !important;
     }
@@ -447,18 +477,18 @@ html, body, header, .view {
         table-layout: fixed !important;
         width: 100% !important;
     }
-    .module-table>thead>tr>th {
+    .module-table > thead > tr > th {
         text-align: center;
         font-size: 9pt;
         vertical-align: middle;
-        padding: .3rem .1rem .3rem .6rem;
+        padding: 0.3rem 0.1rem 0.3rem 0.6rem;
     }
-    .module-table>tbody>tr>td {
+    .module-table > tbody > tr > td {
         font-size: 9pt;
         vertical-align: middle;
-        padding: .1rem .1rem .3rem .6rem;
+        padding: 0.1rem 0.1rem 0.3rem 0.6rem;
     }
-    .module-table>tbody>tr>td>.btn {
+    .module-table > tbody > tr > td > .btn {
         padding: 5px;
         font-size: 7pt;
     }
@@ -471,17 +501,17 @@ html, body, header, .view {
         left: 0;
         border-top: 15px #1c2a47 solid !important;
     }
-    .paginator-container>.flex-row-reverse {
+    .paginator-container > .flex-row-reverse {
         flex-direction: row !important;
         overflow: hidden;
     }
-    .btn-menu-1>.btn {
+    .btn-menu-1 > .btn {
         font-size: 6pt !important;
     }
-    .btn-menu-2>.btn {
+    .btn-menu-2 > .btn {
         font-size: 6pt !important;
     }
-    .btn-menu-3>.list-group-item {
+    .btn-menu-3 > .list-group-item {
         padding: 5px 0;
     }
     .list-action-header h5 {
@@ -491,7 +521,7 @@ html, body, header, .view {
     .list-action-header {
         padding: 7px !important;
     }
-    .btn-menu-3>.list-group-item>.btn {
+    .btn-menu-3 > .list-group-item > .btn {
         font-size: 6pt !important;
         padding: 10px 0 !important;
         border-radius: 0;
@@ -507,16 +537,19 @@ html, body, header, .view {
     .sidebar-wrapper .sidebar-menu .sidebar-dropdown .sidebar-submenu li a {
         font-size: 7pt;
     }
-    .po-jo-table-items>td {
+    .po-jo-table-items > td {
         padding: 0 !important;
     }
-    .po-jo-table-items>td>.card {
+    .po-jo-table-items > td > .card {
         margin: 5px !important;
     }
     .sidebar-wrapper .sidebar-menu {
         height: 60vh;
     }
-    html, body, header, .view {
+    html,
+    body,
+    header,
+    .view {
         height: 100%;
     }
     .hidden-xs {
@@ -526,7 +559,7 @@ html, body, header, .view {
         display: block !important;
     }
 
-    #system-top-nav>.navbar-brand {
+    #system-top-nav > .navbar-brand {
         text-align: center !important;
         display: block !important;
         width: 100% !important;
@@ -535,76 +568,82 @@ html, body, header, .view {
     #login-content {
         padding: 0 !important;
     }
-    #login-content>.card {
+    #login-content > .card {
         background: #00000000 !important;
         padding: 100% 0 !important;
         margin-top: 30px !important;
     }
-    #login-content>.card>.card-body>form>h6 {
-        color: #FFF !important;
+    #login-content > .card > .card-body > form > h6 {
+        color: #fff !important;
     }
-    #login-content>.card>.card-body>form>.md-form {
-        color: #FFF !important;
+    #login-content > .card > .card-body > form > .md-form {
+        color: #fff !important;
     }
-    #login-content>.card>.card-body>form>.md-form>label {
-        color: #FFF !important;
+    #login-content > .card > .card-body > form > .md-form > label {
+        color: #fff !important;
     }
-    #login-content>.card>.card-body>form>.md-form>input {
-        color: #FFF !important;
+    #login-content > .card > .card-body > form > .md-form > input {
+        color: #fff !important;
     }
-    #login-content>.card>.card-body>form>.md-form>i {
-        color: #FFF !important;
+    #login-content > .card > .card-body > form > .md-form > i {
+        color: #fff !important;
     }
-    #login-content>.card>.card-body>form>.md-form>svg {
-        color: #FFF !important;
+    #login-content > .card > .card-body > form > .md-form > svg {
+        color: #fff !important;
     }
-    #login-content>.card>.card-body>form>.form-check>label {
-        color: #FFF !important;
+    #login-content > .card > .card-body > form > .form-check > label {
+        color: #fff !important;
     }
-    #login-content>.card>.card-body>form>.form-check>input {
-        color: #FFF !important;
+    #login-content > .card > .card-body > form > .form-check > input {
+        color: #fff !important;
     }
-    #login-content>.card>.card-body>form>.login-buttons>.btn {
-        color: #FFF !important;
+    #login-content > .card > .card-body > form > .login-buttons > .btn {
+        color: #fff !important;
         display: block !important;
         width: 100% !important;
     }
     #edit-title {
         font-size: 9pt;
     }
-    #dtmaterial tbody>tr>td {
+    #dtmaterial tbody > tr > td {
         font-size: 8pt !important;
     }
-    #modal-lg-create>.modal-dialog>.modal-content>.modal-body {
+    #modal-lg-create > .modal-dialog > .modal-content > .modal-body {
         padding: 0 !important;
     }
-    #modal-lg-edit>.modal-dialog>.modal-content>.modal-body {
+    #modal-lg-edit > .modal-dialog > .modal-content > .modal-body {
         padding: 0 !important;
     }
-    #modal-lg-create>.modal-dialog>.modal-content>.modal-body>.card>.card-body {
+    #modal-lg-create
+        > .modal-dialog
+        > .modal-content
+        > .modal-body
+        > .card
+        > .card-body {
         padding: 8px !important;
     }
-    #modal-lg-edit>.modal-dialog>.modal-content>.modal-body>.card>.card-body {
+    #modal-lg-edit
+        > .modal-dialog
+        > .modal-content
+        > .modal-body
+        > .card
+        > .card-body {
         padding: 8px !important;
     }
 }
 
 /* Small devices (landscape phones, 576px and up) */
 @media (min-width: 576px) {
-
 }
 
 /* Medium devices (tablets, 768px and up) */
 @media (min-width: 768px) {
-
 }
 
 /* Large devices (desktops, 992px and up) */
 @media (min-width: 992px) {
-
 }
 
 /* Extra large devices (large desktops, 1200px and up) */
 @media (min-width: 1200px) {
-
 }

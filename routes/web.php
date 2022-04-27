@@ -37,6 +37,9 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     Route::get('voucher-tracking/{toggle}', 'VoucherLogController@index');
     Route::get('voucher-tracking/generate-table/{toggle}', 'VoucherLogController@show');
+    Route::post('voucher-tracking/search', 'VoucherLogController@search')
+         ->name('voucher-tracking-search');
+    Route::get('v-track/get-search', 'VoucherLogController@getSearch');
 
     /*===================== ACCOUNT MANAGEMENT ROUTES =====================*/
 

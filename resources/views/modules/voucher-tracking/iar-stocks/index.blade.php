@@ -50,11 +50,11 @@
         </tr>
     </thead>
 
-    @if (count($data) > 0)
-        @foreach ($data as $listCounter => $log)
+    @if (count($iarStockData) > 0)
+        @foreach ($iarStockData as $listCounter => $log)
     <tr>
         <td class="table-border-left" align="center">
-            {{ ($listCounter + 1) + (($data->currentpage() - 1) * $data->perpage()) }}
+            {{ ($listCounter + 1) + (($iarStockData->currentpage() - 1) * $iarStockData->perpage()) }}
         </td>
 
         <!-- PO/JO Division -->
@@ -127,11 +127,11 @@
                 </tr>
             </thead>
 
-            @if (count($data) > 0)
-                @foreach ($data as $listCounter => $log)
+            @if (count($iarStockData) > 0)
+                @foreach ($iarStockData as $listCounter => $log)
             <tr>
                 <td class="table-border-left" align="center">
-                    {{ ($listCounter + 1) + (($data->currentpage() - 1) * $data->perpage()) }}
+                    {{ ($listCounter + 1) + (($iarStockData->currentpage() - 1) * $iarStockData->perpage()) }}
                 </td>
 
                 <!-- IAR Division -->
