@@ -42,7 +42,9 @@ $(function () {
 
     function getSearch(module) {
         const keyword = $("#keyword").val();
-        const getURL = `${baseURL}/v-track/get-search?keyword=${keyword}&module=${module}`;
+        const getURL = encodeURI(
+            `${baseURL}/v-track/get-search?keyword=${keyword}&module=${module}`
+        );
         const formData = new FormData();
 
         //formData.append("keyword", keyword);
@@ -122,14 +124,16 @@ $(function () {
             $("#table-generate")
                 .html(modalLoadingContent)
                 .load(
-                    "generate-table/" +
-                        toggle +
-                        "?date_from=" +
-                        dateFrom +
-                        "&date_to=" +
-                        dateTo +
-                        "&search=" +
-                        search,
+                    encodeURI(
+                        "generate-table/" +
+                            toggle +
+                            "?date_from=" +
+                            dateFrom +
+                            "&date_to=" +
+                            dateTo +
+                            "&search=" +
+                            search
+                    ),
                     function () {
                         $("#btn-generate").removeAttr("disabled");
                         $("#btn-generate-table").removeAttr("disabled");
