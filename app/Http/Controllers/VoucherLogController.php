@@ -1217,6 +1217,7 @@ class VoucherLogController extends Controller
         if (!empty($search)) {
             $data = $data->where(function ($query)  use ($search, $projects, $accounts, $suppliers) {
                 $query->where('ors.id', 'LIKE', '%' . $search . '%')
+                      ->orWhere('ors.po_no', 'LIKE', '%' . $search . '%')
                       ->orWhere('ors.transaction_type', 'LIKE', '%' . $search . '%')
                       ->orWhere('ors.document_type', 'LIKE', '%' . $search . '%')
                       ->orWhere('ors.fund_cluster', 'LIKE', '%' . $search . '%')
