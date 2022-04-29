@@ -30,7 +30,12 @@
                     <div class="gradient-card-header unique-color
                                 narrower py-2 px-2 mb-1 d-flex justify-content-between
                                 align-items-center">
-                        <div></div>
+                        <div>
+                            <a class="btn btn-outline-white btn-rounded btn-sm px-2"
+                               onclick="$(this).generateExcel('track-all-{{ date('Y-m-d') }}', 'tab-search-content');">
+                                <i class="fas fa-file-excel"></i> Download All
+                            </a>
+                        </div>
                         <div>
                             <a class="btn btn-outline-white btn-rounded btn-sm toggle-sidebar px-2"
                                onclick="$('#vtrack-dropdown').addClass('active');$('#vtrack-dropdown').find('.sidebar-submenu').css('display', 'block');$('#vtrack-search').focus();">
@@ -62,7 +67,7 @@
 
                             @php $counter = 1; @endphp
                         </ul>
-                        <div class="tab-content" id="myTabContent">
+                        <div class="tab-content" id="tab-search-content">
 
                             @foreach ($modules as $keyID => $module)
                             <div class="tab-pane fade {{ $counter == 1 ? 'show active' : '' }}"
