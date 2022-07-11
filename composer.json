@@ -13,10 +13,11 @@
         "elibyy/tcpdf-laravel": "^6.0",
         "fideloper/proxy": "^4.0",
         "intervention/image": "^2.5",
+        "kyslik/column-sortable": "^6.0",
         "laravel/framework": "^6.2",
         "laravel/tinker": "^2.0",
-        "webpatser/laravel-uuid": "^3.0",
-        "kyslik/column-sortable": "^6.0"
+        "maatwebsite/excel": "^3.1",
+        "webpatser/laravel-uuid": "^3.0"
     },
     "require-dev": {
         "facade/ignition": "^1.4",

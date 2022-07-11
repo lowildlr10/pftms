@@ -1251,6 +1251,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_orsledger',
         'access' => 'is_allowed'
     ]);
+    Route::post('report/ledger/obligation/import', [
+        'uses' => 'LedgerController@import',
+        'module' => 'report_orsledger',
+        'access' => 'is_allowed'
+    ])->name('report-obligation-ledger-import');
 
     // Disbursement Ledger Module
     Route::any('report/ledger/disbursement', [

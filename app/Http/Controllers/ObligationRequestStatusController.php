@@ -561,6 +561,7 @@ class ObligationRequestStatusController extends Controller
         $address = $orsData->address;
         $responsibilityCenter = $orsData->responsibility_center;
         $particulars = $orsData->particulars;
+        $dvParticulars = $orsData->particulars;
         $mfoPAP = $orsData->mfo_pap ?
                   unserialize($orsData->mfo_pap) :
                   [];
@@ -708,6 +709,7 @@ class ObligationRequestStatusController extends Controller
         $address = $request->address;
         $responsibilityCenter = $request->responsibility_center;
         $particulars = $request->particulars;
+        $dvParticulars = $request->particulars;
         $mfoPAP = $request->mfo_pap ? serialize($request->mfo_pap) : serialize([]);
         //$uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
         $project = $request->funding_source;
@@ -757,7 +759,10 @@ class ObligationRequestStatusController extends Controller
             $instanceDV = DisbursementVoucher::where('ors_id', $id)->first();
 
             if ($instanceDV) {
+                $particulars = str_replace("To obligate", "To payment", $particulars);
+
                 $instanceDV->uacs_object_code = $uacsObjectCode;
+                $instanceDV->particulars = $particulars;
                 $instanceDV->prior_year = $priorYear;
                 $instanceDV->continuing = $continuing;
                 $instanceDV->current = $current;

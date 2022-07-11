@@ -366,6 +366,7 @@ class DisbursementVoucherController extends Controller
                   [];
         $serialNo = $orsData->serial_no;
         $address = $orsData->address;
+        $particulars = str_replace("To obligate", "To payment", $orsData->particulars);
         $sigCert1 = $orsData->sig_certified_1;
         $uacsObjectCode = implode(',', unserialize($orsData->uacs_object_code));
         $transactionType = $orsData->transaction_type;
@@ -462,7 +463,7 @@ class DisbursementVoucherController extends Controller
             'orsID', 'transactionType', 'sigCert1',
             'project', 'projects', 'priorYear', 'continuing',
             'current', 'mfoPAPs', 'orsData', 'mfoPAP', 'orsListUacs',
-            'uacsDisplay', 'uacsObjectCode'
+            'uacsDisplay', 'uacsObjectCode', 'particulars'
         ));
     }
 

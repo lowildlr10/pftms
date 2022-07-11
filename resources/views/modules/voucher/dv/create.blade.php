@@ -221,7 +221,7 @@
                     <div class="form-group p-0 m-0">
                         <textarea class="md-textarea form-control border border-0 rounded-0 required"
                                   id="particulars" name="particulars" rows="8"
-                                  placeholder="Write particulars here...">To payment...</textarea>
+                                  placeholder="Write particulars here...">{{ $particulars }}</textarea>
                     </div>
                 </div>
                 <div class="col-md-2 border border-left-0 border-bottom-0 border-dark px-0 text-center">
