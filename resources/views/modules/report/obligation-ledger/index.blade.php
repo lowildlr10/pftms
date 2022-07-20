@@ -41,6 +41,20 @@
                                     href="{{ route('project') }}">
                                 Go to Projects <i class="fas fa-arrow-right"></i>
                             </a>
+
+                            <a class="btn btn-outline-white btn-rounded btn-sm px-2" href="#">
+                                <form id="form-file-import" action="{{ route('report-obligation-ledger-import') }}" method="POST"
+                                      enctype="multipart/form-data">
+                                    @csrf
+
+                                    <label for="file-import" class="m-0">
+                                        <i class="fas fa-file-excel"></i> Import
+                                    </label>
+
+                                    <input type="file" name="file_import" id="file-import" class="right d-none" onchange="$('#form-file-import').submit();"
+                                           accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+                                </form>
+                            </a>
                         </div>
                         <div>
                             <button class="btn btn-outline-white btn-rounded btn-sm px-2"

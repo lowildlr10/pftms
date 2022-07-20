@@ -28,6 +28,9 @@ use Carbon\Carbon;
 use Auth;
 use DB;
 
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
+
 class LedgerController extends Controller
 {
     /**
@@ -1416,6 +1419,18 @@ class LedgerController extends Controller
         }
 
         return response()->json($mooes);
+    }
+
+    public function import(Request $request) {
+        $file = $request->file('file_import');
+        $rows = Excel::ToArray (new LedgerController, $file);
+        //WithCalculatedFormulas::calculate(false);
+
+        dd($rows);
+
+        foreach ($array as $row) {
+            //dd($row->calculate(false));
+        }
     }
 
     private function groupAllotments($allotments, $isRealignment = false, $currRealignData = NULL) {

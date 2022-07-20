@@ -459,6 +459,19 @@ class VoucherLogController extends Controller
             });
         }
 
+        if ($roles->is_ordinary) {
+            $data = $data->where('pr.requested_by', Auth::user()->id);
+        }
+
+        /*
+        if ($roles->is_developer || $roles->is_adminstrator || $roles->is_rd ||
+            $roles->is_ard || $roles->is_planning || $roles->is_dpso ||
+            $roles->is_budget || $roles->is_accountant) {
+            //$data = $data->data;
+        } else {
+
+        }*/
+
         $data = $data->orderByRaw('LENGTH(pr.pr_no)', 'desc')
                      ->orderBy('pr.pr_no', 'desc')
                      ->whereNull('pr.deleted_at')
