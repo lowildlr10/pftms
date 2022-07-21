@@ -49,6 +49,7 @@ class LiquidationReport extends Model
         'dv_id',
         'dv_dtd',
         'liquidated_by',
+        'created_by',
         'date_liquidated'
     ];
 

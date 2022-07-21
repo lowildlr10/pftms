@@ -41,6 +41,7 @@ class PurchaseRequest extends Model
         'sig_app',
         'sig_funds_available',
         'recommended_by',
+        'created_by',
         'purpose',
         'remarks',
         'status',

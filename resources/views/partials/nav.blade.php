@@ -220,6 +220,7 @@
                     </a>
                     <div class="sidebar-submenu">
                         <ul>
+                            {{--
                             <li>
                                 <a href="#" class="waves-effect">PMF</a>
                             </li>
@@ -228,6 +229,18 @@
                             </li>
                             <li>
                                 <a href="#" class="waves-effect">PCPPE</a>
+                            </li>
+                            --}}
+
+                            <li>
+                                <a href="#" class="waves-effect">
+                                    RCPPRE
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="waves-effect">
+                                    RCPCI
+                                </a>
                             </li>
                             <li>
                                 <a href="{{ route('report-raod') }}" class="waves-effect">

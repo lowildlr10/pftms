@@ -59,6 +59,7 @@ class DisbursementVoucher extends Model
         'module_class',
         'for_payment',
         'disbursed_by',
+        'created_by',
         'funding_source',
     ];
 

@@ -128,7 +128,13 @@
                                                 substr($ors->particulars, 0, 150).'...' : $ors->particulars
                                             }}
                                         </td>
-                                        <td>{{ $ors->emppayee['firstname'] }} {{ $ors->emppayee['lastname'] }}</td>
+                                        <td>
+                                            @if (isset($ors->emppayee['firstname']))
+                                            {{ $ors->emppayee['firstname'] }} {{ $ors->emppayee['lastname'] }}
+                                            @else
+                                            {{ $ors->custompayee['payee_name'] }}
+                                            @endif
+                                        </td>
                                         <td align="center">
                                             @if (!empty($ors->date_obligated))
                                                 @if ((Auth::user()->role == 1 || Auth::user()->role == 4))
@@ -198,7 +204,12 @@
                                                 @endif
                                             </small><br>
                                             <small>
-                                                <b>Payee:</b> {{ $ors->emppayee['firstname'] }} {{ $ors->emppayee['lastname'] }}
+                                                <b>Payee: </b>
+                                                @if (isset($ors->emppayee['firstname']))
+                                                {{ $ors->emppayee['firstname'] }} {{ $ors->emppayee['lastname'] }}
+                                                @else
+
+                                                @endif
                                             </small>
                                         </td>
                                     </tr>
@@ -291,7 +302,13 @@
                                 (strlen($ors->particulars) > 150) ?
                                 substr($ors->particulars, 0, 150).'...' : $ors->particulars
                             }}<br>
-                            <strong>Payee: </strong> {{ $ors->emppayee['firstname'] }} {{ $ors->emppayee['lastname'] }}<br>
+                            <strong>Payee: </strong>
+                            @if (isset($ors->emppayee['firstname']))
+                            {{ $ors->emppayee['firstname'] }} {{ $ors->emppayee['lastname'] }}
+                            @else
+
+                            @endif
+                            <br>
 
                             @if (!$ors->date_obligated)
                                 @if (!empty($ors->doc_status->issued_remarks) &&

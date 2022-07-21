@@ -53,6 +53,7 @@ class ObligationRequestStatus extends Model
         'sig_accounting',
         'sig_agency_head',
         'obligated_by',
+        'created_by',
         'date_certified_1',
         'date_certified_2',
         'date_received',
@@ -101,6 +102,10 @@ class ObligationRequestStatus extends Model
 
     public function bidpayee() {
         return $this->hasOne('App\Models\Supplier', 'id', 'payee');
+    }
+
+    public function custompayee() {
+        return $this->hasOne('App\Models\CustomPayee', 'id', 'payee');
     }
 
     public $sortable = [

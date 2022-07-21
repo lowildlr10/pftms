@@ -109,6 +109,10 @@
                 </div>
                 <div class="col-md-10 border border-left-0 border-bottom-0 border-dark">
                     <div class="md-form form-sm">
+                        <select name="payee" id="payee" class="payee-tokenizer">
+
+                        </select>
+                        {{--
                         <select id="payee" name="payee" searchable="Search here.."
                                 class="mdb-select crud-select md-form my-0 required" disabled>
                             <option class="red-text" value="" disabled selected>Payee</option>
@@ -120,6 +124,7 @@
                                 @endforeach
                             @endif
                         </select>
+                        --}}
                     </div>
                 </div>
             </div>

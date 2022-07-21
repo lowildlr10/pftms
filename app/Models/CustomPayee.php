@@ -5,18 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
-use Kyslik\ColumnSortable\Sortable;
 
-class AgencyLGU extends Model
+class CustomPayee extends Model
 {
-    use SoftDeletes, Sortable;
+    use SoftDeletes;
 
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'agency_lgus';
+    protected $table = 'custom_payees';
 
     /**
      * The attributes that are mass assignable.
@@ -25,10 +24,7 @@ class AgencyLGU extends Model
      */
     protected $fillable = [
         'id',
-        'region',
-        'province',
-        'municipality',
-        'agency_name',
+        'payee_name'
     ];
 
     /**
@@ -47,21 +43,5 @@ class AgencyLGU extends Model
 
     public static function generateUuid() {
          return Uuid::generate();
-    }
-
-    public $sortable = [
-        'agency_name',
-    ];
-
-    public function _region() {
-        return $this->hasOne('App\Models\Region', 'id', 'region');
-    }
-
-    public function _province() {
-        return $this->hasOne('App\Models\Province', 'id', 'province');
-    }
-
-    public function _municipality() {
-        return $this->hasOne('App\Models\Municipality', 'id', 'municipality');
     }
 }

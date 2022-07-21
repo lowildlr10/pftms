@@ -188,6 +188,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'ca_ors_burs',
         'access' => 'is_allowed'
     ])->name('ca-ors-burs-update-uacs-items');
+    Route::any('cadv-reim-liquidation/ors-burs/get-custom-payees', [
+        'uses' => 'CollectionController@getCustomPayees',
+        'module' => 'ca_ors_burs',
+        'access' => 'is_allowed'
+    ]);
 
     // Disbursement Voucher
     Route::any('cadv-reim-liquidation/dv', [
@@ -302,14 +307,19 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     ])->name('ca-dv-store-remarks');
     Route::get('cadv-reim-liquidation/dv/show-uacs-items/{id}', [
         'uses' => 'DisbursementVoucherController@showUacsItems',
-        'module' => 'ca_ors_burs',
+        'module' => 'ca_dv',
         'access' => 'is_allowed'
     ])->name('ca-dv-show-uacs-items');
     Route::post('cadv-reim-liquidation/dv/update-uacs-items/{id}', [
         'uses' => 'DisbursementVoucherController@updateUacsItems',
-        'module' => 'ca_ors_burs',
+        'module' => 'ca_dv',
         'access' => 'is_allowed'
     ])->name('ca-dv-update-uacs-items');
+    Route::post('cadv-reim-liquidation/dv/get-custom-payees', [
+        'uses' => 'CollectionController@getCustomPayees',
+        'module' => 'ca_dv',
+        'access' => 'is_allowed'
+    ]);
 
     // Liquidation Report
     Route::any('cadv-reim-liquidation/liquidation', [
@@ -412,6 +422,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'ca_lr',
         'access' => 'is_allowed'
     ])->name('ca-lr-store-remarks');
+    Route::post('cadv-reim-liquidation/liquidation/get-custom-payees', [
+        'uses' => 'CollectionController@getCustomPayees',
+        'module' => 'ca_lr',
+        'access' => 'is_allowed'
+    ]);
 
     /*===================== PROCUREMENT ROUTES =====================*/
 

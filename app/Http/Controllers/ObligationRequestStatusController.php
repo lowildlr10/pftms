@@ -25,6 +25,7 @@ use App\Models\FundingProject;
 use App\Models\MooeAccountTitle;
 use App\Models\MfoPap;
 use App\Models\OrsBursUacsItem;
+use App\Models\CustomPayee;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -490,6 +491,20 @@ class ObligationRequestStatusController extends Controller
         $routeName = 'ca-ors-burs';
 
         try {
+            $empData = User::where('id', $payee)->count();
+            $supplierData = Supplier::where('id', $payee)->count();
+            $customPayeeData = CustomPayee::where('id', $payee)
+                                         ->orWhere('payee_name', $payee)
+                                         ->count();
+
+            if (!$empData || !$supplierData || !$customPayeeData) {
+                $instancePayee = CustomPayee::create([
+                    'payee_name' => $payee
+                ]);
+
+                $payee = $instancePayee->id->string;
+            }
+
             $instanceORS = new ObligationRequestStatus;
             $instanceORS->document_type = $documentType;
             $instanceORS->transaction_type = $transactionType;
