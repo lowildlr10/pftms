@@ -86,7 +86,8 @@
                     </div>
                     <div class="form-group p-0 m-0">
                         <textarea class="form-control border border-0 rounded-0 required" id="particulars" name="particulars"
-                                  rows="8" placeholder="Write particulars here..."></textarea>
+                                  rows="8" placeholder="Write particulars here..."
+                                  >{{ isset($particulars) ? $particulars : 'To liquidate...' }}</textarea>
                     </div>
                 </div>
                 <div class="col-md-4 border border-left-0 border-bottom-0 border-dark px-0 text-center">
@@ -204,6 +205,19 @@
                             <span class="red-text">* </span>
                             [ A ] Certified: Correctness of the above date
                         </small>
+                        <select name="claimant" id="sig_claimant" class="claimant-tokenizer">
+                            @if (isset($claimant))
+                                @foreach ($claimants as $_claimants)
+                                    @foreach ($_claimants as $claim)
+                                        @if ($claim->id == $claimant)
+                            <option value="{{ $claim->id }}" selected>{{ $claim->payee_name }}</option>
+                                        @endif
+                                    @endforeach
+                                @endforeach
+                            @endif
+                        </select>
+
+                        {{--
                         <select id="sig-claimant" name="sig_claimant" searchable="Search here.."
                                 class="mdb-select crud-select md-form my-0 required">
                             <option value="" disabled selected
@@ -221,6 +235,7 @@
                             </option>
                             @endif
                         </select>
+                        --}}
                     </div>
                     <div class="md-form my-0">
                         <input type="date" id="date-claimant" name="date_claimant"

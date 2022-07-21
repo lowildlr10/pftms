@@ -28,6 +28,7 @@ use App\Models\MooeAccountTitle;
 use App\Models\MfoPap;
 use App\Models\DvUacsItem;
 use App\Models\OrsBursUacsItem;
+use App\Models\CustomPayee;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -354,6 +355,8 @@ class DisbursementVoucherController extends Controller
         $roleHasAdministrator = Auth::user()->hasAdministratorRole();
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
 
+        $payees = [];
+
         $orsListUacs = OrsBursUacsItem::where('ors_id', $orsID)
                                       ->orderBy('description')
                                       ->get();
@@ -380,13 +383,27 @@ class DisbursementVoucherController extends Controller
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
 
+        /*
         $payees = $roleHasOrdinary ?
                 User::where('id', Auth::user()->id)
                     ->orderBy('firstname')
                     ->get() :
                 User::where('is_active', 'y')
                     ->whereIn('division', $empDivisionAccess)
-                    ->orderBy('firstname')->get();
+                    ->orderBy('firstname')->get();*/
+
+        $payees[] = User::select(
+            DB::raw("CONCAT(firstname, ' ', lastname, ' [ ', position, ' ]') as name"),
+            'id'
+        )->orderBy('firstname')->get();
+        $payees[] = Supplier::select(
+            DB::raw("CONCAT(company_name, ' ', ' [ Registered Supplier ]') as company_name"),
+            'id'
+        )->orderBy('company_name')->get();
+        $payees[] = CustomPayee::select(
+            DB::raw("CONCAT(payee_name, ' [ Manually Added ]') as payee_name"),
+            'id'
+        )->orderBy('payee_name')->get();
 
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
@@ -638,6 +655,20 @@ class DisbursementVoucherController extends Controller
         $routeName = 'ca-dv';
 
         try {
+            $empData = User::where('id', $payee)->count();
+            $supplierData = Supplier::where('id', $payee)->count();
+            $customPayeeData = CustomPayee::where('id', $payee)
+                                         ->orWhere('payee_name', $payee)
+                                         ->count();
+
+            if (!$empData && !$supplierData && !$customPayeeData) {
+                $instancePayee = CustomPayee::create([
+                    'payee_name' => $payee
+                ]);
+
+                $payee = $instancePayee->id->string;
+            }
+
             $instanceDV = new DisbursementVoucher;
             $instanceDV->ors_id = $orsID;
             $instanceDV->transaction_type = $transactionType;
@@ -662,6 +693,7 @@ class DisbursementVoucherController extends Controller
             $instanceDV->date_agency_head = $dateAgencyHead;
             $instanceDV->module_class = 2;
             $instanceDV->funding_source = $project;
+            $instanceDV->created_by = Auth::user()->id;
             $instanceDV->save();
 
             $dvID = $instanceDV->id->string;
@@ -696,6 +728,8 @@ class DisbursementVoucherController extends Controller
         $roleHasAdministrator = Auth::user()->hasAdministratorRole();
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
         $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
+
+        $payees = [];
 
         $orsList = ObligationRequestStatus::all();
         $dvData = DisbursementVoucher::with(['bidpayee', 'procors', 'emppayee'])->find($id);
@@ -750,7 +784,18 @@ class DisbursementVoucherController extends Controller
             $tinNo = $dvData->bidpayee['tin_no'];
             $viewFile = 'modules.procurement.dv.update';
         } else if ($moduleClass == 2) {
-            $payees = User::orderBy('firstname')->get();
+            $payees[] = User::select(
+                DB::raw("CONCAT(firstname, ' ', lastname, ' [ ', position, ' ]') as name"),
+                'id'
+            )->orderBy('firstname')->get();
+            $payees[] = Supplier::select(
+                DB::raw("CONCAT(company_name, ' ', ' [ Registered Supplier ]') as company_name"),
+                'id'
+            )->orderBy('company_name')->get();
+            $payees[] = CustomPayee::select(
+                DB::raw("CONCAT(payee_name, ' [ Manually Added ]') as payee_name"),
+                'id'
+            )->orderBy('payee_name')->get();
             $tinNo = $dvData->emppayee['emp_id'];
             $viewFile = 'modules.voucher.dv.update';
         }
@@ -854,6 +899,7 @@ class DisbursementVoucherController extends Controller
         $orsID = !empty($request->ors_id) ? $request->ors_id : NULL;
         $transactionType = $request->transaction_type;
         $dateDV = !empty($request->date_dv) ? $request->date_dv : NULL;
+        $payee = $request->payee;
         $dvNo = $request->dv_no;
         $modePayments = !empty($request->mode_payment) ? $request->mode_payment : [];
         $otherPayment = !empty($request->other_payment) ? $request->other_payment : NULL;
@@ -900,6 +946,20 @@ class DisbursementVoucherController extends Controller
             $instanceDV = DisbursementVoucher::find($id);
             $moduleClass = $instanceDV->module_class;
 
+            $empData = User::where('id', $payee)->count();
+            $supplierData = Supplier::where('id', $payee)->count();
+            $customPayeeData = CustomPayee::where('id', $payee)
+                                         //->orWhere('payee_name', $payee)
+                                         ->count();
+
+            if (!$empData && !$supplierData && !$customPayeeData) {
+                $instancePayee = CustomPayee::create([
+                    'payee_name' => $payee
+                ]);
+
+                $payee = $instancePayee->id->string;
+            }
+
             if ($moduleClass == 3) {
                 $routeName = 'proc-dv';
             } else if ($moduleClass == 2) {
@@ -911,6 +971,7 @@ class DisbursementVoucherController extends Controller
 
             $instanceDV->fund_cluster = $fundCluster;
             $instanceDV->date_dv = $dateDV;
+            $instanceDV->payee = $payee;
             $instanceDV->dv_no = $dvNo;
             $instanceDV->payment_mode = $modePayment;
             $instanceDV->other_payment = $otherPayment;

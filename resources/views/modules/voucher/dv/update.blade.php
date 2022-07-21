@@ -163,6 +163,19 @@
                 </div>
                 <div class="col-md-5 border border-left-0 border-bottom-0 border-dark">
                     <div class="md-form">
+                        <select name="payee" id="payee" class="payee-tokenizer">
+                            @if (isset($payee))
+                                @foreach ($payees as $_payees)
+                                    @foreach ($_payees as $pay)
+                                        @if ($pay->id == $payee)
+                            <option value="{{ $pay->id }}" selected>{{ $pay->payee_name }}</option>
+                                        @endif
+                                    @endforeach
+                                @endforeach
+                            @endif
+                        </select>
+
+                        {{--
                         <select id="payee" name="payee" searchable="Search here.."
                                 class="mdb-select md-form my-0 crud-select" disabled>
                             <option class="red-text" value="" disabled selected
@@ -180,6 +193,7 @@
                             </option>
                             @endif
                         </select>
+                        --}}
                     </div>
                 </div>
                 <div class="col-md-3 border border-left-0 border-bottom-0 border-dark">

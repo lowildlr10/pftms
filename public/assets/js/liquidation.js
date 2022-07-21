@@ -2,6 +2,7 @@ $(function() {
     const template = '<div class="tooltip md-tooltip">' +
                      '<div class="tooltip-arrow md-arrow"></div>' +
                      '<div class="tooltip-inner md-inner stylish-color"></div></div>';
+    const claimantData = {};
 
     $.ajaxSetup({
         headers: {
@@ -21,6 +22,47 @@ $(function() {
 		}).on('hidden.bs.modal', function() {
 		    $('#modal-body-show').html('').css('display', 'none');
 		});
+    }
+
+    function initializeSelect2() {
+        $(".claimant-tokenizer").select2({
+            placeholder: "Select a claimant...",
+            width: "100%",
+            allowClear: true,
+            tags: true,
+            dropdownParent: $(".claimant-tokenizer").parent(),
+            ajax: {
+                url: `${baseURL}/cadv-reim-liquidation/liquidation/get-custom-claimants`,
+                type: "post",
+                dataType: "json",
+                delay: 250,
+                data: function (params) {
+                    return {
+                        //_token: CSRF_TOKEN,
+                        search: params.term,
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, (item) => {
+                            let jsonData = {};
+                            jsonData["name"] = item.payee_name;
+                            payeeData[item.id] = jsonData;
+
+                            return {
+                                text: `${item.payee_name}`,
+                                id: item.id,
+                            };
+                        }),
+                        pagination: {
+                            more: true,
+                        },
+                    };
+                },
+                cache: true,
+            },
+            //theme: "material",
+        });
     }
 
     function sendRemarks(url, refreshURL, formData) {
@@ -68,6 +110,7 @@ $(function() {
         $('#modal-body-create').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
+            initializeSelect2();
             $(this).slideToggle(500);
         });
         $("#modal-lg-create").modal({keyboard: false, backdrop: 'static'})
@@ -91,6 +134,7 @@ $(function() {
         $('#modal-body-edit').load(url, function() {
             $('#mdb-preloader').fadeOut(300);
             $('.crud-select').materialSelect();
+            initializeSelect2();
             $(this).slideToggle(500);
         });
         $("#modal-lg-edit").modal({keyboard: false, backdrop: 'static'})

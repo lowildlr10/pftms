@@ -79,12 +79,17 @@
                                 <tbody>
                                     @if (count($list) > 0)
                                         @foreach ($list as $listCtr => $ors)
+
+                                    {{--
                                             @if (!$roleHasOrdinary && empty($ors->doc_status->date_issued) &&
                                                  Auth::user()->id != $ors->payee)
                                     <tr class="d-none">
                                             @else
                                     <tr class="hidden-xs">
                                             @endif
+                                    --}}
+
+                                    <tr class="hidden-xs">
                                         <td align="center">
                                             @if (!empty($ors->date_obligated))
                                             <i class="fas fa-file-signature fa-lg green-text material-tooltip-main"
@@ -131,6 +136,8 @@
                                         <td>
                                             @if (isset($ors->emppayee['firstname']))
                                             {{ $ors->emppayee['firstname'] }} {{ $ors->emppayee['lastname'] }}
+                                            @elseif (isset($ors->bidpayee['company_name']))
+                                            {{ $ors->bidpayee['company_name'] }}
                                             @else
                                             {{ $ors->custompayee['payee_name'] }}
                                             @endif
@@ -207,8 +214,10 @@
                                                 <b>Payee: </b>
                                                 @if (isset($ors->emppayee['firstname']))
                                                 {{ $ors->emppayee['firstname'] }} {{ $ors->emppayee['lastname'] }}
+                                                @elseif (isset($ors->bidpayee['company_name']))
+                                                {{ $ors->bidpayee['company_name'] }}
                                                 @else
-
+                                                {{ $ors->custompayee['payee_name'] }}
                                                 @endif
                                             </small>
                                         </td>
@@ -305,8 +314,10 @@
                             <strong>Payee: </strong>
                             @if (isset($ors->emppayee['firstname']))
                             {{ $ors->emppayee['firstname'] }} {{ $ors->emppayee['lastname'] }}
+                            @elseif (isset($ors->bidpayee['company_name']))
+                            {{ $ors->bidpayee['company_name'] }}
                             @else
-
+                            {{ $ors->custompayee['payee_name'] }}
                             @endif
                             <br>
 

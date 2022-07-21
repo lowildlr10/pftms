@@ -211,6 +211,19 @@
                             <span class="red-text">* </span>
                             [ A ] Certified: Correctness of the above date
                         </small>
+                        <select name="sig_claimant" id="claimant" class="claimant-tokenizer">
+                            @if (isset($claimant))
+                                @foreach ($claimants as $_claimants)
+                                    @foreach ($_claimants as $claim)
+                                        @if ($claim->id == $claimant)
+                            <option value="{{ $claim->id }}" selected>{{ $claim->payee_name }}</option>
+                                        @endif
+                                    @endforeach
+                                @endforeach
+                            @endif
+                        </select>
+
+                        {{--
                         <select id="sig-claimant" name="sig_claimant" searchable="Search here.."
                                 class="mdb-select crud-select md-form my-0 required">
                             <option value="" disabled selected
@@ -228,6 +241,7 @@
                             </option>
                             @endif
                         </select>
+                        --}}
                     </div>
                     <div class="md-form">
                         <div class="md-form my-0">

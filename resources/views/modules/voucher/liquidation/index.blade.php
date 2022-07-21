@@ -79,12 +79,17 @@
                                 <tbody>
                                     @if (count($list) > 0)
                                         @foreach ($list as $listCtr => $lr)
+
+                                    {{--
                                             @if (!$roleHasOrdinary && empty($lr->doc_status->date_issued) &&
                                                  Auth::user()->id != $lr->sig_claimant)
                                     <tr class="d-none">
                                             @else
                                     <tr class="hidden-xs">
                                             @endif
+                                    --}}
+
+                                    <tr class="hidden-xs">
                                         <td align="center">
                                             @if (!empty($lr->date_liquidated))
                                             <i class="fas fa-file-signature fa-lg green-text material-tooltip-main"
@@ -128,7 +133,15 @@
                                                 substr($lr->particulars, 0, 150).'...' : $lr->particulars
                                             }}
                                         </td>
-                                        <td>{{ $lr->empclaimant['firstname'] }} {{ $lr->empclaimant['lastname'] }}</td>
+                                        <td>
+                                        @if (isset($lr->empclaimant['firstname']))
+                                        {{ $lr->empclaimant['firstname'] }} {{ $lr->empclaimant['lastname'] }}
+                                        @elseif (isset($lr->bidclaimant['company_name']))
+                                        {{ $lr->bidclaimant['company_name'] }}
+                                        @else
+                                        {{ $lr->customclaimant['payee_name'] }}
+                                        @endif
+                                        </td>
                                         <td align="center">
                                             @if (!empty($lr->date_liquidated))
                                                 @if ((Auth::user()->role == 1 || Auth::user()->role == 4))
@@ -196,7 +209,14 @@
                                                 @endif
                                             </small><br>
                                             <small>
-                                                <b>Payee:</b> {{ $lr->empclaimant['firstname'] }} {{ $lr->empclaimant['lastname'] }}
+                                                <b>Claimant: </b>
+                                                @if (isset($lr->empclaimant['firstname']))
+                                                {{ $lr->empclaimant['firstname'] }} {{ $lr->empclaimant['lastname'] }}
+                                                @elseif (isset($lr->bidclaimant['company_name']))
+                                                {{ $lr->bidclaimant['company_name'] }}
+                                                @else
+                                                {{ $lr->customclaimant['payee_name'] }}
+                                                @endif
                                             </small>
                                         </td>
                                     </tr>
@@ -289,7 +309,15 @@
                                 (strlen($lr->particulars) > 150) ?
                                 substr($lr->particulars, 0, 150).'...' : $lr->particulars
                             }}<br>
-                            <strong>Payee: </strong> {{ $lr->empclaimant['firstname'] }} {{ $lr->empclaimant['lastname'] }}<br>
+                            <strong>Payee: </strong>
+                            @if (isset($lr->empclaimant['firstname']))
+                            {{ $lr->empclaimant['firstname'] }} {{ $lr->empclaimant['lastname'] }}
+                            @elseif (isset($lr->bidclaimant['company_name']))
+                            {{ $lr->bidclaimant['company_name'] }}
+                            @else
+                            {{ $lr->customclaimant['payee_name'] }}
+                            @endif
+                            <br>
 
                             @if (!$lr->date_liquidated)
                                 @if (!empty($lr->doc_status->issued_remarks) &&

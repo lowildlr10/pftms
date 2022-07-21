@@ -79,12 +79,17 @@
                                 <tbody>
                                     @if (count($list) > 0)
                                         @foreach ($list as $listCtr => $dv)
+
+                                        {{--
                                             @if (!$roleHasOrdinary && empty($dv->doc_status->date_issued) &&
                                                  Auth::user()->id != $dv->payee)
                                         <tr class="d-none">
                                                 @else
                                         <tr class="hidden-xs">
                                             @endif
+                                        --}}
+
+                                    <tr class="hidden-xs">
                                         <td align="center">
                                             @if (!empty($dv->date_for_payment))
                                                 @if (empty($dv->date_disbursed))
@@ -133,7 +138,15 @@
                                                 substr($dv->particulars, 0, 150).'...' : $dv->particulars
                                             }}
                                         </td>
-                                        <td>{{ $dv->emppayee['firstname'] }} {{ $dv->emppayee['lastname'] }}</td>
+                                        <td>
+                                            @if (isset($dv->emppayee['firstname']))
+                                            {{ $dv->emppayee['firstname'] }} {{ $dv->emppayee['lastname'] }}
+                                            @elseif (isset($dv->bidpayee['company_name']))
+                                            {{ $dv->bidpayee['company_name'] }}
+                                            @else
+                                            {{ $dv->custompayee['payee_name'] }}
+                                            @endif
+                                        </td>
                                         <td align="center">
                                             <a class="btn-floating btn-sm btn-mdb-color p-2 waves-effect material-tooltip-main mr-0"
                                                data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal"
@@ -182,7 +195,14 @@
                                                 @endif
                                             </small><br>
                                             <small>
-                                                <b>Payee:</b> {{ $dv->emppayee['firstname'] }} {{ $dv->emppayee['lastname'] }}
+                                                <b>Payee: </b>
+                                                @if (isset($dv->emppayee['firstname']))
+                                                {{ $dv->emppayee['firstname'] }} {{ $dv->emppayee['lastname'] }}
+                                                @elseif (isset($dv->bidpayee['company_name']))
+                                                {{ $dv->bidpayee['company_name'] }}
+                                                @else
+                                                {{ $dv->custompayee['payee_name'] }}
+                                                @endif
                                             </small>
                                         </td>
                                     </tr>
@@ -274,7 +294,15 @@
                                 (strlen($dv->particulars) > 150) ?
                                 substr($dv->particulars, 0, 150).'...' : $dv->particulars
                             }}<br>
-                            <strong>Payee: </strong> {{ $dv->emppayee['firstname'] }} {{ $dv->emppayee['lastname'] }}<br>
+                            <strong>Payee: </strong>
+                            @if (isset($dv->emppayee['firstname']))
+                            {{ $dv->emppayee['firstname'] }} {{ $dv->emppayee['lastname'] }}
+                            @elseif (isset($dv->bidpayee['company_name']))
+                            {{ $dv->bidpayee['company_name'] }}
+                            @else
+                            {{ $dv->custompayee['payee_name'] }}
+                            @endif
+                            <br>
 
                             @if (!empty($dv->date_for_payment))
                                 @if (!empty($dv->doc_status->issued_remarks) &&

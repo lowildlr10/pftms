@@ -422,7 +422,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'ca_lr',
         'access' => 'is_allowed'
     ])->name('ca-lr-store-remarks');
-    Route::post('cadv-reim-liquidation/liquidation/get-custom-payees', [
+    Route::post('cadv-reim-liquidation/liquidation/get-custom-claimants', [
         'uses' => 'CollectionController@getCustomPayees',
         'module' => 'ca_lr',
         'access' => 'is_allowed'

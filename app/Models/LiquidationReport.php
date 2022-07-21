@@ -77,8 +77,17 @@ class LiquidationReport extends Model
     public function dv() {
         return $this->hasOne('App\Models\DisbursementVoucher', 'id', 'dv_id');
     }
+
     public function empclaimant() {
         return $this->hasOne('App\Models\EmpAccount', 'id', 'sig_claimant');
+    }
+
+    public function bidclaimant() {
+        return $this->hasOne('App\Models\Supplier', 'id', 'sig_claimant');
+    }
+
+    public function customclaimant() {
+        return $this->hasOne('App\Models\CustomPayee', 'id', 'sig_claimant');
     }
 
     public $sortable = [

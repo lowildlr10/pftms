@@ -22,6 +22,7 @@ use App\Models\PaperSize;
 use App\Models\Supplier;
 use App\Models\Signatory;
 use App\Models\ItemUnitIssue;
+use App\Models\CustomPayee;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -165,8 +166,11 @@ class LiquidationController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showCreateFromDV($dvID) {
+        $claimants = [];
+
         $dvList = DisbursementVoucher::all();
         $dvData = DisbursementVoucher::find($dvID);
+        $particulars = str_replace("To payment", "To liquidate", $dvData->particulars);
         $amount = $dvData->amount;
         $dvNo = $dvData->dv_no;
         $dvDate = $dvData->date_dv;
@@ -175,6 +179,8 @@ class LiquidationController extends Controller
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
+
+        /*
         $claimants = $roleHasOrdinary ?
                 User::where('id', Auth::user()->id)
                     ->orderBy('firstname')
@@ -182,6 +188,20 @@ class LiquidationController extends Controller
                 User::where('is_active', 'y')
                     ->whereIn('division', $empDivisionAccess)
                     ->orderBy('firstname')->get();
+        */
+
+        $claimants[] = User::select(
+            DB::raw("CONCAT(firstname, ' ', lastname, ' [ ', position, ' ]') as name"),
+            'id'
+        )->orderBy('firstname')->get();
+        $claimants[] = Supplier::select(
+            DB::raw("CONCAT(company_name, ' ', ' [ Registered Supplier ]') as company_name"),
+            'id'
+        )->orderBy('company_name')->get();
+        $claimants[] = CustomPayee::select(
+            DB::raw("CONCAT(payee_name, ' [ Manually Added ]') as payee_name"),
+            'id'
+        )->orderBy('payee_name')->get();
 
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
@@ -194,7 +214,7 @@ class LiquidationController extends Controller
         }
 
         return view('modules.voucher.liquidation.create', compact(
-            'signatories', 'claimants', 'claimant',
+            'signatories', 'claimants', 'claimant', 'particulars',
             'dvNo', 'amount', 'dvList', 'dvID', 'dvDate'
         ));
     }
@@ -268,10 +288,24 @@ class LiquidationController extends Controller
         $routeName = 'ca-lr';
         $documentType = 'Liquidation Report';
 
-        try {
+
             $instanceDV = DisbursementVoucher::find($dvID);
 
             if ($instanceDV && !empty($instanceDV->dv_no)) {
+                $empData = User::where('id', $sigClaimant)->count();
+                $supplierData = Supplier::where('id', $sigClaimant)->count();
+                $customPayeeData = CustomPayee::where('id', $sigClaimant)
+                                            ->orWhere('payee_name', $sigClaimant)
+                                            ->count();
+
+                if (!$empData && !$supplierData && !$customPayeeData) {
+                    $instancePayee = CustomPayee::create([
+                        'payee_name' => $sigClaimant
+                    ]);
+
+                    $sigClaimant = $instancePayee->id->string;
+                }
+
                 $instanceLR = new LiquidationReport;
                 $instanceLR->period_covered = $periodCover;
                 $instanceLR->serial_no = $serialNo;
@@ -296,6 +330,7 @@ class LiquidationController extends Controller
                 $instanceLR->sig_accounting = $sigAccounting;
                 $instanceLR->jev_no = $jevNo;
                 $instanceLR->date_accounting = $dateAccounting;
+                $instanceLR->created_by = Auth::user()->id;
                 $instanceLR->save();
 
                 $msg = "$documentType successfully created.";
@@ -307,7 +342,7 @@ class LiquidationController extends Controller
                 Auth::user()->log($request, $msg);
                 return redirect(url()->previous())
                                      ->with('warning', $msg);
-            }
+            } try {
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
@@ -408,6 +443,20 @@ class LiquidationController extends Controller
         $documentType = 'Liquidation Report';
 
         try {
+            $empData = User::where('id', $sigClaimant)->count();
+            $supplierData = Supplier::where('id', $sigClaimant)->count();
+            $customPayeeData = CustomPayee::where('id', $sigClaimant)
+                                         //->orWhere('payee_name', $sigClaimant)
+                                         ->count();
+
+            if (!$empData && !$supplierData && !$customPayeeData) {
+                $instancePayee = CustomPayee::create([
+                    'payee_name' => $sigClaimant
+                ]);
+
+                $sigClaimant = $instancePayee->id->string;
+            }
+
             $instanceLR = LiquidationReport::find($id);
             $instanceLR->period_covered = $periodCover;
             $instanceLR->serial_no = $serialNo;

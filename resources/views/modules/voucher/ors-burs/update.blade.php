@@ -110,7 +110,13 @@
                 <div class="col-md-10 border border-left-0 border-bottom-0 border-dark">
                     <div class="md-form form-sm">
                         <select name="payee" id="payee" class="payee-tokenizer">
-
+                            @foreach ($payees as $_payees)
+                                @foreach ($_payees as $pay)
+                                    @if ($pay->id == $payee)
+                            <option value="{{ $pay->id }}" selected>{{ $pay->payee_name }}</option>
+                                    @endif
+                                @endforeach
+                            @endforeach
                         </select>
                         {{--
                         <select id="payee" name="payee" searchable="Search here.."

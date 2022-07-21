@@ -100,6 +100,10 @@ class DisbursementVoucher extends Model
         return $this->hasOne('App\Models\Supplier', 'id', 'payee');
     }
 
+    public function custompayee() {
+        return $this->hasOne('App\Models\CustomPayee', 'id', 'payee');
+    }
+
     public $sortable = [
         'dv_no',
         'particulars',

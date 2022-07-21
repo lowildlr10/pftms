@@ -16,6 +16,7 @@ class Update1LiquidationReportsTable extends Migration
         Schema::table('liquidation_reports', function (Blueprint $table) {
             $table->uuid('created_by')->nullable()->after('liquidated_by');
             $table->foreign('created_by')->nullable()->references('id')->on('emp_accounts');
+            $table->dropForeign('liquidation_reports_sig_claimant_foreign');
         });
     }
 
@@ -29,6 +30,7 @@ class Update1LiquidationReportsTable extends Migration
         Schema::table('liquidation_reports', function (Blueprint $table) {
             $table->dropForeign('liquidation_reports_created_by_foreign');
             $table->dropColumn('created_by');
+            $table->foreign('sig_claimant')->nullable()->references('id')->on('emp_accounts');
         });
     }
 }

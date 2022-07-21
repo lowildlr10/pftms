@@ -497,7 +497,7 @@ class ObligationRequestStatusController extends Controller
                                          ->orWhere('payee_name', $payee)
                                          ->count();
 
-            if (!$empData || !$supplierData || !$customPayeeData) {
+            if (!$empData && !$supplierData && !$customPayeeData) {
                 $instancePayee = CustomPayee::create([
                     'payee_name' => $payee
                 ]);
@@ -528,6 +528,7 @@ class ObligationRequestStatusController extends Controller
             $instanceORS->current = $current;
             $instanceORS->amount = $amount;
             $instanceORS->module_class = 2;
+            $instanceORS->created_by = Auth::user()->id;
             $instanceORS->save();
 
             $orsID = $instanceORS->id->string;
@@ -563,6 +564,8 @@ class ObligationRequestStatusController extends Controller
         $roleHasAdministrator = Auth::user()->hasAdministratorRole();
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
         $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
+
+        $payees = [];
 
         $orsData = ObligationRequestStatus::find($id);
         $isObligated = !empty($orsData->date_obligated) ? 1 : 0;
@@ -620,7 +623,18 @@ class ObligationRequestStatusController extends Controller
             $address = $address ? $address : $supplier->address;
         } else if ($moduleClass == 2) {
             $viewFile = 'modules.voucher.ors-burs.update';
-            $payees = User::orderBy('firstname')->get();
+            $payees[] = User::select(
+                DB::raw("CONCAT(firstname, ' ', lastname, ' [ ', position, ' ]') as name"),
+                'id'
+            )->orderBy('firstname')->get();
+            $payees[] = Supplier::select(
+                DB::raw("CONCAT(company_name, ' ', ' [ Registered Supplier ]') as company_name"),
+                'id'
+            )->orderBy('company_name')->get();
+            $payees[] = CustomPayee::select(
+                DB::raw("CONCAT(payee_name, ' [ Manually Added ]') as payee_name"),
+                'id'
+            )->orderBy('payee_name')->get();
             $employee = DB::table('emp_accounts')->where('id', $payee)->first();
             $address = $address ? $address : $employee->address;
         }
@@ -720,6 +734,7 @@ class ObligationRequestStatusController extends Controller
         $serialNo = $request->serial_no;
         $dateORS = !empty($request->date_ors_burs) ? $request->date_ors_burs: NULL;
         $fundCluster = $request->fund_cluster;
+        $payee = $request->payee;
         $office = $request->office;
         $address = $request->address;
         $responsibilityCenter = $request->responsibility_center;
@@ -743,6 +758,20 @@ class ObligationRequestStatusController extends Controller
             $instanceORS = ObligationRequestStatus::find($id);
             $moduleClass = $instanceORS->module_class;
 
+            $empData = User::where('id', $payee)->count();
+            $supplierData = Supplier::where('id', $payee)->count();
+            $customPayeeData = CustomPayee::where('id', $payee)
+                                         //->orWhere('payee_name', $payee)
+                                         ->count();
+
+            if (!$empData && !$supplierData && !$customPayeeData) {
+                $instancePayee = CustomPayee::create([
+                    'payee_name' => $payee
+                ]);
+
+                $payee = $instancePayee->id->string;
+            }
+
             if ($moduleClass == 3) {
                 $routeName = 'proc-ors-burs';
             } else if ($moduleClass == 2) {
@@ -754,6 +783,7 @@ class ObligationRequestStatusController extends Controller
             $instanceORS->serial_no = $serialNo;
             $instanceORS->date_ors_burs = $dateORS;
             $instanceORS->fund_cluster = $fundCluster;
+            $instanceORS->payee = $payee;
             $instanceORS->office = $office;
             $instanceORS->address = $address;
             $instanceORS->responsibility_center = $responsibilityCenter;
@@ -1288,7 +1318,9 @@ class ObligationRequestStatusController extends Controller
 
     public function obligate(Request $request, $id) {
         $serialNo = $request->serial_no;
-        $request->uacs_object_code = implode(',', $request->uacs_object_code);
+        $request->uacs_object_code = $request->uacs_object_code ?
+                                    implode(',', $request->uacs_object_code):
+                                    NULL;
         //$uacsObjectCode = $request->uacs_object_code ? serialize($request->uacs_object_code) : serialize([]);
         $uacsIDs = $request->uacs_id;
         $uacsDescriptions = $request->uacs_description;

@@ -33,6 +33,7 @@ use App\Models\MonitoringOffice;
 use App\Models\AllotmentClass;
 use App\Models\FundingProject;
 use App\Models\MooeAccountTitle;
+use App\Models\CustomePayee;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -2995,23 +2996,43 @@ class PrintController extends Controller
     }
 
     private function getDataDV($id, $type) {
-        if ($type == 'procurement') {
+        $payee = "";
 
+        if ($type == 'procurement') {
             $dv = DB::table('disbursement_vouchers as dv')
                     ->select('dv.id as dv_id', 'dv.*', 'bid.company_name', 'bid.vat_no as tin')
                     ->join('obligation_request_status as ors', 'ors.id', '=', 'dv.ors_id')
-                    ->join('suppliers as bid', 'bid.id', '=', 'ors.payee')
+                    ->join('suppliers as bid', 'bid.id', '=', 'dv.payee')
                     ->where('dv.id', $id)
                     ->first();
+
+            $payee = $dv->company_name;
         } else if ($type == 'cashadvance') {
             $dv = DB::table('disbursement_vouchers as dv')
-                    ->select('dv.id as dv_id', 'dv.*', 'emp.emp_id')
-                    ->join('emp_accounts as emp', 'emp.id', '=', 'dv.payee')
+                    ->select(
+                        'dv.id as dv_id', 'dv.*', 'emp.emp_id',
+                        'emp.firstname', 'emp.middlename', 'emp.lastname',
+                        'bid.company_name', 'pay.payee_name'
+                    )
+                    ->leftJoin('emp_accounts as emp', 'emp.id', '=', 'dv.payee')
+                    ->leftJoin('suppliers as bid', 'bid.id', '=', 'dv.payee')
+                    ->leftJoin('custom_payees as pay', 'pay.id', '=', 'dv.payee')
                     ->where('dv.id', $id)
                     ->first();
+
+            if ($dv->firstname) {
+                if (!empty($dv->middlename)) {
+                    $payee = $dv->firstname . " " . $dv->middlename[0] . ". " . $dv->lastname;
+                } else {
+                    $payee = $dv->firstname . " " . $dv->lastname;
+                }
+            } else if ($dv->company_name) {
+                $payee = $dv->company_name;
+            } else {
+                $payee = $dv->payee_name;
+            }
         }
 
-        $payee = "";
         $multiplier = 100 / 91.4296;
 
         if (strpos($dv->particulars, "\n") !== FALSE) {
@@ -3076,12 +3097,6 @@ class PrintController extends Controller
         $tableData[] = [$dv->particulars,
                         $dv->responsibility_center,
                         $mfoPAP, $amount];
-
-        if ($dv->module_class == 3) {
-            $payee = $dv->company_name;
-        } else if ($dv->module_class == 2) {
-            $payee = Auth::user()->getEmployee($dv->payee)->name;
-        }
 
         $dataHeader = [
             [
@@ -3232,16 +3247,27 @@ class PrintController extends Controller
             $payee = $ors->company_name;
         } else if ($type == 'cashadvance'){
             $ors = DB::table('obligation_request_status as ors')
-                     ->select('ors.*', 'emp.firstname', 'emp.middlename', 'emp.lastname')
-                     ->join('emp_accounts as emp', 'emp.id', '=', 'ors.payee')
+                     ->select(
+                        'ors.*', 'emp.firstname', 'emp.middlename', 'emp.lastname',
+                        'bid.company_name', 'pay.payee_name'
+                     )
+                     ->leftJoin('emp_accounts as emp', 'emp.id', '=', 'ors.payee')
+                     ->leftJoin('suppliers as bid', 'bid.id', '=', 'ors.payee')
+                     ->leftJoin('custom_payees as pay', 'pay.id', '=', 'ors.payee')
                      ->where([['ors.id', $id], ['ors.module_class', 2]])
                      ->first();
             $payee = "";
 
-            if (!empty($ors->middlename)) {
-                $payee = $ors->firstname . " " . $ors->middlename[0] . ". " . $ors->lastname;
+            if ($ors->firstname) {
+                if (!empty($ors->middlename)) {
+                    $payee = $ors->firstname . " " . $ors->middlename[0] . ". " . $ors->lastname;
+                } else {
+                    $payee = $ors->firstname . " " . $ors->lastname;
+                }
+            } else if ($ors->company_name) {
+                $payee = $ors->company_name;
             } else {
-                $payee = $ors->firstname . " " . $ors->lastname;
+                $payee = $ors->payee_name;
             }
         }
 
