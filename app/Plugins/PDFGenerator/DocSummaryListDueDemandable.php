@@ -44,7 +44,8 @@ class DocSummaryListDueDemandable extends PDF {
         $this->SetHeaderMargin(10);
         $this->SetFooterMargin(5);
         $this->SetPrintHeader(false);
-        $this->SetPrintFooter(false);
+        //$this->SetPrintFooter(false);
+        $this->generateInfoOnly = true;
 
         //Set auto page breaks
         $this->SetAutoPageBreak(TRUE, 5);

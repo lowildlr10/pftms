@@ -34,7 +34,8 @@ class DocLineItemBudgetRealignment extends PDF {
         $this->SetMargins(10, 15, 10);
         $this->SetHeaderMargin(10);
         $this->SetPrintHeader(false);
-        $this->SetPrintFooter(false);
+        //$this->SetPrintFooter(false);
+        $this->generateInfoOnly = true;
 
         //Set auto page breaks
         $this->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);

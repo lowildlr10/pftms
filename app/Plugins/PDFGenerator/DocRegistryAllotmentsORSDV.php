@@ -8,7 +8,7 @@ class DocRegistryAllotmentsORSDV extends PDF {
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
 
-        $this->docId = $data->id;
+        $this->docId = implode(', ', $data->id);
 
         /* ------------------------------------- Start of Config ------------------------------------- */
 

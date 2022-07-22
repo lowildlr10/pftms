@@ -1260,6 +1260,7 @@ class PrintController extends Controller
         }
 
         return (object)[
+            'id' => $_regAllotIDs,
             'data' => $data
         ];
     }
@@ -1708,6 +1709,7 @@ class PrintController extends Controller
         ];
 
         return (object)[
+            'id' => $budRealignID,
             'header_count' => $tableHeaderCount,
             'table_data' => $data,
             'cy_year' => $cyYear,
@@ -2110,6 +2112,7 @@ class PrintController extends Controller
         ];
 
         return (object)[
+            'id' => $budgetID,
             'header_count' => $tableHeaderCount,
             'table_data' => $data,
             'cy_year' => $cyYear,

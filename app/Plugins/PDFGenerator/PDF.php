@@ -19,6 +19,7 @@ class PDF extends TCPDF {
     public $customPageNo = null;
     public $onlyPageNo = false;
     public $isPageGrouped = false;
+    public $generateInfoOnly = false;
 
     /*
     //Set the array of column alignments
@@ -299,37 +300,45 @@ class PDF extends TCPDF {
     }
 
     public function Footer() {
+
+        if (!$this->generateInfoOnly) {
+            // Go to 1.5 cm from bottom
+            $this->SetY(-15);
+            // Select helvetica italic 8
+            $this->SetFont('helvetica', '', $this->footerFontSize + ($this->fontScale * $this->footerFontSize));
+            // Print current and total page numbers
+
+            //$this->Cell(0,10,'Page '.$this->pageNo().'/{nb}',0,0,'C');
+
+            if (!$this->onlyPageNo) {
+                $this->Cell(0, 4, 'This document shall be deemed uncontrolled unless labelled "CONTROLLED"', 0, 0, 'C');
+                $this->ln();
+
+                $this->Cell($this->w - ($this->w * 0.51), 4, 'User should verify latest', 0, 0, 'R');
+                $this->SetFont('helvetica', 'B', $this->footerFontSize + ($this->fontScale * $this->footerFontSize));
+                $this->Cell(0, 4, ' revision.', 0, 0, 'L');
+                $this->ln();
+            }
+
+            $this->SetFont('helvetica', 'I', 7);
+
+            if (!$this->isPageGrouped) {
+                $pageNo = 'Page '.$this->getAliasNumPage().' of '.$this->getAliasNbPages();
+            } else {
+                $pageNo = 'Page '.$this->getPageNumGroupAlias().' of '.$this->getPageGroupAlias();
+            }
+
+            $this->Cell(0, 3, $pageNo, 0, 0, 'R');
+
+            $this->GenerateInfo();
+        } else {
+            $this->GenerateInfo();
+        }
+    }
+
+    public function GenerateInfo() {
         $pageWidth = $this->w;
         $pageHeight = $this->h;
-
-        // Go to 1.5 cm from bottom
-        $this->SetY(-15);
-        // Select helvetica italic 8
-        $this->SetFont('helvetica', '', $this->footerFontSize + ($this->fontScale * $this->footerFontSize));
-        // Print current and total page numbers
-
-        //$this->Cell(0,10,'Page '.$this->pageNo().'/{nb}',0,0,'C');
-
-        if (!$this->onlyPageNo) {
-            $this->Cell(0, 4, 'This document shall be deemed uncontrolled unless labelled "CONTROLLED"', 0, 0, 'C');
-            $this->ln();
-
-            $this->Cell($this->w - ($this->w * 0.51), 4, 'User should verify latest', 0, 0, 'R');
-            $this->SetFont('helvetica', 'B', $this->footerFontSize + ($this->fontScale * $this->footerFontSize));
-            $this->Cell(0, 4, ' revision.', 0, 0, 'L');
-            $this->ln();
-        }
-
-        $this->SetFont('helvetica', 'I', 7);
-
-        if (!$this->isPageGrouped) {
-            $pageNo = 'Page '.$this->getAliasNumPage().' of '.$this->getAliasNbPages();
-        } else {
-            $pageNo = 'Page '.$this->getPageNumGroupAlias().' of '.$this->getPageGroupAlias();
-        }
-
-        $this->Cell(0, 3, $pageNo, 0, 0, 'R');
-
         $code = $this->docId; // qrcode
 
         if (isset($code) && !empty($code)) {
