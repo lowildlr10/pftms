@@ -235,7 +235,7 @@ $(function () {
         });
     };
 
-    $.fn.download = function () {
+    $.fn.downloadPDF = function () {
         const paperSize = $("#paper-size").val(),
             fontSize = $("#font-size").val(),
             otherParam = $("#other_param").val(),
@@ -243,6 +243,20 @@ $(function () {
 
         $("#inp-document-type").val(documentType);
         $("#inp-preview-toggle").val("download");
+        $("#inp-font-scale").val(fontSize);
+        $("#inp-paper-size").val(paperSize);
+        $("#inp-other-param").val(otherParam);
+        $("#modal-print-content object form").attr("action", url).submit();
+    };
+
+    $.fn.downloadImage = function () {
+        const paperSize = $("#paper-size").val(),
+            fontSize = $("#font-size").val(),
+            otherParam = $("#other_param").val(),
+            url = (urlPost = `${baseURL}/print/${key}`);
+
+        $("#inp-document-type").val(documentType);
+        $("#inp-preview-toggle").val("download-image");
         $("#inp-font-scale").val(fontSize);
         $("#inp-paper-size").val(paperSize);
         $("#inp-other-param").val(otherParam);

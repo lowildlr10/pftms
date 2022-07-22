@@ -69,8 +69,11 @@
 
             <!--Footer-->
             <div class="modal-footer">
-                <button class="btn btn-primary btn-sm waves-effect" onclick="$(this).download();">
-                    <i class="fas fa-download"></i> Download
+                <button class="btn btn-primary btn-sm waves-effect" onclick="$(this).downloadPDF();">
+                    <i class="fas fa-file-pdf"></i> Download as PDF
+                </button>
+                <button class="btn btn-primary btn-sm waves-effect" onclick="$(this).downloadImage();">
+                    <i class="fas fa-image"></i> Download as Image
                 </button>
                 <button type="button" class="btn btn-outline-black btn-sm waves-effect"
                         data-dismiss="modal">Close</button>

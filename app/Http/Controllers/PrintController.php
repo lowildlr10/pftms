@@ -3987,6 +3987,18 @@ class PrintController extends Controller
     private function printDocument($pdf, $docTitle, $previewToggle) {
         if ($previewToggle == 'download') {
             $pdf->Output($docTitle . '.pdf', 'D');
+        } else if ($previewToggle == 'download-image') {
+            $imageBlob = $pdf->Output($docTitle, 'S');
+
+            $imagick = new \Imagick();
+            $imagick->setResolution(300,300);
+            $imagick->readImageBlob($imageBlob);
+            $imagick->setImageFormat('jpg');
+
+            header('Content-type: image/jpg');
+            header('Content-Disposition: attachment; filename="' . $docTitle . '.jpg"');
+
+            echo $imagick;
         } else {
             $pdf->Output($docTitle . '.pdf', 'I');
         }

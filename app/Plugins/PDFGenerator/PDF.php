@@ -357,7 +357,7 @@ class PDF extends TCPDF {
             $this->StartTransform();
             $this->setXY(21, $pageHeight - 19);
             $this->SetFont('helvetica', 'IB', 6);
-            $this->Write(0, 'Generated On:', '', 0, '', true, 0, false, false, 0);
+            $this->Write(0, 'Last Printed/Generated:', '', 0, '', true, 0, false, false, 0);
             $this->setXY(21, $pageHeight - 16);
             $this->SetFont('helvetica', 'I', 6);
             $this->Write(0, Carbon::now(), '', 0, '', true, 0, false, false, 0);
