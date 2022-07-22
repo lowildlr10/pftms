@@ -101,7 +101,8 @@ class PurchaseRequestController extends Controller
 
                 $prData = $prData->whereIn('requested_by', $userIDs);
             } else {
-                $empDivisionAccess = [Auth::user()->division];
+                //$empDivisionAccess = [Auth::user()->division];
+                $empDivisionAccess = Auth::user()->getDivisionAccess();
                 $prData = $prData->where('requested_by', Auth::user()->id);
             }
         } else {
@@ -562,7 +563,7 @@ class PurchaseRequestController extends Controller
                     User::where('id', Auth::user()->id)->get() :
                     User::where('is_active', 'y')->orderBy('firstname')->get();
             $divisions = ($roleHasOrdinary || $roleHasBudget || $roleHasAccountant) ?
-                    EmpDivision::where('id', Auth::user()->division)
+                    EmpDivision::whereIn('id', $empDivisionAccess)
                                ->orderBy('division_name')
                                ->get() :
                     EmpDivision::orderBy('division_name')
@@ -861,6 +862,7 @@ class PurchaseRequestController extends Controller
                 $instancePR->recommended_by = $recommendedBy;
                 $instancePR->office = $office;
                 $instancePR->status = 1;
+                $instancePR->created_by = Auth::user()->id;
                 $instancePR->save();
 
                 // Storing PR Items data
