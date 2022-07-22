@@ -3053,6 +3053,10 @@ class PrintController extends Controller
             $dv->responsibility_center = str_replace($searchStr, '<br>', $dv->responsibility_center);
         }
 
+        if (strlen($dv->particulars) < 300) {
+            $dv->particulars .= '<br><br><br><br><br>';
+        }
+
         /*
         if (strpos($dv->mfo_pap, "\n") !== FALSE) {
             $searchStr = ["\r\n", "\n", "\r"];
@@ -3325,6 +3329,10 @@ class PrintController extends Controller
         if (strpos($ors->particulars, "\n") !== FALSE) {
             $searchStr = ["\r\n", "\n", "\r"];
             $ors->particulars = str_replace($searchStr, '<br>', $ors->particulars);
+        }
+
+        if (strlen($ors->particulars) < 300) {
+            $ors->particulars .= '<br><br><br><br><br><br>';
         }
 
         /*
