@@ -7,6 +7,9 @@ class DocLineItemBudgetRealignment extends PDF {
         $pageHeight = $this->h;
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
+
+        $this->docId = $data->id;
+
         $originalFontSize = $data->header_count > 7 ? 8 : 9;
 
         $cy = $data->cy_year;

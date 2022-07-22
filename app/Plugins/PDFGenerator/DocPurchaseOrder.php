@@ -7,6 +7,9 @@ class DocPurchaseOrder extends PDF {
         $pageHeight = $this->h;
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
+
+        $this->docId = $data->po->id;
+
         $poDate = $data->po->date_po;
         $appName = strtoupper($data->po->sig_approval);
         $deptName = strtoupper($data->po->sig_funds_available);

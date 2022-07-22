@@ -8,6 +8,8 @@ class DocListDueDemandable extends PDF {
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
 
+        $this->docId = $data->lddap->id;
+
         $docSubject = "List of Due And Demandable Accounts Payable - Advice to Debit Accounts";
 
         $lddapDate = date('j F Y', strtotime($data->lddap->date_lddap));

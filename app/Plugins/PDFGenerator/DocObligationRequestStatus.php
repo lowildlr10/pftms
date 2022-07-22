@@ -7,6 +7,9 @@ class DocObligationRequestStatus extends PDF {
         $pageHeight = $this->h;
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
+
+        $this->docId = $data->ors->id;
+
         $orsDate = $data->ors->date_ors_burs;
         $sDate2 = $data->sDate1;
         $sDate1 = $data->sDate2;

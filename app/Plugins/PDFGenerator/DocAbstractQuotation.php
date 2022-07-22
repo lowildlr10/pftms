@@ -8,9 +8,10 @@ class DocAbstractQuotation extends PDF {
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
 
+        $this->docId = $data->abstract->id;
+
         $prNo = $data->pr->pr_no;
         $abstractDate = $data->abstract->date_abstract;
-
 
         $chairperson = strtoupper($data->sig_chairperson->name);
         $viceChairperson = strtoupper($data->sig_vice_chairperson->name);

@@ -7,6 +7,9 @@ class DocJobOrder extends PDF {
         $pageHeight = $this->h;
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
+
+        $this->docId = $data->jo->id;
+
         $contentWidth = $pageWidth  - 20;
         $joDate = $data->jo->date_po;
         $deptName = strtoupper($data->jo->sig_department);

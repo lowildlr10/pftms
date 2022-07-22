@@ -8,6 +8,8 @@ class DocSummaryListDueDemandable extends PDF {
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
 
+        $this->docId = $data->summary->id;
+
         $mdsNo = $data->mds_account_no;
         $department = $data->summary->department;
         $department = $data->summary->department;

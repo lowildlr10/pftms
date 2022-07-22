@@ -8,6 +8,8 @@ class DocRegistryAllotmentsORSDV extends PDF {
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
 
+        $this->docId = $data->id;
+
         /* ------------------------------------- Start of Config ------------------------------------- */
 
         //set default monospaced font

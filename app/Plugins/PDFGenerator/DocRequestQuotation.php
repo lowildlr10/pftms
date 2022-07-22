@@ -8,6 +8,8 @@ class DocRequestQuotation extends PDF {
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
 
+        $this->docId = $data->rfq->id;
+
         /* ------------------------------------- Start of Config ------------------------------------- */
 
         //set default monospaced font

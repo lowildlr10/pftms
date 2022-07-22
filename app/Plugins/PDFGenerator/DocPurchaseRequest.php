@@ -8,6 +8,8 @@ class DocPurchaseRequest extends PDF {
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
 
+        $this->docId = $data->pr->id;
+
         $data->requested_by->name = strtoupper($data->requested_by->name);
         $data->approved_by->name = strtoupper($data->approved_by->name);
         $data->recommended_by->name = strtoupper($data->recommended_by->name);

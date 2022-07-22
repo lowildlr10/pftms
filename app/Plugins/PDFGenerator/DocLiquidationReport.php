@@ -7,6 +7,9 @@ class DocLiquidationReport extends PDF {
         $pageHeight = $this->h;
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
+
+        $this->docId = $data->liq->id;
+
         $serialNo = $data->liq->serial_no;
         $dateLiquidation = $data->liq->date_liquidation;
         $dateClaimant = $data->liq->date_claimant;

@@ -8,6 +8,8 @@ class DocInspectionAcceptanceReport extends PDF {
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
 
+        $this->docId = $data->iar->id;
+
         $poDate = $data->iar->date_po;
         $iarDate = $data->iar->date_iar;
         $invoiceDate = $data->iar->date_invoice;

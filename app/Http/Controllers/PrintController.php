@@ -2329,6 +2329,7 @@ class PrintController extends Controller
         ];
 
         return (object)[
+            'id' => $invStockIssueID,
             'fund_cluster' => $fundCluster,
             'entity_name' => $entityName,
             'inventory_no' => $inventoryNo,
@@ -2467,6 +2468,7 @@ class PrintController extends Controller
         ];
 
         return (object)[
+            'id' => $invStockIssueID,
             'fund_cluster' => $fundCluster,
             'inventory_no' => $inventoryNo,
             'office' => $office,
@@ -2558,6 +2560,7 @@ class PrintController extends Controller
         ];
 
         return (object)[
+            'id' => $invStockIssueID,
             'fund_cluster' => $fundCluster,
             'inventory_no' => $inventoryNo,
             'po_no' => $poNo,

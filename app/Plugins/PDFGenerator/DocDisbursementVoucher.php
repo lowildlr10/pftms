@@ -7,6 +7,9 @@ class DocDisbursementVoucher extends PDF {
         $pageHeight = $this->h;
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
+
+        $this->docId = $data->dv->id;
+
         $dvDate = $data->dv->date_dv;
         $signatory = strtoupper($data->sign1);
         $sign1 = strtoupper($data->sign2);

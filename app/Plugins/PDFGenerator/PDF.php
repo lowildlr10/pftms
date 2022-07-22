@@ -3,12 +3,14 @@
 namespace App\Plugins\PDFGenerator;
 
 use \TCPDF;
+use Carbon\Carbon;
 
 class PDF extends TCPDF {
     // variable to store widths and aligns of cells, and line height
     public $headerIcon = true;
     public $headerVerRev = true;
     public $docCode;
+    public $docId;
     public $docRev;
     public $docRevDate;
     public $fontScale = 0;
@@ -297,6 +299,9 @@ class PDF extends TCPDF {
     }
 
     public function Footer() {
+        $pageWidth = $this->w;
+        $pageHeight = $this->h;
+
         // Go to 1.5 cm from bottom
         $this->SetY(-15);
         // Select helvetica italic 8
@@ -323,8 +328,38 @@ class PDF extends TCPDF {
             $pageNo = 'Page '.$this->getPageNumGroupAlias().' of '.$this->getPageGroupAlias();
         }
 
-
         $this->Cell(0, 3, $pageNo, 0, 0, 'R');
+
+        $code = $this->docId; // qrcode
+
+        if (isset($code) && !empty($code)) {
+            $style = array(
+                'border' => false,
+                'vpadding' => 'auto',
+                'hpadding' => 'auto',
+                'fgcolor' => [64, 64, 64],
+                'bgcolor' => false, //array(255,255,255)
+                'module_width' => 1, // width of a single module in points
+                'module_height' => 1 // height of a single module in points
+            );
+            $this->write2DBarcode($code, 'QRCODE,H', 0, $pageHeight - 20, 25, 16, $style, 'N');
+
+            $this->SetTextColor(96, 96, 96);
+            $this->StartTransform();
+            $this->setXY(21, $pageHeight - 19);
+            $this->SetFont('helvetica', 'IB', 6);
+            $this->Write(0, 'Generated On:', '', 0, '', true, 0, false, false, 0);
+            $this->setXY(21, $pageHeight - 16);
+            $this->SetFont('helvetica', 'I', 6);
+            $this->Write(0, Carbon::now(), '', 0, '', true, 0, false, false, 0);
+            $this->setXY(21, $pageHeight - 11);
+            $this->SetFont('helvetica', 'IB', 6);
+            $this->Write(0, 'PFTMS Doc ID:', '', 0, '', true, 0, false, false, 0);
+            $this->setXY(21, $pageHeight - 8);
+            $this->SetFont('helvetica', 'I', 6);
+            $this->Write(0, $code, '', 0, '', true, 0, false, false, 0);
+            $this->StopTransform();
+        }
     }
 
 }

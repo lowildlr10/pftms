@@ -8,6 +8,8 @@ class DocInventoryCustodian extends PDF {
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
 
+        $this->docId = $data->id;
+
         $data->fund_cluster = $data->fund_cluster ? $data->fund_cluster : '01';
         $data->entity_name = $data->entity_name ? $data->entity_name : 'Department of Science and Technology - CAR';
         $data->received_from_name = strtoupper($data->received_from_name);

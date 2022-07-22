@@ -8,6 +8,8 @@ class DocPropertyAcknowledgement extends PDF {
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
 
+        $this->docId = $data->id;
+
         $data->fund_cluster = $data->fund_cluster ? $data->fund_cluster : '01';
         $data->received_by_name = strtoupper($data->received_by_name);
         $data->issued_by_name = strtoupper($data->issued_by_name);

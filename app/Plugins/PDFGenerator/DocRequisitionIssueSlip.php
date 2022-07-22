@@ -8,6 +8,8 @@ class DocRequisitionIssueSlip extends PDF {
         $pageWidth = $this->w;
         $fontScale = $this->fontScale;
 
+        $this->docId = $data->id;
+
         $data->fund_cluster = $data->fund_cluster ? $data->fund_cluster : '01';
         $data->responsibility_center = $data->responsibility_center ? $data->responsibility_center : '19 001 03000 14';
 
