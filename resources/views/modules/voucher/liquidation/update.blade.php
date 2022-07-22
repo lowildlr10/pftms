@@ -212,10 +212,10 @@
                             [ A ] Certified: Correctness of the above date
                         </small>
                         <select name="sig_claimant" id="claimant" class="claimant-tokenizer">
-                            @if (isset($claimant))
+                            @if (isset($sigClaimant))
                                 @foreach ($claimants as $_claimants)
                                     @foreach ($_claimants as $claim)
-                                        @if ($claim->id == $claimant)
+                                        @if ($claim->id == $sigClaimant)
                             <option value="{{ $claim->id }}" selected>{{ $claim->payee_name }}</option>
                                         @endif
                                     @endforeach

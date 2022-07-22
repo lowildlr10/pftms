@@ -205,7 +205,7 @@
                             <span class="red-text">* </span>
                             [ A ] Certified: Correctness of the above date
                         </small>
-                        <select name="claimant" id="sig_claimant" class="claimant-tokenizer">
+                        <select name="sig_claimant" id="claimant" class="claimant-tokenizer">
                             @if (isset($claimant))
                                 @foreach ($claimants as $_claimants)
                                     @foreach ($_claimants as $claim)

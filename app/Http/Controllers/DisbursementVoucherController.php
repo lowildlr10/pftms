@@ -299,7 +299,8 @@ class DisbursementVoucherController extends Controller
             if ($roleHasDeveloper || $roleHasBudget || $roleHasAccountant || $roleHasRD ||
                 $roleHasARD) {
             } else {
-                 $dvData = $dvData->where('payee', Auth::user()->id);
+                 $dvData = $dvData->where('payee', Auth::user()->id)
+                                  ->orWhere('created_by', Auth::user()->id);
             }
 
             if (!empty($keyword)) {
@@ -321,6 +322,10 @@ class DisbursementVoucherController extends Controller
                                   ->orWhere('middlename', 'like', "%$keyword%")
                                   ->orWhere('lastname', 'like', "%$keyword%")
                                   ->orWhere('position', 'like', "%$keyword%");
+                        })->orWhereHas('bidpayee', function($query) use ($keyword) {
+                            $query->where('company_name', 'like', "%$keyword%");
+                        })->orWhereHas('custompayee', function($query) use ($keyword) {
+                            $query->where('payee_name', 'like', "%$keyword%");
                         });
                 });
             }
@@ -362,7 +367,7 @@ class DisbursementVoucherController extends Controller
                                       ->get();
         $orsList = ObligationRequestStatus::all();
         $orsData = ObligationRequestStatus::with('emppayee')->find($orsID);
-        $empID = $orsData->emppayee['emp_id'];
+        $empID = isset($orsData->emppayee['emp_id']) ? $orsData->emppayee['emp_id'] : NULL;
         $payee = $orsData->payee;
         $mfoPAP = $orsData->mfo_pap ?
                   unserialize($orsData->mfo_pap) :
@@ -796,7 +801,7 @@ class DisbursementVoucherController extends Controller
                 DB::raw("CONCAT(payee_name, ' [ Manually Added ]') as payee_name"),
                 'id'
             )->orderBy('payee_name')->get();
-            $tinNo = $dvData->emppayee['emp_id'];
+            $tinNo = isset($dvData->emppayee['emp_id']) ? $dvData->emppayee['emp_id'] : NULL;
             $viewFile = 'modules.voucher.dv.update';
         }
 

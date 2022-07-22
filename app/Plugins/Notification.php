@@ -182,7 +182,7 @@ class Notification {
                         linked to PO/JO number <b>$poNo</b> is now <b>Obligated</b>.";
         } else {
             $module = 'cash_advance';
-            $userID = $orsData->payee;
+            $userID = $orsData->created_by;
             $msgNotif = "Your <b>$documentType</b> with a serial number of <b>$serialNo</b>
                         is now <b>Obligated</b>.";
         }

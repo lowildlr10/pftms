@@ -232,7 +232,8 @@ class ObligationRequestStatusController extends Controller
             if ($roleHasDeveloper || $roleHasBudget || $roleHasAccountant || $roleHasRD ||
                 $roleHasARD) {
             } else {
-                 $orsData = $orsData->where('payee', Auth::user()->id);
+                 $orsData = $orsData->where('payee', Auth::user()->id)
+                                    ->orWhere('created_by', Auth::user()->id);
             }
 
             if (!empty($keyword)) {
@@ -255,6 +256,10 @@ class ObligationRequestStatusController extends Controller
                                   ->orWhere('middlename', 'like', "%$keyword%")
                                   ->orWhere('lastname', 'like', "%$keyword%")
                                   ->orWhere('position', 'like', "%$keyword%");
+                        })->orWhereHas('bidpayee', function($query) use ($keyword) {
+                            $query->where('company_name', 'like', "%$keyword%");
+                        })->orWhereHas('custompayee', function($query) use ($keyword) {
+                            $query->where('payee_name', 'like', "%$keyword%");
                         });
                 });
             }

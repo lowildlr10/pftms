@@ -2934,8 +2934,10 @@ class PrintController extends Controller
     private function getDataLiquidation($id) {
         $liq = DB::table('liquidation_reports as liq')
                  ->select('liq.*', 'emp.firstname', 'emp.middlename', 'emp.lastname',
-                          'dv.dv_no')
-                 ->join('emp_accounts as emp', 'emp.id', '=', 'liq.sig_claimant')
+                          'bid.company_name', 'pay.payee_name', 'dv.dv_no')
+                 ->leftJoin('emp_accounts as emp', 'emp.id', '=', 'liq.sig_claimant')
+                 ->leftJoin('suppliers as bid', 'bid.id', '=', 'liq.sig_claimant')
+                 ->leftJoin('custom_payees as pay', 'pay.id', '=', 'liq.sig_claimant')
                  ->join('disbursement_vouchers as dv', 'dv.id', '=', 'liq.dv_id')
                  ->where('liq.id', $id)
                  ->first();
@@ -2946,7 +2948,7 @@ class PrintController extends Controller
         $multiplier = 100 / 90;
 
         $instanceSignatory = new Signatory;
-        $claimant = Auth::user()->getEmployee($liq->sig_claimant)->name;
+        //$claimant = Auth::user()->getEmployee($liq->sig_claimant)->name;
         $supervisor = $instanceSignatory->getSignatory($liq->sig_supervisor)->name;
         $accounting = $instanceSignatory->getSignatory($liq->sig_accounting)->name;
 
@@ -2956,10 +2958,16 @@ class PrintController extends Controller
             $liq->particulars = $liq->particulars . '<br>';
         }
 
-        if (!empty($liq->middlename)) {
-            $claimant = $liq->firstname . " " . $liq->middlename[0] . ". " . $liq->lastname;
+        if ($liq->firstname) {
+            if (!empty($liq->middlename)) {
+                $claimant = $liq->firstname . " " . $liq->middlename[0] . ". " . $liq->lastname;
+            } else {
+                $claimant = $liq->firstname . " " . $liq->lastname;
+            }
+        } else if ($liq->company_name) {
+            $claimant = $liq->company_name;
         } else {
-            $claimant = $liq->firstname . " " . $liq->lastname;
+            $claimant = $liq->payee_name;
         }
 
         $tableData[] = [$liq->particulars,

@@ -138,8 +138,10 @@
                                             {{ $ors->emppayee['firstname'] }} {{ $ors->emppayee['lastname'] }}
                                             @elseif (isset($ors->bidpayee['company_name']))
                                             {{ $ors->bidpayee['company_name'] }}
-                                            @else
+                                            @elseif (isset($ors->custompayee['payee_name']))
                                             {{ $ors->custompayee['payee_name'] }}
+                                            @else
+                                            None
                                             @endif
                                         </td>
                                         <td align="center">
@@ -216,8 +218,10 @@
                                                 {{ $ors->emppayee['firstname'] }} {{ $ors->emppayee['lastname'] }}
                                                 @elseif (isset($ors->bidpayee['company_name']))
                                                 {{ $ors->bidpayee['company_name'] }}
-                                                @else
+                                                @elseif (isset($ors->custompayee['payee_name']))
                                                 {{ $ors->custompayee['payee_name'] }}
+                                                @else
+                                                None
                                                 @endif
                                             </small>
                                         </td>
@@ -316,8 +320,10 @@
                             {{ $ors->emppayee['firstname'] }} {{ $ors->emppayee['lastname'] }}
                             @elseif (isset($ors->bidpayee['company_name']))
                             {{ $ors->bidpayee['company_name'] }}
-                            @else
+                            @elseif (isset($ors->custompayee['payee_name']))
                             {{ $ors->custompayee['payee_name'] }}
+                            @else
+                            None
                             @endif
                             <br>
 

@@ -143,8 +143,10 @@
                                             {{ $dv->emppayee['firstname'] }} {{ $dv->emppayee['lastname'] }}
                                             @elseif (isset($dv->bidpayee['company_name']))
                                             {{ $dv->bidpayee['company_name'] }}
-                                            @else
+                                            @elseif (isset($dv->custompayee['payee_name']))
                                             {{ $dv->custompayee['payee_name'] }}
+                                            @else
+                                            None
                                             @endif
                                         </td>
                                         <td align="center">
@@ -200,8 +202,10 @@
                                                 {{ $dv->emppayee['firstname'] }} {{ $dv->emppayee['lastname'] }}
                                                 @elseif (isset($dv->bidpayee['company_name']))
                                                 {{ $dv->bidpayee['company_name'] }}
-                                                @else
+                                                @elseif (isset($dv->custompayee['payee_name']))
                                                 {{ $dv->custompayee['payee_name'] }}
+                                                @else
+                                                None
                                                 @endif
                                             </small>
                                         </td>
@@ -299,8 +303,10 @@
                             {{ $dv->emppayee['firstname'] }} {{ $dv->emppayee['lastname'] }}
                             @elseif (isset($dv->bidpayee['company_name']))
                             {{ $dv->bidpayee['company_name'] }}
-                            @else
+                            @elseif (isset($dv->custompayee['payee_name']))
                             {{ $dv->custompayee['payee_name'] }}
+                            @else
+                            None
                             @endif
                             <br>
 

@@ -114,7 +114,7 @@
                                             {{ $pr->pr_no }}
                                         </td>
                                         <td>{{ $pr->date_pr }}</td>
-                                        <td>{{ $pr->funding['project_title'] }}</td>
+                                        <td>{{ isset($pr->funding['project_title']) ? $pr->funding['project_title'] : 'None' }}</td>
                                         <td>
                                             <i class="fas fa-caret-right"></i> {{
                                                 (strlen($pr->purpose) > 150) ?
@@ -300,7 +300,7 @@
                     <div class="card-body">
                         <p>
                             <strong>PR Date: </strong> {{ $pr->date_pr }}<br>
-                            <strong>Charging: </strong> {{ $pr->funding['project_name'] }}<br>
+                            <strong>Charging: </strong> {{ isset($pr->funding['project_title']) ? $pr->funding['project_title'] : 'None' }}<br>
                             <strong>Purpose: </strong> {{
                                 (strlen($pr->purpose) > 150) ?
                                 substr($pr->purpose, 0, 150).'...' : $pr->purpose

@@ -88,21 +88,29 @@ class LiquidationController extends Controller
         $instanceDocLog = new DocLog;
 
         // User groups
+        $roleHasDeveloper = Auth::user()->hasDeveloperRole();
+        $roleHasAdministrator = Auth::user()->hasOrdinaryRole();
+        $roleHasRD = Auth::user()->hasRdRole();
+        $roleHasARD = Auth::user()->hasArdRole();
+        $roleHasPSTD = Auth::user()->hasPstdRole();
+        $roleHasPlanning = Auth::user()->hasPlanningRole();
+        $roleHasProjectStaff = Auth::user()->hasProjectStaffRole();
+        $roleHasBudget = Auth::user()->hasBudgetRole();
+        $roleHasAccountant = Auth::user()->hasAccountantRole();
+        $roleHasPropertySupply = Auth::user()->hasPropertySupplyRole();
         $roleHasOrdinary = Auth::user()->hasOrdinaryRole();
-        $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
-                             [Auth::user()->division];
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
 
         if ($type == 'cashadvance') {
-            $lrData = LiquidationReport::with('dv')->whereHas('empclaimant', function($query)
-                                           use($empDivisionAccess) {
-                $query->whereIn('division', $empDivisionAccess);
-            })->whereNull('deleted_at');
+            $lrData = LiquidationReport::with('dv')->whereNull('deleted_at');
 
-            if ($roleHasOrdinary) {
-                $lrData = $lrData->where('sig_claimant', Auth::user()->id);
+            if ($roleHasDeveloper || $roleHasBudget || $roleHasAccountant || $roleHasRD ||
+                $roleHasARD) {
+            } else {
+                 $lrData = $lrData->where('sig_claimant', Auth::user()->id)
+                                  ->orWhere('created_by', Auth::user()->id);
             }
 
             if (!empty($keyword)) {
@@ -121,11 +129,16 @@ class LiquidationController extends Controller
                         ->orWhere('dv_dtd', 'like', "%$keyword%")
                         ->orWhere('or_no', 'like', "%$keyword%")
                         ->orWhere('or_dtd', 'like', "%$keyword%")
+                        ->orWhere('dv_id', 'like', "%$keyword%")
                         ->orWhereHas('empclaimant', function($query) use ($keyword) {
                             $query->where('firstname', 'like', "%$keyword%")
                                   ->orWhere('middlename', 'like', "%$keyword%")
                                   ->orWhere('lastname', 'like', "%$keyword%")
                                   ->orWhere('position', 'like', "%$keyword%");
+                        })->orWhereHas('bidclaimant', function($query) use ($keyword) {
+                            $query->where('company_name', 'like', "%$keyword%");
+                        })->orWhereHas('customclaimant', function($query) use ($keyword) {
+                            $query->where('payee_name', 'like', "%$keyword%");
                         })->orWhereHas('dv', function($query) use ($keyword) {
                             $query->where('id', 'like', "%$keyword%")
                                   ->orWhere('ors_id', 'like', "%$keyword%")
@@ -288,7 +301,7 @@ class LiquidationController extends Controller
         $routeName = 'ca-lr';
         $documentType = 'Liquidation Report';
 
-
+        try {
             $instanceDV = DisbursementVoucher::find($dvID);
 
             if ($instanceDV && !empty($instanceDV->dv_no)) {
@@ -342,7 +355,7 @@ class LiquidationController extends Controller
                 Auth::user()->log($request, $msg);
                 return redirect(url()->previous())
                                      ->with('warning', $msg);
-            } try {
+            }
         } catch (\Throwable $th) {
             $msg = "Unknown error has occured. Please try again.";
             Auth::user()->log($request, $msg);
@@ -358,6 +371,8 @@ class LiquidationController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showEdit($id) {
+        $claimants = [];
+
         $dvList = DisbursementVoucher::all();
         $liquidationData = LiquidationReport::with('dv')->find($id);
         $dateDV = $liquidationData->dv['date_dv'];
@@ -385,12 +400,26 @@ class LiquidationController extends Controller
         $jevNo = $liquidationData->jev_no;
         $dateAccounting = $liquidationData->date_accounting;
 
+        $claimants[] = User::select(
+            DB::raw("CONCAT(firstname, ' ', lastname, ' [ ', position, ' ]') as name"),
+            'id'
+        )->orderBy('firstname')->get();
+        $claimants[] = Supplier::select(
+            DB::raw("CONCAT(company_name, ' ', ' [ Registered Supplier ]') as company_name"),
+            'id'
+        )->orderBy('company_name')->get();
+        $claimants[] = CustomPayee::select(
+            DB::raw("CONCAT(payee_name, ' [ Manually Added ]') as payee_name"),
+            'id'
+        )->orderBy('payee_name')->get();
+
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
                           ->limit(1)
         ])->where('is_active', 'y')->get();
-        $claimants = User::orderBy('firstname')->get();
+
+        //$claimants = User::orderBy('firstname')->get();
 
         foreach ($signatories as $sig) {
             $sig->module = json_decode($sig->module);
