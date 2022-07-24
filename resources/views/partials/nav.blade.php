@@ -172,16 +172,21 @@
                 <li class="sidebar-dropdown">
                     <a href="#">
                         <i class="fas fa-box"></i>
-                        <span class="menu-text">Inventory</span>
+                        <span class="menu-text">Inventory & Disposal</span>
                     </a>
                     <div class="sidebar-submenu">
                         <ul>
                             <li>
-                                <a href="{{ route('stocks') }}" class="waves-effect">Stocks</a>
+                                <a href="{{ route('stocks') }}" class="waves-effect">
+                                    Inventory of All Items<br>
+                                    Procured
+                                </a>
                             </li>
                             <li>
-                                <a href="{{ route('stocks') }}" class="waves-effect">
-                                    <i class="fas fa-qrcode"></i>&nbsp;-&nbsp;Barcode
+                                <a href="{{ route('inv-summary-per-person') }}" class="waves-effect">
+                                    Summary of Issued Items<br>
+                                    per Person Based on the<br>
+                                    PAR/ICS/RIS
                                 </a>
                             </li>
                         </ul>
@@ -190,25 +195,25 @@
                 <li class="sidebar-dropdown">
                     <a href="#">
                         <i class="fas fa-cogs"></i>
-                        <span class="menu-text">Maintenance</span>
+                        <span class="menu-text">
+                            Maintenance of Properties<br>from Inventory
+                        </span>
                     </a>
                     <div class="sidebar-submenu">
                         <ul>
                             <li>
-                                <a href="#" class="waves-effect">--</a>
+                                <a href="#" class="waves-effect">
+                                    Properties, Plant, Equipment,<br>
+                                    ICT Hardware/Software, and<br>
+                                    Etc.
+                                </a>
                             </li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="sidebar-dropdown">
-                    <a href="#">
-                        <i class="fas fa-trash"></i>
-                        <span class="menu-text">Disposal</span>
-                    </a>
-                    <div class="sidebar-submenu">
-                        <ul>
                             <li>
-                                <a href="#" class="waves-effect">--</a>
+                                <a href="#" class="waves-effect">
+                                    Checklist and Maintenance<br>
+                                    Record for Each ICT<br>
+                                    Equipment
+                                </a>
                             </li>
                         </ul>
                     </div>
@@ -244,7 +249,8 @@
                             </li>
                             <li>
                                 <a href="{{ route('report-raod') }}" class="waves-effect">
-                                    Registry of Allotments, Obligations <br>and Disbursement
+                                    Registry of Allotments, Oblig-
+                                    <br>ations and Disbursement
                                 </a>
                             </li>
                         </ul>

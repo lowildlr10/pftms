@@ -906,7 +906,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
 
     /*===================== INVENTORY ROUTES =====================*/
 
-    // Stocks
+    // All Items Procured
     Route::any('inventory/stocks', [
         'uses' => 'InventoryStockController@index',
         'module' => 'inv_stocks',
@@ -997,6 +997,18 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'inv_stocks',
         'access' => 'delete'
     ])->name('stocks-delete');
+
+    // Per Person
+    Route::get('inventory/summary-per-person', [
+        'uses' => 'InventoryStockController@indexPerPerson',
+        'module' => 'inv_stocks',
+        'access' => 'is_allowed'
+    ])->name('inv-summary-per-person');
+    Route::any('inventory/summary-per-person/{empID}', [
+        'uses' => 'InventoryStockController@indexListStocks',
+        'module' => 'inv_stocks',
+        'access' => 'is_allowed'
+    ])->name('inv-summary-per-person-view');
 
     /*===================== PAYMENT ROUTES =====================*/
 

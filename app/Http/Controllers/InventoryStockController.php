@@ -38,7 +38,6 @@ class InventoryStockController extends Controller
      */
     public function index(Request $request) {
         $keyword = trim($request->keyword);
-        $instanceDocLog = new DocLog;
 
         // Get module access
         $module = 'inv_stocks';
@@ -51,6 +50,70 @@ class InventoryStockController extends Controller
 
         // Main data
         $paperSizes = PaperSize::orderBy('paper_type')->get();
+        $invStocksData = $this->indexStockData($request);
+        $instanceInvClass = InventoryClassification::orderBy('classification_name')->get();
+
+        return view('modules.inventory.stock.index', [
+            'keyword' => $keyword,
+            'list' => $invStocksData,
+            'paperSizes' => $paperSizes,
+            'instanceInvClass' => $instanceInvClass,
+            'isAllowedCreate' => $isAllowedCreate,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedDelete' => $isAllowedDelete,
+            'isAllowedDestroy' => $isAllowedDestroy,
+            'isAllowedIssue' => $isAllowedIssue,
+            'isAllowedIAR' => $isAllowedIAR,
+            'isAllowedDestroy' => $isAllowedDestroy
+        ]);
+    }
+
+    public function indexPerPerson() {
+        $pageLimit = 20;
+        $empIDs = [];
+        $issuedStocksData = InventoryStockIssue::select('sig_received_by')->get();
+
+        foreach ($issuedStocksData as $issued) {
+            $empIDs[] = $issued->sig_received_by;
+
+            $empIDs = array_unique($empIDs);
+        }
+
+        $list = User::select(
+            DB::raw("CONCAT(firstname, ' ', lastname) as name"),
+            'id', 'is_active', 'position'
+        )->whereIn('id', $empIDs)
+        ->sortable(['firstname' => 'asc'])
+        ->paginate($pageLimit);
+
+        return view('modules.inventory.per-person.index', compact(
+            'list'
+        ));
+    }
+
+    public function indexListStocks(Request $request, $empID) {
+        $keyword = trim($request->keyword);
+        $paperSizes = PaperSize::orderBy('paper_type')->get();
+        $invStocksData = $this->indexStockData($request, $empID);
+        $instanceInvClass = InventoryClassification::orderBy('classification_name')->get();
+        $empDat = User::select(DB::raw("CONCAT(firstname, ' ', lastname) as name"))
+                      ->where('id', $empID)
+                      ->first();
+        $empName = $empDat->name;
+
+        return view('modules.inventory.per-person.index-stock', [
+            'keyword' => $keyword,
+            'list' => $invStocksData,
+            'paperSizes' => $paperSizes,
+            'instanceInvClass' => $instanceInvClass,
+            'empID' => $empID,
+            'empName' => $empName
+        ]);
+    }
+
+    public function indexStockData($request, $empID = NULL) {
+        $keyword = trim($request->keyword);
+
         /*
         $invStocksData = InventoryStock::with(['stockitems', 'procstatus', 'inventoryclass'])
                                        ->has('stockitems', '>', 0);*/
@@ -88,7 +151,6 @@ class InventoryStockController extends Controller
         }
 
         $invStocksData = $invStocksData->sortable(['inventory_no' => 'desc'])->paginate(15);
-        $instanceInvClass = InventoryClassification::orderBy('classification_name')->get();
 
         foreach ($invStocksData as $invStock) {
             $invStock->stockitems = InventoryStockItem::where('inv_stock_id', $invStock->id)
@@ -107,19 +169,7 @@ class InventoryStockController extends Controller
             }
         }
 
-        return view('modules.inventory.stock.index', [
-            'keyword' => $keyword,
-            'list' => $invStocksData,
-            'paperSizes' => $paperSizes,
-            'instanceInvClass' => $instanceInvClass,
-            'isAllowedCreate' => $isAllowedCreate,
-            'isAllowedUpdate' => $isAllowedUpdate,
-            'isAllowedDelete' => $isAllowedDelete,
-            'isAllowedDestroy' => $isAllowedDestroy,
-            'isAllowedIssue' => $isAllowedIssue,
-            'isAllowedIAR' => $isAllowedIAR,
-            'isAllowedDestroy' => $isAllowedDestroy
-        ]);
+        return $invStocksData;
     }
 
     /**
