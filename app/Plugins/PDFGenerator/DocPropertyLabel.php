@@ -97,7 +97,7 @@ class DocPropertyLabel extends PDF {
                 $this->StopTransform();
             }*/
 
-            $this->setXY(89.3, 157);
+            $this->setXY(88.9, 200);
 
             $type = 'code128';
             //$type = 'code39';
@@ -111,11 +111,11 @@ class DocPropertyLabel extends PDF {
                 'position' => 'S',
                 'align' => 'C',
                 'stretch' => true,
-                'fitwidth' => false,
+                'fitwidth' => true,
                 'cellfitalign' => '',
-                'border' => true,
+                'border' => false,
                 'hpadding' => 2,
-                'vpadding' => 3,
+                'vpadding' => 1.4,
                 'fgcolor' => array(0, 0, 0),
                 'bgcolor' => false,
                 'text' => false,
@@ -123,8 +123,19 @@ class DocPropertyLabel extends PDF {
                 'fontsize' => 8,
                 'stretchtext' => 4
             ];
-            $this->write1DBarcode($code, 'C39', '', '', $pageHeight, 15, 0.4, $barcodeStyle, 'M');
+            $this->write1DBarcode($code, 'C39', '', '', $pageHeight - 13, 15, 0.4, $barcodeStyle, 'M');
             $this->StopTransform();
+
+            $style = array(
+                'border' => false,
+                'vpadding' => 'auto',
+                'hpadding' => 'auto',
+                'fgcolor' => [0, 0, 0],
+                'bgcolor' => false, //array(255,255,255)
+                'module_width' => 1, // width of a single module in points
+                'module_height' => 1 // height of a single module in points
+            );
+            $this->write2DBarcode($code, 'QRCODE,H', 89, $pageHeight - 53, 25, 16, $style, 'N');
 
             /* ------------------------------------- End of Doc ------------------------------------- */
         }
