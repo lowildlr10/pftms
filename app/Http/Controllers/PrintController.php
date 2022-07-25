@@ -4002,7 +4002,7 @@ class PrintController extends Controller
             $imageBlob = $pdf->Output($docTitle, 'S');
 
             $imInstance = new \Imagick();
-            $imInstance->setResolution(300, 300);
+            $imInstance->setResolution(900, 900);
             $imInstance->readImageBlob($imageBlob);
             $imInstance->setImageFormat('png');
 
@@ -4019,7 +4019,7 @@ class PrintController extends Controller
 
                 foreach ($imInstance as $i => $img) {
                     $filename = "$docTitle-$i.png";
-                    $img->setResolution(300, 300);
+                    $img->setResolution(900, 900);
                     $img->setImageFormat('png');
                     $img->writeImage(storage_path("app/$path")."/$filename");
                     $zip->addFile(storage_path("app/$path/$filename"), $filename);
