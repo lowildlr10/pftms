@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestItem;
@@ -2134,11 +2135,16 @@ class PrintController extends Controller
     private function getDataPropertyLabel($invStockIssueID) {
         $stockID = [];
         $invStockIssueData = InventoryStockIssue::find($invStockIssueID);
+        $invID = $invStockIssueData->inv_stock_id;
         $inventoryStockID = $invStockIssueData->inv_stock_id;
         $invStockIssueItemData = InventoryStockIssueItem::with('invstockitems')
                                                     ->where('inv_stock_issue_id', $invStockIssueID)
                                                     ->where('excluded', 'n')
                                                     ->get();
+
+        $invDat = InventoryStock::find($invID);
+        $invNo = $invDat->inventory_no;
+
         $data = (object) [
             'inv_stock_issue' => $invStockIssueData,
             'inv_stock_issue_item' => $invStockIssueItemData
@@ -2151,6 +2157,7 @@ class PrintController extends Controller
         $sigReceivedBy = $invStockIssueData->sig_received_by;
         $certifiedBy = $instanceSignatory->getSignatory($sigIssuedBy)->name;
         $issuedTo = Auth::user()->getEmployee($sigReceivedBy)->name;
+        $issuedToEmpID = Auth::user()->getEmployee($sigReceivedBy)->emp_id;
         $finalData = [];
         $multiplier = 1;
 
@@ -2232,7 +2239,11 @@ class PrintController extends Controller
             }
         }
 
-        return (object) ['label_data' => $finalData];
+        return (object) [
+            'inventory_no' => $invNo,
+            'emp_id' => $issuedToEmpID,
+            'label_data' => $finalData
+        ];
     }
 
     private function getDataICS($invStockIssueID) {
@@ -3990,15 +4001,43 @@ class PrintController extends Controller
         } else if ($previewToggle == 'download-image') {
             $imageBlob = $pdf->Output($docTitle, 'S');
 
-            $imagick = new \Imagick();
-            $imagick->setResolution(300,300);
-            $imagick->readImageBlob($imageBlob);
-            $imagick->setImageFormat('jpg');
+            $imInstance = new \Imagick();
+            $imInstance->setResolution(300, 300);
+            $imInstance->readImageBlob($imageBlob);
+            $imInstance->setImageFormat('png');
 
-            header('Content-type: image/jpg');
-            header('Content-Disposition: attachment; filename="' . $docTitle . '.jpg"');
+            if (count($imInstance) > 1) {
+                $zip = new \ZipArchive();
+                $path = "public/temp/$docTitle";
+                $zipfile = storage_path("app/$path")."/$docTitle.zip";
 
-            echo $imagick;
+                if (!Storage::exists($path)) {
+                    Storage::makeDirectory($path);
+                }
+
+                $zip->open($zipfile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+                foreach ($imInstance as $i => $img) {
+                    $filename = "$docTitle-$i.png";
+                    $img->setResolution(300, 300);
+                    $img->setImageFormat('png');
+                    $img->writeImage(storage_path("app/$path")."/$filename");
+                    $zip->addFile(storage_path("app/$path/$filename"), $filename);
+                }
+
+                $zip->close();
+
+                header('Content-Type: application/zip');
+                header('Content-disposition: attachment; filename="'.$docTitle.'.zip"');
+                header('Content-Length: ' . filesize($zipfile));
+                readfile($zipfile);
+
+                Storage::deleteDirectory($path);
+            } else {
+                header('Content-type: image/png');
+                header('Content-Disposition: attachment; filename="' . $docTitle . '.png"');
+                echo $imInstance;
+            }
         } else {
             $pdf->Output($docTitle . '.pdf', 'I');
         }
@@ -4542,7 +4581,8 @@ class PrintController extends Controller
         $docCode = "";
         $docRev = "";
         $docRevDate = "";
-        $docTitle = "property_label";
+        $docTitle = 'proptag-'.$data->inventory_no.'-'.$data->emp_id;
+        $docTitle = strtoupper($docTitle);
         $docCreator = "DOST-CAR";
         $docAuthor = "DOST-CAR";
         $docSubject = "Property Label";

@@ -107,20 +107,22 @@ class DocPropertyLabel extends PDF {
 
             $this->StartTransform();
             $this->Rotate(90);
-            $barcodeStyle = ['position' => 'S',
-                            'align' => 'C',
-                            'stretch' => true,
-                            'fitwidth' => false,
-                            'cellfitalign' => '',
-                            'border' => true,
-                            'hpadding' => 2,
-                            'vpadding' => 3,
-                            'fgcolor' => array(0, 0, 0),
-                            'bgcolor' => false,
-                            'text' => false,
-                            'font' => 'helvetica',
-                            'fontsize' => 8,
-                            'stretchtext' => 4];
+            $barcodeStyle = [
+                'position' => 'S',
+                'align' => 'C',
+                'stretch' => true,
+                'fitwidth' => false,
+                'cellfitalign' => '',
+                'border' => true,
+                'hpadding' => 2,
+                'vpadding' => 3,
+                'fgcolor' => array(0, 0, 0),
+                'bgcolor' => false,
+                'text' => false,
+                'font' => 'helvetica',
+                'fontsize' => 8,
+                'stretchtext' => 4
+            ];
             $this->write1DBarcode($code, 'C39', '', '', $pageHeight, 15, 0.4, $barcodeStyle, 'M');
             $this->StopTransform();
 

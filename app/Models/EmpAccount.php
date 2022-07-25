@@ -430,6 +430,7 @@ class EmpAccount extends Authenticatable
         $userData = EmpAccount::find($id);
 
         if ($userData) {
+            $empID = $userData->emp_id;
             $firstname = $userData->firstname;
             $middleInitial = !empty($userData->middlename) ?
                             ' '.$userData->middlename[0].'. ' : ' ';
@@ -454,6 +455,7 @@ class EmpAccount extends Authenticatable
 
             $roleName = count($roleNames) > 0 ? implode(', ', $roleNames) : '';
         } else {
+            $empID = NULL;
             $fullname = NULL;
             $position = NULL;
             $signature = NULL;
@@ -463,6 +465,7 @@ class EmpAccount extends Authenticatable
         }
 
         return (object) [
+            'emp_id' => $empID,
             'name' => $fullname,
             'position' => $position,
             'signature' => $signature,
