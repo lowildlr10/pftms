@@ -769,26 +769,27 @@ class ObligationRequestStatusController extends Controller
                                          //->orWhere('payee_name', $payee)
                                          ->count();
 
-            if (!$empData && !$supplierData && !$customPayeeData) {
-                $instancePayee = CustomPayee::create([
-                    'payee_name' => $payee
-                ]);
-
-                $payee = $instancePayee->id->string;
-            }
-
             if ($moduleClass == 3) {
                 $routeName = 'proc-ors-burs';
             } else if ($moduleClass == 2) {
                 $routeName = 'ca-ors-burs';
                 $instanceORS->transaction_type = $transactionType;
+
+                if (!$empData && !$supplierData && !$customPayeeData) {
+                    $instancePayee = CustomPayee::create([
+                        'payee_name' => $payee
+                    ]);
+
+                    $payee = $instancePayee->id->string;
+                }
+
+                $instanceORS->payee = $payee;
             }
 
             $instanceORS->document_type = $documentType;
             $instanceORS->serial_no = $serialNo;
             $instanceORS->date_ors_burs = $dateORS;
             $instanceORS->fund_cluster = $fundCluster;
-            $instanceORS->payee = $payee;
             $instanceORS->office = $office;
             $instanceORS->address = $address;
             $instanceORS->responsibility_center = $responsibilityCenter;

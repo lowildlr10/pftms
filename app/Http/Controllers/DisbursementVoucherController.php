@@ -957,14 +957,6 @@ class DisbursementVoucherController extends Controller
                                          //->orWhere('payee_name', $payee)
                                          ->count();
 
-            if (!$empData && !$supplierData && !$customPayeeData) {
-                $instancePayee = CustomPayee::create([
-                    'payee_name' => $payee
-                ]);
-
-                $payee = $instancePayee->id->string;
-            }
-
             if ($moduleClass == 3) {
                 $routeName = 'proc-dv';
             } else if ($moduleClass == 2) {
@@ -972,11 +964,20 @@ class DisbursementVoucherController extends Controller
                 $instanceDV->ors_id = $orsID;
                 $instanceDV->transaction_type = $transactionType;
                 $instanceDV->sig_certified = $sigCertified;
+
+                if (!$empData && !$supplierData && !$customPayeeData) {
+                    $instancePayee = CustomPayee::create([
+                        'payee_name' => $payee
+                    ]);
+
+                    $payee = $instancePayee->id->string;
+                }
+
+                $instanceDV->payee = $payee;
             }
 
             $instanceDV->fund_cluster = $fundCluster;
             $instanceDV->date_dv = $dateDV;
-            $instanceDV->payee = $payee;
             $instanceDV->dv_no = $dvNo;
             $instanceDV->payment_mode = $modePayment;
             $instanceDV->other_payment = $otherPayment;
