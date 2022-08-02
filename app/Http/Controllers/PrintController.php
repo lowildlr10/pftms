@@ -2159,15 +2159,15 @@ class PrintController extends Controller
         $issuedTo = Auth::user()->getEmployee($sigReceivedBy)->name;
         $issuedToEmpID = Auth::user()->getEmployee($sigReceivedBy)->emp_id;
         $finalData = [];
-        $multiplier = 1;
+        $multiplier = 1.13;
 
         foreach ($invStockIssueItemData as $item) {
             $invstockitem = InventoryStockItem::where('id', $item->inv_stock_item_id)
                                               ->first();
             $propertyNos = unserialize($item->prop_stock_no);
             $dateAcquired = $item->date_issued;
-            $description = (strlen($invstockitem->description) > 300) ?
-                            substr($invstockitem->description, 0, 300).'...' :
+            $description = (strlen($invstockitem->description) > 350) ?
+                            substr($invstockitem->description, 0, 350).'...' :
                             $invstockitem->description;
 
             if (!empty($dateAcquired)) {
@@ -2189,7 +2189,7 @@ class PrintController extends Controller
                                     $multiplier * 67],
                         'font-styles' => ['', ''],
                         'type' => 'row-data',
-                        'data' => [[' Property No.:', $propertyNo]]
+                        'data' => [["&nbsp;Property No.:", $propertyNo]]
                     ]
                 ];
                 $data2 = [
@@ -2199,7 +2199,7 @@ class PrintController extends Controller
                                     $multiplier * 67],
                         'font-styles' => ['', ''],
                         'type' => 'row-data',
-                        'data' => [[' Description:', $description]]
+                        'data' => [["&nbsp;Description:", $description]]
                     ]
                 ];
                 $data3 = [
@@ -2211,7 +2211,7 @@ class PrintController extends Controller
                                     $multiplier * 34],
                         'font-styles' => ['', 'B', '', 'B'],
                         'type' => 'row-data',
-                        'data' => [[' Date Acquired:', $dateAcquired, 'Issued To:', $issuedTo]]
+                        'data' => [["&nbsp;Date Acquired:", $dateAcquired, 'Issued To:', $issuedTo]]
                     ]
                 ];
                 $data4 = [
@@ -2221,8 +2221,8 @@ class PrintController extends Controller
                                     $multiplier * 67],
                         'font-styles' => ['', 'B'],
                         'type' => 'row-data',
-                        'data' => [[' Certified By:', $certifiedBy],
-                                [' Verified By:', '______________________________________________________']]
+                        'data' => [["&nbsp;Certified By:", $certifiedBy],
+                                ["&nbsp;Verified By:", '____________________________________________']]
                     ]
                 ];
 
@@ -4002,7 +4002,7 @@ class PrintController extends Controller
             $imageBlob = $pdf->Output($docTitle, 'S');
 
             $imInstance = new \Imagick();
-            $imInstance->setResolution(900, 900);
+            $imInstance->setResolution(300, 300);
             $imInstance->readImageBlob($imageBlob);
             $imInstance->setImageFormat('png');
 
@@ -4019,7 +4019,7 @@ class PrintController extends Controller
 
                 foreach ($imInstance as $i => $img) {
                     $filename = "$docTitle-$i.png";
-                    $img->setResolution(900, 900);
+                    $img->setResolution(300, 300);
                     $img->setImageFormat('png');
                     $img->writeImage(storage_path("app/$path")."/$filename");
                     $zip->addFile(storage_path("app/$path/$filename"), $filename);
@@ -4573,7 +4573,7 @@ class PrintController extends Controller
     }
 
     private function generatePropertyLabel($data, $fontScale, $pageHeight, $pageWidth, $pageUnit, $previewToggle) {
-        $pageSize = [$pageWidth, $pageHeight];
+        $pageSize = [$pageWidth - 5, $pageHeight + 10];
         $pdf = new DocPropertyLabel('L', $pageUnit, $pageSize);
         $pdf->setHeaderLR(false, false);
         $pdf->setFontScale($fontScale);
