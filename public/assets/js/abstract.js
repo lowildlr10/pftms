@@ -439,7 +439,9 @@ $(function () {
                 .css("background", "#000000ab")
                 .fadeIn(300, function () {
                     processData();
-                    $("#form-update").submit();
+                    $(document).ajaxStop(function () {
+                        $("#form-update").submit();
+                    });
                 });
         }
     };
