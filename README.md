@@ -1,3 +1,12 @@
+![image](https://user-images.githubusercontent.com/26521475/182509110-e5b9a1e2-ec61-49f3-9bc3-de013d91d8e6.png)
+
+# Demo
+
+__URL:__ https://dev-pftms.dostcar.ph<br>
+__Username:__ admin<br>
+__Password:__ 5!dIPPG9PfKQbY/Z<br>
+
+
 # Installation and Configuration
 
 1. Open command prompt or bash terminal.
@@ -79,3 +88,4 @@
      - Roles
      - Groups
      - Accounts
+ 
