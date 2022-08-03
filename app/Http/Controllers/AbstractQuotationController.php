@@ -467,8 +467,15 @@ class AbstractQuotationController extends Controller
                         $remark = $remarks[$columnCtr]->remarks;
 
                         if ($bidderCount == $oldBidderCount) {
-                            $absItemID = $abstractItemIDs[$columnCtr]->abs_item_id;
-                            $instanceAbsItem = AbstractQuotationItem::find($absItemID);
+                            if (isset($abstractItemIDs[$columnCtr])) {
+                                $absItemID = $abstractItemIDs[$columnCtr]->abs_item_id;
+                                $instanceAbsItem = AbstractQuotationItem::find($absItemID);
+                            } else {
+                                $instanceAbsItem = new AbstractQuotationItem;
+                                $instanceAbsItem->abstract_id = $id;
+                                $instanceAbsItem->pr_id = $prID;
+                                $instanceAbsItem->pr_item_id = $prIDItem;
+                            }
                         } else {
                             if ($columnCtr == 0) {
                                 AbstractQuotationItem::where('pr_item_id', $prIDItem)->delete();
