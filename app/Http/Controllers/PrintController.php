@@ -2970,9 +2970,9 @@ class PrintController extends Controller
         $accounting = $instanceSignatory->getSignatory($liq->sig_accounting)->name;
 
         if (strlen($liq->particulars) <= 73) {
+            $liq->particulars = $liq->particulars . '<br><br><br><br>';
+        } else if (strlen($liq->particulars) > 73 && strlen($liq->particulars) <= 200) {
             $liq->particulars = $liq->particulars . '<br><br>';
-        } else if (strlen($liq->particulars) > 73 && strlen($liq->particulars) <= 150) {
-            $liq->particulars = $liq->particulars . '<br>';
         }
 
         if ($liq->firstname) {
@@ -2986,6 +2986,13 @@ class PrintController extends Controller
         } else {
             $claimant = $liq->payee_name;
         }
+
+        $liq->amount = number_format($liq->amount, 2);
+        $liq->total_amount = number_format($liq->total_amount, 2);
+        $liq->amount_cash_adv = $liq->amount_cash_adv ? number_format($liq->amount_cash_adv, 2) : '-';
+        $liq->amount_refunded = $liq->amount_refunded ? number_format($liq->amount_refunded, 2) : '-';
+        $liq->amount_reimbursed = $liq->amount_reimbursed ? number_format($liq->amount_reimbursed, 2) : '-';
+
 
         $tableData[] = [$liq->particulars,
                         $liq->amount];
