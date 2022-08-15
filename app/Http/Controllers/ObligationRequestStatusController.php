@@ -1299,7 +1299,7 @@ class ObligationRequestStatusController extends Controller
             ],
             (object) [
                 'type' => 'continuing',
-                'serial_no' => '02 101101 '.date('Y m').' '
+                'serial_no' => '02 101102 '.date('Y m').' '
             ],
         ];
         $serialNo = $instanceORS->serial_no;
