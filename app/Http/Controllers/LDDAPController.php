@@ -15,6 +15,7 @@ use App\Models\Signatory;
 use App\Models\DocumentLog as DocLog;
 use App\Models\PaperSize;
 use App\Models\Supplier;
+use App\Models\CustomPayee;
 use App\Models\MdsGsb;
 use App\Models\MooeAccountTitle;
 use DB;
@@ -113,10 +114,12 @@ class LDDAPController extends Controller
                                      ->get();
         $lddapCtr = ListDemandPayable::where('created_at', 'like', '%'.date('Y').'%')
                                      ->count() + 1;
+        $_lddapCtr = str_pad($lddapCtr, 3, '0', STR_PAD_LEFT);
         $lddapCtr = str_pad($lddapCtr, 4, '0', STR_PAD_LEFT);
         $month = date('m');
         $year = date('Y');
         $lddapNo = "01101101 $month $lddapCtr $year";
+        $lddapSerialNo = "990$year$month$_lddapCtr";
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
                           ->whereColumn('id', 'signatories.emp_id')
@@ -128,7 +131,7 @@ class LDDAPController extends Controller
         }
 
         return view('modules.payment.lddap.create', compact(
-            'dvList', 'signatories', 'lddapNo'
+            'dvList', 'signatories', 'lddapNo', 'lddapSerialNo'
         ));
     }
 
@@ -158,6 +161,7 @@ class LDDAPController extends Controller
         $lddapDate = $request->lddap_date;
         $fundCluster = $request->fund_cluster;
         $mdsGsbAccntNo = $request->mds_gsb_accnt_no[0];
+        $serialNo = $request->serial_no;
         $listCurrentCreditorName = $request->current_creditor_name;
         $listCurrentCreditorAccNo = $request->current_creditor_acc_no;
         $listCurrentOrsNo = $request->current_ors_no;
@@ -221,6 +225,7 @@ class LDDAPController extends Controller
             $instanceLDDAP->date_lddap = $lddapDate;
             $instanceLDDAP->fund_cluster = $fundCluster;
             $instanceLDDAP->mds_gsb_accnt_no = $mdsGSBID;
+            $instanceLDDAP->serial_no = $serialNo;
             $instanceLDDAP->save();
 
             $lastLDDAP = ListDemandPayable::orderBy('created_at', 'desc')->first();
@@ -317,6 +322,13 @@ class LDDAPController extends Controller
             ['lddap_id', $id], ['category', 'current_year']
         ])->orderBy('item_no')->get();
 
+        $lddapCtr = ListDemandPayable::where('created_at', 'like', '%'.date('Y').'%')
+                                     ->count() + 1;
+        $lddapCtr = str_pad($lddapCtr, 3, '0', STR_PAD_LEFT);
+        $month = date('m');
+        $year = date('Y');
+        $lddapSerialNo = "990$year$month$lddapCtr";
+
         foreach ($currentItems as $curritem) {
             $curritem->ors_no = unserialize($curritem->ors_no);
             $curritem->allot_class_uacs = unserialize($curritem->allot_class_uacs);
@@ -394,7 +406,7 @@ class LDDAPController extends Controller
             'priorNet', 'sigCertCorrect', 'sigApproval1',
             'sigApproval2', 'sigApproval3', 'sigAgencyAuth1',
             'sigAgencyAuth2', 'sigAgencyAuth3', 'sigAgencyAuth4',
-            'mdsGSB'
+            'mdsGSB', 'lddapSerialNo'
         ));
     }
 
@@ -425,6 +437,7 @@ class LDDAPController extends Controller
         $lddapDate = $request->lddap_date;
         $fundCluster = $request->fund_cluster;
         $mdsGsbAccntNo = $request->mds_gsb_accnt_no[0];
+        $serialNo = $request->serial_no;
         $listCurrentCreditorName = $request->current_creditor_name;
         $listCurrentCreditorAccNo = $request->current_creditor_acc_no;
         $listCurrentOrsNo = $request->current_ors_no;
@@ -488,6 +501,7 @@ class LDDAPController extends Controller
             $instanceLDDAP->date_lddap = $lddapDate;
             $instanceLDDAP->fund_cluster = $fundCluster;
             $instanceLDDAP->mds_gsb_accnt_no = $mdsGSBID;
+            $instanceLDDAP->serial_no = $serialNo;
             $instanceLDDAP->save();
 
             if ((is_array($listCurrentCreditorName) && count($listCurrentCreditorName) > 0) ||
@@ -773,6 +787,59 @@ class LDDAPController extends Controller
         return response()->json($mooeTitleData);
     }
 
+    public function getOrsBursDetails(Request $request) {
+        $orsIds = explode(",", $request->ors_burs_ids);
+        $orsData = DB::table("obligation_request_status")
+                    ->whereIn('id', $orsIds)
+                    ->get();
+
+        $payees = [];
+        $uacs = [];
+        $totalAmount = 0;
+
+        foreach ($orsData as $ctr => $ors) {
+            $payee = User::select(DB::raw("CONCAT(firstname, ' ', lastname, ' [ ', position, ' ]') as payee_name"))
+                         ->find($ors->payee);
+
+            if (!$payee) {
+                $payee = Supplier::select("company_name as payee_name")->find($ors->payee);
+            }
+
+            if (!$payee) {
+                $payee = CustomPayee::find($ors->payee);
+            }
+
+            if ($payee) {
+                $payees[] = "$payee->payee_name";
+            }
+
+            $_uacs = unserialize($ors->uacs_object_code);
+
+            if (is_array($_uacs)) {
+                foreach ($_uacs as $uac) {
+                    if ($uac) {
+                        $mooeTitle = MooeAccountTitle::find($uac);
+                        $uacs[] = [
+                            "id" => $uac,
+                            "title" => "$mooeTitle->uacs_code : $mooeTitle->account_title"
+                        ];
+                    }
+                }
+            }
+
+            $totalAmount += $ors->amount;
+        }
+
+        sort($payees);
+        $payeesStr = implode(", \n", $payees);
+
+        return response()->json([
+            'payees' => $payeesStr,
+            'uacs' => $uacs,
+            'total_amount' => (double) $totalAmount
+        ], 200);
+    }
+
     private function setRelatedDVDisbursed($id) {
         $lddapItems = ListDemandPayableItem::where('lddap_id', $id)
                                            ->get();
@@ -790,4 +857,5 @@ class LDDAPController extends Controller
             }
         }
     }
+
 }

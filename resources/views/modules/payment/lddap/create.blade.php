@@ -81,7 +81,7 @@
             </div>
 
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-7">
                     <div class="form-group form-sm">
                         <label for="mds-gsb-accnt-no my-3" class="active">
                             <span class="red-text">* </span>
@@ -89,6 +89,16 @@
                         </label>
                         <select class="mdb-select required mds-gsb-tokenizer"
                                 name="mds_gsb_accnt_no[]" id="mds-gsb-accnt-no"></select>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="md-form form-sm">
+                        <input type="text" id="serial-no" name="serial_no"
+                               class="form-control required" value="{{ $lddapSerialNo }}">
+                        <label for="serial-no" class="active">
+                            <span class="red-text">* </span>
+                            <strong>Serial No.</strong>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -168,8 +178,9 @@
                             <tr id="current-row-1" class="current-row">
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea name="current_creditor_name[]" placeholder=" Value..."
-                                                  class="md-textarea required form-control-sm w-100 py-1"></textarea>
+                                        <textarea class="md-textarea required form-control-sm w-100 py-1 current-creditor-name"
+                                                  name="current_creditor_name[]" placeholder=" Value..."
+                                                  ></textarea>
                                     </div>
                                 </td>
                                 <td>

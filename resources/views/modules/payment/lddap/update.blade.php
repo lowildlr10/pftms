@@ -81,7 +81,7 @@
             </div>
 
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-7">
                     <div class="form-group form-sm">
                         <label for="mds-gsb-accnt-no my-3" class="active">
                             <span class="red-text">* </span>
@@ -93,6 +93,16 @@
                                 {{ $mdsGSB->branch }} / {{ $mdsGSB->sub_account_no }}
                             </option>
                         </select>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="md-form form-sm">
+                        <input type="text" id="serial-no" name="serial_no"
+                               class="form-control required" value="{{ $lddap->serial_no ? $lddap->serial_no : $lddapSerialNo }}">
+                        <label for="serial-no" class="active">
+                            <span class="red-text">* </span>
+                            <strong>Serial No.</strong>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -175,8 +185,8 @@
                             <tr id="current-row-{{ $ctrCurrent + 1 }}" class="current-row">
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea name="current_creditor_name[]" placeholder=" Value..."
-                                                  class="md-textarea required form-control-sm w-100 py-1"
+                                        <textarea class="md-textarea required form-control-sm w-100 py-1 current-creditor-name"
+                                                  name="current_creditor_name[]" placeholder=" Value..."
                                                   >{{ $item->creditor_name }}</textarea>
                                     </div>
                                 </td>
@@ -331,8 +341,8 @@
                             <tr id="prior-row-{{ $ctrPrior + 1 }}" class="prior-row">
                                 <td>
                                     <div class="md-form form-sm my-0">
-                                        <textarea name="prior_creditor_name[]" placeholder=" Value..."
-                                                  class="md-textarea required form-control-sm w-100 py-1"
+                                        <textarea class="md-textarea required form-control-sm w-100 py-1 prior-creditor-name"
+                                                  name="prior_creditor_name[]" placeholder=" Value..."
                                                   >{{ $item->creditor_name }}</textarea>
                                     </div>
                                 </td>

@@ -19,6 +19,7 @@ class DocListDueDemandable extends PDF {
         $ncaNo = $data->lddap->nca_no;
         $lddapNo = $data->lddap->lddap_ada_no;
         $fundCluster = $data->lddap->fund_cluster;
+        $serialNo = $data->lddap->serial_no;
         $mdsgsbBranch = $data->mds_gsb_branch;
         $mdsgsbSubAccount = $data->mds_gsb_sub_account_no;
         $totalAmountWords = $data->lddap->total_amount_words;
@@ -45,13 +46,13 @@ class DocListDueDemandable extends PDF {
         //Set margins
         $this->SetMargins(5, 10, 5);
         $this->SetHeaderMargin(10);
-        $this->SetFooterMargin(5);
+        $this->SetFooterMargin(10);
         $this->SetPrintHeader(false);
         //$this->SetPrintFooter(false);
         $this->generateInfoOnly = true;
 
         //Set auto page breaks
-        $this->SetAutoPageBreak(TRUE, 5);
+        $this->SetAutoPageBreak(TRUE, 25);
 
         //Set image scale factor
         $this->setImageScale(PDF_IMAGE_SCALE_RATIO);
@@ -93,13 +94,29 @@ class DocListDueDemandable extends PDF {
 
         $this->Cell($pageWidth * 0.685, 4, 'Operating Unit : ' . $operatingUnit, 0, 0, 'L');
         $this->Cell(0, 4, 'Fund Cluster : ' . $fundCluster, 0, 0, 'L');
-        $this->Ln();
+        $this->Ln(5);
 
-        $this->Cell(0, 10, 'MDS-GSB BRANCH/MDS SUB ACCOUNT NO.: ' . "$mdsgsbBranch / $mdsgsbSubAccount", 0, 0, 'C');
-        $this->Ln();
+        $this->Cell($pageWidth * 0.7, 7, 'MDS-GSB BRANCH/MDS SUB ACCOUNT NO.: ' . "$mdsgsbBranch / $mdsgsbSubAccount", 0, 0, 'R');
+
+
+        $this->SetTextColor(0, 139, 255);
+        $this->Cell($pageWidth * 0.032, 7, "", 0, 0, 'C');
+        $this->SetFont('Helvetica', '', 11 + ($fontScale * 11));
+        $cellBorder = [
+            'TBLR' => ['width' => 0.1, 'color' => [221, 221, 221], 'solid' => 0, 'cap' => 'butt']
+        ];
+        $this->Cell($pageWidth * 0.21, 7, $serialNo, $cellBorder, 0, 'C');
+        $this->Cell(0, 7, "", 0, 0, 'C');
+        $this->SetTextColor(0, 0, 0);
+        $this->SetFont('Times', 'B', 8 + ($fontScale * 8));
+        $this->Ln(8);
+
+        $cellBorder = [
+            'TBLR' => ['width' => 0.2, 'color' => [0, 0, 0], 'solid' => 0, 'cap' => 'butt']
+        ];
 
         //Table Data
-        $this->Cell(0, 4, 'I. LIST OF DUE AND DEMANDABLE ACCOUNTS PAYABLE (LDDAP)', 1, 0, 'C');
+        $this->Cell(0, 4, 'I. LIST OF DUE AND DEMANDABLE ACCOUNTS PAYABLE (LDDAP)', $cellBorder, 0, 'C');
         $this->Ln();
 
         $this->Cell($pageWidth * 0.422, 4, 'CREDITOR', 'BLR', 0, 'C');
@@ -298,6 +315,17 @@ class DocListDueDemandable extends PDF {
         $this->SetFont('Times', 'I', 8 + ($fontScale * 8));
         $this->Cell(0, 8, '(Erasures shall invalidate this document)', 'BLR', 0, 'C', false, '', 1, true);
         $this->Ln();
+
+        /*
+        $this->SetTextColor(0, 139, 255);
+        $this->SetFont('Helvetica', '', 11 + ($fontScale * 11));
+        $this->SetLineWidth(0.05);
+        $this->setXY(158, 35);
+        $cellBorder = [
+            'TBLR' => ['width' => 0.1, 'color' => [221, 221, 221], 'solid' => 0, 'cap' => 'butt']
+        ];
+        $this->Cell(45, 7, $serialNo, $cellBorder, 1, 'C');
+        $this->SetTextColor(0, 0, 0);*/
 
         /* ------------------------------------- End of Doc ------------------------------------- */
     }
