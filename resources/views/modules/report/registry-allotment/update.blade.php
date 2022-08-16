@@ -156,6 +156,7 @@
                                         Unpaid Obligations
                                     </small>
                                 </th>
+                                <th width="10%"></th>
                                 <th width="2%"></th>
                             </tr>
                             <tr>
@@ -184,14 +185,19 @@
                                         Not Yet Due and Demandable
                                     </small>
                                 </th>
-                                <th width="1%"></th>
+                                <th class="text-center" width="10%">
+                                    <small>
+                                        Is Excluded?
+                                    </small>
+                                </th>
+                                <th width="2%"></th>
                             </tr>
                         </thead>
 
                         @if (count($regItems) > 0)
                         <tbody id="item-row-container" class="sortable">
                             @foreach ($regItems as $itemCtr => $item)
-                            <tr class="item-row">
+                            <tr class="item-row {{ $item->raod ? ($item->raod->is_excluded == 'y' ? 'red lighten-4' : '') : '' }}">
                                 <td>
                                     <div class="md-form form-sm my-0">
                                         @php
@@ -338,6 +344,12 @@
                                                onclick="$(this).solveNotYetDueDemandable('{{ $itemCtr }}')">
                                     </div>
                                 </td>
+                                <th class="align-middle text-center" scope="row">
+                                    <input class="form-check-input is-excluded" type="checkbox" value="1" id="check-{{ $itemCtr }}"
+                                           {{ $item->raod ? ($item->raod->is_excluded == 'y' ? 'checked' : '') : '' }}
+                                           onclick="$(this).highlightExcluded($(this));">
+                                    <label class="form-check-label" for="check-{{ $itemCtr }}" class="label-table"></label>
+                                </th>
                                 <td class="align-middle">
                                     <a href="#" class="grey-text">
                                         <i class="fas fa-ellipsis-v"></i>

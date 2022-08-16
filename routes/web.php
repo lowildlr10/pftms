@@ -1073,6 +1073,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'pay_lddap',
         'access' => 'is_allowed'
     ]);
+    Route::post('payment/lddap/get-ors-burs-details', [
+        'uses' => 'LDDAPController@getOrsBursDetails',
+        'module' => 'pay_lddap',
+        'access' => 'is_allowed'
+    ]);
 
     // Summary of LDDAP Module
     Route::any('payment/summary', [
@@ -1352,6 +1357,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_raod',
         'access' => 'is_allowed'
     ])->name('report-raod');
+    Route::get('report/registry-allot-obli-disb/show', [
+        'uses' => 'RegAllotmentController@show',
+        'module' => 'report_raod',
+        'access' => 'create'
+    ])->name('report-raod-show');
     Route::get('report/registry-allot-obli-disb/show-create', [
         'uses' => 'RegAllotmentController@showCreate',
         'module' => 'report_raod',
@@ -1399,6 +1409,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     ]);
     Route::post('report/registry-allot-obli-disb/get-uacs-object', [
         'uses' => 'RegAllotmentController@getUacsObject',
+        'module' => 'report_raod',
+        'access' => 'is_allowed'
+    ]);
+    Route::any('report/registry-allot-obli-disb/get-custom-payees', [
+        'uses' => 'CollectionController@getCustomPayees',
         'module' => 'report_raod',
         'access' => 'is_allowed'
     ]);

@@ -166,6 +166,7 @@ class RegAllotmentController extends Controller
         $uacsCode = $request->uacs_object_code ?
                     serialize(explode(',', $request->uacs_object_code)) :
                     serialize([]);
+
         $instanceRegAllot = new RegAllotmentItem([
             'reg_allotment_id' => $regID,
             'ors_id' => $orsID,
@@ -183,6 +184,7 @@ class RegAllotmentController extends Controller
             'disbursement' => $request->disbursement,
             'due_demandable' => $request->due_demandable,
             'not_due_demandable' => $request->not_due_demandable,
+            'is_excluded' => $request->is_excluded,
         ]);
         $instanceRegAllot->save();
 
@@ -209,8 +211,219 @@ class RegAllotmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id) {
-        //
+    public function show(Request $request) {
+        $regAllotIDs = $request->ids ? explode(";", trim($request->ids)) : [];
+        $regAllotIDs = array_filter($regAllotIDs);
+
+        $mfoPapGrps = [];
+        $dates = [];
+        $data = [];
+
+        foreach ($regAllotIDs as $regAllotID) {
+            $regAllotData = DB::table('funding_reg_allotments')
+                                ->where('id', $regAllotID)
+                                ->first();
+            $mfoPapGrps[] = implode(',', unserialize($regAllotData->mfo_pap));
+
+            $dates[] = [
+                'id' => $regAllotID,
+                'date' => $regAllotData->period_ending . '-01'
+            ];
+        }
+
+        array_unique($mfoPapGrps);
+        usort($dates, ['App\Http\Controllers\RegAllotmentController', 'dateCompare']);
+
+        foreach ($mfoPapGrps as $papGrp) {
+            $mfoPAPs = [];
+            $periodEnding = [];
+            $entityName = '';
+            $fundCluster = '';
+            $legalBasis = '';
+            $mfoPAP = '';
+            $sheetNo = '1';
+
+            $currMonth = '';
+            $currTotalAllot = 0;
+            $currTotalOblig = 0;
+            $currTotalUnoblig = 0;
+            $currTotalDisb = 0;
+            $currTotalDue = 0;
+            $currTotalNotDue = 0;
+
+            $suppliers = DB::table('suppliers')->get();
+
+            $_mfoPAPs = explode(',', $papGrp);
+
+            foreach ($_mfoPAPs as $grpKey => $pap) {
+                $mfoPapDat = DB::table('mfo_pap')
+                                ->where('id', $pap)
+                                ->first();
+
+                if ($mfoPapDat) {
+                    $mfoPAPs[] = $mfoPapDat->code;
+                }
+            }
+
+            $mfoPAP = implode(', ', $mfoPAPs);
+            $data[] = (object) [
+                'mfo_pap' => $mfoPAP
+            ];
+            $datKey = count($data) - 1;
+
+            foreach ($dates as $regDat) {
+                $itemTableData = [];
+                $footerTableData = [];
+
+                $regAllotData = DB::table('funding_reg_allotments')
+                                  ->where('id', $regDat['id'])
+                                  ->first();
+
+                if (implode(',', unserialize($regAllotData->mfo_pap)) == $papGrp) {
+                    $itemTableData = [];
+                    $footerTableData = [];
+                    $regAllotmentItems = DB::table('funding_reg_allotment_items')
+                                           ->where([['reg_allotment_id', $regDat['id']], ['is_excluded', 'n']])
+                                           ->orderBy('order_no')
+                                           ->get();
+
+                    $data[$datKey]->id[] = $regDat['id'];
+                    $periodEnding[] = date_format(date_create($regAllotData->period_ending), 'F Y');
+                    $entityName = $regAllotData->entity_name;
+                    $fundCluster = $regAllotData->fund_cluster;
+                    $legalBasis = $regAllotData->legal_basis;
+                    $sheetNo = $regAllotData->sheet_no;
+
+                    $_periodEnding = date_format(date_create($regAllotData->period_ending), 'F Y');
+                    $currMonth = strtoupper($_periodEnding);
+
+                    $multiplier = 1;
+
+                    $totalAllot = 0;
+                    $totalOblig = 0;
+                    $totalUnoblig = 0;
+                    $totalDisb = 0;
+                    $totalDue = 0;
+                    $totalNotDue = 0;
+
+                    foreach ($regAllotmentItems as $ctr => $item) {
+                        $payee = Auth::user()->getEmployee($item->payee)->name;
+                        $uacsCodes = unserialize($item->uacs_object_code);
+                        $uacsObjects = [];
+
+                        if (strpos($item->particulars, "\n") !== FALSE) {
+                            $searchStr = ["\r\n", "\n", "\r"];
+                            $item->particulars = str_replace($searchStr, '<br>', $item->particulars);
+                        }
+
+                        if (!$payee) {
+                            foreach ($suppliers as $key => $bid) {
+                                if ($bid->id == $item->payee) {
+                                    $payee = $bid->company_name;
+                                    break;
+                                }
+                            }
+                        }
+
+                        foreach ($uacsCodes as $uacs) {
+                            $mooeTitleDat = DB::table('mooe_account_titles')
+                                            ->where('id', $uacs)
+                                            ->first();
+
+                            if ($mooeTitleDat) {
+                                $uacsObjects[] = $mooeTitleDat->uacs_code;
+                            }
+                        }
+
+                        $uacsObjects = implode(', ', $uacsObjects);
+
+                        $totalAllot += $item->allotments;
+                        $totalOblig += $item->obligations;
+                        $totalUnoblig += $item->unobligated_allot;
+                        $totalDisb += $item->disbursement;
+                        $totalDue += $item->due_demandable;
+                        $totalNotDue += $item->not_due_demandable;
+
+                        $currTotalAllot += $item->allotments;
+                        $currTotalOblig += $item->obligations;
+                        $currTotalUnoblig += $item->unobligated_allot;
+                        $currTotalDisb += $item->disbursement;
+                        $currTotalDue += $item->due_demandable;
+                        $currTotalNotDue += $item->not_due_demandable;
+
+                        $item->allotments = number_format($item->allotments, 2);
+                        $item->obligations = number_format($item->obligations, 2);
+                        $item->unobligated_allot = number_format($item->unobligated_allot, 2);
+                        $item->disbursement = number_format($item->disbursement, 2);
+                        $item->due_demandable = number_format($item->due_demandable, 2);
+                        $item->not_due_demandable = number_format($item->not_due_demandable, 2);
+
+                        $itemTableData[] = [
+                            $item->date_received,
+                            $item->date_obligated,
+                            $item->date_released,
+                            $payee,
+                            $item->particulars,
+                            $item->serial_number,
+                            $uacsObjects,
+                            $item->allotments,
+                            $item->obligations,
+                            $item->unobligated_allot,
+                            $item->disbursement,
+                            $item->due_demandable,
+                            $item->not_due_demandable,
+                        ];
+                    }
+
+                    $totalAllot = number_format($totalAllot, 2);
+                    $totalOblig = number_format($totalOblig, 2);
+                    $totalUnoblig = number_format($totalUnoblig, 2);
+                    $totalDisb = number_format($totalDisb, 2);
+                    $totalDue = number_format($totalDue, 2);
+                    $totalNotDue = number_format($totalNotDue, 2);
+
+                    $footerTableData[] = [
+                        'TOTAL FOR THE MONTH OF ',
+                        strtoupper($_periodEnding),
+                        '', '', '',
+                        $totalAllot,
+                        $totalOblig,
+                        $totalUnoblig,
+                        $totalDisb,
+                        $totalDue,
+                        $totalNotDue,
+                    ];
+
+                    $data[$datKey]->table_data[] = (object) [
+                        'body' => $itemTableData,
+                        'footer' => $footerTableData,
+                        'month' => strtoupper($_periodEnding)
+                    ];
+                }
+            }
+
+            $currTotalAllot = number_format($currTotalAllot, 2);
+            $currTotalOblig = number_format($currTotalOblig, 2);
+            $currTotalUnoblig = number_format($currTotalUnoblig, 2);
+            $currTotalDisb = number_format($currTotalDisb, 2);
+            $currTotalDue = number_format($currTotalDue, 2);
+            $currTotalNotDue = number_format($currTotalNotDue, 2);
+
+            $data[$datKey]->period_ending = implode(', ', $periodEnding);
+            $data[$datKey]->entity_name = $entityName;
+            $data[$datKey]->fund_cluster = $fundCluster;
+            $data[$datKey]->legal_basis = $legalBasis;
+            $data[$datKey]->sheet_no = $sheetNo;
+            $data[$datKey]->current_month = $currMonth;
+            $data[$datKey]->total_allotment = $currTotalAllot;
+            $data[$datKey]->total_obligation = $currTotalOblig;
+            $data[$datKey]->total_unobligated = $currTotalUnoblig;
+            $data[$datKey]->total_disbursement = $currTotalDisb;
+            $data[$datKey]->total_due = $currTotalDue;
+            $data[$datKey]->total_not_due = $currTotalNotDue;
+        }
+
+        return view('modules.report.registry-allotment.show', compact('data'));
     }
 
     /**
@@ -543,5 +756,12 @@ class RegAllotmentController extends Controller
         }
 
         return response()->json($mooes);
+    }
+
+    private static function dateCompare($date1, $date2) {
+        $date1 = strtotime($date1['date']);
+        $date2 = strtotime($date2['date']);
+
+        return $date1 - $date2;
     }
 }

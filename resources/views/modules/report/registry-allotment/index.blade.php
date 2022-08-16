@@ -45,6 +45,10 @@
                             @endif
 
                             <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
+                                    onclick="$(this).showSelected(`{{ route('report-raod-show') }}`);">
+                                <i class="fas fa-print"></i> Show Selected
+                            </button>
+                            <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2"
                                     onclick="$(this).showPrint('id', 'report_raod', 'multiple');">
                                 <i class="fas fa-print"></i> Print Selected
                             </button>
@@ -237,7 +241,7 @@
 @endif
 
 @include('modals.search-post')
-@include('modals.show')
+@include('modals.show-full')
 @include('modals.create')
 @include('modals.edit')
 @include('modals.delete-destroy')
@@ -255,6 +259,8 @@
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/funding-reg-allot.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>
+<script type="text/javascript" src="{{ asset('js/xlsx.full.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('js/FileSaver.min.js') }}"></script>
 <script>
     // Tooltips Initialization
     $(function () {

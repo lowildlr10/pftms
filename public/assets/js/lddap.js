@@ -9,41 +9,130 @@ $(function () {
         '<div class="tooltip-arrow md-arrow"></div>' +
         '<div class="tooltip-inner md-inner stylish-color"></div></div>';
 
-    function initializeSelect2() {
-        $(".ors-tokenizer").select2({
-            tokenSeparators: [","],
-            placeholder: "Value...",
-            width: "100%",
-            maximumSelectionSize: 4,
-            allowClear: true,
-            ajax: {
-                url: `${baseURL}/payment/lddap/get-ors-burs`,
-                type: "post",
-                dataType: "json",
-                delay: 250,
-                data: function (params) {
-                    return {
-                        _token: CSRF_TOKEN,
-                        search: params.term,
-                    };
-                },
-                processResults: function (data) {
-                    return {
-                        results: $.map(data, function (item) {
-                            return {
-                                text: item.serial_no,
-                                id: item.id,
-                            };
-                        }),
-                        pagination: {
-                            more: true,
-                        },
-                    };
-                },
-                cache: true,
-            },
-            //theme: "material"
+    function setOrsBursDetails(mainElem) {
+        let orsData = [];
+
+        mainElem.find("option:selected").each(() => {
+            orsData = mainElem.val();
         });
+
+        let formData = new FormData();
+        const url = `${baseURL}/payment/lddap/get-ors-burs-details`;
+
+        formData.append("ors_burs_ids", orsData);
+
+        $.ajax({
+            url: url,
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: formData,
+            success: function (response) {
+                const payees = response.payees;
+                const uacs = response.uacs;
+                const totalAmount = response.total_amount;
+
+                mainElem
+                    .closest("tr")
+                    .children()
+                    .each(function (i, elem) {
+                        $(elem).find(".current-creditor-name").text(payees);
+                        $(elem).find(".prior-creditor-name").text(payees);
+                        $(elem).find(".current-gross-amount").val(totalAmount);
+                        $(elem).find(".prior-gross-amount").val(totalAmount);
+
+                        $(elem)
+                            .find(".allot-class-tokenizer")
+                            .val(null)
+                            .trigger("change");
+
+                        $.each(uacs, function (i, mooe) {
+                            const allotClassElem = $(elem).find(
+                                ".allot-class-tokenizer"
+                            );
+                            const mooeId = mooe.id;
+                            const mooeTitle = mooe.title;
+
+                            if (
+                                allotClassElem.find(
+                                    "option[value='" + mooeId + "']"
+                                ).length
+                            ) {
+                                allotClassElem.val(mooeId).trigger("change");
+                            } else {
+                                // Create a DOM Option and pre-select by default
+                                const newOption = new Option(
+                                    mooeTitle,
+                                    mooeId,
+                                    true,
+                                    true
+                                );
+                                // Append it to the select
+                                allotClassElem
+                                    .append(newOption)
+                                    .trigger("change");
+                            }
+                        });
+                    });
+
+                $(this).computeGrossTotal("current");
+                $(this).computeGrossTotal("prior");
+                computeGrandTotal();
+            },
+            fail: function (xhr, textStatus, errorThrown) {
+                alert("Try selecting ORS/BURS again.");
+            },
+            error: function (data) {
+                alert("Try selecting ORS/BURS again.");
+            },
+        });
+    }
+
+    function initializeSelect2() {
+        $(".ors-tokenizer")
+            .select2({
+                tokenSeparators: [","],
+                placeholder: "Value...",
+                width: "100%",
+                maximumSelectionSize: 4,
+                allowClear: true,
+                ajax: {
+                    url: `${baseURL}/payment/lddap/get-ors-burs`,
+                    type: "post",
+                    dataType: "json",
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            _token: CSRF_TOKEN,
+                            search: params.term,
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.serial_no,
+                                    id: item.id,
+                                };
+                            }),
+                            pagination: {
+                                more: true,
+                            },
+                        };
+                    },
+                    cache: true,
+                },
+                //theme: "material"
+            })
+            .on("select2:select", function (e) {
+                setOrsBursDetails($(this));
+            })
+            .on("select2:unselect", function (e) {
+                setOrsBursDetails($(this));
+            })
+            .on("select2:clear", function (e) {
+                setOrsBursDetails($(this));
+            });
 
         $(".allot-class-tokenizer").select2({
             tokenSeparators: [","],
@@ -300,7 +389,7 @@ $(function () {
 
         let creditorName = `<td><div class="md-form form-sm my-0">
                             <textarea name="${_lastRowID[0]}_creditor_name[]" placeholder=" Value..."
-                            class="md-textarea required form-control-sm w-100 py-1"></textarea>
+                            class="${_lastRowID[0]}-creditor-name md-textarea required form-control-sm w-100 py-1"></textarea>
                             </div></td>`;
         let creditorAccntNo = `<td><div class="md-form form-sm my-0">
                                <textarea name="${_lastRowID[0]}_creditor_acc_no[]" placeholder=" Value..."
