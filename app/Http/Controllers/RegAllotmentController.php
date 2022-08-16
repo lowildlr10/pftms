@@ -166,6 +166,7 @@ class RegAllotmentController extends Controller
         $uacsCode = $request->uacs_object_code ?
                     serialize(explode(',', $request->uacs_object_code)) :
                     serialize([]);
+
         $instanceRegAllot = new RegAllotmentItem([
             'reg_allotment_id' => $regID,
             'ors_id' => $orsID,
@@ -183,6 +184,7 @@ class RegAllotmentController extends Controller
             'disbursement' => $request->disbursement,
             'due_demandable' => $request->due_demandable,
             'not_due_demandable' => $request->not_due_demandable,
+            'is_excluded' => $request->is_excluded,
         ]);
         $instanceRegAllot->save();
 

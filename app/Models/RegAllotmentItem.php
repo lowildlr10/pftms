@@ -37,6 +37,7 @@ class RegAllotmentItem extends Model
         'disbursement',
         'due_demandable',
         'not_due_demandable',
+        'is_excluded'
     ];
 
     /**

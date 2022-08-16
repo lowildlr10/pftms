@@ -335,6 +335,10 @@ header,
     border-radius: 1.25rem !important;
 }
 
+#voucher-table-section > table {
+    width: max-content;
+}
+
 /* Extra Small devices (landscape phones, atmost 575px) */
 @media (max-width: 575px) {
     body {

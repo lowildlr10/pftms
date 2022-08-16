@@ -1407,6 +1407,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_raod',
         'access' => 'is_allowed'
     ]);
+    Route::any('report/registry-allot-obli-disb/get-custom-payees', [
+        'uses' => 'CollectionController@getCustomPayees',
+        'module' => 'report_raod',
+        'access' => 'is_allowed'
+    ]);
     /*
     Route::get('report/ledger/disbursement/show/{id}/{for}/{type}', [
         'uses' => 'LedgerController@showLedger',

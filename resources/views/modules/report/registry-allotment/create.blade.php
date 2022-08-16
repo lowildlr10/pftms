@@ -156,6 +156,7 @@
                                         Unpaid Obligations
                                     </small>
                                 </th>
+                                <th width="10%"></th>
                                 <th width="2%"></th>
                             </tr>
                             <tr>
@@ -184,7 +185,12 @@
                                         Not Yet Due and Demandable
                                     </small>
                                 </th>
-                                <th width="1%"></th>
+                                <th class="text-center" width="10%">
+                                    <small>
+                                        Is Excluded?
+                                    </small>
+                                </th>
+                                <th width="2%"></th>
                             </tr>
                         </thead>
                     </table>

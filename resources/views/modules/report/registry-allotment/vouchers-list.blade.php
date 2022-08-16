@@ -51,6 +51,7 @@
                     Unpaid Obligations
                 </small>
             </th>
+            <th width="10%"></th>
             <th width="2%"></th>
         </tr>
         <tr>
@@ -79,7 +80,12 @@
                     Not Yet Due and Demandable
                 </small>
             </th>
-            <th width="1%"></th>
+            <th class="text-center" width="10%">
+                <small>
+                    Is Excluded?
+                </small>
+            </th>
+            <th width="2%"></th>
         </tr>
     </thead>
 
@@ -205,6 +211,11 @@
                            onclick="$(this).solveNotYetDueDemandable('{{ $itemCtr }}')">
                 </div>
             </td>
+            <th class="align-middle text-center" scope="row">
+                <input class="form-check-input is-excluded" type="checkbox" value="1" id="check-{{ $itemCtr }}"
+                       onclick="$(this).highlightExcluded($(this));">
+                <label class="form-check-label" for="check-{{ $itemCtr }}" class="label-table"></label>
+            </th>
             <td class="align-middle">
                 <a href="#" class="grey-text">
                     <i class="fas fa-ellipsis-v"></i>

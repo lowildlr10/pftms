@@ -865,7 +865,7 @@ class PrintController extends Controller
                     $itemTableData = [];
                     $footerTableData = [];
                     $regAllotmentItems = DB::table('funding_reg_allotment_items')
-                                           ->where('reg_allotment_id', $regDat['id'])
+                                           ->where([['reg_allotment_id', $regDat['id']], ['is_excluded', 'n']])
                                            ->orderBy('order_no')
                                            ->get();
 
