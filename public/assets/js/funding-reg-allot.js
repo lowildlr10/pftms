@@ -8,6 +8,34 @@ $(function () {
     let payeeData = {},
         mooeTitle = {};
 
+    function s2ab(s) {
+        var buf = new ArrayBuffer(s.length);
+        var view = new Uint8Array(buf);
+        for (var i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xff;
+        return buf;
+    }
+
+    $.fn.generateExcel = function () {
+        const fileName = `raod.xlsx`;
+
+        wb = XLSX.utils.table_to_book(
+            document.getElementById("section-show-selected"),
+            {
+                sheet: "raod",
+            }
+        );
+        wbout = XLSX.write(wb, {
+            bookType: "xlsx",
+            bookSST: true,
+            type: "binary",
+        });
+
+        saveAs(
+            new Blob([s2ab(wbout)], { type: "application/octet-stream" }),
+            fileName
+        );
+    };
+
     function initializeSelect2() {
         $(".payee-tokenizer").select2({
             tokenSeparators: [","],
@@ -303,6 +331,34 @@ $(function () {
             : 0;
         $(`#due-demandable-${ctr}`).val(0);
         $(`#not-due-demandable-${ctr}`).val(obligation);
+    };
+
+    $.fn.showSelected = function (url) {
+        let ids = "";
+
+        $(".chk").each(function () {
+            if ($(this).is(":checked")) {
+                ids += $(this).val() + ";";
+            }
+        });
+
+        url = encodeURI(`${url}?ids=${ids}`);
+
+        $("#mdb-preloader").css("background", "#000000ab").fadeIn(300);
+        $("#modal-body-show-full").load(url, function () {
+            $("#mdb-preloader").fadeOut(300);
+            $(this).slideToggle(500);
+        });
+        $("#modal-lg-show-full")
+            .modal({ keyboard: false, backdrop: "static" })
+            .on("shown.bs.modal", function () {
+                $("#show-full-title").html(
+                    "Show Selected Registry of Allotments, Obligations and Disbursement"
+                );
+            })
+            .on("hidden.bs.modal", function () {
+                $("#modal-body-show-full").html("").css("display", "none");
+            });
     };
 
     $.fn.showCreate = function (url) {

@@ -1357,6 +1357,11 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'module' => 'report_raod',
         'access' => 'is_allowed'
     ])->name('report-raod');
+    Route::get('report/registry-allot-obli-disb/show', [
+        'uses' => 'RegAllotmentController@show',
+        'module' => 'report_raod',
+        'access' => 'create'
+    ])->name('report-raod-show');
     Route::get('report/registry-allot-obli-disb/show-create', [
         'uses' => 'RegAllotmentController@showCreate',
         'module' => 'report_raod',
