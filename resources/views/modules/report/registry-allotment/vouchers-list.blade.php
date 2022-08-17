@@ -135,6 +135,14 @@
                                 @php break @endphp
                             @endif
                         @endforeach
+                        @foreach ($customPayees as $pay)
+                            @if ($pay->id == $item->payee)
+                        <option value="{{$pay->id}}" selected>
+                            {{$pay->payee_name}} (Manually Added)
+                        </option>
+                                @php break @endphp
+                            @endif
+                        @endforeach
                     </select>
                 </div>
             </td>

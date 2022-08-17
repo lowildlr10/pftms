@@ -1403,17 +1403,12 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'is_allowed'
     ]);
     Route::post('report/registry-allot-obli-disb/get-payee', [
-        'uses' => 'RegAllotmentController@getPayees',
+        'uses' => 'CollectionController@getCustomPayees',
         'module' => 'report_raod',
         'access' => 'is_allowed'
     ]);
     Route::post('report/registry-allot-obli-disb/get-uacs-object', [
         'uses' => 'RegAllotmentController@getUacsObject',
-        'module' => 'report_raod',
-        'access' => 'is_allowed'
-    ]);
-    Route::any('report/registry-allot-obli-disb/get-custom-payees', [
-        'uses' => 'CollectionController@getCustomPayees',
         'module' => 'report_raod',
         'access' => 'is_allowed'
     ]);

@@ -241,13 +241,25 @@
                                                 name="payee[]">
                                             @foreach ($employees as $emp)
                                                 @if ($emp->id == ($item->raod ? $item->raod->payee : $item->ors_payee))
-                                            <option value="{{$emp->id}}" selected>{{$emp->firstname}} {{$emp->lastname}}</option>
+                                            <option value="{{$emp->id}}" selected>
+                                                {{$emp->firstname}} {{$emp->lastname}} (Registered Employee)
+                                            </option>
                                                     @php break @endphp
                                                 @endif
                                             @endforeach
                                             @foreach ($suppliers as $bid)
                                                 @if ($bid->id == ($item->raod ? $item->raod->payee : $item->ors_payee))
-                                            <option value="{{$bid->id}}" selected>{{$bid->company_name}}</option>
+                                            <option value="{{$bid->id}}" selected>
+                                                {{$bid->company_name}} (Registered Supplier)
+                                            </option>
+                                                    @php break @endphp
+                                                @endif
+                                            @endforeach
+                                            @foreach ($customPayees as $pay)
+                                                @if ($pay->id == ($item->raod ? $item->raod->payee : $item->ors_payee))
+                                            <option value="{{$pay->id}}" selected>
+                                                {{$pay->payee_name}} (Manually Added)
+                                            </option>
                                                     @php break @endphp
                                                 @endif
                                             @endforeach
