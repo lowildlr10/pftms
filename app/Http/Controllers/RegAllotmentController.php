@@ -24,6 +24,7 @@ use App\Models\EmpAccount as User;
 use App\Models\EmpUnit;
 use App\Models\Supplier;
 use App\Models\MooeAccountTitle;
+use App\Models\CustomPayee;
 use App\Models\MfoPap;
 
 use Carbon\Carbon;
@@ -231,10 +232,10 @@ class RegAllotmentController extends Controller
             ];
         }
 
-        array_unique($mfoPapGrps);
+        $mfoPapGrps = array_unique($mfoPapGrps);
         usort($dates, ['App\Http\Controllers\RegAllotmentController', 'dateCompare']);
 
-        foreach ($mfoPapGrps as $papGrp) {
+        foreach ($mfoPapGrps as $mfoGrpKey => $papGrp) {
             $mfoPAPs = [];
             $periodEnding = [];
             $entityName = '';
@@ -271,7 +272,7 @@ class RegAllotmentController extends Controller
             ];
             $datKey = count($data) - 1;
 
-            foreach ($dates as $regDat) {
+            foreach ($dates as $dateCtr => $regDat) {
                 $itemTableData = [];
                 $footerTableData = [];
 
@@ -434,8 +435,9 @@ class RegAllotmentController extends Controller
      */
     public function showEdit($id) {
         $employees = User::orderBy('firstname')->get();
-        $mfoPAPs = MfoPap::orderBy('code')->get();
         $suppliers = Supplier::orderBy('company_name')->get();
+        $customPayees = CustomPayee::orderBy('payee_name')->get();
+        $mfoPAPs = MfoPap::orderBy('code')->get();
         $uacsObjects = MooeAccountTitle::orderBy('uacs_code')->get();
         $regDat = RegAllotment::find($id);
         $periodEnding = $regDat->period_ending;
@@ -506,7 +508,8 @@ class RegAllotmentController extends Controller
         return view('modules.report.registry-allotment.update', compact(
             'id', 'periodEnding', 'entityName', 'fundCluster',
             'legalBasis', 'mfoPAP', 'sheetNo', 'regItems',
-            'employees', 'suppliers', 'uacsObjects', 'mfoPAPs'
+            'employees', 'suppliers', 'uacsObjects', 'mfoPAPs',
+            'customPayees'
         ));
     }
 
@@ -625,6 +628,7 @@ class RegAllotmentController extends Controller
         $mfoPAPs = $request->mfo_pap ? $request->mfo_pap : [];
         $employees = User::orderBy('firstname')->get();
         $suppliers = Supplier::orderBy('company_name')->get();
+        $customPayees = CustomPayee::orderBy('payee_name')->get();
         $uacsObjects = MooeAccountTitle::orderBy('uacs_code')->get();
 
         if (count($mfoPAPs) > 0) {
@@ -663,7 +667,7 @@ class RegAllotmentController extends Controller
         }
 
         return view('modules.report.registry-allotment.vouchers-list', compact(
-            'employees', 'suppliers', 'vouchers', 'uacsObjects'
+            'employees', 'suppliers', 'vouchers', 'uacsObjects', 'customPayees'
         ));
     }
 

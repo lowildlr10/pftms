@@ -16,14 +16,20 @@ $(function () {
     }
 
     $.fn.generateExcel = function () {
-        const fileName = `raod.xlsx`;
+        const createDate = moment().format("YYYYMMDD");
+        const fileName = `raod-${createDate}.xlsx`;
+        const wb = XLSX.utils.book_new();
 
-        wb = XLSX.utils.table_to_book(
-            document.getElementById("section-show-selected"),
-            {
-                sheet: "raod",
-            }
-        );
+        $(".sel-section").each(function () {
+            const sectionId = $(this).attr("id");
+            const elem = document.getElementById(sectionId);
+            const ws = XLSX.utils.table_to_sheet(elem);
+
+            const sheetName = $(this).find(".mfo-pap-text").val();
+
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        });
+
         wbout = XLSX.write(wb, {
             bookType: "xlsx",
             bookSST: true,
@@ -59,11 +65,11 @@ $(function () {
                     return {
                         results: $.map(data, function (item) {
                             let jsonData = {};
-                            jsonData["name"] = item.name;
+                            jsonData["payee_name"] = item.payee_name;
                             payeeData[item.id] = jsonData;
 
                             return {
-                                text: `${item.name}`,
+                                text: `${item.payee_name}`,
                                 id: item.id,
                             };
                         }),

@@ -259,6 +259,7 @@
 <script type="text/javascript" src="{{ asset('assets/js/input-validation.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/funding-reg-allot.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/print.js') }}"></script>
+<script type="text/javascript" src="{{ asset('js/moment.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/xlsx.full.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/FileSaver.min.js') }}"></script>
 <script>

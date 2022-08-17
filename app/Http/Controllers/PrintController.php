@@ -813,7 +813,7 @@ class PrintController extends Controller
             ];
         }
 
-        array_unique($mfoPapGrps);
+        $mfoPapGrps = array_unique($mfoPapGrps);
         usort($dates, ['App\Http\Controllers\PrintController', 'dateCompare']);
 
         foreach ($mfoPapGrps as $papGrp) {
