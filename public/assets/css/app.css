@@ -339,6 +339,10 @@ header,
     width: max-content;
 }
 
+.table td {
+    font-weight: 400 !important;
+}
+
 /* Extra Small devices (landscape phones, atmost 575px) */
 @media (max-width: 575px) {
     body {
