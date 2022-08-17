@@ -881,7 +881,7 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     Route::post('procurement/dv/disburse/{id}', [
         'uses' => 'DisbursementVoucherController@disburse',
         'module' => 'proc_dv',
-        'access' => 'diburse'
+        'access' => 'disburse'
     ])->name('proc-dv-disburse');
     Route::get('procurement/dv/show-remarks/{id}', [
         'uses' => 'DisbursementVoucherController@showLogRemarks',
@@ -895,12 +895,12 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
     ])->name('proc-dv-store-remarks');
     Route::get('procurement/dv/show-uacs-items/{id}', [
         'uses' => 'DisbursementVoucherController@showUacsItems',
-        'module' => 'proc_ors_burs',
+        'module' => 'proc_dv',
         'access' => 'is_allowed'
     ])->name('proc-dv-show-uacs-items');
     Route::post('procurement/dv/update-uacs-items/{id}', [
         'uses' => 'DisbursementVoucherController@updateUacsItems',
-        'module' => 'proc_ors_burs',
+        'module' => 'proc_dv',
         'access' => 'is_allowed'
     ])->name('proc-dv-update-uacs-items');
 
