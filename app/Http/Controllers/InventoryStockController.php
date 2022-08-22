@@ -11,9 +11,9 @@ use App\Models\PurchaseJobOrder;
 use App\Models\PurchaseJobOrderItem;
 use App\Models\ObligationRequestStatus;
 use App\Models\InspectionAcceptance;
-use App\Models\InventoryStockIssue;
 use App\Models\InventoryStock;
 use App\Models\InventoryStockItem;
+use App\Models\InventoryStockIssue;
 use App\Models\InventoryStockIssueItem;
 
 use App\Models\EmpAccount as User;
@@ -93,6 +93,13 @@ class InventoryStockController extends Controller
 
     public function indexListStocks(Request $request, $empID) {
         $keyword = trim($request->keyword);
+
+        // Get module access
+        $module = 'inv_stocks';
+        $isAllowedUpdate = Auth::user()->getModuleAccess($module, 'update');
+        $isAllowedDelete = Auth::user()->getModuleAccess($module, 'delete');
+        $isAllowedDestroy = Auth::user()->getModuleAccess($module, 'destroy');
+
         $paperSizes = PaperSize::orderBy('paper_type')->get();
         $invStocksData = $this->indexStockData($request, $empID);
         $instanceInvClass = InventoryClassification::orderBy('classification_name')->get();
@@ -107,18 +114,24 @@ class InventoryStockController extends Controller
             'paperSizes' => $paperSizes,
             'instanceInvClass' => $instanceInvClass,
             'empID' => $empID,
-            'empName' => $empName
+            'empName' => $empName,
+            'isAllowedUpdate' => $isAllowedUpdate,
+            'isAllowedDelete' => $isAllowedDelete,
+            'isAllowedDestroy' => $isAllowedDestroy
         ]);
     }
 
     public function indexStockData($request, $empID = NULL) {
         $keyword = trim($request->keyword);
 
-        /*
-        $invStocksData = InventoryStock::with(['stockitems', 'procstatus', 'inventoryclass'])
-                                       ->has('stockitems', '>', 0);*/
         $invStocksData = InventoryStock::with(['procstatus', 'inventoryclass'])
-                                       ->has('stockitems', '>', 0);
+                                    ->has('stockitems', '>', 0);
+
+        if ($empID) {
+            $invStocksData = $invStocksData->whereHas('stockrecipients', function($query) use ($empID) {
+                $query->where('sig_received_by', $empID);
+            });
+        }
 
         if (!empty($keyword)) {
             $invStocksData = $invStocksData->where(function($qry) use ($keyword) {
@@ -138,14 +151,14 @@ class InventoryStockController extends Controller
                         $query->where('company_name', 'like', "%$keyword%");
                     })->orWhereHas('inventoryclass', function($query) use ($keyword) {
                         $query->where('classification_name', 'like', "%$keyword%")
-                              ->orWhere('abbrv', 'like', "%$keyword%");
+                            ->orWhere('abbrv', 'like', "%$keyword%");
                     })->orWhereHas('procstatus', function($query) use ($keyword) {
                         $query->where('status_name', 'like', "%$keyword%");
                     })->orWhereHas('stockitems', function($query) use ($keyword) {
                         $query->where('po_item_id', 'like', "%$keyword%")
-                              ->orWhere('description', 'like', "%$keyword%")
-                              ->orWhere('quantity', 'like', "%$keyword%")
-                              ->orWhere('amount', 'like', "%$keyword%");
+                            ->orWhere('description', 'like', "%$keyword%")
+                            ->orWhere('quantity', 'like', "%$keyword%")
+                            ->orWhere('amount', 'like', "%$keyword%");
                     });
             });
         }
@@ -153,18 +166,45 @@ class InventoryStockController extends Controller
         $invStocksData = $invStocksData->sortable(['inventory_no' => 'desc'])->paginate(15);
 
         foreach ($invStocksData as $invStock) {
-            $invStock->stockitems = InventoryStockItem::where('inv_stock_id', $invStock->id)
-                                                      ->orderBy('item_no')
-                                                      ->get();
+            if (!$empID) {
+                $invStock->stockitems = InventoryStockItem::where('inv_stock_id', $invStock->id)
+                                                    ->orderBy('item_no')
+                                                    ->get();
+            } else {
+                $stockIssuedData = InventoryStockIssue::where([
+                    ['sig_received_by', $empID], ['inv_stock_id', $invStock->id]
+                ])->first();
+
+                $invStock->inv_issue_id = $stockIssuedData->id;
+                $invStock->stockitems = InventoryStockItem::where('inv_stock_id', $invStock->id)
+                                                    ->has('stockissueditems')
+                                                    ->orderBy('item_no')
+                                                    ->get();
+
+            }
 
             foreach ($invStock->stockitems as $item) {
                 $stockItem = InventoryStockItem::find($item->id);
-                $stockIssuedItem = InventoryStockIssueItem::where('inv_stock_item_id', $item->id)
-                                                          ->get();
+
                 $item->available_quantity = $stockItem->quantity;
 
-                foreach ($stockIssuedItem as $issuedItem) {
-                    $item->available_quantity -= $issuedItem->quantity;
+                if (!$empID) {
+                    $stockIssuedItem = InventoryStockIssueItem::where('inv_stock_item_id', $item->id)
+                                                            ->get();
+
+                    foreach ($stockIssuedItem as $issuedItem) {
+                        $item->available_quantity -= $issuedItem->quantity;
+                    }
+                } else {
+                    $item->issued_quantity = 0;
+                    $stockIssuedItem = InventoryStockIssueItem::where('inv_stock_item_id', $item->id)
+                        ->whereHas('invstockissue', function($query) use ($empID) {
+                            $query->where('sig_received_by', $empID);
+                        })->get();
+
+                    foreach ($stockIssuedItem as $issuedItem) {
+                        $item->issued_quantity += $stockItem->quantity;
+                    }
                 }
             }
         }
