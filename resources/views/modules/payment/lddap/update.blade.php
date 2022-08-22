@@ -8,7 +8,7 @@
                     <div class="md-form row">
                         <div class="col-md-12 text-center">
                             <strong class="h5">
-                                LIST OF DUE AND DEMANDABLE ACCOUNTS PAYABLE - ADVICE TO DEVIT ACCOUNTS (LDDAP-ADA)
+                                LIST OF DUE AND DEMANDABLE ACCOUNTS PAYABLE - ADVICE TO DEBIT ACCOUNTS (LDDAP-ADA)
                             </strong>
                         </div>
                     </div>
@@ -157,7 +157,7 @@
                                 </th>
                                 <th class="text-center"  width="9%">
                                     <small>
-                                        REAMARKS
+                                        REMARKS
                                     </small>
                                 </th>
                                 <th width="2%"></th>

@@ -59,6 +59,10 @@ class InventoryStock extends Model
          return Uuid::generate();
     }
 
+    public function stockrecipients() {
+        return $this->hasMany('App\Models\InventoryStockIssue', 'inv_stock_id', 'id');
+    }
+
     public function stockitems() {
         return $this->hasMany('App\Models\InventoryStockItem', 'inv_stock_id', 'id')->orderBy('item_no');
     }

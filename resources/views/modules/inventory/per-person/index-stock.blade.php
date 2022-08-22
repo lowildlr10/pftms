@@ -117,6 +117,10 @@
                                                 <strong>{{ $cntr + 1 }}.|</strong> {{ $item->description }}.
                                                         @endif
 
+                                                <strong class="indigo-text">
+                                                    - [{{ $item->issued_quantity }} {{ $item->issued_quantity > 1 ? 'items' : 'item' }} Issued]
+                                                </strong>
+
                                                 <br>
 
                                                     @endforeach
@@ -134,6 +138,7 @@
                                         </td>
                                     </tr>
                                     <tr class="d-none show-xs">
+                                        {{--
                                         <td data-target="#right-modal-{{ $listCtr + 1 }}" data-toggle="modal">
                                             Inventory No: {{ $inv->inventory_no }} {!!
                                                 !$inv->po_id ? '<br><em><small class="grey-text">(Manually Added)</small></em>' : ''
@@ -149,10 +154,12 @@
                                                 <b>Classification Name:</b> {{ $inv->inventoryclass['classification_name'] }}
                                             </small>
                                         </td>
+                                        --}}
                                     </tr>
 
                                     <tr>
                                         <td class="p-0 pl-3 m-0">
+                                            {{--
                                             <table class="table table-condensed my-0 py-0">
                                                 @if (count($inv->stockitems) > 0)
                                                     @foreach ($inv->stockitems as $cntr => $item)
@@ -186,6 +193,7 @@
                                                 @endforeach
                                             @endif
                                             </table>
+                                            --}}
                                         </td>
                                     </tr>
                                         @endforeach
@@ -244,26 +252,48 @@
                                 <button type="button" class="btn btn-outline-mdb-color
                                         btn-sm px-2 waves-effect waves-light"
                                         onclick="$(this).showPrint(
-                                            '{{ $empID }}', 'inv_{{ strtolower($inv->inventoryclass['abbrv']) }}'
+                                            '{{ $inv->inv_issue_id }}', 'inv_{{ strtolower($inv->inventoryclass['abbrv']) }}'
                                         );">
-                                    <i class="fas fa-print blue-text"></i> Print {{ $inv->inventoryclass['abbrv'] }}
+                                    <i class="fas fa-print blue-text"></i> Print {{ strtolower($inv->inventoryclass['abbrv']) }}
                                 </button>
+
+                                @if ($isAllowedUpdate)
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light"
+                                        onclick="$(this).showUpdateIssueItem(`{{ route('stocks-show-update-issue-item', [
+                                            'invStockIssueID' => $inv->inv_issue_id,
+                                            'classification' => strtolower($inv->inventoryclass['abbrv'])
+                                        ]) }}`);">
+                                    <i class="fas fa-edit orange-text"></i> Edit
+                                </button>
+                                @endif
+
+                                @if ($isAllowedDelete)
+                                <button type="button" class="btn btn-outline-mdb-color
+                                        btn-sm px-2 waves-effect waves-light"
+                                        onclick="$(this).showDeleteIssue('{{ route('stocks-delete-issue', [
+                                            'invStockIssueID' => $inv->inv_issue_id
+                                        ]) }}', '{{ $empName }}');">
+                                    <i class="fas fa-trash red-text"></i> Delete
+                                </button>
+                                @endif
                             </div>
                         </div>
                     </div>
                     <div class="card-body">
                         <p>
+                            <strong>Issued To: </strong> {{ $empName }}<br>
                             <strong>Classification: </strong> {{ $inv->inventoryclass['classification_name'] }}<br>
                             <strong>Status: </strong> {{ $inv->procstatus['status_name'] }}<br>
                             <strong>Created: </strong> {{ $inv->created_at }}<br>
                         </p>
-                        <button type="button" class="btn btn-sm btn-mdb-color btn-rounded
-                                btn-block waves-effect mb-2"
-                                onclick="$(this).showRecipients(`{{ route('stocks-show-recipients', [
-                                    'id' => $inv->id
-                                ]) }}`);">
-                            <i class="fas fa-users fa-lg"></i> Show Recipients
+
+                        @if (strtolower($inv->inventoryclass['abbrv']) == 'par' || strtolower($inv->inventoryclass['abbrv']) == 'ics')
+                        <button class="btn btn-sm btn-mdb-color btn-rounded btn-block waves-effect mb-2"
+                                    onclick="$(this).showPrint('{{ $inv->inv_issue_id }}', 'inv_label');">
+                            <i class="fas fa-barcode"></i> Generate Label
                         </button>
+                        @endif
                     </div>
                 </div>
                 <hr>
@@ -271,7 +301,7 @@
                     <li class="list-group-item justify-content-between">
                         <h6><strong><i class="fas fa-receipt"></i> Items/Properties</strong></h6>
                     </li>
-                    <li class="list-group-item justify-content-between">
+                    <li class="list-group-item justify-content-between" style="font-weight: 400 !important;">
                         @if (count($inv->stockitems) > 0)
                             @foreach ($inv->stockitems as $cntr => $item)
                         <i class="fas fa-caret-right"></i>
@@ -281,6 +311,10 @@
                             @else
                         <strong>{{ $cntr + 1 }}.|</strong> {{ $item->description }}.
                             @endif
+
+                            <strong class="indigo-text">
+                                - [{{ $item->issued_quantity }} {{ $item->issued_quantity > 1 ? 'items' : 'item' }} Issued]
+                            </strong>
                         <br>
                             @endforeach
                         @endif
@@ -302,6 +336,8 @@
 
 @include('modals.search-post')
 @include('modals.show')
+@include('modals.edit')
+@include('modals.delete-destroy')
 @include('modals.print')
 
 @endsection

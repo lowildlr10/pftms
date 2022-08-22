@@ -56,4 +56,9 @@ class InventoryStockIssue extends Model
     public function recipient() {
         return $this->hasOne('App\Models\EmpAccount', 'id', 'sig_received_by');
     }
+
+    public function stockissueitems() {
+        return $this->hasMany('App\Models\InventoryStockIssueItem', 'inv_stock_issue_id', 'id')->orderBy('item_no');
+    }
+
 }

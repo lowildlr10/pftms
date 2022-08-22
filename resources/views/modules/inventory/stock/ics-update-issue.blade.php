@@ -165,7 +165,7 @@
                     <div class="md-form form-sm">
                         <input type="date" id="date-po" class="form-control" readonly
                                value="{{ $poDate }}">
-                        <label for="date-po" class="active mt-3">
+                        <label for="date-po" class="active">
                             <strong>Date</strong>
                         </label>
                     </div>
