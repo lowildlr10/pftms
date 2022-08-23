@@ -334,10 +334,15 @@
                     <div class="card-body">
                         <p>
                             <strong>PR Date: </strong> {{ $dv->pr['date_pr'] }}<br>
-                            <strong>ORS/BURS Date: </strong> {{ $dv->date_ors_burs }}<br>
+                            <hr>
+                            <strong>ORS/BURS Date: </strong> {{ $dv->ors_burs_data->date_ors_burs }}<br>
+                            <strong>ORS/BURS Obligation Date: </strong> {{ date('Y-m-d', strtotime($dv->ors_burs_data->date_obligated)) }}<br>
+                            <strong>ORS/BURS Serial No.: </strong> {{ $dv->ors_burs_data->serial_no }}<br>
+                            <hr>
+                            <strong>DV Date: </strong> {{ $dv->date_dv }}<br>
                             <strong>Particulars: </strong> {{
-                                (strlen($dv->dv['particulars']) > 150) ?
-                                substr($dv->dv['particulars'], 0, 150).'...' : $dv->dv['particulars']
+                                (strlen($dv->particulars) > 150) ?
+                                substr($dv->particulars, 0, 150).'...' : $dv->particulars
                             }}<br>
                             <strong>Payee: </strong> {{ $dv->bidpayee['company_name'] }}<br>
 
@@ -412,6 +417,14 @@
                 <ul class="btn-menu-3 list-group z-depth-0">
                     <li class="list-action-header list-group-item justify-content-between">
                         <h5><strong><i class="fas fa-pen-nib"></i> Actions</strong></h5>
+                    </li>
+
+                    <!-- Regenerate ORS/BURS Button Section -->
+                    <li class="list-group-item justify-content-between">
+                        <a onclick="$(this).redirectToDoc('{{ route('proc-ors-burs') }}', '{{ $dv->ors_id }}');"
+                          class="btn btn-outline-mdb-color waves-effect btn-block btn-md btn-rounded">
+                            <i class="fas fa-angle-double-left"></i> Regenerate ORS/BURS
+                        </a>
                     </li>
 
                     <!-- Regenerate IAR Button Section -->

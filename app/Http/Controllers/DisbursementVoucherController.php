@@ -236,7 +236,8 @@ class DisbursementVoucherController extends Controller
                         ->orWhere('disbursement_vouchers.fund_cluster', 'like', "%$keyword%")
                         ->orWhereHas('procors', function($query) use ($keyword) {
                             $query->where('id', 'like', "%$keyword%")
-                                  ->orWhere('po_no', 'like', "%$keyword%");
+                                  ->orWhere('po_no', 'like', "%$keyword%")
+                                  ->orWhere('serial_no', 'like', "%$keyword%");
                         })
                         ->orWhereHas('bidpayee', function($query) use ($keyword) {
                             $query->where('company_name', 'like', "%$keyword%")
@@ -248,6 +249,7 @@ class DisbursementVoucherController extends Controller
             $dvData = $dvData->sortable(['procors.po_no' => 'desc'])->paginate(15);
 
             foreach ($dvData as $dvDat) {
+                $dvDat->ors_burs_data = ObligationRequestStatus::find($dvDat->ors_id);
                 $dvDat->doc_status = $instanceDocLog->checkDocStatus($dvDat->id);
             }
 
@@ -326,6 +328,9 @@ class DisbursementVoucherController extends Controller
                             $query->where('company_name', 'like', "%$keyword%");
                         })->orWhereHas('custompayee', function($query) use ($keyword) {
                             $query->where('payee_name', 'like', "%$keyword%");
+                        })->orWhereHas('procors', function($query) use ($keyword) {
+                            $query->where('id', 'like', "%$keyword%")
+                                  ->orWhere('serial_no', 'like', "%$keyword%");
                         });
                 });
             }
@@ -336,6 +341,7 @@ class DisbursementVoucherController extends Controller
 
             foreach ($dvData as $dvDat) {
                 $dvDat->doc_status = $instanceDocLog->checkDocStatus($dvDat->id);
+                $dvDat->ors_burs_data = ObligationRequestStatus::find($dvDat->ors_id);
                 $dvDat->has_ors = ObligationRequestStatus::where('id', $dvDat->ors_id)->count();
                 $dvDat->has_lr = LiquidationReport::where('dv_id', $dvDat->id)->count();
             }
@@ -501,12 +507,16 @@ class DisbursementVoucherController extends Controller
         $roleHasAdministrator = Auth::user()->hasAdministratorRole();
         $roleHasDeveloper = Auth::user()->hasDeveloperRole();
 
+
+        $payees = [];
+
         $orsList = ObligationRequestStatus::all();
         $empID = '';
         $payee = '';
         $serialNo = '';
         $address = '';
         $sigCert1 = '';
+        $particulars = 'To payment of...';
         $transactionType = '';
         $orsID = NULL;
         $priorYear = NULL;
@@ -521,13 +531,27 @@ class DisbursementVoucherController extends Controller
         $empDivisionAccess = !$roleHasOrdinary ? Auth::user()->getDivisionAccess() :
                              [Auth::user()->division];
 
+        /*
         $payees = $roleHasOrdinary ?
                 User::where('id', Auth::user()->id)
                     ->orderBy('firstname')
                     ->get() :
                 User::where('is_active', 'y')
                     ->whereIn('division', $empDivisionAccess)
-                    ->orderBy('firstname')->get();
+                    ->orderBy('firstname')->get();*/
+
+        $payees[] = User::select(
+            DB::raw("CONCAT(firstname, ' ', lastname, ' [ ', position, ' ]') as name"),
+            'id'
+        )->orderBy('firstname')->get();
+        $payees[] = Supplier::select(
+            DB::raw("CONCAT(company_name, ' ', ' [ Registered Supplier ]') as company_name"),
+            'id'
+        )->orderBy('company_name')->get();
+        $payees[] = CustomPayee::select(
+            DB::raw("CONCAT(payee_name, ' [ Manually Added ]') as payee_name"),
+            'id'
+        )->orderBy('payee_name')->get();
 
         $signatories = Signatory::addSelect([
             'name' => User::select(DB::raw('CONCAT(firstname, " ", lastname) AS name'))
@@ -597,7 +621,7 @@ class DisbursementVoucherController extends Controller
             'orsID', 'transactionType', 'sigCert1',
             'projects', 'priorYear', 'continuing',
             'current', 'mfoPAPs', 'uacsDisplay',
-            'uacsObjectCode', 'orsListUacs'
+            'uacsObjectCode', 'orsListUacs', 'particulars'
         ));
     }
 

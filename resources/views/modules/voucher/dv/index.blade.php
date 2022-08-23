@@ -292,8 +292,19 @@
                     </div>
                     <div class="card-body">
                         <p>
-                            <strong>DV Date: </strong> {{ $dv->date_dv }}<br>
+                            @if ($dv->ors_burs_data)
                             <strong>ORS/BURS Date: </strong> {{ $dv->procors['date_ors_burs'] }}<br>
+                            <strong>ORS/BURS Obligation Date: </strong> {{ date('Y-m-d', strtotime($dv->ors_burs_data->date_obligated)) }}<br>
+                            <strong>ORS/BURS Serial No.: </strong> {{ $dv->ors_burs_data->serial_no }}<br>
+                            @else
+                            <small class="indigo-text">
+                                <strong>*DV is standalone. There is no linked or created ORS/BURS.</strong>
+                            </small>
+                            @endif
+
+                            <hr>
+
+                            <strong>DV Date: </strong> {{ $dv->date_dv }}<br>
                             <strong>Particulars: </strong> {{
                                 (strlen($dv->particulars) > 150) ?
                                 substr($dv->particulars, 0, 150).'...' : $dv->particulars
