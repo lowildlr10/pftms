@@ -131,7 +131,15 @@
                                             @endif
                                         </td>
                                         <td></td>
-                                        <td>{{ !empty($dv->dv_no) ? $dv->dv_no : 'NA' }}</td>
+                                        <td>
+                                            {{ !empty($dv->dv_no) ? $dv->dv_no : 'NA' }}
+
+                                            @if ($dv->ors_burs_data)
+                                            <small class="grey-text">
+                                                (ORS/BURS Serial No.: {{$dv->ors_burs_data->serial_no}})
+                                            </small>
+                                            @endif
+                                        </td>
                                         <td>
                                             <i class="fas fa-caret-right"></i> {{
                                                 (strlen($dv->particulars) > 150) ?
