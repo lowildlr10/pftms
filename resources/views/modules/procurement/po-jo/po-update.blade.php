@@ -4,10 +4,16 @@
     <div class="row">
         <div class="col-md-6">
             <div class="md-form">
-                <input type="text" id="company-name" class="form-control form-sm"
-                       value="{{ $companyName }}" readonly>
-                <label for="company-name" class="{{ !empty($companyName) ? 'active' : '' }}">
-                    Supplier
+                <select class="mdb-select crud-select md-form colorful-select dropdown-dark required"
+                        data-stop-refresh="true" searchable="Search here.." name="awarded_to">
+                    @foreach ($awardees as $award)
+                    <option value="{{ $award->id }}" {{ $award->id == $awardedTo ? 'selected' : '' }}>
+                        {{ $award->company_name }}
+                    </option>
+                    @endforeach
+                </select>
+                <label class="mdb-main-label active">
+                    Supplier <span class="red-text">*</span>
                 </label>
             </div>
         </div>

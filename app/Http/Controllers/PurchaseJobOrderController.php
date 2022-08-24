@@ -275,10 +275,12 @@ class PurchaseJobOrderController extends Controller
      */
     public function showEdit(Request $request, $id) {
         $unitIssues = ItemUnitIssue::orderBy('unit_name')->get();
+        $awardees = Supplier::orderBy('company_name')->get();
         $instancePO = PurchaseJobOrder::with(['poitems', 'awardee'])->find($id);
         $prID = $instancePO->pr_id;
         $poNo = $instancePO->po_no;
         $poDate = $instancePO->date_po;
+        $awardedTo = $instancePO->awarded_to;
         $companyName = $instancePO->awardee['company_name'];
         $companyAddress = $instancePO->awardee['address'];
         $companyTinNo = $instancePO->awardee['tin_no'];
@@ -320,7 +322,7 @@ class PurchaseJobOrderController extends Controller
             'fundCluster', 'sigDepartment', 'sigApproval',
             'sigFundsAvailable', 'poItems', 'signatories',
             'instancePO' , 'poNumbers', 'modeProcurement',
-            'unitIssues'
+            'unitIssues', 'awardees', 'awardedTo'
         ));
     }
 
@@ -332,6 +334,7 @@ class PurchaseJobOrderController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id) {
+        $awardedTo = $request->awarded_to;
         $poDate = $request->date_po;
         $placeDelivery = $request->place_delivery;
         $deliveryTerm = $request->delivery_term;
@@ -357,6 +360,7 @@ class PurchaseJobOrderController extends Controller
             $poNo = $instancePO->po_no;
             $documentType = $instancePO->document_type;
 
+            $instancePO->awarded_to = $awardedTo;
             $instancePO->date_po = $poDate;
             $instancePO->place_delivery = $placeDelivery;
             $instancePO->date_delivery = $dateDelivery;
@@ -401,8 +405,19 @@ class PurchaseJobOrderController extends Controller
             $instanceORS = ObligationRequestStatus::where('po_no', $poNo)->first();
 
             if ($instanceORS) {
+                $orsID = $instanceORS->id;
+                $instanceORS->po_no = $poNo;
+                $instanceORS->payee = $awardedTo;
                 $instanceORS->amount = $grandTotal;
                 $instanceORS->save();
+
+                $instanceDV = DisbursementVoucher::where('ors_id', $orsID)->first();
+
+                if ($instanceDV) {
+                    $instanceDV->payee = $awardedTo;
+                    $instanceDV->amount = $grandTotal;
+                    $instanceDV->save();
+                }
             }
 
             $documentType = $documentType == 'po' ? 'Purchase Order' : 'Job Order';
