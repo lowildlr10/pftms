@@ -88,9 +88,9 @@
                     </div>
                     <div class="md-form form-sm">
                         <input type="date" id="date-dv" name="date_dv"
-                               class="form-control required" value="{{ $dvDate }}">
+                               class="form-control" value="{{ $dvDate }}">
                         <label for="date-dv" class="active">
-                            <strong>Date <span class="red-text">*</span></strong>
+                            <strong>Date</strong>
                         </label>
                     </div>
                     <div class="md-form form-sm">
