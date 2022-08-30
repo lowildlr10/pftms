@@ -79,9 +79,9 @@
                     </div>
                     <div class="md-form form-sm">
                         <input type="date" id="date-ors-burs" name="date_ors_burs"
-                               class="form-control required">
+                               class="form-control">
                         <label for="date-ors-burs" class="active">
-                            <strong>Date <span class="red-text">*</span></strong>
+                            <strong>Date</strong>
                         </label>
                     </div>
                     <div class="md-form form-sm">

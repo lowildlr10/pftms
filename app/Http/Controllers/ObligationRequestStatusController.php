@@ -788,7 +788,7 @@ class ObligationRequestStatusController extends Controller
 
             $instanceORS->document_type = $documentType;
             $instanceORS->serial_no = $serialNo;
-            $instanceORS->date_ors_burs = $dateORS;
+            $instanceORS->date_ors_burs = !empty($dateORS) ? $dateORS : $instanceORS->date_obligated;
             $instanceORS->fund_cluster = $fundCluster;
             $instanceORS->office = $office;
             $instanceORS->address = $address;
@@ -1353,6 +1353,7 @@ class ObligationRequestStatusController extends Controller
             }
 
             $instanceORS->uacs_object_code = $uacsObjectCode;
+            $instanceORS->date_ors_burs = Carbon::now();
             $instanceORS->date_obligated = Carbon::now();
             $instanceORS->obligated_by = Auth::user()->id;
             $instanceORS->serial_no = $serialNo;

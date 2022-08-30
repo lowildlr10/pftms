@@ -1001,7 +1001,7 @@ class DisbursementVoucherController extends Controller
             }
 
             $instanceDV->fund_cluster = $fundCluster;
-            $instanceDV->date_dv = $dateDV;
+            $instanceDV->date_dv = !empty($dateDV) ? $dateDV : $instanceDV->date_disbursed;
             $instanceDV->dv_no = $dvNo;
             $instanceDV->payment_mode = $modePayment;
             $instanceDV->other_payment = $otherPayment;
@@ -1541,6 +1541,7 @@ class DisbursementVoucherController extends Controller
                 $routeName = 'ca-dv';
             }
 
+            $instanceDV->date_dv= Carbon::now();
             $instanceDV->date_disbursed = Carbon::now();
             $instanceDV->disbursed_by = Auth::user()->id;
             $instanceDV->save();
