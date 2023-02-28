@@ -51,7 +51,7 @@ class DocRequestQuotation extends PDF {
             $this->Ln(10);
 
             //Title
-            $this->MultiCell(0, '5', 'REQUEST FOR BIDS/QUOTATION', 0, 'C');
+            $this->MultiCell(0, '1', 'REQUEST FOR BIDS/QUOTATION', 0, 'C');
             $this->Ln();
 
             $this->Cell(0, 5, 'Sir/Madam:');
@@ -62,9 +62,29 @@ class DocRequestQuotation extends PDF {
                             "to have your best prices, terms and conditions of delivery.",
                             0, 'L');
             $this->Ln(5);
+            $this->Cell(0, 5, 'Project Title: ____________________________________________________________________________________');
+            $this->Ln();
+            $this->Cell(0, 5, 'Project Location/: ________________________________________________________________________________');
+            $this->Ln();
+
 
             //Table data
             $this->htmlTable($groupNo->table_data);
+            $this->Ln();
+            
+            $this->Cell(0, 5, 'General Conditions:');
+            $this->Ln();
+
+            $this->MultiCell(0, 0, '1.  Lowest price shall be quoted on the item/s  inclusive of all government taxes and submit signed quotation in a sealed envelope.');
+
+            $this->MultiCell(0, 0, '2.  Delivery period must be ________________ as per stated on the purchase / job order for the winning bidder. Otherwise,  a penalty of 1/10 of 1% of every day of delay shall be charged.');
+
+            $this->MultiCell(0, 0, '3.  Warranty shall be for a min. of 3 months for expendable goods, and min. of 1 year for non-expendable goods, reckoned from the date of acceptance by the procuring entity.');
+
+            $this->MultiCell(0, 0, '4.  For each item, the columns in the table above shall be completely filled-out. Non-compliance / Incomplete data or non-filling up shall be a ground for disqualification. Alternative bid is not allowed.');
+
+            $this->MultiCell(0, 0, '5.  The Lowest Calculated Bidder (LCB) shall be required to submit  the following documentary requirements: Mayor’s Permit, PhilGEPS registration number, Income tax return, Omnibus sworn statement.');
+            $this->Ln();
 
             //Footer
             $this->SetFont('helvetica', 'BI', 10  + ($fontScale * 10));

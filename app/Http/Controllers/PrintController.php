@@ -3843,8 +3843,8 @@ class PrintController extends Controller
         $groupNumbers = $this->getItemGroup($prID);
 
         $headers = [
-            'ITEM NO.', 'QTY', 'UNIT', 'ARTICLES/PARTICULARS',
-            'Approved Budget for the Contract (unit)', 'UNIT PRICE'
+            'ITEM NO.', 'QTY', 'UNIT', 'PROCURING ENTITIES’ SPECIFICATIONS ARTICLES/PARTICULARS',
+            'ABC(PER UNIT)', 'BIDDER’S SPECIFICATIONS/ OFFER', 'UNIT PRICE'
         ];
 
         foreach ($groupNumbers as $groupNo) {
@@ -3859,53 +3859,59 @@ class PrintController extends Controller
                 if (strpos($item->item_description, "\n") !== FALSE) {
                     $searchStr = ["\r\n", "\n", "\r"];
                     $item->item_description = str_replace($searchStr, '<br>', $item->item_description);
-                }
+                }    
 
                 $tableData[] = (object)[$key + 1,
                                         $item->quantity,
                                         $item->unit_name,
                                         $item->item_description,
                                         number_format($item->est_unit_cost, 2),
+                                        '',
                                         ''];
             }
 
             $multiplier = 100 / 92.35;
             $data = [
                 [
-                    'aligns' => ['C', 'C', 'C', 'C', 'C', 'C'],
+                    'aligns' => ['C', 'C', 'C', 'C', 'C', 'C', 'C'],
                     'widths' => [$multiplier * 7.14, $multiplier * 6.19,
-                                 $multiplier * 7.62, $multiplier * 49.3,
-                                 $multiplier * 13.2, $multiplier * 8.9],
-                    'font-styles' => ['', '', '', '', '', ''],
+                                 $multiplier * 7.62, $multiplier * 35.3,
+                                 $multiplier * 13.2, $multiplier * 15.9,
+                                 $multiplier * 8.9],
+                    'font-styles' => ['', '', '', '', '', '', ''],
                     'type' => 'row-title',
                     'data' => [$headers]
                 ], [
-                    'aligns' => ['C','C','C','L','R','R'],
+                    'aligns' => ['C','C','C','L','R','R','R'],
                     'widths' => [$multiplier * 7.14, $multiplier * 6.19,
-                                 $multiplier * 7.62, $multiplier * 49.3,
-                                 $multiplier * 13.2, $multiplier * 8.9],
-                    'font-styles' => ['', '', '', '', '', ''],
+                                 $multiplier * 7.62, $multiplier * 35.3,
+                                 $multiplier * 13.2, $multiplier * 15.9, 
+                                $multiplier * 8.9],
+                    'font-styles' => ['', '', '', '', '', '', ''],
                     'type' => 'row-data',
                     'data' => $tableData
                 ], count($tableData) == 0 ? [
-                    'aligns' => ['C','C','C','C','R','R'],
+                    'aligns' => ['C','C','C','C','R','R','R'],
                     'widths' => [$multiplier * 7.14, $multiplier * 6.19,
-                                 $multiplier * 7.62, $multiplier * 49.3,
-                                 $multiplier * 13.2, $multiplier * 8.9],
-                    'font-styles' => ['', '', '', '', '', ''],
+                                 $multiplier * 7.62, $multiplier * 35.3,
+                                 $multiplier * 13.2, $multiplier * 15.9,
+                                 $multiplier * 8.9],
+                    'font-styles' => ['', '', '', '', '', '', ''],
                     'type' => 'other',
-                    'data' => [['', '', '', '', '', '']]
+                    'data' => [['', '', '', '', '', '', '']]
                 ] : null
             ];
 
             $groupNo->table_data = (object)$data;
         }
 
-        return (object)['pr' => $instancePR,
-                        'group_no' => $groupNumbers,
-                        'rfq' => $instanceRFQ,
-                        'sig_rfq' => $sigRFQ,
-                        'canvassed_by' => $canvassedBy];
+        return (object)[
+            'pr' => $instancePR,
+            'group_no' => $groupNumbers,
+            'rfq' => $instanceRFQ,
+            'sig_rfq' => $sigRFQ,
+            'canvassed_by' => $canvassedBy
+        ];
     }
 
     private function getDataPR($id) {
