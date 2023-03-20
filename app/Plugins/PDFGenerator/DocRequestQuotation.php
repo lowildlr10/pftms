@@ -71,27 +71,33 @@ class DocRequestQuotation extends PDF {
             //Table data
             $this->htmlTable($groupNo->table_data);
             $this->Ln();
-            
-            $this->Cell(0, 5, 'General Conditions:');
+
+            $this->SetFont('helvetica', 'BI', 10  + ($fontScale * 10));
+            $this->Cell(0.5, 5, 'General Conditions:');
             $this->Ln();
 
-            $this->MultiCell(0, 0, '1.  Lowest price shall be quoted on the item/s  inclusive of all government taxes and submit signed quotation in a sealed envelope.');
+            $this->MultiCell(0, 0, "1.  Lowest price shall be quoted on the item/s  inclusive of all government taxes and submit signed quotation ".
+                                    "in a sealed envelope.", 0, 'L');
 
-            $this->MultiCell(0, 0, '2.  Delivery period must be ________________ as per stated on the purchase / job order for the winning bidder. Otherwise,  a penalty of 1/10 of 1% of every day of delay shall be charged.');
+            $this->MultiCell(0, 0, "2.  Delivery period must be ________________ as per stated on the purchase / job order for the winning bidder.".
+                                    " Otherwise,  a penalty of 1/10 of 1% of every day of delay shall be charged.", 0, 'L');
 
-            $this->MultiCell(0, 0, '3.  Warranty shall be for a min. of 3 months for expendable goods, and min. of 1 year for non-expendable goods, reckoned from the date of acceptance by the procuring entity.');
+            $this->MultiCell(0, 0, "3.  Warranty shall be for a min. of 3 months for expendable goods, and min. of 1 year for non-expendable goods,".
+                                   " reckoned from the date of acceptance by the procuring entity.", 0, 'L');
 
-            $this->MultiCell(0, 0, '4.  For each item, the columns in the table above shall be completely filled-out. Non-compliance / Incomplete data or non-filling up shall be a ground for disqualification. Alternative bid is not allowed.');
+            $this->MultiCell(0, 0, "4.  For each item, the columns in the table above shall be completely filled-out. Non-compliance / Incomplete".
+                                    " data or non-filling up shall be a ground for disqualification. Alternative bid is not allowed.", 0, 'L');
 
-            $this->MultiCell(0, 0, '5.  The Lowest Calculated Bidder (LCB) shall be required to submit  the following documentary requirements: Mayor’s Permit, PhilGEPS registration number, Income tax return, Omnibus sworn statement.');
-            $this->Ln();
+            $this->MultiCell(0, 0, "5.  The Lowest Calculated Bidder (LCB) shall be required to submit  the following documentary requirements:".
+                                   " Mayor’s Permit, PhilGEPS registration number, Income tax return, Omnibus sworn statement.", 0, 'L');
+            $this->Ln(3);
 
             //Footer
-            $this->SetFont('helvetica', 'BI', 10  + ($fontScale * 10));
+            $this->SetFont('helvetica', 'B', 10  + ($fontScale * 10));
             $this->Cell($pageWidth * 0.5, 5, "     Delivery Term (Complete)");
             $this->SetFont('helvetica', '', 10  + ($fontScale * 10));
             $this->Cell($pageWidth * 0.068, 5, "Payment");
-            $this->SetFont('helvetica', 'BI', 10  + ($fontScale * 10));
+            $this->SetFont('helvetica', 'B', 10  + ($fontScale * 10));
             $this->Cell($pageWidth * 0, 5, "Term");
             $this->Ln();
 
@@ -101,17 +107,17 @@ class DocRequestQuotation extends PDF {
             $this->Ln();
 
             $this->Cell($pageWidth * 0.205, 5, "________  On-site delivery");
-            $this->SetFont('helvetica', 'BI', 10  + ($fontScale * 10));
+            $this->SetFont('helvetica', 'B', 10  + ($fontScale * 10));
             $this->Cell(0, 5, "to _____________");
             $this->Ln(8);
 
-            $this->SetFont('helvetica', 'BI', 10  + ($fontScale * 10));
+            $this->SetFont('helvetica', 'B', 10  + ($fontScale * 10));
             $this->Cell($pageWidth * 0.09, 5, "Warranty: ",);
             $this->SetFont('helvetica', '', 10  + ($fontScale * 10));
             $this->Cell(0, 5, "___________________________________");
             $this->Ln();
 
-            $this->SetFont('helvetica', 'BI', 10  + ($fontScale * 10));
+            $this->SetFont('helvetica', 'B', 10  + ($fontScale * 10));
             $this->Cell($pageWidth * 0.184, 5, "After Sales Service/s: ",);
             $this->SetFont('helvetica', '', 10  + ($fontScale * 10));
             $this->Cell(0, 4, "_________________________");
@@ -140,7 +146,7 @@ class DocRequestQuotation extends PDF {
 
             $this->SetFont('helvetica', 'B', 10  + ($fontScale * 10));
             $this->Cell(0, 5,"DEPARTMENT OF SCIENCE AND TECHNOLOGY", 0, 'B', 'L');
-            $this->Ln(8);
+            $this->Ln(4);
 
             $this->Cell($pageWidth * 0.55, 5," ");
             $this->Cell(0, 5,"______________________________");
@@ -151,24 +157,24 @@ class DocRequestQuotation extends PDF {
             $this->Cell($pageWidth * 0.55, 5, " ");
             $this->SetFont('helvetica', '', 10 + ($fontScale * 10));
             $this->Cell(0, 5, "Name of Firm/Company and Address:", 0, 0);
-            $this->Ln(10);
+            $this->Ln(6);
 
             $this->SetFont('helvetica', 'B', 10 + ($fontScale * 10));
             $this->Cell($pageWidth * 0.39, 5, strtoupper($data->sig_rfq->name), 'B', 0, 'C');
             $this->Cell($pageWidth * 0.16, 5, '');
             $this->SetFont('helvetica', '', 10 + ($fontScale * 10));
             $this->Cell(0, 5, "");
-            $this->Ln();
+            $this->Ln(4);
 
             $this->SetFont('helvetica', '', 10 + ($fontScale * 10));
             $this->Cell($pageWidth * 0.39, 5, "Property & Supply Officer/ PSTD", 0, 0, 'C');
             $this->Cell($pageWidth * 0.16, 5, '');
             $this->Cell(0, 5, "Signature over Printed Name of Authorized", 'T');
-            $this->Ln();
+            $this->Ln(4);
 
             $this->Cell($pageWidth * 0.55, 5, "");
             $this->Cell(0, 5, "Representative");
-            $this->Ln(12);
+            $this->Ln(10);
 
             $this->Cell(0, 5, "IMPORTANT:", 0);
             $this->Ln();
