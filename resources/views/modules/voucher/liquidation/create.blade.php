@@ -38,9 +38,9 @@
                     </div>
                     <div class="md-form form-sm">
                         <input type="date" id="date-liquidation" name="date_liquidation"
-                            class="form-control required">
+                            class="form-control">
                         <label for="date-liquidation" class="active">
-                            <span class="red-text">* </span>
+                            {{-- <span class="red-text">* </span> --}}
                             <strong>Date</strong>
                         </label>
                     </div>
@@ -92,12 +92,12 @@
                 </div>
                 <div class="col-md-4 border border-left-0 border-bottom-0 border-dark px-0 text-center">
                     <div class="p-2 border-bottom border-dark">
-                        <span class="red-text">* </span>
+                        {{-- <span class="red-text">* </span> --}}
                         <strong>AMOUNT</strong>
                     </div>
                     <div class="md-form px-3">
-                        <input type="number" id="amount" name="amount" placeholder="Enter a value..."
-                               class="form-control required" value="{{ $amount }}">
+                        <input type="number" id="amount-cash-adv" name="amount_cash_adv"  placeholder="Enter a value..."
+                               class="form-control">
                     </div>
                 </div>
             </div>
@@ -126,9 +126,11 @@
                                         AMOUNT OF CASH ADVANCE PER DV NO. <span class="red-text">* </span>
                                     </div>
                                     <div class="md-form my-0">
-                                        <select id="dv-id" name="dv_id" searchable="Search here.."
+                                        <input type="text" id="dv-id" name="dv_id"
+                                                class="form-control required">
+                                        {{--<input id="dv-id" name="dv_id" searchable="Search here.."
                                                 class="mdb-select crud-select md-form my-0 required">
-                                            <option value="" disabled selected
+                                             <option value="" disabled selected
                                             > Choose a DV document</option>
 
                                             @if (count($dvList) > 0)
@@ -140,7 +142,7 @@
                                             </option>
                                                 @endforeach
                                             @endif
-                                        </select>
+                                        </input> --}}
                                     </div>
                                 </div>
                             </div>
@@ -156,8 +158,8 @@
                 </div>
                 <div class="col-md-4 border border-left-0 border-bottom-0 border-dark p-2">
                     <div class="md-form my-0">
-                        <input type="number" id="amount-cash-adv" name="amount_cash_adv"
-                               placeholder="Enter a value..." class="form-control required">
+                        <input type="number" id="amount" name="amount"
+                               placeholder="Enter a value..." class="form-control required" value="{{ $amount }}">
                     </div>
                 </div>
             </div>

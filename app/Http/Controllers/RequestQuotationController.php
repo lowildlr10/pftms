@@ -154,7 +154,6 @@ class RequestQuotationController extends Controller
             'roleHasAccountant' => $roleHasAccountant,
         ]);
     }
-
     /**
      * Display the specified resource.
      *
