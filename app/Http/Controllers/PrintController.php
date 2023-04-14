@@ -260,8 +260,14 @@ class PrintController extends Controller
                     $msg = "Ggenerated the $docType $orsID.";
                     Auth::user()->log($request, $msg);
                 } else {
-                    $this->generateBURS($data, $data->ors->document_type, $fontScale,
-                                        $pageHeight, $pageWidth, $previewToggle);
+                    $this->generateBURS(
+                        $data,
+                        $fontScale,
+                        $pageHeight,
+                        $pageWidth,
+                        $pageUnit,
+                        $previewToggle
+                    );
                 }
                 break;
             case 'proc_iar':
@@ -3859,7 +3865,7 @@ class PrintController extends Controller
                 if (strpos($item->item_description, "\n") !== FALSE) {
                     $searchStr = ["\r\n", "\n", "\r"];
                     $item->item_description = str_replace($searchStr, '<br>', $item->item_description);
-                }    
+                }
 
                 $tableData[] = (object)[$key + 1,
                                         $item->quantity,
@@ -3885,7 +3891,7 @@ class PrintController extends Controller
                     'aligns' => ['C','C','C','L','R','R','R'],
                     'widths' => [$multiplier * 7.14, $multiplier * 6.19,
                                  $multiplier * 7.62, $multiplier * 35.3,
-                                 $multiplier * 13.2, $multiplier * 15.9, 
+                                 $multiplier * 13.2, $multiplier * 15.9,
                                 $multiplier * 8.9],
                     'font-styles' => ['', '', '', '', '', '', ''],
                     'type' => 'row-data',
