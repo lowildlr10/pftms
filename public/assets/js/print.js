@@ -43,7 +43,11 @@ $(function () {
         key = _key;
         documentType = _documentType;
         otherParam = _otherParam;
-
+        // console.log([key,
+        //     documentType,
+        //     otherParam,
+        // ]);
+        // return false;
         switch (documentType) {
             case "proc_pr":
                 $("#print-title").html("Generate Purchase Request");
@@ -54,9 +58,7 @@ $(function () {
                 setPaperSize("A4");
                 break;
             case "proc_abstract":
-                $("#print-title").html(
-                    "Generate Abstract of Bids and Quotation"
-                );
+                $("#print-title").html("Generate Abstract of Bids and Quotation");
                 setPaperSize("Long");
                 break;
             case "proc_po":
@@ -72,9 +74,7 @@ $(function () {
                 setPaperSize("A4");
                 break;
             case "proc_burs":
-                $("#print-title").html(
-                    "Generate Budget Utilization Request Status"
-                );
+                $("#print-title").html("Generate Budget Utilization Request Status");
                 setPaperSize("A4");
                 break;
             case "ca_ors":
@@ -82,9 +82,7 @@ $(function () {
                 setPaperSize("A4");
                 break;
             case "ca_burs":
-                $("#print-title").html(
-                    "Generate Budget Utilization Request Status"
-                );
+                $("#print-title").html("Generate Budget Utilization Request Status");
                 setPaperSize("A4");
                 break;
             case "proc_iar":
@@ -112,15 +110,11 @@ $(function () {
                 setPaperSize("A4");
                 break;
             case "pay_summary":
-                $("#print-title").html(
-                    "Generate Summary of LDDAP-ADAs Issued and Invalidated ADA Entries"
-                );
+                $("#print-title").html("Generate Summary of LDDAP-ADAs Issued and Invalidated ADA Entries");
                 setPaperSize("A4");
                 break;
             case "inv_par":
-                $("#print-title").html(
-                    "Generate Property Acknowledgement Reciept"
-                );
+                $("#print-title").html("Generate Property Acknowledgement Reciept");
                 setPaperSize("A4");
                 break;
             case "inv_ris":
@@ -152,9 +146,7 @@ $(function () {
                 setPaperSize("Long");
                 break;
             case "report_raod":
-                $("#print-title").html(
-                    "Generate Registry of Allotments, Obligations and Disbursements"
-                );
+                $("#print-title").html("Generate Registry of Allotments, Obligations and Disbursements");
                 setPaperSize("Long");
 
                 if (otherParam == "multiple") {
