@@ -95,7 +95,7 @@
                     </div>
                     <div class="md-form form-sm">
                         <input type="text" id="dv-no" name="dv_no"
-                               class="form-control">
+                               class="form-control" >
                         <label for="dv-no">
                             <strong>DV Number</strong>
                         </label>
