@@ -2362,3 +2362,8 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
         'access' => 'destory'
     ])->name('municipality-destroy');
 });
+
+// PAR,
+Route::get('/par','ParController@index')->middleware('auth');
+Route::get('/ris','RisController@index')->middleware('auth');
+Route::get('/ics','IcsController@index')->middleware('auth');

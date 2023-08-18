@@ -189,6 +189,25 @@
                                     PAR/ICS/RIS
                                 </a>
                             </li>
+                           <li>
+                                <a href="/par" class="waves-effect">
+                                    Inventory of <br>
+                                    Property Acknowledgement <br>
+                                    Receipt (PAR)
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/ris" class="waves-effect">
+                                    Inventory of <br>
+                                    Requisition and Issue Slip (RIS)
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/ics" class="waves-effect">
+                                    Inventory of <br>
+                                    Inventory Custodian Slip (ICS)
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </li>
