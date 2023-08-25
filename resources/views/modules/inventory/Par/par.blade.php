@@ -58,6 +58,7 @@
                                 <thead class="mdb-color darken-3 mb-0 p-1 white-text">
 						            <tr>
 						                <th>Description</th>
+                                        <th>PR_NO</th>
                                         <th>Inventory No.</th>
 						                <th>Quantity</th>
                                         <th>Unit Value</th>
@@ -76,6 +77,9 @@
 						                <td>
                                         <input type="hidden" id="id" value="">
                                             <span class="item_class">{!! $description->description !!}</span>
+                                        </td>
+                                        <td>
+                                            <span class="date"> {{$description->pr_no}}  </span>
                                         </td>
 						                <td>
                                             <span class="date"> {{$description->inventory_no}}  </span>
@@ -115,6 +119,7 @@
 						        <tfoot class="mdb-color darken-3 mb-0 p-1 white-text">
 						            <tr>
 						                <th>Description</th>
+                                        <th>PR_NO</th>
                                         <th>Inventory No.</th>
 						                <th>Quantity</th>
                                         <th>Unit Value</th>
