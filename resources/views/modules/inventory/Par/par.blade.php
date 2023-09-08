@@ -76,6 +76,9 @@
 						            <tr>
 						                <td>
                                         <input type="hidden" id="id" value="">
+                                        <span class="item_class">{!! $description->id !!}</span>
+<br>
+<br>
                                             <span class="item_class">{!! $description->description !!}</span>
                                         </td>
                                         <td>

@@ -12,7 +12,7 @@
                 <h5 class="card-title white-text">
                     <strong>
                         <i class="fas fa-box"></i> &#8594;
-                        Inventory Custodian Slip (ICS)
+                        Inventory of All (PAR/RIS/ICS)
                     </strong>
                 </h5>
                 <hr class="white hidden-xs">
@@ -21,8 +21,8 @@
                         <i class="fa fa-caret-right mx-2" aria-hidden="true"></i>
                     </li>
                     <li class="active">
-                        <a href="/ics" class="waves-effect waves-light cyan-text">
-                            Inventory Custodian Slip (ICS)
+                        <a href="/parrisics" class="waves-effect waves-light cyan-text">
+                            Inventory of All (PAR/RIS/ICS)
                         </a>
                     </li>
                 </ul>
@@ -41,7 +41,7 @@
                         </div>
                         <div>
 
-                            <a href="/ics" class="btn btn-outline-white btn-rounded btn-sm px-2">
+                            <a href="/parrisics" class="btn btn-outline-white btn-rounded btn-sm px-2">
                                 <i class="fas fa-sync-alt fa-pulse"></i>
                             </a>
                         </div>
@@ -53,8 +53,8 @@
 
                             <!--Table-->
                                 <!--Table head-->
-                                @if (empty($_ics))
-                                <p>No ICS found.</p>
+                                @if (empty($parrisics))
+                                <p>No (PAR/RIS/ICS) found.</p>
                             @else
                             <table id="Table" class="table table-striped table-bordered table-hover" style="width:100%">
 
@@ -62,63 +62,66 @@
                                         <tr>
                                             <th>Description</th>
                                             <th>PR_NO</th>
-                                            <th>Inventory No.</th>
+                                            <th>Inventory Number</th>
                                             <th>Quantity</th>
-                                            <th>Unit Value</th>
-                                            <th>Total Cost</th>
+                                            <th>Amount</th>
+                                            <th>Total Amount</th>
                                             <th>Date of Purchase Order</th>
                                             <th>Classification Name</th>
                                             <th>Issued To</th>
+                                            {{-- <th>Status</th> --}}
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($_ics as $_ics)
-
+                                        @foreach ($parrisics as $parrisics)
                                             <tr>
                                                 <td>
                                                     <input type="hidden" id="id" value="">
-                                                    <span class="item_class">{!! $_ics->description !!}</span>
+                                                    <span class="item_class">{!! $parrisics->description !!}</span>
                                                 </td>
                                                 <td>
-                                                    <span class="date"> {{$_ics->pr_no}}  </span>
+                                                    <span class="date"> {{$parrisics->pr_no}}  </span>
                                                 </td>
                                                 <td>
-                                                    <span class="date"> {{$_ics->inventory_no}}  </span>
+                                                    <span class="date"> {{$parrisics->inventory_no}}  </span>
                                                 </td>
                                                 <td>
-                                                    <span class="date"> {{$_ics->quantity}}</span>
+                                                    <span class="date"> {{$parrisics->quantity}}</span>
                                                 </td>
                                                 <td>
-                                                    <span class="date"> {{$_ics->unit_cost}} </span>
+                                                    <span class="date"> {{$parrisics->unit_cost}} </span>
                                                 </td>
                                                 <td>
-                                                    <span class="date"> {{$_ics->total_cost}} </span>
+                                                    <span class="date"> {{$parrisics->total_cost}} </span>
                                                 </td>
                                                 <td>
-                                                    <span class="date"> {{$_ics->date_po}} </span>
+                                                    <span class="date"> {{$parrisics->date_po}} </span>
                                                 </td>
                                                 <td>
-                                                    <span class="date"> {{$_ics->classification_name}}  </span>
+                                                    <span class="date"> {{$parrisics->classification_name}}  </span>
                                                 </td>
                                                 <td>
-                                                    <span class="date"> {{$_ics->firstname}},{{$_ics->lastname}}  </span>
+                                                    <span class="date"> {{$parrisics->firstname}},{{$parrisics->lastname}}  </span>
                                                 </td>
+                                                {{-- <td>
+
+                                                </td> --}}
                                             </tr>
                                         @endforeach
                                 <!--Table body-->
 							    </tbody>
 						        <tfoot class="mdb-color darken-3 mb-0 p-1 white-text">
 						            <tr>
-						                <th>Description</th>
+                                        <th>Description</th>
                                         <th>PR_NO</th>
-                                        <th>Inventory No.</th>
-						                <th>Quantity</th>
-                                        <th>Unit Value</th>
-                                        <th>Total Cost</th>
-                                        <th>Acquistion Date</th>
+                                        <th>Inventory Number</th>
+                                        <th>Quantity</th>
+                                        <th>Amount</th>
+                                        <th>Total Amount</th>
+                                        <th>Date of Purchase Order</th>
                                         <th>Classification Name</th>
                                         <th>Issued To</th>
-                                        {{-- <th>Action</th> --}}
+                                        {{-- <th>Status</th> --}}
 						            </tr>
 						        </tfoot>
                             </table>
@@ -235,8 +238,10 @@
 
 @section('custom-js')
 
+<script src="{{ asset('datatables/js/jquery.min.js') }}"></script>
 <script src="{{ asset('datatables/js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('datatables/js/dataTables.bootstrap4.min.js') }}"></script>
+        <script src="new\js\item.js"></script>
 
 <script type="text/javascript">
 	// Call the dataTables jQuery plugin

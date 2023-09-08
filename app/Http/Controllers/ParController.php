@@ -27,7 +27,7 @@ class ParController extends Controller
     public function index()
 {
     $description = DB::table('inventory_stock_items')
-    ->select('description', 'pr_no', 'inventory_no', 'inventory_stock_items.quantity', 'unit_cost', 'total_cost', 'date_po', 'inventory_stock_classifications.classification_name', 'firstname', 'lastname')
+    ->select('inventory_stock_items.id','description', 'pr_no', 'inventory_no', 'inventory_stock_items.quantity', 'unit_cost', 'total_cost', 'date_po', 'inventory_stock_classifications.classification_name', 'firstname', 'lastname')
     ->join('item_classifications', 'inventory_stock_items.item_classification', '=', 'item_classifications.id')
     ->join('item_unit_issues', 'inventory_stock_items.unit_issue', '=', 'item_unit_issues.id')
     ->join('inventory_stocks', 'inventory_stock_items.inv_stock_id', '=', 'inventory_stocks.id')

@@ -189,6 +189,12 @@
                                     PAR/ICS/RIS
                                 </a>
                             </li>
+                             <li>
+                                <a href="/parrisics" class="waves-effect">
+                                    Inventory of All<br>
+                                    (PAR/RIS/ICS)<br>
+                                </a>
+                            </li>
                            <li>
                                 <a href="/par" class="waves-effect">
                                     Inventory of <br>
