@@ -63,6 +63,7 @@
 						                <th>Quantity</th>
                                         <th>Unit Value</th>
                                         <th>Total Cost</th>
+                                        <th>Funding</th>
                                         <th>Acquistion Date</th>
                                         <th>Classification Name</th>
                                         <th>Issued To</th>
@@ -92,6 +93,9 @@
                                         </td>
                                         <td>
                                             <span class="date"> {{$_ris->total_cost}} </span>
+                                        </td>
+                                        <td>
+                                            <span class="date"> {{$_ris->sector_name}} </span>
                                         </td>
                                         <td>
                                             <span class="date"> {{$_ris->date_po}} </span>
@@ -124,6 +128,7 @@
 						                <th>Quantity</th>
                                         <th>Unit Value</th>
                                         <th>Total Cost</th>
+                                        <th>Funding</th>
                                         <th>Acquistion Date</th>
                                         <th>Classification Name</th>
                                         <th>Issued To</th>

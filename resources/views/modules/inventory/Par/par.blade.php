@@ -63,6 +63,7 @@
 						                <th>Quantity</th>
                                         <th>Unit Value</th>
                                         <th>Total Cost</th>
+                                        <th>Funding</th>
                                         <th>Acquistion Date</th>
                                         <th>Classification Name</th>
                                         <th>Issued To</th>
@@ -76,7 +77,7 @@
 						            <tr>
 						                <td>
                                         <input type="hidden" id="id" value="">
-                                        <span class="item_class">{!! $description->id !!}</span>
+                                        {{-- <span class="item_class">{!! $description->id !!}</span> --}}
 <br>
 <br>
                                             <span class="item_class">{!! $description->description !!}</span>
@@ -95,6 +96,9 @@
                                         </td>
                                         <td>
                                             <span class="date"> {{$description->total_cost}} </span>
+                                        </td>
+                                        <td>
+                                            <span class="date"> {{$description->sector_name}} </span>
                                         </td>
                                         <td>
                                             <span class="date"> {{$description->date_po}} </span>
@@ -127,6 +131,7 @@
 						                <th>Quantity</th>
                                         <th>Unit Value</th>
                                         <th>Total Cost</th>
+                                        <th>Funding</th>
                                         <th>Acquistion Date</th>
                                         <th>Classification Name</th>
                                         <th>Issued To</th>

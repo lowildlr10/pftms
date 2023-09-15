@@ -60,15 +60,16 @@
 
                                     <thead class="mdb-color darken-3 mb-0 p-1 white-text">
                                         <tr>
-                                            <th>Description</th>
-                                            <th>PR_NO</th>
-                                            <th>Inventory Number</th>
-                                            <th>Quantity</th>
-                                            <th>Amount</th>
-                                            <th>Total Amount</th>
-                                            <th>Date of Purchase Order</th>
-                                            <th>Classification Name</th>
-                                            <th>Issued To</th>
+                                          <th>Description</th>
+                                          <th>PR_NO</th>
+                                         <th>Inventory No.</th>
+                                         <th>Quantity</th>
+                                          <th>Unit Value</th>
+                                          <th>Total Cost</th>
+                                          <th>Funding</th>
+                                          <th>Acquistion Date</th>
+                                          <th>Classification Name</th>
+                                          <th>Issued To</th>
                                             {{-- <th>Status</th> --}}
                                         </tr>
                                     </thead>
@@ -95,6 +96,9 @@
                                                     <span class="date"> {{$parrisics->total_cost}} </span>
                                                 </td>
                                                 <td>
+                                                  <span class="date"> {{$parrisics->sector_name}} </span>
+                                              </td>
+                                                <td>
                                                     <span class="date"> {{$parrisics->date_po}} </span>
                                                 </td>
                                                 <td>
@@ -112,15 +116,16 @@
 							    </tbody>
 						        <tfoot class="mdb-color darken-3 mb-0 p-1 white-text">
 						            <tr>
-                                        <th>Description</th>
-                                        <th>PR_NO</th>
-                                        <th>Inventory Number</th>
-                                        <th>Quantity</th>
-                                        <th>Amount</th>
-                                        <th>Total Amount</th>
-                                        <th>Date of Purchase Order</th>
-                                        <th>Classification Name</th>
-                                        <th>Issued To</th>
+                          <th>Description</th>
+                          <th>PR_NO</th>
+                          <th>Inventory No.</th>
+                          <th>Quantity</th>
+                          <th>Unit Value</th>
+                          <th>Total Cost</th>
+                          <th>Funding</th>
+                          <th>Acquistion Date</th>
+                          <th>Classification Name</th>
+                          <th>Issued To</th>
                                         {{-- <th>Status</th> --}}
 						            </tr>
 						        </tfoot>

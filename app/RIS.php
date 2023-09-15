@@ -39,4 +39,10 @@ class RIS extends Model
     public function purchase_job_order_items(){
         return $this->belongsTo(PurchaseJobOrderItem::Class,'purchase_job_order_items');
     }
+    public function funding_projects(){
+        return $this->belongsTo(FundingProject::Class,'funding_projects');
+    }
+    public function industry_sectors(){
+        return $this->belongsTo(IndustrySector::Class,'industry_sectors');
+    }
 }

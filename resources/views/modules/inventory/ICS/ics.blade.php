@@ -66,6 +66,7 @@
                                             <th>Quantity</th>
                                             <th>Unit Value</th>
                                             <th>Total Cost</th>
+                                            <th>Funding</th>
                                             <th>Date of Purchase Order</th>
                                             <th>Classification Name</th>
                                             <th>Issued To</th>
@@ -95,6 +96,9 @@
                                                     <span class="date"> {{$_ics->total_cost}} </span>
                                                 </td>
                                                 <td>
+                                                    <span class="date"> {{$_ics->sector_name}} </span>
+                                                </td>
+                                                <td>
                                                     <span class="date"> {{$_ics->date_po}} </span>
                                                 </td>
                                                 <td>
@@ -115,6 +119,7 @@
 						                <th>Quantity</th>
                                         <th>Unit Value</th>
                                         <th>Total Cost</th>
+                                        <th>Funding</th>
                                         <th>Acquistion Date</th>
                                         <th>Classification Name</th>
                                         <th>Issued To</th>
