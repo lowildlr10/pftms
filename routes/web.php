@@ -2365,6 +2365,8 @@ Route::middleware(['web', 'auth', 'moduleaccess'])->group(function () {
 
 // PAR,
 Route::get('/par','ParController@index')->middleware('auth');
+Route::post('/updatepar', 'ParController@edit')->middleware('auth');
+
 Route::get('/ris','RisController@index')->middleware('auth');
 Route::get('/ics','IcsController@index')->middleware('auth');
 Route::get('/parrisics','PARRISICSController@index')->middleware('auth');

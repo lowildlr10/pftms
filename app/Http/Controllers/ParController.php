@@ -26,10 +26,11 @@ class ParController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
 {
+    $emp_accounts = DB::table('emp_accounts')->get();
     $description = DB::table('inventory_stock_items')
-    ->select('description', 'pr_no', 'inventory_no', 'inventory_stock_items.quantity', 'unit_cost', 'total_cost', 'sector_name', 'date_po', 'inventory_stock_classifications.classification_name', 'firstname', 'lastname')
+    ->select('inventory_stock_items.id', 'description', 'pr_no', 'inventory_no', 'inventory_stock_items.quantity', 'unit_cost', 'total_cost', 'sector_name', 'date_po', 'inventory_stock_classifications.classification_name', 'firstname', 'lastname',  'inventory_stock_items.care_of_to', 'inventory_stock_items.date_of_issuance', 'inventory_stock_items.status',)
     ->leftJoin('item_classifications', 'inventory_stock_items.item_classification', '=', 'item_classifications.id')
     ->leftJoin('item_unit_issues', 'inventory_stock_items.unit_issue', '=', 'item_unit_issues.id')
     ->leftJoin('inventory_stocks', 'inventory_stock_items.inv_stock_id', '=', 'inventory_stocks.id')
@@ -45,7 +46,7 @@ class ParController extends Controller
         ->where('inventory_stock_classifications.classification_name', 'Property Aknowledgement Receipt (PAR)')
         ->get();
         // dd($description);
-           return view('modules.inventory.Par.par', ['description' => $description]);
+           return view('modules.inventory.Par.par', ['description' => $description, 'emp_accounts' => $emp_accounts,]);
 }
 
 
@@ -88,9 +89,22 @@ class ParController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Request $Request)
     {
-        //
+                        // print_r($Request->all());
+    $id = $Request->input('id');
+    $care_of_to = $Request->input('care_of_to');
+    $date_of_issuance = $Request->input('date_of_issuance');
+    $status = $Request->input('status');
+
+    DB::table('inventory_stock_items')
+    ->where('id', $id)
+    ->update([
+        'care_of_to'=> $care_of_to,
+        'date_of_issuance'=> $date_of_issuance,
+        'status'=> $status,
+            ]);
+    return back();
     }
 
     /**

@@ -67,6 +67,10 @@
                                         <th>Acquistion Date</th>
                                         <th>Classification Name</th>
                                         <th>Issued To</th>
+                                        <th>Care off To</th>
+                                        <th>Date of Issuance</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
                                         {{-- <th>Action</th> --}}
 						            </tr>
 						        </thead>
@@ -76,10 +80,8 @@
 
 						            <tr>
 						                <td>
-                                        <input type="hidden" id="id" value="">
-                                        {{-- <span class="item_class">{!! $description->id !!}</span> --}}
-<br>
-<br>
+                                            <input type="hidden" id="id" value="{!! $description->id !!}">
+
                                             <span class="item_class">{!! $description->description !!}</span>
                                         </td>
                                         <td>
@@ -109,16 +111,26 @@
                                         <td>
                                             <span class="date"> {{$description->firstname}}, {{$description->lastname}}  </span>
                                         </td>
-						                {{-- <td class="inline">
+                                        <td>
+                                            <span class="care_of_to"> {{$description->care_of_to}}  </span>
+                                        </td>
 
-                                        <a type="button" class="btn-floating btn-sm btn-orange p-2 waves-effect material-tooltip-main mr-0 jel-update-user" title="Update" data-placement="left" align="center">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                            <a class="btn-floating btn-sm btn-red p-2 waves-effect material-tooltip-main mr-0 jel-delate-user"
-                                               data-toggle="tooltip" data-placement="left" align="center" title="Delete">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                        </td> --}}
+                                        <td>
+                                            <span class="date_of_issuance"> {{$description->date_of_issuance}}  </span>
+                                        </td>
+
+                                        <td>
+                                            <span class="status"> {{$description->status}}  </span>
+                                        </td>
+                                        <td>
+
+                                            <a type="button" class="btn-floating btn-sm btn-orange p-2 waves-effect material-tooltip-main mr-0 jel-update-user" title="Update" data-placement="left" align="center">
+                                                <i class="fas fa-edit"></i>
+                                              {{-- <a class="btn-floating btn-sm btn-red p-2 waves-effect material-tooltip-main mr-0 jel-delate-user"
+                                                   data-toggle="tooltip" data-placement="left" align="center" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </a> --}}
+                                            </td>
 						            </tr>
                                 @endforeach
                                 <!--Table body-->
@@ -135,6 +147,10 @@
                                         <th>Acquistion Date</th>
                                         <th>Classification Name</th>
                                         <th>Issued To</th>
+                                        <th>Care off To</th>
+                                        <th>Date of Issuance</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
                                         {{-- <th>Action</th> --}}
 						            </tr>
 						        </tfoot>
@@ -151,99 +167,53 @@
     </section>
 </div>
 
-<!--Create Modal -->
-            <div class="modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true"  data-keyboard="false" data-backdrop="static">
-              <div class="modal-dialog" role="document">
-                 <div class="modal-content">
-                  <div class="modal-header stylish-color-dark white-text">
-                    <h5 class="modal-title" id="exampleModalLabel">Create Equipment Name (Classifications)</h5>
-                    <button type="button" class="close white-text" data-dismiss="modal" aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                  <div class="modal-body">
-                    <form action="/create" method="post" autocomplete="off" enctype="multipart/form-data">
-                        {!! csrf_field() !!}
-                  <div class="form-row">
-                    <div class="md-form form-sm  col-md-12">
-                        <label for="inputEmail4">Equipment Name (Classifications) <span style="color: red;">*</span></label>
-                      <input type="text" name="item_class" class="form-control" id="inputEmail4" required="">
-                    </div>
-                </div>
-            </div>
-                  <div class="modal-footer rgba-stylish-strong p-1">
-                    <button type="button" class="btn btn btn-light btn-sm waves-effect" data-dismiss="modal">
-                        <i class="far fa-window-close"></i> Close</button>
-                    <button type="submit" class="btn btn-success btn-sm waves-effect waves-light">
-                        <i class="fas fa-file-import"></i> Create</button>
-                  </div>
-                </form>
-               </div>
-              </div>
-            </div>
-
 <!-- update -->
-      <div class="modal" id="update-user-mdl" data-backdrop="static" data-keyboard="false">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header stylish-color-dark white-text">
-              <h5 class="modal-title" id="exampleModalLabel">Update Equipment Name (Classifications)</h5>
-              <button type="button" class="close white-text" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-             <form action="/update" method="post" autocomplete="off" enctype="multipart/form-data">
-            {!! csrf_field() !!}
-            <div class="modal-body">
-                 <div class="form-row">
-                    <label for="inputPassword3">Equipment Name (Classifications) <span style="color: red;">*</span></label>
-                    <div class="col-sm-12 md-form form-sm">
-                    <input type="hidden" id="update-id" name="id" value="">
-                      <input type="text" class="form-control" id="u-item_class" name="item_class" required="">
+<div class="modal" id="update-user-mdl" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header stylish-color-dark white-text">
+          <h5 class="modal-title" id="exampleModalLabel">Update </h5>
+          <button type="button" class="close white-text" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+         <form action="/updatepar" method="post" autocomplete="off" enctype="multipart/form-data">
+        {!! csrf_field() !!}
+        <div class="modal-body">
+             <div class="form-row">
+                <input type="hidden" id="update-id" name="id" value="">
+                <label for="inputPassword3">Care of To <span style="color: red;">*</span></label>
+                <div class="col-sm-12 md-form form-sm">
+                  <input type="text" class="form-control" id="u-care_of_to" placeholder="Search here.." name="care_of_to" list="list-item-class" id="input-datalist" required="">
+                    <datalist id="list-item-class">
+                      @foreach ($emp_accounts as $item_class)
+                      <option value="{!! $item_class->firstname!!} {!! $item_class->lastname !!}">
+                      @endforeach
+                    </datalist>
+                </div>
+                <label for="inputPassword3">Date of Issuance <span style="color: red;">*</span></label>
+                <div class="col-sm-12 md-form form-sm">
+                      <input type="date" class="form-control" id="u-date_of_issuance" name="date_of_issuance" required="">
                     </div>
-                 </div>
-            </div>
-                  <div class="modal-footer rgba-stylish-strong p-1">
-                    <button type="button" class="btn btn btn-light btn-sm waves-effect" data-dismiss="modal">
-                        <i class="far fa-window-close"></i> Close</button>
-                    <button type="submit" class="btn btn-orange btn-sm waves-effect waves-light">
-                        <i class="fas fa-pencil-alt"></i> Update</button>
-            </div>
-          </div>
-                    </form>
-          <!-- /.modal-content -->
+                    <label for="inputPassword3">Status <span style="color: red;">*</span></label>
+                    <div class="col-sm-12 md-form form-sm">
+                          <input type="text" class="form-control" id="u-status" name="status" required="">
+                        </div>
+             </div>
         </div>
-        <!-- /.modal-dialog -->
-      </div>
-      <!-- /.modal -->
-
-      <!-- DELETE -->
-      <div class="modal" id="delate-user-mdl" data-backdrop="static" data-keyboard="false">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header modal-header danger-color-dark white-text">
-              <h5 class="modal-title"><span class="fas fa-trash"> </span> Delete Equipment Name (Classifications)</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <form action="/delete" method="post">
-                 {!! csrf_field() !!}
-                     <input type="hidden" id="delate_id" name="id" value="">
-                    <h6 class="sndbox-del-con">Are You Sure To Delete?</h6>
-            </div>
-            <div class="modal-footer p-1">
-              <button type="button" class="btn btn btn-light btn-sm waves-effect" data-dismiss="modal"><span class="fas fa-window-close"></span> Close</button>
-              <button type="submit" class="btn btn-red btn-sm waves-effect waves-light"><i class="fas fa-trash"></i>  Delete</button>
-            </div>
-          </form>
-          </div>
-          <!-- /.modal-content -->
+              <div class="modal-footer rgba-stylish-strong p-1">
+                <button type="button" class="btn btn btn-light btn-sm waves-effect" data-dismiss="modal">
+                    <i class="far fa-window-close"></i> Close</button>
+                <button type="submit" class="btn btn-orange btn-sm waves-effect waves-light">
+                    <i class="fas fa-pencil-alt"></i> Update</button>
         </div>
-        <!-- /.modal-dialog -->
       </div>
-      <!-- /.modal -->
+                </form>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
 
 
 @endsection
@@ -251,7 +221,39 @@
 @section('custom-js')
 
 <script src="{{ asset('datatables/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('datatables/js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('datatables/js/dataTables.bootstrap4.min.js') }}"></script>
+
+<script>
+    $('body').on('click', '.jel-update-user', function(event) {
+      event.preventDefault();
+
+    //delete the value
+    $('#u-care_of_to').val('');
+    $('#u-date_of_issuance').val('');
+    $('#u-status').val('');
+
+    //find closest tr
+    var trJel = $(this).closest('tr');
+    //get the value and declare variables
+    var care_of_to = $(trJel).find('.care_of_to').html();
+
+    var id = $(trJel).find('#id').val();
+    var date_of_issuance = $(trJel).find('.date_of_issuance').html();
+    var status = $(trJel).find('.status').html();
+
+    //add value of the input fields
+
+    $('#update-id').val(id);
+    $('#u-care_of_to').val(care_of_to);
+    $('#u-date_of_issuance').val(date_of_issuance);
+    $('#u-status').val(status);
+
+    $("#update-user-mdl").modal("show");
+
+    });
+
+            </script>
 
 <script type="text/javascript">
 	// Call the dataTables jQuery plugin
