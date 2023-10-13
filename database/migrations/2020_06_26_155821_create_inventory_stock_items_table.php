@@ -31,6 +31,9 @@ class CreateInventoryStockItemsTable extends Migration
             $table->uuid('unit_issue');
             $table->foreign('unit_issue')->references('id')->on('item_unit_issues');
             $table->text('description');
+            $table->text('care_of_to')->nullable();
+            $table->text('date_of_issuance')->nullable();
+            $table->text('status')->nullable();
             $table->unsignedInteger('quantity')->default(0);
             $table->double('amount', 50, 2)->default(0.00);
         });
